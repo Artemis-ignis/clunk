@@ -10,37 +10,57 @@ import { useState } from "react";
  */
 
 const REPO = "https://github.com/Artemis-ignis/clunk";
-const CLONE = `git clone ${REPO}.git\ncd clunk && npm install`;
+const FILE_URL = "https://clunk-preview.vercel.app/clunk-mcp.mjs";
+
+/**
+ * The server is one dependency-free file, so connecting is fetch it, then register it.
+ * It used to be clone the repository, npm install the whole web app, and point the agent at a
+ * cwd — four steps and a few hundred megabytes to expose six tools.
+ */
+const FETCH = `curl -fsSL ${FILE_URL} -o clunk-mcp.mjs`;
 
 const TABS: { id: string; label: string; note: string; snippet: string }[] = [
   {
-    id: "agent",
-    label: "에이전트에게 한 줄",
-    note: "Claude Code·Codex·Cursor·그 외 무엇이든 — 이 프롬프트를 붙여넣으면 에이전트가 알아서 설치하고 준비 확인까지 합니다.",
-    snippet: `${REPO} 를 클론하고 npm install 한 뒤, 그 폴더의 stdio MCP 서버(npm run mcp)를 "clunk"라는 이름으로 등록해줘. 등록되면 clunk_engine_profiles를 호출해 준비 상태를 확인하고, 내 게임 엔진에 맞는 프리셋으로 에셋 검사를 시작해.`,
-  },
-  {
     id: "claude",
     label: "Claude Code",
-    note: "클론한 clunk 폴더 안에서 실행하세요.",
-    snippet: `${CLONE}\nclaude mcp add clunk -- npm run mcp`,
+    note: "두 줄이면 끝입니다.",
+    snippet: `${FETCH}
+claude mcp add clunk -- node "$(pwd)/clunk-mcp.mjs"`,
   },
   {
     id: "codex",
     label: "Codex",
-    note: "~/.codex/config.toml 에 추가하세요 (cwd는 클론 경로).",
-    snippet: `${CLONE}\n\n# ~/.codex/config.toml\n[mcp_servers.clunk]\ncommand = "npm"\nargs = ["run", "mcp"]\ncwd = "<클론한 clunk 폴더 경로>"`,
+    note: "~/.codex/config.toml 에 넣으세요.",
+    snippet: `${FETCH}
+
+# ~/.codex/config.toml
+[mcp_servers.clunk]
+command = "node"
+args = ["/절대/경로/clunk-mcp.mjs"]`,
   },
   {
     id: "cursor",
     label: "Cursor",
-    note: "프로젝트의 .cursor/mcp.json 에 추가하세요.",
-    snippet: `${CLONE}\n\n// .cursor/mcp.json\n{\n  "mcpServers": {\n    "clunk": { "command": "npm", "args": ["run", "mcp"], "cwd": "<클론한 clunk 폴더 경로>" }\n  }\n}`,
+    note: "프로젝트의 .cursor/mcp.json 에 넣으세요.",
+    snippet: `${FETCH}
+
+// .cursor/mcp.json
+{
+  "mcpServers": {
+    "clunk": { "command": "node", "args": ["/절대/경로/clunk-mcp.mjs"] }
+  }
+}`,
+  },
+  {
+    id: "agent",
+    label: "그 외 아무 에이전트",
+    note: "MCP를 지원하는 도구라면 이 문장을 붙여넣으세요.",
+    snippet: `${FILE_URL} 를 clunk-mcp.mjs로 내려받고, stdio MCP 서버 "clunk"로 등록해줘(command: node, args: 그 파일의 절대 경로). 등록되면 clunk_engine_profiles를 호출해 준비 상태를 확인하고, 내 게임 엔진에 맞는 프리셋으로 에셋 검사를 시작해.`,
   },
 ];
 
 export function InstallCommands() {
-  const [active, setActive] = useState("agent");
+  const [active, setActive] = useState("claude");
   const [copied, setCopied] = useState(false);
   const tab = TABS.find((entry) => entry.id === active) ?? TABS[0];
 
@@ -56,8 +76,8 @@ export function InstallCommands() {
       <div className="inst3-head">
         <span className="eyebrow">지금 연결하기</span>
         <p className="inst3-lead">
-          에이전트에 Clunk MCP를 붙이는 데 필요한 전부입니다 — 설치가 끝나면 에이전트가
-          알아서 엔진을 묻고, 판정하고, 고칩니다. 소스는{" "}
+          파일 하나를 내려받아 등록하면 끝입니다. 클론도, 설치도, cwd 설정도 없습니다. 붙고 나면
+          에이전트가 알아서 엔진을 묻고 판정합니다. 소스는{" "}
           <a href={REPO} target="_blank" rel="noreferrer">
             GitHub
           </a>

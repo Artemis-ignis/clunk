@@ -7,6 +7,7 @@ import {
   CLI_SAMPLE,
   EDITOR_PACKAGES,
   MCP_CONFIG_SNIPPET,
+  MCP_INSTALL_COMMAND,
   MCP_SERVER,
   MCP_TOOL_COUNT,
   MCP_TOOLS,
@@ -54,28 +55,34 @@ export default function DocsPage() {
         <header className="page-head">
           <span className="eyebrow">연동 가이드</span>
           <h1>
-            에이전트에 붙이고,
+            연결은 두 줄,
             <br />
-            <em>CI에서 막습니다.</em>
+            <em>그다음은 에이전트가 합니다.</em>
           </h1>
           <p className="lead">
-            Clunk는 MCP 서버와 CLI를 함께 제공합니다. 두 경로 모두 웹 검사기와 같은 Core를 호출하므로 같은 해시와 같은
-            점수가 나옵니다.
+            파일 하나를 내려받아 에이전트에 등록하면 끝입니다. 저장소를 클론할 필요도, 의존성을 설치할
+            필요도 없습니다. CLI도 같은 Core를 호출하므로 어느 쪽으로 돌려도 해시와 점수가 같습니다.
           </p>
         </header>
 
         <section className="doc-section">
           <h2>MCP로 연결하기</h2>
           <p className="doc-lead">
-            서버는 stdio JSON-RPC로 동작합니다. 아래 설정을 에이전트의 MCP 클라이언트 설정 파일에 넣으면 도구 {MCP_TOOL_COUNT}개가
-            그대로 노출됩니다. MCP 표준을 지원하는 에이전트라면 별도 어댑터 없이 사용할 수 있습니다.
+            서버는 Node 내장 모듈만 쓰는 단일 파일입니다. 내려받아 등록하면 도구 {MCP_TOOL_COUNT}개가 그대로
+            노출됩니다. MCP를 지원하는 에이전트라면 어댑터가 따로 필요하지 않습니다.
           </p>
+          <CodeBlock
+            title="Claude Code"
+            language="bash"
+            code={MCP_INSTALL_COMMAND}
+            caption="다른 도구는 아래 설정 파일 형식을 쓰세요. command는 node, args는 내려받은 파일의 절대 경로입니다."
+          />
           <div className="doc-split">
             <CodeBlock
               title=".mcp.json"
               language="json"
               code={MCP_CONFIG_SNIPPET}
-              caption="저장소에 들어 있는 plugins/clunk-assetops/.mcp.json과 같은 형태입니다."
+              caption="Codex·Cursor 등 설정 파일을 쓰는 도구용입니다."
             />
             <CodeBlock
               title="검증한 호출 흐름"
