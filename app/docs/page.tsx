@@ -55,27 +55,27 @@ export default function DocsPage() {
         <header className="page-head">
           <span className="eyebrow">연동 가이드</span>
           <h1>
-            연결은 두 줄,
+            연결은 한 줄,
             <br />
             <em>그다음은 에이전트가 합니다.</em>
           </h1>
           <p className="lead">
-            파일 하나를 내려받아 에이전트에 등록하면 끝입니다. 저장소를 클론할 필요도, 의존성을 설치할
-            필요도 없습니다. CLI도 같은 Core를 호출하므로 어느 쪽으로 돌려도 해시와 점수가 같습니다.
+            한 줄로 에이전트에 붙습니다. 저장소를 클론할 필요도, 의존성을 설치할 필요도 없습니다.
+            CLI도 같은 Core를 호출하므로 어느 쪽으로 돌려도 해시와 점수가 같습니다.
           </p>
         </header>
 
         <section className="doc-section">
           <h2>MCP로 연결하기</h2>
           <p className="doc-lead">
-            서버는 Node 내장 모듈만 쓰는 단일 파일입니다. 내려받아 등록하면 도구 {MCP_TOOL_COUNT}개가 그대로
+            서버는 Node 내장 모듈만 쓰는 단일 파일입니다. 아래 한 줄이면 도구 {MCP_TOOL_COUNT}개가 그대로
             노출됩니다. MCP를 지원하는 에이전트라면 어댑터가 따로 필요하지 않습니다.
           </p>
           <CodeBlock
             title="Claude Code"
             language="bash"
             code={MCP_INSTALL_COMMAND}
-            caption="다른 도구는 아래 설정 파일 형식을 쓰세요. command는 node, args는 내려받은 파일의 절대 경로입니다."
+            caption="설정 파일을 쓰는 도구는 아래 형식으로 넣으세요. 내용은 같습니다."
           />
           <div className="doc-split">
             <CodeBlock

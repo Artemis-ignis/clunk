@@ -102,14 +102,12 @@ npx.cmd tsx scripts/texture-audit.mjs examples/texture-audit/harvest-frontier.te
 
 ## MCP
 
-연결은 두 줄입니다. 저장소를 클론하거나 의존성을 설치할 필요가 없습니다 — 서버는 Node 내장 모듈만
-쓰는 단일 파일입니다.
+연결은 한 줄입니다. 클론도 설치도 필요 없습니다 — 서버는 Node 내장 모듈만 쓰는 단일 파일이고,
+배포 저장소 [clunk-mcp](https://github.com/Artemis-ignis/clunk-mcp)에서 npx가 바로 실행합니다.
 
-```powershell
-curl.exe -fsSL https://clunk-preview.vercel.app/clunk-mcp.mjs -o clunk-mcp.mjs
-claude mcp add clunk -- node "$PWDclunk-mcp.mjs"
+```bash
+claude mcp add clunk -- npx -y github:Artemis-ignis/clunk-mcp
 ```
-
 저장소에서 직접 돌릴 때는 다음과 같습니다.
 
 ```powershell

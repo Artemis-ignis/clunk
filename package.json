@@ -10,7 +10,7 @@
     "build": "vinext build",
     "start": "vinext start",
     "test": "npm run typecheck && npm run core:test && npm run surface:test && npm run profile:test && npm run build && node --test tests/rendered-html.test.mjs",
-    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern .static-preview --ignore-pattern bin --ignore-pattern \"public/clunk-mcp.mjs\"",
+    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern .static-preview --ignore-pattern bin --ignore-pattern \"**/clunk-mcp.mjs\"",
     "typecheck": "tsc --noEmit",
     "core:test": "tsx tests/core.test.ts",
     "surface:test": "tsx tests/surface-parity.test.ts",

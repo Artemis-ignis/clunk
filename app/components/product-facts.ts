@@ -180,14 +180,13 @@ export const MCP_SERVER = {
 
 /** Config shape from plugins/clunk-assetops/.mcp.json, with the machine-specific cwd removed. */
 /** Two lines: fetch one dependency-free file, register it. No clone, no install, no cwd. */
-export const MCP_INSTALL_COMMAND = `curl -fsSL https://clunk-preview.vercel.app/clunk-mcp.mjs -o clunk-mcp.mjs
-claude mcp add clunk -- node "$(pwd)/clunk-mcp.mjs"`;
+export const MCP_INSTALL_COMMAND = `claude mcp add clunk -- npx -y github:Artemis-ignis/clunk-mcp`;
 
 export const MCP_CONFIG_SNIPPET = `{
   "mcpServers": {
     "clunk": {
-      "command": "node",
-      "args": ["/absolute/path/to/clunk-mcp.mjs"]
+      "command": "npx",
+      "args": ["-y", "github:Artemis-ignis/clunk-mcp"]
     }
   }
 }`;

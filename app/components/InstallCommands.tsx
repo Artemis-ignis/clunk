@@ -10,44 +10,37 @@ import { useState } from "react";
  */
 
 const REPO = "https://github.com/Artemis-ignis/clunk";
-const FILE_URL = "https://clunk-preview.vercel.app/clunk-mcp.mjs";
+const PKG = "github:Artemis-ignis/clunk-mcp";
 
 /**
- * The server is one dependency-free file, so connecting is fetch it, then register it.
- * It used to be clone the repository, npm install the whole web app, and point the agent at a
- * cwd — four steps and a few hundred megabytes to expose six tools.
+ * One line, every tool, every platform.
+ *
+ * The server is a single dependency-free file published as its own package, so npx fetches
+ * and runs it without a clone, an install, or a cwd. The file path variant is kept for people
+ * who would rather pin a copy than resolve it each time.
  */
-const FETCH = `curl -fsSL ${FILE_URL} -o clunk-mcp.mjs`;
-
 const TABS: { id: string; label: string; note: string; snippet: string }[] = [
   {
     id: "claude",
     label: "Claude Code",
-    note: "두 줄이면 끝입니다.",
-    snippet: `${FETCH}
-claude mcp add clunk -- node "$(pwd)/clunk-mcp.mjs"`,
+    note: "이 한 줄이면 끝입니다.",
+    snippet: `claude mcp add clunk -- npx -y ${PKG}`,
   },
   {
     id: "codex",
     label: "Codex",
     note: "~/.codex/config.toml 에 넣으세요.",
-    snippet: `${FETCH}
-
-# ~/.codex/config.toml
-[mcp_servers.clunk]
-command = "node"
-args = ["/절대/경로/clunk-mcp.mjs"]`,
+    snippet: `[mcp_servers.clunk]
+command = "npx"
+args = ["-y", "${PKG}"]`,
   },
   {
     id: "cursor",
     label: "Cursor",
     note: "프로젝트의 .cursor/mcp.json 에 넣으세요.",
-    snippet: `${FETCH}
-
-// .cursor/mcp.json
-{
+    snippet: `{
   "mcpServers": {
-    "clunk": { "command": "node", "args": ["/절대/경로/clunk-mcp.mjs"] }
+    "clunk": { "command": "npx", "args": ["-y", "${PKG}"] }
   }
 }`,
   },
@@ -55,7 +48,7 @@ args = ["/절대/경로/clunk-mcp.mjs"]`,
     id: "agent",
     label: "그 외 아무 에이전트",
     note: "MCP를 지원하는 도구라면 이 문장을 붙여넣으세요.",
-    snippet: `${FILE_URL} 를 clunk-mcp.mjs로 내려받고, stdio MCP 서버 "clunk"로 등록해줘(command: node, args: 그 파일의 절대 경로). 등록되면 clunk_engine_profiles를 호출해 준비 상태를 확인하고, 내 게임 엔진에 맞는 프리셋으로 에셋 검사를 시작해.`,
+    snippet: `stdio MCP 서버 "clunk"를 등록해줘 — command: npx, args: ["-y", "${PKG}"]. 등록되면 clunk_engine_profiles를 호출해 준비 상태를 확인하고, 내 게임 엔진에 맞는 프리셋으로 에셋 검사를 시작해.`,
   },
 ];
 
@@ -76,8 +69,8 @@ export function InstallCommands() {
       <div className="inst3-head">
         <span className="eyebrow">지금 연결하기</span>
         <p className="inst3-lead">
-          파일 하나를 내려받아 등록하면 끝입니다. 클론도, 설치도, cwd 설정도 없습니다. 붙고 나면
-          에이전트가 알아서 엔진을 묻고 판정합니다. 소스는{" "}
+          클론도, 설치도, 경로 설정도 없습니다. 붙고 나면 에이전트가 알아서 엔진을 묻고
+          판정합니다. 소스는{" "}
           <a href={REPO} target="_blank" rel="noreferrer">
             GitHub
           </a>
