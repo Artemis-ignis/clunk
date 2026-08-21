@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "1.0",
+  "id": "unity-desktop-preset-v1",
+  "version": "0.1.0",
+  "basedOn": "pc",
+  "label": "Unity · 데스크톱",
+  "description": "Unity 데스크톱 타깃용 단일 에셋 가이드 예산입니다. 삼각형 예산은 현세대 커뮤니티 합의(프랍 5k~20k, 히어로 30k+; 프리셋 50k), 머티리얼 소수 유지 권장은 Unity 공식 문서 방향과 일치합니다.",
+  "_confidence": "triangles/materials=community-consensus, texDim=convention, textureMemory=estimated(BC7 비트레이트 산출)",
+  "_importNotes": "Unity 에디터는 glTF/GLB 네이티브 임포트 불가 — Unity glTFast 패키지 필요. X축 반전 변환, 미터 1:1. 데스크톱 권장 GPU 텍스처 포맷은 DXT1/BC7(공식). 런타임 GLB 로드 시 PNG/JPEG는 재압축되지 않습니다.",
+  "_sources": [
+    "https://docs.unity3d.com/Manual/ModelingOptimizedCharacters.html",
+    "https://docs.unity3d.com/6000.2/Documentation/Manual/texture-choose-format-by-platform.html",
+    "https://www.cgtrader.com/forum/general-discussions/recommended-poly-count-for-game-models"
+  ],
+  "thresholds": {
+    "maxTriangles": 50000,
+    "maxMaterials": 5,
+    "maxTextureMemoryBytes": 67108864,
+    "maxTextureDimension": 4096,
+    "readyScoreThreshold": 90
+  }
+}

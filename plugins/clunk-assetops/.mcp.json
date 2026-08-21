@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "clunk": {
+      "command": "cmd.exe",
+      "args": [
+        "/d",
+        "/s",
+        "/c",
+        "call",
+        "npm.cmd",
+        "run",
+        "mcp"
+      ],
+      "cwd": "C:\\Users\\50106\\Desktop\\Clunk",
+      "enabled": true,
+      "startup_timeout_sec": 10,
+      "tool_timeout_sec": 3600
+    }
+  }
+}

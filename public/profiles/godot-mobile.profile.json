@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "1.0",
+  "id": "godot-mobile-preset-v1",
+  "version": "0.1.0",
+  "basedOn": "mobile",
+  "label": "Godot 4 · 모바일",
+  "description": "Godot 4 모바일 타깃용 단일 에셋(프랍·캐릭터급) 가이드 예산입니다. 텍스처 치수 상한은 Godot 공식 문서 수치이고, 삼각형·머티리얼 예산은 공식 문서가 수치를 제시하지 않아 커뮤니티 합의 기반입니다.",
+  "_confidence": "texDim=official, triangles/materials/textureMemory=community-consensus",
+  "_importNotes": "glTF/GLB는 Godot의 권장 1급 포맷. 주의: KHR_draco_mesh_compression 미지원 — Draco 압축 GLB는 임포트 자체가 실패합니다(meshopt는 별개). 축은 Y-up·에셋 정면 +Z, 단위는 미터(Godot 1unit=1m와 일치). 모바일 GPU 텍스처는 통상 4096² 제한, 작업 권장 2048².",
+  "_sources": [
+    "https://docs.godotengine.org/en/stable/tutorials/3d/3d_rendering_limitations.html",
+    "https://docs.godotengine.org/en/stable/tutorials/performance/optimizing_3d_performance.html",
+    "https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_3d_scenes/available_formats.html",
+    "https://github.com/godotengine/godot/issues/73738"
+  ],
+  "thresholds": {
+    "maxTriangles": 20000,
+    "maxMaterials": 4,
+    "maxTextureMemoryBytes": 67108864,
+    "maxTextureDimension": 4096,
+    "readyScoreThreshold": 90
+  }
+}

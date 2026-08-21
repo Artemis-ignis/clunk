@@ -1,0 +1,23 @@
+{
+  "assets": [
+    {
+      "file": "agentic-arc.png",
+      "sourceDirectory": "agentic-build-and-orchestrate-ai-agents-while-you-sleep/public/images/arc.png",
+      "role": "landing visual layer",
+      "status": "template-provided asset reused for Clunk presentation; not product evidence"
+    },
+    {
+      "file": "agentic-footer.png",
+      "sourceDirectory": "agentic-build-and-orchestrate-ai-agents-while-you-sleep/public/images/footer.png",
+      "role": "landing CTA visual layer",
+      "status": "template-provided asset reused for Clunk presentation; not product evidence"
+    },
+    {
+      "file": "liquid-gradient.jpg",
+      "sourceDirectory": "liquid-glass-login-page/public/images/gradient-background.jpg",
+      "role": "login gateway background",
+      "status": "template-provided asset reused for Clunk presentation; not authentication evidence"
+    }
+  ],
+  "productEvidenceRule": "Product metrics, auth state, billing state, inspection results, and Passport data are rendered from Clunk runtime data only."
+}

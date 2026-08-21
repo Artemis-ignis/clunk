@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "1.0",
+  "id": "unreal-desktop-preset-v1",
+  "version": "0.1.0",
+  "basedOn": "pc",
+  "label": "Unreal 5 · 데스크톱 (비-Nanite)",
+  "description": "UE5 데스크톱 비-Nanite 기준 단일 에셋 가이드 예산입니다(스켈레탈 메시·반투명 등 Nanite 불가 자산에 적용). Nanite 스태틱 메시는 삼각형 하드 리밋이 사실상 없고(공식: 트라이앵글당 평균 14.4바이트 디스크) 이 프리셋의 삼각형 예산이 적용되지 않습니다 — 그 경우 파일 크기·텍스처 예산만 보세요.",
+  "_confidence": "texDim=official(밉 14단계 한도 기준 8192), triangles/materials=community-consensus, textureMemory=estimated",
+  "_importNotes": "UE5는 glTF/GLB를 Interchange 프레임워크로 네이티브 임포트합니다. 기본 임포트 스케일 100(glTF 미터 → 언리얼 센티미터) — 크기가 100배로 보이면 이 설정입니다. 축은 오른손 Y-up → 왼손 Z-up 자동 변환. 공식 지원 확장: KHR_lights_punctual, materials_unlit, materials_clearcoat, materials_variants, mesh_quantization, texture_transform. 모바일 타깃이면 Nanite 미지원·텍스처 2048² 상한·머티리얼 샘플러 5개 제한(공식)에 주의.",
+  "_sources": [
+    "https://dev.epicgames.com/documentation/en-us/unreal-engine/nanite-virtualized-geometry-in-unreal-engine",
+    "https://dev.epicgames.com/documentation/unreal-engine/performance-guidelines-for-mobile-devices-in-unreal-engine",
+    "https://dev.epicgames.com/documentation/en-us/unreal-engine/texture-support-and-settings?application_version=4.27"
+  ],
+  "thresholds": {
+    "maxTriangles": 100000,
+    "maxMaterials": 5,
+    "maxTextureMemoryBytes": 268435456,
+    "maxTextureDimension": 8192,
+    "readyScoreThreshold": 90
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "1.0",
+  "id": "unity-mobile-preset-v1",
+  "version": "0.1.0",
+  "basedOn": "mobile",
+  "label": "Unity · 모바일",
+  "description": "Unity 모바일 타깃용 단일 에셋 가이드 예산입니다. 삼각형 예산은 현세대 커뮤니티 합의(히어로 캐릭터 5k~20k, 프리셋은 보수적 10k), 머티리얼 2~3개 권장은 Unity 공식 문서 문구입니다. 참고: Unity 5.6 시절 공식 수치는 모바일 캐릭터 300~1,500tri로 훨씬 보수적이며, 현행 매뉴얼은 수치를 삭제하고 정성 지침만 남겼습니다.",
+  "_confidence": "materials=official(legacy doc), triangles=community-consensus, texDim=convention, textureMemory=estimated(ASTC 비트레이트 산출)",
+  "_importNotes": "주의: Unity 에디터는 glTF/GLB를 네이티브 임포트하지 못합니다 — 공식 패키지 Unity glTFast(com.unity.cloud.gltfast)가 필요합니다. 좌표 변환은 X축 반전(glTF 오른손→Unity 왼손), 단위는 미터 1:1. 셰이더는 UV 세트 최대 2개. 런타임 GLB 로드 시 내장 PNG/JPEG는 GPU 압축(ASTC)으로 트랜스코드되지 않아 비압축으로 VRAM에 올라가므로, 런타임 파이프라인이면 KTX2/BasisU 권장.",
+  "_sources": [
+    "https://docs.unity3d.com/Manual/ModelingOptimizedCharacters.html",
+    "https://docs.unity3d.com/6000.2/Documentation/Manual/texture-choose-format-by-platform.html",
+    "https://learn.unity.com/course/3d-art-optimization-for-mobile-gaming-5474",
+    "https://polycount.com/discussion/230521/how-many-polys-should-character-models-have-in-a-mobile-game"
+  ],
+  "thresholds": {
+    "maxTriangles": 10000,
+    "maxMaterials": 3,
+    "maxTextureMemoryBytes": 16777216,
+    "maxTextureDimension": 2048,
+    "readyScoreThreshold": 90
+  }
+}

@@ -1,0 +1,336 @@
+<meta charset="utf-8" />
+<title>Clunk 제품 구조 개념도</title>
+<style>
+  :root {
+    --accent: #087cae;
+    --accent-strong: #056083;
+    --accent-wash: #e1f4fb;
+    --accent-line: #a8d5e8;
+    --text: #15212b;
+    --text-strong: #0b1822;
+    --muted: #607486;
+    --muted-strong: #3d5566;
+    --line: #d6e0e7;
+    --line-soft: #e7eef3;
+    --surface-raised: #f6f9fb;
+    --font: "Pretendard", "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo",
+      system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "Consolas", "D2Coding", "Courier New", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #ffffff; }
+  body { font-family: var(--font); -webkit-font-smoothing: antialiased; }
+
+  .diagram {
+    position: relative;
+    width: 1600px;
+    height: 1010px;
+    background: #ffffff;
+    color: var(--text);
+    overflow: hidden;
+  }
+  .layer { position: absolute; inset: 0; pointer-events: none; }
+  .wires { z-index: 1; }
+  .blocks { z-index: 2; }
+  .wires-top { z-index: 3; }
+  .abs { position: absolute; }
+
+  /* ---------- header ---------- */
+  .brand-mark {
+    left: 56px; top: 28px; width: 46px; height: 46px;
+    background: var(--accent); border-radius: 13px; color: #fff;
+    font-family: var(--mono); font-size: 16px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; letter-spacing: .02em;
+  }
+  .head-text { left: 118px; top: 25px; }
+  .head-text h1 {
+    margin: 0; font-size: 31px; font-weight: 750; letter-spacing: -.035em;
+    color: var(--text-strong); line-height: 1.15;
+  }
+  .head-text p {
+    margin: 7px 0 0; font-size: 15.5px; color: var(--muted-strong);
+    line-height: 1.4; letter-spacing: -.012em;
+  }
+  .head-text p b { color: var(--accent-strong); font-weight: 750; }
+  .concept-pill {
+    right: 56px; top: 32px;
+    border: 1px solid var(--line); background: var(--surface-raised);
+    border-radius: 999px; padding: 8px 16px;
+    display: flex; align-items: center; gap: 9px;
+  }
+  .concept-pill b { font-size: 13px; font-weight: 750; color: var(--text-strong); letter-spacing: -.01em; }
+  .concept-pill span { font-size: 12px; color: var(--muted); letter-spacing: -.01em; }
+  .concept-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); display: block; }
+  .rule { left: 56px; top: 106px; width: 1488px; height: 1px; background: var(--line-soft); }
+
+  .kicker { font-size: 12.5px; font-weight: 700; letter-spacing: .09em; color: var(--muted); }
+
+  /* ---------- surface band ---------- */
+  .band {
+    left: 56px; top: 126px; width: 1488px; height: 104px;
+    border: 1px solid var(--line-soft); border-radius: 16px; background: var(--surface-raised);
+  }
+  .band-l { left: 24px; top: 28px; width: 300px; }
+  .band-l .kicker { display: block; }
+  .band-l p { margin: 8px 0 0; font-size: 14px; font-weight: 700; color: var(--text-strong); letter-spacing: -.03em; line-height: 1.3; }
+  .band-chips { left: 336px; top: 28px; display: flex; gap: 16px; }
+  .surf-chip {
+    width: 173px; height: 48px; background: #fff; border: 1px solid var(--accent-line);
+    border-radius: 10px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 2px;
+  }
+  .surf-chip b { font-size: 15.5px; font-weight: 720; color: var(--text-strong); letter-spacing: -.025em; }
+  .surf-chip span { font-family: var(--mono); font-size: 10.5px; color: var(--muted); letter-spacing: .01em; }
+  .band-r { left: 1100px; top: 29px; width: 364px; text-align: right; }
+  .band-r b { display: block; font-size: 15px; font-weight: 780; color: var(--accent-strong); letter-spacing: -.03em; }
+  .band-r span { display: block; margin-top: 7px; font-size: 12.5px; color: var(--muted); letter-spacing: -.015em; }
+
+  /* ---------- core ---------- */
+  .core {
+    left: 372px; top: 272px; width: 780px; height: 604px;
+    border: 2px solid #7cc2dd; border-radius: 20px; background: #fff;
+    box-shadow: 0 18px 44px rgba(8, 124, 174, .10); overflow: hidden;
+  }
+  .core-head {
+    height: 72px; background: #f2fafd; border-bottom: 1px solid #d7ecf5;
+    display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+  }
+  .core-head-l { display: flex; align-items: center; gap: 12px; }
+  .core-head-l b { font-size: 21px; font-weight: 780; color: var(--text-strong); letter-spacing: -.03em; }
+  .core-head-r { font-size: 13px; color: var(--muted-strong); letter-spacing: -.015em; }
+  .tag-mono {
+    font-family: var(--mono); font-size: 11px; color: var(--accent-strong);
+    background: var(--accent-wash); border: 1px solid var(--accent-line);
+    border-radius: 6px; padding: 4px 8px; white-space: nowrap;
+  }
+
+  .steps { padding: 16px 24px; display: flex; flex-direction: column; gap: 25px; }
+  .step {
+    height: 80px; border: 1px solid #dbe7ee; border-radius: 12px; background: #f8fbfd;
+    display: flex; align-items: center; padding: 0 18px; gap: 18px;
+  }
+  .step-num {
+    flex: 0 0 auto; width: 34px; height: 34px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    font-family: var(--mono); font-size: 16px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .step-body { flex: 1 1 auto; min-width: 0; }
+  .step-body b { display: block; font-size: 17.5px; font-weight: 720; color: var(--text-strong); letter-spacing: -.028em; }
+  .step-body span { display: block; margin-top: 5px; font-size: 13.5px; color: var(--muted-strong); letter-spacing: -.018em; line-height: 1.35; }
+  .step .tag-mono { flex: 0 0 auto; }
+
+  /* ---------- columns ---------- */
+  .col { top: 272px; display: flex; flex-direction: column; gap: 32px; }
+  .col-in { left: 56px; width: 244px; }
+  .col-out { left: 1212px; width: 332px; }
+  .col-card {
+    height: 180px; border: 1px solid var(--line); border-radius: 14px;
+    background: #fff; padding: 20px; display: flex; flex-direction: column;
+  }
+  .col-card b { font-size: 17.5px; font-weight: 730; color: var(--text-strong); letter-spacing: -.03em; }
+  .col-card p { margin: 9px 0 0; font-size: 13.5px; color: var(--muted-strong); line-height: 1.55; letter-spacing: -.018em; }
+  .col-card .foot { margin-top: auto; }
+  .card-accent { border-color: var(--accent-line); background: #fbfeff; }
+  .k-in { left: 56px; top: 242px; }
+  .k-out { left: 1212px; top: 242px; }
+
+  /* ---------- boundary ---------- */
+  .boundary {
+    left: 56px; top: 908px; width: 1488px; height: 76px;
+    border: 1px solid var(--accent-line); border-radius: 14px; background: var(--accent-wash);
+    display: flex; align-items: center; justify-content: space-between; padding: 0 24px; gap: 24px;
+  }
+  .boundary-l { display: flex; align-items: center; gap: 16px; }
+  .boundary-badge {
+    font-size: 12.5px; font-weight: 750; color: #fff; background: var(--accent-strong);
+    border-radius: 8px; padding: 7px 12px; letter-spacing: -.01em; white-space: nowrap;
+  }
+  .boundary-l span { font-size: 16.5px; font-weight: 680; color: var(--text-strong); letter-spacing: -.032em; }
+  .boundary-r { display: flex; gap: 10px; }
+  .boundary-r i {
+    font-style: normal; font-family: var(--mono); font-size: 11.5px; color: var(--accent-strong);
+    background: #fff; border: 1px solid var(--accent-line); border-radius: 8px; padding: 7px 11px;
+    white-space: nowrap;
+  }
+</style>
+
+<div class="diagram">
+
+  <svg class="layer wires" width="1600" height="1010" viewBox="0 0 1600 1010" fill="none">
+    <defs>
+      <marker id="ah" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#087cae" />
+      </marker>
+    </defs>
+    <g stroke="#087cae" stroke-width="2" stroke-linecap="round" fill="none">
+      <!-- 4 surfaces -> core -->
+      <line x1="478.5" y1="234" x2="478.5" y2="270" marker-end="url(#ah)" />
+      <line x1="667.5" y1="234" x2="667.5" y2="270" marker-end="url(#ah)" />
+      <line x1="856.5" y1="234" x2="856.5" y2="270" marker-end="url(#ah)" />
+      <line x1="1045.5" y1="234" x2="1045.5" y2="270" marker-end="url(#ah)" />
+
+      <!-- inputs -> core -->
+      <path d="M300,362 H326 Q336,362 336,372 V574" />
+      <path d="M300,786 H326 Q336,786 336,776 V574" />
+      <path d="M300,574 H372" marker-end="url(#ah)" />
+
+      <!-- core -> results -->
+      <path d="M1152,574 H1212" marker-end="url(#ah)" />
+      <path d="M1182,574 V372 Q1182,362 1192,362 H1212" marker-end="url(#ah)" />
+      <path d="M1182,574 V776 Q1182,786 1192,786 H1212" marker-end="url(#ah)" />
+    </g>
+  </svg>
+
+  <svg class="layer wires-top" width="1600" height="1010" viewBox="0 0 1600 1010" fill="none">
+    <defs>
+      <marker id="ah2" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#087cae" />
+      </marker>
+    </defs>
+    <g stroke="#087cae" stroke-width="2" stroke-linecap="round" fill="none">
+      <line x1="431" y1="442" x2="431" y2="463" marker-end="url(#ah2)" />
+      <line x1="431" y1="547" x2="431" y2="568" marker-end="url(#ah2)" />
+      <line x1="431" y1="652" x2="431" y2="673" marker-end="url(#ah2)" />
+      <line x1="431" y1="757" x2="431" y2="778" marker-end="url(#ah2)" />
+    </g>
+  </svg>
+
+  <div class="layer blocks">
+
+    <!-- header -->
+    <div class="abs brand-mark">CL</div>
+    <div class="abs head-text">
+      <h1>Clunk 제품 구조 개념도</h1>
+      <p>게임 3D 에셋(GLB · glTF)이 Clunk를 거쳐 <b>증거가 남는 검사 · 최적화</b>가 되는 구조</p>
+    </div>
+    <div class="abs concept-pill">
+      <span class="concept-dot"></span><b>개념도</b><span>실제 제품 화면 스크린샷 아님</span>
+    </div>
+    <div class="abs rule"></div>
+
+    <!-- surface band -->
+    <div class="abs band">
+      <div class="abs band-l">
+        <span class="kicker">제품 표면</span>
+        <p>하나의 Core를 호출하는 4개 진입점</p>
+      </div>
+      <div class="abs band-chips">
+        <div class="surf-chip"><b>Web 워크스페이스</b><span>브라우저</span></div>
+        <div class="surf-chip"><b>CLI</b><span>터미널 · 빌드 파이프라인</span></div>
+        <div class="surf-chip"><b>MCP</b><span>AI 에이전트</span></div>
+        <div class="surf-chip"><b>VS Code</b><span>에디터 명령</span></div>
+      </div>
+      <div class="abs band-r">
+        <b>같은 엔진, 같은 결과</b>
+        <span>어느 표면에서 실행해도 동일한 검사 계약을 사용</span>
+      </div>
+    </div>
+
+    <!-- core -->
+    <div class="abs core">
+      <div class="core-head">
+        <div class="core-head-l">
+          <b>Clunk Core</b>
+          <span class="tag-mono">packages/core</span>
+        </div>
+        <div class="core-head-r">확장자만 보지 않고 실제 바이트를 읽어 결정론적으로 처리</div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <b>실제 바이트 검사</b>
+            <span>GLB 바이트를 그대로 파싱해 입력 SHA-256과 scene · mesh · texture 메트릭 산출</span>
+          </div>
+          <span class="tag-mono">SHA-256</span>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <b>정책 finding · Game-Ready Score</b>
+            <span>선언된 규칙 세트로 severity · 측정값 · 임계값을 기록하고 READY / 조치 필요 판정</span>
+          </div>
+          <span class="tag-mono">ruleSetId</span>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <b>허용 목록 최적화</b>
+            <span>빈 노드 · 중복 머티리얼 · 허용된 metadata만 정리하고 새 파일로 저장</span>
+          </div>
+          <span class="tag-mono">원본 보존</span>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <b>새 파일 재검사</b>
+            <span>최적화된 출력 파일을 처음부터 다시 파싱해 출력 해시와 메트릭을 재측정</span>
+          </div>
+          <span class="tag-mono">fresh reinspect</span>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <b>Asset Passport 발급</b>
+            <span>입력 해시와 출력 해시를 규칙 세트 · result digest와 함께 하나로 연결</span>
+          </div>
+          <span class="tag-mono">passport.json</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- inputs -->
+    <div class="abs kicker k-in">입력 · 어디서 만들었든</div>
+    <div class="abs col col-in">
+      <div class="col-card">
+        <b>AI 생성</b>
+        <p>생성형 3D 도구가 만든 결과물.<br />정리 상태를 알기 어렵습니다</p>
+        <div class="foot"><span class="tag-mono">.glb · .gltf</span></div>
+      </div>
+      <div class="col-card">
+        <b>마켓 구매</b>
+        <p>에셋 스토어에서 내려받은 파일.<br />제작자마다 규칙이 다릅니다</p>
+        <div class="foot"><span class="tag-mono">.glb · .gltf</span></div>
+      </div>
+      <div class="col-card">
+        <b>외주 납품</b>
+        <p>외부 아티스트가 전달한 납품본.<br />납품 건마다 편차가 생깁니다</p>
+        <div class="foot"><span class="tag-mono">.glb · .gltf</span></div>
+      </div>
+    </div>
+
+    <!-- results -->
+    <div class="abs kicker k-out">결과 · 저장</div>
+    <div class="abs col col-out">
+      <div class="col-card">
+        <b>최적화된 새 GLB 파일</b>
+        <p>원본은 수정하지 않고 별도 출력 파일로 저장.<br />브라우저에서 바로 미리보기와 다운로드</p>
+        <div class="foot"><span class="tag-mono">output .glb</span></div>
+      </div>
+      <div class="col-card card-accent">
+        <b>Asset Passport</b>
+        <p>입력 해시 → 출력 해시를 잇는 증빙 JSON.<br />규칙 세트와 result digest를 함께 기록</p>
+        <div class="foot"><span class="tag-mono">passport .json</span></div>
+      </div>
+      <div class="col-card">
+        <b>워크스페이스 저장</b>
+        <p>검사 이력 · Passport 기록 · 크레딧 원장을<br />인증된 계정 워크스페이스에 보관</p>
+        <div class="foot"><span class="tag-mono">메타데이터 · 해시</span></div>
+      </div>
+    </div>
+
+    <!-- boundary -->
+    <div class="abs boundary">
+      <div class="boundary-l">
+        <span class="boundary-badge">저장 경계</span>
+        <span>원본 파일은 브라우저 안에서만 처리하고, 서버에는 메타데이터만 남깁니다</span>
+      </div>
+      <div class="boundary-r">
+        <i>브라우저 · 원본 GLB 바이트</i>
+        <i>서버 · 해시 · 리포트 · 이력 · 크레딧</i>
+      </div>
+    </div>
+
+  </div>
+</div>

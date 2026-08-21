@@ -1,0 +1,27 @@
+{
+  "name": "clunk-assetops",
+  "version": "0.1.0",
+  "description": "Build and operate Clunk's evidence-first Game AssetOps product across Web, CLI, MCP, and VS Code.",
+  "author": {
+    "name": "Clunk"
+  },
+  "homepage": "https://www.modoo.or.kr/apply",
+  "license": "UNLICENSED",
+  "keywords": ["game-assets", "gltf", "glb", "assetops", "mcp", "game-ready"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Clunk Assetops",
+    "shortDescription": "Inspect and improve real GLB/GLTF evidence.",
+    "longDescription": "Clunk AssetOps keeps one deterministic Core contract behind the Sites Inspector, CLI, MCP server, and VS Code adapter. It preserves originals, records hashes, restricts optimization, and requires fresh reinspection before an artifact is called ready.",
+    "developerName": "Clunk",
+    "category": "Productivity",
+    "capabilities": ["Inspect", "Optimize", "MCP", "CLI", "VS Code"],
+    "brandColor": "#0B87B5",
+    "defaultPrompt": [
+      "Inspect this GLB and explain every blocking finding.",
+      "Optimize only the Clunk allowlist and reinspect the output.",
+      "Compare Web, CLI, MCP, and VS Code result digests."
+    ]
+  },
+  "mcpServers": "./.mcp.json"
+}

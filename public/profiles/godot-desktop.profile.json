@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "1.0",
+  "id": "godot-desktop-preset-v1",
+  "version": "0.1.0",
+  "basedOn": "pc",
+  "label": "Godot 4 · 데스크톱",
+  "description": "Godot 4 데스크톱(Forward+) 타깃용 단일 에셋 가이드 예산입니다. 텍스처 치수 상한(8192² 초과 시 구형 기기 미지원 가능)은 공식 문서 기반, 삼각형·머티리얼 예산은 공식 수치 부재로 일반 최적화 관행 기반 추정입니다.",
+  "_confidence": "texDim=official, triangles/materials/textureMemory=estimated",
+  "_importNotes": "glTF/GLB는 Godot의 권장 1급 포맷. Draco 압축 GLB는 임포트 실패(KHR_draco_mesh_compression 미지원). 축 Y-up·정면 +Z·미터 단위. PBR metallic-roughness가 StandardMaterial3D로 변환되며, Blender 익스포트 기본값 탓에 cull mode가 양면(Disabled)으로 들어오는 성능 함정이 공식 문서에 명시되어 있습니다.",
+  "_sources": [
+    "https://docs.godotengine.org/en/stable/tutorials/3d/3d_rendering_limitations.html",
+    "https://docs.godotengine.org/en/stable/tutorials/performance/optimizing_3d_performance.html",
+    "https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_3d_scenes/model_export_considerations.html"
+  ],
+  "thresholds": {
+    "maxTriangles": 100000,
+    "maxMaterials": 8,
+    "maxTextureMemoryBytes": 268435456,
+    "maxTextureDimension": 8192,
+    "readyScoreThreshold": 90
+  }
+}

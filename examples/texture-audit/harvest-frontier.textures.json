@@ -1,0 +1,35 @@
+{
+  "baseDir": "C:/Users/50106/Desktop/Harvest Frontier/public/assets/textures",
+  "camera": { "fovDeg": 52, "viewportWidthPx": 1600 },
+  "distanceBandsM": [5, 15, 30],
+  "gameplayBandIndex": 1,
+  "groundAnisotropy": 2.0,
+  "gpuMemoryBudgetBytes": 41943040,
+  "thresholds": { "A": 0.6, "B": 0.35, "C": 0.15, "washGradientPerSigma": 0.4 },
+  "contrastWindowPx": 24,
+  "textures": [
+    {
+      "path": "grass-meadow.png",
+      "usages": [
+        { "label": "지형 근접층", "mPerTile": 3.4 },
+        { "label": "광역 제2층", "mPerTile": 11.0 }
+      ]
+    },
+    { "path": "dirt-path.png", "usages": [{ "label": "경로", "mPerTile": 2.2 }] },
+    {
+      "path": "soil-tilled.png",
+      "usages": [
+        { "label": "지형 앞치마", "mPerTile": 1.6 },
+        { "label": "이랑 밭", "mPerTile": 1.2 }
+      ]
+    },
+    { "path": "wood-planks-weathered.png", "usages": [{ "label": "world-box 추정", "mPerTile": 1.5 }] },
+    { "path": "plaster-wall.png", "usages": [{ "label": "world-box 추정", "mPerTile": 1.5 }] },
+    {
+      "path": "roof-tiles.png",
+      "usages": [{ "label": "world-box 추정", "mPerTile": 1.2 }],
+      "expectedRepeats": { "horizontal": 3.77, "vertical": 2.7 }
+    }
+  ],
+  "strictChecks": ["seam", "memory"]
+}

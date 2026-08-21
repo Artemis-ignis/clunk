@@ -1,0 +1,13 @@
+{
+  "name": "clunk-vscode",
+  "displayName": "Clunk AssetOps",
+  "description": "Inspect and safely optimize GLB/GLTF assets with the Clunk Core contract.",
+  "version": "0.1.0",
+  "publisher": "clunk",
+  "engines": { "vscode": ">=1.90.0" },
+  "activationEvents": ["onCommand:clunk.inspect", "onCommand:clunk.optimize"],
+  "main": "./dist/extension.js",
+  "contributes": { "commands": [{ "command": "clunk.inspect", "title": "Clunk: Inspect Asset" }, { "command": "clunk.optimize", "title": "Clunk: Optimize Safely" }] },
+  "scripts": { "build": "tsc -p tsconfig.json" },
+  "devDependencies": { "@types/vscode": "^1.90.0", "typescript": "^5.9.3" }
+}
