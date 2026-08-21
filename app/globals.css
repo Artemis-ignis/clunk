@@ -6765,3 +6765,28 @@ html.snap-y {
   font-size: var(--fs-1);
   line-height: 1.7;
 }
+
+/* --- Server verification (inspector) ---------------------------------------
+   Opt-in upload, so the panel states the cost and the fact of the upload before the
+   button rather than after it. */
+.verify-card {
+  display: grid;
+  gap: var(--sp-12);
+  border-color: var(--accent-line);
+}
+
+.verify-terms {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.76rem;
+}
+
+.verify-notice {
+  margin: 0;
+  padding: var(--sp-12);
+  border-radius: var(--r-control);
+  background: var(--accent-soft);
+  color: var(--text-muted);
+  font-size: var(--fs-1);
+  line-height: 1.6;
+}

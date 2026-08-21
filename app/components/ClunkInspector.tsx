@@ -174,6 +174,15 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
   // Credits are spent on this screen, so the balance belongs on this screen. Seeded from
   // /api/me and then kept current from the `credits` every write endpoint returns.
   const [credits, setCredits] = useState<number | null>(null);
+  // Server verification is optional and only exists where the operator configured a signing
+  // key, so the button is driven by what the server says rather than by a build-time flag.
+  const [verifyPolicy, setVerifyPolicy] = useState<{
+    maxUploadBytes: number;
+    creditCost: number;
+    algorithm: string;
+  } | null>(null);
+  const [verifyState, setVerifyState] = useState<"idle" | "busy" | "done">("idle");
+  const [verifyNotice, setVerifyNotice] = useState<string | null>(null);
   const [creditsUnavailable, setCreditsUnavailable] = useState(false);
   // What is running right now, so a synchronous inspection is not an unexplained freeze.
   const [activeJob, setActiveJob] = useState<{ name: string; bytes: number; phase: "inspect" | "optimize" } | null>(null);
@@ -538,6 +547,70 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
     } finally {
       setBusy("idle");
       setActiveJob(null);
+    }
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/verifications")
+      .then((response) => (response.ok ? (response.json() as Promise<Record<string, unknown>>) : null))
+      .then((body) => {
+        if (cancelled || !body?.ok) return;
+        setVerifyPolicy({
+          maxUploadBytes: Number(body.maxUploadBytes),
+          creditCost: Number(body.creditCost),
+          algorithm: String(body.algorithm ?? ""),
+        });
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function requestServerVerification() {
+    if (!sourceBytes || !verifyPolicy) return;
+    setVerifyState("busy");
+    setVerifyNotice(null);
+    try {
+      const response = await fetch("/api/verifications", {
+        method: "POST",
+        headers: {
+          "content-type": "application/octet-stream",
+          "x-clunk-file-name": encodeURIComponent(fileName || "asset.glb"),
+          "x-clunk-profile-id": isCustomActive ? "pc" : profileId,
+        },
+        body: sourceBytes.slice().buffer as ArrayBuffer,
+      });
+      const body = (await response.json()) as {
+        ok?: boolean;
+        error?: string;
+        credits?: number;
+        passport?: unknown;
+        passportId?: string;
+        idempotent?: boolean;
+      };
+      if (typeof body.credits === "number") setCredits(body.credits);
+      if (!response.ok || !body.ok) {
+        setVerifyNotice(body.error ?? "서버 검증에 실패했습니다.");
+        setVerifyState("idle");
+        return;
+      }
+      download(
+        new TextEncoder().encode(`${JSON.stringify(body.passport, null, 2)}
+`),
+        `${body.passportId ?? "clunk-verification"}.json`,
+        "application/json",
+      );
+      setVerifyNotice(
+        body.idempotent
+          ? "이미 같은 바이트로 발급한 기록이 있어 크레딧을 추가로 차감하지 않았습니다."
+          : "서버가 이 바이트를 직접 검사하고 서명했습니다. 내려받은 파일을 상대에게 함께 보내세요.",
+      );
+      setVerifyState("done");
+    } catch {
+      setVerifyNotice("서버 검증 요청을 보내지 못했습니다. 연결을 확인한 뒤 다시 시도해 주세요.");
+      setVerifyState("idle");
     }
   }
 
@@ -1073,6 +1146,39 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
               geometry나 texture 변환은 하지 않습니다.
             </p>
           </div>
+
+          {verifyPolicy && sourceBytes ? (
+            <div className="panel action-card verify-card">
+              <span className="mono-label">제3자에게 제출할 증명</span>
+              <button
+                type="button"
+                className="button button-quiet button-block"
+                disabled={
+                  !report ||
+                  busy !== "idle" ||
+                  verifyState === "busy" ||
+                  sourceBytes.byteLength > verifyPolicy.maxUploadBytes
+                }
+                onClick={() => void requestServerVerification()}
+              >
+                {verifyState === "busy" ? "서버 검증 중" : "서버 검증 받기"}
+                <Icon name="shield" size={15} />
+              </button>
+              <p>
+                <strong>이 파일이 서버로 업로드됩니다.</strong> 서버가 직접 검사하고 결과에 서명한 뒤
+                바이트는 폐기합니다(보관하지 않습니다). 받은 사람은{" "}
+                <code>clunk verify</code> 로 서명과 파일 해시를 직접 대조할 수 있습니다.
+              </p>
+              <p className="verify-terms num">
+                {verifyPolicy.creditCost} 크레딧 · 최대 {formatBytes(verifyPolicy.maxUploadBytes)} ·{" "}
+                {verifyPolicy.algorithm}
+                {sourceBytes.byteLength > verifyPolicy.maxUploadBytes
+                  ? ` · 이 파일 ${formatBytes(sourceBytes.byteLength)}은(는) 상한을 넘어 보낼 수 없습니다`
+                  : ""}
+              </p>
+              {verifyNotice ? <p className="verify-notice">{verifyNotice}</p> : null}
+            </div>
+          ) : null}
         </aside>
       </div>
 
