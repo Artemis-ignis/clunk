@@ -2,6 +2,7 @@ import {
   applyCreditOperation,
   assertSameOrigin,
   canonicalFingerprint,
+  errorBody,
   getRuntimeDb,
   jsonError,
   parseJson,
@@ -69,19 +70,43 @@ export async function POST(request: Request) {
       payload.fileName.length > 255 ||
       fields.some((value) => typeof value !== "string" || !value.trim())
     ) {
-      return privateJson({ ok: false, error: "Incomplete analysis record." }, { status: 400 });
+      return privateJson(
+        errorBody("검사 기록에 필요한 항목이 빠졌습니다. 파일을 다시 검사한 뒤 저장해 주세요.", "run_incomplete"),
+        { status: 400 },
+      );
     }
     if (!/^[a-f0-9]{64}$/.test(payload.inputHash!) || !["glb", "gltf"].includes(payload.format!)) {
-      return privateJson({ ok: false, error: "Invalid format or SHA-256 input hash." }, { status: 400 });
+      return privateJson(
+        errorBody(
+          "GLB 또는 GLTF 파일만 저장할 수 있으며, 파일 해시 형식도 올바라야 합니다. 파일을 다시 검사한 뒤 저장해 주세요.",
+          "run_invalid_hash",
+        ),
+        { status: 400 },
+      );
     }
     if (!Number.isSafeInteger(payload.byteLength) || Number(payload.byteLength) < 1 || Number(payload.byteLength) > 250_000_000) {
-      return privateJson({ ok: false, error: "Invalid asset byte length." }, { status: 400 });
+      return privateJson(
+        errorBody(
+          "파일 크기가 저장 가능한 범위를 벗어났습니다. 1바이트 이상 250MB 이하 파일만 저장할 수 있습니다.",
+          "run_invalid_byte_length",
+        ),
+        { status: 400 },
+      );
     }
     if (!["web", "mobile", "pc"].includes(payload.profileId!) || payload.ruleSetId !== "clunk-game-ready-v1") {
-      return privateJson({ ok: false, error: "Unsupported policy profile." }, { status: 400 });
+      return privateJson(
+        errorBody(
+          "지원하지 않는 정책 프로필입니다. web, mobile, pc 중 하나를 선택한 뒤 다시 시도해 주세요.",
+          "run_unsupported_profile",
+        ),
+        { status: 400 },
+      );
     }
     if (!Number.isInteger(payload.score) || Number(payload.score) < 0 || Number(payload.score) > 100 || !Number.isInteger(payload.hardBlockerCount) || Number(payload.hardBlockerCount) < 0 || !Number.isInteger(payload.findingCount) || Number(payload.findingCount) < 0) {
-      return privateJson({ ok: false, error: "Invalid report counts or score." }, { status: 400 });
+      return privateJson(
+        errorBody("검사 점수나 위반 건수 값이 올바르지 않습니다. 파일을 다시 검사한 뒤 저장해 주세요.", "run_invalid_score"),
+        { status: 400 },
+      );
     }
     const db = getRuntimeDb();
     const verified = verifyClientLocalInspection(payload.report, {
@@ -103,7 +128,13 @@ export async function POST(request: Request) {
     };
     const reportJson = JSON.stringify(storedReport);
     if (reportJson.length > 180_000) {
-      return privateJson({ ok: false, error: "Analysis report is too large." }, { status: 413 });
+      return privateJson(
+        errorBody(
+          "검사 리포트 용량이 저장 한도를 넘었습니다. 에셋을 더 작은 단위로 나눠 검사한 뒤 저장해 주세요.",
+          "run_report_too_large",
+        ),
+        { status: 413 },
+      );
     }
     const verifiedScore = verified.report.score as { ready: boolean };
     const persistedStatus = verifiedScore.ready === true && Number(payload.hardBlockerCount) === 0 ? "ready" : "blocked";

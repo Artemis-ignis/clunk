@@ -1,5 +1,6 @@
 import {
   applyCreditOperation,
+  errorBody,
   getCredits,
   getRuntimeDb,
   privateJson,
@@ -40,7 +41,10 @@ export async function POST(request: Request) {
     const payload = await parseJson<{ action?: string }>(request);
     if (payload.action !== "simulate-upgrade") {
       return privateJson(
-        { ok: false, error: "Only the demo upgrade action is available in v1." },
+        errorBody(
+          "v1에서는 데모 업그레이드 동작만 사용할 수 있습니다. ‘크레딧과 플랜’ 화면에서 데모 전환 버튼을 사용해 주세요.",
+          "credit_action_unsupported",
+        ),
         { status: 400 },
       );
     }
@@ -70,7 +74,7 @@ export async function POST(request: Request) {
       mode: "DEMO",
       credits: operation.balance,
       idempotent: operation.idempotent,
-      message: "Demo credits added. No real payment was processed.",
+      message: "데모 크레딧 100개를 추가했습니다. 실제 결제는 이루어지지 않았습니다.",
     });
   } catch (error) {
     return jsonError(error);

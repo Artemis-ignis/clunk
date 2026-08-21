@@ -56,6 +56,7 @@
   --warning: #8a5a06;
   --warning-soft: rgba(138, 90, 6, 0.11);
   --danger: #b3213c;
+  --danger-line: rgba(179, 33, 60, 0.34);
   --danger-soft: rgba(179, 33, 60, 0.09);
 
   /* type */
@@ -170,6 +171,7 @@
   --warning: #e8b25c;
   --warning-soft: rgba(232, 178, 92, 0.13);
   --danger: #ff7d93;
+  --danger-line: rgba(255, 125, 147, 0.4);
   --danger-soft: rgba(255, 125, 147, 0.12);
 
   --glass: rgba(10, 18, 30, 0.72);
@@ -6368,4 +6370,48 @@ html.snap-y {
 
 .passport-scope-note strong {
   color: var(--text-muted);
+}
+
+/* --- Account data controls (settings) -------------------------------------
+   Deleting a workspace cannot be undone, so the panel is marked as dangerous in the
+   surface itself rather than only in its copy. */
+.settings-block {
+  margin-top: var(--sp-24);
+}
+
+.settings-danger {
+  margin-top: var(--sp-24);
+  border-color: var(--danger-line);
+}
+
+.settings-confirm-input {
+  width: 100%;
+  max-width: 26rem;
+  padding: 10px var(--sp-12);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-control);
+  background: var(--ink-0);
+  color: var(--text-strong);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+}
+
+.settings-confirm-input:focus-visible {
+  border-color: var(--danger);
+  outline: 2px solid var(--danger);
+  outline-offset: 1px;
+}
+
+.button-danger {
+  border-color: var(--danger-line);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.button-danger:hover:not(:disabled) {
+  border-color: var(--danger);
+}
+
+.settings-danger-label {
+  color: var(--danger);
 }

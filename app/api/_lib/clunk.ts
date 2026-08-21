@@ -32,7 +32,13 @@ const SCHEMA_STATEMENTS = [
 
 export async function requireClunkContext(): Promise<ClunkUserContext> {
   const user = await getChatGPTUser();
-  if (!user) throw new ClunkHttpError("Authentication required.", 401);
+  if (!user) {
+    throw new ClunkHttpError(
+      "로그인이 필요합니다. ChatGPT 계정으로 로그인한 뒤 다시 시도해 주세요.",
+      401,
+      "auth_required",
+    );
+  }
   const db = getRuntimeDb();
   await ensureSchema(db);
   const workspaceId = await ensureWorkspace(db, user);
@@ -41,9 +47,16 @@ export async function requireClunkContext(): Promise<ClunkUserContext> {
 
 export function getRuntimeDb(): D1Database {
   if (!runtime.DB) {
+    // The binding name and the hosting config path are operator information, not
+    // user information: the visitor can do nothing with it, so it stays in the
+    // server log and never reaches the response body.
+    console.error(
+      "[clunk:api] D1 binding is missing. Set .openai/hosting.json d1 to DB before serving the workspace.",
+    );
     throw new ClunkHttpError(
-      "Clunk D1 is not configured. Set .openai/hosting.json d1 to DB before using the workspace.",
+      "워크스페이스 저장소에 연결할 수 없습니다. 잠시 후 다시 시도하고, 계속 같은 화면이 나오면 지원팀에 문의해 주세요.",
       503,
+      "storage_unavailable",
     );
   }
   return runtime.DB;
@@ -102,7 +115,11 @@ export async function parseJson<T>(request: Request): Promise<T> {
   try {
     return (await request.json()) as T;
   } catch {
-    throw new ClunkHttpError("Invalid JSON request body.", 400);
+    throw new ClunkHttpError(
+      "요청 내용을 읽지 못했습니다. 페이지를 새로고침한 뒤 다시 시도해 주세요.",
+      400,
+      "invalid_json",
+    );
   }
 }
 
@@ -134,7 +151,11 @@ export async function applyCreditOperation(
   extraStatements?: (operationId: string) => D1PreparedStatement[],
 ): Promise<{ balance: number; idempotent: boolean }> {
   if (!/^[a-zA-Z0-9:._-]{1,128}$/.test(input.key)) {
-    throw new ClunkHttpError("Invalid credit operation key.", 400);
+    throw new ClunkHttpError(
+      "크레딧 처리 요청 형식이 올바르지 않습니다. 페이지를 새로고침한 뒤 다시 시도해 주세요.",
+      400,
+      "invalid_credit_key",
+    );
   }
   if (
     typeof input.fingerprint !== "string" ||
@@ -144,10 +165,18 @@ export async function applyCreditOperation(
     input.kind.length < 1 ||
     input.kind.length > 64
   ) {
-    throw new ClunkHttpError("Invalid credit operation metadata.", 400);
+    throw new ClunkHttpError(
+      "크레딧 처리 정보가 올바르지 않습니다. 페이지를 새로고침한 뒤 다시 시도해 주세요.",
+      400,
+      "invalid_credit_metadata",
+    );
   }
   if (!Number.isSafeInteger(input.amount) || input.amount === 0) {
-    throw new ClunkHttpError("Invalid credit operation amount.", 400);
+    throw new ClunkHttpError(
+      "차감할 크레딧 수량이 올바르지 않습니다. 페이지를 새로고침한 뒤 다시 시도해 주세요.",
+      400,
+      "invalid_credit_amount",
+    );
   }
   const candidateOperationId = `credit-op-${stableId(`${workspaceId}:${input.key}:${input.fingerprint}`)}`;
   const inserted = await db
@@ -162,15 +191,27 @@ export async function applyCreditOperation(
     .prepare(`SELECT id, fingerprint, kind, amount, status FROM clunk_credit_operations WHERE workspace_id = ? AND idempotency_key = ?`)
     .bind(workspaceId, input.key)
     .first<{ id: string; fingerprint: string; kind: string; amount: number; status: string }>();
-  if (!operation) throw new ClunkHttpError("Credit operation could not be created.", 500);
+  if (!operation) {
+    throw new ClunkHttpError(
+      "크레딧 처리 기록을 만들지 못했습니다. 잠시 후 다시 시도해 주세요.",
+      500,
+      "credit_operation_failed",
+    );
+  }
   if (
     operation.fingerprint !== input.fingerprint ||
     operation.kind !== input.kind ||
     Number(operation.amount) !== input.amount
   ) {
-    throw new ClunkHttpError("Credit idempotency key was already used for another request.", 409);
+    throw new ClunkHttpError(
+      "같은 요청 번호로 이미 다른 작업이 처리되었습니다. 검사를 다시 실행해 새 요청으로 저장해 주세요.",
+      409,
+      "credit_key_conflict",
+    );
   }
-  if (operation.status === "rejected") throw new ClunkHttpError("Not enough demo credits.", 402);
+  if (operation.status === "rejected") {
+    throw insufficientCreditsError(await getCredits(db, workspaceId), Math.abs(input.amount));
+  }
   const operationId = operation.id;
   const ledgerId = `credit-ledger-${operationId}`;
   await db.batch([
@@ -180,7 +221,9 @@ export async function applyCreditOperation(
   ]);
   const appliedOperation = await db.prepare(`SELECT status FROM clunk_credit_operations WHERE id = ?`).bind(operationId).first<{ status: string }>();
   const balance = await getCredits(db, workspaceId);
-  if (appliedOperation?.status !== "applied") throw new ClunkHttpError("Not enough demo credits.", 402);
+  if (appliedOperation?.status !== "applied") {
+    throw insufficientCreditsError(balance, Math.abs(input.amount));
+  }
   const insertedChanges = Number((inserted as { meta?: { changes?: number } }).meta?.changes ?? 0);
   return { balance, idempotent: insertedChanges === 0 };
 }
@@ -204,7 +247,13 @@ export function verifyClientLocalInspection(
     findingCount: number;
   },
 ): { report: Record<string, unknown>; resultDigest: string } {
-  if (!isRecord(value)) throw new ClunkHttpError("A complete Core inspection report is required.", 400);
+  if (!isRecord(value)) {
+    throw new ClunkHttpError(
+      "검사 리포트가 함께 전달되지 않았습니다. 파일을 다시 검사한 뒤 저장해 주세요.",
+      400,
+      "report_missing",
+    );
+  }
   const score = value.score;
   const findings = value.findings;
   if (
@@ -232,7 +281,11 @@ export function verifyClientLocalInspection(
     !/^[a-f0-9]{64}$/.test(String(value.resultDigest ?? "")) ||
     value.analysisId !== expected.analysisId
   ) {
-    throw new ClunkHttpError("Inspection report fields do not match the saved Core result.", 400);
+    throw new ClunkHttpError(
+      "검사 리포트가 브라우저에서 계산한 결과와 일치하지 않습니다. 파일을 다시 검사한 뒤 저장해 주세요.",
+      400,
+      "report_mismatch",
+    );
   }
   const canonical = {
     schemaVersion: value.schemaVersion,
@@ -250,7 +303,11 @@ export function verifyClientLocalInspection(
   };
   const resultDigest = canonicalFingerprint(canonical);
   if (resultDigest !== value.resultDigest) {
-    throw new ClunkHttpError("Inspection result digest verification failed.", 400);
+    throw new ClunkHttpError(
+      "검사 결과 무결성 확인에 실패했습니다. 파일을 다시 검사한 뒤 저장해 주세요.",
+      400,
+      "report_digest_mismatch",
+    );
   }
   return { report: value, resultDigest };
 }
@@ -260,9 +317,36 @@ export async function refundCreditOperation(db: D1Database, workspaceId: string,
 }
 
 export function jsonError(error: unknown): Response {
-  const status = error instanceof ClunkHttpError ? error.status : 500;
-  const message = error instanceof ClunkHttpError ? error.message : "Unexpected server error.";
-  return Response.json({ ok: false, error: message }, { status, headers: { "cache-control": "private, no-store" } });
+  const headers = { "cache-control": "private, no-store" };
+  if (error instanceof ClunkHttpError) {
+    return Response.json(
+      { ok: false, error: error.message, code: error.code, ...(error.details ?? {}) },
+      { status: error.status, headers },
+    );
+  }
+  // Stacks, table names and binding names belong in the server log only.
+  console.error("[clunk:api] unhandled error", error);
+  return Response.json(
+    {
+      ok: false,
+      error: "요청을 처리하지 못했습니다. 잠시 후 다시 시도하고, 계속되면 지원팀에 문의해 주세요.",
+      code: "internal_error",
+    },
+    { status: 500, headers },
+  );
+}
+
+/**
+ * Error body for the checks that answer inline instead of throwing. Keeps the
+ * `{ ok, error }` shape the UI already reads and adds the machine-readable
+ * `code` alongside it.
+ */
+export function errorBody(
+  message: string,
+  code: string,
+  extra?: Record<string, unknown>,
+): Record<string, unknown> {
+  return { ok: false, error: message, code, ...(extra ?? {}) };
 }
 
 export function privateJson(value: unknown, init: ResponseInit = {}): Response {
@@ -279,19 +363,42 @@ export function assertSameOrigin(request: Request): void {
   if (!origin) return;
   try {
     if (new URL(origin).origin !== new URL(request.url).origin) {
-      throw new ClunkHttpError("Cross-origin write request rejected.", 403);
+      throw new ClunkHttpError(
+        "다른 사이트에서 보낸 저장 요청은 처리하지 않습니다. Clunk 화면에서 직접 실행해 주세요.",
+        403,
+        "cross_origin_rejected",
+      );
     }
   } catch (error) {
     if (error instanceof ClunkHttpError) throw error;
-    throw new ClunkHttpError("Invalid request origin.", 403);
+    throw new ClunkHttpError(
+      "요청 출처를 확인할 수 없습니다. Clunk 화면에서 직접 실행해 주세요.",
+      403,
+      "invalid_origin",
+    );
   }
 }
 
 export class ClunkHttpError extends Error {
-  constructor(message: string, public readonly status: number) {
+  constructor(
+    message: string,
+    public readonly status: number,
+    public readonly code: string = "request_failed",
+    public readonly details?: Record<string, unknown>,
+  ) {
     super(message);
     this.name = "ClunkHttpError";
   }
+}
+
+function insufficientCreditsError(balance: number, required: number): ClunkHttpError {
+  return new ClunkHttpError(
+    `데모 크레딧이 부족합니다. 남은 크레딧 ${balance}개, 이번 작업에 필요한 크레딧 ${required}개입니다. ` +
+      "‘크레딧과 플랜’ 화면에서 데모 크레딧을 추가한 뒤 다시 시도해 주세요.",
+    402,
+    "insufficient_credits",
+    { balance, required },
+  );
 }
 
 function stableId(value: string): string {

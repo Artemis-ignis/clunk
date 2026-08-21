@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireChatGPTUser } from "../chatgpt-auth";
 import { Icon } from "../components/Icon";
 import { WorkspaceShell } from "../components/WorkspaceShell";
+import { AccountDataControls } from "./AccountDataControls";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -78,6 +79,8 @@ export default async function SettingsPage() {
           </p>
         </aside>
       </div>
+
+      <AccountDataControls />
 
       <div className="settings-actions">
         <Link href="/app" className="button button-primary">

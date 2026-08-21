@@ -2,6 +2,7 @@ import {
   applyCreditOperation,
   assertSameOrigin,
   canonicalFingerprint,
+  errorBody,
   getRuntimeDb,
   isSafeRecordId,
   jsonError,
@@ -33,10 +34,19 @@ export async function POST(request: Request) {
       typeof payload.sourceHash !== "string" ||
       typeof payload.outputHash !== "string"
     ) {
-      return privateJson({ ok: false, error: "Incomplete optimization record." }, { status: 400 });
+      return privateJson(
+        errorBody("최적화 기록에 필요한 항목이 빠졌습니다. 최적화를 다시 실행한 뒤 저장해 주세요.", "optimization_incomplete"),
+        { status: 400 },
+      );
     }
     if (!/^[a-f0-9]{64}$/.test(payload.sourceHash) || !/^[a-f0-9]{64}$/.test(payload.outputHash) || payload.sourceHash === payload.outputHash) {
-      return privateJson({ ok: false, error: "Invalid or unchanged optimization hashes." }, { status: 400 });
+      return privateJson(
+        errorBody(
+          "최적화 전후 파일 해시가 올바르지 않거나 서로 같습니다. 실제로 변경된 결과물로 다시 저장해 주세요.",
+          "optimization_invalid_hashes",
+        ),
+        { status: 400 },
+      );
     }
     const reinspection = payload.reinspection as {
       analysisId?: string;
@@ -71,7 +81,13 @@ export async function POST(request: Request) {
       !Number.isInteger(reinspection.score.hardBlockerCount) ||
       Number(reinspection.score.hardBlockerCount) < 0
     ) {
-      return privateJson({ ok: false, error: "Fresh output reinspection is required and must match the output hash." }, { status: 400 });
+      return privateJson(
+        errorBody(
+          "최적화 결과물을 다시 검사한 리포트가 필요하며, 그 리포트가 결과물 해시와 일치해야 합니다. 결과물을 재검사한 뒤 저장해 주세요.",
+          "optimization_reinspection_required",
+        ),
+        { status: 400 },
+      );
     }
     const verifiedReinspection = verifyClientLocalInspection(payload.reinspection, {
       analysisId: reinspection.analysisId!,
@@ -104,7 +120,13 @@ export async function POST(request: Request) {
         );
       })
     ) {
-      return privateJson({ ok: false, error: "Optimization contains an operation outside the v1 allowlist." }, { status: 400 });
+      return privateJson(
+        errorBody(
+          "v1에서 허용하지 않는 최적화 작업이 포함되어 있습니다. 기본 무손실 최적화만 사용한 뒤 다시 저장해 주세요.",
+          "optimization_operation_not_allowed",
+        ),
+        { status: 400 },
+      );
     }
     const passport = payload.passport;
     if (
@@ -116,7 +138,13 @@ export async function POST(request: Request) {
       (passport as Record<string, unknown>).outputInspectionDigest !== verifiedReinspection.resultDigest ||
       typeof (passport as Record<string, unknown>).passportId !== "string"
     ) {
-      return privateJson({ ok: false, error: "A Passport linked to the fresh output inspection is required." }, { status: 400 });
+      return privateJson(
+        errorBody(
+          "결과물 재검사와 연결된 Passport가 필요합니다. 최적화를 다시 실행해 Passport를 새로 발급한 뒤 저장해 주세요.",
+          "optimization_passport_required",
+        ),
+        { status: 400 },
+      );
     }
     const storedReinspection = {
       ...verifiedReport,
@@ -131,7 +159,13 @@ export async function POST(request: Request) {
     const passportJson = JSON.stringify(storedPassport);
     const reinspectionJson = JSON.stringify(storedReinspection);
     if (operationJson.length > 50_000 || passportJson.length > 180_000 || reinspectionJson.length > 180_000) {
-      return privateJson({ ok: false, error: "Optimization evidence is too large." }, { status: 413 });
+      return privateJson(
+        errorBody(
+          "최적화 증빙 데이터 용량이 저장 한도를 넘었습니다. 에셋을 더 작은 단위로 나눠 처리한 뒤 저장해 주세요.",
+          "optimization_evidence_too_large",
+        ),
+        { status: 413 },
+      );
     }
     const db = getRuntimeDb();
     const asset = await db
@@ -139,10 +173,22 @@ export async function POST(request: Request) {
       .bind(payload.assetId, workspaceId)
       .first<{ id: string; sha256: string }>();
     if (!asset) {
-      return privateJson({ ok: false, error: "Asset was not found in this workspace." }, { status: 404 });
+      return privateJson(
+        errorBody(
+          "이 워크스페이스에서 해당 에셋을 찾을 수 없습니다. 원본 파일을 먼저 검사해 저장한 뒤 최적화를 저장해 주세요.",
+          "asset_not_found",
+        ),
+        { status: 404 },
+      );
     }
     if (asset.sha256 !== payload.sourceHash) {
-      return privateJson({ ok: false, error: "Optimization source hash does not match the workspace asset." }, { status: 400 });
+      return privateJson(
+        errorBody(
+          "최적화한 원본 파일이 워크스페이스에 저장된 에셋과 일치하지 않습니다. 같은 원본 파일로 다시 실행해 주세요.",
+          "optimization_source_mismatch",
+        ),
+        { status: 400 },
+      );
     }
     const outputAssetId = scopedStorageId("asset", workspaceId, payload.outputHash);
     const outputAnalysisStorageId = scopedStorageId("analysis", workspaceId, reinspection.analysisId!);
