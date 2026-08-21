@@ -4523,7 +4523,10 @@ pre {
 
 html.snap-y {
   scroll-snap-type: y mandatory;
-  scroll-padding-top: 96px;
+  /* Sections are exactly 100dvh and carry their own top padding to clear the floating
+     nav (its bottom edge sits at y=80). A scroll-padding of 96px on top of that pushed
+     each snapped section 96px down, so its last 96px sat below the fold and looked cut. */
+  scroll-padding-top: 0;
 }
 
 .snap-sec {
@@ -6049,5 +6052,83 @@ html.snap-y {
 
   .hero3-callout strong {
     font-size: 0.68rem;
+  }
+}
+
+/* --- Snap fit, short viewports -------------------------------------------
+   The landing was budgeted at 1440x900. On 1366x768 — still the most common
+   laptop panel — four sections ran 10-107px past the screen, and `.snap-sec`
+   clips (overflow: hidden), so the bottom of each was simply cut off. This tier
+   buys the height back from chrome (padding, heading size, gaps) rather than
+   from content. */
+@media (min-width: 961px) and (max-height: 880px) {
+  .snap-sec {
+    padding-top: 92px;
+    padding-bottom: 22px;
+  }
+
+  .sec3 .h2 {
+    font-size: var(--fs-5);
+  }
+
+  .sec3-head {
+    margin-bottom: var(--sp-12);
+  }
+
+  .sec3-head .eyebrow {
+    margin-bottom: 6px;
+  }
+
+  .sec3-head > p {
+    font-size: var(--fs-2);
+  }
+
+  .sec3 .panel {
+    padding: var(--sp-12) var(--sp-16);
+  }
+}
+
+/* 768px-tall panels need another ~48px. Measured split at 1366x768: section chrome
+   (padding 106) + head (170-196) + content (495-528). The content panels are already
+   dvh-scaled, so the remaining give is in the chrome and the head. */
+@media (min-width: 961px) and (max-height: 820px) {
+  .snap-sec {
+    /* 84px keeps a 4px gap under the nav (bottom edge y=80) — the tightest honest value. */
+    padding-top: 84px;
+    padding-bottom: 8px;
+  }
+
+  .sec3-head {
+    margin-bottom: var(--sp-8);
+  }
+
+  .sec3 .h2 {
+    font-size: 1.45rem;
+  }
+
+  .sec3-head > p {
+    font-size: 0.92rem;
+    line-height: 1.4;
+  }
+
+  .sec3 .panel {
+    padding: 10px var(--sp-16);
+  }
+}
+
+/* Below ~740px of viewport height there is no honest amount of compression left:
+   1280x720 still ran 40-48px past. Forced snapping there would clip content, so the
+   landing falls back to normal scrolling — the same escape hatch used under 960px wide. */
+@media (min-width: 961px) and (max-height: 740px) {
+  html.snap-y {
+    scroll-snap-type: none;
+  }
+
+  .snap-sec {
+    min-height: auto;
+    scroll-snap-align: none;
+    overflow: visible;
+    padding-top: 82px;
+    padding-bottom: var(--sp-40);
   }
 }
