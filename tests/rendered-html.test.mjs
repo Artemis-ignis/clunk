@@ -110,3 +110,19 @@ test("the worker strips identity headers from an untrusted host", async () => {
   assert.equal(response.status, 307, "a forged identity header must not authenticate");
   assert.match(response.headers.get("location") ?? "", /\/signin-with-chatgpt/);
 });
+
+test("the worker survives a runtime with no bindings", async () => {
+  // The plain Node production server calls the worker without any Cloudflare bindings, so
+  // `env` arrives undefined. Reading a variable straight off it turned every single request
+  // into a 500 — the site was completely down and nothing in the build said so.
+  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
+  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}-noenv`);
+  const { default: worker } = await import(workerUrl.href);
+
+  const response = await worker.fetch(
+    new Request("http://localhost/", { headers: { accept: "text/html" } }),
+    undefined,
+    { waitUntil() {}, passThroughOnException() {} },
+  );
+  assert.equal(response.status, 200, "a missing binding object must not break page rendering");
+});

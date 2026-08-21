@@ -132,8 +132,10 @@ const worker = {
   async fetch(incoming: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     // Publish the bindings for modules that must stay loadable outside workerd (see
     // app/auth-env.ts). Same value, no virtual-module import in the render path.
-    (globalThis as typeof globalThis & { __clunkRuntimeEnv?: unknown }).__clunkRuntimeEnv = env;
-    const request = withVerifiedIdentity(incoming, env.CLUNK_TRUSTED_AUTH_HOSTS);
+    (globalThis as typeof globalThis & { __clunkRuntimeEnv?: unknown }).__clunkRuntimeEnv = env ?? {};
+    // `env` is undefined under the plain Node production server, which has no Cloudflare
+    // bindings at all. Reading through it unguarded turned every request into a 500.
+    const request = withVerifiedIdentity(incoming, env?.CLUNK_TRUSTED_AUTH_HOSTS);
     const url = new URL(request.url);
 
     if (url.pathname === "/_vinext/image") {
