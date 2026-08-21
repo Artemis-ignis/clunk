@@ -62,7 +62,9 @@ export function getRuntimeDb(): D1Database {
   return runtime.DB;
 }
 
-export async function ensureSchema(db: D1Database): Promise<void> {
+let schemaReady: Promise<void> | null = null;
+
+async function applySchema(db: D1Database): Promise<void> {
   await db.batch(SCHEMA_STATEMENTS.map((statement) => db.prepare(statement)));
   await db.batch([
     db.prepare(
@@ -72,6 +74,28 @@ export async function ensureSchema(db: D1Database): Promise<void> {
       `INSERT OR IGNORE INTO clunk_plans (id, name, monthly_credits, is_demo) VALUES ('builder-demo', 'Builder Demo', 100, 1)`,
     ),
   ]);
+}
+
+/**
+ * Create the schema once per isolate instead of once per request.
+ *
+ * Every authenticated request used to fire 16 CREATE statements plus 2 seed inserts before
+ * doing any actual work. On a metered database that is 18 statements of pure overhead per
+ * call, and it made an endpoint that charges no credits — GET /api/me — an effective way to
+ * burn through write quota.
+ *
+ * The in-flight promise is shared so concurrent requests wait on one run, and a failure
+ * clears it so the next request retries rather than inheriting a broken cache. A fresh
+ * isolate still runs it once, which keeps the safety net for a newly provisioned database.
+ */
+export async function ensureSchema(db: D1Database): Promise<void> {
+  if (!schemaReady) {
+    schemaReady = applySchema(db).catch((error: unknown) => {
+      schemaReady = null;
+      throw error;
+    });
+  }
+  await schemaReady;
 }
 
 export async function ensureWorkspace(

@@ -1,3 +1,4 @@
+import { CAN_SELL } from "../../legal/company";
 import {
   applyCreditOperation,
   errorBody,
@@ -37,6 +38,20 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     assertSameOrigin(request);
+    // Free credits with no payment check. Harmless while the product is a free demo, but a
+    // standing giveaway the moment it is actually sold — and because a workspace id is
+    // derived from the user id, it would be repeatable per identity. CAN_SELL flips to true
+    // only when the operator fills in real business details, which is exactly the point at
+    // which this must stop existing.
+    if (CAN_SELL) {
+      return privateJson(
+        errorBody(
+          "데모 크레딧 지급은 무상 제공 기간에만 사용할 수 있습니다. 요금 화면에서 플랜을 선택해 주세요.",
+          "demo_upgrade_disabled",
+        ),
+        { status: 410 },
+      );
+    }
     const { workspaceId } = await requireClunkContext();
     const payload = await parseJson<{ action?: string }>(request);
     if (payload.action !== "simulate-upgrade") {
