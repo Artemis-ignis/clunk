@@ -23,6 +23,13 @@ const ENGINE_PRESET_KEYS = ["godot-mobile", "godot-desktop", "unity-mobile", "un
  * Agent workflow contract, advertised at initialize so a connected agent can run the whole
  * "is this right for MY game?" loop without human command lines.
  */
+/**
+ * This server is a local stdio tool. It reads and writes absolute paths the caller supplies
+ * (clunk_optimize's outputPath, clunk_profile_from's outPath), which is correct for a tool the
+ * user runs on their own machine and unacceptable over a network: exposing it remotely turns
+ * it into arbitrary file read and write. Keep it on stdio. Do not put it behind an HTTP or
+ * WebSocket transport.
+ */
 const INSTRUCTIONS = [
   "Clunk judges whether a GLB/GLTF fits a specific game. Recommended agent workflow:",
   "1. If the user's engine/target is not known yet, call clunk_engine_profiles and ASK the user to pick one (Godot/Unity/Unreal x mobile/desktop), or ask for reference assets that already work in their game and call clunk_profile_from to derive their project profile.",

@@ -106,6 +106,8 @@ npx.cmd tsx scripts/texture-audit.mjs examples/texture-audit/harvest-frontier.te
 npx.cmd tsx integrations/mcp/server.ts
 ```
 
+**이 서버는 로컬 stdio 도구입니다. 원격으로 노출하지 마십시오.** 호출자가 준 절대 경로를 그대로 읽고 쓰므로(예: `clunk_optimize`의 `outputPath`), 네트워크에 열면 임의 파일 읽기·쓰기가 됩니다.
+
 stdio JSON-RPC 서버가 `clunk_inspect`, `clunk_validate`, `clunk_optimize`, `clunk_passport`를 제공합니다. 실제 MCP 클라이언트에 연결할 때는 작업 폴더의 절대 경로와 위 Windows 명령을 사용하고, 원본과 출력 경로를 분리합니다.
 
 ## Codex Plugin·Skill
