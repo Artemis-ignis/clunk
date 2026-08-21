@@ -79,7 +79,7 @@ export default function Home() {
               <p className="lead">
                 Claude Code·Codex에 설정 5줄로 Clunk를 연결하면, 에이전트가 에셋을 만든 직후
                 스스로 검사받고 통과 증명까지 남깁니다. 사람이 파일을 하나하나 열어보는 병목이
-                사라집니다. 연결의 전부가 아래 도구 4개 — 골라 보세요, 실제 기록된 응답이
+                사라집니다. 아래는 가장 많이 쓰이는 도구 4개 — 골라 보세요, 실제 기록된 응답이
                 재생됩니다.
               </p>
             </div>
@@ -201,6 +201,11 @@ export default function Home() {
                 <Link href="/pricing">요금</Link>
                 <Link href="/docs">문서</Link>
                 <a href="/llms.txt">llms.txt</a>
+              </nav>
+              <nav className="site-footer-legal" aria-label="법적 고지">
+                <Link href="/legal/terms">이용약관</Link>
+                <Link href="/legal/privacy">개인정보처리방침</Link>
+                <Link href="/legal/refund">환불·청약철회</Link>
               </nav>
               <span className="demo-marker">DEMO MODE · 실제 결제 아님</span>
             </footer>

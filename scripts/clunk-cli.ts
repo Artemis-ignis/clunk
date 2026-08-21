@@ -17,7 +17,7 @@ import { loadBundle, writeOutputBundle } from "../integrations/shared/node-asset
 import { resolveProfilePolicy } from "../integrations/shared/custom-profile";
 
 const USAGE = [
-  "Usage: npm run clunk -- <inspect|validate|optimize|passport> <path> [options]",
+  "Usage: npm run clunk -- <inspect|validate|optimize|passport|watch|profile-from> <path> [options]",
   "",
   "  inspect  <path>                     Inspect one GLB or local GLTF bundle.",
   "  validate <path>                     Inspect and exit with code 2 on an ERROR or CRITICAL finding.",

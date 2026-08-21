@@ -44,7 +44,11 @@ const MONTHLY_PLANS = [
       "CLI·MCP·VS Code 어댑터 경로",
       "크레딧 팩 추가 구매 할인",
     ],
-    cta: { label: "출시 알림 받기", href: "/docs", primary: false },
+    cta: {
+      label: "출시 알림 받기",
+      href: "mailto:jyp201333@gmail.com?subject=Clunk%20Team%20%ED%94%8C%EB%9E%9C%20%EC%B6%9C%EC%8B%9C%20%EC%95%8C%EB%A6%BC",
+      primary: false,
+    },
     active: false,
   },
   {
@@ -60,7 +64,11 @@ const MONTHLY_PLANS = [
       "서버 재검사 R2 경로와 감사 통제",
       "우선 지원과 온보딩",
     ],
-    cta: { label: "출시 알림 받기", href: "/docs", primary: false },
+    cta: {
+      label: "출시 알림 받기",
+      href: "mailto:jyp201333@gmail.com?subject=Clunk%20Studio%20%ED%94%8C%EB%9E%9C%20%EC%B6%9C%EC%8B%9C%20%EC%95%8C%EB%A6%BC",
+      primary: false,
+    },
     active: false,
   },
 ] as const;
@@ -84,7 +92,7 @@ export default function PricingPage() {
           </h1>
           <p className="lead">
             구독은 팀 자리와 정책, 이력을 담당하고, 검사와 최적화 실행은 크레딧으로 셉니다. 검사
-            1회 = 크레딧 1개, 성공한 실행에만 차감되고 실패하면 자동 복구됩니다.
+            1회 = 크레딧 1개이며, 성공한 실행에만 차감됩니다. 실행이 실패하면 차감 자체가 일어나지 않습니다.
           </p>
         </header>
 
@@ -175,7 +183,7 @@ export default function PricingPage() {
               <p className="pack-amount">
                 0<small>실패 시 차감</small>
               </p>
-              <p className="pack-note">성공한 실행에만 차감합니다. 실패하면 원장에 복구 기록이 남습니다.</p>
+              <p className="pack-note">성공한 실행에만 차감합니다. 실패한 실행은 애초에 차감되지 않습니다.</p>
             </article>
             <article className="pack-card">
               <p className="pack-amount">

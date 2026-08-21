@@ -57,6 +57,17 @@ Tools returned by `tools/list`:
 - `clunk_passport` - Create a Passport by freshly inspecting source and output artifacts.
   input: `sourcePath` (required), `outputPath` (required), `profile`.
   output: Passport linking both hashes and both inspection digests.
+- `clunk_engine_profiles` - List the bundled engine presets and how to apply them.
+  input: none.
+  output: preset keys (godot-mobile, godot-desktop, unity-mobile, unity-desktop,
+  unreal-desktop), their budgets, and import notes per engine.
+- `clunk_profile_from` - Derive a project profile from assets that already work in the
+  game: budgets become the measured maximum plus headroom.
+  input: `assets` (required, one or more paths), `outPath`, `headroom`.
+  output: the generated profile JSON and what each budget was derived from.
+
+If the target engine is unknown, ask first: `clunk_engine_profiles` lists the presets, and
+`clunk_profile_from` derives one from assets the game already ships.
 
 Typical agent loop: `initialize` -> `tools/list` -> `clunk_inspect` -> (if fixable)
 `clunk_optimize` -> `clunk_passport`.

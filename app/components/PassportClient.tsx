@@ -90,6 +90,15 @@ export function PassportClient({ userLabel }: { userLabel: string }) {
             모든 Passport는 최적화 직후의 새 재검사에서 만들어집니다. 원본 해시, 출력 해시, 적용한 작업,
             전후 점수가 한 파일에 들어 있습니다.
           </p>
+          {/* What the Passport does and does not attest. The record is produced by Core on the
+              user's own machine, so the honest claim is reproducibility, not third-party audit. */}
+          <p className="passport-scope-note">
+            검사는 이용자의 기기에서 실행되므로, 이 기록은 <strong>같은 파일로 누구나 다시 돌려
+            대조할 수 있다는 뜻</strong>입니다. 같은 바이트에 같은 규칙 세트를 적용하면 항상 같은
+            digest가 나옵니다. 다만 Clunk 서버가 원본 바이트를 대신 재검증하지는 않으므로, 제3자
+            감사 증명서와는 다릅니다. 상대에게 제출할 때는 파일과 Passport를 함께 보내 직접 대조하게
+            하십시오.
+          </p>
         </div>
         <Link className="button button-quiet" href="/docs">
           Passport 규격

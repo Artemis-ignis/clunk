@@ -6354,3 +6354,18 @@ html.snap-y {
 .site-footer-legal a:hover {
   color: var(--text-strong);
 }
+
+/* The Passport's honest scope: reproducible by anyone holding the same bytes, but not a
+   third-party audit. Set apart from the lead paragraph so it reads as a qualification. */
+.passport-scope-note {
+  margin-top: var(--sp-12);
+  padding-left: var(--sp-12);
+  border-left: 2px solid var(--line-strong);
+  color: var(--text-dim);
+  font-size: var(--fs-1);
+  line-height: 1.65;
+}
+
+.passport-scope-note strong {
+  color: var(--text-muted);
+}
