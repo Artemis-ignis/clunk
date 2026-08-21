@@ -89,7 +89,7 @@ const FAQ = [
 
 export default function SupportPage() {
   return (
-    <SiteShell>
+    <SiteShell active="support">
       <main className="legal-main">
         <div className="legal-inner">
           <header className="legal-head">

@@ -12,13 +12,14 @@ import { ThemeToggle } from "./ThemeToggle";
  * Tinted for the dark palette and given a scrolled state so the bar reads against the hero image.
  */
 
-export type ShellSection = "home" | "app" | "dashboard" | "pricing" | "docs";
+export type ShellSection = "home" | "app" | "dashboard" | "pricing" | "docs" | "support";
 
 const NAV_LINKS: { label: string; href: string; section: ShellSection }[] = [
   { label: "검사기", href: "/app", section: "app" },
   { label: "대시보드", href: "/dashboard", section: "dashboard" },
   { label: "요금", href: "/pricing", section: "pricing" },
   { label: "문서", href: "/docs", section: "docs" },
+  { label: "지원", href: "/support", section: "support" },
 ];
 
 export function SiteNav({ active }: { active?: ShellSection }) {

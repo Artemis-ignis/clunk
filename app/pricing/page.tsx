@@ -201,6 +201,29 @@ export default function PricingPage() {
             카드는 청구되지 않습니다. 실제 사업 단계에서는 분리해 둔 BillingProvider에 국내 결제 제공자를 붙입니다.
           </p>
         </aside>
+
+        {/* The questions that actually decide a purchase — what happens if I want out, what
+            this cannot do, who I reach when it breaks — belong next to the price, not three
+            clicks away in a footer. */}
+        <section className="pricing-assurance" aria-labelledby="assurance-heading">
+          <h2 id="assurance-heading" className="mono-label">
+            결제 전에 확인할 것
+          </h2>
+          <div className="pricing-assurance-grid">
+            <Link href="/legal/refund" className="pricing-assurance-card">
+              <strong>환불·청약철회 기준</strong>
+              <span>7일 이내 미사용분 전액 환불, 사용분은 단가 공제. 계산 근거를 함께 안내합니다.</span>
+            </Link>
+            <Link href="/support" className="pricing-assurance-card">
+              <strong>지금 하지 못하는 일</strong>
+              <span>손실 최적화 없음, 서버 재검증 없음 등 한계를 먼저 적어 두었습니다.</span>
+            </Link>
+            <Link href="/settings" className="pricing-assurance-card">
+              <strong>데이터 내보내기·삭제</strong>
+              <span>내 데이터를 언제든 JSON으로 내려받고 계정을 지울 수 있습니다.</span>
+            </Link>
+          </div>
+        </section>
       </main>
     </SiteShell>
   );
