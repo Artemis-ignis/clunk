@@ -37,6 +37,10 @@
   --text-on-accent: #f6fdff;
 
   /* primary accent. --accent is contrast safe as text on --ink-0 and --ink-1. */
+  --band-ink: #0b1622;
+  --band-text: #f1f7fc;
+  --band-muted: #a9bfd3;
+  --band-line: rgba(255, 255, 255, 0.13);
   --accent: #0a7ea8;
   --accent-strong: #075e80;
   --accent-bright: #16b8e8;
@@ -149,6 +153,10 @@
   --tint-3: rgba(151, 187, 218, 0.12);
 
   --text: #b9cbdd;
+  --band-ink: #0d1726;
+  --band-text: #f1f7fc;
+  --band-muted: #9db3c8;
+  --band-line: rgba(255, 255, 255, 0.09);
   --text-strong: #f1f7fc;
   --text-muted: #90a7bc;
   --text-dim: #66809a;
@@ -6888,4 +6896,108 @@ html.snap-y {
   border-radius: var(--r-panel);
   background: radial-gradient(60% 55% at 50% 0%, var(--accent-soft), transparent 70%);
   pointer-events: none;
+}
+
+
+/* --- Contrast band ---------------------------------------------------------
+   The light palette put --ink-1 (#f8fbfd) next to --ink-0 (#ffffff), so the alternating
+   sections were the same sheet of paper and the page had no rhythm at all. A band inverts
+   instead of nudging: in light mode it is dark, in dark mode it lifts off the background,
+   and either way you can see where one idea ends and the next begins. */
+.sec3-band {
+  background: var(--band-ink);
+  color: var(--band-text);
+}
+
+.sec3-band .h2,
+.sec3-band h2,
+.sec3-band h3,
+.sec3-band strong {
+  color: var(--band-text);
+}
+
+.sec3-band p,
+.sec3-band li,
+.sec3-band small,
+.sec3-band .muted-note {
+  color: var(--band-muted);
+}
+
+.sec3-band .eyebrow,
+.sec3-band .mono-label {
+  color: var(--accent-bright, var(--accent));
+}
+
+/* Panels inside a band float on it rather than punching a white hole through it. */
+.sec3-band .panel,
+.sec3-band .codeblock,
+.sec3-band .install-block {
+  border-color: var(--band-line);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.sec3-band .button-quiet {
+  border-color: var(--band-line);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--band-text);
+}
+
+.sec3-band .button-quiet:hover {
+  border-color: var(--accent-bright, var(--accent));
+}
+
+.sec3-band code {
+  color: var(--band-text);
+}
+
+.sec3-band a {
+  color: var(--accent-bright, var(--accent));
+}
+
+/* The install panel is the moment the product asks for a commitment, so on the band it has
+   to read as a terminal artifact rather than a white hole punched through the section. */
+.sec3-band .inst3-panel {
+  border-color: var(--band-line);
+  background: rgba(255, 255, 255, 0.045);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.sec3-band .inst3-panel-head {
+  border-color: var(--band-line);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--band-muted);
+}
+
+.sec3-band .inst3-code {
+  color: var(--band-text);
+}
+
+.sec3-band .inst3-lead {
+  color: var(--band-muted);
+}
+
+.sec3-band .inst3-tabs button {
+  border-color: var(--band-line);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--band-muted);
+}
+
+.sec3-band .inst3-tabs button[aria-selected="true"],
+.sec3-band .inst3-tabs button.is-on {
+  border-color: transparent;
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.sec3-band .inst3-copy {
+  border-color: var(--band-line);
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--band-text);
+}
+
+/* On the band the primary button needs its own contrast, not the page's. */
+.sec3-band .button-primary {
+  background: var(--accent-bright, var(--accent));
+  color: #04121b;
+  font-weight: 620;
 }

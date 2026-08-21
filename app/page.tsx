@@ -167,7 +167,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="snap-sec sec3 cta3" id="start">
+        <section className="snap-sec sec3 sec3-band cta3" id="start">
           <div className="snap-inner cta3-inner">
             <div className="cta3-copy">
               <RevealText className="h2" as="h2">
