@@ -130,3 +130,10 @@ agent; Clunk owns the rails and the gate. See docs/generate-pipeline.ko.md.
 - Workspace: /dashboard
 - Scope and integration guide: /docs
 - Credits and demo ledger: /pricing
+
+## Install (agents)
+
+Clone https://github.com/Artemis-ignis/clunk , run `npm install`, then register the stdio
+MCP server (`npm run mcp`, cwd = the clone) under the name "clunk". Verify readiness by
+calling clunk_engine_profiles. The initialize response carries the recommended agent
+workflow (ask for the user's engine, judge with enginePreset, fix-and-reinspect loop).

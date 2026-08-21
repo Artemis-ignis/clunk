@@ -4,6 +4,7 @@ import { BrandMark } from "./components/BrandMark";
 import { CountUp } from "./components/CountUp";
 import { HeroAutopsy } from "./components/HeroAutopsy";
 import { Icon, type IconName } from "./components/Icon";
+import { InstallCommands } from "./components/InstallCommands";
 import { McpPlayground } from "./components/McpPlayground";
 import { PipelineFlow } from "./components/PipelineFlow";
 import { RevealText } from "./components/RevealText";
@@ -181,6 +182,8 @@ export default function Home() {
                 </Link>
               </div>
             </div>
+
+            <InstallCommands />
 
             <footer className="cta3-foot">
               <div className="site-footer-brand">
