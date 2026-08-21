@@ -184,6 +184,64 @@ const exhaustedCredits = await apiFor(exhaustedUserId, "/api/credits");
 expectStatus(exhaustedCredits, 200, "no-credit balance");
 assert.equal(Number(exhaustedCredits.body.credits), 0, "exhausted workspace must remain at zero credits");
 
+// --- Account deletion scope -------------------------------------------------
+// DELETE /api/account removes every row of a workspace. A refactor that drops one
+// workspace_id condition would take someone else's data with it, and nothing would fail
+// loudly. Two actors are given real records; one is deleted; the other must be untouched
+// byte for byte.
+const victimId = `${userId}-neighbour`;
+const neighbourRun = await apiFor(victimId, "/api/runs", {
+  method: "POST",
+  body: JSON.stringify(runPayload),
+});
+expectStatus(neighbourRun, 200, "neighbour inspection");
+
+const neighbourBefore = await apiFor(victimId, "/api/account/export");
+expectStatus(neighbourBefore, 200, "neighbour export before deletion");
+// exportedAt is the moment the export ran, so it legitimately differs between the two calls.
+const withoutTimestamp = (value: unknown) => {
+  const { exportedAt, ...rest } = (value ?? {}) as Record<string, unknown>;
+  void exportedAt;
+  return JSON.stringify(rest);
+};
+const neighbourBeforeJson = withoutTimestamp(neighbourBefore.body.export);
+
+const deleteTarget = await api("/api/account");
+expectStatus(deleteTarget, 200, "account summary before deletion");
+const confirmationPhrase = String(deleteTarget.body.confirmationPhrase);
+
+const wrongConfirm = await api("/api/account", {
+  method: "DELETE",
+  body: JSON.stringify({ confirm: "definitely not the phrase" }),
+});
+assert.equal(wrongConfirm.status, 400, "a wrong confirmation phrase must not delete anything");
+
+const stillThere = await api("/api/account");
+expectStatus(stillThere, 200, "account survives a refused deletion");
+
+const deleted = await api("/api/account", {
+  method: "DELETE",
+  body: JSON.stringify({ confirm: confirmationPhrase }),
+});
+expectStatus(deleted, 200, "account deletion with the exact phrase");
+
+// Without this the test would also pass if deletion quietly did nothing. Re-authenticating
+// creates a fresh empty workspace, so the target must come back with no records.
+const targetAfter = await api("/api/account/export");
+expectStatus(targetAfter, 200, "target export after deletion");
+const targetCounts = (targetAfter.body.export as { counts?: Record<string, number> }).counts ?? {};
+assert.equal(targetCounts.assets, 0, "deleted workspace must have no assets left");
+assert.equal(targetCounts.analysisRuns, 0, "deleted workspace must have no analysis runs left");
+assert.equal(targetCounts.passports, 0, "deleted workspace must have no passports left");
+
+const neighbourAfter = await apiFor(victimId, "/api/account/export");
+expectStatus(neighbourAfter, 200, "neighbour export after deletion");
+assert.equal(
+  withoutTimestamp(neighbourAfter.body.export),
+  neighbourBeforeJson,
+  "deleting one workspace must not touch another",
+);
+
 console.log(JSON.stringify({
   ok: true,
   userId,
@@ -206,5 +264,8 @@ console.log(JSON.stringify({
     "blocked optimization status preserved",
     "cross-origin write rejected",
     "demo upgrade credited exactly once",
+    "wrong confirmation phrase refused",
+    "deleted workspace is actually emptied",
+    "deletion is scoped to one workspace",
   ],
 }));
