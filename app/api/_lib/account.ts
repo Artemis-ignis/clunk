@@ -12,7 +12,7 @@
  * which additionally carry an ownership guard. `clunk_plans` is shared reference
  * data and is never touched.
  */
-import type { ChatGPTUser } from "../../chatgpt-auth";
+import type { AuthUser } from "../../auth-provider";
 import { ClunkHttpError, getCredits } from "./clunk";
 
 export const EXPORT_SCHEMA_VERSION = "clunk-data-export/1";
@@ -92,7 +92,7 @@ export async function getWorkspaceSummary(
  */
 export async function buildWorkspaceExport(
   db: D1Database,
-  user: ChatGPTUser,
+  user: AuthUser,
   workspaceId: string,
 ): Promise<Record<string, unknown>> {
   const account = await db
@@ -240,7 +240,7 @@ export type WorkspaceDeletionResult = {
  */
 export async function deleteWorkspaceData(
   db: D1Database,
-  user: ChatGPTUser,
+  user: AuthUser,
   workspaceId: string,
 ): Promise<WorkspaceDeletionResult> {
   const owner = await db

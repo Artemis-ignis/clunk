@@ -55,6 +55,11 @@ export const PROCESSORS = [
     location: "미국 등 글로벌 리전",
   },
   {
+    name: "GitHub, Inc.",
+    role: "GitHub 계정 로그인 사용 시 본인 확인",
+    location: "미국",
+  },
+  {
     name: "OpenAI, L.L.C.",
     role: "ChatGPT Sites 호스팅 및 로그인 인증 처리",
     location: "미국",

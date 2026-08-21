@@ -1,9 +1,9 @@
 import { env } from "cloudflare:workers";
-import { getChatGPTUser, type ChatGPTUser } from "../../chatgpt-auth";
+import { getCurrentUser, type AuthUser } from "../../auth-provider";
 import { sha256Hex, stableStringify } from "../../../packages/core/src/index";
 
 export type ClunkUserContext = {
-  user: ChatGPTUser;
+  user: AuthUser;
   workspaceId: string;
 };
 
@@ -31,10 +31,10 @@ const SCHEMA_STATEMENTS = [
 ];
 
 export async function requireClunkContext(): Promise<ClunkUserContext> {
-  const user = await getChatGPTUser();
+  const user = await getCurrentUser();
   if (!user) {
     throw new ClunkHttpError(
-      "로그인이 필요합니다. ChatGPT 계정으로 로그인한 뒤 다시 시도해 주세요.",
+      "로그인이 필요합니다. 로그인 화면에서 다시 로그인한 뒤 시도해 주세요.",
       401,
       "auth_required",
     );
@@ -98,9 +98,14 @@ export async function ensureSchema(db: D1Database): Promise<void> {
   await schemaReady;
 }
 
+/**
+ * Workspace id is derived from the user id alone, so the provider prefix in a self-hosted
+ * id (`github:<numeric id>`) keeps those users in a namespace the header provider can
+ * never land in, without changing the derivation rule.
+ */
 export async function ensureWorkspace(
   db: D1Database,
-  user: ChatGPTUser,
+  user: AuthUser,
 ): Promise<string> {
   const workspaceId = `ws-${sha256Hex(new TextEncoder().encode(user.userId)).slice(0, 24)}`;
   const subscriptionId = `sub-${workspaceId}`;

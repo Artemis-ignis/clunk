@@ -6723,3 +6723,10 @@ html.snap-y {
   font-family: var(--font-mono);
   font-size: 0.78rem;
 }
+
+/* Sign-in method buttons. The first one already carries .login-cta's top margin, so this
+   only has to space the stack. */
+.login-methods {
+  display: grid;
+  gap: var(--sp-12);
+}

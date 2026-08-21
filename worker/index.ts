@@ -7,6 +7,14 @@ interface Env {
   DB: D1Database;
   /** Comma-separated hostnames allowed to carry ChatGPT identity headers. Unset = loopback only. */
   CLUNK_TRUSTED_AUTH_HOSTS?: string;
+  /**
+   * Self-hosted sign-in, read through app/auth-env.ts. All three are optional and all
+   * three fail closed: without the session secret no cookie can be signed, and without
+   * the GitHub pair that provider is never offered.
+   */
+  CLUNK_SESSION_SECRET?: string;
+  CLUNK_GITHUB_CLIENT_ID?: string;
+  CLUNK_GITHUB_CLIENT_SECRET?: string;
   IMAGES: {
     input(stream: ReadableStream): {
       transform(options: Record<string, unknown>): {

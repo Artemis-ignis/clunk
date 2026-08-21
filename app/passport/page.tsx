@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { requireChatGPTUser } from "../chatgpt-auth";
+import { requireUser } from "../auth-provider";
 import { PassportClient } from "../components/PassportClient";
 
 export const dynamic = "force-dynamic";
@@ -9,6 +9,6 @@ export const metadata: Metadata = {
 };
 
 export default async function PassportPage() {
-  const user = await requireChatGPTUser("/passport");
+  const user = await requireUser("/passport");
   return <PassportClient userLabel={user.displayName} />;
 }

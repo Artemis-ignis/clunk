@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getChatGPTUser, chatGPTSignInPath } from "../chatgpt-auth";
+import { getCurrentUser, safeReturnPath } from "../auth-provider";
 import { BrandLockup } from "../components/BrandMark";
 import { Icon } from "../components/Icon";
+import { LoginMethods } from "../components/LoginMethods";
 import { ThemeToggle } from "../components/ThemeToggle";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "로그인",
-  description: "ChatGPT 계정으로 Clunk 비공개 워크스페이스에 입장합니다. 별도 회원가입 절차는 없습니다.",
+  description: "ChatGPT 계정 또는 GitHub 계정으로 Clunk 비공개 워크스페이스에 입장합니다.",
 };
 
 /**
@@ -16,15 +17,23 @@ export const metadata: Metadata = {
  * the staged gradient still fills the viewport, three pulsing glass orbs float behind the
  * content, and a single frosted card sits centred with a heavy inner highlight.
  *
- * The template's email, password and three social buttons are removed. Clunk stores no
- * password of its own, so the card offers exactly one route in.
+ * The template's email and password fields stay removed — Clunk stores no password of its
+ * own. What the card offers is whatever sign-in method this deployment actually has
+ * configured, resolved at request time by LoginMethods.
  */
-export default async function LoginPage() {
-  const user = await getChatGPTUser();
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ return_to?: string }>;
+}) {
+  const user = await getCurrentUser();
   if (user) {
     const { redirect } = await import("next/navigation");
     redirect("/app");
   }
+
+  const params = await searchParams;
+  const returnTo = safeReturnPath(params.return_to ?? "/app");
 
   return (
     <main className="login-page">
@@ -47,7 +56,7 @@ export default async function LoginPage() {
       <section className="login-card" aria-labelledby="login-title">
         <span className="login-card-chip">
           <Icon name="shield" size={13} />
-          ChatGPT SIWC
+          비밀번호 없는 로그인
         </span>
 
         <h1 id="login-title">
@@ -56,20 +65,18 @@ export default async function LoginPage() {
           <em>들어갑니다.</em>
         </h1>
         <p className="login-lead">
-          ChatGPT 계정으로 로그인하면 곧 회원가입입니다. 따로 가입 절차를 밟지 않아도 워크스페이스가 만들어집니다.
+          가지고 계신 계정으로 로그인하면 곧 회원가입입니다. 따로 가입 절차를 밟지 않아도
+          워크스페이스가 만들어집니다.
         </p>
 
-        <Link className="button button-primary button-block login-cta" href={chatGPTSignInPath("/app")}>
-          ChatGPT 계정으로 시작하기
-          <Icon name="arrowUpRight" size={16} />
-        </Link>
+        <LoginMethods returnTo={returnTo} />
 
         <ul className="login-facts">
           <li>
             <Icon name="fingerprint" size={15} />
             <span>
               <strong>비밀번호를 보관하지 않습니다</strong>
-              Clunk는 자체 이메일과 비밀번호 데이터베이스를 만들지 않습니다.
+              Clunk는 자체 비밀번호 데이터베이스를 만들지 않고, 로그인한 계정 제공자만 신뢰합니다.
             </span>
           </li>
           <li>
@@ -87,10 +94,6 @@ export default async function LoginPage() {
             </span>
           </li>
         </ul>
-
-        <p className="login-boundary">
-          비공개 파일럿에서는 ChatGPT 로그인만 사용합니다. Google, Apple, 이메일 계정은 받지 않습니다.
-        </p>
 
         <Link className="login-back" href="/">
           <Icon name="arrowRight" size={14} />

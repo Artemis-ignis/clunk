@@ -13,10 +13,22 @@ export const metadata: Metadata = {
  */
 const COLLECTED = [
   {
-    item: "이메일 주소, 표시 이름",
-    source: "ChatGPT 계정 로그인 시 호스트가 전달",
+    item: "이메일 주소, 표시 이름, 성명, 계정 식별자",
+    source: "ChatGPT 계정 로그인 시 호스트가 요청 헤더로 전달",
     purpose: "계정 식별, 워크스페이스 소유권 확인, 장애 시 연락",
     table: "clunk_users",
+  },
+  {
+    item: "GitHub 계정 식별자·로그인명·이메일",
+    source: "GitHub 계정으로 로그인할 때 GitHub가 전달(read:user, user:email 범위)",
+    purpose: "계정 식별, 워크스페이스 소유권 확인",
+    table: "clunk_users",
+  },
+  {
+    item: "로그인 세션 쿠키",
+    source: "GitHub 로그인 성공 시 발급",
+    purpose: "로그인 상태 유지",
+    table: "저장하지 않음(브라우저 쿠키, 7일 후 만료)",
   },
   {
     item: "워크스페이스 이름, 구성원 역할",
@@ -90,6 +102,19 @@ export default function PrivacyPage() {
       <p>
         위 항목 외에 주민등록번호, 결제카드 정보, 위치정보, 광고 식별자는 수집하지 않습니다.
         서비스는 광고·분석 목적의 제3자 추적 스크립트를 사용하지 않습니다.
+      </p>
+
+      <h2>2-1. 로그인 방법에 따른 차이</h2>
+      <p>
+        ChatGPT 계정으로 들어오시면 호스트가 전달한 식별자·이메일·성명을 저장합니다. GitHub
+        계정으로 들어오시면 GitHub의 사용자 식별자와 로그인명, 그리고 공개 이메일을 저장합니다.
+        GitHub에서 이메일을 모두 비공개로 두신 경우에는 GitHub가 제공하는 회신 불가 별칭
+        주소(<code>@users.noreply.github.com</code>)를 대신 저장합니다.
+      </p>
+      <p>
+        저희는 <strong>비밀번호를 받지도 저장하지도 않습니다.</strong> 로그인 상태는 서명된 쿠키로
+        유지되며, 쿠키에는 계정 식별자와 발급·만료 시각만 들어갑니다. 이메일과 이름은 매 요청마다
+        데이터베이스에서 다시 읽으므로, 계정을 삭제하시면 즉시 로그아웃됩니다.
       </p>
 
       <h2>3. 보관 기간과 파기</h2>
