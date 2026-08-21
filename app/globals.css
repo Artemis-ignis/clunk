@@ -6660,3 +6660,66 @@ html.snap-y {
   font-size: var(--fs-1);
   line-height: 1.6;
 }
+
+/* --- Dashboard run filters -------------------------------------------------
+   Finding one inspection among many, and saying plainly how many are shown. */
+.run-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-12);
+  margin-bottom: var(--sp-16);
+}
+
+.run-search {
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+
+.run-search input {
+  width: 100%;
+  padding: 8px var(--sp-12);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-control);
+  background: var(--ink-0);
+  color: var(--text-strong);
+  font-size: var(--fs-1);
+}
+
+.run-search input::placeholder {
+  color: var(--text-dim);
+}
+
+.run-status-filter {
+  display: flex;
+  gap: 4px;
+}
+
+.run-status-chip {
+  padding: 6px var(--sp-12);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease),
+    background var(--dur-1) var(--ease);
+}
+
+.run-status-chip:hover {
+  color: var(--text-strong);
+  border-color: var(--accent-line);
+}
+
+.run-status-chip.is-on {
+  border-color: transparent;
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.run-count {
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}

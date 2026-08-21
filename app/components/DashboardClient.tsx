@@ -46,6 +46,8 @@ type MeResponse = {
 
 export function DashboardClient() {
   const [runs, setRuns] = useState<Run[]>([]);
+  const [runQuery, setRunQuery] = useState("");
+  const [runStatus, setRunStatus] = useState<"all" | "ready" | "blocked">("all");
   const [passports, setPassports] = useState<Passport[]>([]);
   const [ledger, setLedger] = useState<CreditEntry[]>([]);
   const [credits, setCredits] = useState<number | null>(null);
@@ -97,6 +99,21 @@ export function DashboardClient() {
   const findingCount = useMemo(() => runs.reduce((total, run) => total + run.findingCount, 0), [runs]);
   const readyCount = useMemo(() => runs.filter((run) => run.status === "ready").length, [runs]);
   const latestRun = runs[0] ?? null;
+
+  // The history was a flat list of everything the API returned. Past a few dozen inspections
+  // there is no way to find the one you are looking for, and the API caps at RUN_PAGE_SIZE
+  // with nothing on screen saying so — older runs simply stopped existing.
+  const visibleRuns = useMemo(() => {
+    const needle = runQuery.trim().toLowerCase();
+    return runs.filter((run) => {
+      if (runStatus === "ready" && run.status !== "ready") return false;
+      if (runStatus === "blocked" && run.status === "ready") return false;
+      if (!needle) return true;
+      return [run.fileName, run.inputHash, run.profileId, run.format]
+        .filter((value): value is string => typeof value === "string" && value.length > 0)
+        .some((value) => value.toLowerCase().includes(needle));
+    });
+  }, [runs, runQuery, runStatus]);
 
   const connectionChip = (
     <span className={`conn-chip conn-chip-${connection}`}>
@@ -162,6 +179,42 @@ export function DashboardClient() {
           </div>
           {runs.length ? (
             <div className="table-scroll">
+              <div className="run-filters">
+                <label className="run-search">
+                  <span className="sr-only">검사 이력 검색</span>
+                  <input
+                    type="search"
+                    value={runQuery}
+                    onChange={(event) => setRunQuery(event.target.value)}
+                    placeholder="파일 이름, 해시, 프로파일로 찾기"
+                  />
+                </label>
+                <div className="run-status-filter" role="group" aria-label="결과로 거르기">
+                  {([
+                    ["all", "전체"],
+                    ["ready", "준비 완료"],
+                    ["blocked", "조치 필요"],
+                  ] as const).map(([value, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      className={runStatus === value ? "run-status-chip is-on" : "run-status-chip"}
+                      aria-pressed={runStatus === value}
+                      onClick={() => setRunStatus(value)}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <span className="run-count num">
+                  {visibleRuns.length === runs.length
+                    ? `${runs.length}건`
+                    : `${runs.length}건 중 ${visibleRuns.length}건`}
+                </span>
+              </div>
+              {visibleRuns.length === 0 ? (
+                <p className="muted-note">조건에 맞는 검사가 없습니다.</p>
+              ) : null}
               <table className="run-table">
                 <thead>
                   <tr>
@@ -174,7 +227,7 @@ export function DashboardClient() {
                   </tr>
                 </thead>
                 <tbody>
-                  {runs.map((run) => (
+                  {visibleRuns.map((run) => (
                     <RunRow
                       key={run.id}
                       run={run}
@@ -186,7 +239,7 @@ export function DashboardClient() {
               </table>
               <p className="muted-note">
                 워크스페이스 이력은 웹 검사기 실행만 저장합니다. CLI와 MCP 실행은 로컬 결과로
-                남고 같은 해시를 돌려줍니다.
+                남고 같은 해시를 돌려줍니다.{runs.length >= 50 ? " 최근 50건까지 표시합니다." : ""}
               </p>
             </div>
           ) : (
