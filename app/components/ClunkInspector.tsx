@@ -658,13 +658,13 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
       </ol>
 
       {notice ? (
-        <div className="banner banner-info">
+        <div className="banner banner-info" role="status" aria-live="polite">
           <Icon name="info" size={16} />
           <p>{notice}</p>
         </div>
       ) : null}
       {error ? (
-        <div className="banner banner-error">
+        <div className="banner banner-error" role="alert">
           <Icon name="circleAlert" size={16} />
           <p>{error}</p>
         </div>
@@ -681,7 +681,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
         </div>
       ) : null}
       {saveFailure ? (
-        <div className="banner banner-warning" role="status">
+        <div className="banner banner-warning" role="status" aria-live="polite">
           <Icon name="triangleAlert" size={16} />
           <p>
             이 결과는 저장되지 않았습니다. {saveFailure.message} 검사는 브라우저에서 이미 끝났으니
