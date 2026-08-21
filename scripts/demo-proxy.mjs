@@ -57,6 +57,22 @@ const server = http.createServer((req, res) => {
   req.pipe(upstream);
 });
 
-server.listen(PORT, "0.0.0.0", () => {
-  console.log(`[demo-proxy] http://localhost:${PORT} -> localhost:${UPSTREAM_PORT} (SIWC user: ${USER})`);
+// Loopback by default. Binding 0.0.0.0 put a logged-in /app, /dashboard and /settings —
+// with whatever real data the local D1 holds — in front of anyone on the same network,
+// and the token was optional. Exposing it now takes an explicit opt-in and a token.
+const HOST = process.env.CLUNK_DEMO_EXPOSE === "1" ? "0.0.0.0" : "127.0.0.1";
+
+if (HOST === "0.0.0.0" && !TOKEN) {
+  console.error(
+    "[demo-proxy] CLUNK_DEMO_EXPOSE=1 은 CLUNK_DEMO_TOKEN 없이 쓸 수 없습니다.",
+    "토큰 없이 외부에 열면 인증된 워크스페이스가 그대로 공개됩니다.",
+  );
+  process.exit(1);
+}
+
+server.listen(PORT, HOST, () => {
+  const scope = HOST === "0.0.0.0" ? "모든 인터페이스(토큰 필요)" : "루프백 전용";
+  console.log(
+    `[demo-proxy] http://localhost:${PORT} -> localhost:${UPSTREAM_PORT} (SIWC user: ${USER}, ${scope})`,
+  );
 });
