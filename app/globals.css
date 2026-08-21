@@ -6034,3 +6034,20 @@ html.snap-y {
     font-size: 1.72rem;
   }
 }
+
+/* Phone chips need slack, not a hairline fit: a scrollbar (or any few-px width change)
+   shrinks the stage and the chip, being a fixed pixel size, eats a larger share of the
+   18% sky. These sizes leave ~9px of margin instead of ~2px. */
+@media (max-width: 700px) {
+  .hero3-callout {
+    padding: 4px 8px;
+  }
+
+  .hero3-callout-label {
+    font-size: 0.52rem;
+  }
+
+  .hero3-callout strong {
+    font-size: 0.68rem;
+  }
+}
