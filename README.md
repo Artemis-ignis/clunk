@@ -117,6 +117,11 @@ stdio JSON-RPC 서버가 `clunk_inspect`, `clunk_validate`, `clunk_optimize`, `c
 - `.openai/hosting.json`은 1차에 D1만 선언하며 R2는 `null`입니다.
 - 원본 에셋은 브라우저 로컬 처리입니다. D1에는 사용자·workspace·구독 상태와 파일 메타데이터·hash·report·작업·Passport·크레딧 원장을 저장하며, 원본 바이트는 저장하지 않습니다.
 - `/app`, `/dashboard`, `/settings`, 저장 API는 모든 환경에서 Sites 호스트가 주입한 ChatGPT SIWC 사용자 헤더가 없으면 거부합니다. 애플리케이션은 클라이언트 body의 userId를 신뢰하지 않습니다. 로컬 브라우저 검증도 테스트용 SIWC 헤더를 주입한 인증 세션으로 수행하며, 인증 우회 미리보기는 제품 경로에 남겨두지 않습니다.
+- **`CLUNK_TRUSTED_AUTH_HOSTS`는 배포 전 반드시 설정합니다.** 인증은 호스트가 주입하는 SIWC 헤더로만 이루어지고 workspace id가 userId에서 파생되므로, 워커에 직접 닿을 수 있는 오리진(기본 `*.workers.dev`, 프리뷰 배포, 커스텀 도메인 직결)이 있으면 헤더를 손으로 써넣는 것만으로 임의 계정 사칭이 성립합니다. 워커는 신뢰 호스트 목록에 없는 호스트로 들어온 요청에서 SIWC 헤더를 제거합니다(거부가 아니라 제거 — 공개 페이지는 그대로 열리고 인증 화면만 로그아웃 상태로 보입니다). 미설정 시 루프백만 신뢰하므로, 설정을 잊으면 모두가 로그아웃 상태로 보입니다. 조용한 사칭보다 눈에 띄는 실패를 택한 것입니다.
+  ```
+  CLUNK_TRUSTED_AUTH_HOSTS=clunk.example.com,clunk-sites-host.example
+  ```
+- 모든 응답에 CSP·X-Frame-Options·HSTS·nosniff·Referrer-Policy·Permissions-Policy를 주입합니다(`worker/index.ts`). CSP의 `script-src`에 `wasm-unsafe-eval`이 있는 이유는 GLB 미리보기가 meshopt 디코더를 WebAssembly로 인스턴스화하기 때문입니다.
 - Stripe나 실제 결제는 연결하지 않습니다. 모든 크레딧·플랜 화면에 `DEMO MODE · 실제 결제 아님`을 표시합니다.
 - 향후 결제는 `BillingProvider` 인터페이스 뒤에 국내 제공자를 연결할 수 있게 분리했습니다.
 

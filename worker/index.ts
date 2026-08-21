@@ -5,6 +5,8 @@ import handler from "vinext/server/app-router-entry";
 interface Env {
   ASSETS: Fetcher;
   DB: D1Database;
+  /** Comma-separated hostnames allowed to carry ChatGPT identity headers. Unset = loopback only. */
+  CLUNK_TRUSTED_AUTH_HOSTS?: string;
   IMAGES: {
     input(stream: ReadableStream): {
       transform(options: Record<string, unknown>): {
@@ -75,8 +77,52 @@ function harden(response: Response): Response {
   });
 }
 
+/**
+ * Identity headers are only trustworthy on the host that injects them.
+ *
+ * The app authenticates purely from `oai-authenticated-user-*` request headers, and the
+ * workspace id is derived from the user id. Nothing verified that a request actually came
+ * through the host that sets those headers, so any origin reachable directly — the default
+ * workers.dev name, a preview deployment, a custom domain wired straight to the worker —
+ * accepted a hand-written header as a complete login for any account.
+ *
+ * The gate strips those headers unless the request arrived on a host declared as trusted.
+ * Stripping rather than rejecting keeps public pages working everywhere; the authenticated
+ * surfaces simply see a signed-out visitor.
+ *
+ * Fail closed: with CLUNK_TRUSTED_AUTH_HOSTS unset only loopback is trusted. A deployment
+ * that forgets to set it shows everyone as signed out — visible and recoverable, unlike
+ * silent impersonation.
+ */
+const IDENTITY_HEADERS = [
+  "oai-authenticated-user-id",
+  "oai-authenticated-user-email",
+  "oai-authenticated-user-full-name",
+  "oai-authenticated-user-full-name-encoding",
+];
+
+const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
+
+function isTrustedAuthHost(hostname: string, trustedList: string | undefined): boolean {
+  if (LOOPBACK_HOSTS.has(hostname)) return true;
+  if (!trustedList) return false;
+  return trustedList
+    .split(",")
+    .map((entry) => entry.trim().toLowerCase())
+    .filter(Boolean)
+    .includes(hostname.toLowerCase());
+}
+
+function withVerifiedIdentity(request: Request, trustedList: string | undefined): Request {
+  if (isTrustedAuthHost(new URL(request.url).hostname, trustedList)) return request;
+  if (!IDENTITY_HEADERS.some((header) => request.headers.has(header))) return request;
+  const headers = new Headers(request.headers);
+  for (const header of IDENTITY_HEADERS) headers.delete(header);
+  return new Request(request, { headers });
+}
 const worker = {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  async fetch(incoming: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    const request = withVerifiedIdentity(incoming, env.CLUNK_TRUSTED_AUTH_HOSTS);
     const url = new URL(request.url);
 
     if (url.pathname === "/_vinext/image") {
