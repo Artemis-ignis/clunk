@@ -110,3 +110,63 @@ test("unparseable input scores zero and reports the real reason", async () => {
     assert.match(parseFinding.message, testCase.expect);
   }
 });
+
+test("a node graph that revisits paths cannot stall the inspection", () => {
+  // Each node lists the same child twice. Depth is still linear, but a walk that carries a
+  // per-path visited set explores 2^n paths — 40 such nodes in a 900-byte file used to freeze
+  // the browser tab with no way to cancel. Receiving an asset from a collaborator is the
+  // product's main use, so this was a hand-written file away from being a denial of service.
+  const nodeCount = 2000;
+  const nodes: Array<{ children?: number[] }> = [];
+  for (let index = 0; index < nodeCount; index += 1) {
+    nodes.push(index < nodeCount - 1 ? { children: [index + 1, index + 1] } : {});
+  }
+  const bytes = new TextEncoder().encode(
+    JSON.stringify({ asset: { version: "2.0" }, scenes: [{ nodes: [0] }], scene: 0, nodes }),
+  );
+
+  const started = Date.now();
+  const report = inspectAsset(createAssetBundle("revisit.gltf", bytes));
+  const elapsed = Date.now() - started;
+
+  assert.equal(report.metrics.maxDepth, nodeCount);
+  assert.ok(elapsed < 2000, `inspection took ${elapsed}ms; the walk is not linear`);
+});
+
+test("an embedded resource that cannot be decoded is reported, not ignored", () => {
+  // A data URI with characters outside the base64 alphabet decodes to nothing. Before, embedded
+  // resources were assumed resolved, so a broken payload disappeared and the asset looked clean.
+  const bytes = new TextEncoder().encode(
+    JSON.stringify({
+      asset: { version: "2.0" },
+      buffers: [{ byteLength: 8, uri: "data:application/octet-stream;base64,!!!!not-base64!!!!" }],
+      scenes: [{ nodes: [] }],
+      scene: 0,
+    }),
+  );
+
+  const report = inspectAsset(createAssetBundle("broken-embed.gltf", bytes));
+  assert.ok(
+    report.metrics.unresolvedResourceCount > 0,
+    "an undecodable embedded resource must be counted as unresolved",
+  );
+});
+
+test("a large embedded resource decodes in linear time", () => {
+  // 3 MB of valid base64. The old decoder accumulated a JS number per byte and looked each
+  // character up with indexOf, so this scaled quadratically in both time and memory.
+  const payload = "QUJDRA==".repeat(512 * 1024 / 8);
+  const bytes = new TextEncoder().encode(
+    JSON.stringify({
+      asset: { version: "2.0" },
+      buffers: [{ byteLength: 8, uri: "data:application/octet-stream;base64," + payload }],
+      scenes: [{ nodes: [] }],
+      scene: 0,
+    }),
+  );
+
+  const started = Date.now();
+  inspectAsset(createAssetBundle("big-embed.gltf", bytes));
+  const elapsed = Date.now() - started;
+  assert.ok(elapsed < 3000, `decoding took ${elapsed}ms; it is not linear`);
+});

@@ -1383,8 +1383,17 @@ function collectResourceIssues(parsed: ParsedAsset): ResourceIssue[] {
     ...(Array.isArray(parsed.json.images) ? parsed.json.images : []),
   ];
   for (const definition of definitions) {
-    if (!definition?.uri || String(definition.uri).startsWith("data:")) continue;
+    if (!definition?.uri) continue;
     const uri = String(definition.uri);
+    if (uri.startsWith("data:")) {
+      // Embedded resources used to be assumed resolved. One that fails to decode — malformed
+      // base64, or larger than the decoder will materialise — then vanished silently and the
+      // asset looked clean. Report it instead; the URI itself is not echoed back because a
+      // data URI is the payload.
+      if (resolveUri(parsed, uri)) continue;
+      issues.push({ uri: "data:<embedded>", remote: false, unresolved: true });
+      continue;
+    }
     const remote = isRemoteUri(uri);
     issues.push({ uri, remote, unresolved: remote || !resolveUri(parsed, uri) });
   }
@@ -1405,6 +1414,26 @@ function resolveUri(parsed: ParsedAsset, uri: string): Uint8Array | null {
   }
 }
 
+/** Refuse to materialise an embedded resource larger than this; the caller then reports it as unresolved. */
+const MAX_DATA_URI_BYTES = 128 * 1024 * 1024;
+
+const BASE64_VALUES: Record<number, number> = (() => {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  const table: Record<number, number> = {};
+  for (let index = 0; index < alphabet.length; index += 1) {
+    table[alphabet.charCodeAt(index)] = index;
+  }
+  return table;
+})();
+
+/**
+ * Decode a base64 data URI into bytes.
+ *
+ * The previous version accumulated into a growable number[] — roughly an order of magnitude
+ * more memory than the bytes themselves — and called alphabet.indexOf per character, making
+ * decoding quadratic. A crafted .gltf with a large embedded buffer could exhaust memory
+ * before any rule ever ran. Size the result first, then fill a typed array via a lookup table.
+ */
 function decodeDataUri(uri: string): Uint8Array | null {
   const comma = uri.indexOf(",");
   if (comma < 0) return null;
@@ -1413,23 +1442,28 @@ function decodeDataUri(uri: string): Uint8Array | null {
   if (!metadata.toLowerCase().includes(";base64")) {
     return utf8(decodeURIComponent(payload));
   }
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-  const clean = payload.replace(/\s/g, "");
-  const output: number[] = [];
+  const clean = payload.replace(/s/g, "");
+  const capacity = Math.floor((clean.length * 3) / 4);
+  if (capacity > MAX_DATA_URI_BYTES) return null;
+  const output = new Uint8Array(capacity);
+  let written = 0;
   let buffer = 0;
   let bits = 0;
-  for (const character of clean) {
-    if (character === "=") break;
-    const value = alphabet.indexOf(character);
-    if (value < 0) return null;
+  for (let index = 0; index < clean.length; index += 1) {
+    const code = clean.charCodeAt(index);
+    if (code === 61) break; // '='
+    const value = BASE64_VALUES[code];
+    if (value === undefined) return null;
     buffer = (buffer << 6) | value;
     bits += 6;
     if (bits >= 8) {
       bits -= 8;
-      output.push((buffer >> bits) & 0xff);
+      if (written >= capacity) return null;
+      output[written] = (buffer >> bits) & 0xff;
+      written += 1;
     }
   }
-  return new Uint8Array(output);
+  return written === capacity ? output : output.subarray(0, written);
 }
 
 function imageDimensions(
@@ -1493,19 +1527,60 @@ function parseJpegDimensions(bytes: Uint8Array): [number, number] | null {
   return null;
 }
 
+/**
+ * Longest node chain, memoised.
+ *
+ * The previous version carried a per-path visited Set and copied it at every step. That stops
+ * cycles but not repeated paths through a DAG: a few dozen nodes each listing the same child
+ * twice reach 2^n visits, so a small hand-written file froze the tab with no way to cancel.
+ * Depth from a node does not depend on how you got there, so it is cached once per node and
+ * the whole walk becomes linear. Iterative on purpose — a long chain would otherwise blow the
+ * call stack.
+ */
 function maxNodeDepth(nodes: GltfDocument[], roots: Set<number>): number {
-  const visit = (index: number, depth: number, seen: Set<number>): number => {
-    if (seen.has(index)) return depth;
-    const node = nodes[index];
-    if (!node) return depth;
-    const nextSeen = new Set(seen).add(index);
-    const children = Array.isArray(node.children) ? node.children : [];
-    return Math.max(
-      depth,
-      ...children.map((child: unknown) => visit(Number(child), depth + 1, nextSeen)),
-    );
+  const chainFrom = new Map<number, number>();
+  const inProgress = new Set<number>();
+
+  const walk = (start: number): number => {
+    const stack: Array<{ index: number; expanded: boolean }> = [{ index: start, expanded: false }];
+    while (stack.length > 0) {
+      const frame = stack[stack.length - 1];
+      const node = nodes[frame.index];
+      if (!node) {
+        chainFrom.set(frame.index, 0);
+        inProgress.delete(frame.index);
+        stack.pop();
+        continue;
+      }
+      if (chainFrom.has(frame.index)) {
+        inProgress.delete(frame.index);
+        stack.pop();
+        continue;
+      }
+      const children = Array.isArray(node.children) ? node.children : [];
+      if (!frame.expanded) {
+        frame.expanded = true;
+        inProgress.add(frame.index);
+        for (const child of children) {
+          const childIndex = Number(child);
+          // A cycle contributes nothing past the node that closes it.
+          if (inProgress.has(childIndex) || chainFrom.has(childIndex)) continue;
+          stack.push({ index: childIndex, expanded: false });
+        }
+        continue;
+      }
+      let best = 0;
+      for (const child of children) {
+        best = Math.max(best, chainFrom.get(Number(child)) ?? 0);
+      }
+      chainFrom.set(frame.index, best + 1);
+      inProgress.delete(frame.index);
+      stack.pop();
+    }
+    return chainFrom.get(start) ?? 0;
   };
-  return Math.max(0, ...Array.from(roots, (root) => visit(root, 1, new Set())));
+
+  return Math.max(0, ...Array.from(roots, (root) => walk(root)));
 }
 
 function collectNodeRefs(nodes: GltfDocument[], index: number, refs: Set<number>): void {
