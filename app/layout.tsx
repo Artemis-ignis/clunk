@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { SITE_ORIGIN } from "./site-origin";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,21 +15,25 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Clunk - Game AssetOps",
+    default: "Clunk — 팀을 위한 실시간 3D 에셋 품질 게이트",
     template: "%s | Clunk",
   },
-  description: "실제 GLB와 GLTF를 검사하고 안전하게 최적화하는 Game AssetOps 제품입니다.",
-  metadataBase: new URL(process.env.CLUNK_SITE_ORIGIN ?? "http://localhost:3000"),
+  description: "에이전트가 만든 GLB를 사람이 열어보기 전에 실제 바이트로 검사하고 점수·근거·Passport를 남깁니다.",
+  metadataBase: new URL(SITE_ORIGIN),
   openGraph: {
-    title: "Clunk - Make every asset defensible",
-    description: "GLB와 GLTF 팀을 위한 로컬 우선 Game AssetOps 워크스페이스입니다.",
+    title: "Clunk — 팀을 위한 실시간 3D 에셋 품질 게이트",
+    description: "에이전트가 만든 GLB를 사람이 열어보기 전에 실제 바이트로 검사하고 점수·근거·Passport를 남깁니다.",
     type: "website",
-    images: [{ url: "/og.png", width: 1664, height: 936, alt: "Clunk - Make every asset defensible" }],
+    locale: "ko_KR",
+    siteName: "Clunk",
+    images: [
+      { url: "/og.png", width: 1672, height: 941, alt: "Clunk — 3D 에셋 품질 게이트" },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Clunk - Make every asset defensible",
-    description: "GLB와 GLTF 팀을 위한 로컬 우선 Game AssetOps 워크스페이스입니다.",
+    title: "Clunk — 팀을 위한 실시간 3D 에셋 품질 게이트",
+    description: "에이전트가 만든 GLB를 사람이 열어보기 전에 실제 바이트로 검사하고 점수·근거·Passport를 남깁니다.",
     images: ["/og.png"],
   },
   icons: {

@@ -25,6 +25,56 @@ interface ExecutionContext {
 // dangerouslyAllowSVG: true in next.config.js and uncomment below:
 // const imageConfig: ImageConfig = { dangerouslyAllowSVG: true };
 
+
+/**
+ * Response hardening. The app shipped with no security headers at all, which left an XSS
+ * with no containment and let any page frame the authenticated surfaces (a click inside an
+ * iframe is same-origin, so the CSRF origin check does not catch clickjacking).
+ *
+ * The CSP allows inline styles and inline scripts because the framework streams RSC payloads
+ * and the theme bootstrap runs inline before paint; it still blocks foreign script origins,
+ * object/embed, and framing.
+ */
+const SECURITY_HEADERS: Record<string, string> = {
+  "x-content-type-options": "nosniff",
+  "x-frame-options": "DENY",
+  "referrer-policy": "strict-origin-when-cross-origin",
+  "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+  "cross-origin-opener-policy": "same-origin",
+  "strict-transport-security": "max-age=31536000; includeSubDomains",
+  "content-security-policy": [
+    "default-src 'self'",
+    "base-uri 'self'",
+    "object-src 'none'",
+    "frame-ancestors 'none'",
+    "form-action 'self'",
+    "img-src 'self' data: blob:",
+    "media-src 'self' blob:",
+    "font-src 'self' data:",
+    "style-src 'self' 'unsafe-inline'",
+    // wasm-unsafe-eval: the GLB preview instantiates the meshopt decoder as WebAssembly.
+    "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'",
+    "connect-src 'self'",
+    "worker-src 'self' blob:",
+  ].join("; "),
+};
+
+function harden(response: Response): Response {
+  // A 101/204/304 must not be rewritten: constructing a Response from them throws.
+  if (response.status === 101 || response.status === 204 || response.status === 304) {
+    return response;
+  }
+  const headers = new Headers(response.headers);
+  for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
+    if (!headers.has(key)) headers.set(key, value);
+  }
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
@@ -37,10 +87,10 @@ const worker = {
           const result = await env.IMAGES.input(body).transform(width > 0 ? { width } : {}).output({ format, quality });
           return result.response();
         },
-      }, allowedWidths);
+      }, allowedWidths).then(harden);
     }
 
-    return handler.fetch(request, env, ctx);
+    return harden(await handler.fetch(request, env, ctx));
   },
 };
 
