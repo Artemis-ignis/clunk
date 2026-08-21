@@ -1,0 +1,68 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; background: transparent; }
+  #stage { width: 1600px; height: 1200px; }
+</style>
+<div id="stage"></div>
+<script type="importmap">
+  { "imports": { "three": "/node_modules/three/build/three.module.js", "three/addons/": "/node_modules/three/examples/jsm/" } }
+</script>
+<script type="module">
+  import * as THREE from "three";
+  import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+  import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
+
+  const W = 1600, H = 1200;
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+  renderer.setSize(W, H);
+  renderer.setPixelRatio(1);
+  renderer.setClearColor(0x000000, 0);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.12;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  document.getElementById("stage").appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(32, W / H, 0.1, 4000);
+
+  const hemi = new THREE.HemisphereLight(0xeaf6ff, 0x39424d, 1.15);
+  scene.add(hemi);
+  const key = new THREE.DirectionalLight(0xffffff, 2.2);
+  scene.add(key);
+  const rim = new THREE.DirectionalLight(0x9adfff, 1.1);
+  scene.add(rim);
+
+  const loader = new GLTFLoader();
+  loader.setMeshoptDecoder(MeshoptDecoder);
+  const modelUrl = new URLSearchParams(location.search).get("model") ?? "/tractor.glb";
+  loader.load(modelUrl, (gltf) => {
+    const root = gltf.scene;
+    scene.add(root);
+    root.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+
+    const box = new THREE.Box3().setFromObject(root);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    const radius = size.length() * 0.5;
+
+    key.position.set(center.x + radius * 2.2, center.y + radius * 3.0, center.z + radius * 2.6);
+    rim.position.set(center.x - radius * 2.6, center.y + radius * 1.4, center.z - radius * 2.2);
+
+    const q = new URLSearchParams(location.search);
+    const dir = new THREE.Vector3(
+      Number(q.get("dx") ?? 1.35),
+      Number(q.get("dy") ?? 0.72),
+      Number(q.get("dz") ?? 1.55),
+    ).normalize();
+    const dist = Number(q.get("dist") ?? 2.6);
+    camera.position.copy(center.clone().add(dir.multiplyScalar(radius * dist)));
+    camera.lookAt(center.clone().add(new THREE.Vector3(0, -radius * 0.04, 0)));
+    camera.updateProjectionMatrix();
+
+    renderer.render(scene, camera);
+    window.__DONE__ = true;
+  }, undefined, (err) => { window.__ERR__ = String(err); });
+</script>

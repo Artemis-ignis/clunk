@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "1.0",
+  "id": "harvest-frontier-runtime-v1",
+  "version": "0.1.0",
+  "basedOn": "pc",
+  "label": "Harvest Frontier runtime (near LOD)",
+  "description": "Harvest Frontier의 procedural PBR runtime GLB를 Clunk 범용 pc 프로파일 대신 그 파이프라인 계약으로 읽기 위한 예시 프로파일입니다.",
+  "_source": "docs/integrations/harvest-frontier.ko.md (2026-08-20 KST 기준 corpus 표와 '확인된 연결 경계' 절)에서 도출했습니다. Harvest Frontier 저장소는 읽기 전용 참조이며 이 프로파일은 Clunk 쪽 제안입니다.",
+  "_status": "예시입니다. Harvest 팀이 near/far 예산을 숫자로 선언하면 그 값으로 교체해야 하며, 이 프로파일의 READY는 Harvest 자체 validator의 PASS가 아닙니다.",
+  "_thresholdNotes": {
+    "maxTriangles": "핸드오프 문서 corpus의 near LOD 최대치는 tractor.compact.m1.glb의 30,188 삼각형입니다. 40,000으로 두면 현재 corpus가 예산의 75%에 있어 80% 근접 경고(WARNING)도 뜨지 않습니다.",
+    "maxMaterials": "corpus 최대치는 tractor near/far의 48 머티리얼입니다. 범용 pc 프로파일의 24는 이 파이프라인에서 항상 ERROR가 되므로 64로 올렸습니다.",
+    "maxTextureMemoryBytes": "Harvest runtime은 procedural PBR이라 텍스처가 0개여야 합니다. 예산을 0으로 두어 텍스처가 하나라도 생기면 ERROR로 드러나게 했습니다(메시지는 'budget exceeded'로 표시됩니다).",
+    "maxTextureDimension": "위와 같은 이유로 0입니다.",
+    "readyScoreThreshold": "Clunk 기본값 90을 그대로 둡니다."
+  },
+  "thresholds": {
+    "maxTriangles": 40000,
+    "maxMaterials": 64,
+    "maxTextureMemoryBytes": 0,
+    "maxTextureDimension": 0,
+    "readyScoreThreshold": 90
+  },
+  "rules": {
+    "GEO-MISSING-NORMALS": {
+      "severity": "INFO",
+      "_why": "핸드오프 corpus에 primitive 6~7개가 normal 없이 export되는 것이 기록되어 있습니다. factory에서 의도한 flat shading이므로 결함이 아니라 사실 기록으로 남깁니다."
+    },
+    "TEX-MISSING-UV0": {
+      "severity": "INFO",
+      "_why": "'procedural PBR이라 UV·텍스처가 없고'가 문서화된 계약입니다. 다만 이 규칙은 텍스처가 있을 때만 발생하므로 현재 corpus에서는 애초에 뜨지 않습니다."
+    },
+    "SCENE-NONUNIT-SCALE": {
+      "severity": "INFO",
+      "_why": "corpus의 non-unit scale 노드는 105~412개이며 named pivot 기반 코드 업데이트가 그 위에서 동작합니다. 엔진이 하나(Three.js)로 고정되어 있어 이식 위험 경고가 아니라 사실 기록으로 둡니다."
+    },
+    "SCENE-EMPTY-NODES": {
+      "severity": "INFO",
+      "_why": "empty node 4~39개는 pivot·socket·collider 같은 semantic contract 노드입니다. 문서가 '삭제하면 안 됩니다'라고 못박았으므로 경고가 아니라 사실 기록입니다. 주의: 이 severity 조정은 보고서만 바꾸며, optimize를 실행하면 v1 optimizer가 여전히 조건에 맞는 빈 노드를 제거합니다. Harvest runtime GLB에는 optimize를 실행하지 않습니다."
+    },
+    "SCENE-ZERO-SCALE": {
+      "enabled": true,
+      "_why": "zero scale은 파이프라인 계약에 없는 실제 결함이므로 기본 ERROR를 유지합니다."
+    },
+    "MAT-DUPLICATES": {
+      "enabled": true,
+      "_why": "동일 머티리얼 중복은 Harvest에도 실제 낭비이므로 기본 WARNING을 유지합니다."
+    },
+    "SEC-REMOTE-RESOURCE": {
+      "enabled": true,
+      "_why": "포맷·보안 규칙은 프로젝트 프로파일이 낮추지 않습니다."
+    },
+    "SEC-MISSING-RESOURCE": {
+      "enabled": true,
+      "_why": "포맷·보안 규칙은 프로젝트 프로파일이 낮추지 않습니다."
+    }
+  },
+  "_limitations": [
+    "required named node 검사 없음: Harvest validator가 확인하는 pivot·socket·collider·required node 존재 여부를 Clunk 규칙으로 표현할 수 없습니다. 이 프로파일은 '있어야 한다'를 검사하지 못하고, 빈 노드를 결함으로 보지 않게만 만듭니다.",
+    "Meshopt 보존 검사 없음: EXT_meshopt_compression이 extensionsUsed·extensionsRequired에 남아 있는지 확인하는 규칙이 없습니다. Clunk는 extensionCount만 metric으로 셉니다.",
+    "decode-aware bounds 없음: quantize된 accessor의 raw bounds가 그대로 보고됩니다(tractor.compact.m1.glb는 ±32767). 실제 decode 후 bounds와 다릅니다.",
+    "near/far LOD 쌍 계약 없음: 'far LOD는 near보다 삼각형·바이트가 적어야 한다'는 두 파일을 함께 보는 규칙이라 파일 단위 프로파일로 표현할 수 없습니다.",
+    "byte 예산 없음: 파일 크기 상한 규칙이 없습니다.",
+    "semantic extras 보존 검사 없음: sculptRuntime.assetId 같은 extras 기반 계약을 확인하는 규칙이 없고, optimize의 clean-metadata는 오히려 extras를 제거합니다.",
+    "프로파일은 검사·점수만 바꿉니다: optimize의 허용 목록(prune-empty-nodes, dedupe-materials, clean-metadata)은 v1에서 프로파일로 잠그지 못합니다.",
+    "Clunk READY는 Harvest 자체 validator의 PASS가 아니며, 판매 승인 판정도 아닙니다."
+  ]
+}

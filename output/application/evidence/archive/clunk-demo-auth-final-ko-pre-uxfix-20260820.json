@@ -1,0 +1,25 @@
+{
+  "file": "clunk-demo-auth-final-ko-pre-uxfix-20260820.webm",
+  "bytes": 975086,
+  "sha256": "4cc2c9532d5866f4d83ab27aa3b0d1045f6bc83639d4c7566572168042874f08",
+  "durationSeconds": 52,
+  "sourceUrl": "http://localhost:3000/app",
+  "finalUrl": "http://localhost:3000/dashboard",
+  "authMode": "test SIWC headers in local authenticated browser session",
+  "consoleErrors": 0,
+  "pageErrors": 0,
+  "flow": [
+    "authenticated Inspector open",
+    "real clunk-messy-sample.glb upload",
+    "Core finding and Game-Ready Score display",
+    "allowlisted optimization",
+    "fresh output reinspection and Passport",
+    "GLB and Passport download controls",
+    "D1-backed Dashboard runs, credits, and Passport view"
+  ],
+  "submissionBoundary": "local evidence only; official URL, public access, and playback must be confirmed before submission",
+  "archived": true,
+  "archivedOn": "2026-08-20",
+  "archivedReason": "2026-08-20 3단계 상태 라벨 개선 이전 녹화본입니다. 현재 UI와 라벨이 다르므로 제출 후보가 아니며 이력 보존용입니다.",
+  "supersededBy": "../clunk-demo-auth-final-ko.webm"
+}

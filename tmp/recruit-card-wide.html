@@ -1,0 +1,319 @@
+<meta charset="utf-8" />
+<title>Clunk 파일럿 모집 카드 · 와이드</title>
+<style>
+  /* Tokens lifted verbatim from app/globals.css :root */
+  :root {
+    --ink-0: #05080c;
+    --ink-1: #090e15;
+    --ink-2: #0e141d;
+    --ink-3: #131b26;
+    --line: rgba(233, 244, 252, 0.09);
+    --line-strong: rgba(233, 244, 252, 0.18);
+    --text: #e7eef5;
+    --text-strong: #f7fafc;
+    --text-muted: #9caebe;
+    --text-dim: #7c8fa2;
+    --accent: #6fd8f5;
+    --accent-bright: #a7ebfd;
+    --accent-soft: rgba(111, 216, 245, 0.12);
+    --accent-line: rgba(111, 216, 245, 0.34);
+    --accent-ink: #04141c;
+    --r-pill: 999px;
+    --r-control: 10px;
+    --r-panel: 16px;
+    --font: "Pretendard Variable", Pretendard, "Noto Sans KR", "Malgun Gothic",
+      "Apple SD Gothic Neo", system-ui, sans-serif;
+    --mono: "Consolas", "D2Coding", "Courier New", monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--ink-0); }
+  body {
+    font-family: var(--font);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  .card {
+    position: relative;
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+    background: var(--ink-0);
+    color: var(--text);
+  }
+
+  /* agentic-arc.png is a bright render on white. Inverting it (then restoring hue) turns the
+     white ground to black, so `screen` over the dark card drops the ground entirely and keeps
+     only the glass shapes as a coloured glow instead of a grey smear. */
+  .art {
+    position: absolute;
+    right: -17%;
+    bottom: -52%;
+    width: 82%;
+    max-width: none;
+    opacity: 0.56;
+    filter: invert(1) hue-rotate(180deg) saturate(1.8) brightness(1.24) contrast(1.06);
+    mix-blend-mode: screen;
+    mask-image: radial-gradient(48% 54% at 58% 46%, black 0%, rgba(0, 0, 0, 0.5) 42%, transparent 74%);
+    -webkit-mask-image: radial-gradient(48% 54% at 58% 46%, black 0%, rgba(0, 0, 0, 0.5) 42%, transparent 74%);
+    pointer-events: none;
+  }
+  .scrim {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(90% 92% at 4% 0%, rgba(111, 216, 245, 0.15), transparent 62%),
+      radial-gradient(46% 44% at 78% 88%, rgba(5, 8, 12, 0.62), transparent 74%),
+      linear-gradient(
+        100deg,
+        rgba(5, 8, 12, 0.94) 0%,
+        rgba(5, 8, 12, 0.9) 38%,
+        rgba(5, 8, 12, 0.6) 66%,
+        rgba(5, 8, 12, 0.5) 100%
+      );
+  }
+  .grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.5;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 70px 70px;
+    mask-image: radial-gradient(88% 88% at 3% 4%, black 0%, transparent 62%);
+    -webkit-mask-image: radial-gradient(88% 88% at 3% 4%, black 0%, transparent 62%);
+  }
+  .hairline-top {
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent) 0%, rgba(111, 216, 245, 0.28) 42%, transparent 82%);
+  }
+
+  .frame {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 54px 60px 46px;
+  }
+
+  .head { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 20px 10px;
+    border: 1px solid var(--accent-line);
+    border-radius: var(--r-pill);
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex: 0 0 auto; }
+  .head-note {
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 16px;
+    letter-spacing: 0.04em;
+  }
+
+  .cols { flex: 1; display: flex; align-items: center; gap: 44px; padding: 8px 0 14px; }
+  .copy { flex: 1; min-width: 0; }
+
+  h1 {
+    margin: 0;
+    color: var(--text-strong);
+    font-size: 49px;
+    font-weight: 620;
+    letter-spacing: -0.038em;
+    line-height: 1.3;
+  }
+  h1 em { color: var(--accent); font-style: normal; font-weight: 700; }
+
+  .sub {
+    margin: 22px 0 0;
+    color: var(--text-strong);
+    font-size: 24px;
+    font-weight: 620;
+    letter-spacing: -0.022em;
+    line-height: 1.4;
+  }
+  .sub b { color: var(--accent-bright); font-weight: 750; }
+  .sub .sep { color: var(--text-dim); font-weight: 500; padding: 0 5px; }
+
+  .target {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 12px 0 0;
+    color: var(--text-muted);
+    font-size: 19px;
+    letter-spacing: -0.018em;
+    line-height: 1.45;
+  }
+  .target svg { flex: 0 0 auto; margin-top: 5px; color: var(--accent); }
+
+  /* fact panel */
+  .facts {
+    width: 352px;
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 22px 24px 24px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-panel);
+    background: rgba(9, 14, 21, 0.76);
+  }
+  .fact {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 13px 0;
+    border-top: 1px solid var(--line);
+    color: var(--text);
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.018em;
+    line-height: 1.4;
+  }
+  .fact:first-of-type { border-top: 0; }
+  .fact svg { flex: 0 0 auto; margin-top: 3px; color: var(--accent); }
+  .facts-label {
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    line-height: 1.3;
+    padding-bottom: 12px;
+  }
+
+  .foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line-strong);
+  }
+  .contact { display: flex; align-items: center; gap: 16px; min-width: 0; }
+  .mono-label {
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 15px;
+    letter-spacing: 0.1em;
+    line-height: 1.3;
+    white-space: nowrap;
+  }
+  .slot {
+    display: inline-flex;
+    align-items: center;
+    padding: 9px 18px;
+    border: 2px dashed var(--accent-line);
+    border-radius: var(--r-control);
+    background: rgba(111, 216, 245, 0.07);
+    color: var(--accent-bright);
+    font-family: var(--mono);
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-word { text-shadow: 0 2px 20px rgba(5, 8, 12, 0.95); }
+  .arrow { flex: 0 0 auto; color: var(--text-dim); }
+  .brand-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 auto;
+    border-radius: 11px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .brand-word {
+    color: var(--text-strong);
+    font-size: 23px;
+    font-weight: 750;
+    letter-spacing: 0.21em;
+    line-height: 1;
+  }
+</style>
+
+<div class="card">
+  <img class="art" src="/public/template-assets/agentic-arc.png" alt="" />
+  <div class="grid"></div>
+  <div class="scrim"></div>
+  <div class="hairline-top"></div>
+
+  <div class="frame">
+    <div class="head">
+      <span class="pill"><i class="dot"></i>비공개 파일럿 · 참여 무료</span>
+      <span class="head-note">GLB · GLTF</span>
+    </div>
+
+    <div class="cols">
+      <div class="copy">
+        <h1>에셋을 게임에 넣기 전에,<br />왜 통과인지 <em>증거</em>를 남깁니다.</h1>
+        <p class="sub">Clunk 비공개 파일럿 참여 팀 모집<span class="sep">—</span><b>무료</b></p>
+        <p class="target">
+          <svg width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <circle cx="10" cy="10" r="8.2" stroke="currentColor" stroke-width="1.7" />
+            <circle cx="10" cy="10" r="3" fill="currentColor" />
+          </svg>
+          <span>외주·마켓 에셋을 반복해서 통합하는 인디·소규모 게임 팀</span>
+        </p>
+      </div>
+
+      <div class="facts">
+        <span class="facts-label">파일럿 조건</span>
+        <span class="fact">
+          <svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <path d="M3 9.4l4 4L15 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          파일럿 기간 무료
+        </span>
+        <span class="fact">
+          <svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <path d="M9 1.8l6 2.4v4.4c0 3.6-2.4 6.4-6 7.6-3.6-1.2-6-4-6-7.6V4.2l6-2.4z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+          </svg>
+          원본은 브라우저 밖으로 나가지 않음
+        </span>
+        <span class="fact">
+          <svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <circle cx="9" cy="9" r="7.2" stroke="currentColor" stroke-width="1.7" />
+            <path d="M9 4.8V9l2.8 1.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+          </svg>
+          실제 에셋 사용 + 30분 인터뷰 1회
+        </span>
+      </div>
+    </div>
+
+    <div class="foot">
+      <div class="contact">
+        <span class="mono-label">문의 · 신청</span>
+        <svg class="arrow" width="22" height="10" viewBox="0 0 26 12" fill="none" aria-hidden="true"><path d="M0 6h22m0 0l-5.2-4.8M22 6l-5.2 4.8" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="slot">[연락처]</span>
+      </div>
+      <div class="brand">
+        <span class="brand-mark">C</span>
+        <span class="brand-word">CLUNK</span>
+      </div>
+    </div>
+  </div>
+</div>

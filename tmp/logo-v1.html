@@ -1,0 +1,70 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+  body { margin:0; display:flex; height:100vh; font-family:system-ui; }
+  .half { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:28px; }
+  .light { background:#f7fafc; color:#0b1822; }
+  .dark { background:#05080c; color:#f7fafc; }
+  .row { display:flex; align-items:center; gap:32px; }
+  .label { font-size:13px; opacity:.6; letter-spacing:.08em; }
+  .word { display:flex; align-items:center; gap:14px; font-weight:800; letter-spacing:.22em; font-size:28px; }
+</style>
+<svg width="0" height="0">
+  <defs>
+    <linearGradient id="slabTop" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="slabLeft" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1e3a8a"/><stop offset="1" stop-color="#172554"/>
+    </linearGradient>
+    <linearGradient id="slabRight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2563eb"/><stop offset="1" stop-color="#1e40af"/>
+    </linearGradient>
+    <linearGradient id="scanTopG" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#a5f3fc"/><stop offset=".5" stop-color="#22d3ee"/><stop offset="1" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="scanFaceG" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#06b6d4"/><stop offset="1" stop-color="#7c3aed"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="14" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+</svg>
+<template id="mark">
+  <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+    <!-- bottom slab -->
+    <g>
+      <polygon points="256,280 396,350 256,420 116,350" fill="url(#slabTop)"/>
+      <polygon points="116,350 256,420 256,466 116,396" fill="url(#slabLeft)"/>
+      <polygon points="396,350 256,420 256,466 396,396" fill="url(#slabRight)"/>
+    </g>
+    <!-- middle scan slice (thinner, offset right, glowing) -->
+    <g filter="url(#glow)">
+      <polygon points="298,182 438,252 298,322 158,252" fill="url(#scanTopG)"/>
+      <polygon points="158,252 298,322 298,356 158,286" fill="url(#scanFaceG)"/>
+      <polygon points="438,252 298,322 298,356 438,286" fill="#6366f1"/>
+    </g>
+    <!-- top slab -->
+    <g>
+      <polygon points="256,80 396,150 256,220 116,150" fill="url(#slabTop)"/>
+      <polygon points="116,150 256,220 256,266 116,196" fill="url(#slabLeft)"/>
+      <polygon points="396,150 256,220 256,266 396,196" fill="url(#slabRight)"/>
+    </g>
+  </svg>
+</template>
+<div class="half light">
+  <div class="label">LIGHT</div>
+  <div class="row"><span data-mark style="width:200px"></span><span data-mark style="width:64px"></span><span data-mark style="width:24px"></span></div>
+  <div class="word"><span data-mark style="width:44px"></span>CLUNK</div>
+</div>
+<div class="half dark">
+  <div class="label">DARK</div>
+  <div class="row"><span data-mark style="width:200px"></span><span data-mark style="width:64px"></span><span data-mark style="width:24px"></span></div>
+  <div class="word"><span data-mark style="width:44px"></span>CLUNK</div>
+</div>
+<script>
+  const t = document.getElementById('mark');
+  document.querySelectorAll('[data-mark]').forEach(el => { el.appendChild(t.content.firstElementChild.cloneNode(true)); el.style.display='inline-block'; });
+</script>

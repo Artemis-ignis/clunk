@@ -1,0 +1,11 @@
+{
+  "purpose": "YouTube thumbnail candidates for the 52s Clunk demo video (Q5). Branding asset only - NOT product evidence, NOT a screenshot of real analysis results.",
+  "generator": "codex CLI 0.147.0, model gpt-5.6-luna (imagegen skill), reasoning high",
+  "generatedAt": "2026-08-20",
+  "prompt_summary": "Dark tech background, large latin CLUNK wordmark, GAME ASSETOPS subtitle, wireframe 3D game asset passing an inspection scan grid with green check highlights. No Korean text, no fake UI metrics or charts.",
+  "files": [
+    { "file": "thumbnail-candidate-1.png", "size": "1280x720", "bytes": 1372056, "note": "primary recommendation - front-facing wireframe robot in scan grid" },
+    { "file": "thumbnail-candidate-2.png", "size": "1280x720", "bytes": 1515967, "note": "alternate - robot arm + scan gate; CLUNK wordmark ligature slightly tighter" }
+  ],
+  "usage_rule": "May be used as YouTube thumbnail or brand hero. Must never be presented as an actual Clunk analysis screen or measurement evidence."
+}

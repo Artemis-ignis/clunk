@@ -1,0 +1,20 @@
+{
+  "file": "clunk-demo-34s-ko.webm",
+  "bytes": 1208885,
+  "sha256": "cfe495fa301fed0bd7ab836ef881cee69bcb2e75287159b12137be5aab817b4d",
+  "durationSeconds": 34.76,
+  "sourceUrl": "http://localhost:3000/",
+  "flow": [
+    "landing",
+    "inspector",
+    "real GLB sample inspection",
+    "allowlisted optimization",
+    "fresh output reinspection",
+    "GLB download",
+    "Passport download"
+  ],
+  "consoleErrors": 0,
+  "status": "local-candidate",
+  "officialSubmissionUrlVerified": false,
+  "recordedAt": "2026-08-20 Asia/Seoul"
+}

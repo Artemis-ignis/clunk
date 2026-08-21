@@ -1,0 +1,1101 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-20T11:12:41.6436843Z",
+  "sourceProject": "C:\\Users\\50106\\Desktop\\Harvest Frontier",
+  "runtimeRoot": "C:\\Users\\50106\\Desktop\\Harvest Frontier\\public\\assets\\runtime",
+  "readOnly": true,
+  "optimizerAllowed": false,
+  "clunkProfile": "pc",
+  "ruleSetId": "clunk-game-ready-v1",
+  "assets": [
+    {
+      "fileName": "cultivator.compact.m1.glb",
+      "sourcePath": "C:\\Users\\50106\\Desktop\\Harvest Frontier\\public\\assets\\runtime\\cultivator.compact.m1.glb",
+      "bytes": 189912,
+      "sha256": "18a720e4e55878eb64cdcd5da39fb02187741d0e1af7ed06ca2a279540519a50",
+      "clunkInspection": {
+        "schemaVersion": "1.0",
+        "operation": "inspect",
+        "coreBuildId": "0.1.0",
+        "ruleSetId": "clunk-game-ready-v1",
+        "ruleSetVersion": "1.0.0",
+        "inputHash": "18a720e4e55878eb64cdcd5da39fb02187741d0e1af7ed06ca2a279540519a50",
+        "resultDigest": "702a6c8bc83070d78e4aa7195cb8958574b32ca954077a1d700802dafc350038",
+        "report": {
+          "schemaVersion": "1.0",
+          "coreVersion": "0.1.0",
+          "ruleSetId": "clunk-game-ready-v1",
+          "ruleSetVersion": "1.0.0",
+          "profileId": "pc",
+          "fileName": "cultivator.compact.m1.glb",
+          "format": "glb",
+          "byteLength": 189912,
+          "inputHash": "18a720e4e55878eb64cdcd5da39fb02187741d0e1af7ed06ca2a279540519a50",
+          "metrics": {
+            "sceneCount": 1,
+            "nodeCount": 160,
+            "maxDepth": 6,
+            "emptyNodeCount": 0,
+            "meshCount": 42,
+            "primitiveCount": 42,
+            "vertexCount": 45538,
+            "triangleCount": 16196,
+            "drawCallCount": 42,
+            "materialCount": 20,
+            "duplicateMaterialCount": 0,
+            "textureCount": 0,
+            "imageCount": 0,
+            "textureMaxDimension": 0,
+            "textureMemoryBytes": 0,
+            "animationCount": 0,
+            "skinCount": 0,
+            "missingNormalPrimitiveCount": 6,
+            "missingUvPrimitiveCount": 42,
+            "nonUnitScaleNodeCount": 111,
+            "zeroScaleNodeCount": 0,
+            "externalResourceCount": 0,
+            "unresolvedResourceCount": 0,
+            "remoteResourceCount": 0,
+            "extensionCount": 4,
+            "bounds": {
+              "min": [
+                -32767,
+                -32767,
+                -32767
+              ],
+              "max": [
+                32767,
+                32767,
+                32767
+              ],
+              "dimensions": [
+                65534,
+                65534,
+                65534
+              ]
+            }
+          },
+          "findings": [
+            {
+              "id": "FORMAT-GLTF2:/asset",
+              "ruleId": "FORMAT-GLTF2",
+              "category": "format",
+              "severity": "INFO",
+              "path": "/asset",
+              "title": "glTF 2.0 parsed",
+              "message": "GLB is a supported glTF 2.0 container.",
+              "observed": "GLB",
+              "threshold": "GLB or GLTF 2.0",
+              "autoFixable": false,
+              "action": "No action required."
+            },
+            {
+              "id": "GEO-MISSING-NORMALS:/meshes/*/primitives/*/attributes",
+              "ruleId": "GEO-MISSING-NORMALS",
+              "category": "geometry",
+              "severity": "WARNING",
+              "path": "/meshes/*/primitives/*/attributes",
+              "title": "Normals are missing",
+              "message": "One or more primitives do not provide NORMAL attributes.",
+              "observed": 6,
+              "threshold": 0,
+              "autoFixable": false,
+              "action": "Generate or author normals in the source asset and re-import."
+            },
+            {
+              "id": "SCENE-NONUNIT-SCALE:/nodes/*/scale",
+              "ruleId": "SCENE-NONUNIT-SCALE",
+              "category": "scene",
+              "severity": "WARNING",
+              "path": "/nodes/*/scale",
+              "title": "Non-unit scale transforms found",
+              "message": "The asset contains non-unit node scales that may differ across engines.",
+              "observed": 111,
+              "threshold": 0,
+              "autoFixable": false,
+              "action": "Confirm the target engine's transform and import policy."
+            }
+          ],
+          "score": {
+            "score": 99,
+            "threshold": 90,
+            "ready": false,
+            "hardBlockerCount": 0,
+            "breakdown": {
+              "format": 100,
+              "scene": 97,
+              "geometry": 97,
+              "materials": 100,
+              "textures": 100,
+              "runtime": 100
+            },
+            "ruleSetId": "clunk-game-ready-v1",
+            "ruleSetVersion": "1.0.0"
+          },
+          "analysisId": "analysis-18a720e4e558-702a6c8b",
+          "resultDigest": "702a6c8bc83070d78e4aa7195cb8958574b32ca954077a1d700802dafc350038"
+        }
+      }
+    },
+    {
+      "fileName": "cultivator.compact.m1.lod1.glb",
+      "sourcePath": "C:\\Users\\50106\\Desktop\\Harvest Frontier\\public\\assets\\runtime\\cultivator.compact.m1.lod1.glb",
+      "bytes": 104760,
+      "sha256": "464106711b59289dc0fd432b323fae691aec66deefff68e7f67c37306a098c3a",
+      "clunkInspection": {
+        "schemaVersion": "1.0",
+        "operation": "inspect",
+        "coreBuildId": "0.1.0",
+        "ruleSetId": "clunk-game-ready-v1",
+        "ruleSetVersion": "1.0.0",
+        "inputHash": "464106711b59289dc0fd432b323fae691aec66deefff68e7f67c37306a098c3a",
+        "resultDigest": "3d66d6c50d102d049d72207286a01d1274c089d041241a4c8e81418f8901e90f",
+        "report": {
+          "schemaVersion": "1.0",
+          "coreVersion": "0.1.0",
+          "ruleSetId": "clunk-game-ready-v1",
+          "ruleSetVersion": "1.0.0",
+          "profileId": "pc",
+          "fileName": "cultivator.compact.m1.lod1.glb",
+          "format": "glb",
+          "byteLength": 104760,
+          "inputHash": "464106711b59289dc0fd432b323fae691aec66deefff68e7f67c37306a098c3a",
+          "metrics": {
+            "sceneCount": 1,
+            "nodeCount": 160,
+            "maxDepth": 6,
+            "emptyNodeCount": 0,
+            "meshCount": 33,
+            "primitiveCount": 33,
+            "vertexCount": 5312,
+            "triangleCount": 7824,
+            "drawCallCount": 33,
+            "materialCount": 20,
+            "duplicateMaterialCount": 0,
+            "textureCount": 0,
+            "imageCount": 0,
+            "textureMaxDimension": 0,
+            "textureMemoryBytes": 0,
+            "animationCount": 0,
+            "skinCount": 0,
+            "missingNormalPrimitiveCount": 6,
+            "missingUvPrimitiveCount": 33,
+            "nonUnitScaleNodeCount": 111,
+            "zeroScaleNodeCount": 0,
+            "externalResourceCount": 0,
+            "unresolvedResourceCount": 0,
+            "remoteResourceCount": 0,
+            "extensionCount": 4,
+            "bounds": {
+              "min": [
+                -32767,
+                -32767,
+                -32767
+              ],
+              "max": [
+                32767,
+                32767,
+                32767
+              ],
+              "dimensions": [
+                65534,
+                65534,
+                65534
+              ]
+            }
+          },
+          "findings": [
+            {
+              "id": "FORMAT-GLTF2:/asset",
+              "ruleId": "FORMAT-GLTF2",
+              "category": "format",
+              "severity": "INFO",
+              "path": "/asset",
+              "title": "glTF 2.0 parsed",
+              "message": "GLB is a supported glTF 2.0 container.",
+              "observed": "GLB",
+              "threshold": "GLB or GLTF 2.0",
+              "autoFixable": false,
+              "action": "No action required."
+            },
+            {
+              "id": "GEO-MISSING-NORMALS:/meshes/*/primitives/*/attributes",
+              "ruleId": "GEO-MISSING-NORMALS",
+              "category": "geometry",
+              "severity": "WARNING",
+              "path": "/meshes/*/primitives/*/attributes",
+              "title": "Normals are missing",
+              "message": "One or more primitives do not provide NORMAL attributes.",
+              "observed": 6,
+              "threshold": 0,
+              "autoFixable": false,
+              "action": "Generate or author normals in the source asset and re-import."
+            },
+            {
+              "id": "SCENE-NONUNIT-SCALE:/nodes/*/scale",
+              "ruleId": "SCENE-NONUNIT-SCALE",
+              "category": "scene",
+              "severity": "WARNING",
+              "path": "/nodes/*/scale",
+              "title": "Non-unit scale transforms found",
+              "message": "The asset contains non-unit node scales that may differ across engines.",
+              "observed": 111,
+              "threshold": 0,
+              "autoFixable": false,
+              "action": "Confirm the target engine's transform and import policy."
+            }
+          ],
+          "score": {
+            "score": 99,
+            "threshold": 90,
+            "ready": false,
+            "hardBlockerCount": 0,
+            "breakdown": {
+              "format": 100,
+              "scene": 97,
+              "geometry": 97,
+              "materials": 100,
+              "textures": 100,
+              "runtime": 100
+            },
+            "ruleSetId": "clunk-game-ready-v1",
+            "ruleSetVersion": "1.0.0"
+          },
+          "analysisId": "analysis-464106711b59-3d66d6c5",
+          "resultDigest": "3d66d6c50d102d049d72207286a01d1274c089d041241a4c8e81418f8901e90f"
+        }
+      }
+    },
+    {
+      "fileName": "processing.line.m1.glb",
+      "sourcePath": "C:\\Users\\50106\\Desktop\\Harvest Frontier\\public\\assets\\runtime\\processing.line.m1.glb",
+      "bytes": 435532,
+      "sha256": "dc2de953592988384f2cd0fed87350b8f6d4226003567ab837fc06a09f305fed",
+      "clunkInspection": {
+        "schemaVersion": "1.0",
+        "operation": "inspect",
+        "coreBuildId": "0.1.0",
+        "ruleSetId": "clunk-game-ready-v1",
+        "ruleSetVersion": "1.0.0",
+        "inputHash": "dc2de953592988384f2cd0fed87350b8f6d4226003567ab837fc06a09f305fed",
+        "resultDigest": "e6ee19264fa92983aabb14734ba68b19067d41bb352cdd85d09ed7120b00afee",
+        "report": {
+          "schemaVersion": "1.0",
+          "coreVersion": "0.1.0",
+          "ruleSetId": "clunk-game-ready-v1",
+          "ruleSetVersion": "1.0.0",
+          "profileId": "pc",
+          "fileName": "processing.line.m1.glb",
+          "format": "glb",
+          "byteLength": 435532,
+          "inputHash": "dc2de953592988384f2cd0fed87350b8f6d4226003567ab837fc06a09f305fed",
+          "metrics": {
+            "sceneCount": 1,
+            "nodeCount": 177,
+            "maxDepth": 4,
+            "emptyNodeCount": 4,
+            "meshCount": 78,
+            "primitiveCount": 78,
+            "vertexCount": 17268,
+            "triangleCount": 24936,
+            "drawCallCount": 78,
+            "materialCount": 40,
+            "duplicateMaterialCount": 0,
+            "textureCount": 0,
+            "imageCount": 0,
+            "textureMaxDimension": 0,
+            "textureMemoryBytes": 0,
+            "animationCount": 0,
+            "skinCount": 0,
+            "missingNormalPrimitiveCount": 0,
+            "missingUvPrimitiveCount": 0,
+            "nonUnitScaleNodeCount": 146,
+            "zeroScaleNodeCount": 0,
+            "externalResourceCount": 0,
+            "unresolvedResourceCount": 0,
+            "remoteResourceCount": 0,
+            "extensionCount": 6,
+            "bounds": {
+              "min": [
+                -32767,
+                -32767,
+                -32767
+              ],
+              "max": [
+                32767,
+                32767,
+                32767
+              ],
+              "dimensions": [
+                65534,
+                65534,
+                65534
+              ]
+            }
+          },
+          "findings": [
+            {
+              "id": "FORMAT-GLTF2:/asset",
+              "ruleId": "FORMAT-GLTF2",
+              "category": "format",
+              "severity": "INFO",
+              "path": "/asset",
+              "title": "glTF 2.0 parsed",
+              "message": "GLB is a supported glTF 2.0 container.",
+              "observed": "GLB",
+              "threshold": "GLB or GLTF 2.0",
+              "autoFixable": false,
+              "action": "No action required."
+            },
+            {
+              "id": "MAT-MATERIAL-BUDGET:/materials",
+              "ruleId": "MAT-MATERIAL-BUDGET",
+              "category": "materials",
+              "severity": "ERROR",
+              "path": "/materials",
+              "title": "Material budget exceeded",
+              "message": "The asset contains more materials than the selected profile allows.",
+              "observed": 40,
+              "threshold": 24,
+              "autoFixable": false,
+              "action": "Reduce material slots deliberately and verify the visual result."
+            },
+            {
+              "id": "SCENE-EMPTY-NODES:/nodes",
+              "ruleId": "SCENE-EMPTY-NODES",
+              "category": "scene",
+              "severity": "WARNING",
+              "path": "/nodes",
+              "title": "Empty nodes found",
+              "message": "Identity-only nodes without a mesh, camera, skin, or child are present.",
+              "observed": 4,
+              "threshold": 0,
+              "autoFixable": true,
+              "action": "Run the allowlisted empty-node cleanup and recheck the output."
+            },
+            {
+              "id": "SCENE-NONUNIT-SCALE:/nodes/*/scale",
+              "ruleId": "SCENE-NONUNIT-SCALE",
+              "category": "scene",
+              "severity": "WARNING",
+              "path": "/nodes/*/scale",
+              "title": "Non-unit scale transforms found",
+              "message": "The asset contains non-unit node scales that may differ across engines.",
+              "observed": 146,
+              "threshold": 0,
+              "autoFixable": false,
+              "action": "Confirm the target engine's transform and import policy."
+            }
+          ],
+          "score": {
+            "score": 96,
+            "threshold": 90,
+            "ready": false,
+            "hardBlockerCount": 1,
+            "breakdown": {
+              "format": 100,
+              "scene": 94,
+              "geometry": 100,
+              "materials": 82,
+              "textures": 100,
+              "runtime": 100
+            },
+            "ruleSetId": "clunk-game-ready-v1",
+            "ruleSetVersion": "1.0.0"
+          },
+          "analysisId": "analysis-dc2de9535929-e6ee1926",
+          "resultDigest": "e6ee19264fa92983aabb14734ba68b19067d41bb352cdd85d09ed7120b00afee"
+        }
+      }
+    },
+    {
+      "fileName": "processing.line.m1.lod1.glb",
+      "sourcePath": "C:\\Users\\50106\\Desktop\\Harvest Frontier\\public\\assets\\runtime\\processing.line.m1.lod1.glb",
+      "bytes": 199700,
+      "sha256": "2605f6fa3f477b569566b4db9b371c5c87554221c61a5edbf10317e3f3e2ba49",
+      "clunkInspection": {
+        "schemaVersion": "1.0",
+        "operation": "inspect",
+        "coreBuildId": "0.1.0",
+        "ruleSetId": "clunk-game-ready-v1",
+        "ruleSetVersion": "1.0.0",
+        "inputHash": "2605f6fa3f477b569566b4db9b371c5c87554221c61a5edbf10317e3f3e2ba49",
+        "resultDigest": "df50a0e9b6141f6783f9f590abeff6a702a05766f47054ade2ee5b734cb58cdf",
+        "report": {
+          "schemaVersion": "1.0",
+          "coreVersion": "0.1.0",
+          "ruleSetId": "clunk-game-ready-v1",
+          "ruleSetVersion": "1.0.0",
+          "profileId": "pc",
+          "fileName": "processing.line.m1.lod1.glb",
+          "format": "glb",
+          "byteLength": 199700,
+          "inputHash": "2605f6fa3f477b569566b4db9b371c5c87554221c61a5edbf10317e3f3e2ba49",
+          "metrics": {
+            "sceneCount": 1,
+            "nodeCount": 136,
+            "maxDepth": 4,
+            "emptyNodeCount": 5,
+            "meshCount": 63,
+            "primitiveCount": 63,
+            "vertexCount": 9737,
+            "triangleCount": 14906,
+            "drawCallCount": 63,
+            "materialCount": 31,
+            "duplicateMaterialCount": 0,
+            "textureCount": 0,
+            "imageCount": 0,
+            "textureMaxDimension": 0,
+            "textureMemoryBytes": 0,
+            "animationCount": 0,
+            "skinCount": 0,
+            "missingNormalPrimitiveCount": 0,
+            "missingUvPrimitiveCount": 63,
+            "nonUnitScaleNodeCount": 105,
+            "zeroScaleNodeCount": 0,
+            "externalResourceCount": 0,
+            "unresolvedResourceCount": 0,
+            "remoteResourceCount": 0,
+            "extensionCount": 6,
+            "bounds": {
+              "min": [
+                -32767,
+                -32767,
+                -32767
+              ],
+              "max": [
+                32767,
+                32767,
+                32767
+              ],
+              "dimensions": [
+                65534,
+                65534,
+                65534
+              ]
+            }
+          },
+          "findings": [
+            {
+              "id": "FORMAT-GLTF2:/asset",
+              "ruleId": "FORMAT-GLTF2",
+              "category": "format",
+              "severity": "INFO",
+              "path": "/asset",
+              "title": "glTF 2.0 parsed",
+              "message": "GLB is a supported glTF 2.0 container.",
+              "observed": "GLB",
+              "threshold": "GLB or GLTF 2.0",
+              "autoFixable": false,
+              "action": "No action required."
+            },
+            {
+              "id": "MAT-MATERIAL-BUDGET:/materials",
+              "ruleId": "MAT-MATERIAL-BUDGET",
+              "category": "materials",
+              "severity": "ERROR",
+              "path": "/materials",
+              "title": "Material budget exceeded",
+              "message": "The asset contains more materials than the selected profile allows.",
+              "observed": 31,
+              "threshold": 24,
+              "autoFixable": false,
+              "action": "Reduce material slots deliberately and verify the visual result."
+            },
+            {
+              "id": "SCENE-EMPTY-NODES:/nodes",
+              "ruleId": "SCENE-EMPTY-NODES",
+              "category": "scene",
+              "severity": "WARNING",
+              "path": "/nodes",
+              "title": "Empty nodes found",
+              "message": "Identity-only nodes without a mesh, camera, skin, or child are present.",
+              "observed": 5,
+              "threshold": 0,
+              "autoFixable": true,
+              "action": "Run the allowlisted empty-node cleanup and recheck the output."
+            },
+            {
+              "id": "SCENE-NONUNIT-SCALE:/nodes/*/scale",
+              "ruleId": "SCENE-NONUNIT-SCALE",
+              "category": "scene",
+              "severity": "WARNING",
+              "path": "/nodes/*/scale",
+              "title": "Non-unit scale transforms found",
+              "message": "The asset contains non-unit node scales that may differ across engines.",
+              "observed": 105,
+              "threshold": 0,
+              "autoFixable": false,
+              "action": "Confirm the target engine's transform and import policy."
+            }
+          ],
+          "score": {
+            "score": 96,
+            "threshold": 90,
+            "ready": false,
+            "hardBlockerCount": 1,
+            "breakdown": {
+              "format": 100,
+              "scene": 94,
+              "geometry": 100,
+              "materials": 82,
+              "textures": 100,
+              "runtime": 100
+            },
+            "ruleSetId": "clunk-game-ready-v1",
+            "ruleSetVersion": "1.0.0"
+          },
+          "analysisId": "analysis-2605f6fa3f47-df50a0e9",
+          "resultDigest": "df50a0e9b6141f6783f9f590abeff6a702a05766f47054ade2ee5b734cb58cdf"
+        }
+      }
+    },
+    {
+      "fileName": "seeder.compact.m1.glb",
+      "sourcePath": "C:\\Users\\50106\\Desktop\\Harvest Frontier\\public\\assets\\runtime\\seeder.compact.m1.glb",
+      "bytes": 557888,
+      "sha256": "b5ece82b0c814ad8ac7c028a5d14303ee2e0da9462bb386c47fdc58000733570",
+      "clunkInspection": {
+        "schemaVersion": "1.0",
+        "operation": "inspect",
+        "coreBuildId": "0.1.0",
+        "ruleSetId": "clunk-game-ready-v1",
+        "ruleSetVersion": "1.0.0",
+        "inputHash": "b5ece82b0c814ad8ac7c028a5d14303ee2e0da9462bb386c47fdc58000733570",
+        "resultDigest": "7127f247660ae26be67f0e0b43c42a46134d8745db1deddc0f9dfc7f23d565b4",
+        "report": {
+          "schemaVersion": "1.0",
+          "coreVersion": "0.1.0",
+          "ruleSetId": "clunk-game-ready-v1",
+          "ruleSetVersion": "1.0.0",
+          "profileId": "pc",
+          "fileName": "seeder.compact.m1.glb",
+          "format": "glb",
+          "byteLength": 557888,
+          "inputHash": "b5ece82b0c814ad8ac7c028a5d14303ee2e0da9462bb386c47fdc58000733570",
+          "metrics": {
+            "sceneCount": 1,
+            "nodeCount": 562,
+            "maxDepth": 9,
+            "emptyNodeCount": 35,
+            "meshCount": 75,
+            "primitiveCount": 75,
+            "vertexCount": 13926,
+            "triangleCount": 11318,
+            "drawCallCount": 75,
+            "materialCount": 22,
+            "duplicateMaterialCount": 0,
+            "textureCount": 0,
+            "imageCount": 0,
+            "textureMaxDimension": 0,
+            "textureMemoryBytes": 0,
+            "animationCount": 0,
+            "skinCount": 0,
+            "missingNormalPrimitiveCount": 0,
+            "missingUvPrimitiveCount": 1,
+            "nonUnitScaleNodeCount": 412,
+            "zeroScaleNodeCount": 0,
+            "externalResourceCount": 0,
+            "unresolvedResourceCount": 0,
+            "remoteResourceCount": 0,
+            "extensionCount": 3,
+            "bounds": {
+              "min": [
+                -32767,
+                -32767,
+                -32767
+              ],
+              "max": [
+                32767,
+                32767,
+                32767
+              ],
+              "dimensions": [
+                65534,
+                65534,
+                65534
+              ]
+            }
+          },
+          "findings": [
+            {
+              "id": "FORMAT-GLTF2:/asset",
+              "ruleId": "FORMAT-GLTF2",
+              "category": "format",
+              "severity": "INFO",
+              "path": "/asset",
+              "title": "glTF 2.0 parsed",
+              "message": "GLB is a supported glTF 2.0 container.",
+              "observed": "GLB",
+              "threshold": "GLB or GLTF 2.0",
+              "autoFixable": false,
+              "action": "No action required."
+            },
+            {
+              "id": "SCENE-EMPTY-NODES:/nodes",
+              "ruleId": "SCENE-EMPTY-NODES",
+              "category": "scene",
+              "severity": "WARNING",
+              "path": "/nodes",
+              "title": "Empty nodes found",
+              "message": "Identity-only nodes without a mesh, camera, skin, or child are present.",
+              "observed": 35,
+              "threshold": 0,
+              "autoFixable": true,
+              "action": "Run the allowlisted empty-node cleanup and recheck the output."
+            },
+            {
+              "id": "SCENE-NONUNIT-SCALE:/nodes/*/scale",
+              "ruleId": "SCENE-NONUNIT-SCALE",
+              "category": "scene",
+              "severity": "WARNING",
+              "path": "/nodes/*/scale",
+              "title": "Non-unit scale transforms found",
+              "message": "The asset contains non-unit node scales that may differ across engines.",
+              "observed": 412,
+              "threshold": 0,
+              "autoFixable": false,
+              "action": "Confirm the target engine's transform and import policy."
+            }
+          ],
+          "score": {
+            "score": 99,
+            "threshold": 90,
+            "ready": false,
+            "hardBlockerCount": 0,
+            "breakdown": {
+              "format": 100,
+              "scene": 94,
+              "geometry": 100,
+              "materials": 100,
+              "textures": 100,
+              "runtime": 100
+            },
+            "ruleSetId": "clunk-game-ready-v1",
+            "ruleSetVersion": "1.0.0"
+          },
+          "analysisId": "analysis-b5ece82b0c81-7127f247",
+          "resultDigest": "7127f247660ae26be67f0e0b43c42a46134d8745db1deddc0f9dfc7f23d565b4"
+        }
+      }
+    },
+    {
+      "fileName": "seeder.compact.m1.lod1.glb",
+      "sourcePath": "C:\\Users\\50106\\Desktop\\Harvest Frontier\\public\\assets\\runtime\\seeder.compact.m1.lod1.glb",
+      "bytes": 219100,
+      "sha256": "72a6937833549abf43ecaf498ee4e950d2c91b0c824488b894e7cab8aaf3667c",
+      "clunkInspection": {
+        "schemaVersion": "1.0",
+        "operation": "inspect",
+        "coreBuildId": "0.1.0",
+        "ruleSetId": "clunk-game-ready-v1",
+        "ruleSetVersion": "1.0.0",
+        "inputHash": "72a6937833549abf43ecaf498ee4e950d2c91b0c824488b894e7cab8aaf3667c",
+        "resultDigest": "145678d5cbaddaaa056a9a6b92a5e5a0d7bfc94e53cd6b44ba11577135c5dbce",
+        "report": {
+          "schemaVersion": "1.0",
+          "coreVersion": "0.1.0",
+          "ruleSetId": "clunk-game-ready-v1",
+          "ruleSetVersion": "1.0.0",
+          "profileId": "pc",
+          "fileName": "seeder.compact.m1.lod1.glb",
+          "format": "glb",
+          "byteLength": 219100,
+          "inputHash": "72a6937833549abf43ecaf498ee4e950d2c91b0c824488b894e7cab8aaf3667c",
+          "metrics": {
+            "sceneCount": 1,
+            "nodeCount": 418,
+            "maxDepth": 9,
+            "emptyNodeCount": 39,
+            "meshCount": 55,
+            "primitiveCount": 55,
+            "vertexCount": 4773,
+            "triangleCount": 6460,
+            "drawCallCount": 55,
+            "materialCount": 18,
+            "duplicateMaterialCount": 0,
+            "textureCount": 0,
+            "imageCount": 0,
+            "textureMaxDimension": 0,
+            "textureMemoryBytes": 0,
+            "animationCount": 0,
+            "skinCount": 0,
+            "missingNormalPrimitiveCount": 0,
+            "missingUvPrimitiveCount": 55,
+            "nonUnitScaleNodeCount": 272,
+            "zeroScaleNodeCount": 0,
+            "externalResourceCount": 0,
+            "unresolvedResourceCount": 0,
+            "remoteResourceCount": 0,
+            "extensionCount": 3,
+            "bounds": {
+              "min": [
+                -32767,
+                -32767,
+                -32767
+              ],
+              "max": [
+                32767,
+                32767,
+                32767
+              ],
+              "dimensions": [
+                65534,
+                65534,
+                65534
+              ]
+            }
+          },
+          "findings": [
+            {
+              "id": "FORMAT-GLTF2:/asset",
+              "ruleId": "FORMAT-GLTF2",
+              "category": "format",
+              "severity": "INFO",
+              "path": "/asset",
+              "title": "glTF 2.0 parsed",
+              "message": "GLB is a supported glTF 2.0 container.",
+              "observed": "GLB",
+              "threshold": "GLB or GLTF 2.0",
+              "autoFixable": false,
+              "action": "No action required."
+            },
+            {
+              "id": "SCENE-EMPTY-NODES:/nodes",
+              "ruleId": "SCENE-EMPTY-NODES",
+              "category": "scene",
+              "severity": "WARNING",
+              "path": "/nodes",
+              "title": "Empty nodes found",
+              "message": "Identity-only nodes without a mesh, camera, skin, or child are present.",
+              "observed": 39,
+              "threshold": 0,
+              "autoFixable": true,
+              "action": "Run the allowlisted empty-node cleanup and recheck the output."
+            },
+            {
+              "id": "SCENE-NONUNIT-SCALE:/nodes/*/scale",
+              "ruleId": "SCENE-NONUNIT-SCALE",
+              "category": "scene",
+              "severity": "WARNING",
+              "path": "/nodes/*/scale",
+              "title": "Non-unit scale transforms found",
+              "message": "The asset contains non-unit node scales that may differ across engines.",
+              "observed": 272,
+              "threshold": 0,
+              "autoFixable": false,
+              "action": "Confirm the target engine's transform and import policy."
+            }
+          ],
+          "score": {
+            "score": 99,
+            "threshold": 90,
+            "ready": false,
+            "hardBlockerCount": 0,
+            "breakdown": {
+              "format": 100,
+              "scene": 94,
+              "geometry": 100,
+              "materials": 100,
+              "textures": 100,
+              "runtime": 100
+            },
+            "ruleSetId": "clunk-game-ready-v1",
+            "ruleSetVersion": "1.0.0"
+          },
+          "analysisId": "analysis-72a693783354-145678d5",
+          "resultDigest": "145678d5cbaddaaa056a9a6b92a5e5a0d7bfc94e53cd6b44ba11577135c5dbce"
+        }
+      }
+    },
+    {
+      "fileName": "tractor.compact.m1.glb",
+      "sourcePath": "C:\\Users\\50106\\Desktop\\Harvest Frontier\\public\\assets\\runtime\\tractor.compact.m1.glb",
+      "bytes": 680412,
+      "sha256": "d92ae93240cc9b4d477df13cbddd0342738feb57ed9b8551e73d68fd83b3222c",
+      "clunkInspection": {
+        "schemaVersion": "1.0",
+        "operation": "inspect",
+        "coreBuildId": "0.1.0",
+        "ruleSetId": "clunk-game-ready-v1",
+        "ruleSetVersion": "1.0.0",
+        "inputHash": "d92ae93240cc9b4d477df13cbddd0342738feb57ed9b8551e73d68fd83b3222c",
+        "resultDigest": "2ed773f10f2cedd78accf179478c2e448d4bb688077741b4aed11233319721da",
+        "report": {
+          "schemaVersion": "1.0",
+          "coreVersion": "0.1.0",
+          "ruleSetId": "clunk-game-ready-v1",
+          "ruleSetVersion": "1.0.0",
+          "profileId": "pc",
+          "fileName": "tractor.compact.m1.glb",
+          "format": "glb",
+          "byteLength": 680412,
+          "inputHash": "d92ae93240cc9b4d477df13cbddd0342738feb57ed9b8551e73d68fd83b3222c",
+          "metrics": {
+            "sceneCount": 1,
+            "nodeCount": 249,
+            "maxDepth": 8,
+            "emptyNodeCount": 0,
+            "meshCount": 88,
+            "primitiveCount": 88,
+            "vertexCount": 83090,
+            "triangleCount": 30188,
+            "drawCallCount": 88,
+            "materialCount": 48,
+            "duplicateMaterialCount": 0,
+            "textureCount": 0,
+            "imageCount": 0,
+            "textureMaxDimension": 0,
+            "textureMemoryBytes": 0,
+            "animationCount": 0,
+            "skinCount": 0,
+            "missingNormalPrimitiveCount": 7,
+            "missingUvPrimitiveCount": 88,
+            "nonUnitScaleNodeCount": 181,
+            "zeroScaleNodeCount": 0,
+            "externalResourceCount": 0,
+            "unresolvedResourceCount": 0,
+            "remoteResourceCount": 0,
+            "extensionCount": 8,
+            "bounds": {
+              "min": [
+                -32767,
+                -32767,
+                -32767
+              ],
+              "max": [
+                32767,
+                32767,
+                32767
+              ],
+              "dimensions": [
+                65534,
+                65534,
+                65534
+              ]
+            }
+          },
+          "findings": [
+            {
+              "id": "FORMAT-GLTF2:/asset",
+              "ruleId": "FORMAT-GLTF2",
+              "category": "format",
+              "severity": "INFO",
+              "path": "/asset",
+              "title": "glTF 2.0 parsed",
+              "message": "GLB is a supported glTF 2.0 container.",
+              "observed": "GLB",
+              "threshold": "GLB or GLTF 2.0",
+              "autoFixable": false,
+              "action": "No action required."
+            },
+            {
+              "id": "GEO-MISSING-NORMALS:/meshes/*/primitives/*/attributes",
+              "ruleId": "GEO-MISSING-NORMALS",
+              "category": "geometry",
+              "severity": "WARNING",
+              "path": "/meshes/*/primitives/*/attributes",
+              "title": "Normals are missing",
+              "message": "One or more primitives do not provide NORMAL attributes.",
+              "observed": 7,
+              "threshold": 0,
+              "autoFixable": false,
+              "action": "Generate or author normals in the source asset and re-import."
+            },
+            {
+              "id": "MAT-MATERIAL-BUDGET:/materials",
+              "ruleId": "MAT-MATERIAL-BUDGET",
+              "category": "materials",
+              "severity": "ERROR",
+              "path": "/materials",
+              "title": "Material budget exceeded",
+              "message": "The asset contains more materials than the selected profile allows.",
+              "observed": 48,
+              "threshold": 24,
+              "autoFixable": false,
+              "action": "Reduce material slots deliberately and verify the visual result."
+            },
+            {
+              "id": "SCENE-NONUNIT-SCALE:/nodes/*/scale",
+              "ruleId": "SCENE-NONUNIT-SCALE",
+              "category": "scene",
+              "severity": "WARNING",
+              "path": "/nodes/*/scale",
+              "title": "Non-unit scale transforms found",
+              "message": "The asset contains non-unit node scales that may differ across engines.",
+              "observed": 181,
+              "threshold": 0,
+              "autoFixable": false,
+              "action": "Confirm the target engine's transform and import policy."
+            }
+          ],
+          "score": {
+            "score": 96,
+            "threshold": 90,
+            "ready": false,
+            "hardBlockerCount": 1,
+            "breakdown": {
+              "format": 100,
+              "scene": 97,
+              "geometry": 97,
+              "materials": 82,
+              "textures": 100,
+              "runtime": 100
+            },
+            "ruleSetId": "clunk-game-ready-v1",
+            "ruleSetVersion": "1.0.0"
+          },
+          "analysisId": "analysis-d92ae93240cc-2ed773f1",
+          "resultDigest": "2ed773f10f2cedd78accf179478c2e448d4bb688077741b4aed11233319721da"
+        }
+      }
+    },
+    {
+      "fileName": "tractor.compact.m1.lod1.glb",
+      "sourcePath": "C:\\Users\\50106\\Desktop\\Harvest Frontier\\public\\assets\\runtime\\tractor.compact.m1.lod1.glb",
+      "bytes": 509584,
+      "sha256": "5b457fc118613961793662111a3e69b75c7200c25f89368d3fb44841a056cf5f",
+      "clunkInspection": {
+        "schemaVersion": "1.0",
+        "operation": "inspect",
+        "coreBuildId": "0.1.0",
+        "ruleSetId": "clunk-game-ready-v1",
+        "ruleSetVersion": "1.0.0",
+        "inputHash": "5b457fc118613961793662111a3e69b75c7200c25f89368d3fb44841a056cf5f",
+        "resultDigest": "90cdec261b4126ceeff9ae0835d6b50ed63fc3ec658af244e35bea7c0ce23e98",
+        "report": {
+          "schemaVersion": "1.0",
+          "coreVersion": "0.1.0",
+          "ruleSetId": "clunk-game-ready-v1",
+          "ruleSetVersion": "1.0.0",
+          "profileId": "pc",
+          "fileName": "tractor.compact.m1.lod1.glb",
+          "format": "glb",
+          "byteLength": 509584,
+          "inputHash": "5b457fc118613961793662111a3e69b75c7200c25f89368d3fb44841a056cf5f",
+          "metrics": {
+            "sceneCount": 1,
+            "nodeCount": 249,
+            "maxDepth": 8,
+            "emptyNodeCount": 0,
+            "meshCount": 77,
+            "primitiveCount": 77,
+            "vertexCount": 13022,
+            "triangleCount": 18668,
+            "drawCallCount": 77,
+            "materialCount": 48,
+            "duplicateMaterialCount": 0,
+            "textureCount": 0,
+            "imageCount": 0,
+            "textureMaxDimension": 0,
+            "textureMemoryBytes": 0,
+            "animationCount": 0,
+            "skinCount": 0,
+            "missingNormalPrimitiveCount": 7,
+            "missingUvPrimitiveCount": 77,
+            "nonUnitScaleNodeCount": 181,
+            "zeroScaleNodeCount": 0,
+            "externalResourceCount": 0,
+            "unresolvedResourceCount": 0,
+            "remoteResourceCount": 0,
+            "extensionCount": 8,
+            "bounds": {
+              "min": [
+                -32767,
+                -32767,
+                -32767
+              ],
+              "max": [
+                32767,
+                32767,
+                32767
+              ],
+              "dimensions": [
+                65534,
+                65534,
+                65534
+              ]
+            }
+          },
+          "findings": [
+            {
+              "id": "FORMAT-GLTF2:/asset",
+              "ruleId": "FORMAT-GLTF2",
+              "category": "format",
+              "severity": "INFO",
+              "path": "/asset",
+              "title": "glTF 2.0 parsed",
+              "message": "GLB is a supported glTF 2.0 container.",
+              "observed": "GLB",
+              "threshold": "GLB or GLTF 2.0",
+              "autoFixable": false,
+              "action": "No action required."
+            },
+            {
+              "id": "GEO-MISSING-NORMALS:/meshes/*/primitives/*/attributes",
+              "ruleId": "GEO-MISSING-NORMALS",
+              "category": "geometry",
+              "severity": "WARNING",
+              "path": "/meshes/*/primitives/*/attributes",
+              "title": "Normals are missing",
+              "message": "One or more primitives do not provide NORMAL attributes.",
+              "observed": 7,
+              "threshold": 0,
+              "autoFixable": false,
+              "action": "Generate or author normals in the source asset and re-import."
+            },
+            {
+              "id": "MAT-MATERIAL-BUDGET:/materials",
+              "ruleId": "MAT-MATERIAL-BUDGET",
+              "category": "materials",
+              "severity": "ERROR",
+              "path": "/materials",
+              "title": "Material budget exceeded",
+              "message": "The asset contains more materials than the selected profile allows.",
+              "observed": 48,
+              "threshold": 24,
+              "autoFixable": false,
+              "action": "Reduce material slots deliberately and verify the visual result."
+            },
+            {
+              "id": "SCENE-NONUNIT-SCALE:/nodes/*/scale",
+              "ruleId": "SCENE-NONUNIT-SCALE",
+              "category": "scene",
+              "severity": "WARNING",
+              "path": "/nodes/*/scale",
+              "title": "Non-unit scale transforms found",
+              "message": "The asset contains non-unit node scales that may differ across engines.",
+              "observed": 181,
+              "threshold": 0,
+              "autoFixable": false,
+              "action": "Confirm the target engine's transform and import policy."
+            }
+          ],
+          "score": {
+            "score": 96,
+            "threshold": 90,
+            "ready": false,
+            "hardBlockerCount": 1,
+            "breakdown": {
+              "format": 100,
+              "scene": 97,
+              "geometry": 97,
+              "materials": 82,
+              "textures": 100,
+              "runtime": 100
+            },
+            "ruleSetId": "clunk-game-ready-v1",
+            "ruleSetVersion": "1.0.0"
+          },
+          "analysisId": "analysis-5b457fc11861-90cdec26",
+          "resultDigest": "90cdec261b4126ceeff9ae0835d6b50ed63fc3ec658af244e35bea7c0ce23e98"
+        }
+      }
+    }
+  ],
+  "collaborationBoundary": [
+    "Harvest Frontier remains the source of truth for semantic nodes, pivots, sockets, colliders, LOD, Meshopt, quantization, and gameplay validation.",
+    "This runner reads GLB bytes and invokes Clunk inspect only; it never writes to Harvest Frontier and never runs Clunk optimize.",
+    "A changed SHA-256 requires a new inspection and must not reuse an earlier Passport or application evidence."
+  ]
+}

@@ -1,0 +1,132 @@
+# Clunk
+
+> Clunk is a quality gate for 3D assets. When an AI agent generates a GLB or glTF, the agent
+> calls Clunk immediately and gets a policy verdict, a score, and a signed evidence record
+> (Asset Passport) back before the asset moves downstream.
+> 한국어: AI 에이전트가 3D 에셋을 만든 직후 스스로 호출하는 에셋 품질 게이트입니다.
+
+Status: private pilot (Korea first). Billing is a working demo ledger, not a payment provider.
+
+## What Clunk actually does
+
+- Parses real GLB and glTF 2.0 bytes. No screenshot, no fixture, no mock metric.
+- Records `inputHash` (SHA-256 of the input bytes), `coreBuildId`, `ruleSetId`, `ruleSetVersion`
+  and `resultDigest` for every run.
+- Evaluates 17 rules across 6 categories (format, scene, geometry, materials, textures, runtime).
+  Rule set: `clunk-game-ready-v1` v`1.0.0`. Ready score threshold: 90.
+- Every finding carries `ruleId`, `severity`, `path`, `observed` and `threshold`.
+- Optimizes with an allowlist only, then re-inspects the produced artifact from scratch.
+
+## Verdicts
+
+- `준비 완료` (ready): no blocking finding, declared policy satisfied.
+- `조건부 준비` (conditional): no hard blocker, warnings remain that lossless cleanup cannot fix.
+- `차단됨` (blocked): at least one ERROR or CRITICAL finding remains.
+
+## MCP server
+
+Transport: stdio, JSON-RPC. `initialize` returns protocolVersion `2025-06-18` and
+serverInfo `{ "name": "clunk", "version": "0.1.0" }`. Works with any MCP capable agent.
+
+Client config:
+
+```json
+{
+  "mcpServers": {
+    "clunk": {
+      "command": "npm",
+      "args": ["run", "mcp"],
+      "cwd": "/path/to/clunk"
+    }
+  }
+}
+```
+
+Tools returned by `tools/list`:
+
+- `clunk_inspect` - Inspect a real GLB/GLTF using Clunk Core.
+  input: `path` (required), `profile` (`web` | `mobile` | `pc`).
+  output: inspection report, `inputHash`, `resultDigest`.
+- `clunk_validate` - Validate a real GLB/GLTF against a declared policy.
+  input: `path` (required), `profile`.
+  output: `valid` boolean plus the same report.
+- `clunk_optimize` - Apply only Clunk's allowlisted render-safe and metadata-only operations
+  and write a new artifact.
+  input: `path` (required), `outputPath`, `profile`.
+  output: applied `operations`, `outputHash`, path of the new file.
+- `clunk_passport` - Create a Passport by freshly inspecting source and output artifacts.
+  input: `sourcePath` (required), `outputPath` (required), `profile`.
+  output: Passport linking both hashes and both inspection digests.
+
+Typical agent loop: `initialize` -> `tools/list` -> `clunk_inspect` -> (if fixable)
+`clunk_optimize` -> `clunk_passport`.
+
+## CLI
+
+```bash
+npm run clunk -- inspect <asset.glb> --profile pc
+npm run clunk -- validate <asset.glb> --profile web
+npm run clunk -- optimize <asset.glb> --out <output.glb>
+npm run clunk -- passport <source.glb> <optimized.glb>
+```
+
+`validate` exits with code 2 when the asset does not satisfy the declared policy, so it can be
+used directly as a CI gate. All commands print one JSON envelope on stdout.
+
+Watch mode re-inspects files on change and keeps a bytes/sha256/score manifest fresh, with an
+optional `--ref <commit>` stamp, so Clunk can sit inside a pipeline instead of being invoked
+per event:
+
+```bash
+npm run clunk -- watch <paths...> --profile-file <profile.json> --manifest out.json --ref <commit>
+```
+
+## Texture set audit
+
+Tiling/terrain textures intentionally live outside GLBs, so they get their own input type:
+`scripts/texture-audit.mjs <config.json> [--strict]`. Per texture and usage density (m/tile) it
+reports mip readability per camera-distance band (grade A-D with a numeric prescription), tile
+seam verdicts (SEAMLESS / SOFT-SEAM / MASKED / VISIBLE-SEAM with placement-context exposure),
+and mip-inclusive GPU memory versus a budget. `--strict` exits 2 on exposed seams, gameplay-band
+D grades, or a blown budget (checks selectable via `strictChecks`). Calibrated against a real
+game team's visual ground truth (8/8 agreement); see docs/texture-audit.ko.md.
+
+## Safety boundaries
+
+- The input file is never overwritten. Optimization always writes a separate artifact.
+- Allowlisted operations only: `prune-empty-nodes`, `dedupe-materials`, `clean-metadata`,
+  `repack`. The first, second and fourth are lossless; `clean-metadata` is metadata only.
+- Not applied automatically in v1: mesh simplification, texture re-encoding, Draco or Meshopt
+  compression, quantization, animation and skin edits, unknown extension rewrites.
+- An asset is only reported ready after parse, policy, score, fresh re-inspection of the output
+  bytes, blocker review, and reopening the downloaded artifact all pass.
+
+## Local first
+
+The web inspector parses asset bytes in the browser. Only metadata, hashes and results are
+stored server side. Original asset bytes are not uploaded automatically, and artifact storage
+is deliberately disabled during the pilot.
+
+## Surfaces
+
+Web inspector (`app/app`), CLI (`scripts/clunk-cli.ts`), MCP server (`integrations/mcp`),
+VS Code extension (`integrations/vscode`). All four call the same Core contract and record the
+same identifiers.
+
+## Custom profiles
+
+Project-specific inspection profiles are supported as JSON definitions: CLI `--profile-file <path.json>` and MCP tool argument `profileFile`. See docs/custom-profiles.ko.md and examples/profiles/harvest-frontier.example.json. Built-in profiles (web/mobile/pc) remain byte-identical. The web inspector accepts the same profile JSON for local-only inspection (no save, no credit).
+
+## Generation pipeline
+
+Agents can generate assets as procedural three.js factory code (img2threejs discipline,
+Apache-2.0), extract a GLB with `scripts/threejs-to-glb.mjs <factory.mjs> <out.glb>`, and run it
+through the normal gate (inspect -> optimize -> passport). Generation intelligence stays in the
+agent; Clunk owns the rails and the gate. See docs/generate-pipeline.ko.md.
+
+## Links
+
+- Inspector: /app
+- Workspace: /dashboard
+- Scope and integration guide: /docs
+- Credits and demo ledger: /pricing

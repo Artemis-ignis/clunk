@@ -1,0 +1,53 @@
+{
+  "file": "clunk-demo-auth-final-ko-800x450-20260820.webm",
+  "bytes": 1662418,
+  "sha256": "6aa4991773a5bbcf60321852fa2f1cd366cdffda02a04879950927688edb3774",
+  "durationSeconds": 47.04,
+  "durationMeasurement": "EBML Segment>Info Duration (0x4489) x TimecodeScale (0x2AD7B1); raw 47040 x 1000000 ns",
+  "frameSize": "800x450",
+  "recordedAt": "2026-08-20",
+  "uiVersion": "3-state readiness labels",
+  "readinessLabels": [
+    "준비 완료",
+    "조건부 준비",
+    "차단됨"
+  ],
+  "supersedes": "archive/clunk-demo-auth-final-ko-pre-uxfix-20260820.webm",
+  "supersededReason": "이전 녹화는 2단계 상태 표기를 담고 있어 현재 UI와 일치하지 않습니다.",
+  "sourceUrl": "http://localhost:3000/app",
+  "finalUrl": "http://localhost:3000/dashboard",
+  "authMode": "test SIWC headers in local authenticated browser session",
+  "consoleErrors": 0,
+  "pageErrors": 0,
+  "flow": [
+    "authenticated Inspector open (인증된 /app 진입)",
+    "real clunk-messy-sample.glb upload via file input",
+    "Core finding 4건 and Game-Ready Score 99 display",
+    "allowlisted optimization (안전하게 최적화)",
+    "fresh output reinspection and Passport panel `두 해시에 연결된 전후 결과.` with `조건부 준비` label",
+    "GLB and Passport download controls",
+    "D1-backed Dashboard runs, credits, and Passport view with `조건부 준비` chips"
+  ],
+  "observedValues": {
+    "scoreBeforeAfter": "99 -> 100",
+    "materialCountBeforeAfter": "2 -> 1",
+    "emptyNodeCountBeforeAfter": "1 -> 0",
+    "inputHash": "181473ff49e2a753b3c22198a0ef76f6052ab1efc38ac03a57c58bc62ae8fdf1",
+    "outputHash": "718f2fbaf4545bb96381c3055270212ca7c91e7197b562555ba63b3c0dc8302b",
+    "dashboardRuns": 2,
+    "dashboardPassports": 1,
+    "dashboardCredits": 23
+  },
+  "assertions": {
+    "scoreVisible": true,
+    "passportPanelHeading": true,
+    "conditionalLabelInInspector": true,
+    "conditionalLabelInDashboard": true,
+    "dashboardCreditsHistoryPassport": true
+  },
+  "submissionBoundary": "local evidence only; official URL, public access, and playback must be confirmed before submission",
+  "archived": true,
+  "archivedOn": "2026-08-20",
+  "archivedReason": "3단계 라벨 반영 재녹화 1회차입니다. 흐름과 라벨은 현재 UI와 같지만 프레임 크기가 800×450이라 업로드 화질 기준에 미달해 1280×720 재녹화본으로 교체했습니다.",
+  "supersededBy": "../clunk-demo-auth-final-ko.webm"
+}

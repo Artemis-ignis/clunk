@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.0",
+  "assets": [
+    {
+      "file": "clunk-ready-sample.glb",
+      "source": "Clunk-authored deterministic procedural quad; no external reference",
+      "license": "Original work, permission granted for Clunk product demos and application evidence",
+      "generated": true,
+      "sha256": "cea85cf041beddba512453d30a3ded19a2b6a6d217486f4c77e54f3e0ce8a627",
+      "bytes": 1224
+    },
+    {
+      "file": "clunk-messy-sample.glb",
+      "source": "Clunk-authored deterministic procedural quad; no external reference",
+      "license": "Original work, permission granted for Clunk product demos and application evidence",
+      "generated": true,
+      "sha256": "181473ff49e2a753b3c22198a0ef76f6052ab1efc38ac03a57c58bc62ae8fdf1",
+      "bytes": 1124
+    }
+  ]
+}
