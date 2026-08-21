@@ -136,6 +136,28 @@ export async function POST(request: Request) {
         { status: 413 },
       );
     }
+    // A file the core could not read produces one CRITICAL FORMAT-PARSE finding and a score
+    // of 0. Until the byte length in that report was fixed this request was rejected earlier
+    // for the wrong reason and no credit moved; now it would validate and be charged. The
+    // product's own promise is that only successful runs are debited, so refuse the save and
+    // say plainly that nothing was charged. The user still has the full diagnostic locally.
+    const verifiedFindings = (verified.report.findings ?? []) as Array<{
+      ruleId?: string;
+      severity?: string;
+      message?: string;
+    }>;
+    const parseFailure = verifiedFindings.find(
+      (finding) => finding.ruleId === "FORMAT-PARSE" || finding.ruleId === "INPUT-MISSING",
+    );
+    if (parseFailure) {
+      return privateJson(
+        errorBody(
+          `이 파일은 glTF 2.0으로 읽을 수 없어 이력에 저장하지 않았습니다. 크레딧은 차감되지 않았습니다. (${parseFailure.message ?? "파싱 실패"})`,
+          "run_unparseable",
+        ),
+        { status: 422 },
+      );
+    }
     const verifiedScore = verified.report.score as { ready: boolean };
     const persistedStatus = verifiedScore.ready === true && Number(payload.hardBlockerCount) === 0 ? "ready" : "blocked";
     const assetId = scopedStorageId("asset", workspaceId, payload.inputHash!);
