@@ -4816,11 +4816,15 @@ html.snap-y {
   font-weight: 500;
 }
 
+/* The tractor render fills its 4:3 frame: measured opaque pixels reach 99.17% of the image
+   height, so the wheels touch the stage floor. Anchoring the strip to the stage bottom put
+   the filename under the tyres. `top: 100%` parks it entirely below the frame instead. */
 .hero3-filestrip {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: -3.5%;
+  top: 100%;
+  margin-top: var(--sp-12);
   z-index: 4;
   display: flex;
   flex-wrap: wrap;
@@ -5827,9 +5831,9 @@ html.snap-y {
     gap: var(--sp-48);
   }
 
+  /* Keep the strip out of flow here too. In flow it inflated the stage box by its own
+     height, and the bottom-anchored chips then landed on top of it. */
   .hero3-filestrip {
-    position: static;
-    margin-top: var(--sp-8);
     justify-content: flex-start;
     font-size: 0.66rem;
   }
