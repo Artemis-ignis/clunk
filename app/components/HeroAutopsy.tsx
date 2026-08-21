@@ -144,7 +144,7 @@ export function HeroAutopsy() {
           {CALLOUTS.map((c, i) => (
             <div
               key={c.key}
-              className="hero3-callout"
+              className={`hero3-callout hero3-callout--${c.key}`}
               style={{ ...c.chip, transitionDelay: `${640 + i * 260}ms` }}
             >
               <span className="hero3-callout-label">{c.label}</span>
@@ -161,7 +161,7 @@ export function HeroAutopsy() {
             </span>
             <span className="status-pill status-ready">
               <span className="status-dot" />
-              READY · 하드 블로커 0
+              READY<span className="hero3-score-detail"> · 하드 블로커 0</span>
             </span>
           </div>
 

@@ -4731,8 +4731,10 @@ html.snap-y {
   z-index: 4;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: var(--sp-12) var(--sp-16);
+  gap: 1px;
+  /* Measured: the empty sky above the tractor is only 18% of the stage, so a chip taller
+     than that cannot clear the silhouette. These paddings keep the three-line chip at ~13%. */
+  padding: 8px 12px;
   border: 1px solid var(--line-strong);
   border-radius: var(--r-control);
   background: var(--glass);
@@ -4752,32 +4754,32 @@ html.snap-y {
 .hero3-callout-label {
   color: var(--accent);
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.62rem;
   letter-spacing: 0.1em;
 }
 
 .hero3-callout strong {
   color: var(--text-strong);
-  font-size: var(--fs-2);
+  font-size: 0.86rem;
   font-weight: 620;
   line-height: var(--lh-tight);
 }
 
 .hero3-callout small {
   color: var(--text-dim);
-  font-size: var(--fs-1);
+  font-size: 0.68rem;
 }
 
 .hero3-score {
   position: absolute;
-  right: 1%;
-  top: 3%;
+  right: 0;
+  top: 0;
   z-index: 4;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--sp-8);
-  padding: var(--sp-16) var(--sp-20);
+  gap: 4px;
+  padding: 10px 14px;
   border: 1px solid var(--accent-line);
   border-radius: var(--r-panel);
   background: var(--glass);
@@ -4803,7 +4805,7 @@ html.snap-y {
 
 .hero3-score-value {
   color: var(--text-strong);
-  font-size: var(--fs-6);
+  font-size: var(--fs-5);
   font-weight: 550;
   letter-spacing: var(--ls-display);
   line-height: 1;
@@ -5977,5 +5979,49 @@ html.snap-y {
   .hero3-scrollcue span,
   .mcp3-cursor {
     animation: none !important;
+  }
+}
+
+/* Phone hero: the sky above the tractor is only ~48px here, so the stacked score card
+   (79px) cannot clear the cab no matter where it sits. Laying it out as a single row
+   drops it to ~37px, which fits the sky band with the value and the READY verdict intact. */
+@media (max-width: 700px) {
+  .hero3-score {
+    right: 0.5%;
+    top: 0;
+    flex-direction: row;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 9px;
+  }
+
+  .hero3-score-label {
+    display: none;
+  }
+
+  .hero3-score-value {
+    font-size: 1.1rem;
+  }
+
+  .hero3-score-value small {
+    font-size: 0.6rem;
+  }
+}
+
+/* The chip offsets are inline styles from the CALLOUTS table, so the phone override needs
+   !important. Both chips are 17.2% tall here against an 18.2% sky: starting them at 0.5%
+   is what keeps them off the exhaust stack and the cab roof. */
+@media (max-width: 700px) {
+  .hero3-callout--geometry,
+  .hero3-callout--scene {
+    top: 0.5% !important;
+  }
+}
+
+/* Phone: the sky band fits GEOMETRY + SCENE + the score badge only if the badge sheds its
+   detail clause. The verdict word itself stays. */
+@media (max-width: 700px) {
+  .hero3-score-detail {
+    display: none;
   }
 }
