@@ -9,7 +9,9 @@ import { ThemeToggle } from "../components/ThemeToggle";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "로그인",
-  description: "ChatGPT 계정 또는 GitHub 계정으로 Clunk 비공개 워크스페이스에 입장합니다.",
+  // 이 문구는 정적 메타데이터라 제공자 설정 여부를 알 수 없다. 켜지지 않았을 수도 있는
+  // 로그인 방법을 약속하지 않도록 방법 이름을 빼고 적는다.
+  description: "Clunk 비공개 워크스페이스에 입장합니다. 지원되는 로그인 방법은 화면에 표시됩니다.",
 };
 
 /**
