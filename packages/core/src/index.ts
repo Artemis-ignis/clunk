@@ -457,6 +457,7 @@ export function inspectAsset(
       "FORMAT-PARSE",
       message,
       inputHash,
+      sourceBytes.byteLength,
     );
   }
 }
@@ -1174,6 +1175,13 @@ function calculateScore(findings: Finding[], policy: ResolvedPolicy): ScoreRepor
   };
 }
 
+/**
+ * A file we could not parse has no measurable qualities, so every category scores 0 and the
+ * asset is never READY. The previous version only deducted from `format`, which averaged out
+ * to 92/100 — a text file renamed to .glb scored 92 and the number was the product's whole
+ * sales claim. byteLength is now the real source length: hard-coding 0 made the API reject
+ * every failure with a byte-length error, hiding the actual parse diagnostic from the user.
+ */
 function makeFailureReport(
   fileName: string,
   format: AssetFormat,
@@ -1181,6 +1189,7 @@ function makeFailureReport(
   ruleId: string,
   message: string,
   inputHash = "",
+  byteLength = 0,
 ): InspectionReport {
   const finding: Finding = {
     id: `${ruleId}:/asset`,
@@ -1196,7 +1205,22 @@ function makeFailureReport(
     action: "Provide a valid GLB or a complete GLTF bundle.",
   };
   const metrics = emptyMetrics();
-  const score = calculateScore([finding], policy);
+  const score: ScoreReport = {
+    score: 0,
+    threshold: policy.readyScoreThreshold,
+    ready: false,
+    hardBlockerCount: 1,
+    breakdown: {
+      format: 0,
+      scene: 0,
+      geometry: 0,
+      materials: 0,
+      textures: 0,
+      runtime: 0,
+    },
+    ruleSetId: policy.ruleSetId,
+    ruleSetVersion: policy.ruleSetVersion,
+  };
   const canonical = {
     schemaVersion: "1.0" as const,
     coreVersion: CORE_VERSION,
@@ -1205,7 +1229,7 @@ function makeFailureReport(
     profileId: policy.profileId,
     fileName,
     format,
-    byteLength: 0,
+    byteLength,
     inputHash,
     metrics,
     findings: [finding],

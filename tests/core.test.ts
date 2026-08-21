@@ -71,3 +71,42 @@ test("metadata cleanup is explicit, allowlisted, and render-safe", () => {
   assert.equal(result.operations[0].safety, "metadata-only");
   assert.equal(result.after.metrics.nodeCount, result.before.metrics.nodeCount);
 });
+
+test("unparseable input scores zero and reports the real reason", async () => {
+  const cases: Array<{ name: string; bytes: Uint8Array; expect: RegExp }> = [
+    { name: "empty.glb", bytes: new Uint8Array(0), expect: /shorter than its header/i },
+    {
+      name: "text.glb",
+      bytes: new TextEncoder().encode("this is definitely not a glb file at all"),
+      expect: /invalid glb magic/i,
+    },
+    {
+      name: "broken.gltf",
+      bytes: new TextEncoder().encode("{ not json at all"),
+      expect: /json/i,
+    },
+  ];
+
+  for (const testCase of cases) {
+    const report = inspectAsset(createAssetBundle(testCase.name, testCase.bytes));
+
+    // A file we could not read has no measurable qualities. Scoring it on a per-category
+    // average used to return 92/100 for a renamed text file, which made the headline number
+    // meaningless. Every category must be zero.
+    assert.equal(report.score.score, 0, `${testCase.name} must score 0`);
+    assert.equal(report.score.ready, false);
+    assert.ok(report.score.hardBlockerCount > 0);
+    for (const [category, value] of Object.entries(report.score.breakdown)) {
+      assert.equal(value, 0, `${testCase.name} breakdown.${category} must be 0`);
+    }
+
+    // The byte length must be the real one: hard-coding 0 made the storage API reject the
+    // run with a byte-length error, so the actual diagnostic never reached the user.
+    assert.equal(report.byteLength, testCase.bytes.byteLength);
+
+    const parseFinding = report.findings.find((finding) => finding.ruleId === "FORMAT-PARSE");
+    assert.ok(parseFinding, `${testCase.name} must report FORMAT-PARSE`);
+    assert.equal(parseFinding.severity, "CRITICAL");
+    assert.match(parseFinding.message, testCase.expect);
+  }
+});
