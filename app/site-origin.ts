@@ -17,6 +17,7 @@ export const PUBLIC_ROUTES = [
   { path: "/", priority: "1.0", changefreq: "weekly" },
   { path: "/pricing", priority: "0.8", changefreq: "monthly" },
   { path: "/docs", priority: "0.8", changefreq: "weekly" },
+  { path: "/support", priority: "0.6", changefreq: "monthly" },
   { path: "/legal/terms", priority: "0.3", changefreq: "yearly" },
   { path: "/legal/privacy", priority: "0.3", changefreq: "yearly" },
   { path: "/legal/refund", priority: "0.3", changefreq: "yearly" },

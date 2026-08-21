@@ -41,6 +41,7 @@ export function SiteShell({
             <Link href="/pricing">요금</Link>
             <Link href="/docs">문서</Link>
             <Link href="/settings">설정</Link>
+            <Link href="/support">지원</Link>
             <a href="/llms.txt">llms.txt</a>
           </nav>
           <nav className="site-footer-legal" aria-label="법적 고지">
