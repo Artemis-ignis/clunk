@@ -43,6 +43,11 @@ export function SiteShell({
             <Link href="/settings">설정</Link>
             <a href="/llms.txt">llms.txt</a>
           </nav>
+          <nav className="site-footer-legal" aria-label="법적 고지">
+            <Link href="/legal/terms">이용약관</Link>
+            <Link href="/legal/privacy">개인정보처리방침</Link>
+            <Link href="/legal/refund">환불·청약철회</Link>
+          </nav>
           <span className="demo-marker">DEMO MODE · 실제 결제 아님</span>
         </div>
       </footer>
