@@ -5,8 +5,8 @@ async page => {
   page.on("console", message => { if (message.type() === "error") consoleErrors.push(message.text()); });
   page.on("pageerror", error => { pageErrors.push(String(error)); });
   await page.context().setExtraHTTPHeaders({
-    "oai-authenticated-user-id": "browser-evidence-auth-20260820",
-    "oai-authenticated-user-email": "browser-evidence-auth@example.test",
+    "oai-authenticated-user-id": "browser-evidence-v3-20260821",
+    "oai-authenticated-user-email": "browser-evidence-v3@example.test",
     "oai-authenticated-user-full-name": "Browser%20Evidence",
     "oai-authenticated-user-full-name-encoding": "percent-encoded-utf-8",
   });

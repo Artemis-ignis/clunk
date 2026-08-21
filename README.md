@@ -128,7 +128,7 @@ stdio JSON-RPC 서버가 `clunk_inspect`, `clunk_validate`, `clunk_optimize`, `c
 - 확인한 공고 원본: `C:\Users\50106\Desktop\1.pdf`
 - 제출 이미지 최대 10장: 실제 실행 화면·실제 결과·제품 흐름 중심
 - 숏폼 30~60초: 샘플을 꾸며내지 않고 실제 브라우저 실행 녹화
-- 첨부 후보·실제 확보 상태: [제출 증거 매트릭스](docs/application/evidence-matrix.ko.md), [증거 파일 목록](output/application/evidence/manifest.ko.md), [44초 1280×720 SIWC 인증 실제 데모](output/application/evidence/clunk-demo-auth-final-ko.webm), [한국어 데모 대본](docs/application/demo-script.ko.md)
+- 첨부 후보·실제 확보 상태: [제출 증거 매트릭스](docs/application/evidence-matrix.ko.md), [증거 파일 목록](output/application/evidence/manifest.ko.md), [38초 1280×720 SIWC 인증 실제 데모](output/application/evidence/clunk-demo-auth-final-ko.webm), [한국어 데모 대본](docs/application/demo-script.ko.md)
 - 실제 게임 검증 협업: [Harvest Frontier 핸드오프](docs/integrations/harvest-frontier.ko.md), [현재 8종 읽기 전용 manifest](docs/integrations/harvest-frontier-run.json), [반복 PowerShell runner](scripts/harvest-frontier-handoff.ps1)
 
 ## 정직한 제한
