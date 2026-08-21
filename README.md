@@ -136,6 +136,17 @@ stdio JSON-RPC 서버가 `clunk_inspect`, `clunk_validate`, `clunk_optimize`, `c
 - 첨부 후보·실제 확보 상태: [제출 증거 매트릭스](docs/application/evidence-matrix.ko.md), [증거 파일 목록](output/application/evidence/manifest.ko.md), [38초 1280×720 SIWC 인증 실제 데모](output/application/evidence/clunk-demo-auth-final-ko.webm), [한국어 데모 대본](docs/application/demo-script.ko.md)
 - 실제 게임 검증 협업: [Harvest Frontier 핸드오프](docs/integrations/harvest-frontier.ko.md), [현재 8종 읽기 전용 manifest](docs/integrations/harvest-frontier-run.json), [반복 PowerShell runner](scripts/harvest-frontier-handoff.ps1)
 
+## 상용 판매 준비도
+
+보안·개인정보 감사와 상용 완성도 감사(실제 브라우저 조작 재현)의 결과, 처리한 것과 남은 것을
+[docs/commercial-readiness.ko.md](docs/commercial-readiness.ko.md)에 추적합니다. 현재 판정은
+**아직 팔 수 없음** — 결제 코드가 존재하지 않고 자체 로그인이 없어 호스트 밖에서는 가입이
+불가능합니다. 그 둘을 제외한 "팔면 사고 나는" 결함은 상당수 제거했습니다.
+
+법적 고지는 [이용약관](app/legal/terms/page.tsx) · [개인정보처리방침](app/legal/privacy/page.tsx) ·
+[환불정책](app/legal/refund/page.tsx)에 있고, 사업자 정보는 `app/legal/company.ts` 한 파일이
+단일 소스입니다. 등록 전이므로 전 필드가 비어 있고 화면에 "사업자 등록 후 기재"로 표시됩니다.
+
 ## 정직한 제한
 
 v1은 mesh simplification, texture 재인코딩, Draco/Meshopt, quantization, animation·skin 변경과 unknown extension 변경을 자동화하지 않습니다. 브라우저 local-first 모드에서는 서버가 원본 바이트를 재검증하지 않으므로, D1 report는 인증된 사용자 작업의 메타데이터 기록으로 취급합니다. 공개 SaaS에서 서버 재검증·보관이 필요해질 때 R2와 서버 Core 실행을 추가합니다.
