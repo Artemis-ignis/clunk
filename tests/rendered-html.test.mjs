@@ -38,3 +38,39 @@ test("server-renders public product routes", async () => {
     assert.doesNotMatch(html, /Your site is taking shape|SkeletonPreview/);
   }
 });
+
+test("responses carry the security headers the worker promises", async () => {
+  const response = await render();
+  const csp = response.headers.get("content-security-policy") ?? "";
+  assert.match(csp, /default-src 'self'/);
+  assert.match(csp, /frame-ancestors 'none'/);
+  assert.match(csp, /object-src 'none'/);
+  // The GLB preview instantiates the meshopt decoder as WebAssembly; without this the 3D
+  // preview silently fails on any browser that enforces the policy.
+  assert.match(csp, /script-src[^;]*'wasm-unsafe-eval'/);
+  assert.equal(response.headers.get("x-frame-options"), "DENY");
+  assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+  assert.match(response.headers.get("strict-transport-security") ?? "", /max-age=\d+/);
+});
+
+test("the page loads no subresource from another origin", async () => {
+  // connect-src, font-src, img-src and script-src are all limited to 'self'. Anything pulled
+  // from a third-party host would be blocked at runtime, so catch it here instead of in a
+  // browser console after deploy. Absolute URLs in metadata (og:image, canonical) are fine —
+  // they are not fetched as subresources.
+  const html = await (await render()).text();
+  const subresources = [
+    ...html.matchAll(/<script[^>]+src="([^"]+)"/gi),
+    ...html.matchAll(/<link[^>]+href="([^"]+)"[^>]*>/gi),
+    ...html.matchAll(/<img[^>]+src="([^"]+)"/gi),
+  ]
+    .map((match) => match[1])
+    .filter((url) => /^https?:\/\//i.test(url))
+    .filter((url) => !url.startsWith("http://localhost"));
+
+  assert.deepEqual(
+    subresources,
+    [],
+    `외부 오리진 서브리소스가 CSP에 막힙니다: ${subresources.join(", ")}`,
+  );
+});
