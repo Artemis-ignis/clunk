@@ -151,6 +151,12 @@ export default function Home() {
                 Passport에는 원본과 결과물의 해시, 검사 다이제스트, 적용 작업이 함께 봉인됩니다.
                 출력 GLB를 다시 파싱해 해시가 맞아야 준비 완료가 됩니다.
               </p>
+              {/* The claim only means something if the person receiving it can check it
+                  themselves, so the section shows the command rather than asserting trust. */}
+              <p className="chain3-verify">
+                제출용은 <strong>서버 검증</strong>을 고르면 서버가 그 바이트를 직접 열어 검사하고
+                서명합니다. 받는 쪽이 대조합니다. <code>clunk verify passport.json --asset model.glb</code>
+              </p>
             </div>
 
             <dl className="principle3-row">

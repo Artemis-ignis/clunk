@@ -6221,6 +6221,22 @@ html.snap-y {
    (padding 106) + head (170-196) + content (495-528). The content panels are already
    dvh-scaled, so the remaining give is in the chrome and the head. */
 @media (min-width: 961px) and (max-height: 820px) {
+  /* 768px 화면에서는 검증 한 줄이 섹션을 넘기므로 행간만 더 조인다. */
+  .chain3-verify {
+    font-size: 0.72rem;
+    line-height: 1.4;
+  }
+
+  /* 마지막 원칙 행이 16px 넘쳐 잘렸다. 카드 안쪽 여백에서 회수한다. */
+  .principle3 {
+    padding-top: var(--sp-8);
+    padding-bottom: var(--sp-8);
+  }
+
+  .principle3-row {
+    margin-top: var(--sp-12);
+  }
+
   .snap-sec {
     /* 84px keeps a 4px gap under the nav (bottom edge y=80) — the tightest honest value. */
     padding-top: 84px;
@@ -6789,4 +6805,34 @@ html.snap-y {
   color: var(--text-muted);
   font-size: var(--fs-1);
   line-height: 1.6;
+}
+
+/* The verification claim, with the command that checks it. A proof nobody can test is a
+   slogan, so the command sits in the section rather than in a docs page. */
+.chain3-verify {
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.chain3-verify code {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 7px;
+  border-radius: var(--sp-4);
+  background: var(--ink-2);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .chain3-verify code {
+    display: block;
+    margin: 6px 0 0;
+    overflow-x: auto;
+    white-space: pre;
+  }
 }
