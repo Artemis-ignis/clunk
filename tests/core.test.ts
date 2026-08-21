@@ -7,6 +7,14 @@ import {
   optimizeAsset,
   sha256Hex,
 } from "../packages/core/src/index";
+import {
+  buildUnsignedVerificationPassport,
+  generateVerificationKeyPair,
+  parseVerificationPrivateKey,
+  recomputeInspectionDigest,
+  signVerificationPassport,
+  verifyVerificationPassport,
+} from "../packages/core/src/verification";
 
 async function sample(name: string) {
   const bytes = new Uint8Array(await readFile(`public/samples/${name}`));
@@ -169,4 +177,104 @@ test("a large embedded resource decodes in linear time", () => {
   inspectAsset(createAssetBundle("big-embed.gltf", bytes));
   const elapsed = Date.now() - started;
   assert.ok(elapsed < 3000, `decoding took ${elapsed}ms; it is not linear`);
+});
+
+/*
+ * Server-verification signing.
+ *
+ * These are the claims the product sells: a passport Clunk signed verifies, a passport anyone
+ * edited afterwards does not, and a passport for one asset does not describe another. The whole
+ * point of the feature is that the last two fail, so they are asserted as loudly as the first.
+ */
+test("a signed verification passport verifies against the matching public key", async () => {
+  const { bytes, bundle } = await sample("clunk-ready-sample.glb");
+  const report = inspectAsset(bundle, { profileId: "pc" });
+  const { pair } = await generateVerificationKeyPair("Ed25519");
+  const passport = await signVerificationPassport(
+    buildUnsignedVerificationPassport(report, "https://clunk.test", "2026-08-22T00:00:00.000Z"),
+    pair,
+  );
+
+  assert.equal(passport.verificationMode, "server-verified");
+  assert.equal(passport.asset.sha256, sha256Hex(bytes));
+  assert.equal(recomputeInspectionDigest(passport), report.resultDigest);
+  assert.deepEqual(await verifyVerificationPassport(passport, pair.publicKey), {
+    ok: true,
+    keyId: pair.keyId,
+    algorithm: "Ed25519",
+  });
+});
+
+test("editing any field of a signed passport invalidates the signature", async () => {
+  const { bundle } = await sample("clunk-messy-sample.glb");
+  const report = inspectAsset(bundle, { profileId: "pc" });
+  const { pair } = await generateVerificationKeyPair("Ed25519");
+  const passport = await signVerificationPassport(
+    buildUnsignedVerificationPassport(report, "https://clunk.test", "2026-08-22T00:00:00.000Z"),
+    pair,
+  );
+
+  const forgedScore = JSON.parse(JSON.stringify(passport)) as typeof passport;
+  forgedScore.score.score = 100;
+  forgedScore.score.ready = true;
+  forgedScore.score.hardBlockerCount = 0;
+  const scoreCheck = await verifyVerificationPassport(forgedScore, pair.publicKey);
+  assert.equal(scoreCheck.ok, false, "a hand-raised score must not verify");
+
+  const forgedHash = JSON.parse(JSON.stringify(passport)) as typeof passport;
+  forgedHash.asset.sha256 = "0".repeat(64);
+  assert.equal((await verifyVerificationPassport(forgedHash, pair.publicKey)).ok, false);
+
+  const forgedFindings = JSON.parse(JSON.stringify(passport)) as typeof passport;
+  forgedFindings.findings = [];
+  assert.equal((await verifyVerificationPassport(forgedFindings, pair.publicKey)).ok, false);
+});
+
+test("a passport does not verify against a different issuing key", async () => {
+  const { bundle } = await sample("clunk-ready-sample.glb");
+  const report = inspectAsset(bundle, { profileId: "pc" });
+  const mine = await generateVerificationKeyPair("Ed25519");
+  const theirs = await generateVerificationKeyPair("Ed25519");
+  const passport = await signVerificationPassport(
+    buildUnsignedVerificationPassport(report, "https://clunk.test", "2026-08-22T00:00:00.000Z"),
+    mine.pair,
+  );
+  const check = await verifyVerificationPassport(passport, theirs.pair.publicKey);
+  assert.equal(check.ok, false);
+});
+
+test("a local-first report is never mistaken for a server-verified passport", async () => {
+  const { bundle } = await sample("clunk-ready-sample.glb");
+  const report = inspectAsset(bundle);
+  const { pair } = await generateVerificationKeyPair("Ed25519");
+  const check = await verifyVerificationPassport(report, pair.publicKey);
+  assert.equal(check.ok, false, "an unsigned local report must be rejected outright");
+});
+
+test("the private key env value round-trips through base64 and JSON", async () => {
+  const { pair, privateKeyEnvValue } = await generateVerificationKeyPair("Ed25519");
+  const fromBase64Value = parseVerificationPrivateKey(privateKeyEnvValue);
+  assert.equal(fromBase64Value.keyId, pair.keyId);
+  const fromJson = parseVerificationPrivateKey(JSON.stringify(pair.privateJwk));
+  assert.equal(fromJson.keyId, pair.keyId);
+  assert.deepEqual(fromJson.publicKey, pair.publicKey);
+  assert.throws(() => parseVerificationPrivateKey(""), /비어 있습니다/);
+  assert.throws(() => parseVerificationPrivateKey('{"kty":"RSA"}'), /개인키 JWK가 아닙니다/);
+  assert.throws(
+    () => parseVerificationPrivateKey('{"kty":"RSA","d":"aa","x":"bb"}'),
+    /지원하는 키는/,
+    "an unsupported curve must be refused rather than silently signed with",
+  );
+});
+
+test("ECDSA P-256 is a working fallback for a runtime without Ed25519", async () => {
+  const { bundle } = await sample("clunk-ready-sample.glb");
+  const report = inspectAsset(bundle);
+  const { pair } = await generateVerificationKeyPair("ECDSA-P256-SHA256");
+  const passport = await signVerificationPassport(
+    buildUnsignedVerificationPassport(report, "https://clunk.test", "2026-08-22T00:00:00.000Z"),
+    pair,
+  );
+  assert.equal(passport.signature.algorithm, "ECDSA-P256-SHA256");
+  assert.equal((await verifyVerificationPassport(passport, pair.publicKey)).ok, true);
 });

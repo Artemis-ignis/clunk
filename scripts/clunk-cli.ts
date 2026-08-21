@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { existsSync, readdirSync, statSync, watch as fsWatch } from "node:fs";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { basename, dirname, extname, resolve } from "node:path";
 import {
   READY_SCORE_THRESHOLD,
@@ -12,17 +12,30 @@ import {
   type AssetPolicy,
   type ProfileId,
 } from "../packages/core/src/index";
+import {
+  generateVerificationKeyPair,
+  parseVerificationPublicKey,
+  recomputeInspectionDigest,
+  verifyVerificationPassport,
+  type VerificationAlgorithm,
+  type VerificationPassport,
+  type VerificationPublicKey,
+} from "../packages/core/src/verification";
+import { sha256Hex } from "../packages/core/src/index";
 import { inspectEnvelope, optimizeEnvelope, passportEnvelope, validateEnvelope } from "../packages/core/src/contract";
 import { loadBundle, writeOutputBundle } from "../integrations/shared/node-asset";
 import { resolveProfilePolicy } from "../integrations/shared/custom-profile";
 
 const USAGE = [
-  "Usage: npm run clunk -- <inspect|validate|optimize|passport|watch|profile-from> <path> [options]",
+  "Usage: npm run clunk -- <inspect|validate|optimize|passport|verify|verify-keygen|watch|profile-from> <path> [options]",
   "",
   "  inspect  <path>                     Inspect one GLB or local GLTF bundle.",
   "  validate <path>                     Inspect and exit with code 2 on an ERROR or CRITICAL finding.",
   "  optimize <path>                     Apply the allowlisted safe operations into a new artifact.",
   "  passport <source> <optimized>       Reinspect both files and print a Passport envelope.",
+  "  verify   <passport.json>            Check a server-verified Passport's Ed25519/P-256 signature",
+  "                                      against Clunk's published key. Exit code 2 on failure.",
+  "  verify-keygen                       Generate a new issuing key pair for CLUNK_VERIFY_PRIVATE_KEY.",
   "  watch    <path...>                  Re-inspect files or directories on change and keep",
   "                                      a bytes/sha256/score manifest fresh. Ctrl+C to stop.",
   "  profile-from <asset...>             Derive a project profile from assets that already",
@@ -37,6 +50,11 @@ const USAGE = [
   "  --headroom <factor>                 profile-from budget headroom over the measured max. Default 1.3.",
   "  --id <ruleSetId>                    profile-from rule set id. Default derived from --out filename.",
   "  --based-on web|mobile|pc            profile-from base profile for unset fields. Default pc.",
+  "  --asset <file>                      verify: also check the file's sha256 against the Passport.",
+  "  --key <file>                        verify: public key JSON saved from Clunk's well-known",
+  "                                      endpoint. Offline verification uses this.",
+  "  --key-url <url>                     verify: fetch the public key from this URL instead.",
+  "  --algorithm ed25519|p256            verify-keygen: signature algorithm. Default ed25519.",
   "",
   "Custom profiles are documented in docs/custom-profiles.ko.md; there is an example in",
   "examples/profiles/harvest-frontier.example.json.",
@@ -54,6 +72,10 @@ const FLAGS_WITH_VALUE = new Set([
   "--headroom",
   "--id",
   "--based-on",
+  "--asset",
+  "--key",
+  "--key-url",
+  "--algorithm",
 ]);
 
 function flag(name: string): string | undefined {
@@ -85,11 +107,22 @@ function output(value: unknown) {
 }
 
 async function main() {
-  if (!command || !["inspect", "validate", "optimize", "passport", "watch", "profile-from"].includes(command)) {
+  if (
+    !command ||
+    !["inspect", "validate", "optimize", "passport", "verify", "verify-keygen", "watch", "profile-from"].includes(command)
+  ) {
     throw new Error(USAGE);
   }
   if (command === "profile-from") {
     await runProfileFrom();
+    return;
+  }
+  if (command === "verify") {
+    await runVerify();
+    return;
+  }
+  if (command === "verify-keygen") {
+    await runVerifyKeygen();
     return;
   }
   const assetPolicy = await policy();
@@ -129,6 +162,186 @@ async function main() {
   await writeOutputBundle(result.outputBundle, outputPath, bundle.entry);
   await writeFile(passportPath, `${JSON.stringify(result.passport, null, 2)}\n`, { encoding: "utf8", flag: "wx" });
   output(optimizeEnvelope(result, outputPath, passportPath));
+}
+
+/**
+ * verify: the receiving end of the product.
+ *
+ * A publisher or a client is handed `passport.json` and, usually, the asset. This command answers
+ * two questions without asking the sender for anything: was this document signed by Clunk's key,
+ * and does it describe the file I actually have. It is the only reason the signature is worth
+ * anything, so it has to work offline — `--key` takes a public key file the recipient keeps
+ * themselves, and nothing else is required.
+ */
+async function runVerify() {
+  const passportPath = positionals()[0];
+  if (!passportPath) {
+    throw new Error("Usage: verify <passport.json> [--asset <파일>] [--key <공개키.json> | --key-url <url>]");
+  }
+  const absolutePassport = resolve(passportPath);
+  let document: VerificationPassport;
+  try {
+    document = JSON.parse(await readFile(absolutePassport, "utf8")) as VerificationPassport;
+  } catch (error) {
+    throw new Error(
+      `Passport 파일을 읽지 못했습니다: ${absolutePassport}\n  ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+
+  const lines: string[] = [];
+  const checks: Array<{ state: "OK" | "FAIL" | "SKIP"; label: string; detail: string }> = [];
+
+  const asset = document?.asset;
+  lines.push("Clunk 서버 검증 Passport");
+  lines.push(`  파일           ${asset?.fileName ?? "(알 수 없음)"} (${asset?.format ?? "?"}, ${Number(asset?.byteLength ?? 0).toLocaleString()} bytes)`);
+  lines.push(`  sha256         ${asset?.sha256 ?? "(없음)"}`);
+  lines.push(`  검사 시각      ${document?.inspectedAt ?? "(없음)"}`);
+  lines.push(`  발급자         ${document?.issuer ?? "(없음)"}`);
+  lines.push(`  규칙 세트      ${document?.ruleSetId ?? "?"} v${document?.ruleSetVersion ?? "?"} / ${document?.profileId ?? "?"}`);
+  if (document?.score) {
+    lines.push(
+      `  점수           ${document.score.score}/100 (기준 ${document.score.threshold}) ${document.score.ready ? "READY" : "NOT-READY"}, 차단 finding ${document.score.hardBlockerCount}건`,
+    );
+  }
+  lines.push("");
+
+  const keySource = await resolvePublicKey(document);
+  if (keySource.warning) lines.push(`  ! ${keySource.warning}`);
+
+  const signature = await verifyVerificationPassport(document, keySource.key);
+  checks.push(
+    signature.ok
+      ? { state: "OK", label: "서명", detail: `${signature.algorithm} / keyId ${signature.keyId} (${keySource.description})` }
+      : { state: "FAIL", label: "서명", detail: signature.reason },
+  );
+
+  // Only meaningful once the signature parsed; an unsigned or foreign document has no digest
+  // worth recomputing.
+  if (signature.ok) {
+    const recomputed = recomputeInspectionDigest(document);
+    checks.push(
+      recomputed === document.resultDigest
+        ? { state: "OK", label: "내부 정합성", detail: "resultDigest가 문서에 적힌 검사 내용과 일치합니다" }
+        : {
+            state: "FAIL",
+            label: "내부 정합성",
+            detail: `resultDigest 불일치 (문서 ${document.resultDigest} / 재계산 ${recomputed})`,
+          },
+    );
+  }
+
+  const assetPath = flag("--asset");
+  if (!assetPath) {
+    checks.push({
+      state: "SKIP",
+      label: "파일 대조",
+      detail: "--asset 을 주지 않아 실제 파일과 대조하지 않았습니다. 서명만 확인한 상태입니다",
+    });
+  } else {
+    const absoluteAsset = resolve(assetPath);
+    let actualHash: string;
+    try {
+      actualHash = sha256Hex(new Uint8Array(await readFile(absoluteAsset)));
+    } catch (error) {
+      throw new Error(
+        `대조할 파일을 읽지 못했습니다: ${absoluteAsset}\n  ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+    checks.push(
+      actualHash === asset?.sha256
+        ? { state: "OK", label: "파일 대조", detail: `${basename(absoluteAsset)} 의 sha256이 Passport와 일치합니다` }
+        : {
+            state: "FAIL",
+            label: "파일 대조",
+            detail: `${basename(absoluteAsset)} 의 sha256은 ${actualHash} 이고 Passport는 ${asset?.sha256 ?? "(없음)"} 입니다. 이 Passport는 이 파일의 것이 아닙니다`,
+          },
+    );
+  }
+
+  lines.push("검증 결과");
+  for (const check of checks) {
+    // Korean labels are double-width, so column padding would misalign anyway; a separator
+    // keeps the three lines readable in every terminal.
+    lines.push(`  [${check.state.padEnd(4)}] ${check.label} — ${check.detail}`);
+  }
+  lines.push("");
+
+  const failed = checks.some((check) => check.state === "FAIL");
+  if (failed) {
+    lines.push("결과: 실패 — 이 Passport는 신뢰할 수 없습니다.");
+  } else {
+    lines.push("결과: 통과 — Clunk 서버가 이 바이트를 직접 열어 검사하고 서명한 기록입니다.");
+    lines.push("증명하지 않는 것:");
+    for (const limitation of document.limitations ?? []) lines.push(`  - ${limitation}`);
+  }
+  process.stdout.write(`${lines.join("\n")}\n`);
+  if (failed) process.exitCode = 2;
+}
+
+/**
+ * Where the public key comes from, most trustworthy first.
+ *
+ * A key fetched from the origin the document itself names is trust-on-first-use: a forger who
+ * controls that origin can serve a matching key. That path stays available because it is the only
+ * one that works with no setup, but it announces itself so nobody mistakes it for a pinned check.
+ */
+async function resolvePublicKey(
+  document: VerificationPassport,
+): Promise<{ key: VerificationPublicKey; description: string; warning?: string }> {
+  const keyFile = flag("--key") ?? process.env.CLUNK_VERIFY_PUBLIC_KEY_FILE;
+  if (keyFile) {
+    const absolute = resolve(keyFile);
+    const parsed = parseVerificationPublicKey(JSON.parse(await readFile(absolute, "utf8")));
+    return { key: parsed, description: `로컬 공개키 ${basename(absolute)}` };
+  }
+  const explicitUrl = flag("--key-url") ?? process.env.CLUNK_VERIFY_KEY_URL;
+  const issuerUrl = document?.issuer ? `${document.issuer.replace(/\/$/, "")}/.well-known/clunk-verification-key` : null;
+  const url = explicitUrl ?? issuerUrl;
+  if (!url) {
+    throw new Error(
+      "공개키를 찾지 못했습니다. --key <파일> 로 저장해 둔 공개키를 주거나 --key-url <url> 을 지정해 주세요.",
+    );
+  }
+  const response = await fetch(url).catch((error: unknown) => {
+    throw new Error(`공개키를 받아오지 못했습니다: ${url}\n  ${error instanceof Error ? error.message : String(error)}`);
+  });
+  if (!response.ok) throw new Error(`공개키 응답이 ${response.status} 입니다: ${url}`);
+  const key = parseVerificationPublicKey(await response.json());
+  return {
+    key,
+    description: `원격 공개키 ${url}`,
+    warning: explicitUrl
+      ? undefined
+      : "공개키를 Passport가 스스로 밝힌 발급자에서 받아왔습니다. 이 상태는 문서의 자기 일관성만 확인합니다. 신뢰 근거로 쓰려면 공개키를 한 번 받아 파일로 보관하고 --key 로 대조하세요.",
+  };
+}
+
+/**
+ * verify-keygen: produce an issuing key. Run once per deployment, by an operator, off the record.
+ * The private half is printed for the operator to paste into their secret store and is never
+ * written to disk by this command.
+ */
+async function runVerifyKeygen() {
+  const requested = (flag("--algorithm") ?? "ed25519").toLowerCase();
+  if (!["ed25519", "p256", "ecdsa"].includes(requested)) {
+    throw new Error("--algorithm 은 ed25519 또는 p256 이어야 합니다.");
+  }
+  const algorithm: VerificationAlgorithm = requested === "ed25519" ? "Ed25519" : "ECDSA-P256-SHA256";
+  const { pair, privateKeyEnvValue } = await generateVerificationKeyPair(algorithm);
+  process.stdout.write(
+    [
+      `[verify-keygen] ${pair.algorithm} / keyId ${pair.keyId}`,
+      "",
+      "1) 서버 환경변수에 붙여넣으세요 (이 값은 비밀입니다. 저장소에 커밋하지 마세요):",
+      `   CLUNK_VERIFY_PRIVATE_KEY=${privateKeyEnvValue}`,
+      "",
+      "2) 공개키는 서버가 /.well-known/clunk-verification-key 로 배포합니다. 참고용 값:",
+      `   ${JSON.stringify(pair.publicKey)}`,
+      "",
+      "환경변수를 설정하지 않으면 서버 검증 기능은 켜지지 않습니다(fail-closed).",
+      "",
+    ].join("\n"),
+  );
 }
 
 /**

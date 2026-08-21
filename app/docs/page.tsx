@@ -30,7 +30,10 @@ $ npm run clunk -- validate public/samples/clunk-messy-sample.glb --profile web
 $ npm run clunk -- optimize public/samples/clunk-messy-sample.glb --out out/quad.glb
 
 # Passport: 원본과 결과물을 각각 다시 검사해 하나로 묶습니다
-$ npm run clunk -- passport public/samples/clunk-messy-sample.glb out/quad.glb`;
+$ npm run clunk -- passport public/samples/clunk-messy-sample.glb out/quad.glb
+
+# 서버 검증 Passport 확인: 서명이 깨졌거나 파일이 다르면 exit code 2
+$ npm run clunk -- verify passport.json --asset model.glb --key clunk-verification-key.json`;
 
 const AGENT_SESSION = `$ echo '{"jsonrpc":"2.0","id":1,"method":"initialize"}' | npm run mcp
   protocolVersion  ${MCP_SERVER.protocolVersion}
@@ -97,10 +100,39 @@ export default function DocsPage() {
         <section className="doc-section">
           <h2>CLI로 실행하기</h2>
           <p className="doc-lead">
-            여섯 개 명령 모두 JSON 한 덩어리를 stdout으로 출력합니다. <code>validate</code>는 정책을 만족하지 않으면 exit
-            code 2로 끝나므로 CI 게이트에 그대로 넣을 수 있습니다.
+            검사 계열 명령은 JSON 한 덩어리를 stdout으로 출력합니다. <code>validate</code>와 <code>verify</code>는 판정이
+            실패하면 exit code 2로 끝나므로 CI 게이트에 그대로 넣을 수 있습니다.
           </p>
           <CodeBlock title="terminal" language="bash" code={CLI_COMMANDS} />
+        </section>
+
+        <section className="doc-section">
+          <h2>서버 검증 Passport</h2>
+          <p className="doc-lead">
+            기본 검사는 이용자의 기기에서 실행되므로, 그 기록은 <strong>같은 파일로 재현할 수 있다</strong>는 뜻이지
+            제3자가 대조할 수 있는 증명서는 아닙니다. 서명하는 쪽과 주장하는 쪽이 같은 기계이기 때문입니다. 제출용
+            증명서가 필요하면 <strong>서버 검증</strong>을 요청하십시오. 선택한 파일만 Clunk 서버로 업로드되고, 서버가
+            직접 검사한 결과에 Ed25519 서명이 붙습니다.
+          </p>
+          <ul className="principle-list">
+            <li>
+              <strong>옵트인</strong> — 요청한 파일에만 적용됩니다. 그 외 에셋은 지금까지처럼 브라우저 밖으로 나가지
+              않습니다.
+            </li>
+            <li>
+              <strong>바이트를 보관하지 않습니다</strong> — 업로드된 바이트는 검사에만 쓰이고 즉시 폐기됩니다. 남는
+              것은 sha256, 검사 결과, 서명뿐입니다.
+            </li>
+            <li>
+              <strong>누구나 확인할 수 있습니다</strong> — 공개키는{" "}
+              <code>/.well-known/clunk-verification-key</code>에 있습니다. 한 번 받아 파일로 보관하면 이후에는 네트워크
+              없이 <code>npm run clunk -- verify</code>로 대조할 수 있습니다.
+            </li>
+            <li>
+              <strong>증명하는 범위</strong> — “Clunk 서버가 이 sha256을 가진 바이트를 직접 열어 이 규칙 세트로
+              검사했고 결과가 이렇다”까지입니다. 그 에셋이 특정 게임·엔진에서 실제로 잘 돈다는 보증은 아닙니다.
+            </li>
+          </ul>
         </section>
 
         <section className="doc-section">

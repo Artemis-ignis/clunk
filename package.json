@@ -16,6 +16,7 @@
     "surface:test": "tsx tests/surface-parity.test.ts",
     "profile:test": "tsx tests/custom-profile.test.ts",
     "api:smoke": "tsx scripts/api-credit-smoke.ts",
+    "api:verify-smoke": "tsx scripts/api-verification-smoke.ts",
     "e2e": "node scripts/e2e.mjs",
     "generate:samples": "node scripts/generate-sample-assets.mjs",
     "clunk": "tsx scripts/clunk-cli.ts",

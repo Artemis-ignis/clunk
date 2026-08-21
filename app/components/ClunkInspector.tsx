@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import {
   BUILTIN_PROFILE_BUDGETS,
   createAssetBundle,
@@ -32,6 +33,70 @@ type QueueItem = {
   assetId?: string | null;
   error?: string;
 };
+
+/**
+ * Upload ceiling, enforced on `file.size` before a single byte is read.
+ *
+ * inspectAsset() is synchronous and its SHA-256 is plain JS, so the inspection owns the main
+ * thread for its whole duration, and the 3D preview then parses the same bytes on that same
+ * thread. Measured end to end in Chrome against the dev server (file chosen -> score painted):
+ *
+ *   0.5MB 0.04s · 1MB 0.4s · 2MB 0.8s · 4MB 1.4s · 8MB 3.9s · 12MB 5.9s · 16MB 8.2s
+ *   24MB 13.2s · 32MB 17.4s · 48MB and 100MB: no result inside a 300s / 420s observation
+ *   window, and the tab could not be closed afterwards.
+ *
+ * The curve is superlinear and the tab is frozen for all of it. 8MB is the last size that
+ * finishes inside the few-seconds band a person will sit through, so it is the limit; larger
+ * assets are refused up front and sent to the CLI, which has no such ceiling.
+ */
+const MAX_ASSET_BYTES = 8 * 1024 * 1024;
+
+/**
+ * Ceiling for the 3D preview, which is a separate cost from the inspection.
+ *
+ * The timings above are end to end, and most of that time is not the inspection: three.js
+ * parses the same bytes again on the same thread and uploads them to the GPU. Measured in
+ * Node, the core inspection alone runs 8MB in 184ms and 100MB in 2.3s — an order of magnitude
+ * under the numbers a person actually experiences. So the preview, not the verdict, is what
+ * makes a large asset unusable, and it is the part worth giving up first: skipping it above
+ * this size keeps the findings, the score and the downloads for assets the browser could not
+ * otherwise open at all.
+ */
+const MAX_PREVIEW_BYTES = 8 * 1024 * 1024;
+
+/** Thrown by saveRun so the UI can tell "no credits" apart from "server is down". */
+class SaveFailure extends Error {
+  constructor(message: string, readonly status: number) {
+    super(message);
+    this.name = "SaveFailure";
+  }
+}
+
+/**
+ * Korean copy for a failed save, keyed on the HTTP status rather than the server string, so
+ * the credit case keeps its own wording (and its top-up link) whatever the API replies.
+ */
+function saveFailureText(status: number, serverMessage?: string): string {
+  if (status === 402) return "데모 크레딧이 부족해 저장하지 못했습니다.";
+  if (status === 401) return "로그인이 만료되어 저장하지 못했습니다. 다시 로그인해 주세요.";
+  if (status === 0) return "네트워크가 끊겨 저장하지 못했습니다.";
+  if (status >= 500) return "워크스페이스 서버가 응답하지 않아 저장하지 못했습니다.";
+  return serverMessage?.trim() || "워크스페이스 저장에 실패했습니다.";
+}
+
+/**
+ * Lets the browser paint before a synchronous inspection seizes the thread. Without it the
+ * "검사 중" state is set and blocked in the same tick, so the user only ever sees the frozen
+ * "before" frame.
+ */
+function nextPaint(): Promise<void> {
+  return new Promise((resolve) => {
+    // Two frames, not one: React commits on its own scheduler task, so a single rAF can fire
+    // before the commit. The second frame is guaranteed to be after it, and the timeout hands
+    // the thread back only once that frame has been presented.
+    requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(resolve, 0)));
+  });
+}
 
 const STEPS = [
   { index: "01", label: "입력" },
@@ -106,6 +171,17 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
   const [customProfile, setCustomProfile] = useState<CustomProfile | null>(null);
   const [customProfileName, setCustomProfileName] = useState<string | null>(null);
   const [profileMode, setProfileMode] = useState<"builtin" | "custom">("builtin");
+  // Credits are spent on this screen, so the balance belongs on this screen. Seeded from
+  // /api/me and then kept current from the `credits` every write endpoint returns.
+  const [credits, setCredits] = useState<number | null>(null);
+  const [creditsUnavailable, setCreditsUnavailable] = useState(false);
+  // What is running right now, so a synchronous inspection is not an unexplained freeze.
+  const [activeJob, setActiveJob] = useState<{ name: string; bytes: number; phase: "inspect" | "optimize" } | null>(null);
+  // Set when the browser produced a valid report the workspace refused to store. The report
+  // stays on screen; this only records why it is not in the history.
+  const [saveFailure, setSaveFailure] = useState<{ message: string; needsCredits: boolean } | null>(null);
+  const [batchStopped, setBatchStopped] = useState<"none" | "cancelled" | "credits">("none");
+  const cancelBatchRef = useRef(false);
 
   const isCustomActive = profileMode === "custom" && customProfile !== null;
   // The workspace API only persists built-in-profile runs it can re-verify, so custom-profile
@@ -133,11 +209,59 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
     Boolean(optimization),
   ];
 
-  async function loadAsset(name: string, bytes: Uint8Array, isSample: boolean) {
-    setBusy("inspect"); setError(null); setNotice(null); setOptimization(null); setDownloadGate("pending"); setSampleMode(isSample); setFileName(name); setSourceBytes(bytes); setAssetId(null);
+  const readCredits = useCallback(async (): Promise<number | null> => {
     try {
-      const nextReport = inspectAsset(createAssetBundle(name, bytes), activePolicy);
-      setReport(nextReport);
+      const response = await fetch("/api/me", { headers: { accept: "application/json" } });
+      const body = (await response.json().catch(() => ({}))) as { credits?: number };
+      if (response.ok && typeof body.credits === "number") return body.credits;
+      return null;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const applyCredits = useCallback((value: number | null) => {
+    if (value === null) {
+      setCreditsUnavailable(true);
+      return;
+    }
+    setCredits(value);
+    setCreditsUnavailable(false);
+  }, []);
+
+  const refreshCredits = useCallback(async () => {
+    applyCredits(await readCredits());
+  }, [applyCredits, readCredits]);
+
+  useEffect(() => {
+    let alive = true;
+    void readCredits().then((value) => {
+      if (alive) applyCredits(value);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [applyCredits, readCredits]);
+
+  async function loadAsset(name: string, bytes: Uint8Array, isSample: boolean) {
+    setBusy("inspect"); setError(null); setNotice(null); setOptimization(null); setDownloadGate("pending"); setSampleMode(isSample); setFileName(name); setSourceBytes(bytes); setAssetId(null); setSaveFailure(null);
+    setActiveJob({ name, bytes: bytes.byteLength, phase: "inspect" });
+    // The inspection blocks the thread; hand the "검사 중" frame to the compositor first.
+    await nextPaint();
+    let nextReport: InspectionReport;
+    try {
+      nextReport = inspectAsset(createAssetBundle(name, bytes), activePolicy);
+    } catch (caught) {
+      setReport(null);
+      setError(caught instanceof Error ? caught.message : "에셋 검사에 실패했습니다.");
+      setBusy("idle");
+      setActiveJob(null);
+      return;
+    }
+    // The local result is final at this point. Whatever the workspace says next, it stays.
+    setReport(nextReport);
+    setActiveJob(null);
+    try {
       if (isSample) setNotice("데모 샘플입니다. 이 로컬 결과는 워크스페이스 이력과 크레딧 사용량에서 제외됩니다.");
       else if (isCustomActive)
         setNotice(
@@ -145,20 +269,36 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
         );
       else await persistAnalysis(nextReport);
     } catch (caught) {
-      setReport(null); setError(caught instanceof Error ? caught.message : "에셋 검사에 실패했습니다.");
-    } finally { setBusy("idle"); }
+      const status = caught instanceof SaveFailure ? caught.status : 500;
+      setSaveFailure({
+        message: caught instanceof Error ? caught.message : saveFailureText(status),
+        needsCredits: status === 402,
+      });
+      setNotice(null);
+    } finally {
+      setBusy("idle");
+    }
   }
 
   async function saveRun(
     nextReport: InspectionReport,
   ): Promise<{ assetId: string | null; idempotent: boolean }> {
-    const response = await fetch("/api/runs", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
-      analysisId: nextReport.analysisId, fileName: nextReport.fileName, format: nextReport.format, byteLength: nextReport.byteLength,
-      inputHash: nextReport.inputHash, profileId: nextReport.profileId, ruleSetId: nextReport.ruleSetId, score: nextReport.score.score,
-      hardBlockerCount: nextReport.score.hardBlockerCount, findingCount: nextReport.findings.length, report: nextReport,
-    }) });
-    const body = await response.json().catch(() => ({})) as { assetId?: string; idempotent?: boolean; error?: string };
-    if (!response.ok) throw new Error(body.error ?? "워크스페이스 저장에 실패했습니다.");
+    let response: Response;
+    try {
+      response = await fetch("/api/runs", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
+        analysisId: nextReport.analysisId, fileName: nextReport.fileName, format: nextReport.format, byteLength: nextReport.byteLength,
+        inputHash: nextReport.inputHash, profileId: nextReport.profileId, ruleSetId: nextReport.ruleSetId, score: nextReport.score.score,
+        hardBlockerCount: nextReport.score.hardBlockerCount, findingCount: nextReport.findings.length, report: nextReport,
+      }) });
+    } catch {
+      throw new SaveFailure(saveFailureText(0), 0);
+    }
+    const body = await response.json().catch(() => ({})) as { assetId?: string; idempotent?: boolean; error?: string; credits?: number };
+    if (typeof body.credits === "number") {
+      setCredits(body.credits);
+      setCreditsUnavailable(false);
+    }
+    if (!response.ok) throw new SaveFailure(saveFailureText(response.status, body.error), response.status);
     return { assetId: body.assetId ?? null, idempotent: body.idempotent === true };
   }
 
@@ -177,13 +317,37 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
   }
 
   /**
+   * Size gate. `file.size` is metadata, so an oversized asset is rejected without ever being
+   * read into memory — the old path awaited arrayBuffer() first and froze the tab there.
+   */
+  function oversizedNotice(files: File[]): string | null {
+    const oversized = files.filter((file) => file.size > MAX_ASSET_BYTES);
+    if (!oversized.length) return null;
+    const listed = oversized
+      .slice(0, 3)
+      .map((file) => `${file.name} ${formatBytes(file.size)}`)
+      .join(", ");
+    return `브라우저 검사 상한은 ${formatBytes(MAX_ASSET_BYTES)}입니다. 상한을 넘은 파일은 열지 않았습니다: ${listed}${
+      oversized.length > 3 ? ` 외 ${oversized.length - 3}개` : ""
+    }. 이 크기는 검사하는 동안 탭이 수십 초에서 수 분 동안 멈춥니다. 터미널에서 clunk inspect <파일> 로 검사하세요. CLI에는 크기 제한이 없습니다.`;
+  }
+
+  /**
    * First single file takes the direct flow. Anything after that — multiple files, or another
    * file while a result is already open — accumulates in the batch queue instead of replacing.
    */
-  async function handleFiles(files: File[]) {
-    if (!files.length) return;
+  async function handleFiles(incoming: File[]) {
+    if (!incoming.length) return;
+    setError(null);
+    const rejection = oversizedNotice(incoming);
+    const files = incoming.filter((file) => file.size <= MAX_ASSET_BYTES);
+    if (!files.length) {
+      setError(rejection);
+      return;
+    }
     if (files.length === 1 && !queue.length && !report) {
       await handleFile(files[0]);
+      if (rejection) setError(rejection);
       return;
     }
     const items: QueueItem[] = await Promise.all(
@@ -195,23 +359,33 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
       })),
     );
     setQueue((prev) => [...prev, ...items]);
-    setError(null);
     setNotice(`${items.length}개 파일이 큐에 올라왔습니다. 시작 버튼을 누르기 전에는 크레딧을 쓰지 않습니다.`);
+    if (rejection) setError(rejection);
   }
 
   async function runBatch() {
     if (batchBusy) return;
     setBatchBusy(true);
     setError(null);
+    setBatchStopped("none");
+    setSaveFailure(null);
+    cancelBatchRef.current = false;
     let okCount = 0;
     let failCount = 0;
     let debitCount = 0;
+    let stopped: "none" | "cancelled" | "credits" = "none";
     const hadOpenReport = Boolean(report);
     const doneItems: QueueItem[] = [];
     // Snapshot: files dropped while the batch runs wait for the next explicit start.
     const pending = queue.filter((item) => item.status === "queued");
     for (const item of pending) {
+      if (cancelBatchRef.current) {
+        stopped = "cancelled";
+        break;
+      }
       setQueue((prev) => prev.map((q) => (q.id === item.id ? { ...q, status: "running" } : q)));
+      setActiveJob({ name: item.name, bytes: item.bytes.byteLength, phase: "inspect" });
+      await nextPaint();
       try {
         const nextReport = inspectAsset(createAssetBundle(item.name, item.bytes), activePolicy);
         const saved = isCustomActive ? { assetId: null, idempotent: true } : await saveRun(nextReport);
@@ -222,22 +396,41 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
         setQueue((prev) => prev.map((q) => (q.id === item.id ? doneItem : q)));
       } catch (caught) {
         failCount += 1;
+        const status = caught instanceof SaveFailure ? caught.status : 500;
         const messageText = caught instanceof Error ? caught.message : "검사에 실패했습니다.";
         setQueue((prev) => prev.map((q) => (q.id === item.id ? { ...q, status: "error", error: messageText } : q)));
+        // One 402 means every remaining file would fail the same way. Stop instead of
+        // firing the rest of the queue at a wall and printing a column of failures.
+        if (status === 402) {
+          stopped = "credits";
+          break;
+        }
       }
       await new Promise((resolve) => setTimeout(resolve, 140));
     }
+    setActiveJob(null);
     setBatchBusy(false);
+    setBatchStopped(stopped);
+    cancelBatchRef.current = false;
     const reused = okCount - debitCount;
-    setNotice(
-      isCustomActive
-        ? `일괄 검사 완료(커스텀 프로파일 · 로컬 전용): 성공 ${okCount}건, 실패 ${failCount}건 · 크레딧 차감 없음`
-        : `일괄 검사 완료: 성공 ${okCount}건, 실패 ${failCount}건 · 크레딧 ${debitCount}개 차감${
-            reused > 0 ? ` (이미 저장된 검사 ${reused}건은 차감 없음)` : ""
-          }`,
-    );
+    const tail =
+      stopped === "cancelled"
+        ? " · 사용자가 중단해 남은 파일은 대기 상태로 두었습니다"
+        : stopped === "credits"
+          ? " · 크레딧이 떨어져 남은 파일은 실행하지 않았습니다"
+          : "";
+    const summary = isCustomActive
+      ? `일괄 검사 완료(커스텀 프로파일 · 로컬 전용): 성공 ${okCount}건, 실패 ${failCount}건 · 크레딧 차감 없음${tail}`
+      : `일괄 검사 완료: 성공 ${okCount}건, 실패 ${failCount}건 · 크레딧 ${debitCount}개 차감${
+          reused > 0 ? ` (이미 저장된 검사 ${reused}건은 차감 없음)` : ""
+        }${tail}`;
+    setNotice(summary);
+    if (stopped === "credits") void refreshCredits();
     // Land the user on a result instead of an empty detail pane.
     if (!hadOpenReport && doneItems.length) openQueueItem(doneItems[0]);
+    // openQueueItem replaces the notice with the file it opened. That is the right headline
+    // for a clean run, but not for a run that stopped early — put the reason back on top.
+    if (stopped !== "none") setNotice(summary);
   }
 
   async function applyEnginePreset(key: string) {
@@ -291,6 +484,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
     setDownloadGate("pending");
     setAssetId(item.assetId ?? null);
     setOpenedQueueId(item.id);
+    setSaveFailure(null);
     setError(null);
     setNotice(`큐에서 ${item.name} 결과를 열었습니다.`);
   }
@@ -303,7 +497,9 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
 
   async function handleOptimize() {
     if (!sourceBytes || !report) return;
-    setBusy("optimize"); setError(null); setDownloadGate("pending");
+    setBusy("optimize"); setError(null); setDownloadGate("pending"); setSaveFailure(null);
+    setActiveJob({ name: fileName, bytes: sourceBytes.byteLength, phase: "optimize" });
+    await nextPaint();
     try {
       const result = optimizeAsset(createAssetBundle(fileName, sourceBytes), activePolicy);
       const reopened = inspectAsset(createAssetBundle(result.outputFileName, result.outputBytes), activePolicy);
@@ -322,12 +518,27 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
           assetId: assetId ?? `asset-${result.inputHash.slice(0, 24)}`, sourceHash: result.inputHash, outputHash: result.outputHash,
           operations: result.operations, passport: result.passport, reinspection: result.after,
         }) });
-        const body = await response.json().catch(() => ({})) as { error?: string };
-        if (!response.ok) throw new Error(body.error ?? "최적화 저장에 실패했습니다.");
+        const body = await response.json().catch(() => ({})) as { error?: string; credits?: number };
+        if (typeof body.credits === "number") {
+          setCredits(body.credits);
+          setCreditsUnavailable(false);
+        }
+        if (!response.ok) throw new SaveFailure(saveFailureText(response.status, body.error), response.status);
         setNotice("최적화를 저장했습니다. 데모 크레딧 1개를 사용했고 Passport가 준비되었습니다.");
       }
-    } catch (caught) { setError(caught instanceof Error ? caught.message : "최적화에 실패했습니다."); }
-    finally { setBusy("idle"); }
+    } catch (caught) {
+      // The optimized bytes and their Passport are already on screen and already re-verified;
+      // a failed save must not take the download away from the user.
+      if (caught instanceof SaveFailure) {
+        setSaveFailure({ message: caught.message, needsCredits: caught.status === 402 });
+        setNotice(null);
+      } else {
+        setError(caught instanceof Error ? caught.message : "최적화에 실패했습니다.");
+      }
+    } finally {
+      setBusy("idle");
+      setActiveJob(null);
+    }
   }
 
   function download(bytes: Uint8Array, name: string, type: string) {
@@ -338,13 +549,29 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
   }
 
   const blocked = Boolean(report && report.findings.some((finding) => finding.severity === "CRITICAL"));
+  const queuedCount = queue.filter((item) => item.status === "queued").length;
+  // Pre-flight against the real balance: the old queue happily promised "40 크레딧" on a
+  // 25-credit workspace and only told the truth after 15 rows had already failed.
+  const creditShortfall =
+    !isCustomActive && credits !== null && queuedCount > credits ? queuedCount - credits : 0;
 
   return (
     <WorkspaceShell
       active="inspector"
       title="에셋 검사기"
       userLabel={userLabel}
-      status={<StatusPill status={status} />}
+      status={
+        <>
+          <Link className="credit-chip" href="/pricing" title="데모 크레딧 잔액 · 클릭하면 크레딧과 플랜 화면으로 이동합니다">
+            <Icon name="credit" size={13} />
+            <span>잔액</span>
+            <strong className="num">
+              {creditsUnavailable ? "확인 불가" : credits === null ? "…" : credits}
+            </strong>
+          </Link>
+          <StatusPill status={status} />
+        </>
+      }
     >
       <ol className="pipeline-strip" aria-label="에셋 처리 단계">
         {STEPS.map((step, index) => (
@@ -367,6 +594,32 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
         <div className="banner banner-error">
           <Icon name="circleAlert" size={16} />
           <p>{error}</p>
+        </div>
+      ) : null}
+      {activeJob ? (
+        <div className="banner banner-running" role="status" aria-live="polite">
+          <span className="spinner" />
+          <p>
+            <strong>{activeJob.name}</strong>
+            <span className="num"> {formatBytes(activeJob.bytes)}</span>{" "}
+            {activeJob.phase === "optimize" ? "최적화 중" : "검사 중"} — 브라우저에서 계산하는 동안
+            화면이 잠시 멈춘 것처럼 보일 수 있습니다.
+          </p>
+        </div>
+      ) : null}
+      {saveFailure ? (
+        <div className="banner banner-warning" role="status">
+          <Icon name="triangleAlert" size={16} />
+          <p>
+            이 결과는 저장되지 않았습니다. {saveFailure.message} 검사는 브라우저에서 이미 끝났으니
+            아래 결과와 다운로드는 그대로 사용할 수 있습니다.
+            {saveFailure.needsCredits ? (
+              <>
+                {" "}
+                <Link href="/pricing">크레딧과 플랜에서 충전하기</Link>
+              </>
+            ) : null}
+          </p>
         </div>
       ) : null}
 
@@ -398,7 +651,50 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
                 </>
               )}
             </p>
+            {creditShortfall > 0 ? (
+              <p className="queue-credit-alert">
+                <Icon name="triangleAlert" size={14} />
+                <span>
+                  잔액이 <strong className="num">{credits}</strong> 크레딧이라 대기 중{" "}
+                  <strong className="num">{queuedCount}</strong>개 가운데{" "}
+                  <strong className="num">{credits}</strong>개까지만 검사할 수 있습니다. 나머지{" "}
+                  <strong className="num">{creditShortfall}</strong>개는 저장에 실패하므로, 지금
+                  시작하면 크레딧이 떨어지는 지점에서 멈춥니다.{" "}
+                  <Link href="/pricing">크레딧과 플랜에서 충전하기</Link>
+                </span>
+              </p>
+            ) : null}
+            {batchStopped === "cancelled" ? (
+              <p className="queue-credit-alert queue-stop-note">
+                <Icon name="info" size={14} />
+                <span>
+                  일괄 검사를 중단했습니다. 남은 파일은 대기 상태로 두었으니 다시 시작하면 이어서
+                  검사합니다.
+                </span>
+              </p>
+            ) : null}
+            {batchStopped === "credits" ? (
+              <p className="queue-credit-alert">
+                <Icon name="circleAlert" size={14} />
+                <span>
+                  데모 크레딧이 부족해 일괄 검사를 멈췄습니다. 남은 파일은 대기 상태로 두었으니
+                  충전한 뒤 다시 시작하면 이어서 검사합니다.{" "}
+                  <Link href="/pricing">크레딧과 플랜에서 충전하기</Link>
+                </span>
+              </p>
+            ) : null}
             <div className="queue-tools">
+              {batchBusy ? (
+                <button
+                  type="button"
+                  className="button button-quiet button-sm"
+                  onClick={() => {
+                    cancelBatchRef.current = true;
+                  }}
+                >
+                  중단
+                </button>
+              ) : null}
               <button
                 type="button"
                 className="button button-quiet button-sm"
@@ -415,6 +711,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
                 onClick={() => {
                   setQueue([]);
                   setOpenedQueueId(null);
+                  setBatchStopped("none");
                 }}
               >
                 큐 비우기
@@ -622,6 +919,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
             </span>
             <strong>GLB 또는 GLTF를 놓으세요</strong>
             <span>여러 파일을 한 번에 놓으면 일괄 검사 큐가 만들어집니다</span>
+            <span className="num">파일당 최대 {formatBytes(MAX_ASSET_BYTES)} · 더 큰 에셋은 CLI에서</span>
           </label>
 
           <div className="sample-picker">
@@ -664,13 +962,32 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
                 </small>
               </div>
             </div>
-            <span className="hash-chip">
-              <Icon name="hash" size={13} />
-              {report ? shortHash(report.inputHash) : "해시 없음"}
+            <span className="run-header-chips">
+              {saveFailure ? (
+                <span className="unsaved-chip" title={saveFailure.message}>
+                  <Icon name="triangleAlert" size={12} />
+                  저장 안 됨
+                </span>
+              ) : null}
+              <span className="hash-chip">
+                <Icon name="hash" size={13} />
+                {report ? shortHash(report.inputHash) : "해시 없음"}
+              </span>
             </span>
           </div>
 
-          <AssetPreview bytes={activeBytes} fileName={activeFileName || "asset.glb"} />
+          {!activeBytes || activeBytes.byteLength <= MAX_PREVIEW_BYTES ? (
+            <AssetPreview bytes={activeBytes} fileName={activeFileName || "asset.glb"} />
+          ) : (
+            <div className="panel preview-skipped">
+              <span className="mono-label">3D 미리보기 생략</span>
+              <p>
+                {formatBytes(activeBytes.byteLength)} 파일은 미리보기를 그리지 않습니다. 브라우저가
+                같은 바이트를 한 번 더 파싱해 GPU에 올리는 동안 화면이 수십 초 멈추기 때문입니다.
+                <strong> 검사 결과와 다운로드는 그대로 사용할 수 있습니다.</strong>
+              </p>
+            </div>
+          )}
 
           <div className="panel metrics-panel">
             <div className="panel-head">

@@ -777,12 +777,22 @@ pre {
   white-space: nowrap;
 }
 
-/* Batch queue: balance vs. queued cost, checked before the run instead of after. */
+/* Batch queue: balance vs. queued cost, checked before the run instead of after.
+   Scoped to .queue-confirm so it outranks that container's generic `p` rule and takes a
+   full row of its own instead of being squeezed between the blurb and the buttons. */
+.queue-confirm .queue-credit-alert {
+  flex: 1 0 100%;
+}
+
+.queue-confirm .queue-credit-alert strong {
+  color: inherit;
+}
+
 .queue-credit-alert {
   display: flex;
   align-items: flex-start;
   gap: var(--sp-8);
-  margin: var(--sp-8) 0 0;
+  margin: 0;
   padding: var(--sp-8) var(--sp-12);
   border: 1px solid rgba(138, 90, 6, 0.34);
   border-radius: var(--r-control);
@@ -807,6 +817,13 @@ pre {
   font-weight: 620;
   text-decoration: underline;
   white-space: nowrap;
+}
+
+/* Same shape, no alarm: a user-requested stop is not a problem. */
+.queue-stop-note {
+  border-color: var(--line-strong);
+  background: var(--tint-3);
+  color: var(--text-muted);
 }
 
 .spinner {
@@ -6729,4 +6746,22 @@ html.snap-y {
 .login-methods {
   display: grid;
   gap: var(--sp-12);
+}
+
+/* Stands in for the 3D preview when the asset is too large to draw. The verdict is still
+   there; only the picture is missing, and the copy says why. */
+.preview-skipped {
+  display: grid;
+  gap: var(--sp-8);
+  padding: var(--sp-24);
+  border-style: dashed;
+  text-align: center;
+}
+
+.preview-skipped p {
+  margin: 0 auto;
+  max-width: 34em;
+  color: var(--text-muted);
+  font-size: var(--fs-1);
+  line-height: 1.7;
 }
