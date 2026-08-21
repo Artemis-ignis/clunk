@@ -138,6 +138,12 @@ stdio JSON-RPC 서버가 도구 6종을 제공합니다: `clunk_inspect`, `clunk
 - 첨부 후보·실제 확보 상태: [제출 증거 매트릭스](docs/application/evidence-matrix.ko.md), [증거 파일 목록](output/application/evidence/manifest.ko.md), [38초 1280×720 SIWC 인증 실제 데모](output/application/evidence/clunk-demo-auth-final-ko.webm), [한국어 데모 대본](docs/application/demo-script.ko.md)
 - 실제 게임 검증 협업: [Harvest Frontier 핸드오프](docs/integrations/harvest-frontier.ko.md), [현재 8종 읽기 전용 manifest](docs/integrations/harvest-frontier-run.json), [반복 PowerShell runner](scripts/harvest-frontier-handoff.ps1)
 
+## 배포
+
+실제로 켜기 전에 해야 할 설정과 순서는 [docs/deploy-runbook.ko.md](docs/deploy-runbook.ko.md)에
+모아 두었습니다. 환경변수 다섯 개, GitHub OAuth 앱 등록, 사업자 정보 기재, 배포 후 확인 항목,
+그리고 하지 말아야 할 것(MCP 원격 노출·데모 프록시 개방)이 들어 있습니다.
+
 ## 상용 판매 준비도
 
 보안·개인정보 감사와 상용 완성도 감사(실제 브라우저 조작 재현)의 결과, 처리한 것과 남은 것을
