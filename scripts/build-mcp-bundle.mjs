@@ -28,5 +28,9 @@ await writeFile("bin/clunk-mcp.mjs", banner + code, "utf8");
 await mkdir("public", { recursive: true });
 await writeFile("public/clunk-mcp.mjs", banner + code, "utf8");
 
+// The publishable package carries the same bytes, so publishing never ships a stale build.
+await mkdir("packages/mcp-npm", { recursive: true });
+await writeFile("packages/mcp-npm/clunk-mcp.mjs", banner + code, "utf8");
+
 const bytes = (await readFile("bin/clunk-mcp.mjs")).byteLength;
 console.log(`bin/clunk-mcp.mjs  ${bytes.toLocaleString()} bytes (dependency-free)`);

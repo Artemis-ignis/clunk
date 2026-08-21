@@ -1,0 +1,13 @@
+{
+  "name": "clunk-mcp",
+  "version": "0.1.0",
+  "description": "Clunk MCP server — inspect, validate, optimize and prove GLB/GLTF game assets from any MCP-capable agent.",
+  "keywords": ["mcp", "gltf", "glb", "3d", "game-assets", "model-context-protocol"],
+  "license": "MIT",
+  "type": "module",
+  "bin": { "clunk-mcp": "clunk-mcp.mjs" },
+  "files": ["clunk-mcp.mjs", "README.md"],
+  "engines": { "node": ">=20" },
+  "repository": { "type": "git", "url": "git+https://github.com/Artemis-ignis/clunk.git" },
+  "homepage": "https://clunk-preview.vercel.app"
+}
