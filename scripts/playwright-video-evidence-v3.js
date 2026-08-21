@@ -39,7 +39,8 @@ async page => {
   await page.waitForTimeout(2600);
 
   for (const d of downloads) {
-    try { await d.saveAs("C:\\Users\\50106\\Desktop\\Clunk\\.playwright-cli\\video-dl-" + d.suggestedFilename()); } catch {}
+    // 저장 실패는 녹화 자체를 중단시키지 않는다 — 다운로드 해시 대조는 별도 단계에서 한다.
+    try { await d.saveAs("C:\\Users\\50106\\Desktop\\Clunk\\.playwright-cli\\video-dl-" + d.suggestedFilename()); } catch { /* ignore */ }
   }
   return { downloads: downloads.map(d => d.suggestedFilename()), consoleErrors, pageErrors };
 }

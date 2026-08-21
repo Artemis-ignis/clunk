@@ -5755,28 +5755,11 @@ html.snap-y {
   border-top: 1px solid var(--line);
 }
 
-/* --- Snap responsiveness --------------------------------------------------
-   Below the breakpoint the sections grow taller than one screen, so forced
-   snapping would trap content; scrolling falls back to normal. */
-
-@media (max-width: 960px) {
-  html.snap-y {
-    scroll-snap-type: none;
-  }
-
-  .snap-sec {
-    min-height: auto;
-    padding: 120px var(--gutter) var(--sp-64);
-  }
-
-  .hero3-inner {
-    grid-template-columns: 1fr;
-    gap: var(--sp-48);
-  }
-
-  /* Small screens keep the full teardown look — leader lines and all. The chips shrink
-     to caption size instead of disappearing: same percent anchors as desktop (the stage
-     keeps its 4:3 geometry), so three compact chips sit clear of the model. */
+/* Chip compaction starts well before the hero stacks: in the 961-1240px band the hero is
+   still two columns, so the stage narrows while desktop-sized chips keep their pixel size —
+   that is exactly where they collide with the model. Same percent anchors, caption-sized
+   chips, `small` line dropped. */
+@media (max-width: 1240px) {
   .hero3-callout {
     gap: 0;
     padding: 5px 9px;
@@ -5822,6 +5805,26 @@ html.snap-y {
 
   .hero3-lead line {
     stroke-width: 1.1px;
+  }
+}
+
+/* --- Snap responsiveness --------------------------------------------------
+   Below the breakpoint the sections grow taller than one screen, so forced
+   snapping would trap content; scrolling falls back to normal. */
+
+@media (max-width: 960px) {
+  html.snap-y {
+    scroll-snap-type: none;
+  }
+
+  .snap-sec {
+    min-height: auto;
+    padding: 120px var(--gutter) var(--sp-64);
+  }
+
+  .hero3-inner {
+    grid-template-columns: 1fr;
+    gap: var(--sp-48);
   }
 
   .hero3-filestrip {
