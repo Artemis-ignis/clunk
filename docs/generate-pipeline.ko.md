@@ -51,3 +51,16 @@ npm 라이브러리가 아니라 에이전트 스킬이다. 이미지를 근거�
 - 텍스처 포함 생성물은 현 레일 밖이다 — 텍스처 세트 검사(P0)와 함께 확장한다.
 
 관련: [roadmap-hf-feedback.ko.md](roadmap-hf-feedback.ko.md) · [benchmark-meshy.ko.md](benchmark-meshy.ko.md) · [custom-profiles.ko.md](custom-profiles.ko.md)
+
+## 실게임 채택 기록 (2026-08-21, 1호)
+
+풍차 데모가 Harvest Frontier에 **정식 채택**되었습니다 (HF 커밋 2377e665, M67-B):
+- 원본 팩토리 무변경 보존(sha256 36c400a4… 양측 대조 일치), props.ts 이디엄으로 어댑트
+- **blades_pivot 소켓 계약이 어댑트를 그대로 통과** — HF가 vitest 단언으로 고정, 결정론적
+  바람 티커에 합성(회전 실증 캡처 포함). 생성측 named-node 계약의 실전 검증 1호
+- 5재질 → 3드로우 병합, 예산 델타 실측 +6드로우/+2,730트라이앵글
+- provenance에 "clunk-generate-pipeline demo, adapted" + Apache-2.0 명시 기록
+- HF 정직 기록: 콜라이더 미부착(후속), reduced-motion 시 날개 정지(설계상)
+
+생성 파이프라인의 순환 완결: 에이전트 생성 → Clunk 검수 100/100 → Passport →
+실게임 채택(provenance) → 소켓 계약이 실제 애니메이션 시스템에 접속.
