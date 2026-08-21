@@ -74,8 +74,8 @@ const MONTHLY_PLANS = [
 ] as const;
 
 const CREDIT_PACKS = [
-  { amount: "+100", price: "15,000원", note: "스팟 검수. 구독 없이 선불로 시작" },
-  { amount: "+500", price: "65,000원", note: "마일스톤 검수 몰아치기용" },
+  { amount: "+100", price: "15,000원", note: "스팟 검사. 구독 없이 선불로 시작" },
+  { amount: "+500", price: "65,000원", note: "마일스톤 검사 몰아치기용" },
   { amount: "+2,000", price: "220,000원", note: "대규모 에셋 드롭 정리용" },
 ] as const;
 

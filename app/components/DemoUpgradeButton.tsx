@@ -26,7 +26,7 @@ export function DemoUpgradeButton({ disabled = false }: { disabled?: boolean }) 
           : state === "done"
             ? "데모 크레딧 100개 추가됨"
             : state === "error"
-              ? "로그인 후 업그레이드"
+              ? "실패 · 다시 시도"
               : "Builder 데모로 전환"}
     </button>
   );
