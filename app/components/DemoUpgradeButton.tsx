@@ -24,10 +24,10 @@ export function DemoUpgradeButton({ disabled = false }: { disabled?: boolean }) 
         : state === "busy"
           ? "추가 중"
           : state === "done"
-            ? "데모 크레딧 100개 추가됨"
+            ? "크레딧 100개 추가됨"
             : state === "error"
               ? "실패 · 다시 시도"
-              : "Builder 데모로 전환"}
+              : "Builder로 전환"}
     </button>
   );
 }

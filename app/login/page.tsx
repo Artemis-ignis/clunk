@@ -105,7 +105,6 @@ export default async function LoginPage({
 
       <footer className="login-footer">
         <span>Clunk, 3D 에셋 품질 게이트</span>
-        <span className="demo-marker">DEMO MODE · 실제 결제 아님</span>
       </footer>
     </main>
   );

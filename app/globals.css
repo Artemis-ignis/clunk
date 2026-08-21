@@ -6836,3 +6836,56 @@ html.snap-y {
     white-space: pre;
   }
 }
+
+/* --- Pricing: give the plans presence --------------------------------------
+   The cards were a flat white grid with hairline borders, which read as a documentation
+   table that happened to contain money. Depth, a shadow on the plan you can actually use,
+   and a price that carries the weight of the section. */
+.plan-card {
+  box-shadow: var(--shadow-soft);
+  transition: transform var(--dur-1) var(--ease), box-shadow var(--dur-1) var(--ease),
+    border-color var(--dur-1) var(--ease);
+}
+
+.plan-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-panel);
+}
+
+.plan-card-active {
+  box-shadow: var(--shadow-panel);
+}
+
+.plan-card-active::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(150deg, var(--accent), transparent 60%);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.plan-price {
+  letter-spacing: var(--ls-display);
+}
+
+/* A quiet ground under the whole pricing column so the cards sit on something. */
+.pricing-block {
+  position: relative;
+}
+
+.pricing-block::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -6% -8% -10%;
+  border-radius: var(--r-panel);
+  background: radial-gradient(60% 55% at 50% 0%, var(--accent-soft), transparent 70%);
+  pointer-events: none;
+}

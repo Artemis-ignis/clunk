@@ -175,7 +175,7 @@ export default function Home() {
               </RevealText>
               <p className="lead">
                 샘플로 시작하거나 직접 만든 GLB를 실행할 수 있습니다. 크레딧은 결제 약속이 아니라
-                실제로 동작하는 데모 원장입니다.
+                모든 증감이 사유와 함께 남는 원장입니다.
               </p>
               <div className="hero-actions cta3-actions">
                 <Link className="button button-primary" href="/app">
@@ -214,7 +214,6 @@ export default function Home() {
                 <Link href="/legal/privacy">개인정보처리방침</Link>
                 <Link href="/legal/refund">환불·청약철회</Link>
               </nav>
-              <span className="demo-marker">DEMO MODE · 실제 결제 아님</span>
             </footer>
           </div>
         </section>

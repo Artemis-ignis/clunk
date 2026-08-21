@@ -149,7 +149,7 @@ export function DashboardClient() {
       ) : null}
 
       <section className="ws-summary ws-summary-4" aria-label="워크스페이스 요약">
-        <Summary label="사용 가능 크레딧" value={credits === null ? "대기" : `${credits}`} detail="D1 데모 원장 · 성공 시에만 차감" tone="accent" />
+        <Summary label="사용 가능 크레딧" value={credits === null ? "대기" : `${credits}`} detail="성공한 실행에만 차감" tone="accent" />
         <Summary label="실제 검사" value={`${runs.length}`} detail={runs.length ? "이 워크스페이스에 저장됨" : "아직 실제 검사가 없음"} />
         <Summary
           label="준비 완료"
@@ -273,7 +273,7 @@ export function DashboardClient() {
               <span className="mono-label">크레딧 원장</span>
               <h3>사용량</h3>
             </div>
-            <span className="demo-marker">DEMO MODE · 실제 결제 아님</span>
+            <span className="demo-marker">청구 없음</span>
           </div>
           {ledger.length ? (
             <ul className="ledger-list">
@@ -290,11 +290,11 @@ export function DashboardClient() {
             <p className="muted-note">인증 후 실제 원장 내역이 나타납니다.</p>
           )}
           <p className="muted-note">
-            파일럿을 위한 작동하는 데모 원장입니다. 결제 제공자는 아직 연결하지 않았습니다.
+            모든 증감이 사유와 함께 남습니다. 국내 결제 연동 전이라 청구는 발생하지 않습니다.
           </p>
           <DemoUpgradeButton />
           <Link href="/pricing" className="text-link">
-            플랜과 데모 업그레이드
+            플랜과 크레딧
             <Icon name="arrowRight" size={13} />
           </Link>
         </aside>
@@ -386,7 +386,7 @@ function creditReasonLabel(reason: string) {
   if (reason === "demo-grant") return "시작 지급";
   if (reason === "inspect") return "검사 1회";
   if (reason === "optimize") return "최적화 1회";
-  if (reason === "demo-upgrade") return "Builder 데모 전환";
+  if (reason === "demo-upgrade") return "Builder 전환";
   if (reason === "refund") return "실패 복구";
   return reason;
 }

@@ -77,7 +77,7 @@ class SaveFailure extends Error {
  * the credit case keeps its own wording (and its top-up link) whatever the API replies.
  */
 function saveFailureText(status: number, serverMessage?: string): string {
-  if (status === 402) return "데모 크레딧이 부족해 저장하지 못했습니다.";
+  if (status === 402) return "크레딧이 부족해 저장하지 못했습니다.";
   if (status === 401) return "로그인이 만료되어 저장하지 못했습니다. 다시 로그인해 주세요.";
   if (status === 0) return "네트워크가 끊겨 저장하지 못했습니다.";
   if (status >= 500) return "워크스페이스 서버가 응답하지 않아 저장하지 못했습니다.";
@@ -271,7 +271,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
     setReport(nextReport);
     setActiveJob(null);
     try {
-      if (isSample) setNotice("데모 샘플입니다. 이 로컬 결과는 워크스페이스 이력과 크레딧 사용량에서 제외됩니다.");
+      if (isSample) setNotice("샘플입니다. 이 로컬 결과는 워크스페이스 이력과 크레딧 사용량에서 제외됩니다.");
       else if (isCustomActive)
         setNotice(
           `커스텀 프로파일(${customProfileName ?? "JSON"}) 검사 — 로컬 결과 전용이라 저장과 크레딧 차감이 없습니다.`,
@@ -317,7 +317,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
     setNotice(
       saved.idempotent
         ? "이미 저장된 검사라 크레딧 차감 없이 기존 기록에 연결했습니다."
-        : "워크스페이스에 검사를 저장했습니다. 데모 크레딧 1개를 사용했습니다.",
+        : "워크스페이스에 검사를 저장했습니다. 크레딧 1개를 사용했습니다.",
     );
   }
 
@@ -518,7 +518,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
       setOptimization(result);
       setDownloadGate("verified");
       if (sampleMode) {
-        setNotice("데모 샘플을 로컬에서 최적화했습니다. 크레딧과 워크스페이스 이력은 변하지 않습니다.");
+        setNotice("샘플을 로컬에서 최적화했습니다. 크레딧과 워크스페이스 이력은 변하지 않습니다.");
       } else if (isCustomActive) {
         setNotice("커스텀 프로파일 최적화 — 로컬 결과 전용이라 저장과 크레딧 차감이 없습니다. 파일과 Passport는 아래에서 내려받을 수 있습니다.");
       } else {
@@ -533,7 +533,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
           setCreditsUnavailable(false);
         }
         if (!response.ok) throw new SaveFailure(saveFailureText(response.status, body.error), response.status);
-        setNotice("최적화를 저장했습니다. 데모 크레딧 1개를 사용했고 Passport가 준비되었습니다.");
+        setNotice("최적화를 저장했습니다. 크레딧 1개를 사용했고 Passport가 준비되었습니다.");
       }
     } catch (caught) {
       // The optimized bytes and their Passport are already on screen and already re-verified;
@@ -635,7 +635,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
       userLabel={userLabel}
       status={
         <>
-          <Link className="credit-chip" href="/pricing" title="데모 크레딧 잔액 · 클릭하면 크레딧과 플랜 화면으로 이동합니다">
+          <Link className="credit-chip" href="/pricing" title="크레딧 잔액 · 클릭하면 크레딧과 플랜 화면으로 이동합니다">
             <Icon name="credit" size={13} />
             <span>잔액</span>
             <strong className="num">
@@ -719,7 +719,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
                 </>
               ) : (
                 <>
-                  파일당 데모 크레딧 <strong>1개</strong>가 <strong>성공한 검사에만</strong>{" "}
+                  파일당 크레딧 <strong>1개</strong>가 <strong>성공한 검사에만</strong>{" "}
                   차감됩니다. 시작 버튼을 누르기 전에는 아무것도 차감되지 않습니다.
                 </>
               )}
@@ -750,7 +750,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
               <p className="queue-credit-alert">
                 <Icon name="circleAlert" size={14} />
                 <span>
-                  데모 크레딧이 부족해 일괄 검사를 멈췄습니다. 남은 파일은 대기 상태로 두었으니
+                  크레딧이 부족해 일괄 검사를 멈췄습니다. 남은 파일은 대기 상태로 두었으니
                   충전한 뒤 다시 시작하면 이어서 검사합니다.{" "}
                   <Link href="/pricing">크레딧과 플랜에서 충전하기</Link>
                 </span>

@@ -98,9 +98,9 @@ export function WorkspaceShell({
           설정
         </Link>
         <div className="rail-plan">
-          <span className="mono-label">비공개 파일럿</span>
-          <strong>데모 크레딧</strong>
-          <small>DEMO MODE · 실제 결제 아님</small>
+          <span className="mono-label">얼리 액세스</span>
+          <strong>크레딧으로 실행</strong>
+          <small>검사 1회 = 크레딧 1개 · 지금은 요금이 청구되지 않습니다</small>
         </div>
       </div>
     </div>

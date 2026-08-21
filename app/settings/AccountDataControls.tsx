@@ -165,7 +165,7 @@ export function AccountDataControls() {
         </p>
         {summary ? (
           <p className="muted-note" style={{ marginTop: "var(--sp-8)" }}>
-            현재 저장된 레코드 {totalRecords}건 · 남은 데모 크레딧 {summary.credits}개
+            현재 저장된 레코드 {totalRecords}건 · 남은 크레딧 {summary.credits}개
           </p>
         ) : null}
         <div className="settings-actions">
