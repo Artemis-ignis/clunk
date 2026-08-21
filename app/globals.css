@@ -6025,3 +6025,12 @@ html.snap-y {
     display: none;
   }
 }
+
+/* Phone: at the default size the first headline line wraps and leaves "에셋," stranded on a
+   line of its own. Sizing it so the written break is the only break keeps the two-line
+   reading the copy was written for. */
+@media (max-width: 430px) {
+  .hero3-copy h1 {
+    font-size: 1.72rem;
+  }
+}
