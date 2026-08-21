@@ -130,6 +130,9 @@ function withVerifiedIdentity(request: Request, trustedList: string | undefined)
 }
 const worker = {
   async fetch(incoming: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    // Publish the bindings for modules that must stay loadable outside workerd (see
+    // app/auth-env.ts). Same value, no virtual-module import in the render path.
+    (globalThis as typeof globalThis & { __clunkRuntimeEnv?: unknown }).__clunkRuntimeEnv = env;
     const request = withVerifiedIdentity(incoming, env.CLUNK_TRUSTED_AUTH_HOSTS);
     const url = new URL(request.url);
 

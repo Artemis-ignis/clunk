@@ -74,3 +74,39 @@ test("the page loads no subresource from another origin", async () => {
     `외부 오리진 서브리소스가 CSP에 막힙니다: ${subresources.join(", ")}`,
   );
 });
+
+test("protected surfaces stay closed to an unauthenticated request", async () => {
+  // The auth entry point moved behind a provider abstraction. A regression here would not
+  // throw or fail to build — it would quietly serve someone else's workspace, so the boundary
+  // is asserted against the built worker rather than trusted.
+  for (const pathname of ["/app", "/dashboard", "/settings", "/passport"]) {
+    const response = await render(pathname);
+    assert.equal(response.status, 307, `${pathname} must redirect a signed-out visitor`);
+    assert.match(
+      response.headers.get("location") ?? "",
+      /\/signin-with-chatgpt\?return_to=/,
+      `${pathname} must send the visitor to sign in`,
+    );
+  }
+});
+
+test("the worker strips identity headers from an untrusted host", async () => {
+  // Authentication is derived from request headers alone, so any origin that reaches the
+  // worker directly could otherwise hand-write a login for any account.
+  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
+  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}-trust`);
+  const { default: worker } = await import(workerUrl.href);
+  const env = { ASSETS: { fetch: async () => new Response("", { status: 404 }) } };
+  const ctx = { waitUntil() {}, passThroughOnException() {} };
+
+  const forged = new Request("https://untrusted.example/app", {
+    headers: {
+      accept: "text/html",
+      "oai-authenticated-user-id": "victim-user",
+      "oai-authenticated-user-email": "victim@example.test",
+    },
+  });
+  const response = await worker.fetch(forged, env, ctx);
+  assert.equal(response.status, 307, "a forged identity header must not authenticate");
+  assert.match(response.headers.get("location") ?? "", /\/signin-with-chatgpt/);
+});

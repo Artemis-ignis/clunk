@@ -11,14 +11,25 @@
  * default, so a deployment that forgets to configure it cannot issue sessions signed
  * with a guessable key.
  */
-import { env } from "cloudflare:workers";
+/**
+ * The Cloudflare env is read from what the worker stashes on the global at the top of
+ * `fetch`, not through a `cloudflare:workers` import.
+ *
+ * That import is a virtual module: it only resolves inside workerd. Pulling it into the
+ * page-render path meant plain Node could not even load /app — the production Node server
+ * returned 500 and the built worker could not be exercised in tests. Reading a stashed
+ * reference keeps the same value in workerd while staying loadable anywhere.
+ */
+type RuntimeGlobal = typeof globalThis & { __clunkRuntimeEnv?: Record<string, unknown> };
 
 type RuntimeEnv = Record<string, unknown> & { DB?: D1Database };
 
-const runtime = env as unknown as RuntimeEnv;
+function runtimeEnv(): RuntimeEnv {
+  return ((globalThis as RuntimeGlobal).__clunkRuntimeEnv ?? {}) as RuntimeEnv;
+}
 
 export function readAuthEnv(name: string): string | undefined {
-  const fromBinding = runtime[name];
+  const fromBinding = runtimeEnv()[name];
   if (typeof fromBinding === "string" && fromBinding.trim() !== "") {
     return fromBinding.trim();
   }
@@ -32,5 +43,5 @@ export function readAuthEnv(name: string): string | undefined {
 
 /** D1 handle for the auth path. Returns null instead of throwing: a signed-out visitor is a valid state. */
 export function getAuthDatabase(): D1Database | null {
-  return runtime.DB ?? null;
+  return runtimeEnv().DB ?? null;
 }
