@@ -19,6 +19,9 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { decodePngSrgb, linearLuminance } from "./lib/png.mjs";
 
+/** 처방은 여러 줄이다. 한 줄에 몰아 쓰면 두 선택지가 한 문장으로 붙어 읽힌다. */
+const NEWLINE = "\n";
+
 // --------------------------------------------------------------------------- PNG decoding
 
 /**
@@ -445,11 +448,44 @@ function auditTexture(config, textureConfig, judgementDistances) {
       }
       const usageNeeded = usage.mPerTile * 2 ** (gameplay.effectiveMip - readableMip);
       const structureWavelengthM = texelWorldM * 2 ** (gameplay.effectiveMip + 1);
+
+      // 처방의 크기를 함께 말한다.
+      //
+      // 이 계산은 B 문턱을 겨우 넘는 최소값을 낸다. Harvest Frontier가 두 처방을 실제
+      // 프레임에서 A/B로 재 봤는데(2026-08-23) 흙길 2.2→3.1(+41%)은 고주파 에너지
+      // +15.4%로 대조군 노이즈의 150배였고, 회벽 2.4→2.8(+17%)은 -0.1%로 노이즈
+      // 안쪽이었다. 즉 문턱을 겨우 넘는 처방은 화면에서 보이지 않을 수 있다.
+      // 처방을 내면서 그 사실을 말하지 않으면, 사람이 시킨 대로 하고도 아무 일이
+      // 일어나지 않는 것을 자기 탓으로 여긴다.
+      const scaleFactor = usageNeeded / usage.mPerTile;
+      const predictedPreservationPct = Number((preservationAt(readableMip) * 100).toFixed(1));
+      // 1.25라는 선은 관측 두 점(1.16배 안 보임 / 1.41배 뚜렷) 사이에 그은 것이고,
+      // 데이터 두 개로 그은 선이므로 잠정값이다. A/B가 더 쌓이면 옮겨야 한다.
+      const marginal = scaleFactor < 1.25;
+
       prescription = {
         targetGrade: "B",
         raiseUsageToMPerTile: Number(usageNeeded.toFixed(1)),
+        scaleFactor: Number(scaleFactor.toFixed(2)),
+        predictedPreservationPct,
+        currentPreservationPct: Number(gameplay.contrastPreservedPct.toFixed(1)),
+        marginal,
         orAddStructureWavelengthAtLeastM: Number(structureWavelengthM.toFixed(2)),
-        note: `판정 거리 ${gameplay.distanceM}m에서 B 등급이 되려면 usage를 ${usageNeeded.toFixed(1)} m/타일로 올리거나, 파장 ≥ ${structureWavelengthM.toFixed(2)}m 대역에 구조(제2 레이어 등)를 추가하세요.`,
+        note:
+          `판정 거리 ${gameplay.distanceM}m · 지금 보존 ${gameplay.contrastPreservedPct.toFixed(1)}% → B 문턱 ${predictedPreservationPct}%.` +
+          NEWLINE +
+          `      길 A) usage를 ${usageNeeded.toFixed(1)} m/타일로 (지금의 ${scaleFactor.toFixed(2)}배). ` +
+          `텍스처 특징이 그만큼 물리적으로 커집니다. 넓은 지면·벽처럼 특징 크기가 임의인 면에서는 무해하지만, ` +
+          `널판이나 기와처럼 특징 크기가 물체의 형태 정보인 경우 물체가 다르게 읽힙니다.` +
+          NEWLINE +
+          `      길 B) 파장 ≥ ${structureWavelengthM.toFixed(2)}m 대역에 구조를 추가. ` +
+          `특징 크기는 그대로 두고 밉이 살아남을 저주파를 넣습니다. 그림 작업이 필요합니다.` +
+          NEWLINE +
+          `      어느 쪽이 맞는지는 이 텍스처의 특징 크기가 물체의 의미를 갖는지에 달렸고, 그건 파일이 아니라 프로젝트가 압니다.` +
+          (marginal
+            ? NEWLINE +
+              `      주의: ${scaleFactor.toFixed(2)}배는 문턱을 겨우 넘는 크기입니다. 프레임에서 눈에 띄지 않을 수 있습니다.`
+            : ``),
       };
     }
 

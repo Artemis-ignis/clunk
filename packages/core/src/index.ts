@@ -1925,7 +1925,7 @@ export function stableStringify(value: unknown): string {
   return `{${entries.join(",")}}`;
 }
 
-function utf8(value: string): Uint8Array {
+export function utf8(value: string): Uint8Array {
   return new TextEncoder().encode(value);
 }
 
