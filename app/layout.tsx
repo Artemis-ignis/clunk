@@ -27,14 +27,14 @@ export const metadata: Metadata = {
     locale: "ko_KR",
     siteName: "Clunk",
     images: [
-      { url: "/og.png", width: 1672, height: 941, alt: "Clunk — 3D 에셋 품질 게이트" },
+      { url: "/og.jpg", width: 1200, height: 630, alt: "Clunk — 3D 에셋 품질 게이트" },
     ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Clunk — 팀을 위한 실시간 3D 에셋 품질 게이트",
     description: "에이전트가 만든 GLB를 사람이 열어보기 전에 실제 바이트로 검사하고 점수·근거·Passport를 남깁니다.",
-    images: ["/og.png"],
+    images: ["/og.jpg"],
   },
   icons: {
     // ?v=3: browsers cache favicons hard; the query busts it whenever the mark changes.
