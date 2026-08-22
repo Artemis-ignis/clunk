@@ -203,14 +203,27 @@ const DELTA_E_FLOOR = 6;
 
 function prescribe(entry, worstPair, sourceAlsoShown) {
   const notes = [];
+
+  // 권장 크기: 2배 DPI를 덮는 가장 작은 2의 거듭제곱.
+  //
+  // 여유가 있는지를 먼저 판정한다. 예전에는 pixelRatio만 보고 처방을 냈는데, 그러면
+  // 128×128 파일에 대고 "128×128이면 충분합니다"라고 말한다. 조언을 따르고 나서도
+  // 같은 문장이 그대로 남으니 상시 검사에 걸어 두면 매번 '아직 할 일이 있다'로 읽힌다.
+  // 이미 적정한 것은 적정하다고 말해야 검사가 끝난다.
+  const sourceSide = Math.max(entry.source.width, entry.source.height);
+  const renderSide = Math.max(entry.rendered.width, entry.rendered.height);
+  const enough = 1 << Math.ceil(Math.log2(renderSide * 2));
+  const headroom = !sourceAlsoShown && enough < sourceSide;
+
   if (entry.contrast.retention < CONTRAST_FLOOR) {
     notes.push(
       `${entry.rendered.width}px에서 큰 명암 구조가 원본의 ${(entry.contrast.retention * 100).toFixed(0)}%만 남습니다. ` +
         `이 크기에서 살아남는 것은 실루엣과 큰 덩어리뿐이니 그쪽을 벌리세요.`,
     );
   }
+
   // 이 수치는 두 방향 모두에서 쓸모가 있다. 낮으면 "그려도 안 보인다", 높으면
-  // "이미 큰 덩어리 그림이니 원본 해상도가 필요 없다"는 뜻이다.
+  // "이미 큰 덩어리 그림"이라는 뜻이다.
   const survives = (entry.detailRetention * 100).toFixed(1);
   if (entry.detailRetention < 0.5) {
     notes.push(
@@ -221,20 +234,22 @@ function prescribe(entry, worstPair, sourceAlsoShown) {
     notes.push(
       `원본에 그린 명암 변화의 ${survives}%가 ${entry.rendered.width}px에서도 남습니다. ` +
         `축소에 강한 그림(큰 덩어리 위주)이라는 뜻입니다.` +
-        (sourceAlsoShown ? `` : ` 동시에 이 노출 지점만 보면 원본 해상도가 필요 없다는 뜻이기도 합니다.`),
+        (headroom ? ` 동시에 이 노출 지점만 보면 원본 해상도가 필요 없다는 뜻이기도 합니다.` : ``),
     );
   }
-  // 원본 해상도가 다른 곳에서도 그대로 쓰이면(상점 스크린샷처럼 규격이 1920×1080인
-  // 경우) 줄이라는 말은 틀린 조언이다. 이 검사가 보는 렌더 크기는 여러 노출 지점 중
-  // 하나일 뿐이므로, 그 사실을 설정에서 알려 주면 낭비 판정을 하지 않는다.
-  if (entry.pixelRatio >= 4 && !sourceAlsoShown) {
-    const side = Math.max(entry.rendered.width, entry.rendered.height);
-    const enough = 1 << Math.ceil(Math.log2(side * 2));
+
+  if (headroom) {
     notes.push(
       `원본이 렌더 크기의 ${entry.pixelRatio.toFixed(0)}배 픽셀을 담고 있습니다. ` +
         `${enough}×${enough}면 2배 DPI까지 충분하고, 지금 파일 ${(entry.byteLength / 1024).toFixed(0)}KB를 크게 줄입니다.`,
     );
+  } else if (!sourceAlsoShown) {
+    notes.push(
+      `${entry.source.width}×${entry.source.height}는 ${entry.rendered.width}px 렌더에 적정합니다` +
+        `(2배 DPI 기준 ${enough}×${enough}). 더 줄일 여지 없음.`,
+    );
   }
+
   if (worstPair) {
     const other = worstPair.pair.find((name) => name !== entry.file) ?? worstPair.pair[0];
     const lever = worstPair.chroma < worstPair.lightness ? "색상" : "명도";
