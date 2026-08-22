@@ -575,3 +575,105 @@ test("두 병합 수치가 같은 드로우콜을 두 번 세지 않는다", () 
     "드로우콜을 0개로 줄일 수 있다고 말해서는 안 된다",
   );
 });
+
+/**
+ * 바퀴 넷이 따로 도는 차. 몸통 여섯 조각은 같은 머티리얼을 쓰고 움직이지 않는다.
+ * dynamic을 붙이면 바퀴가 병합 후보에서 빠져야 한다.
+ */
+function vehicle(markWheels: boolean) {
+  // 노드가 참조하는 수와 정확히 맞춘다. 고아 메시가 남으면 그것도 정적 후보로 잡힌다.
+  const meshes = 9;
+  const document = {
+    asset: { version: "2.0" },
+    scene: 0,
+    scenes: [{ nodes: [0] }],
+    nodes: [
+      { name: "Body", children: [1, 2, 3, 4, 5, 6, 7] },
+      ...[0, 1, 2, 3, 4, 5].map((i) => ({ name: `Panel_${i}`, mesh: i })),
+      {
+        name: "WheelAssembly",
+        children: [8, 9, 10],
+        ...(markWheels
+          ? { extras: { clunk: { dynamic: true, reason: "steer-knuckle" } } }
+          : {}),
+      },
+      ...[6, 7, 8].map((i) => ({ name: `Wheel_${i}`, mesh: i })),
+    ],
+    meshes: Array.from({ length: meshes }, () => ({
+      primitives: [{ attributes: { POSITION: 0, NORMAL: 0 }, indices: 1, material: 0 }],
+    })),
+    materials: [{ pbrMetallicRoughness: {} }],
+    accessors: [
+      { componentType: 5126, count: 3, type: "VEC3", min: [0, 0, 0], max: [1, 1, 1] },
+      { componentType: 5125, count: 3, type: "SCALAR" },
+    ],
+    bufferViews: [],
+    buffers: [],
+  };
+  return createAssetBundle("vehicle.gltf", new TextEncoder().encode(JSON.stringify(document)));
+}
+
+test("움직인다고 선언한 부품은 병합 후보에서 뺀다", () => {
+  const silent = inspectAsset(vehicle(false));
+  const declared = inspectAsset(vehicle(true));
+
+  assert.equal(silent.metrics.dynamicNodeCount, 0);
+  assert.equal(declared.metrics.dynamicNodeCount, 1, "서브트리 뿌리 하나에만 붙였다");
+
+  // 선언이 없으면 아홉 개가 다 후보로 보인다.
+  assert.equal(silent.metrics.mergeableAcrossMeshCount, 8);
+  // 바퀴 셋이 빠지면 남는 것은 몸통 여섯 중 다섯.
+  assert.equal(declared.metrics.mergeableAcrossMeshCount, 5);
+  assert.equal(declared.metrics.mergeableHeldByDynamicCount, 3);
+});
+
+test("선언이 있으면 참고가 아니라 판정으로 낸다", () => {
+  const silent = inspectAsset(vehicle(false)).findings.find(
+    (entry) => entry.ruleId === "GEO-MERGEABLE-MESHES",
+  );
+  const declared = inspectAsset(vehicle(true)).findings.find(
+    (entry) => entry.ruleId === "GEO-MERGEABLE-MESHES",
+  );
+
+  // 모르는 것으로 점수를 깎으면 바퀴가 도는 트랙터를 만든 사람이 벌을 받는다.
+  assert.equal(silent?.severity, "INFO");
+  assert.match(String(silent?.message), /extras\.clunk\.dynamic/);
+
+  // 무엇이 움직이는지 알려주면 나머지는 실행 가능한 수치다.
+  assert.equal(declared?.severity, "WARNING");
+});
+
+test("최적화가 동적 선언을 지우지 않는다", () => {
+  const document = {
+    asset: { version: "2.0", generator: "exporter" },
+    scene: 0,
+    scenes: [{ nodes: [0] }],
+    nodes: [
+      {
+        name: "Wheel",
+        mesh: 0,
+        extras: { clunk: { dynamic: true, reason: "wheel" }, dcc_id: "abc", layer: "props" },
+      },
+    ],
+    meshes: [{ primitives: [{ attributes: { POSITION: 0 }, indices: 1, material: 0 }] }],
+    materials: [{ pbrMetallicRoughness: {} }],
+    accessors: [
+      { componentType: 5126, count: 3, type: "VEC3", min: [0, 0, 0], max: [1, 1, 1] },
+      { componentType: 5125, count: 3, type: "SCALAR" },
+    ],
+    bufferViews: [],
+    buffers: [],
+  };
+  const result = optimizeAsset(
+    createAssetBundle("wheel.gltf", new TextEncoder().encode(JSON.stringify(document))),
+  );
+  const cleaned = JSON.parse(new TextDecoder().decode(result.outputBytes));
+
+  // 통째로 지우면 최적화한 파일이 자기가 무엇이 움직이는지 잊어버리고, 다음 검사에서
+  // 그 부품이 병합 후보로 되살아난다.
+  assert.deepEqual(cleaned.nodes[0].extras, { clunk: { dynamic: true, reason: "wheel" } });
+  assert.equal(cleaned.asset.generator, undefined, "나머지 메타데이터는 예정대로 걷어낸다");
+
+  // 그리고 결과 파일을 다시 검사해도 선언이 살아 있어야 한다.
+  assert.equal(result.after.metrics.dynamicNodeCount, 1);
+});

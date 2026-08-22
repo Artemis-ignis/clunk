@@ -184,8 +184,18 @@ export interface AssetMetrics {
   drawCallCount: number;
   /** 같은 메시 안에서 화면을 바꾸지 않고 합칠 수 있는 프리미티브 수 = 줄일 수 있는 드로우콜. */
   mergeablePrimitiveCount: number;
-  /** 메시 경계를 넘어 같은 서명을 쓰는 프리미티브 수. 정적일 때만 합칠 수 있다. */
+  /**
+   * 메시 경계를 넘어 합칠 수 있는 프리미티브 수.
+   *
+   * 파일이 `extras.clunk.dynamic`으로 움직이는 부품을 선언했다면 그 서브트리를 뺀
+   * 실행 가능한 수치다. 선언이 없으면 전체 여지이며 그중 얼마가 실제로 합쳐도 되는지는
+   * 파일이 말해 주지 않는다.
+   */
   mergeableAcrossMeshCount: number;
+  /** 동적으로 선언되어 병합 후보에서 빠진 프리미티브 수. */
+  mergeableHeldByDynamicCount: number;
+  /** `extras.clunk.dynamic`이 붙은 노드 수. 0이면 파일이 아무것도 선언하지 않았다는 뜻. */
+  dynamicNodeCount: number;
   materialCount: number;
   duplicateMaterialCount: number;
   textureCount: number;
@@ -794,13 +804,18 @@ function collectMetrics(parsed: ParsedAsset): AssetMetrics {
   // 같은 메시 안에서 (머티리얼, 속성 집합, 그리기 모드)가 같은 프리미티브는 하나로
   // 합쳐도 화면이 달라지지 않는다. 그 수만큼 드로우콜이 줄어든다.
   let mergeablePrimitiveCount = 0;
-  // 파일 전체에서 같은 서명을 쓰는 프리미티브도 센다. 이쪽은 메시 경계를 넘으므로
-  // 합치려면 노드 트랜스폼을 정점에 구워야 하고, 그러면 그 부분들은 더 이상 따로
-  // 움직일 수 없다. 우리는 어느 부품이 런타임에 움직이는지 알 수 없으므로 판단은
-  // 사람에게 넘기고 수치만 준다.
-  const fileSignatures = new Map<string, number>();
+  // 메시 경계를 넘는 병합 여지는 두 번 센다.
+  //
+  // allSignatures는 표시를 무시한 전체 여지, staticSignatures는 동적으로 선언된
+  // 서브트리를 뺀 여지다. 둘의 차이가 "움직이기 때문에 남겨 둔 몫"이고, 그 수치를
+  // 따로 말해야 프로젝트가 자기 선언이 얼마를 붙들고 있는지 안다.
+  const allSignatures = new Map<string, number>();
+  const staticSignatures = new Map<string, number>();
+  const dynamic = collectDynamicMeshes(json);
+  let staticWithinMeshCount = 0;
 
-  for (const mesh of meshes) {
+  meshes.forEach((mesh: GltfDocument, meshIndex: number) => {
+    const meshIsDynamic = dynamic.meshes.has(meshIndex);
     const signatures = new Set<string>();
     for (const primitive of mesh.primitives ?? []) {
       primitiveCount += 1;
@@ -811,9 +826,18 @@ function collectMetrics(parsed: ParsedAsset): AssetMetrics {
         attributes: Object.keys(primitive.attributes ?? {}).sort(),
         indexed: primitive.indices !== undefined,
       });
-      if (signatures.has(signature)) mergeablePrimitiveCount += 1;
-      else signatures.add(signature);
-      fileSignatures.set(signature, (fileSignatures.get(signature) ?? 0) + 1);
+      // 같은 메시 안의 병합은 동적 표시와 무관하다. 메시 하나는 어차피 한 덩어리로
+      // 움직이므로, 그 안의 프리미티브를 합쳐도 움직임이 달라지지 않는다.
+      if (signatures.has(signature)) {
+        mergeablePrimitiveCount += 1;
+        if (!meshIsDynamic) staticWithinMeshCount += 1;
+      } else {
+        signatures.add(signature);
+      }
+      allSignatures.set(signature, (allSignatures.get(signature) ?? 0) + 1);
+      if (!meshIsDynamic) {
+        staticSignatures.set(signature, (staticSignatures.get(signature) ?? 0) + 1);
+      }
       const attributes = primitive.attributes ?? {};
       const positionAccessor = getAccessor(json, attributes.POSITION);
       vertexCount += positionAccessor?.count ?? 0;
@@ -826,13 +850,21 @@ function collectMetrics(parsed: ParsedAsset): AssetMetrics {
         boundsMax = mergeBounds(boundsMax, bounds.max, "max");
       }
     }
-  }
+  });
 
   // 전체 병합 여지에서 같은 메시 안 몫을 빼면 메시 경계를 넘는 몫이 남는다.
   // 두 수를 겹쳐 세면 사람이 같은 드로우콜을 두 번 줄일 수 있다고 읽는다.
-  let totalMergeable = 0;
-  for (const count of fileSignatures.values()) totalMergeable += count - 1;
-  const mergeableAcrossMeshCount = Math.max(0, totalMergeable - mergeablePrimitiveCount);
+  const crossMesh = (signatures: Map<string, number>, withinMesh: number) => {
+    let total = 0;
+    for (const count of signatures.values()) total += count - 1;
+    return Math.max(0, total - withinMesh);
+  };
+  const mergeableAcrossMeshCount = crossMesh(staticSignatures, staticWithinMeshCount);
+  const mergeableHeldByDynamicCount = Math.max(
+    0,
+    crossMesh(allSignatures, mergeablePrimitiveCount) - mergeableAcrossMeshCount,
+  );
+  const dynamicNodeCount = dynamic.nodeCount;
 
   const resourceIssues = collectResourceIssues(parsed);
   const textureDimensions = images.map((image: GltfDocument, index: number) =>
@@ -917,6 +949,8 @@ function collectMetrics(parsed: ParsedAsset): AssetMetrics {
     drawCallCount,
     mergeablePrimitiveCount,
     mergeableAcrossMeshCount,
+    mergeableHeldByDynamicCount,
+    dynamicNodeCount,
     materialCount: materials.length,
     duplicateMaterialCount,
     textureCount: textures.length,
@@ -1117,17 +1151,29 @@ function buildFindings(
   // 그래도 보고하는 이유는 규모가 크기 때문이다. 실제 게임 에셋에서 이 여지는
   // 드로우콜의 38~71%였고, 드로우콜은 오브젝트당 비용이라 곧바로 프레임 시간이다.
   if (metrics.mergeableAcrossMeshCount > 0) {
+    // 심각도가 파일의 선언을 따라간다.
+    //
+    // 아무 선언이 없으면 이 수치는 참고다 — 얼마가 실제로 합쳐도 되는지 우리가 모르고,
+    // 모르는 것으로 점수를 깎으면 바퀴가 도는 트랙터를 만든 사람이 벌을 받는다.
+    // 파일이 extras.clunk.dynamic으로 움직이는 부품을 선언했다면 남은 수치는 실행
+    // 가능한 것이고, 그때는 판정으로 낸다. 좋은 입력을 준 프로젝트가 더 나은 답을
+    // 받는 것이 맞다.
+    const declared = metrics.dynamicNodeCount > 0;
     add(
       "GEO-MERGEABLE-MESHES",
       "geometry",
-      "INFO",
+      declared ? "WARNING" : "INFO",
       "/meshes",
       "Meshes share a material and attribute set",
-      `Primitives in different meshes share a material, attribute set, and draw mode. Merging the ones that never move independently at runtime would remove ${metrics.mergeableAcrossMeshCount} of ${metrics.drawCallCount} draw calls. Which ones those are is something only the project knows.`,
+      declared
+        ? `${metrics.dynamicNodeCount} nodes are declared dynamic and were excluded. After that, ${metrics.mergeableAcrossMeshCount} of ${metrics.drawCallCount} draw calls still come from meshes that share a material, attribute set, and draw mode and never move independently. ${metrics.mergeableHeldByDynamicCount > 0 ? `A further ${metrics.mergeableHeldByDynamicCount} are held back by those declarations.` : ""}`
+        : `Primitives in different meshes share a material, attribute set, and draw mode. Merging the ones that never move independently at runtime would remove ${metrics.mergeableAcrossMeshCount} of ${metrics.drawCallCount} draw calls. Which ones those are is something only the project knows — declare the moving parts with extras.clunk.dynamic and this becomes a number you can act on.`,
       metrics.mergeableAcrossMeshCount,
       0,
       false,
-      "Decide which parts are static, merge those in the source asset, and keep the moving parts separate.",
+      declared
+        ? "Merge the remaining shared meshes in the source asset."
+        : "Mark moving subtrees with extras.clunk.dynamic in your exporter, then merge what is left.",
     );
   }
   if (metrics.materialCount > policy.maxMaterials) {
@@ -1431,6 +1477,8 @@ function emptyMetrics(): AssetMetrics {
     drawCallCount: 0,
     mergeablePrimitiveCount: 0,
     mergeableAcrossMeshCount: 0,
+    mergeableHeldByDynamicCount: 0,
+    dynamicNodeCount: 0,
     materialCount: 0,
     duplicateMaterialCount: 0,
     textureCount: 0,
@@ -1852,6 +1900,58 @@ function maxNodeDepth(nodes: GltfDocument[], roots: Set<number>): number {
   };
 
   return Math.max(0, ...Array.from(roots, (root) => walk(root)));
+}
+
+/**
+ * `extras.clunk.dynamic`으로 표시된 서브트리의 메시를 모은다.
+ *
+ * 왜 필요한가: 메시 경계를 넘는 병합은 노드 트랜스폼을 정점에 구워야 하고, 그러면 그
+ * 부품들은 더 이상 따로 움직일 수 없다. 트랙터 바퀴를 차체에 구우면 바퀴가 안 돈다.
+ * 파일만 보고는 무엇이 움직이는지 알 수 없어서 우리는 그 수치를 INFO로만 냈다.
+ *
+ * 프로젝트는 그걸 안다. 익스포터가 움직이는 부품에 표시를 실어 보내면, 우리는 그것을
+ * 빼고 남은 진짜 여지를 계산할 수 있다. 그때 그 수치는 참고가 아니라 판정이 된다.
+ *
+ * 표시는 서브트리 전체에 적용된다. 바퀴 어셈블리의 뿌리에 한 번 붙이면 림과 타이어가
+ * 함께 빠진다. 자식이 다시 정적이라고 선언하는 길은 두지 않았다 — 그런 구조가 필요할
+ * 만큼 흔하지 않고, 되돌리는 규칙은 읽는 사람이 계층을 머릿속으로 추적하게 만든다.
+ */
+export const CLUNK_EXTRAS_KEY = "clunk";
+
+function isDynamicNode(node: GltfDocument | undefined): boolean {
+  const extras = node?.extras as GltfDocument | undefined;
+  const clunk = extras?.[CLUNK_EXTRAS_KEY] as GltfDocument | undefined;
+  return clunk?.dynamic === true;
+}
+
+function collectDynamicMeshes(json: GltfDocument): { meshes: Set<number>; nodeCount: number } {
+  const nodes: GltfDocument[] = Array.isArray(json.nodes) ? json.nodes : [];
+  const meshes = new Set<number>();
+  let nodeCount = 0;
+  const visited = new Set<number>();
+
+  const walk = (index: number, inherited: boolean) => {
+    const node = nodes[index];
+    if (!node) return;
+    // 순환 참조가 있는 파일에서도 멈춘다. 이미 동적으로 본 노드는 다시 볼 필요가 없다.
+    const key = index * 2 + (inherited ? 1 : 0);
+    if (visited.has(key)) return;
+    visited.add(key);
+    const marked = isDynamicNode(node);
+    if (marked) nodeCount += 1;
+    const dynamic = inherited || marked;
+    if (dynamic && node.mesh !== undefined) meshes.add(Number(node.mesh));
+    for (const child of node.children ?? []) walk(Number(child), dynamic);
+  };
+
+  const scenes: GltfDocument[] = Array.isArray(json.scenes) ? json.scenes : [];
+  for (const scene of scenes) {
+    for (const root of scene.nodes ?? []) walk(Number(root), false);
+  }
+  // 씬에 매달리지 않은 노드도 표시를 존중한다. 익스포터가 빠뜨렸다고 부품을 구워
+  // 버리면 안 된다.
+  nodes.forEach((_, index) => walk(index, false));
+  return { meshes, nodeCount };
 }
 
 function collectNodeRefs(nodes: GltfDocument[], index: number, refs: Set<number>): void {
@@ -2294,6 +2394,21 @@ function cleanMetadata(json: GltfDocument, keepExtras: ReadonlySet<unknown> = ne
     const record = value as GltfDocument;
     for (const key of Object.keys(record)) {
       if (key === "extras" && keepExtras.has(record)) continue;
+      // extras.clunk는 우리가 읽는 선언이다. 통째로 지우면 최적화한 파일이 자기가
+      // 무엇이 움직이는지 잊어버리고, 다음 검사에서 그 부품이 병합 후보로 되살아난다.
+      // 선언만 남기고 나머지 extras는 예정대로 걷어낸다.
+      if (key === "extras") {
+        const extras = record[key] as GltfDocument | undefined;
+        const declaration = extras?.[CLUNK_EXTRAS_KEY];
+        if (declaration !== undefined) {
+          const others = Object.keys(extras ?? {}).filter((name) => name !== CLUNK_EXTRAS_KEY);
+          if (others.length) {
+            record[key] = { [CLUNK_EXTRAS_KEY]: declaration };
+            removed += others.length;
+          }
+          continue;
+        }
+      }
       if (key === "extras" || (isAsset && (key === "generator" || key === "copyright"))) {
         delete record[key];
         removed += 1;
