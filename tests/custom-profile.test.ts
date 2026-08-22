@@ -31,14 +31,14 @@ const execFileAsync = promisify(execFile);
  */
 const BUILT_IN_DIGESTS = {
   "clunk-messy-sample.glb": {
-    web: "4be940dcad2022e02c9ccf3fdbe9bedd950399283e028010fb06773e39aefbdf",
-    mobile: "ee745c6e4f5e9ed556ffc8ea7edaa7f7a83bcabcc1f15a31e3fad45a5bee0a6e",
-    pc: "8df0ff576be1d644d35be84465e7ca00f6973838408b76e527eb18d090b4485d",
+    web: "5a81e992b2c504123031fe4354f7fb468bca543ab2857eb0e87ec8cfe7b87918",
+    mobile: "5a906411da3d9c542e9bcdc603d131a8a684f046223f7bd8d1764ae3b2d48b64",
+    pc: "b116172bc7255c01a82826020868a58caceb441728bae36d216b1e6235303a6b",
   },
   "clunk-ready-sample.glb": {
-    web: "22a12ab84542e74a08a8ffcb13404bd5bbc445e5cb876bc42a17ea52f58d8517",
-    mobile: "67fd1c422ed54318186a2f501f826cab3b10a559b3750d5d877362b5fd3a6821",
-    pc: "2c4bb0ef785929d5222ac528f42af3592b7a2a14cd9cc1a8bbdcc5a63f8f990a",
+    web: "c423c35a002f8ce39299bc6ba2c0f678fd0bd6fcc402ad2ea82ea9acdad50299",
+    mobile: "fefec64cf549ba249c08aa201d55476454a98b7740714a21a05f5662f1e1b082",
+    pc: "2f3e92371c8b169011f37ebe80121308e2d5c9dc32f76eaaeb0b2407eebe9295",
   },
 } as const;
 
@@ -87,7 +87,7 @@ test("built-in profiles keep the digests, scores, and findings recorded before c
 
   const optimized = optimizeAsset(await sample("clunk-messy-sample.glb"), { profileId: "web" });
   assert.equal(optimized.outputHash, "4368b41991a64f010713da589b1cb329f450e9b2db78776e9774b1737a70f275");
-  assert.equal(optimized.after.resultDigest, "979f4a0c8be6691e13b01e2ae5d1c5c3ab5f79dc8dc78356050a0b8576ca4ec9");
+  assert.equal(optimized.after.resultDigest, "2c0ecc500700200950f1b65d1b8589e4a3d539dceac6e05f6d8e395fb8f8e7eb");
   assert.equal(optimized.passport.ruleSetId, RULE_SET_ID);
 });
 

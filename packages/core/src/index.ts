@@ -92,6 +92,33 @@ export const RULE_CATALOG: readonly RuleDescriptor[] = [
 
 export const RULE_IDS: readonly RuleId[] = RULE_CATALOG.map((rule) => rule.id);
 
+/**
+ * 이 빌드가 실제로 들고 있는 규칙 세트의 지문.
+ *
+ * 리포트는 지금까지 ruleSetVersion을 "1.1.0"이라는 **선언된 문자열**로만 담았다. 규칙을
+ * 고치고 버전을 안 올리면 리포트가 자기 규칙을 잘못 밝힌다. 그러면 나중에 그 리포트를
+ * 재검증하려는 사람이 다른 digest를 얻고도 이유를 알 수 없다 — 바이트가 달라서인지,
+ * 규칙이 달라서인지.
+ *
+ * 증거를 남기는 이유가 나중에 재검증하기 위해서인데, 자기 규칙을 못 밝히는 증거는
+ * 재검증이 안 된다. 이 지문은 규칙 id·카테고리·기본 심각도와 코어 버전에서 나오므로,
+ * 버전 문자열을 그대로 두고 규칙만 고쳐도 값이 달라진다.
+ *
+ * (Harvest Frontier 세션이 2026-08-23에 같은 결함을 자기 증거 하니스에서 찾았다.
+ * sourceHead는 기록하면서 커밋 안 한 작업 트리를 기록하지 않아, 해시가 측정된 내용을
+ * 담은 적 없는 트리를 가리키고 있었다.)
+ */
+export const RULE_SET_DIGEST: string = sha256Hex(
+  utf8(
+    stableStringify({
+      coreVersion: CORE_VERSION,
+      ruleSetId: RULE_SET_ID,
+      ruleSetVersion: RULE_SET_VERSION,
+      rules: RULE_CATALOG.map((rule) => [rule.id, rule.category, rule.defaultSeverity]),
+    }),
+  ),
+).slice(0, 16);
+
 export interface AssetBundle {
   entry: string;
   files: ReadonlyMap<string, Uint8Array>;
@@ -257,6 +284,8 @@ export interface InspectionReport {
   coreVersion: string;
   ruleSetId: string;
   ruleSetVersion: string;
+  /** 이 빌드의 규칙 세트 지문. 버전 문자열이 같아도 규칙이 다르면 값이 달라진다. */
+  ruleSetDigest: string;
   profileId: ProfileId;
   fileName: string;
   format: AssetFormat;
@@ -288,6 +317,8 @@ export interface Passport {
   coreVersion: string;
   ruleSetId: string;
   ruleSetVersion: string;
+  /** 발급한 빌드의 규칙 세트 지문. 받는 쪽이 같은 규칙으로 재검증했는지 확인할 수 있다. */
+  ruleSetDigest: string;
   profileId: ProfileId;
   sourceHash: string;
   outputHash: string;
@@ -470,6 +501,7 @@ export function inspectAsset(
       coreVersion: CORE_VERSION,
       ruleSetId: defaults.ruleSetId,
       ruleSetVersion: defaults.ruleSetVersion,
+      ruleSetDigest: RULE_SET_DIGEST,
       profileId: defaults.profileId,
       fileName,
       format: parsed.format,
@@ -1446,6 +1478,7 @@ function makeFailureReport(
     coreVersion: CORE_VERSION,
     ruleSetId: policy.ruleSetId,
     ruleSetVersion: policy.ruleSetVersion,
+    ruleSetDigest: RULE_SET_DIGEST,
     profileId: policy.profileId,
     fileName,
     format,
@@ -2132,6 +2165,7 @@ export function createPassport(
     coreVersion: CORE_VERSION,
     ruleSetId: before.ruleSetId,
     ruleSetVersion: before.ruleSetVersion,
+    ruleSetDigest: before.ruleSetDigest,
     profileId: before.profileId,
     sourceHash: before.inputHash,
     outputHash: after.inputHash,

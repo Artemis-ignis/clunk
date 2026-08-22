@@ -6,6 +6,12 @@ import {
   inspectAsset,
   optimizeAsset,
   sha256Hex,
+  stableStringify,
+  CORE_VERSION,
+  RULE_CATALOG,
+  RULE_SET_ID,
+  RULE_SET_VERSION,
+  RULE_SET_DIGEST,
 } from "../packages/core/src/index";
 import {
   buildUnsignedVerificationPassport,
@@ -676,4 +682,51 @@ test("최적화가 동적 선언을 지우지 않는다", () => {
 
   // 그리고 결과 파일을 다시 검사해도 선언이 살아 있어야 한다.
   assert.equal(result.after.metrics.dynamicNodeCount, 1);
+});
+
+test("리포트가 자기 규칙 세트를 지문으로 밝힌다", async () => {
+  const { bundle } = await sample("clunk-messy-sample.glb");
+  const report = inspectAsset(bundle);
+
+  // ruleSetVersion은 사람이 손으로 적는 문자열이다. 규칙을 고치고 버전을 안 올리면
+  // 리포트가 자기 규칙을 잘못 밝히고, 나중에 재검증하는 사람은 digest가 왜 다른지
+  // — 바이트 때문인지 규칙 때문인지 — 알 수 없다.
+  assert.equal(report.ruleSetDigest, RULE_SET_DIGEST);
+  assert.match(report.ruleSetDigest, /^[0-9a-f]{16}$/);
+
+  // 지문은 규칙 목록에서 나온다. 규칙이 하나라도 늘거나 심각도가 바뀌면 달라진다.
+  const fromCatalog = sha256Hex(
+    new TextEncoder().encode(
+      stableStringify({
+        coreVersion: CORE_VERSION,
+        ruleSetId: RULE_SET_ID,
+        ruleSetVersion: RULE_SET_VERSION,
+        rules: RULE_CATALOG.map((rule) => [rule.id, rule.category, rule.defaultSeverity]),
+      }),
+    ),
+  ).slice(0, 16);
+  assert.equal(report.ruleSetDigest, fromCatalog);
+
+  // 규칙 하나만 바꾼 목록은 다른 지문을 낸다 — 이게 이 필드가 하는 일 전부다.
+  const tampered = sha256Hex(
+    new TextEncoder().encode(
+      stableStringify({
+        coreVersion: CORE_VERSION,
+        ruleSetId: RULE_SET_ID,
+        ruleSetVersion: RULE_SET_VERSION,
+        rules: RULE_CATALOG.map((rule, index) =>
+          index === 0 ? [rule.id, rule.category, "ERROR"] : [rule.id, rule.category, rule.defaultSeverity],
+        ),
+      }),
+    ),
+  ).slice(0, 16);
+  assert.notEqual(tampered, report.ruleSetDigest);
+});
+
+test("Passport가 발급 빌드의 규칙 지문을 함께 싣는다", async () => {
+  const { bundle } = await sample("clunk-messy-sample.glb");
+  const result = optimizeAsset(bundle);
+  // 받는 쪽이 같은 규칙으로 재검증했는지 확인할 수 있어야 증명서 구실을 한다.
+  assert.equal(result.passport.ruleSetDigest, RULE_SET_DIGEST);
+  assert.equal(result.passport.ruleSetDigest, result.before.ruleSetDigest);
 });

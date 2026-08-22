@@ -62,6 +62,8 @@ export interface VerificationPassport {
   coreVersion: string;
   ruleSetId: string;
   ruleSetVersion: string;
+  /** 발급한 빌드의 규칙 세트 지문. 이게 없으면 받는 쪽이 digest를 재계산할 수 없다. */
+  ruleSetDigest: string;
   profileId: ProfileId;
   asset: {
     fileName: string;
@@ -269,6 +271,7 @@ export function buildUnsignedVerificationPassport(
     coreVersion: report.coreVersion,
     ruleSetId: report.ruleSetId,
     ruleSetVersion: report.ruleSetVersion,
+    ruleSetDigest: report.ruleSetDigest,
     profileId: report.profileId,
     asset: {
       fileName: report.fileName,
@@ -405,6 +408,7 @@ export function recomputeInspectionDigest(passport: VerificationPassport): strin
         coreVersion: passport.coreVersion,
         ruleSetId: passport.ruleSetId,
         ruleSetVersion: passport.ruleSetVersion,
+        ruleSetDigest: passport.ruleSetDigest,
         profileId: passport.profileId,
         fileName: passport.asset.fileName,
         format: passport.asset.format,
