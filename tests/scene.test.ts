@@ -122,3 +122,34 @@ test("기본 비용 모델은 상수가 아니라 출처가 있는 기본값이�
   assert.equal(overridden.cost.frameBudgetMs, 33.33);
   assert.equal(overridden.cost.microsecondsPerDrawCall, 25, "덮어쓰지 않은 값은 기본값을 유지한다");
 });
+
+test("비용이 붙지 않은 축만 깎은 LOD를 짚는다", () => {
+  // 삼각형을 줄이는 것은 눈에 보이고 만들기 쉬워서 LOD 작업이 그쪽으로 쏠린다.
+  // 그런데 비용은 드로우콜에 붙어 있다. 통과는 하지만 실제로 사는 시간이 거의 없는
+  // LOD가 그렇게 만들어진다.
+  const lopsided = inspectScene([
+    { report: asset("cart.glb", 88, 6, 30_000), lodGroup: "cart", lodLevel: 0 },
+    { report: asset("cart.lod1.glb", 77, 6, 18_600), lodGroup: "cart", lodLevel: 1 },
+  ]);
+  const finding = lopsided.findings.find((entry) => entry.ruleId === "LOD-INEFFECTIVE");
+  assert.equal(finding?.severity, "WARNING");
+  // 실제로 사는 시간을 숫자로 말해야 결정이 된다.
+  assert.match(String(finding?.message), /0.28ms saved/);
+  assert.match(String(finding?.message), /merging parts, not decimating/);
+
+  // 드로우콜을 삼각형만큼 줄인 LOD는 짚지 않는다.
+  const balanced = inspectScene([
+    { report: asset("cart.glb", 88, 6, 30_000), lodGroup: "cart", lodLevel: 0 },
+    { report: asset("cart.lod1.glb", 30, 6, 18_600), lodGroup: "cart", lodLevel: 1 },
+  ]);
+  assert.equal(balanced.findings.some((entry) => entry.ruleId === "LOD-INEFFECTIVE"), false);
+
+  // 아예 안 싼 LOD는 이쪽이 아니라 LOD-NOT-CHEAPER가 잡는다. 두 규칙이 같은 파일에
+  // 대해 동시에 떠들면 사람이 무엇부터 고칠지 알 수 없다.
+  const flat = inspectScene([
+    { report: asset("cart.glb", 88, 6, 30_000), lodGroup: "cart", lodLevel: 0 },
+    { report: asset("cart.lod1.glb", 88, 6, 18_600), lodGroup: "cart", lodLevel: 1 },
+  ]);
+  assert.ok(flat.findings.some((entry) => entry.ruleId === "LOD-NOT-CHEAPER"));
+  assert.equal(flat.findings.some((entry) => entry.ruleId === "LOD-INEFFECTIVE"), false);
+});

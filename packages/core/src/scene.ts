@@ -30,6 +30,7 @@ export type SceneRuleId =
   | "SCENE-DRAW-CALL-HEADROOM"
   | "SCENE-TEXTURE-MEMORY"
   | "LOD-NOT-CHEAPER"
+  | "LOD-INEFFECTIVE"
   | "LOD-MATERIAL-DRIFT"
   | "LOD-MISSING";
 
@@ -250,7 +251,7 @@ export function inspectScene(assets: SceneAssetInput[], budget: SceneBudget = {}
     );
   }
 
-  findings.push(...checkLodGroups(assets));
+  findings.push(...checkLodGroups(assets, cost));
 
   const hardBlockerCount = findings.filter(
     (finding) => finding.severity === "ERROR" || finding.severity === "CRITICAL",
@@ -296,7 +297,7 @@ export function inspectScene(assets: SceneAssetInput[], budget: SceneBudget = {}
  * 그걸 적어 뒀다. 실제로 LOD를 만들어 놓고 삼각형만 줄이고 드로우콜은 그대로 두는
  * 일이 흔한데, 비용이 드로우콜에 붙어 있으므로 그런 LOD는 아무것도 아낀 게 없다.
  */
-function checkLodGroups(assets: SceneAssetInput[]): Finding[] {
+function checkLodGroups(assets: SceneAssetInput[], cost: DrawCostModel): Finding[] {
   const findings: Finding[] = [];
   const groups = new Map<string, SceneAssetInput[]>();
   for (const asset of assets) {
@@ -345,6 +346,36 @@ function checkLodGroups(assets: SceneAssetInput[]): Finding[] {
           threshold: nearDraws - 1,
           autoFixable: false,
           action: "Merge parts in the far level. Reducing triangles alone does not make a LOD cheaper.",
+        });
+      }
+
+      // LOD가 비용이 붙지 않은 축을 깎고 있는가.
+      //
+      // 삼각형을 줄이는 것은 눈에 보이고 만들기도 쉬워서 LOD 작업이 그쪽으로 쏠린다.
+      // 그런데 비용은 드로우콜에 붙어 있다. 삼각형만 세게 줄인 LOD는 통과는 하지만
+      // 실제로 사는 시간이 거의 없다.
+      //
+      // Harvest Frontier의 LOD 넷을 재 보니 전부 이 모양이었다(삼각형 -38~52%,
+      // 드로우콜 -13~27%, 배율 1.6~3.1x). 체인 전체가 사는 시간이 1.4ms였다.
+      // 먼 LOD의 지렛대는 감면이 아니라 병합이다.
+      const callDrop = nearDraws > 0 ? (nearDraws - farDraws) / nearDraws : 0;
+      const triDrop = nearTris > 0 ? (nearTris - farTris) / nearTris : 0;
+      const savedMs = ((nearDraws - farDraws) * cost.microsecondsPerDrawCall) / 1000;
+      // 2배는 판단 기준이다. 삼각형을 드로우콜보다 두 배 넘게 깎았다면 그 LOD의
+      // 노력이 비용이 없는 쪽에 쓰였다는 뜻으로 본다.
+      if (farDraws < nearDraws && callDrop > 0 && triDrop >= callDrop * 2) {
+        findings.push({
+          id: `LOD-INEFFECTIVE:${far.report.fileName}`,
+          ruleId: "LOD-INEFFECTIVE",
+          category: "runtime" as Finding["category"],
+          severity: "WARNING",
+          path: `/lod/${group}`,
+          title: "Far LOD cuts triangles much harder than cost",
+          message: `${far.report.fileName} drops triangles by ${(triDrop * 100).toFixed(0)}% but draw calls by only ${(callDrop * 100).toFixed(0)}%. At ${cost.microsecondsPerDrawCall}us per draw call that is ${savedMs.toFixed(2)}ms saved. Triangle count is close to free; the leverage in a far LOD is merging parts, not decimating them.`,
+          observed: Number((triDrop / callDrop).toFixed(1)),
+          threshold: 2,
+          autoFixable: false,
+          action: "Merge parts in the far level instead of only reducing triangles. Combining meshes that share a material is what makes a distant object cheap.",
         });
       }
 
