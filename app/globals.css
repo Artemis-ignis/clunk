@@ -961,23 +961,25 @@ pre {
 }
 
 /* The dock is inset, so without a scrim the page content that passes either side of the bar
-   gets sliced mid-glyph. This fades the top band of the page out instead. */
+   gets sliced mid-glyph.
+   
+   This used to paint a --ink-0 gradient, which is white in the light theme. That was invisible
+   on a white page and, the moment a section had its own dark surface, showed up as a white
+   smear across the top of it. Blurring what is behind solves the same problem without
+   asserting a colour, so it is correct over any section and in either theme. */
 .sitenav-dock::before {
   content: "";
   position: absolute;
   top: calc(var(--sp-16) * -1);
   left: 0;
   right: 0;
-  height: 136px;
+  height: 116px;
   opacity: 0;
   pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    var(--ink-0) 0%,
-    rgba(var(--ground-rgb), 0.92) 38%,
-    rgba(var(--ground-rgb), 0.62) 68%,
-    rgba(var(--ground-rgb), 0) 100%
-  );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 42%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 42%, transparent 100%);
   transition: opacity var(--dur-2) var(--ease);
 }
 
@@ -5774,12 +5776,13 @@ html.snap-y {
 .cta3-inner {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   flex: 1;
   min-height: calc(100dvh - 156px);
 }
 
 .cta3-copy {
-  margin: auto;
+  margin: 0 auto;
   max-width: 44em;
   text-align: center;
 }
@@ -5798,7 +5801,7 @@ html.snap-y {
 
 .inst3 {
   max-width: 760px;
-  margin: var(--sp-40) auto 0;
+  margin: var(--sp-48) auto 0;
   text-align: left;
 }
 
@@ -5892,6 +5895,7 @@ html.snap-y {
 }
 
 .cta3-foot {
+  margin-top: auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
