@@ -2716,6 +2716,71 @@ pre {
   max-width: var(--measure);
 }
 
+/* Passport 머리말은 1440px에서 오른쪽 절반이 통째로 비어 있었고, 왼쪽에는 13줄짜리
+   설명문이 서 있었다. 제품 화면이 아니라 문서로 읽힌다. 빈 자리에 비교 카드를 놓는다. */
+.passport-welcome {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: end;
+}
+
+.passport-spec-link {
+  margin-top: var(--sp-20);
+}
+
+.passport-kinds {
+  display: grid;
+  gap: var(--sp-12);
+}
+
+.passport-kind {
+  padding: var(--sp-20);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  background: var(--ink-2);
+}
+
+.passport-kind .mono-label {
+  display: block;
+  margin-bottom: var(--sp-8);
+}
+
+.passport-kind p {
+  margin: 0;
+  max-width: none;
+  font-size: var(--fs-1);
+  line-height: var(--lh-lead);
+}
+
+.passport-kind small {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-8);
+  margin-top: var(--sp-12);
+  padding-top: var(--sp-12);
+  border-top: 1px solid var(--line);
+  color: var(--text-dim);
+  font-size: var(--fs-1);
+  line-height: var(--lh-lead);
+}
+
+.passport-kind small svg {
+  flex: none;
+  margin-top: 0.2em;
+}
+
+/* 서명이 붙은 쪽이 더 강한 주장이다. 테두리로 그 차이를 보이게 둔다. */
+.passport-kind-verified {
+  border-color: var(--accent-line, var(--line));
+  background: var(--accent-soft, var(--ink-2));
+}
+
+@media (max-width: 62rem) {
+  .passport-welcome {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .ws-banner {
   margin-bottom: var(--sp-16);
 }

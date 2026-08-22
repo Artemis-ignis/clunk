@@ -57,7 +57,7 @@ export async function POST(request: Request) {
     if (payload.action !== "simulate-upgrade") {
       return privateJson(
         errorBody(
-          "v1에서는 데모 업그레이드 동작만 사용할 수 있습니다. ‘크레딧과 플랜’ 화면에서 데모 전환 버튼을 사용해 주세요.",
+          "v1에서는 데모 업그레이드 동작만 사용할 수 있습니다. ‘크레딧과 플랜’ 화면의 크레딧 받기 버튼을 사용해 주세요.",
           "credit_action_unsupported",
         ),
         { status: 400 },

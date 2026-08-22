@@ -97,7 +97,7 @@ export function PassportClient({ userLabel }: { userLabel: string }) {
 
   return (
     <WorkspaceShell active="passports" title="Passport 보관함" userLabel={userLabel} status={countChip}>
-      <section className="ws-welcome">
+      <section className="ws-welcome passport-welcome">
         <div>
           <h2>
             파일과 판정이
@@ -105,25 +105,33 @@ export function PassportClient({ userLabel }: { userLabel: string }) {
             <em>해시로 묶인 기록.</em>
           </h2>
           <p>
-            로컬 기록은 최적화 직후의 새 재검사에서 만들어집니다. 원본 해시, 출력 해시, 적용한 작업,
-            전후 점수가 한 파일에 들어 있습니다. 서버 검증 Passport는 Clunk 서버가 직접 검사한 결과에
-            Ed25519 서명을 붙인 문서입니다.
+            최적화한 에셋마다 원본 해시, 출력 해시, 적용한 작업, 전후 점수가 한 파일로 남습니다.
           </p>
-          {/* Two claims of different strength live in one vault, so the difference is stated
-              before the list, not buried in a detail panel. */}
-          <p className="passport-scope-note">
-            보관함에는 두 종류가 있습니다. <strong>로컬 검사 기록</strong>은 이용자의 기기에서
-            실행된 검사 결과입니다. 같은 바이트에 같은 규칙 세트를 적용하면 항상 같은 digest가
-            나오므로 재현은 가능하지만, Clunk 서버가 그 바이트를 본 적은 없으므로 제3자에게 내미는
-            증명서가 아닙니다. <strong>서버 검증 Passport</strong>는 이용자가 명시적으로 업로드한
-            바이트를 Clunk 서버가 직접 검사하고 서명한 문서입니다. 받는 쪽이 공개키로 서명을 대조할
-            수 있으므로, 보낸 사람을 믿지 않아도 확인이 됩니다.
-          </p>
+          <Link className="button button-quiet passport-spec-link" href="/docs">
+            Passport 규격
+            <Icon name="arrowUpRight" size={15} />
+          </Link>
         </div>
-        <Link className="button button-quiet" href="/docs">
-          Passport 규격
-          <Icon name="arrowUpRight" size={15} />
-        </Link>
+        {/* 두 기록은 주장의 세기가 다르다. 그 차이를 문단으로 늘어놓으면 아무도 읽지 않고,
+            읽지 않으면 로컬 기록을 증명서로 착각한다. 나란히 놓아 한눈에 갈리게 둔다. */}
+        <div className="passport-kinds">
+          <article className="passport-kind">
+            <span className="mono-label">로컬 검사 기록</span>
+            <p>내 기기에서 실행한 검사입니다. 같은 바이트에 같은 규칙이면 항상 같은 digest가 나옵니다.</p>
+            <small>
+              <Icon name="info" size={13} />
+              서버가 그 바이트를 본 적은 없습니다. 재현은 되지만 제3자에게 내미는 증명서는 아닙니다.
+            </small>
+          </article>
+          <article className="passport-kind passport-kind-verified">
+            <span className="mono-label">서버 검증 Passport</span>
+            <p>업로드한 바이트를 Clunk 서버가 직접 검사하고 Ed25519로 서명한 문서입니다.</p>
+            <small>
+              <Icon name="shield" size={13} />
+              받는 쪽이 공개키로 대조합니다. 보낸 사람을 믿지 않아도 확인이 됩니다.
+            </small>
+          </article>
+        </div>
       </section>
 
       {message ? (
@@ -145,9 +153,8 @@ export function PassportClient({ userLabel }: { userLabel: string }) {
             <Icon name="badge" size={24} />
             <strong>아직 Passport가 없습니다</strong>
             <p>
-              검사기에서 에셋을 안전하게 최적화하면 로컬 기록이 생성됩니다. 출력 바이트를 다시 열어
-              검증한 뒤에만 기록이 남기 때문에, 최적화를 실행하지 않은 에셋은 여기에 나타나지 않습니다.
-              제3자에게 제출할 서명된 증명서가 필요하면 서버 검증을 요청하세요.
+              검사기에서 안전하게 최적화하면 기록이 생깁니다. 출력 바이트를 다시 열어 검증한
+              뒤에만 남기 때문에, 최적화하지 않은 에셋은 여기에 나타나지 않습니다.
             </p>
             <Link href="/app" className="button button-primary button-sm">
               검사기 열기

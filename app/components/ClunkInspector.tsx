@@ -1019,7 +1019,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
             <Icon name="fingerprint" size={16} />
             <div>
               <strong>로컬 우선 처리</strong>
-              <p>파일은 브라우저에 남습니다. 메타데이터와 해시, 결과만 저장합니다.</p>
+              <p>파일은 브라우저에 남습니다. 메타데이터와 해시, 결과만 저장합니다. 서버 검증을 직접 요청할 때만 그 파일이 업로드됩니다.</p>
             </div>
           </div>
         </aside>

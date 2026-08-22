@@ -16,7 +16,7 @@ export const metadata: Metadata = {
  */
 const MONTHLY_PLANS = [
   {
-    name: "Pilot",
+    name: "Solo",
     price: "무료",
     cycle: "지금 사용 가능",
     included: "25",
@@ -39,7 +39,7 @@ const MONTHLY_PLANS = [
     includedNote: "매월 포함 크레딧",
     detail: "반복 검사를 돌리는 소규모 팀",
     features: [
-      "Pilot의 모든 기능",
+      "Solo의 모든 기능",
       "팀 공유 이력과 커스텀 정책 프로파일",
       "CLI·MCP·VS Code 어댑터 경로",
       "크레딧 팩 추가 구매 할인",
@@ -100,7 +100,7 @@ export default function PricingPage() {
           <div className="pricing-block-head">
             <h2>월정액 플랜</h2>
             <p>
-              매월 포함 크레딧이 함께 들어 있습니다. Pilot은 지금 바로 쓸 수 있고, 유료 플랜은 국내
+              매월 포함 크레딧이 함께 들어 있습니다. Solo은 지금 바로 쓸 수 있고, 유료 플랜은 국내
               결제 연동과 함께 엽니다. 그때까지 아래 금액은 확정 전 기준입니다.
             </p>
           </div>
@@ -212,7 +212,7 @@ export default function PricingPage() {
             </Link>
             <Link href="/support" className="pricing-assurance-card">
               <strong>지금 하지 못하는 일</strong>
-              <span>손실 최적화 없음, 서버 재검증 없음 등 한계를 먼저 적어 두었습니다.</span>
+              <span>손실 최적화를 하지 않는 것 등 지금의 한계를 먼저 적어 두었습니다.</span>
             </Link>
             <Link href="/settings" className="pricing-assurance-card">
               <strong>데이터 내보내기·삭제</strong>

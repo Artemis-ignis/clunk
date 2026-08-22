@@ -44,6 +44,15 @@ type MeResponse = {
   };
 };
 
+
+/** 저장된 프로파일 id는 소문자다. 화면에서는 프로파일 선택기와 같은 표기를 쓴다. */
+const PROFILE_LABELS: Record<string, string> = { pc: "PC", web: "Web", mobile: "Mobile" };
+
+function profileLabel(profileId?: string | null) {
+  const id = profileId ?? "pc";
+  return PROFILE_LABELS[id] ?? id;
+}
+
 export function DashboardClient() {
   const [runs, setRuns] = useState<Run[]>([]);
   const [runQuery, setRunQuery] = useState("");
@@ -150,7 +159,7 @@ export function DashboardClient() {
 
       <section className="ws-summary ws-summary-4" aria-label="워크스페이스 요약">
         <Summary label="사용 가능 크레딧" value={credits === null ? "대기" : `${credits}`} detail="성공한 실행에만 차감" tone="accent" />
-        <Summary label="실제 검사" value={`${runs.length}`} detail={runs.length ? "이 워크스페이스에 저장됨" : "아직 실제 검사가 없음"} />
+        <Summary label="검사 기록" value={`${runs.length}`} detail={runs.length ? "이 워크스페이스에 저장됨" : "아직 저장된 검사가 없음"} />
         <Summary
           label="준비 완료"
           value={runs.length ? `${readyCount}/${runs.length}` : "0"}
@@ -245,7 +254,7 @@ export function DashboardClient() {
           ) : (
             <div className="empty-block empty-block-lg">
               <Icon name="inspect" size={24} />
-              <strong>아직 실제 검사가 없습니다</strong>
+              <strong>아직 저장된 검사가 없습니다</strong>
               <p>검사기에서 GLB를 실행하세요. 샘플 버튼은 워크스페이스 지표에서 의도적으로 제외합니다.</p>
               <Link href="/app" className="button button-quiet button-sm">
                 첫 검사 실행
@@ -323,7 +332,7 @@ function RunRow({ run, expanded, onToggle }: { run: Run; expanded: boolean; onTo
         <td className="num">{run.score}/100</td>
         <td className="num">{run.findingCount}건</td>
         <td>
-          <span className="run-profile">{run.profileId ?? "pc"}</span>
+          <span className="run-profile">{profileLabel(run.profileId)}</span>
         </td>
         <td><small>{run.createdAt}</small></td>
       </tr>
@@ -348,7 +357,7 @@ function RunRow({ run, expanded, onToggle }: { run: Run; expanded: boolean; onTo
               </div>
               <small className="num">
                 sha256 {run.inputHash} · {run.byteLength ? `${run.byteLength.toLocaleString()} B · ` : ""}
-                {run.profileId ?? "pc"} 프로파일
+                {profileLabel(run.profileId)} 프로파일
               </small>
             </div>
           </td>
