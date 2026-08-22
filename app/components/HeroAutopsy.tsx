@@ -123,6 +123,11 @@ export function HeroAutopsy() {
 
         <div className={`hero3-stage${armed ? " hero3-armed" : ""}`} aria-label="실측 검사 콜아웃이 달린 실제 게임 에셋">
           <div className="hero3-halo" aria-hidden="true" />
+          {/* WebP at q92 is 67 KB against the PNG's 311 KB for the same 1600x1200 render, and the
+              alpha channel it carries is what the overlap check samples. The PNG stays as the
+              fallback for anything that cannot decode WebP. */}
+          <picture>
+            <source srcSet="/landing/tractor-hero.webp" type="image/webp" />
           <img
             className="hero3-model"
             src="/landing/tractor-hero.png"
@@ -130,6 +135,7 @@ export function HeroAutopsy() {
             width={1600}
             height={1200}
           />
+          </picture>
           <div className="hero3-scan" aria-hidden="true" />
 
           <svg className="hero3-leads" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
