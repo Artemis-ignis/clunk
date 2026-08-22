@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "1.0",
+  "_source": "Harvest Frontier 세션(2026-08-22) 요청. 렌더 크기는 그쪽 src/ui/styles.css의 .dialogue-portrait(48×48, 1px 테두리)에서 직접 읽었습니다. Harvest Frontier 저장소는 읽기 전용 참조입니다.",
+  "groups": [
+    {
+      "name": "NPC 대화 초상화",
+      "note": "src/ui/GameHud.tsx의 대화 카드에서만 그려집니다. 다른 렌더 지점은 없습니다.",
+      "baseDir": "../../../Harvest Frontier/public/assets/portraits",
+      "renderPx": 46,
+      "files": [
+        "npc.choi-minseo.png",
+        "npc.han-seojun.png",
+        "npc.kang-taeho.png",
+        "npc.lee-eunha.png",
+        "npc.park-yuna.png"
+      ]
+    }
+  ]
+}

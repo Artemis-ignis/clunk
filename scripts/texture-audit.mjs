@@ -17,105 +17,21 @@
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { inflateSync } from "node:zlib";
+import { decodePngSrgb, linearLuminance } from "./lib/png.mjs";
 
 // --------------------------------------------------------------------------- PNG decoding
 
+/**
+ * PNG를 읽어 선형 휘도 한 장으로 만든다.
+ *
+ * 디코더 자체는 scripts/lib/png.mjs로 옮겼다. ui-readability-audit이 휘도가 아니라 색을
+ * 필요로 했고, 디코더를 두 벌 두면 한쪽만 고쳐지는 날이 오기 때문이다. 여기서 하는 일은
+ * 그 결과를 이 도구가 쓰는 형태(선형 휘도)로 바꾸는 것뿐이다.
+ */
 function decodePng(buffer) {
-  if (buffer.readUInt32BE(0) !== 0x89504e47) throw new Error("Not a PNG file.");
-  let offset = 8;
-  let ihdr = null;
-  let palette = null;
-  const idat = [];
-  while (offset < buffer.length) {
-    const length = buffer.readUInt32BE(offset);
-    const type = buffer.toString("ascii", offset + 4, offset + 8);
-    const data = buffer.subarray(offset + 8, offset + 8 + length);
-    if (type === "IHDR") {
-      ihdr = {
-        width: data.readUInt32BE(0),
-        height: data.readUInt32BE(4),
-        bitDepth: data[8],
-        colorType: data[9],
-        interlace: data[12],
-      };
-    } else if (type === "PLTE") palette = Buffer.from(data);
-    else if (type === "IDAT") idat.push(Buffer.from(data));
-    else if (type === "IEND") break;
-    offset += 12 + length;
-  }
-  if (!ihdr) throw new Error("PNG missing IHDR.");
-  if (ihdr.bitDepth !== 8) throw new Error(`Unsupported bit depth ${ihdr.bitDepth} (8 only).`);
-  if (ihdr.interlace !== 0) throw new Error("Interlaced PNG is not supported.");
-  const channelsByType = { 0: 1, 2: 3, 3: 1, 4: 2, 6: 4 };
-  const channels = channelsByType[ihdr.colorType];
-  if (!channels) throw new Error(`Unsupported PNG colour type ${ihdr.colorType}.`);
-
-  const raw = inflateSync(Buffer.concat(idat));
-  const { width, height } = ihdr;
-  const stride = width * channels;
-  const out = Buffer.allocUnsafe(stride * height);
-  let src = 0;
-  for (let y = 0; y < height; y++) {
-    const filter = raw[src++];
-    const rowStart = y * stride;
-    const prevStart = rowStart - stride;
-    for (let x = 0; x < stride; x++) {
-      const value = raw[src + x];
-      const left = x >= channels ? out[rowStart + x - channels] : 0;
-      const up = y > 0 ? out[prevStart + x] : 0;
-      const upLeft = y > 0 && x >= channels ? out[prevStart + x - channels] : 0;
-      let recon;
-      switch (filter) {
-        case 0: recon = value; break;
-        case 1: recon = value + left; break;
-        case 2: recon = value + up; break;
-        case 3: recon = value + ((left + up) >> 1); break;
-        case 4: {
-          const p = left + up - upLeft;
-          const pa = Math.abs(p - left);
-          const pb = Math.abs(p - up);
-          const pc = Math.abs(p - upLeft);
-          recon = value + (pa <= pb && pa <= pc ? left : pb <= pc ? up : upLeft);
-          break;
-        }
-        default: throw new Error(`Unknown PNG filter ${filter}.`);
-      }
-      out[rowStart + x] = recon & 0xff;
-    }
-    src += stride;
-  }
-
-  // Expand to linear-light luminance straight away (sRGB decode first — the HF spec calls
-  // out that gamma-space stddev over-rates dark textures).
-  const srgbToLinear = new Float32Array(256);
-  for (let i = 0; i < 256; i++) {
-    const c = i / 255;
-    srgbToLinear[i] = c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-  }
-  const luminance = new Float32Array(width * height);
-  for (let i = 0; i < width * height; i++) {
-    let r;
-    let g;
-    let b;
-    if (ihdr.colorType === 3) {
-      const index = out[i] * 3;
-      if (!palette) throw new Error("Palette PNG missing PLTE.");
-      r = palette[index];
-      g = palette[index + 1];
-      b = palette[index + 2];
-    } else if (channels <= 2) {
-      r = g = b = out[i * channels];
-    } else {
-      r = out[i * channels];
-      g = out[i * channels + 1];
-      b = out[i * channels + 2];
-    }
-    luminance[i] = 0.2126 * srgbToLinear[r] + 0.7152 * srgbToLinear[g] + 0.0722 * srgbToLinear[b];
-  }
-  return { width, height, luminance };
+  const image = decodePngSrgb(buffer);
+  return { width: image.width, height: image.height, luminance: linearLuminance(image) };
 }
-
 // ------------------------------------------------------------------ mip / contrast analysis
 
 function buildMips(image) {
