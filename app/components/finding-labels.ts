@@ -17,6 +17,7 @@ const titles: Record<string, string> = {
   "GEO-TRIANGLE-BUDGET": "삼각형 예산 초과",
   "GEO-DRAW-CALL-BUDGET": "드로우콜 예산 초과",
   "GEO-MERGEABLE-PRIMITIVES": "합칠 수 있는 프리미티브",
+  "GEO-MERGEABLE-MESHES": "합칠 여지가 있는 메시",
   "GEO-MISSING-NORMALS": "Normal 속성 누락",
   "MAT-MATERIAL-BUDGET": "머티리얼 예산 초과",
   "MAT-DUPLICATES": "중복 머티리얼 발견",
@@ -53,6 +54,8 @@ const messages: Record<string, string> = {
     "이미지에서 가로·세로 크기를 읽지 못했습니다. 아래 텍스처 예산은 이 이미지를 빼고 계산한 값이라 그대로 믿을 수 없습니다.",
   "FORMAT-UNKNOWN-EXTENSION":
     "이 파일이 필수라고 선언한 확장 중 Clunk가 해석하지 못하는 것이 있습니다. 엔진이 실제로 읽는 내용과 위 수치가 다를 수 있습니다.",
+  "GEO-MERGEABLE-MESHES":
+    "서로 다른 메시가 같은 머티리얼·속성·그리기 모드를 씁니다. 런타임에 따로 움직이지 않는 것끼리 합치면 드로우콜이 그만큼 줄어듭니다. 다만 어느 부품이 움직이는지는 파일만 봐서는 알 수 없어 판단은 넘깁니다 — 바퀴가 도는 트랙터의 부품을 합치면 게임이 망가집니다.",
   "SEC-REMOTE-RESOURCE": "원격 주소를 참조합니다. Clunk는 로컬 번들 밖의 파일을 가져오지 않습니다.",
   "SEC-MISSING-RESOURCE": "이 파일이 참조하는 로컬 파일이 함께 있지 않습니다.",
   "RUNTIME-ANIMATION-SKIN": "애니메이션과 스킨 데이터는 무손실 최적화가 그대로 보존합니다.",

@@ -32,6 +32,43 @@ function decodePng(buffer) {
   const image = decodePngSrgb(buffer);
   return { width: image.width, height: image.height, luminance: linearLuminance(image) };
 }
+/**
+ * 이 usage를 채점할 밴드.
+ *
+ * viewingDistanceM: [min, max]가 있으면 그 범위 안에서 가장 먼 밴드를 고른다. 없으면
+ * 설정의 gameplayBandIndex를 그대로 쓴다(기존 동작).
+ */
+/**
+ * usage가 선언한 관측 거리를 밴드 목록에 합친다.
+ *
+ * 합치지 않으면 1~3m에서만 보이는 텍스처가 가장 가까운 밴드인 5m에서 채점된다. 실제보다
+ * 가혹한 조건이라 없는 문제를 만들어 낸다. 선언한 거리가 있으면 그 거리에 밴드를 둔다.
+ */
+function effectiveBands(config) {
+  const declared = [];
+  for (const texture of config.textures ?? []) {
+    for (const usage of texture.usages ?? []) {
+      const range = usage.viewingDistanceM;
+      if (Array.isArray(range) && range.length === 2) declared.push(range[1]);
+    }
+  }
+  return [...new Set([...config.distanceBandsM, ...declared])].sort((a, b) => a - b);
+}
+
+function pickJudgementBand(bands, usage, config) {
+  const range = usage?.viewingDistanceM;
+  if (Array.isArray(range) && range.length === 2) {
+    const [near, far] = range;
+    const inside = bands.filter((band) => band.distanceM >= near && band.distanceM <= far);
+    if (inside.length) return inside[inside.length - 1];
+    // 선언한 범위에 걸치는 밴드가 없으면 가장 가까운 밴드를 고른다.
+    return bands.reduce((best, band) =>
+      Math.abs(band.distanceM - far) < Math.abs(best.distanceM - far) ? band : best,
+    );
+  }
+  return bands[config.gameplayBandIndex ?? 1];
+}
+
 // ------------------------------------------------------------------ mip / contrast analysis
 
 function buildMips(image) {
@@ -279,7 +316,7 @@ function seamCheck(image, thresholds, expectedRepeats, coveredEdges) {
   };
 }
 
-function auditTexture(config, textureConfig) {
+function auditTexture(config, textureConfig, judgementDistances) {
   const imagePath = resolve(config.baseDir, textureConfig.path);
   const image = decodePng(readFileSync(imagePath));
   const mips = buildMips(image);
@@ -355,7 +392,7 @@ function auditTexture(config, textureConfig) {
       return texelWorldM * 2 ** octaveEnergy.length * 100;
     })();
 
-    const bands = config.distanceBandsM.map((distance) => {
+    const bands = judgementDistances.map((distance) => {
       const texelsPerPixel = (worldPerPixelAt(distance) / texelWorldM) * anisotropy;
       const mipLevel = Math.max(0, Math.log2(Math.max(1e-6, texelsPerPixel)));
       const preservation = preservationAt(mipLevel);
@@ -382,8 +419,15 @@ function auditTexture(config, textureConfig) {
       };
     });
 
-    // Prescription against the gameplay band and the B threshold (ratio AND sigma floor).
-    const gameplay = bands[config.gameplayBandIndex ?? 1];
+    // 판정 밴드는 이 usage가 실제로 보이는 거리에서 고른다.
+    //
+    // 예전에는 usage와 무관하게 전역 gameplayBandIndex(15m)에서만 등급을 매겼다. 그러면
+    // 60~200m에서만 보이는 원경 텍스처가 15m에서 100%라고 통과하고, 3~15m짜리 벽은
+    // 자기 밴드의 맨 끝에서 채점된다. 둘 다 의미 없는 판정이다. usage가
+    // viewingDistanceM으로 자기 거리를 선언하면 그 범위에서 가장 먼 밴드를 쓴다 —
+    // 가장 가혹한 지점이 그 usage가 실제로 견뎌야 하는 조건이다.
+    // 선언이 없으면 예전처럼 전역 밴드를 쓴다.
+    const gameplay = pickJudgementBand(bands, usage, config);
     let prescription = null;
     if (gameplay && gameplay.grade > "B") {
       const passes = (level) => {
@@ -405,7 +449,7 @@ function auditTexture(config, textureConfig) {
         targetGrade: "B",
         raiseUsageToMPerTile: Number(usageNeeded.toFixed(1)),
         orAddStructureWavelengthAtLeastM: Number(structureWavelengthM.toFixed(2)),
-        note: `게임플레이 밴드(${gameplay.distanceM}m)에서 B 등급이 되려면 usage를 ${usageNeeded.toFixed(1)} m/타일로 올리거나, 파장 ≥ ${structureWavelengthM.toFixed(2)}m 대역에 구조(제2 레이어 등)를 추가하세요.`,
+        note: `판정 거리 ${gameplay.distanceM}m에서 B 등급이 되려면 usage를 ${usageNeeded.toFixed(1)} m/타일로 올리거나, 파장 ≥ ${structureWavelengthM.toFixed(2)}m 대역에 구조(제2 레이어 등)를 추가하세요.`,
       };
     }
 
@@ -472,6 +516,7 @@ const outIndex = process.argv.indexOf("--out");
 const outPath = outIndex >= 0 ? process.argv[outIndex + 1] : null;
 
 const config = JSON.parse(readFileSync(resolve(configPath), "utf8"));
+const JUDGEMENT_DISTANCES = effectiveBands(config);
 config.baseDir = config.baseDir ? resolve(dirname(resolve(configPath)), config.baseDir) : dirname(resolve(configPath));
 
 // Calibration override without touching the config file: --sigma-floor <linear sigma>.
@@ -485,13 +530,16 @@ const report = {
   generatedBy: "clunk texture-audit prototype v0.1",
   assumptions: {
     camera: config.camera,
-    distanceBandsM: config.distanceBandsM,
     groundAnisotropy: config.groundAnisotropy ?? 1,
     thresholds: config.thresholds,
     contrastWindowPx: config.contrastWindowPx ?? 24,
     analysis: "sRGB decode -> linear luminance -> box mip chain -> per-window stddev vs mip0",
   },
-  textures: config.textures.map((textureConfig) => auditTexture(config, textureConfig)),
+  // 밴드는 설정값과 usage가 선언한 관측 거리의 합집합이다.
+  distanceBandsM: JUDGEMENT_DISTANCES,
+  textures: config.textures.map((textureConfig) =>
+    auditTexture(config, textureConfig, JUDGEMENT_DISTANCES),
+  ),
 };
 
 // Texture-set aggregate: mip-inclusive GPU memory vs budget.
@@ -554,9 +602,9 @@ if (process.argv.includes("--strict")) {
     }
     if (strictChecks.has("readability")) {
       for (const usage of texture.usages) {
-        const gameplay = usage.bands[config.gameplayBandIndex ?? 1];
+        const gameplay = pickJudgementBand(usage.bands, usage, config);
         if (gameplay && gameplay.grade === "D") {
-          violations.push(`${texture.path} @ ${usage.mPerTile} m/타일: 게임플레이 밴드 D`);
+          violations.push(`${texture.path} @ ${usage.mPerTile} m/타일: 판정 거리 ${gameplay.distanceM}m에서 D`);
         }
       }
     }

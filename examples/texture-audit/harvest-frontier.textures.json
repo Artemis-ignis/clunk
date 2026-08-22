@@ -1,35 +1,173 @@
 {
   "baseDir": "C:/Users/50106/Desktop/Harvest Frontier/public/assets/textures",
-  "camera": { "fovDeg": 52, "viewportWidthPx": 1600 },
-  "distanceBandsM": [5, 15, 30],
+  "camera": {
+    "fovDeg": 52,
+    "viewportWidthPx": 1600
+  },
+  "distanceBandsM": [
+    5,
+    15,
+    30,
+    60,
+    130,
+    200
+  ],
   "gameplayBandIndex": 1,
-  "groundAnisotropy": 2.0,
+  "groundAnisotropy": 2,
   "gpuMemoryBudgetBytes": 41943040,
-  "thresholds": { "A": 0.6, "B": 0.35, "C": 0.15, "washGradientPerSigma": 0.4 },
+  "thresholds": {
+    "A": 0.6,
+    "B": 0.35,
+    "C": 0.15,
+    "washGradientPerSigma": 0.4
+  },
   "contrastWindowPx": 24,
   "textures": [
     {
       "path": "grass-meadow.png",
       "usages": [
-        { "label": "지형 근접층", "mPerTile": 3.4 },
-        { "label": "광역 제2층", "mPerTile": 11.0 }
+        {
+          "label": "지형 근접층",
+          "mPerTile": 3.4,
+          "viewingDistanceM": [
+            1,
+            5
+          ],
+          "_from": "farmWorld.ts:423"
+        },
+        {
+          "label": "광역 제2층 (회전 0.85 rad)",
+          "mPerTile": 11,
+          "viewingDistanceM": [
+            5,
+            30
+          ],
+          "_from": "farmWorld.ts:425,427"
+        }
       ]
     },
-    { "path": "dirt-path.png", "usages": [{ "label": "경로", "mPerTile": 2.2 }] },
+    {
+      "path": "dirt-path.png",
+      "usages": [
+        {
+          "label": "경로",
+          "mPerTile": 2.2,
+          "viewingDistanceM": [
+            1,
+            10
+          ],
+          "_from": "farmWorld.ts:428"
+        }
+      ]
+    },
     {
       "path": "soil-tilled.png",
       "usages": [
-        { "label": "지형 앞치마", "mPerTile": 1.6 },
-        { "label": "이랑 밭", "mPerTile": 1.2 }
+        {
+          "label": "이랑 밭",
+          "mPerTile": 1.2,
+          "viewingDistanceM": [
+            1,
+            3
+          ],
+          "_from": "fieldSurface.ts:126"
+        },
+        {
+          "label": "지형 흙",
+          "mPerTile": 1.6,
+          "viewingDistanceM": [
+            1,
+            3
+          ],
+          "_from": "farmWorld.ts:429"
+        }
       ]
     },
-    { "path": "wood-planks-weathered.png", "usages": [{ "label": "world-box 추정", "mPerTile": 1.5 }] },
-    { "path": "plaster-wall.png", "usages": [{ "label": "world-box 추정", "mPerTile": 1.5 }] },
+    {
+      "path": "wood-planks-weathered.png",
+      "usages": [
+        {
+          "label": "건물 벽",
+          "mPerTile": 1.6,
+          "viewingDistanceM": [
+            2,
+            15
+          ],
+          "_from": "region.ts:862"
+        },
+        {
+          "label": "통널 프롭",
+          "mPerTile": 0.9,
+          "viewingDistanceM": [
+            2,
+            15
+          ],
+          "_from": "props.ts:1645"
+        }
+      ]
+    },
+    {
+      "path": "plaster-wall.png",
+      "usages": [
+        {
+          "label": "건물 벽",
+          "mPerTile": 2.4,
+          "viewingDistanceM": [
+            3,
+            15
+          ],
+          "_from": "buildings, world-box UV"
+        }
+      ]
+    },
     {
       "path": "roof-tiles.png",
-      "usages": [{ "label": "world-box 추정", "mPerTile": 1.2 }],
-      "expectedRepeats": { "horizontal": 3.77, "vertical": 2.7 }
+      "usages": [
+        {
+          "label": "지붕",
+          "mPerTile": 1.1,
+          "viewingDistanceM": [
+            5,
+            20
+          ],
+          "_from": "region.ts:863"
+        }
+      ],
+      "expectedRepeats": {
+        "horizontal": 3.77,
+        "vertical": 2.7
+      },
+      "_note": "이전 판은 1.2로 추정했습니다. Clunk가 이 프로젝트에서 낸 유일한 실제 발견(세로 심)이 그 추정값 위에서 나왔고, 실측 1.1로 바꿔도 결론은 유지됩니다."
+    },
+    {
+      "path": "ridge-woodland.png",
+      "_note": "이전 판에 아예 없었습니다. 60~200m에서 보이는 원경이라 밴드를 늘려 넣습니다.",
+      "usages": [
+        {
+          "label": "근링",
+          "mPerTile": 26,
+          "viewingDistanceM": [
+            60,
+            130
+          ],
+          "_from": "props.ts:2280"
+        },
+        {
+          "label": "원링",
+          "mPerTile": 39,
+          "viewingDistanceM": [
+            90,
+            200
+          ],
+          "_from": "원링"
+        }
+      ]
     }
   ],
-  "strictChecks": ["seam", "memory"]
+  "strictChecks": [
+    "seam",
+    "memory"
+  ],
+  "_source": "Harvest Frontier 세션(2026-08-23)이 소스에서 직접 읽어 확인해 준 값입니다. 이전 판의 'world-box 추정'은 전부 실측으로 교체했습니다. 각 usage의 _from에 근거 파일을 적어 둡니다. Harvest Frontier 저장소는 읽기 전용 참조입니다.",
+  "_distanceNote": "60·130·200m 밴드는 ridge-woodland 때문에 늘렸습니다. gameplayBandIndex는 그대로 15m입니다."
 }

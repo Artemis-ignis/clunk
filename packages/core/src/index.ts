@@ -45,6 +45,7 @@ export type RuleId =
   | "GEO-TRIANGLE-BUDGET"
   | "GEO-DRAW-CALL-BUDGET"
   | "GEO-MERGEABLE-PRIMITIVES"
+  | "GEO-MERGEABLE-MESHES"
   | "GEO-MISSING-NORMALS"
   | "MAT-MATERIAL-BUDGET"
   | "MAT-DUPLICATES"
@@ -77,6 +78,7 @@ export const RULE_CATALOG: readonly RuleDescriptor[] = [
   { id: "GEO-TRIANGLE-BUDGET", category: "geometry", defaultSeverity: "ERROR" },
   { id: "GEO-DRAW-CALL-BUDGET", category: "geometry", defaultSeverity: "WARNING" },
   { id: "GEO-MERGEABLE-PRIMITIVES", category: "geometry", defaultSeverity: "WARNING" },
+  { id: "GEO-MERGEABLE-MESHES", category: "geometry", defaultSeverity: "INFO" },
   { id: "GEO-MISSING-NORMALS", category: "geometry", defaultSeverity: "WARNING" },
   { id: "MAT-MATERIAL-BUDGET", category: "materials", defaultSeverity: "ERROR" },
   { id: "MAT-DUPLICATES", category: "materials", defaultSeverity: "WARNING" },
@@ -182,6 +184,8 @@ export interface AssetMetrics {
   drawCallCount: number;
   /** 같은 메시 안에서 화면을 바꾸지 않고 합칠 수 있는 프리미티브 수 = 줄일 수 있는 드로우콜. */
   mergeablePrimitiveCount: number;
+  /** 메시 경계를 넘어 같은 서명을 쓰는 프리미티브 수. 정적일 때만 합칠 수 있다. */
+  mergeableAcrossMeshCount: number;
   materialCount: number;
   duplicateMaterialCount: number;
   textureCount: number;
@@ -790,6 +794,11 @@ function collectMetrics(parsed: ParsedAsset): AssetMetrics {
   // 같은 메시 안에서 (머티리얼, 속성 집합, 그리기 모드)가 같은 프리미티브는 하나로
   // 합쳐도 화면이 달라지지 않는다. 그 수만큼 드로우콜이 줄어든다.
   let mergeablePrimitiveCount = 0;
+  // 파일 전체에서 같은 서명을 쓰는 프리미티브도 센다. 이쪽은 메시 경계를 넘으므로
+  // 합치려면 노드 트랜스폼을 정점에 구워야 하고, 그러면 그 부분들은 더 이상 따로
+  // 움직일 수 없다. 우리는 어느 부품이 런타임에 움직이는지 알 수 없으므로 판단은
+  // 사람에게 넘기고 수치만 준다.
+  const fileSignatures = new Map<string, number>();
 
   for (const mesh of meshes) {
     const signatures = new Set<string>();
@@ -804,6 +813,7 @@ function collectMetrics(parsed: ParsedAsset): AssetMetrics {
       });
       if (signatures.has(signature)) mergeablePrimitiveCount += 1;
       else signatures.add(signature);
+      fileSignatures.set(signature, (fileSignatures.get(signature) ?? 0) + 1);
       const attributes = primitive.attributes ?? {};
       const positionAccessor = getAccessor(json, attributes.POSITION);
       vertexCount += positionAccessor?.count ?? 0;
@@ -817,6 +827,12 @@ function collectMetrics(parsed: ParsedAsset): AssetMetrics {
       }
     }
   }
+
+  // 전체 병합 여지에서 같은 메시 안 몫을 빼면 메시 경계를 넘는 몫이 남는다.
+  // 두 수를 겹쳐 세면 사람이 같은 드로우콜을 두 번 줄일 수 있다고 읽는다.
+  let totalMergeable = 0;
+  for (const count of fileSignatures.values()) totalMergeable += count - 1;
+  const mergeableAcrossMeshCount = Math.max(0, totalMergeable - mergeablePrimitiveCount);
 
   const resourceIssues = collectResourceIssues(parsed);
   const textureDimensions = images.map((image: GltfDocument, index: number) =>
@@ -900,6 +916,7 @@ function collectMetrics(parsed: ParsedAsset): AssetMetrics {
     triangleCount,
     drawCallCount,
     mergeablePrimitiveCount,
+    mergeableAcrossMeshCount,
     materialCount: materials.length,
     duplicateMaterialCount,
     textureCount: textures.length,
@@ -1088,6 +1105,29 @@ function buildFindings(
       0,
       false,
       "Merge them in the source asset. Clunk does not rewrite geometry buffers, so this one is yours.",
+    );
+  }
+  // 심각도가 INFO인 이유:
+  //
+  // 이 규칙이 짚는 것은 결함이 아니라 여지다. 부품이 서로 다른 메시로 나뉜 데에는
+  // 보통 이유가 있다 — 바퀴가 돌고 조향이 꺾이는 트랙터의 부품을 합쳐 버리면 게임이
+  // 망가진다. 우리는 어느 노드가 런타임에 움직이는지 파일만 보고는 알 수 없다.
+  // 그러니 WARNING으로 점수를 깎지 않고, 수치와 조건만 정확히 준다.
+  //
+  // 그래도 보고하는 이유는 규모가 크기 때문이다. 실제 게임 에셋에서 이 여지는
+  // 드로우콜의 38~71%였고, 드로우콜은 오브젝트당 비용이라 곧바로 프레임 시간이다.
+  if (metrics.mergeableAcrossMeshCount > 0) {
+    add(
+      "GEO-MERGEABLE-MESHES",
+      "geometry",
+      "INFO",
+      "/meshes",
+      "Meshes share a material and attribute set",
+      `Primitives in different meshes share a material, attribute set, and draw mode. Merging the ones that never move independently at runtime would remove ${metrics.mergeableAcrossMeshCount} of ${metrics.drawCallCount} draw calls. Which ones those are is something only the project knows.`,
+      metrics.mergeableAcrossMeshCount,
+      0,
+      false,
+      "Decide which parts are static, merge those in the source asset, and keep the moving parts separate.",
     );
   }
   if (metrics.materialCount > policy.maxMaterials) {
@@ -1390,6 +1430,7 @@ function emptyMetrics(): AssetMetrics {
     triangleCount: 0,
     drawCallCount: 0,
     mergeablePrimitiveCount: 0,
+    mergeableAcrossMeshCount: 0,
     materialCount: 0,
     duplicateMaterialCount: 0,
     textureCount: 0,

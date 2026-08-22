@@ -31,14 +31,14 @@ const execFileAsync = promisify(execFile);
  */
 const BUILT_IN_DIGESTS = {
   "clunk-messy-sample.glb": {
-    web: "14b703a0604c0b41e17764db395e0e25f7b2f07352bd4ef64852aee693b69652",
-    mobile: "d969efe8a550dde23918f841d303e701524f699fa3ad529cd2d21cb142c2949b",
-    pc: "282cda736c27844f513fac153610758762d55228e1f93ce47613370c9bc41243",
+    web: "6360588fd178e4f1f033b2c320effb59e53e8114ffa825ba0be7f1040375f941",
+    mobile: "685ec1a80f4887f5bd93bdee6ff20b1f2de9e332ce0df5c5e4752db8e16131c1",
+    pc: "bfc910e862b639dac89888a126565d9304ca22719dbd0300cbcda2b06ee3eb09",
   },
   "clunk-ready-sample.glb": {
-    web: "1e2fcfce97fe90b6cf4349939db7cbc9db26485643b5b3dc73d7f72080993b5c",
-    mobile: "ea315ca3b1d7d281183c8eb18370d3a3e6e907a752ac4240a38a4a5ac62ed8f7",
-    pc: "01018ac7e42d510a15da8d0d6c81a35f98a04236284605de8649acc25649a74f",
+    web: "c4c7db72b754d7d2d1b11060ea6d0bb5be3ac709ca2dcbd54d77f083a3e7e7af",
+    mobile: "6555ed6dc7c172efcbd9b4c7365629683134e700f062209227cc3cf8cc31198e",
+    pc: "5eb9e92b010ff7760c25d08dd5b701478b9bab71a116b0fb24ca8de65aa4ef6d",
   },
 } as const;
 
@@ -87,7 +87,7 @@ test("built-in profiles keep the digests, scores, and findings recorded before c
 
   const optimized = optimizeAsset(await sample("clunk-messy-sample.glb"), { profileId: "web" });
   assert.equal(optimized.outputHash, "4368b41991a64f010713da589b1cb329f450e9b2db78776e9774b1737a70f275");
-  assert.equal(optimized.after.resultDigest, "218c0151f20876d1b9bffab7f7ffb556c059486807d3d9114785381c90445958");
+  assert.equal(optimized.after.resultDigest, "8a39f05115561b9096e0e044f2f69cda15a1e0bcb42bba614e8273554e51e5dd");
   assert.equal(optimized.passport.ruleSetId, RULE_SET_ID);
 });
 
@@ -309,9 +309,9 @@ test("invalid custom profile definitions are rejected with the offending value",
   assert.equal(commented.thresholds.maxMaterials, 4);
   assert.deepEqual(commented.rules["MAT-DUPLICATES"], { enabled: true, severity: "ERROR" });
   assert.ok(RULE_IDS.includes("MAT-DUPLICATES"));
-  // 17 → 19: GEO-DRAW-CALL-BUDGET, GEO-MERGEABLE-PRIMITIVES. 규칙이 늘면 프로젝트 프로파일이
+  // 19 → 20: GEO-MERGEABLE-MESHES. 규칙이 늘면 프로젝트 프로파일이
   // 알던 목록도 늘어나므로, 이 수는 손으로 확인하고 올려야 한다.
-  assert.equal(RULE_IDS.length, 19);
+  assert.equal(RULE_IDS.length, 20);
 });
 
 test("the CLI loads a custom profile file and reports the same canonical result as Core", async () => {

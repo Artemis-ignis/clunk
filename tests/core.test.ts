@@ -529,3 +529,49 @@ test("합쳐도 화면이 달라지지 않는 프리미티브를 수로 알려�
   // 프리미티브가 하나뿐이면 합칠 것이 없다.
   assert.equal(inspectAsset(splitMesh(1)).metrics.mergeablePrimitiveCount, 0);
 });
+
+test("메시 경계를 넘는 병합 여지는 따로, 조건과 함께 보고한다", () => {
+  // 실제 게임 에셋은 프리미티브를 메시 안에서 쪼개지 않고 메시 자체를 여러 개 만든다.
+  // 메시 안만 보던 규칙은 그래서 진짜 에셋에서 한 번도 켜지지 않았다.
+  const document = {
+    asset: { version: "2.0" },
+    scene: 0,
+    scenes: [{ nodes: [0, 1, 2] }],
+    nodes: [{ mesh: 0 }, { mesh: 1 }, { mesh: 2 }],
+    meshes: [0, 1, 2].map(() => ({
+      primitives: [{ attributes: { POSITION: 0, NORMAL: 0 }, indices: 1, material: 0 }],
+    })),
+    materials: [{ pbrMetallicRoughness: {} }],
+    accessors: [
+      { componentType: 5126, count: 3, type: "VEC3", min: [0, 0, 0], max: [1, 1, 1] },
+      { componentType: 5125, count: 3, type: "SCALAR" },
+    ],
+    bufferViews: [],
+    buffers: [],
+  };
+  const bundle = createAssetBundle("meshes.gltf", new TextEncoder().encode(JSON.stringify(document)));
+  const report = inspectAsset(bundle);
+
+  assert.equal(report.metrics.drawCallCount, 3);
+  assert.equal(report.metrics.mergeablePrimitiveCount, 0, "메시 안에서는 합칠 것이 없다");
+  assert.equal(report.metrics.mergeableAcrossMeshCount, 2);
+
+  const finding = report.findings.find((entry) => entry.ruleId === "GEO-MERGEABLE-MESHES");
+  // 부품이 따로 나뉜 데에는 보통 이유가 있다(도는 바퀴, 꺾이는 조향). 파일만 보고는
+  // 알 수 없으므로 점수를 깎지 않고 수치와 조건만 준다.
+  assert.equal(finding?.severity, "INFO");
+  assert.equal(finding?.observed, 2);
+  assert.equal(report.score.ready, true);
+});
+
+test("두 병합 수치가 같은 드로우콜을 두 번 세지 않는다", () => {
+  // 겹쳐 세면 사람이 같은 드로우콜을 두 번 줄일 수 있다고 읽는다.
+  const report = inspectAsset(splitMesh(40));
+  assert.equal(report.metrics.mergeablePrimitiveCount, 39);
+  assert.equal(report.metrics.mergeableAcrossMeshCount, 0);
+  assert.ok(
+    report.metrics.mergeablePrimitiveCount + report.metrics.mergeableAcrossMeshCount <
+      report.metrics.drawCallCount,
+    "드로우콜을 0개로 줄일 수 있다고 말해서는 안 된다",
+  );
+});
