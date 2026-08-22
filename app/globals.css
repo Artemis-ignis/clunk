@@ -5933,12 +5933,12 @@ html.snap-y {
   }
 
   .hero3-callout-label {
-    font-size: 0.56rem;
+    font-size: 0.66rem;
     letter-spacing: 0.08em;
   }
 
   .hero3-callout strong {
-    font-size: 0.72rem;
+    font-size: 0.78rem;
   }
 
   .hero3-callout small {
@@ -5952,7 +5952,7 @@ html.snap-y {
   }
 
   .hero3-score-label {
-    font-size: 0.52rem;
+    font-size: 0.66rem;
     letter-spacing: 0.08em;
   }
 
@@ -5961,7 +5961,7 @@ html.snap-y {
   }
 
   .hero3-score-value small {
-    font-size: 0.66rem;
+    font-size: 0.74rem;
   }
 
   .hero3-score .status-pill {
@@ -5997,7 +5997,7 @@ html.snap-y {
      height, and the bottom-anchored chips then landed on top of it. */
   .hero3-filestrip {
     justify-content: flex-start;
-    font-size: 0.66rem;
+    font-size: 0.74rem;
   }
 
   .hero3-scrollcue {
@@ -6164,7 +6164,7 @@ html.snap-y {
   }
 
   .hero3-score-value small {
-    font-size: 0.6rem;
+    font-size: 0.74rem;
   }
 }
 
@@ -6204,11 +6204,11 @@ html.snap-y {
   }
 
   .hero3-callout-label {
-    font-size: 0.52rem;
+    display: none;
   }
 
   .hero3-callout strong {
-    font-size: 0.68rem;
+    font-size: 0.74rem;
   }
 }
 

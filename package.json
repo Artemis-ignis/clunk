@@ -23,7 +23,8 @@
     "mcp": "tsx integrations/mcp/server.ts",
     "site:preflight": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\\site-preflight.ps1",
     "db:generate": "drizzle-kit generate",
-    "build:mcp": "node scripts/build-mcp-bundle.mjs"
+    "build:mcp": "node scripts/build-mcp-bundle.mjs",
+    "qa:render": "node scripts/qa-run-flow.mjs scripts/playwright-render-audit-flow.js"
   },
   "dependencies": {
     "@gltf-transform/core": "^4.2.1",
