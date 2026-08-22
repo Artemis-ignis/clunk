@@ -6932,12 +6932,14 @@ html.snap-y {
   color: var(--accent-bright, var(--accent));
 }
 
-/* Panels inside a band float on it rather than punching a white hole through it. */
-.sec3-band .panel,
-.sec3-band .codeblock,
-.sec3-band .install-block {
-  border-color: var(--band-line);
-  background: rgba(255, 255, 255, 0.04);
+/* A panel inside a band keeps its own surface on purpose.
+   Tinting it to match the band only changed the container: the text inside still used the
+   light theme's near-black, so file names and rule ids disappeared into the dark. These
+   panels are replicas of the product's own UI, and a bright card floating on a dark stage is
+   both readable and the stronger picture. Only the terminal-flavoured blocks go dark, and
+   they set that themselves. */
+.sec3-band .panel {
+  border-color: var(--line);
 }
 
 .sec3-band .button-quiet {
@@ -7004,4 +7006,56 @@ html.snap-y {
   background: var(--accent-bright, var(--accent));
   color: #04121b;
   font-weight: 620;
+}
+
+/* Surface showcase on the band: the tabs and the terminal card are the content here, so they
+   take their contrast from the band rather than from the page. */
+.sec3-band .sur3-tab {
+  border-color: var(--band-line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--band-muted);
+}
+
+.sec3-band .sur3-tab:hover {
+  border-color: var(--accent-bright, var(--accent));
+  color: var(--band-text);
+}
+
+.sec3-band .sur3-tab-active {
+  border-color: transparent;
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.sec3-band .sur3-tab strong,
+.sec3-band .sur3-tab-active strong {
+  color: inherit;
+}
+
+/* A band sets a light text colour for everything inside it, but the surface showcase panels
+   carry their own background — the web card is white. Inheriting the band's colour there put
+   near-white text on a white card and the file name and rule ids vanished. Inside a panel the
+   page's own text colours apply again; the terminal-flavoured panels set their own and are
+   unaffected because they declare colour explicitly. */
+.sec3-band .sur3-panel {
+  color: var(--text-strong);
+}
+
+.sec3-band .sur3-panel p,
+.sec3-band .sur3-panel small,
+.sec3-band .sur3-panel li,
+.sec3-band .sur3-panel .muted-note {
+  color: var(--text-muted);
+}
+
+.sec3-band .sur3-panel strong,
+.sec3-band .sur3-panel h3,
+.sec3-band .sur3-panel h4 {
+  color: var(--text-strong);
+}
+
+/* Same reason as the panel text above: the band's code colour is meant for code sitting on
+   the band, not for code inside a panel that brought its own light surface. */
+.sec3-band .sur3-panel code {
+  color: var(--text-muted);
 }

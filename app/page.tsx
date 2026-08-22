@@ -87,7 +87,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="snap-sec sec3 sec3-alt" id="terminal">
+        <section className="snap-sec sec3 sec3-band" id="terminal">
           <div className="snap-inner">
             <div className="terminal-layout">
               <div className="terminal-copy">
