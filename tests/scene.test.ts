@@ -188,3 +188,31 @@ test("참조된 파일만 출하되면 아무 말도 하지 않는다", () => {
   const noManifest = inspectScene([{ report: asset("hero.glb", 10, 2) }]);
   assert.equal(noManifest.findings.some((entry) => entry.ruleId === "SCENE-UNREFERENCED-ASSET"), false);
 });
+
+test("리포트가 무엇을 덮고 무엇을 못 덮는지 스스로 말한다", () => {
+  // 지금까지 이 경계는 사람이 말로 전했다. 사람이 매번 다시 말해서 유지되는 경계는
+  // 사람이 바뀌면 사라진다. 리포트를 나중에 읽는 사람은 그 말을 들은 적이 없고,
+  // 숫자만 남으면 "드로우콜 283"이 "이 씬의 드로우콜은 283"으로 읽힌다.
+  const scene = inspectScene([
+    { report: asset("a.glb", 10, 2), lodGroup: "a", lodLevel: 0 },
+    { report: asset("a.lod1.glb", 4, 2), lodGroup: "a", lodLevel: 1 },
+  ]);
+  const coverage = scene.findings.find((entry) => entry.ruleId === "SCENE-COVERAGE");
+  assert.ok(coverage, "항상 떠야 한다 — 조용하면 숫자가 전부인 줄 안다");
+  assert.equal(coverage?.severity, "INFO");
+  assert.ok(String(coverage?.message).includes("1 far-LOD variant excluded"));
+  assert.ok(String(coverage?.message).includes("geometry the engine builds at runtime"));
+
+  // 남의 하드웨어에서 잰 기본값을 쓰고 있다는 사실을 리포트가 밝혀야 한다.
+  assert.ok(String(coverage?.message).includes("a default measured on one project"));
+  assert.ok(String(coverage?.action).includes("your own renderer"));
+});
+
+test("프로젝트가 자기 단가를 주면 그렇다고 말한다", () => {
+  const scene = inspectScene([{ report: asset("a.glb", 10, 2) }], {
+    cost: { microsecondsPerDrawCall: 18 },
+  });
+  const coverage = scene.findings.find((entry) => entry.ruleId === "SCENE-COVERAGE");
+  assert.ok(String(coverage?.message).includes("18us per draw call, supplied by this project"));
+  assert.equal(String(coverage?.message).includes("a default measured"), false);
+});

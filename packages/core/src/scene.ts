@@ -33,7 +33,8 @@ export type SceneRuleId =
   | "LOD-INEFFECTIVE"
   | "LOD-MATERIAL-DRIFT"
   | "LOD-MISSING"
-  | "SCENE-UNREFERENCED-ASSET";
+  | "SCENE-UNREFERENCED-ASSET"
+  | "SCENE-COVERAGE";
 
 /**
  * 그리기 비용 모델.
@@ -144,6 +145,9 @@ function resolveCost(budget: SceneBudget): DrawCostModel {
 
 export function inspectScene(assets: SceneAssetInput[], budget: SceneBudget = {}): SceneReport {
   const cost = resolveCost(budget);
+  // 비용 단가를 프로젝트가 준 것인지 우리 기본값인지 기억해 둔다. 리포트가 스스로
+  // 밝혀야 할 사실이고, 병합한 뒤에는 구분할 수 없다.
+  const costIsMeasured = budget.cost?.microsecondsPerDrawCall !== undefined;
   const findings: Finding[] = [];
   const add = (
     ruleId: SceneRuleId,
@@ -266,6 +270,35 @@ export function inspectScene(assets: SceneAssetInput[], budget: SceneBudget = {}
       "Resize or recompress the largest textures, or split the scene so they are not resident together.",
     );
   }
+
+  // 이 리포트가 무엇을 덮고 무엇을 못 덮는지 스스로 말한다.
+  //
+  // 지금까지 나는 이 경계를 사람에게 말로 전했다 — "이 수치는 제출된 에셋만 봅니다",
+  // "저 프로젝트에서는 씬 드로우콜의 31%였습니다". 그런데 사람이 매번 다시 말해서
+  // 유지되는 경계는 사람이 바뀌면 사라진다. 리포트를 나중에 읽는 사람은 그 말을
+  // 들은 적이 없고, 숫자만 남으면 그 숫자가 전부인 줄 안다.
+  //
+  // 그래서 항상 뜬다. 조용한 편이 깔끔하지만, 조용하면 "드로우콜 283"이 "이 씬의
+  // 드로우콜은 283"으로 읽힌다. 실제로는 제출된 파일들의 합일 뿐이다.
+  add(
+    "SCENE-COVERAGE",
+    "INFO",
+    "/scene/coverage",
+    "What this budget does and does not count",
+    `Counted: ${resident.length} submitted assets` +
+      (assets.length > resident.length
+        ? ` (${assets.length - resident.length} far-LOD variant${assets.length - resident.length === 1 ? "" : "s"} excluded)`
+        : "") +
+      `. Not counted: geometry the engine builds at runtime, terrain, particles, UI, and any asset not submitted here. ` +
+      (costIsMeasured
+        ? `Cost model: ${cost.microsecondsPerDrawCall}us per draw call, supplied by this project.`
+        : `Cost model: ${cost.microsecondsPerDrawCall}us per draw call, a default measured on one project's WebGL2 hardware. Measure your own by toggling scene groups and dividing the frame delta by mesh count.`),
+    resident.length,
+    assets.length,
+    costIsMeasured
+      ? "Keep the submitted set in step with what the scene actually loads."
+      : "Supply cost.microsecondsPerDrawCall from your own renderer to make this estimate yours.",
+  );
 
   findings.push(...checkLodGroups(assets, cost));
 
