@@ -35,21 +35,35 @@ type QueueItem = {
 };
 
 /**
- * Upload ceiling, enforced on `file.size` before a single byte is read.
+ * 브라우저 검사 상한.
  *
- * inspectAsset() is synchronous and its SHA-256 is plain JS, so the inspection owns the main
- * thread for its whole duration, and the 3D preview then parses the same bytes on that same
- * thread. Measured end to end in Chrome against the dev server (file chosen -> score painted):
+ * 예전 상한은 8MB였고, 근거는 브라우저에서 잰 곡선이었다(1MB 0.4s · 8MB 3.9s ·
+ * 48MB와 100MB는 몇 분이 지나도 끝나지 않고 탭을 닫을 수도 없었다). 그런데 그 측정은
+ * 검사와 3D 미리보기를 한 덩어리로 쟀다. 둘을 갈라서 다시 재 보니 이렇다:
  *
- *   0.5MB 0.04s · 1MB 0.4s · 2MB 0.8s · 4MB 1.4s · 8MB 3.9s · 12MB 5.9s · 16MB 8.2s
- *   24MB 13.2s · 32MB 17.4s · 48MB and 100MB: no result inside a 300s / 420s observation
- *   window, and the tab could not be closed afterwards.
+ *   미리보기 포함  2MB 0.76s · 8MB 3.24s
+ *   미리보기 생략  16MB 0.35s · 32MB 0.72s · 64MB 1.49s · 96MB 2.18s
  *
- * The curve is superlinear and the tab is frozen for all of it. 8MB is the last size that
- * finishes inside the few-seconds band a person will sit through, so it is the limit; larger
- * assets are refused up front and sent to the CLI, which has no such ceiling.
+ * 검사만 놓고 보면 96MB까지 완전히 선형이고, Node에서 잰 값과 거의 같다. 느린 것은
+ * 검사가 아니라 미리보기였다 — three.js가 같은 바이트를 한 번 더 파싱해 GPU에 올린다.
+ * 즉 옛 상한은 32MB 파일(0.72s)을 거절하면서 8MB 파일(3.24s)은 통과시키고 있었다.
+ *
+ * MAX_PREVIEW_BYTES가 이미 '큰 파일은 미리보기를 포기하고 판정은 낸다'는 경로를 갖고
+ * 있었는데, 두 상한이 똑같이 8MB라 그 경로가 한 번도 실행되지 않았다.
+ *
+ * 64MB는 1.5초로 측정된 지점이다. 96MB도 되지만 폰 브라우저의 메모리 여유를 생각해
+ * 한 칸 낮춘다. 이보다 큰 에셋은 크기 제한이 없는 CLI로 보낸다.
  */
-const MAX_ASSET_BYTES = 8 * 1024 * 1024;
+const MAX_ASSET_BYTES = 64 * 1024 * 1024;
+
+/**
+ * 큐에 한 번에 담아 둘 수 있는 총 바이트.
+ *
+ * 큐는 파일 바이트를 전부 메모리에 들고 있다(로컬 우선이라 업로드하지 않기 때문이다).
+ * 파일당 상한만 8배로 올리면 열 개를 떨어뜨렸을 때 640MB가 된다. 한 파일이 되는 것과
+ * 열 파일이 되는 것은 다른 질문이라, 합계도 따로 막는다.
+ */
+const MAX_BATCH_BYTES = 192 * 1024 * 1024;
 
 /**
  * Ceiling for the 3D preview, which is a separate cost from the inspection.
@@ -338,7 +352,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
       .join(", ");
     return `브라우저 검사 상한은 ${formatBytes(MAX_ASSET_BYTES)}입니다. 상한을 넘은 파일은 열지 않았습니다: ${listed}${
       oversized.length > 3 ? ` 외 ${oversized.length - 3}개` : ""
-    }. 이 크기는 검사하는 동안 탭이 수십 초에서 수 분 동안 멈춥니다. 터미널에서 clunk inspect <파일> 로 검사하세요. CLI에는 크기 제한이 없습니다.`;
+    }. 터미널에서 clunk inspect <파일> 로 검사하세요. CLI에는 크기 제한이 없습니다.`;
   }
 
   /**
@@ -349,14 +363,31 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
     if (!incoming.length) return;
     setError(null);
     const rejection = oversizedNotice(incoming);
-    const files = incoming.filter((file) => file.size <= MAX_ASSET_BYTES);
+    const sized = incoming.filter((file) => file.size <= MAX_ASSET_BYTES);
+    // 큐에 이미 들어 있는 바이트까지 더해서 본다. 파일 하나가 통과한다고 해서 스무 개가
+    // 통과해도 되는 것은 아니다.
+    let budget = MAX_BATCH_BYTES - queue.reduce((sum, item) => sum + item.bytes.byteLength, 0);
+    const files: File[] = [];
+    const dropped: File[] = [];
+    for (const file of sized) {
+      if (file.size <= budget) {
+        budget -= file.size;
+        files.push(file);
+      } else {
+        dropped.push(file);
+      }
+    }
+    const batchNotice = dropped.length
+      ? `한 번에 큐에 담을 수 있는 총량은 ${formatBytes(MAX_BATCH_BYTES)}입니다. ${dropped.length}개 파일은 담지 않았습니다. 지금 큐를 먼저 실행한 뒤 다시 놓아 주세요.`
+      : null;
+    const combined = [rejection, batchNotice].filter(Boolean).join(" ") || null;
     if (!files.length) {
-      setError(rejection);
+      setError(combined);
       return;
     }
     if (files.length === 1 && !queue.length && !report) {
       await handleFile(files[0]);
-      if (rejection) setError(rejection);
+      if (combined) setError(combined);
       return;
     }
     const items: QueueItem[] = await Promise.all(
@@ -369,7 +400,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
     );
     setQueue((prev) => [...prev, ...items]);
     setNotice(`${items.length}개 파일이 큐에 올라왔습니다. 시작 버튼을 누르기 전에는 크레딧을 쓰지 않습니다.`);
-    if (rejection) setError(rejection);
+    if (combined) setError(combined);
   }
 
   async function runBatch() {
@@ -962,7 +993,11 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
             </p>
           </div>
 
-          <span className="mono-label">원본 에셋</span>
+          {/* 업로드·샘플·안내를 한 묶음으로 둔다. 좁은 화면에서 이 묶음을 프로파일
+              설정보다 위로 올리기 위해서다. 폰에서 첫 화면이 통째로 설정 패널이면,
+              사람은 하러 온 일을 1.4화면 아래에서 찾아야 한다. */}
+          <div className="inspector-input">
+            <span className="mono-label">원본 에셋</span>
           <label
             className={`dropzone${dragging ? " dropzone-active" : ""}`}
             onDragOver={(event) => { event.preventDefault(); setDragging(true); }}
@@ -992,7 +1027,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
             </span>
             <strong>GLB 또는 GLTF를 놓으세요</strong>
             <span>여러 파일을 한 번에 놓으면 일괄 검사 큐가 만들어집니다</span>
-            <span className="num">파일당 최대 {formatBytes(MAX_ASSET_BYTES)} · 더 큰 에셋은 CLI에서</span>
+            <span className="num">파일당 최대 {formatBytes(MAX_ASSET_BYTES)} · {formatBytes(MAX_PREVIEW_BYTES)}부터는 3D 미리보기를 건너뜁니다</span>
           </label>
 
           <div className="sample-picker">
@@ -1015,11 +1050,12 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
             </button>
           </div>
 
-          <div className="note-card">
-            <Icon name="fingerprint" size={16} />
-            <div>
-              <strong>로컬 우선 처리</strong>
-              <p>파일은 브라우저에 남습니다. 메타데이터와 해시, 결과만 저장합니다. 서버 검증을 직접 요청할 때만 그 파일이 업로드됩니다.</p>
+            <div className="note-card">
+              <Icon name="fingerprint" size={16} />
+              <div>
+                <strong>로컬 우선 처리</strong>
+                <p>파일은 브라우저에 남습니다. 메타데이터와 해시, 결과만 저장합니다. 서버 검증을 직접 요청할 때만 그 파일이 업로드됩니다.</p>
+              </div>
             </div>
           </div>
         </aside>

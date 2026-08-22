@@ -3259,6 +3259,12 @@ pre {
   align-items: stretch;
 }
 
+.inspector-input {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-20);
+}
+
 .inspector-source {
   display: flex;
   flex-direction: column;
@@ -4419,6 +4425,29 @@ pre {
 @media (max-width: 860px) {
   .inspector-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* 좁은 화면에서는 한 줄로 쌓인다. 그러면 순서가 곧 우선순위다:
+     할 일(업로드) → 답(판정과 finding) → 근거(미리보기와 메트릭) → 설정(프로파일).
+     이 순서를 두기 전에는 파일을 올리고 나서 답이 3.2화면 아래에 있었다. */
+  .inspector-source {
+    order: 1;
+  }
+
+  .inspector-result {
+    order: 2;
+  }
+
+  .inspector-center {
+    order: 3;
+  }
+
+  .inspector-input {
+    order: 1;
+  }
+
+  .inspector-source .profile-picker {
+    order: 2;
   }
 
   .inspector-result {
