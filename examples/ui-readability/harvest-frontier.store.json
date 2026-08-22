@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "1.0",
+  "_source": "Harvest Frontier 세션(2026-08-23)이 렌더 크기를 알려준 자산들. Harvest Frontier 저장소는 읽기 전용 참조입니다.",
+  "_assumption": "스토어 갤러리 썸네일 크기는 그쪽이 숫자를 주지 않아 Steam 갤러리 스트립 관행값 116×65를 가정했습니다. 실제 값이 다르면 renderPx만 바꾸면 됩니다.",
+  "groups": [
+    {
+      "name": "상점 스크린샷 (갤러리 썸네일, EN)",
+      "note": "1920×1080 소스. 구매자가 처음 보는 것은 원본이 아니라 갤러리 썸네일입니다. 여덟 장이 그 크기에서 서로 달라 보이지 않으면 갤러리가 여덟 칸을 쓰고도 한 장 몫만 합니다. 1920×1080 원본은 스토어 규격이자 확대 보기에서 그대로 쓰이므로 해상도 낭비로 보지 않습니다.",
+      "baseDir": "../../../Harvest Frontier/assets/store/screenshots/en",
+      "renderPx": [
+        116,
+        65
+      ],
+      "files": [
+        "01-farm-vista.png",
+        "02-tile-by-tile.png",
+        "03-ripe-harvest.png",
+        "04-walk-behind-tiller.png",
+        "05-compact-tractor.png",
+        "06-rain-day.png",
+        "07-golden-evening.png",
+        "08-neighbour-conversation.png"
+      ],
+      "sourceAlsoShown": true
+    }
+  ]
+}

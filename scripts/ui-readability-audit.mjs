@@ -22,6 +22,8 @@
  *   2) 구별성      같은 그룹 이미지끼리 렌더 크기에서의 평균 색차(CIE Lab, ΔE76).
  *                  두 NPC가 48px에서 같아 보이면 대화 UI가 제 일을 못 한다.
  *   3) 해상도 낭비 원본 픽셀 ÷ 렌더 픽셀. 화면에 쓰지 않는 픽셀을 내려받게 만든다.
+ *                  원본 해상도도 따로 노출되는 자산(상점 스크린샷처럼 규격이 정해진
+ *                  것)은 설정에 sourceAlsoShown: true를 두면 이 판정을 하지 않는다.
  *
  * 재지 않는 것: 미학, 화풍, 인물의 매력. 그건 사람이 볼 일이다.
  */
@@ -199,7 +201,7 @@ function comparePair(a, b) {
 const CONTRAST_FLOOR = 0.5;
 const DELTA_E_FLOOR = 6;
 
-function prescribe(entry, worstPair) {
+function prescribe(entry, worstPair, sourceAlsoShown) {
   const notes = [];
   if (entry.contrast.retention < CONTRAST_FLOOR) {
     notes.push(
@@ -218,10 +220,14 @@ function prescribe(entry, worstPair) {
   } else {
     notes.push(
       `원본에 그린 명암 변화의 ${survives}%가 ${entry.rendered.width}px에서도 남습니다. ` +
-        `축소에 강한 그림(큰 덩어리 위주)이라는 뜻이고, 동시에 원본 해상도가 필요 없다는 뜻이기도 합니다.`,
+        `축소에 강한 그림(큰 덩어리 위주)이라는 뜻입니다.` +
+        (sourceAlsoShown ? `` : ` 동시에 이 노출 지점만 보면 원본 해상도가 필요 없다는 뜻이기도 합니다.`),
     );
   }
-  if (entry.pixelRatio >= 4) {
+  // 원본 해상도가 다른 곳에서도 그대로 쓰이면(상점 스크린샷처럼 규격이 1920×1080인
+  // 경우) 줄이라는 말은 틀린 조언이다. 이 검사가 보는 렌더 크기는 여러 노출 지점 중
+  // 하나일 뿐이므로, 그 사실을 설정에서 알려 주면 낭비 판정을 하지 않는다.
+  if (entry.pixelRatio >= 4 && !sourceAlsoShown) {
     const side = Math.max(entry.rendered.width, entry.rendered.height);
     const enough = 1 << Math.ceil(Math.log2(side * 2));
     notes.push(
@@ -266,7 +272,14 @@ for (const group of config.groups ?? []) {
     }
   }
   pairs.sort((a, b) => a.deltaE - b.deltaE);
-  groups.push({ name: group.name, note: group.note ?? null, renderPx: group.renderPx, entries, pairs });
+  groups.push({
+    name: group.name,
+    note: group.note ?? null,
+    renderPx: group.renderPx,
+    sourceAlsoShown: group.sourceAlsoShown === true,
+    entries,
+    pairs,
+  });
 }
 
 const report = {
@@ -278,6 +291,7 @@ const report = {
     name: group.name,
     note: group.note,
     renderPx: group.renderPx,
+    sourceAlsoShown: group.sourceAlsoShown,
     images: group.entries.map((entry) => {
       const worst = group.pairs.find(
         (pair) => pair.deltaE < DELTA_E_FLOOR && pair.pair.includes(entry.file),
@@ -291,7 +305,7 @@ const report = {
         contrast: entry.contrast,
         detailRetention: entry.detailRetention,
         pass: entry.contrast.retention >= CONTRAST_FLOOR && !worst,
-        prescriptions: prescribe(entry, worst),
+        prescriptions: prescribe(entry, worst, group.sourceAlsoShown),
       };
     }),
     pairs: group.pairs.map(({ pair, deltaE, lightness, chroma }) => ({
