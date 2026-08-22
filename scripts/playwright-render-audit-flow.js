@@ -103,6 +103,20 @@ async page => {
     results.push({ label, ...found });
   };
 
+  /** 앞 화면이 남긴 저장소를 비운다. 지우지 못해도 감사는 계속한다. */
+  const clearClientState = async () => {
+    await page
+      .evaluate(() => {
+        try {
+          window.localStorage.clear();
+          window.sessionStorage.clear();
+        } catch {
+          /* storage can be unavailable; the screen is still worth auditing */
+        }
+      })
+      .catch(() => undefined);
+  };
+
   const setTheme = async (theme) => {
     await page.evaluate((value) => {
       try {
@@ -130,7 +144,15 @@ async page => {
       }
 
       for (const path of ["/pricing", "/docs", "/support", "/app", "/dashboard", "/settings"]) {
+        // 화면마다 앞 화면이 남긴 클라이언트 상태를 지운다.
+        //
+        // 58개 화면이 페이지 하나를 공유한다. goto가 DOM은 새로 그리지만 localStorage와
+        // sessionStorage는 남고, 그러면 앞 화면이 켠 상태가 뒤 화면의 판정을 바꾼다.
+        // 통과했을 때 그 통과를 믿을 수 없게 만드는 종류의 결합이라, 실패가 없더라도
+        // 끊어 두는 것이 맞다. 테마는 바로 아래에서 다시 세운다.
+        await clearClientState();
         await page.goto(base + path, { waitUntil: "networkidle" });
+        await setTheme(theme);
         await page.waitForTimeout(2000);
         await record(`${view}/${theme} · ${path}`);
       }

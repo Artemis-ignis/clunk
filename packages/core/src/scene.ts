@@ -32,7 +32,8 @@ export type SceneRuleId =
   | "LOD-NOT-CHEAPER"
   | "LOD-INEFFECTIVE"
   | "LOD-MATERIAL-DRIFT"
-  | "LOD-MISSING";
+  | "LOD-MISSING"
+  | "SCENE-UNREFERENCED-ASSET";
 
 /**
  * 그리기 비용 모델.
@@ -64,6 +65,21 @@ export interface SceneBudget {
   /** 텍스처 메모리 상한(바이트). 씬 전체 합계로 본다. */
   maxTextureMemoryBytes?: number;
   cost?: Partial<DrawCostModel>;
+  /**
+   * 빌드에 실제로 들어가는 에셋 파일 목록.
+   *
+   * 주면 씬이 참조하지 않는 파일을 짚는다. 만들어지고, 최적화되고, 출하되고, 아무도
+   * 요청하지 않는 파일이 실제로 생긴다 — 없어진 기능의 잔해, 붙지 않은 LOD 체인,
+   * 코드가 절차적으로 만들게 바뀐 뒤 남은 원본. 이용자는 그걸 전부 내려받는다.
+   *
+   * 없는 것보다 찾기 어렵다. 없으면 눈에 띄지만, 있는데 안 읽히면 있다는 사실이
+   * 오히려 안심시킨다.
+   *
+   * **이 목록은 씬 하나가 아니라 빌드 전체를 덮어야 의미가 있다.** 여러 씬으로 나뉜
+   * 게임이라면 씬마다 부르는 것이 아니라, 모든 씬의 에셋을 합쳐 한 번 불러야 한다.
+   * 그렇지 않으면 다른 씬에서 쓰는 파일을 죽었다고 말하게 된다.
+   */
+  shipped?: Array<{ fileName: string; byteLength: number }>;
 }
 
 export interface SceneAssetInput {
@@ -252,6 +268,32 @@ export function inspectScene(assets: SceneAssetInput[], budget: SceneBudget = {}
   }
 
   findings.push(...checkLodGroups(assets, cost));
+
+  if (budget.shipped?.length) {
+    const referenced = new Set(assets.map((asset) => asset.report.fileName));
+    const orphans = budget.shipped.filter((file) => !referenced.has(file.fileName));
+    if (orphans.length) {
+      const orphanBytes = orphans.reduce((sum, file) => sum + file.byteLength, 0);
+      const totalBytes = budget.shipped.reduce((sum, file) => sum + file.byteLength, 0);
+      const sharePct = totalBytes > 0 ? (orphanBytes / totalBytes) * 100 : 0;
+      const named = orphans
+        .slice()
+        .sort((a, b) => b.byteLength - a.byteLength)
+        .slice(0, 4)
+        .map((file) => `${file.fileName} (${(file.byteLength / 1024).toFixed(0)}KB)`)
+        .join(", ");
+      add(
+        "SCENE-UNREFERENCED-ASSET",
+        "WARNING",
+        "/scene/shipped",
+        "Assets ship but nothing in the scene asks for them",
+        `${orphans.length} of ${budget.shipped.length} shipped assets are not referenced by this scene: ${named}${orphans.length > 4 ? ", ..." : ""}. That is ${(orphanBytes / 1024).toFixed(0)}KB, ${sharePct.toFixed(0)}% of the asset payload people download. This only holds if the manifest covers every scene in the build.`,
+        Math.round(orphanBytes),
+        0,
+        "Confirm nothing else loads them, then drop them from the build. If they are for another scene, pass that scene's assets in the same call.",
+      );
+    }
+  }
 
   const hardBlockerCount = findings.filter(
     (finding) => finding.severity === "ERROR" || finding.severity === "CRITICAL",

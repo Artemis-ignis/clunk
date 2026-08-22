@@ -153,3 +153,38 @@ test("비용이 붙지 않은 축만 깎은 LOD를 짚는다", () => {
   assert.ok(flat.findings.some((entry) => entry.ruleId === "LOD-NOT-CHEAPER"));
   assert.equal(flat.findings.some((entry) => entry.ruleId === "LOD-INEFFECTIVE"), false);
 });
+
+test("출하되지만 아무도 요청하지 않는 파일을 짚는다", () => {
+  // 만들어지고, 최적화되고, 출하되고, 아무도 요청하지 않는 파일이 실제로 생긴다.
+  // 없는 것보다 찾기 어렵다 — 없으면 눈에 띄지만, 있는데 안 읽히면 있다는 사실이
+  // 오히려 안심시킨다.
+  const scene = inspectScene([{ report: asset("hero.glb", 10, 2) }], {
+    shipped: [
+      { fileName: "hero.glb", byteLength: 400_000 },
+      { fileName: "hero.lod1.glb", byteLength: 500_000 },
+      { fileName: "cut-feature.glb", byteLength: 100_000 },
+    ],
+  });
+  const finding = scene.findings.find((entry) => entry.ruleId === "SCENE-UNREFERENCED-ASSET");
+  assert.equal(finding?.severity, "WARNING");
+  assert.equal(finding?.observed, 600_000);
+  // 사람이 결정하려면 비율이 필요하다. 600KB가 큰지 작은지는 전체를 알아야 안다.
+  assert.match(String(finding?.message), /60% of the asset payload/);
+  // 가장 큰 것부터 이름을 댄다.
+  assert.ok(String(finding?.message).includes("hero.lod1.glb (488KB)"));
+
+  // 매니페스트가 씬 하나만 덮으면 다른 씬 파일을 죽었다고 말하게 된다. 그 전제를
+  // 메시지가 스스로 밝혀야 한다.
+  assert.match(String(finding?.message), /covers every scene in the build/);
+});
+
+test("참조된 파일만 출하되면 아무 말도 하지 않는다", () => {
+  const scene = inspectScene([{ report: asset("hero.glb", 10, 2) }], {
+    shipped: [{ fileName: "hero.glb", byteLength: 400_000 }],
+  });
+  assert.equal(scene.findings.some((entry) => entry.ruleId === "SCENE-UNREFERENCED-ASSET"), false);
+
+  // 목록을 안 주면 이 검사를 하지 않는다. 모르는 것을 추측하지 않는다.
+  const noManifest = inspectScene([{ report: asset("hero.glb", 10, 2) }]);
+  assert.equal(noManifest.findings.some((entry) => entry.ruleId === "SCENE-UNREFERENCED-ASSET"), false);
+});
