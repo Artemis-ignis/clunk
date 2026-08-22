@@ -43,6 +43,8 @@ export type RuleId =
   | "SCENE-NONUNIT-SCALE"
   | "GEO-NO-MESH"
   | "GEO-TRIANGLE-BUDGET"
+  | "GEO-DRAW-CALL-BUDGET"
+  | "GEO-MERGEABLE-PRIMITIVES"
   | "GEO-MISSING-NORMALS"
   | "MAT-MATERIAL-BUDGET"
   | "MAT-DUPLICATES"
@@ -73,6 +75,8 @@ export const RULE_CATALOG: readonly RuleDescriptor[] = [
   { id: "SCENE-NONUNIT-SCALE", category: "scene", defaultSeverity: "WARNING" },
   { id: "GEO-NO-MESH", category: "geometry", defaultSeverity: "ERROR" },
   { id: "GEO-TRIANGLE-BUDGET", category: "geometry", defaultSeverity: "ERROR" },
+  { id: "GEO-DRAW-CALL-BUDGET", category: "geometry", defaultSeverity: "WARNING" },
+  { id: "GEO-MERGEABLE-PRIMITIVES", category: "geometry", defaultSeverity: "WARNING" },
   { id: "GEO-MISSING-NORMALS", category: "geometry", defaultSeverity: "WARNING" },
   { id: "MAT-MATERIAL-BUDGET", category: "materials", defaultSeverity: "ERROR" },
   { id: "MAT-DUPLICATES", category: "materials", defaultSeverity: "WARNING" },
@@ -94,6 +98,7 @@ export interface AssetBundle {
 export interface AssetPolicy {
   profileId?: ProfileId;
   maxTriangles?: number;
+  maxDrawCalls?: number;
   maxMaterials?: number;
   maxTextureMemoryBytes?: number;
   maxTextureDimension?: number;
@@ -108,6 +113,7 @@ export interface AssetPolicy {
 
 export interface CustomProfileThresholds {
   maxTriangles?: number;
+  maxDrawCalls?: number;
   maxMaterials?: number;
   maxTextureMemoryBytes?: number;
   maxTextureDimension?: number;
@@ -174,6 +180,8 @@ export interface AssetMetrics {
   vertexCount: number;
   triangleCount: number;
   drawCallCount: number;
+  /** 같은 메시 안에서 화면을 바꾸지 않고 합칠 수 있는 프리미티브 수 = 줄일 수 있는 드로우콜. */
+  mergeablePrimitiveCount: number;
   materialCount: number;
   duplicateMaterialCount: number;
   textureCount: number;
@@ -322,6 +330,7 @@ interface ResourceIssue {
 interface ProfileBudget {
   profileId: ProfileId;
   maxTriangles: number;
+  maxDrawCalls: number;
   maxMaterials: number;
   maxTextureMemoryBytes: number;
   maxTextureDimension: number;
@@ -339,6 +348,7 @@ const PROFILE_DEFAULTS: Record<ProfileId, ProfileBudget> = {
   web: {
     profileId: "web",
     maxTriangles: 100_000,
+    maxDrawCalls: 64,
     maxMaterials: 12,
     maxTextureMemoryBytes: 128 * 1024 * 1024,
     maxTextureDimension: 4096,
@@ -347,6 +357,7 @@ const PROFILE_DEFAULTS: Record<ProfileId, ProfileBudget> = {
   mobile: {
     profileId: "mobile",
     maxTriangles: 25_000,
+    maxDrawCalls: 32,
     maxMaterials: 6,
     maxTextureMemoryBytes: 64 * 1024 * 1024,
     maxTextureDimension: 2048,
@@ -355,6 +366,7 @@ const PROFILE_DEFAULTS: Record<ProfileId, ProfileBudget> = {
   pc: {
     profileId: "pc",
     maxTriangles: 250_000,
+    maxDrawCalls: 128,
     maxMaterials: 24,
     maxTextureMemoryBytes: 512 * 1024 * 1024,
     maxTextureDimension: 8192,
@@ -368,7 +380,7 @@ const PROFILE_DEFAULTS: Record<ProfileId, ProfileBudget> = {
  */
 export const BUILTIN_PROFILE_BUDGETS: Record<
   ProfileId,
-  Pick<ProfileBudget, "maxTriangles" | "maxMaterials" | "maxTextureMemoryBytes" | "maxTextureDimension" | "readyScoreThreshold">
+  Pick<ProfileBudget, "maxTriangles" | "maxDrawCalls" | "maxMaterials" | "maxTextureMemoryBytes" | "maxTextureDimension" | "readyScoreThreshold">
 > = PROFILE_DEFAULTS;
 
 const SEVERITY_WEIGHT: Record<Severity, number> = {
@@ -517,6 +529,7 @@ export function createCustomProfile(definition: unknown): CustomProfile {
 
   const thresholds: Required<CustomProfileThresholds> = {
     maxTriangles: requireBudget(thresholdSource.maxTriangles, "maxTriangles", base.maxTriangles),
+    maxDrawCalls: requireBudget(thresholdSource.maxDrawCalls, "maxDrawCalls", base.maxDrawCalls),
     maxMaterials: requireBudget(thresholdSource.maxMaterials, "maxMaterials", base.maxMaterials),
     maxTextureMemoryBytes: requireBudget(
       thresholdSource.maxTextureMemoryBytes,
@@ -684,6 +697,7 @@ function resolvePolicy(policy: AssetPolicy): ResolvedPolicy {
   return {
     profileId,
     maxTriangles: policy.maxTriangles ?? base.maxTriangles,
+    maxDrawCalls: policy.maxDrawCalls ?? base.maxDrawCalls,
     maxMaterials: policy.maxMaterials ?? base.maxMaterials,
     maxTextureMemoryBytes:
       policy.maxTextureMemoryBytes ?? base.maxTextureMemoryBytes,
@@ -773,10 +787,23 @@ function collectMetrics(parsed: ParsedAsset): AssetMetrics {
   let boundsMin: [number, number, number] | null = null;
   let boundsMax: [number, number, number] | null = null;
 
+  // 같은 메시 안에서 (머티리얼, 속성 집합, 그리기 모드)가 같은 프리미티브는 하나로
+  // 합쳐도 화면이 달라지지 않는다. 그 수만큼 드로우콜이 줄어든다.
+  let mergeablePrimitiveCount = 0;
+
   for (const mesh of meshes) {
+    const signatures = new Set<string>();
     for (const primitive of mesh.primitives ?? []) {
       primitiveCount += 1;
       drawCallCount += 1;
+      const signature = stableStringify({
+        material: primitive.material ?? null,
+        mode: primitive.mode ?? 4,
+        attributes: Object.keys(primitive.attributes ?? {}).sort(),
+        indexed: primitive.indices !== undefined,
+      });
+      if (signatures.has(signature)) mergeablePrimitiveCount += 1;
+      else signatures.add(signature);
       const attributes = primitive.attributes ?? {};
       const positionAccessor = getAccessor(json, attributes.POSITION);
       vertexCount += positionAccessor?.count ?? 0;
@@ -872,6 +899,7 @@ function collectMetrics(parsed: ParsedAsset): AssetMetrics {
     vertexCount,
     triangleCount,
     drawCallCount,
+    mergeablePrimitiveCount,
     materialCount: materials.length,
     duplicateMaterialCount,
     textureCount: textures.length,
@@ -1018,6 +1046,48 @@ function buildFindings(
       held === 0
         ? "Run the allowlisted empty-node cleanup and recheck the output."
         : "Run the allowlisted cleanup, then decide in the source asset whether the remaining markers are read by your engine.",
+    );
+  }
+  // 드로우콜을 재기만 하고 아무 말도 하지 않던 자리다.
+  //
+  // Harvest Frontier 세션이 한 세션 안에서 그룹을 하나씩 끄며 12.95ms 프레임을 분해해
+  // 보낸 실측(2026-08-22, WebGL2)이 근거다: 157,560 삼각형짜리 작물 그룹이 0.15ms인데
+  // 82,100 삼각형짜리 건물 그룹이 5.67ms였다 — 삼각형은 절반, 비용은 38배. 메인 패스
+  // 메시당 약 25µs, 그림자 드로우당 약 5µs로, 비용은 삼각형이 아니라 그려지는 오브젝트
+  // 수에 붙어 있었다. 그쪽의 실제 조치도 삼각형을 건드리지 않고 정적 메시를 병합해
+  // 드로우콜을 909→678로 줄인 것이었고 p95가 31~39ms에서 22~23ms로 내려갔다.
+  //
+  // 예산 수치 자체는 그 실측에서 바로 나오지 않는다. 25µs는 그쪽 하드웨어와 렌더러의
+  // 값이고 에셋 하나가 프레임 예산에서 차지해도 될 몫은 프로젝트가 정할 일이다. 그래서
+  // 기본값은 판단이며(에셋 하나가 프레임 드로우콜 예산의 큰 몫을 먹으면 안 된다),
+  // 프로젝트 프로파일에서 maxDrawCalls로 바꿀 수 있게 열어 둔다. 기본 심각도가
+  // 삼각형 예산(ERROR)보다 낮은 WARNING인 것도 같은 이유다.
+  if (metrics.drawCallCount > policy.maxDrawCalls) {
+    add(
+      "GEO-DRAW-CALL-BUDGET",
+      "geometry",
+      "WARNING",
+      "/meshes",
+      "Draw call count is over budget",
+      "Each primitive is a separate draw call, and per-object cost is largely independent of triangle count.",
+      metrics.drawCallCount,
+      policy.maxDrawCalls,
+      false,
+      "Merge primitives that share a material and attribute set, or split the asset so the scene can cull it.",
+    );
+  }
+  if (metrics.mergeablePrimitiveCount > 0) {
+    add(
+      "GEO-MERGEABLE-PRIMITIVES",
+      "geometry",
+      "WARNING",
+      "/meshes/*/primitives",
+      "Primitives could be merged",
+      `Primitives inside the same mesh share a material, attribute set, and draw mode, so merging them removes ${metrics.mergeablePrimitiveCount} draw calls without changing what is drawn.`,
+      metrics.mergeablePrimitiveCount,
+      0,
+      false,
+      "Merge them in the source asset. Clunk does not rewrite geometry buffers, so this one is yours.",
     );
   }
   if (metrics.materialCount > policy.maxMaterials) {
@@ -1319,6 +1389,7 @@ function emptyMetrics(): AssetMetrics {
     vertexCount: 0,
     triangleCount: 0,
     drawCallCount: 0,
+    mergeablePrimitiveCount: 0,
     materialCount: 0,
     duplicateMaterialCount: 0,
     textureCount: 0,

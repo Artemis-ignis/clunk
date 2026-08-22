@@ -18,8 +18,8 @@
       "generated": true,
       "generator": "scripts/build-samples.mjs",
       "note": "같은 프롭 세트를 실제 핸드오프에서 오는 상태로 둔 것. 사라지는 오브젝트, 익스포터 잔여 노드, 복붙 머티리얼, 프롭에 붙은 4K 텍스처.",
-      "sha256": "9f2ab4cf4c750a711c431266e3c7d99d3b2e9f472ed11dba91ce906d8ec7043f",
-      "bytes": 1173772
+      "sha256": "03d293079c89faef2d1805ea36b58fe69e0f8b2cd6e1d10ff611739c5db7e1a6",
+      "bytes": 1175840
     }
   ]
 }

@@ -313,8 +313,24 @@ function buildGlb({ parts, materials, nodes, images, extras, dropNormals = [], d
     if (!dropUv.includes(pi)) {
       attributes.TEXCOORD_0 = pushAccessor(Buffer.from(new Float32Array(m.uv).buffer), "VEC2", 5126, m.vertexCount);
     }
-    const indices = pushAccessor(Buffer.from(new Uint32Array(m.idx).buffer), "SCALAR", 5125, m.idx.length);
-    const mesh = { name: part.name, primitives: [{ attributes, indices, material: part.material }] };
+    // splitInto: 인덱스를 여러 프리미티브로 쪼갠다. 스무딩 그룹이나 머티리얼 슬롯마다
+    // 프리미티브를 따로 뱉는 익스포터가 흔하고, 그러면 같은 머티리얼·같은 속성인데
+    // 드로우콜만 늘어난다. Harvest Frontier 실측에서 비용은 삼각형이 아니라 이쪽에
+    // 붙어 있었다.
+    const splits = part.splitInto ?? 1;
+    const perSplit = Math.floor(m.idx.length / splits / 3) * 3;
+    const primitives = [];
+    for (let k = 0; k < splits; k += 1) {
+      const start = k * perSplit;
+      const end = k === splits - 1 ? m.idx.length : start + perSplit;
+      const slice = new Uint32Array(m.idx.slice(start, end));
+      primitives.push({
+        attributes,
+        indices: pushAccessor(Buffer.from(slice.buffer), "SCALAR", 5125, slice.length),
+        material: part.material,
+      });
+    }
+    const mesh = { name: part.name, primitives };
     if (extras) mesh.extras = extras.mesh(part.name);
     meshes.push(mesh);
   });
@@ -395,7 +411,7 @@ function buildMessy() {
   // 과분할: 사람이 손으로 만들었다면 절대 이렇게 안 나오지만, 서브디비전 모디파이어를
   // 켠 채로 익스포트하면 이렇게 나온다. 모바일 프로파일(25,000)을 넘기는 것이 목적.
   const parts = [
-    { name: "Crate_A", mesh: box(1.1, 1.1, 1.1, 10, [-1.9, 0.55, 0.2]), material: 0 },
+    { name: "Crate_A", mesh: box(1.1, 1.1, 1.1, 10, [-1.9, 0.55, 0.2]), material: 0, splitInto: 6 },
     { name: "Crate_B", mesh: box(0.9, 0.9, 0.9, 10, [-1.9, 1.55, 0.2]), material: 1 },
     { name: "Barrel_Steel", mesh: cylinder(0.42, 0.42, 1.15, 128, 10, [-0.35, 0.58, -0.1]), material: 2 },
     { name: "Barrel_Steel_001", mesh: cylinder(0.42, 0.42, 1.15, 128, 10, [0.6, 0.58, 0.55]), material: 3 },
@@ -403,7 +419,7 @@ function buildMessy() {
     { name: "Bucket", mesh: cylinder(0.3, 0.2, 0.42, 96, 8, [0.05, 0.21, 1.25]), material: 5 },
     { name: "Wheel_Front", mesh: torus(0.52, 0.19, 128, 44, [-3.4, 0.6, 0]), material: 6 },
     { name: "Wheel_Rear", mesh: torus(0.52, 0.19, 128, 44, [3.5, 0.6, 0]), material: 7 },
-    { name: "Ground", mesh: box(9, 0.08, 5, 2, [0, -0.04, 0]), material: 8 },
+    { name: "Ground", mesh: box(9, 0.08, 5, 2, [0, -0.04, 0]), material: 8, splitInto: 6 },
     { name: "FencePost", mesh: box(0.14, 1.5, 0.14, 6, [1.3, 0.75, -1.6]), material: 9 },
     { name: "FenceRail", mesh: box(2.6, 0.12, 0.08, 6, [2.5, 1.15, -1.6]), material: 10 },
   ];

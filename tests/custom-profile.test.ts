@@ -31,14 +31,14 @@ const execFileAsync = promisify(execFile);
  */
 const BUILT_IN_DIGESTS = {
   "clunk-messy-sample.glb": {
-    web: "018e9ab7fe7f3aba135d8d9c28806eddfdece54f0e0fdae2e216575e4e19bf4e",
-    mobile: "cb37713b70c3d0794a834c5a101a3b83d814c0ba68e4e043931fbff09bc13d20",
-    pc: "c074c9454c7b221e66d42ea90aa0c37538b4e93ebb0fbed72946da910de7e997",
+    web: "14b703a0604c0b41e17764db395e0e25f7b2f07352bd4ef64852aee693b69652",
+    mobile: "d969efe8a550dde23918f841d303e701524f699fa3ad529cd2d21cb142c2949b",
+    pc: "282cda736c27844f513fac153610758762d55228e1f93ce47613370c9bc41243",
   },
   "clunk-ready-sample.glb": {
-    web: "03721bf37a2ce4d754c9c3ab225df5faf647c5915684b7457201dfb00dd31484",
-    mobile: "888326201ae55718e179ea2727584de98bae8754e7519927a59e864c9e708fdf",
-    pc: "3333f3d95c947580abc428d799bbe216be4b4c7ae88ea818d8622cd203a0bcee",
+    web: "1e2fcfce97fe90b6cf4349939db7cbc9db26485643b5b3dc73d7f72080993b5c",
+    mobile: "ea315ca3b1d7d281183c8eb18370d3a3e6e907a752ac4240a38a4a5ac62ed8f7",
+    pc: "01018ac7e42d510a15da8d0d6c81a35f98a04236284605de8649acc25649a74f",
   },
 } as const;
 
@@ -70,9 +70,10 @@ test("built-in profiles keep the digests, scores, and findings recorded before c
   const messy = inspectAsset(await sample("clunk-messy-sample.glb"), { profileId: "web" });
   assert.equal(messy.score.score, 92);
   assert.equal(messy.score.ready, false);
-  assert.equal(messy.findings.length, 7);
+  assert.equal(messy.findings.length, 8);
   assert.deepEqual(severityMap(messy.findings), {
     "FORMAT-GLTF2": "INFO",
+    "GEO-MERGEABLE-PRIMITIVES": "WARNING",
     "GEO-MISSING-NORMALS": "WARNING",
     "MAT-DUPLICATES": "WARNING",
     "SCENE-EMPTY-NODES": "WARNING",
@@ -85,8 +86,8 @@ test("built-in profiles keep the digests, scores, and findings recorded before c
   assert.equal(defaulted.resultDigest, BUILT_IN_DIGESTS["clunk-messy-sample.glb"].web);
 
   const optimized = optimizeAsset(await sample("clunk-messy-sample.glb"), { profileId: "web" });
-  assert.equal(optimized.outputHash, "be4610c3e378f2f9799eff6312f6ab9d1e6a4dc54e03bae3ebf3f275398c8151");
-  assert.equal(optimized.after.resultDigest, "dd1406442c3615bb2ebe394d698a6056820c3f2e60d92ceba645052a088fe00f");
+  assert.equal(optimized.outputHash, "4368b41991a64f010713da589b1cb329f450e9b2db78776e9774b1737a70f275");
+  assert.equal(optimized.after.resultDigest, "218c0151f20876d1b9bffab7f7ffb556c059486807d3d9114785381c90445958");
   assert.equal(optimized.passport.ruleSetId, RULE_SET_ID);
 });
 
@@ -97,6 +98,8 @@ test("the example Harvest Frontier profile changes severities and the score on t
   assert.equal(profile.basedOn, "pc");
   assert.deepEqual(profile.thresholds, {
     maxTriangles: 40_000,
+    // 프로파일이 선언하지 않은 예산은 basedOn 프로파일(pc)의 값으로 채워진다.
+    maxDrawCalls: 128,
     maxMaterials: 64,
     maxTextureMemoryBytes: 0,
     maxTextureDimension: 0,
@@ -116,6 +119,7 @@ test("the example Harvest Frontier profile changes severities and the score on t
 
   assert.deepEqual(severityMap(builtIn.findings), {
     "FORMAT-GLTF2": "INFO",
+    "GEO-MERGEABLE-PRIMITIVES": "WARNING",
     "GEO-MISSING-NORMALS": "WARNING",
     "MAT-DUPLICATES": "WARNING",
     "SCENE-EMPTY-NODES": "WARNING",
@@ -127,6 +131,7 @@ test("the example Harvest Frontier profile changes severities and the score on t
   // 텍스처가 들어 있는 이 샘플에서는 의도대로 ERROR가 된다.
   assert.deepEqual(severityMap(custom.findings), {
     "FORMAT-GLTF2": "INFO",
+    "GEO-MERGEABLE-PRIMITIVES": "WARNING",
     "GEO-MISSING-NORMALS": "INFO",
     "GEO-TRIANGLE-BUDGET": "WARNING",
     "MAT-DUPLICATES": "WARNING",
@@ -163,6 +168,7 @@ test("custom profiles can disable rules, raise severities, and tighten budgets",
   assert.equal(report.score.threshold, 100);
   assert.deepEqual(severityMap(report.findings), {
     "FORMAT-GLTF2": "INFO",
+    "GEO-MERGEABLE-PRIMITIVES": "WARNING",
     "GEO-TRIANGLE-BUDGET": "ERROR",
     "MAT-DUPLICATES": "ERROR",
     "MAT-MATERIAL-BUDGET": "ERROR",
@@ -186,6 +192,7 @@ test("custom profiles can disable rules, raise severities, and tighten budgets",
     id: "clunk-permissive-test",
     version: "1.0.0",
     rules: {
+      "GEO-MERGEABLE-PRIMITIVES": { severity: "INFO" },
       "GEO-MISSING-NORMALS": { severity: "INFO" },
       "MAT-DUPLICATES": { severity: "INFO" },
       "SCENE-EMPTY-NODES": { severity: "INFO" },
@@ -213,7 +220,7 @@ test("a custom profile identity reaches optimization results and the Passport", 
   assert.equal(result.passport.before.score.ruleSetId, "harvest-frontier-runtime-v1");
   assert.equal(
     result.outputHash,
-    "be4610c3e378f2f9799eff6312f6ab9d1e6a4dc54e03bae3ebf3f275398c8151",
+    "4368b41991a64f010713da589b1cb329f450e9b2db78776e9774b1737a70f275",
     "a profile changes the report, never the output bytes",
   );
 });
@@ -302,9 +309,9 @@ test("invalid custom profile definitions are rejected with the offending value",
   assert.equal(commented.thresholds.maxMaterials, 4);
   assert.deepEqual(commented.rules["MAT-DUPLICATES"], { enabled: true, severity: "ERROR" });
   assert.ok(RULE_IDS.includes("MAT-DUPLICATES"));
-  // 15 → 17: TEX-UNREADABLE, FORMAT-UNKNOWN-EXTENSION. 규칙이 늘면 프로젝트 프로파일이
+  // 17 → 19: GEO-DRAW-CALL-BUDGET, GEO-MERGEABLE-PRIMITIVES. 규칙이 늘면 프로젝트 프로파일이
   // 알던 목록도 늘어나므로, 이 수는 손으로 확인하고 올려야 한다.
-  assert.equal(RULE_IDS.length, 17);
+  assert.equal(RULE_IDS.length, 19);
 });
 
 test("the CLI loads a custom profile file and reports the same canonical result as Core", async () => {
@@ -376,7 +383,7 @@ test("the CLI validate and optimize commands honor a custom profile file", async
     assert.equal(optimizeEnvelope.passport.ruleSetVersion, "1.0.0");
     assert.equal(
       optimizeEnvelope.outputHash,
-      "be4610c3e378f2f9799eff6312f6ab9d1e6a4dc54e03bae3ebf3f275398c8151",
+      "4368b41991a64f010713da589b1cb329f450e9b2db78776e9774b1737a70f275",
       "the optimizer allowlist is unchanged by a custom profile",
     );
 

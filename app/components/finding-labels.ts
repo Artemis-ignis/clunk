@@ -15,6 +15,8 @@ const titles: Record<string, string> = {
   "SCENE-NONUNIT-SCALE": "1이 아닌 스케일",
   "GEO-NO-MESH": "메시가 없습니다",
   "GEO-TRIANGLE-BUDGET": "삼각형 예산 초과",
+  "GEO-DRAW-CALL-BUDGET": "드로우콜 예산 초과",
+  "GEO-MERGEABLE-PRIMITIVES": "합칠 수 있는 프리미티브",
   "GEO-MISSING-NORMALS": "Normal 속성 누락",
   "MAT-MATERIAL-BUDGET": "머티리얼 예산 초과",
   "MAT-DUPLICATES": "중복 머티리얼 발견",
@@ -36,6 +38,10 @@ const messages: Record<string, string> = {
   "SCENE-NONUNIT-SCALE": "1이 아닌 노드 스케일이 있습니다. 엔진마다 다르게 읽힐 수 있습니다.",
   "GEO-NO-MESH": "그릴 메시가 하나도 없습니다.",
   "GEO-TRIANGLE-BUDGET": "삼각형 수가 이 프로파일의 예산을 넘습니다. 줄이는 것은 손실이 있는 작업이라 사람이 판단해야 합니다.",
+  "GEO-DRAW-CALL-BUDGET":
+    "프리미티브 하나가 드로우콜 하나입니다. 오브젝트당 비용은 삼각형 수와 거의 무관하게 붙기 때문에, 삼각형이 적어도 여기서 느려질 수 있습니다.",
+  "GEO-MERGEABLE-PRIMITIVES":
+    "같은 메시 안에 머티리얼·속성·그리기 모드가 같은 프리미티브가 있습니다. 합치면 화면은 그대로인 채 드로우콜만 줄어듭니다. 지오메트리 버퍼를 다시 쓰는 일이라 Clunk가 대신 하지는 않습니다.",
   "GEO-MISSING-NORMALS": "하나 이상의 primitive에 NORMAL 속성이 없습니다.",
   "MAT-MATERIAL-BUDGET": "머티리얼 수가 이 프로파일의 예산을 넘습니다. 드로우콜이 그만큼 늘어납니다.",
   "MAT-DUPLICATES": "동일한 렌더링 속성을 가진 머티리얼은 손실 없이 합칠 수 있습니다.",

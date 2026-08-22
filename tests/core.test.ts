@@ -472,3 +472,60 @@ test("WebP 텍스처의 크기를 세 가지 청크 형식 모두에서 읽는�
     assert.equal(report.metrics.textureMaxDimension, 1024, label);
   }
 });
+
+/** 같은 머티리얼·같은 속성 프리미티브를 N개 가진 메시 하나. 익스포터가 스무딩 그룹마다
+    프리미티브를 쪼갤 때 나오는 모양이다. */
+function splitMesh(primitiveCount: number) {
+  const document = {
+    asset: { version: "2.0" },
+    scene: 0,
+    scenes: [{ nodes: [0] }],
+    nodes: [{ mesh: 0 }],
+    meshes: [
+      {
+        primitives: Array.from({ length: primitiveCount }, () => ({
+          attributes: { POSITION: 0, NORMAL: 0 },
+          indices: 1,
+          material: 0,
+        })),
+      },
+    ],
+    materials: [{ pbrMetallicRoughness: {} }],
+    accessors: [
+      { componentType: 5126, count: 3, type: "VEC3", min: [0, 0, 0], max: [1, 1, 1] },
+      { componentType: 5125, count: 3, type: "SCALAR" },
+    ],
+    bufferViews: [],
+    buffers: [],
+  };
+  return createAssetBundle("split.gltf", new TextEncoder().encode(JSON.stringify(document)));
+}
+
+test("드로우콜을 재기만 하지 않고 예산과 대조한다", () => {
+  // Harvest Frontier 실측(2026-08-22): 157,560 삼각형 그룹이 0.15ms인데 82,100 삼각형
+  // 그룹이 5.67ms였다. 비용은 삼각형이 아니라 그려지는 오브젝트 수에 붙어 있다. 그런데
+  // drawCallCount는 계산만 되고 어떤 규칙도 보지 않았다.
+  const report = inspectAsset(splitMesh(40), { profileId: "mobile" });
+  assert.equal(report.metrics.drawCallCount, 40);
+  const finding = report.findings.find((entry) => entry.ruleId === "GEO-DRAW-CALL-BUDGET");
+  assert.ok(finding, "예산을 넘겼으면 말해야 한다");
+  assert.equal(finding?.observed, 40);
+
+  // 삼각형은 그대로인데 프리미티브만 합친 에셋은 통과해야 한다 — 규칙이 실제로 보는
+  // 것이 삼각형이 아니라 드로우콜이라는 뜻이다.
+  const merged = inspectAsset(splitMesh(4), { profileId: "mobile" });
+  assert.equal(merged.findings.some((entry) => entry.ruleId === "GEO-DRAW-CALL-BUDGET"), false);
+});
+
+test("합쳐도 화면이 달라지지 않는 프리미티브를 수로 알려준다", () => {
+  const report = inspectAsset(splitMesh(40));
+  // 40개가 모두 같은 (머티리얼, 속성, 모드)이므로 하나만 남기고 39개가 사라진다.
+  assert.equal(report.metrics.mergeablePrimitiveCount, 39);
+  const finding = report.findings.find((entry) => entry.ruleId === "GEO-MERGEABLE-PRIMITIVES");
+  assert.equal(finding?.observed, 39);
+  // 지오메트리 버퍼를 다시 쓰는 일은 무손실 허용 목록 밖이다. 보고만 하고 손대지 않는다.
+  assert.equal(finding?.autoFixable, false);
+
+  // 프리미티브가 하나뿐이면 합칠 것이 없다.
+  assert.equal(inspectAsset(splitMesh(1)).metrics.mergeablePrimitiveCount, 0);
+});
