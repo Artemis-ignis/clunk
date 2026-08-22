@@ -14,6 +14,7 @@ import { SnapRoot } from "./components/SnapRoot";
 import { SurfaceShowcase } from "./components/SurfaceShowcase";
 import {
   MCP_TOOL_COUNT,
+  OPTIMIZE_SAMPLE,
   OPERATION_COUNT,
   RULE_COUNT,
   RULE_SET,
@@ -26,21 +27,10 @@ export const metadata: Metadata = {
     "AI 에이전트가 만든 GLB와 GLTF를 생성 직후 검사하고, 허용된 범위만 최적화하고, 결과를 다시 증명하는 품질 게이트입니다.",
 };
 
-/**
- * Real values from the recorded optimize/passport session in mcp-transcript.ts:
- * the bundled messy sample cleaned by the three allowlisted operations.
- */
-const CHAIN = {
-  sourceHash: "181473ff…e8fdf1",
-  outputHash: "718f2fba…c8302b",
-  operations: [
-    { id: "prune-empty-nodes", label: "빈 노드 정리" },
-    { id: "dedupe-materials", label: "중복 머티리얼 병합" },
-    { id: "clean-metadata", label: "메타데이터 정리" },
-  ],
-  before: { score: 99, bytes: "1,124 B" },
-  after: { score: 100, bytes: "908 B" },
-} as const;
+
+
+const formatKb = (bytes: number) => `${(bytes / 1024).toFixed(0)} KB`;
+const shortHash = (hash: string) => `${hash.slice(0, 8)}…${hash.slice(-6)}`;
 
 export default function Home() {
   return (
@@ -129,27 +119,39 @@ export default function Home() {
             <div className="chain3 panel">
               <div className="chain3-node">
                 <span className="mono-label">원본 GLB</span>
-                <strong className="num">{CHAIN.before.bytes}</strong>
-                <code className="num">sha256 {CHAIN.sourceHash}</code>
-                <span className="status-pill status-conditional">score {CHAIN.before.score}</span>
+                <strong className="num">{formatKb(OPTIMIZE_SAMPLE.beforeBytes)}</strong>
+                <code className="num">sha256 {shortHash(OPTIMIZE_SAMPLE.sourceHash)}</code>
+                <span className="status-pill status-conditional">score {OPTIMIZE_SAMPLE.beforeScore}</span>
               </div>
               <div className="chain3-ops" aria-label="허용 목록 작업">
-                {CHAIN.operations.map((op) => (
+                {OPTIMIZE_SAMPLE.operations.map((op) => (
                   <span key={op.id} className="chain3-op">
                     <code>{op.id}</code>
-                    {op.label}
+                    {op.label} {op.count}건
                   </span>
                 ))}
               </div>
               <div className="chain3-node">
                 <span className="mono-label">새 파일 · 원본 무손실</span>
-                <strong className="num">{CHAIN.after.bytes}</strong>
-                <code className="num">sha256 {CHAIN.outputHash}</code>
-                <span className="status-pill status-ready">score {CHAIN.after.score} · READY</span>
+                <strong className="num">{formatKb(OPTIMIZE_SAMPLE.afterBytes)}</strong>
+                <code className="num">sha256 {shortHash(OPTIMIZE_SAMPLE.outputHash)}</code>
+                <span className="status-pill status-conditional">
+                  score {OPTIMIZE_SAMPLE.afterScore} · 그대로
+                </span>
               </div>
+              {/* 예전에는 이 자리가 score 99 → 100 · READY였다. 그건 정점 4개짜리 장난감
+                  샘플의 값이었고, 실제 게임 에셋으로 바꾼 뒤에도 옛 숫자가 남아 있었다.
+                  지금 값은 실측이고, 점수가 오르지 않는다. 그리고 그게 이 제품의 주장이다. */}
+              <p className="chain3-verdict">
+                <strong>{OPTIMIZE_SAMPLE.operations.reduce((sum, op) => sum + op.count, 0)}건을 지웠는데 점수는 그대로입니다.</strong>{" "}
+                남은 경고는 무손실로 고칠 수 없는 것들이라서요 — 스케일 축이 0인 노드, 합쳐야
+                할 프리미티브, 빠진 노멀. 그건 사람이 결정할 일이고, 우리는 그걸 점수로
+                덮지 않습니다.
+              </p>
               <p className="chain3-note">
-                Passport에는 원본과 결과물의 해시, 검사 다이제스트, 적용 작업이 함께 봉인됩니다.
-                출력 GLB를 다시 파싱해 해시가 맞아야 준비 완료가 됩니다.
+                Passport에는 원본과 결과물의 해시, 검사 다이제스트, 적용 작업, 그리고 그 판정을
+                내린 규칙 세트의 지문이 함께 봉인됩니다. 받는 쪽이 같은 규칙으로 재검증했는지
+                확인할 수 있어야 증명서 구실을 하기 때문입니다.
               </p>
               {/* The claim only means something if the person receiving it can check it
                   themselves, so the section shows the command rather than asserting trust. */}

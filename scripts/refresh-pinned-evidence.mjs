@@ -37,6 +37,7 @@ for (const name of SAMPLES) {
 const messy = await bundle("clunk-messy-sample.glb");
 const pc = inspectAsset(messy, { profileId: "pc" });
 const optimizedWeb = optimizeAsset(messy, { profileId: "web" });
+const optimizedPc = optimizeAsset(messy, { profileId: "pc" });
 
 /** 잠금 블록은 통째로 다시 쓴다. 항목 순서에 기대는 치환은 조용히 어긋난다. */
 const digestBlock = [
@@ -73,6 +74,44 @@ const replacements = [
     find: /(byteLength: )\d+(,)/,
     value: (m, a, b) => `${a}${pc.byteLength}${b}`,
     label: "CLI_SAMPLE.byteLength",
+  },
+  // OPTIMIZE_SAMPLE — 랜딩의 before/after 사슬. 손으로 적어 두었더니 샘플이 바뀐 뒤에도
+  // 옛 숫자가 "실측"이라는 주석을 달고 화면에 남아 있었다.
+  {
+    file: "app/components/product-facts.ts",
+    find: /(sourceHash: ")[0-9a-f]{64}(")/,
+    value: (m, a, b) => `${a}${optimizedPc.inputHash}${b}`,
+    label: "OPTIMIZE_SAMPLE.sourceHash",
+  },
+  {
+    file: "app/components/product-facts.ts",
+    find: /(outputHash: ")[0-9a-f]{64}(")/,
+    value: (m, a, b) => `${a}${optimizedPc.outputHash}${b}`,
+    label: "OPTIMIZE_SAMPLE.outputHash",
+  },
+  {
+    file: "app/components/product-facts.ts",
+    find: /(beforeBytes: )\d+(,)/,
+    value: (m, a, b) => `${a}${optimizedPc.before.byteLength}${b}`,
+    label: "OPTIMIZE_SAMPLE.beforeBytes",
+  },
+  {
+    file: "app/components/product-facts.ts",
+    find: /(afterBytes: )\d+(,)/,
+    value: (m, a, b) => `${a}${optimizedPc.after.byteLength}${b}`,
+    label: "OPTIMIZE_SAMPLE.afterBytes",
+  },
+  {
+    file: "app/components/product-facts.ts",
+    find: /(beforeScore: )\d+(,)/,
+    value: (m, a, b) => `${a}${optimizedPc.before.score.score}${b}`,
+    label: "OPTIMIZE_SAMPLE.beforeScore",
+  },
+  {
+    file: "app/components/product-facts.ts",
+    find: /(afterScore: )\d+(,)/,
+    value: (m, a, b) => `${a}${optimizedPc.after.score.score}${b}`,
+    label: "OPTIMIZE_SAMPLE.afterScore",
   },
   {
     file: "app/components/product-facts.ts",

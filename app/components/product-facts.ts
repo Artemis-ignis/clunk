@@ -1,4 +1,4 @@
-import { READY_SCORE_THRESHOLD, RULE_SET_ID, RULE_SET_VERSION } from "../../packages/core/src/index";
+import { READY_SCORE_THRESHOLD, RULE_IDS, RULE_SET_ID, RULE_SET_VERSION } from "../../packages/core/src/index";
 
 /**
  * Product facts shown on marketing surfaces.
@@ -17,26 +17,14 @@ export const RULE_SET = {
   readyScoreThreshold: READY_SCORE_THRESHOLD,
 } as const;
 
-/** Rule ids emitted by `buildFindings` in packages/core/src/index.ts. */
-export const POLICY_RULE_IDS = [
-  "FORMAT-GLTF2",
-  "FORMAT-PARSE",
-  "INPUT-MISSING",
-  "SEC-MISSING-RESOURCE",
-  "SEC-REMOTE-RESOURCE",
-  "SCENE-EMPTY-NODES",
-  "SCENE-ZERO-SCALE",
-  "SCENE-NONUNIT-SCALE",
-  "GEO-NO-MESH",
-  "GEO-MISSING-NORMALS",
-  "GEO-TRIANGLE-BUDGET",
-  "MAT-DUPLICATES",
-  "MAT-MATERIAL-BUDGET",
-  "TEX-MISSING-UV0",
-  "TEX-DIMENSION-BUDGET",
-  "TEX-MEMORY-BUDGET",
-  "RUNTIME-ANIMATION-SKIN",
-] as const;
+/**
+ * 규칙 id 목록.
+ *
+ * 예전에는 여기에 손으로 옮겨 적어 두었다. 코어가 규칙을 15개에서 20개로 늘리는 동안
+ * 이 목록은 17개에 멈춰 있었고, 랜딩이 그 17을 "정책 규칙"이라는 헤드라인 숫자로
+ * 띄우고 있었다. 손으로 옮긴 목록은 옮긴 그 순간에만 맞다.
+ */
+export const POLICY_RULE_IDS: readonly string[] = RULE_IDS;
 
 /** `FindingCategory` union in packages/core/src/index.ts. */
 export const FINDING_CATEGORIES = [
@@ -213,6 +201,35 @@ export const CLI_SAMPLE = {
     { severity: "WARNING", ruleId: "SCENE-EMPTY-NODES" },
     { severity: "ERROR", ruleId: "SCENE-ZERO-SCALE" },
     { severity: "WARNING", ruleId: "TEX-MISSING-UV0" },
+  ],
+} as const;
+
+/**
+ * 번들 샘플에 안전 최적화를 실제로 돌린 결과.
+ *
+ * 이 값들은 손으로 옮겨 적지 않는다. scripts/refresh-pinned-evidence.mjs가 실제 실행에서
+ * 다시 뽑아 여기에 써 넣고, npm test가 어긋나면 실패한다. 예전에는 손으로 적어 두었고,
+ * 샘플이 바뀐 뒤에도 옛 숫자가 "실측"이라는 주석을 달고 화면에 남아 있었다.
+ */
+export const OPTIMIZE_SAMPLE = {
+  sourceHash: "03d293079c89faef2d1805ea36b58fe69e0f8b2cd6e1d10ff611739c5db7e1a6",
+  outputHash: "4368b41991a64f010713da589b1cb329f450e9b2db78776e9774b1737a70f275",
+  beforeBytes: 1175840,
+  afterBytes: 1171296,
+  beforeScore: 95,
+  afterScore: 95,
+  afterReady: false,
+  operations: [
+    { id: "prune-empty-nodes", count: 8, label: "빈 노드 정리" },
+    { id: "dedupe-materials", count: 4, label: "중복 머티리얼 병합" },
+    { id: "clean-metadata", count: 24, label: "메타데이터 정리" },
+  ],
+  /** 무손실로는 고칠 수 없어 남는 것들. 이게 이 제품이 하지 않는 일의 목록이다. */
+  remaining: [
+    "SCENE-ZERO-SCALE",
+    "GEO-MERGEABLE-PRIMITIVES",
+    "GEO-MISSING-NORMALS",
+    "TEX-MISSING-UV0",
   ],
 } as const;
 

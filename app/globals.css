@@ -5902,6 +5902,34 @@ html.snap-y {
 }
 
 
+/* 이 문단이 이 섹션의 결론이다.
+
+   앞의 사슬은 무엇을 했는지 보여주고, 이 문장은 무엇을 하지 않았는지 말한다. 그게
+   이 제품의 주장이라 본문과 같은 크기로 두면 안 된다. 예전에는 이 자리에 'score
+   99 → 100 · READY'가 있었고, 그건 정점 4개짜리 장난감 샘플의 값이었다. */
+.chain3-verdict {
+  grid-column: 1 / -1;
+  margin-top: var(--sp-20);
+  padding: var(--sp-20) var(--sp-24);
+  border-radius: var(--r-panel);
+  border: 1px solid var(--warning-soft);
+  background: var(--warning-soft);
+  color: var(--text);
+  font-size: var(--fs-2);
+  line-height: var(--lh-lead);
+}
+
+.chain3-verdict strong {
+  display: block;
+  margin-bottom: var(--sp-8);
+  color: var(--warning);
+  font-size: var(--fs-4);
+  font-weight: 550;
+  letter-spacing: var(--ls-heading);
+  line-height: 1.25;
+  word-break: keep-all;
+}
+
 .chain3-note {
   grid-column: 1 / -1;
   margin-top: var(--sp-8);
