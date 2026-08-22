@@ -5650,7 +5650,10 @@ html.snap-y {
   letter-spacing: var(--ls-display);
 }
 
-.proof3-stat span {
+/* Direct child only. The stat's number is rendered by CountUp as <strong><span>…</span></strong>,
+   so an unscoped descendant selector caught it too and forced the headline figure down to
+   0.8rem — the four proof numbers had been rendering at 13px inside a 61px slot. */
+.proof3-stat > span {
   display: block;
   margin-top: var(--sp-8);
   color: var(--text);
