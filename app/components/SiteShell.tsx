@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { BrandMark } from "./BrandMark";
 import { SiteNav, type ShellSection } from "./SiteNav";
@@ -17,14 +16,6 @@ export function SiteShell({
       <SiteNav active={active} />
       {children}
       <footer className="site-footer">
-        <img
-          className="site-footer-art"
-          src="/template-assets/agentic-footer.png"
-          alt=""
-          aria-hidden="true"
-          width={1400}
-          height={580}
-        />
         <div className="site-footer-inner">
           <div className="site-footer-brand">
             <span className="brand-mark">
