@@ -50,7 +50,7 @@ export default async function LoginPage({
           <BrandLockup gradientId="clunk-login" />
         </Link>
         <span className="login-topbar-end">
-          <span className="mono-label">비공개 파일럿</span>
+          <span className="mono-label">얼리 액세스</span>
           <ThemeToggle />
         </span>
       </header>

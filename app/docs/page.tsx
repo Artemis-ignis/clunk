@@ -197,7 +197,7 @@ export default function DocsPage() {
             <article className="scope-card">
               <h3>지원 입력</h3>
               <p>
-                GLB와 glTF 2.0을 지원합니다. GLB는 바이트가 자체 포함되어 파일럿에 권장됩니다. 외부 glTF 리소스는 선택한
+                GLB와 glTF 2.0을 지원합니다. GLB는 바이트가 파일 안에 함께 들어 있어 권장합니다. 외부 glTF 리소스는 선택한
                 로컬 번들에 포함된 경우에만 처리합니다.
               </p>
             </article>

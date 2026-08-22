@@ -8,7 +8,7 @@ import { AccountDataControls } from "./AccountDataControls";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "설정",
-  description: "계정과 워크스페이스 저장 경계를 확인합니다.",
+  description: "무엇이 저장되는지 확인하고, 내 데이터를 내려받거나 계정을 지웁니다.",
 };
 
 export default async function SettingsPage() {
@@ -30,7 +30,7 @@ export default async function SettingsPage() {
       value: viaChatGPT ? "ChatGPT SIWC" : "GitHub 계정",
       note: "어느 쪽이든 Clunk는 자체 이메일과 비밀번호 데이터베이스를 만들지 않습니다.",
     },
-    { label: "저장", value: "브라우저 로컬 처리와 D1 메타데이터", note: "R2 artifact 저장은 파일럿에서 의도적으로 꺼 두었습니다." },
+    { label: "저장", value: "브라우저에서 처리, 결과만 서버에", note: "에셋 파일을 보관하는 저장소는 연결되어 있지 않습니다." },
   ];
 
   const notStored = [
@@ -48,11 +48,14 @@ export default async function SettingsPage() {
       <section className="ws-welcome">
         <div>
           <h2>
-            경계를
+            내 계정과
             <br />
-            <em>명확하게 유지합니다.</em>
+            <em>내 데이터.</em>
           </h2>
-          <p>파일럿은 비밀번호 없는 로그인만 사용합니다. 별도 저장을 켜지 않는 한 원본 에셋은 브라우저 밖으로 나가지 않습니다.</p>
+          <p>
+            무엇이 저장되고 무엇이 저장되지 않는지 확인하고, 내 데이터를 통째로 내려받거나 계정을
+            지울 수 있습니다.
+          </p>
         </div>
       </section>
 

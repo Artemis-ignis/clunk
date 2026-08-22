@@ -28,7 +28,7 @@ const MONTHLY_PLANS = [
       "안전 최적화와 새 재검사, Passport 발급",
       "워크스페이스 이력과 크레딧 원장",
     ],
-    cta: { label: "파일럿 시작", href: "/app", primary: true },
+    cta: { label: "지금 시작하기", href: "/app", primary: true },
     active: true,
   },
   {

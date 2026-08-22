@@ -203,7 +203,7 @@ export function AccountDataControls() {
               <Icon name="circleAlert" size={15} />
               <span>
                 <strong>{row.label}</strong>
-                {summary ? `${summary.counts[row.key] ?? 0}건 삭제` : "현황을 불러오는 중"}
+                {summary ? `${summary.counts[row.key] ?? 0}건 삭제` : loadError ? "확인 불가" : "현황을 불러오는 중"}
               </span>
             </li>
           ))}
@@ -241,36 +241,49 @@ export function AccountDataControls() {
           </div>
         ) : null}
 
-        <div style={{ marginTop: "var(--sp-20)" }}>
-          <label htmlFor="clunk-delete-confirm" style={{ display: "block", marginBottom: "var(--sp-8)" }}>
-            <span className="mono-label">확인 문구</span>
-          </label>
-          <p className="muted-note" style={{ marginBottom: "var(--sp-8)" }}>
-            삭제하려면 워크스페이스 이름 <code>{phrase || "…"}</code> 을(를) 그대로 입력해 주세요.
-          </p>
-          <input
-            id="clunk-delete-confirm"
-            type="text"
-            value={confirmText}
-            onChange={(event) => setConfirmText(event.target.value)}
-            placeholder={phrase}
-            autoComplete="off"
-            spellCheck={false}
-            disabled={!summary || deleteState === "busy"}
-            className="settings-confirm-input"
-          />
-        </div>
+        {/* Without the summary there is no workspace name to confirm against, and asking someone
+            to type a name we cannot show them ("…") is an instruction they cannot follow. Say
+            what happened instead and keep the irreversible control out of reach. */}
+        {phrase ? (
+          <>
+            <div style={{ marginTop: "var(--sp-20)" }}>
+              <label htmlFor="clunk-delete-confirm" style={{ display: "block", marginBottom: "var(--sp-8)" }}>
+                <span className="mono-label">확인 문구</span>
+              </label>
+              <p className="muted-note" style={{ marginBottom: "var(--sp-8)" }}>
+                삭제하려면 워크스페이스 이름 <code>{phrase}</code> 을(를) 그대로 입력해 주세요.
+              </p>
+              <input
+                id="clunk-delete-confirm"
+                type="text"
+                value={confirmText}
+                onChange={(event) => setConfirmText(event.target.value)}
+                placeholder={phrase}
+                autoComplete="off"
+                spellCheck={false}
+                disabled={deleteState === "busy"}
+                className="settings-confirm-input"
+              />
+            </div>
 
-        <div className="settings-actions">
-          <button
-            type="button"
-            className="button button-quiet button-danger"
-            onClick={() => void deleteWorkspace()}
-            disabled={!confirmMatches || deleteState === "busy"}
-          >
-            {deleteState === "busy" ? "삭제하는 중" : "워크스페이스와 계정 영구 삭제"}
-          </button>
-        </div>
+            <div className="settings-actions">
+              <button
+                type="button"
+                className="button button-quiet button-danger"
+                onClick={() => void deleteWorkspace()}
+                disabled={!confirmMatches || deleteState === "busy"}
+              >
+                {deleteState === "busy" ? "삭제하는 중" : "워크스페이스와 계정 영구 삭제"}
+              </button>
+            </div>
+          </>
+        ) : (
+          <p className="muted-note" style={{ marginTop: "var(--sp-20)" }}>
+            현황을 불러오지 못해 삭제를 진행할 수 없습니다. 무엇이 지워지는지 확인하지 못한 채로
+            되돌릴 수 없는 작업을 실행하지 않습니다. 새로고침한 뒤에도 같으면 지원으로 문의해
+            주세요.
+          </p>
+        )}
       </div>
     </>
   );
