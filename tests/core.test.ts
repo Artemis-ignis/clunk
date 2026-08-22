@@ -27,9 +27,55 @@ test("real GLB inspection is deterministic across three runs", async () => {
   assert.equal(reports[0].inputHash, sha256Hex(bytes));
   assert.equal(reports[0].resultDigest, reports[1].resultDigest);
   assert.equal(reports[1].resultDigest, reports[2].resultDigest);
-  assert.equal(reports[0].metrics.triangleCount, 2);
+  // 샘플은 제품의 유일한 무료 체험 경로다. 장난감으로 되돌아가면 여기서 걸린다.
+  assert.ok(reports[0].metrics.triangleCount > 20_000, "데모 샘플이 실제 게임 에셋 규모여야 한다");
+  assert.ok(reports[0].metrics.textureMaxDimension >= 4096, "텍스처 과다 문제가 담겨 있어야 한다");
   assert.ok(reports[0].findings.some((finding) => finding.id.startsWith("GEO-MISSING-NORMALS")));
+  assert.ok(reports[0].findings.some((finding) => finding.severity === "ERROR"));
   assert.equal(reports[0].score.ready, false);
+});
+
+test("정답지 샘플은 세 프로파일 모두에서 통과한다", async () => {
+  const { bundle } = await sample("clunk-ready-sample.glb");
+  for (const profileId of ["pc", "web", "mobile"] as const) {
+    const report = inspectAsset(bundle, { profileId });
+    assert.equal(report.score.ready, true, `${profileId} 프로파일에서 통과해야 한다`);
+  }
+});
+
+test("빈 노드 리포트는 최적화가 실제로 지우는 수만 약속한다", async () => {
+  const { bundle } = await sample("clunk-messy-sample.glb");
+  const report = inspectAsset(bundle);
+  const finding = report.findings.find((entry) => entry.ruleId === "SCENE-EMPTY-NODES");
+  assert.ok(finding, "샘플에 빈 노드가 있어야 이 검증이 의미가 있다");
+  // extras나 트랜스폼을 가진 마커는 남긴다. 비어 보인다고 지우면 스폰 포인트가 사라진다.
+  assert.ok(report.metrics.prunableEmptyNodeCount < report.metrics.emptyNodeCount);
+
+  const result = optimizeAsset(bundle);
+  const pruned = result.operations.find((operation) => operation.id === "prune-empty-nodes");
+  assert.equal(pruned?.count, report.metrics.prunableEmptyNodeCount);
+  assert.equal(
+    result.after.metrics.emptyNodeCount,
+    report.metrics.emptyNodeCount - report.metrics.prunableEmptyNodeCount,
+  );
+});
+
+test("같은 파일을 반복 최적화해도 남기기로 한 노드는 계속 남는다", async () => {
+  const { bundle } = await sample("clunk-messy-sample.glb");
+  const first = optimizeAsset(bundle);
+  const held = first.after.metrics.emptyNodeCount;
+  assert.ok(held > 0, "남기기로 한 마커가 있어야 이 검증이 의미가 있다");
+
+  // CI는 같은 파일에 이걸 반복해서 돌린다. 두 번째 실행에서 판단이 뒤집히면 안 된다.
+  let bytes = first.outputBytes;
+  let name = first.outputFileName;
+  for (let pass = 0; pass < 2; pass += 1) {
+    const again = optimizeAsset(createAssetBundle(name, bytes));
+    assert.equal(again.after.metrics.emptyNodeCount, held);
+    assert.equal(again.after.metrics.nodeCount, first.after.metrics.nodeCount);
+    bytes = again.outputBytes;
+    name = again.outputFileName;
+  }
 });
 
 test("safe optimization creates a new artifact and fresh reinspection", async () => {
@@ -45,8 +91,13 @@ test("safe optimization creates a new artifact and fresh reinspection", async ()
   const downloaded = inspectAsset(createAssetBundle(result.outputFileName, result.outputBytes));
   assert.equal(downloaded.inputHash, result.outputHash);
   assert.equal(downloaded.resultDigest, result.after.resultDigest);
-  assert.equal(downloaded.metrics.materialCount, 1);
-  assert.equal(downloaded.metrics.emptyNodeCount, 0);
+  // 리포트가 "무손실로 병합 가능"이라고 적은 중복이 실제로 사라져야 한다.
+  assert.equal(downloaded.metrics.duplicateMaterialCount, 0);
+  assert.equal(
+    downloaded.metrics.materialCount,
+    result.before.metrics.materialCount - result.before.metrics.duplicateMaterialCount,
+  );
+  assert.equal(downloaded.metrics.prunableEmptyNodeCount, 0);
 });
 
 test("malformed and incomplete inputs are rejected with evidence", () => {
@@ -65,7 +116,14 @@ test("metadata cleanup is explicit, allowlisted, and render-safe", () => {
     extras: { source: "fixture" },
     scene: 0,
     scenes: [{ nodes: [0] }],
-    nodes: [{ extras: { editorOnly: true } }],
+    nodes: [
+      // 실제로 무언가를 붙들고 있는 노드. extras는 런타임이 쓰지 않으므로 지운다.
+      { name: "Root", children: [1, 2], extras: { editorOnly: true } },
+      // 순수 익스포터 잔여물. 지운다.
+      { name: "Empty" },
+      // 엔진이 이름으로 찾는 마커. 노드도 extras도 지키지 않으면 게임이 깨진다.
+      { name: "SpawnPoint", extras: { team: "blue" } },
+    ],
   };
   const source = new TextEncoder().encode(JSON.stringify(document));
   const result = optimizeAsset(createAssetBundle("metadata.gltf", source));
@@ -74,10 +132,19 @@ test("metadata cleanup is explicit, allowlisted, and render-safe", () => {
   assert.equal(cleaned.asset.generator, undefined);
   assert.equal(cleaned.asset.copyright, undefined);
   assert.equal(cleaned.extras, undefined);
-  assert.equal(cleaned.nodes[0].extras, undefined);
-  assert.deepEqual(result.operations.map((operation) => operation.id), ["clean-metadata"]);
-  assert.equal(result.operations[0].safety, "metadata-only");
-  assert.equal(result.after.metrics.nodeCount, result.before.metrics.nodeCount);
+  assert.deepEqual(result.operations.map((operation) => operation.id), [
+    "prune-empty-nodes",
+    "clean-metadata",
+  ]);
+  assert.equal(result.operations[1].safety, "metadata-only");
+
+  assert.deepEqual(
+    cleaned.nodes.map((node) => node.name),
+    ["Root", "SpawnPoint"],
+  );
+  assert.equal(cleaned.nodes[0].extras, undefined, "일반 노드의 extras는 허용 목록대로 지운다");
+  assert.deepEqual(cleaned.nodes[1].extras, { team: "blue" }, "남기기로 한 마커는 extras까지 지킨다");
+  assert.deepEqual(cleaned.nodes[0].children, [1], "노드를 지웠으면 참조도 다시 이어야 한다");
 });
 
 test("unparseable input scores zero and reports the real reason", async () => {

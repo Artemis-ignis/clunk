@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFile } from "node:fs/promises";
 
 async function render(pathname = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -48,6 +49,9 @@ test("responses carry the security headers the worker promises", async () => {
   // The GLB preview instantiates the meshopt decoder as WebAssembly; without this the 3D
   // preview silently fails on any browser that enforces the policy.
   assert.match(csp, /script-src[^;]*'wasm-unsafe-eval'/);
+  // 업로드한 GLB는 blob: URL로만 로더에 전달된다. connect-src에서 blob:을 빼면 텍스처가
+  // 있는 에셋은 미리보기가 통째로 비고, 콘솔에만 조용히 찍힌다. 실제로 그렇게 됐었다.
+  assert.match(csp, /connect-src[^;]*blob:/);
   assert.equal(response.headers.get("x-frame-options"), "DENY");
   assert.equal(response.headers.get("x-content-type-options"), "nosniff");
   assert.match(response.headers.get("strict-transport-security") ?? "", /max-age=\d+/);
@@ -125,4 +129,24 @@ test("the worker survives a runtime with no bindings", async () => {
     { waitUntil() {}, passThroughOnException() {} },
   );
   assert.equal(response.status, 200, "a missing binding object must not break page rendering");
+});
+
+test("스타일시트가 존재하지 않는 토큰을 참조하지 않는다", async () => {
+  // 정의되지 않은 커스텀 프로퍼티는 오류를 내지 않고 그냥 무시된다. --sp-10처럼 없는
+  // 이름을 쓰면 간격이 조용히 0이 되고, 빌드도 린트도 통과한다. 실제로 --ls-tight와
+  // --fs-0이 그렇게 살아 있었다.
+  const css = await readFile("app/globals.css", "utf8");
+  const defined = new Set([...css.matchAll(/(--[a-zA-Z0-9-]+)\s*:/g)].map((match) => match[1]));
+  // 폰트 로더와 인라인 style 속성이 런타임에 넣어 주는 값들.
+  const injected = new Set([
+    "--font-geist-sans",
+    "--font-geist-mono",
+    "--orbit-r",
+    "--orbit-dur",
+    "--orbit-delay",
+  ]);
+  const missing = [...new Set([...css.matchAll(/var\((--[a-zA-Z0-9-]+)/g)].map((match) => match[1]))].filter(
+    (name) => !defined.has(name) && !injected.has(name),
+  );
+  assert.deepEqual(missing, [], `정의되지 않은 CSS 토큰: ${missing.join(", ")}`);
 });

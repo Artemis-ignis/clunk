@@ -18,7 +18,7 @@
     "api:smoke": "tsx scripts/api-credit-smoke.ts",
     "api:verify-smoke": "tsx scripts/api-verification-smoke.ts",
     "e2e": "node scripts/e2e.mjs",
-    "generate:samples": "node scripts/generate-sample-assets.mjs",
+    "generate:samples": "node scripts/build-samples.mjs",
     "clunk": "tsx scripts/clunk-cli.ts",
     "mcp": "tsx integrations/mcp/server.ts",
     "site:preflight": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\\site-preflight.ps1",

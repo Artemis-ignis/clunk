@@ -17,7 +17,7 @@ import {
 import { AssetPreview } from "./AssetPreview";
 import { localizeFindingMessage, localizeFindingTitle } from "./finding-labels";
 import { Icon } from "./Icon";
-import { readinessHint, readinessNote, resolveReadiness } from "./readiness";
+import { readinessHint, readinessLabel, readinessNote, resolveReadiness } from "./readiness";
 import { StatusPill } from "./StatusPill";
 import { WorkspaceShell } from "./WorkspaceShell";
 
@@ -1000,16 +1000,16 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
             <button type="button" className="sample-button" onClick={() => void loadSample("clunk-messy-sample.glb")}>
               <span className="file-chip">GLB</span>
               <span className="sample-copy">
-                <strong>문제 있는 쿼드</strong>
-                <small>경고 3건</small>
+                <strong>손봐야 하는 프롭 세트</strong>
+                <small>1.1MB · finding 6건 · 사라지는 오브젝트 포함</small>
               </span>
               <Icon name="arrowRight" size={14} />
             </button>
             <button type="button" className="sample-button" onClick={() => void loadSample("clunk-ready-sample.glb")}>
               <span className="file-chip file-chip-ready">GLB</span>
               <span className="sample-copy">
-                <strong>준비된 쿼드</strong>
-                <small>점수 100</small>
+                <strong>정리된 같은 프롭 세트</strong>
+                <small>81KB · 세 프로파일 모두 통과</small>
               </span>
               <Icon name="arrowRight" size={14} />
             </button>
@@ -1087,13 +1087,28 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
               <span className="mono-label">Game-Ready Score</span>
               <Icon name="gauge" size={16} />
             </div>
-            <p className={`score-number${report ? "" : " score-number-idle"}`}>
-              <strong>{report ? report.score.score : "실행 대기"}</strong>
-              {report ? <span>/ 100</span> : null}
-            </p>
+            {report && readiness ? (
+              <p className={`score-verdict score-verdict-${readiness}`}>
+                <Icon
+                  name={readiness === "ready" ? "circleCheck" : readiness === "conditional" ? "triangleAlert" : "circleAlert"}
+                  size={20}
+                />
+                <strong>{readinessLabel(readiness)}</strong>
+              </p>
+            ) : (
+              <p className="score-number score-number-idle">
+                <strong>실행 대기</strong>
+              </p>
+            )}
             <div className="score-track">
               <span style={{ width: `${report?.score.score ?? 0}%` }} />
             </div>
+            {report ? (
+              <p className="score-figure">
+                <strong>{report.score.score}</strong>
+                <span>/ 100 · 통과 기준 {report.score.threshold}</span>
+              </p>
+            ) : null}
             <p className="score-note">{readiness ? readinessNote(readiness) : "점수는 실제 검사 보고서에서 계산됩니다."}</p>
           </div>
 
@@ -1115,8 +1130,8 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
                       />
                     </span>
                     <div>
-                      <strong>{localizeFindingTitle(finding.title)}</strong>
-                      <p>{localizeFindingMessage(finding.title, finding.message)}</p>
+                      <strong>{localizeFindingTitle(finding)}</strong>
+                      <p>{localizeFindingMessage(finding, report)}</p>
                       <small>{finding.ruleId} / 관측값 {String(finding.observed)} / 기준값 {String(finding.threshold)}</small>
                     </div>
                   </li>

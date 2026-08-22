@@ -64,7 +64,10 @@ const SECURITY_HEADERS: Record<string, string> = {
     "style-src 'self' 'unsafe-inline'",
     // wasm-unsafe-eval: the GLB preview instantiates the meshopt decoder as WebAssembly.
     "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'",
-    "connect-src 'self'",
+    // blob:은 업로드한 GLB를 로더에 넘기는 유일한 경로다. 파일은 브라우저 밖으로
+    // 나가지 않으므로 자기 자신이 만든 blob을 다시 읽는 것뿐이고, 외부 출처는 늘지
+    // 않는다. 이걸 빼 두었더니 텍스처가 있는 에셋은 미리보기가 통째로 비었다.
+    "connect-src 'self' blob:",
     "worker-src 'self' blob:",
   ].join("; "),
 };

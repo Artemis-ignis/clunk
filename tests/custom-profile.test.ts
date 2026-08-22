@@ -31,14 +31,14 @@ const execFileAsync = promisify(execFile);
  */
 const BUILT_IN_DIGESTS = {
   "clunk-messy-sample.glb": {
-    web: "19d252dac51090249ebeb04c3349c5c55be5c0df51382c6970d6b2787e11fa6f",
-    mobile: "40d2007e5edebdd4ebc31cac30e08c4747f5f05fee477d0b184bec5ad8d7dc7b",
-    pc: "91811095b6afed62aa9b396834ab660cda96ae3c031ff1275811319bf28177b1",
+    web: "9301fa0c34289f9dae1948fa5855c875af68f5f17b6e8a9d29baf94ed1e0f01c",
+    mobile: "ead78b88a07a367cfe78d443d0f20161962daa7ab74a6314b00a84cb6c993da0",
+    pc: "11a617469271ae806381501465145abf1e8d1283fd20103fb49fef7dd6fb2b70",
   },
   "clunk-ready-sample.glb": {
-    web: "be94a98a1e71a301cc6b3bfeed474665ff61440142ae4f902d51a2b56608f487",
-    mobile: "c1b7622f86ae420a674d570f75a2492ceda0bd6b28eaa9b6214039dff5f9448c",
-    pc: "f7756e3dc218dfb2040fe6e58694b5f03b0bf4d7228e66b34305bf0b418a6733",
+    web: "21936e6f631a9ba340b8e0b128417a565c482c43395c27325fc0a34885f4fc42",
+    mobile: "c3906bffc27c5c16ec63fd433e6d84d2bb1b02581efacc4d31af7d05e940db9d",
+    pc: "692ae9f56c553210be6b6069faf2908d6556886fac64e043f9f19381e6c3eec6",
   },
 } as const;
 
@@ -68,22 +68,25 @@ test("built-in profiles keep the digests, scores, and findings recorded before c
   }
 
   const messy = inspectAsset(await sample("clunk-messy-sample.glb"), { profileId: "web" });
-  assert.equal(messy.score.score, 99);
+  assert.equal(messy.score.score, 92);
   assert.equal(messy.score.ready, false);
-  assert.equal(messy.findings.length, 4);
+  assert.equal(messy.findings.length, 7);
   assert.deepEqual(severityMap(messy.findings), {
     "FORMAT-GLTF2": "INFO",
     "GEO-MISSING-NORMALS": "WARNING",
     "MAT-DUPLICATES": "WARNING",
     "SCENE-EMPTY-NODES": "WARNING",
+    "SCENE-ZERO-SCALE": "ERROR",
+    "TEX-MEMORY-BUDGET": "ERROR",
+    "TEX-MISSING-UV0": "WARNING",
   });
 
   const defaulted = inspectAsset(await sample("clunk-messy-sample.glb"));
   assert.equal(defaulted.resultDigest, BUILT_IN_DIGESTS["clunk-messy-sample.glb"].web);
 
   const optimized = optimizeAsset(await sample("clunk-messy-sample.glb"), { profileId: "web" });
-  assert.equal(optimized.outputHash, "718f2fbaf4545bb96381c3055270212ca7c91e7197b562555ba63b3c0dc8302b");
-  assert.equal(optimized.after.resultDigest, "ce70139c1b0135ef6cb70c5d8b22b882198a09e9ed1e80892b6e44f33a364b63");
+  assert.equal(optimized.outputHash, "be4610c3e378f2f9799eff6312f6ab9d1e6a4dc54e03bae3ebf3f275398c8151");
+  assert.equal(optimized.after.resultDigest, "18cd12876360d645cb6565a655ec95c578f412ada89e6a3fd3e9070df68e0ad0");
   assert.equal(optimized.passport.ruleSetId, RULE_SET_ID);
 });
 
@@ -116,16 +119,26 @@ test("the example Harvest Frontier profile changes severities and the score on t
     "GEO-MISSING-NORMALS": "WARNING",
     "MAT-DUPLICATES": "WARNING",
     "SCENE-EMPTY-NODES": "WARNING",
+    "SCENE-ZERO-SCALE": "ERROR",
+    "TEX-MISSING-UV0": "WARNING",
   });
+  // 프로파일이 사실 기록으로 낮춘 것(normals, empty nodes, UV)과 낮추지 않은 것이
+  // 갈린다. 텍스처 예산 0은 "procedural PBR이라 텍스처가 없어야 한다"는 선언이므로
+  // 텍스처가 들어 있는 이 샘플에서는 의도대로 ERROR가 된다.
   assert.deepEqual(severityMap(custom.findings), {
     "FORMAT-GLTF2": "INFO",
     "GEO-MISSING-NORMALS": "INFO",
+    "GEO-TRIANGLE-BUDGET": "WARNING",
     "MAT-DUPLICATES": "WARNING",
     "SCENE-EMPTY-NODES": "INFO",
+    "SCENE-ZERO-SCALE": "ERROR",
+    "TEX-DIMENSION-BUDGET": "ERROR",
+    "TEX-MEMORY-BUDGET": "ERROR",
+    "TEX-MISSING-UV0": "INFO",
   });
-  assert.equal(builtIn.score.score, 99);
-  assert.equal(custom.score.score, 100);
-  assert.equal(custom.score.ready, false, "one real WARNING still blocks READY");
+  assert.equal(builtIn.score.score, 95);
+  assert.equal(custom.score.score, 90);
+  assert.equal(custom.score.ready, false, "hard blocker가 남아 있으면 점수와 무관하게 READY가 아니다");
   assert.equal(custom.score.threshold, 90);
 });
 
@@ -152,16 +165,23 @@ test("custom profiles can disable rules, raise severities, and tighten budgets",
     "FORMAT-GLTF2": "INFO",
     "GEO-TRIANGLE-BUDGET": "ERROR",
     "MAT-DUPLICATES": "ERROR",
+    "MAT-MATERIAL-BUDGET": "ERROR",
+    "SCENE-ZERO-SCALE": "ERROR",
+    "TEX-DIMENSION-BUDGET": "ERROR",
+    "TEX-MEMORY-BUDGET": "ERROR",
+    "TEX-MISSING-UV0": "WARNING",
   });
   const triangleFinding = report.findings.find((finding) => finding.ruleId === "GEO-TRIANGLE-BUDGET");
-  assert.equal(triangleFinding?.observed, 2);
+  assert.equal(triangleFinding?.observed, 34_928);
   assert.equal(triangleFinding?.threshold, 1);
-  assert.equal(report.score.hardBlockerCount, 2);
+  assert.equal(report.score.hardBlockerCount, 6);
   assert.equal(report.score.ready, false);
 
   const validation = validateAsset(bundle, { customProfile: strict });
   assert.equal(validation.valid, false);
 
+  // 일부러 극단적인 프로파일이다. 권장안이 아니라, 프로젝트가 "우리 파이프라인에서
+  // 이건 결함이 아니다"라고 선언했을 때 그 선언이 판정까지 끝까지 전달되는지를 본다.
   const permissive = createCustomProfile({
     id: "clunk-permissive-test",
     version: "1.0.0",
@@ -169,6 +189,9 @@ test("custom profiles can disable rules, raise severities, and tighten budgets",
       "GEO-MISSING-NORMALS": { severity: "INFO" },
       "MAT-DUPLICATES": { severity: "INFO" },
       "SCENE-EMPTY-NODES": { severity: "INFO" },
+      "SCENE-ZERO-SCALE": { severity: "INFO" },
+      "TEX-MEMORY-BUDGET": { severity: "INFO" },
+      "TEX-MISSING-UV0": { severity: "INFO" },
     },
   } satisfies CustomProfileDefinition);
   const permissiveReport = inspectAsset(bundle, { customProfile: permissive });
@@ -190,7 +213,7 @@ test("a custom profile identity reaches optimization results and the Passport", 
   assert.equal(result.passport.before.score.ruleSetId, "harvest-frontier-runtime-v1");
   assert.equal(
     result.outputHash,
-    "718f2fbaf4545bb96381c3055270212ca7c91e7197b562555ba63b3c0dc8302b",
+    "be4610c3e378f2f9799eff6312f6ab9d1e6a4dc54e03bae3ebf3f275398c8151",
     "a profile changes the report, never the output bytes",
   );
 });
@@ -351,7 +374,7 @@ test("the CLI validate and optimize commands honor a custom profile file", async
     assert.equal(optimizeEnvelope.passport.ruleSetVersion, "1.0.0");
     assert.equal(
       optimizeEnvelope.outputHash,
-      "718f2fbaf4545bb96381c3055270212ca7c91e7197b562555ba63b3c0dc8302b",
+      "be4610c3e378f2f9799eff6312f6ab9d1e6a4dc54e03bae3ebf3f275398c8151",
       "the optimizer allowlist is unchanged by a custom profile",
     );
 

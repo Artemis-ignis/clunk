@@ -200,16 +200,18 @@ export const CLI_SAMPLE = {
   command: "npm run clunk -- inspect public/samples/clunk-messy-sample.glb --profile pc",
   file: "clunk-messy-sample.glb",
   profileId: "pc",
-  byteLength: 1124,
-  inputHash: "181473ff49e2a753b3c22198a0ef76f6052ab1efc38ac03a57c58bc62ae8fdf1",
-  resultDigest: "91811095b6afed62aa9b396834ab660cda96ae3c031ff1275811319bf28177b1",
-  score: 99,
-  hardBlockerCount: 0,
+  byteLength: 1173772,
+  inputHash: "9f2ab4cf4c750a711c431266e3c7d99d3b2e9f472ed11dba91ce906d8ec7043f",
+  resultDigest: "11a617469271ae806381501465145abf1e8d1283fd20103fb49fef7dd6fb2b70",
+  score: 95,
+  hardBlockerCount: 1,
   findings: [
     { severity: "INFO", ruleId: "FORMAT-GLTF2" },
     { severity: "WARNING", ruleId: "GEO-MISSING-NORMALS" },
     { severity: "WARNING", ruleId: "MAT-DUPLICATES" },
     { severity: "WARNING", ruleId: "SCENE-EMPTY-NODES" },
+    { severity: "ERROR", ruleId: "SCENE-ZERO-SCALE" },
+    { severity: "WARNING", ruleId: "TEX-MISSING-UV0" },
   ],
 } as const;
 

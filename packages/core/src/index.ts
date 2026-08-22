@@ -8,9 +8,12 @@
 
 export type { BillingProvider, CheckoutReference, PaymentResult } from "./billing";
 
-export const CORE_VERSION = "0.1.0";
+export const CORE_VERSION = "0.2.0";
 export const RULE_SET_ID = "clunk-game-ready-v1";
-export const RULE_SET_VERSION = "1.0.0";
+// 1.1.0: SCENE-EMPTY-NODES가 "비어 있다"와 "우리가 지워도 된다"를 갈라서 보고하도록
+// 바뀌었고, metric에 prunableEmptyNodeCount가 생겼다. 같은 파일이라도 1.0.0에서 나온
+// resultDigest와 값이 달라진다. 옛 리포트를 재현하려면 그쪽 버전으로 읽어야 한다.
+export const RULE_SET_VERSION = "1.1.0";
 export const READY_SCORE_THRESHOLD = 90;
 export const CUSTOM_PROFILE_SCHEMA_VERSION = "1.0";
 
@@ -161,6 +164,7 @@ export interface AssetMetrics {
   nodeCount: number;
   maxDepth: number;
   emptyNodeCount: number;
+  prunableEmptyNodeCount: number;
   meshCount: number;
   primitiveCount: number;
   vertexCount: number;
@@ -819,16 +823,23 @@ function collectMetrics(parsed: ParsedAsset): AssetMetrics {
   for (const scene of scenes) {
     for (const node of scene.nodes ?? []) collectNodeRefs(nodes, Number(node), nodeRefs);
   }
-  const emptyNodeCount = nodes.filter((node: GltfDocument, index: number) => {
-    const isReferenced = nodeRefs.has(index);
-    return (
-      isReferenced &&
+  const preservedNodes = collectPreservedNodes(json);
+  // 두 수를 따로 센다. "비어 있다"와 "우리가 지워도 된다"는 다른 말이고,
+  // 리포트가 그 둘을 뭉뚱그리면 지키지 못할 약속을 하게 된다.
+  const referencedEmptyNodes = nodes.filter(
+    (node: GltfDocument, index: number) =>
+      nodeRefs.has(index) &&
       node.mesh === undefined &&
       node.camera === undefined &&
       node.skin === undefined &&
-      (!Array.isArray(node.children) || node.children.length === 0)
-    );
-  }).length;
+      !preservedNodes.has(index) &&
+      (!Array.isArray(node.children) || node.children.length === 0),
+  );
+  const emptyNodeCount = referencedEmptyNodes.length;
+  const prunableEmptyNodeCount = nodes.filter(
+    (node: GltfDocument, index: number) =>
+      nodeRefs.has(index) && isPrunableEmptyNode(node, index, preservedNodes),
+  ).length;
 
   const min = boundsMin;
   const max = boundsMax;
@@ -842,6 +853,7 @@ function collectMetrics(parsed: ParsedAsset): AssetMetrics {
     nodeCount: nodes.length,
     maxDepth: depthResult,
     emptyNodeCount,
+    prunableEmptyNodeCount,
     meshCount: meshes.length,
     primitiveCount,
     vertexCount,
@@ -974,17 +986,23 @@ function buildFindings(
     );
   }
   if (metrics.emptyNodeCount > 0) {
+    const prunable = metrics.prunableEmptyNodeCount;
+    const held = metrics.emptyNodeCount - prunable;
     add(
       "SCENE-EMPTY-NODES",
       "scene",
       "WARNING",
       "/nodes",
       "Empty nodes found",
-      "Identity-only nodes without a mesh, camera, skin, or child are present.",
+      held === 0
+        ? "Identity-only nodes without a mesh, camera, skin, or child are present. The allowlisted cleanup removes all of them."
+        : `Identity-only nodes without a mesh, camera, skin, or child are present. The allowlisted cleanup removes ${prunable}; ${held} carry extras, a transform, or an extension and are left for a human to judge, because engines commonly read those as spawn points or attachment markers.`,
       metrics.emptyNodeCount,
       0,
-      true,
-      "Run the allowlisted empty-node cleanup and recheck the output.",
+      prunable > 0,
+      held === 0
+        ? "Run the allowlisted empty-node cleanup and recheck the output."
+        : "Run the allowlisted cleanup, then decide in the source asset whether the remaining markers are read by your engine.",
     );
   }
   if (metrics.materialCount > policy.maxMaterials) {
@@ -1249,6 +1267,7 @@ function emptyMetrics(): AssetMetrics {
     nodeCount: 0,
     maxDepth: 0,
     emptyNodeCount: 0,
+    prunableEmptyNodeCount: 0,
     meshCount: 0,
     primitiveCount: 0,
     vertexCount: 0,
@@ -1791,6 +1810,8 @@ export function optimizeAsset(
   const json = cloneJson(parsed.json);
   const operations: RepairOperation[] = [];
 
+  // 빈 노드 판정이 metadata 정리보다 먼저다. 순서를 뒤집으면 extras를 걷어낸
+  // 뒤라서 원래 지키기로 한 노드까지 "비어 있다"고 보이게 된다.
   const pruned = pruneEmptyNodes(json);
   if (pruned > 0) {
     operations.push({
@@ -1811,7 +1832,18 @@ export function optimizeAsset(
     });
   }
 
-  const cleanedMetadata = cleanMetadata(json);
+  // 정리 대상에서 뺀 마커 노드는 extras도 지키다. 그것이 우리가 그 노드를
+  // 남겨 둔 이유이고, 지우면 다음 실행에서 판단이 뒤집힌다.
+  const keepExtras = new Set<unknown>(
+    (Array.isArray(json.nodes) ? json.nodes : []).filter(
+      (node: GltfDocument) =>
+        node.mesh === undefined &&
+        node.camera === undefined &&
+        node.skin === undefined &&
+        (!Array.isArray(node.children) || node.children.length === 0),
+    ),
+  );
+  const cleanedMetadata = cleanMetadata(json, keepExtras);
   if (cleanedMetadata > 0) {
     operations.push({
       id: "clean-metadata",
@@ -1884,9 +1916,36 @@ function createGltfOutputBundle(
   return { entry: outputEntry, files };
 }
 
-function pruneEmptyNodes(json: GltfDocument): number {
-  const nodes: GltfDocument[] = Array.isArray(json.nodes) ? json.nodes : [];
-  if (!nodes.length) return 0;
+/**
+ * 노드가 "지워도 되는 빈 노드"인지 판정한다. 검사기와 최적화기가 반드시 같은
+ * 답을 내야 하므로 판정은 이 함수 한 곳에만 둔다. 두 곳에 각자 두었더니 리포트는
+ * "빈 노드 12개, 무손실 정리 가능"이라고 적고 최적화는 하나도 지우지 않았다.
+ *
+ * extras나 트랜스폼을 가진 빈 노드는 일부러 제외한다. 레벨 디자이너는 스폰
+ * 포인트나 어태치 마커를 빈 노드 + 커스텀 프로퍼티로 두고, 엔진이 그걸 이름으로
+ * 찾아 쓴다. 우리 눈에 비어 보인다고 지우면 게임이 깨진다. 그 판단은 사람 몫이다.
+ */
+function isPrunableEmptyNode(node: GltfDocument, index: number, preserved: Set<number>): boolean {
+  const scale = Array.isArray(node.scale) ? node.scale : [1, 1, 1];
+  const hasTransform =
+    node.matrix !== undefined ||
+    node.translation !== undefined ||
+    node.rotation !== undefined ||
+    scale.some((value: unknown) => Number(value) !== 1);
+  return (
+    !preserved.has(index) &&
+    node.mesh === undefined &&
+    node.camera === undefined &&
+    node.skin === undefined &&
+    (!Array.isArray(node.children) || node.children.length === 0) &&
+    node.extensions === undefined &&
+    node.extras === undefined &&
+    !hasTransform
+  );
+}
+
+/** 스킨 조인트와 애니메이션 타깃은 메시가 없어도 런타임이 쓴다. 지우면 안 된다. */
+function collectPreservedNodes(json: GltfDocument): Set<number> {
   const preserved = new Set<number>();
   for (const skin of json.skins ?? []) {
     for (const joint of skin.joints ?? []) preserved.add(Number(joint));
@@ -1897,25 +1956,14 @@ function pruneEmptyNodes(json: GltfDocument): number {
       if (channel.target?.node !== undefined) preserved.add(Number(channel.target.node));
     }
   }
+  return preserved;
+}
 
-  const remove = nodes.map((node, index) => {
-    const scale = Array.isArray(node.scale) ? node.scale : [1, 1, 1];
-    const hasTransform =
-      node.matrix !== undefined ||
-      node.translation !== undefined ||
-      node.rotation !== undefined ||
-      scale.some((value: unknown) => Number(value) !== 1);
-    return (
-      !preserved.has(index) &&
-      node.mesh === undefined &&
-      node.camera === undefined &&
-      node.skin === undefined &&
-      (!Array.isArray(node.children) || node.children.length === 0) &&
-      node.extensions === undefined &&
-      node.extras === undefined &&
-      !hasTransform
-    );
-  });
+function pruneEmptyNodes(json: GltfDocument): number {
+  const nodes: GltfDocument[] = Array.isArray(json.nodes) ? json.nodes : [];
+  if (!nodes.length) return 0;
+  const preserved = collectPreservedNodes(json);
+  const remove = nodes.map((node, index) => isPrunableEmptyNode(node, index, preserved));
   if (!remove.some(Boolean)) return 0;
 
   const remap = new Map<number, number>();
@@ -1975,7 +2023,14 @@ function dedupeMaterials(json: GltfDocument): number {
   return removed;
 }
 
-function cleanMetadata(json: GltfDocument): number {
+/**
+ * 허용 목록 메타데이터만 걷어낸다.
+ *
+ * `keepExtras`는 지우지 않기로 한 빈 마커 노드들이다. 이걸 넘기지 않으면 첫 실행에서
+ * 지키기로 한 노드가 extras를 잃고, 두 번째 실행에서는 그냥 빈 노드로 보여서 지워진다.
+ * CI는 같은 파일에 이걸 반복해서 돌린다. 한 번 지키기로 했으면 계속 지켜야 한다.
+ */
+function cleanMetadata(json: GltfDocument, keepExtras: ReadonlySet<unknown> = new Set()): number {
   let removed = 0;
 
   const visit = (value: unknown, isAsset = false) => {
@@ -1986,6 +2041,7 @@ function cleanMetadata(json: GltfDocument): number {
     }
     const record = value as GltfDocument;
     for (const key of Object.keys(record)) {
+      if (key === "extras" && keepExtras.has(record)) continue;
       if (key === "extras" || (isAsset && (key === "generator" || key === "copyright"))) {
         delete record[key];
         removed += 1;

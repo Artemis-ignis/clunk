@@ -3,19 +3,23 @@
   "assets": [
     {
       "file": "clunk-ready-sample.glb",
-      "source": "Clunk-authored deterministic procedural quad; no external reference",
+      "source": "Clunk-authored deterministic procedural asset; no external reference",
       "license": "Original work, permission granted for Clunk product demos and application evidence",
       "generated": true,
-      "sha256": "cea85cf041beddba512453d30a3ded19a2b6a6d217486f4c77e54f3e0ce8a627",
-      "bytes": 1224
+      "generator": "scripts/build-samples.mjs",
+      "note": "게임에 넣을 수 있게 정리된 농기구 프롭 세트. 세 프로파일 모두 통과하는 정답지.",
+      "sha256": "1a39fc49d9b6382e35caf62faa5cfb6e8ad60edfe52539f4b4ee0ff106516d93",
+      "bytes": 82680
     },
     {
       "file": "clunk-messy-sample.glb",
-      "source": "Clunk-authored deterministic procedural quad; no external reference",
+      "source": "Clunk-authored deterministic procedural asset; no external reference",
       "license": "Original work, permission granted for Clunk product demos and application evidence",
       "generated": true,
-      "sha256": "181473ff49e2a753b3c22198a0ef76f6052ab1efc38ac03a57c58bc62ae8fdf1",
-      "bytes": 1124
+      "generator": "scripts/build-samples.mjs",
+      "note": "같은 프롭 세트를 실제 핸드오프에서 오는 상태로 둔 것. 사라지는 오브젝트, 익스포터 잔여 노드, 복붙 머티리얼, 프롭에 붙은 4K 텍스처.",
+      "sha256": "9f2ab4cf4c750a711c431266e3c7d99d3b2e9f472ed11dba91ce906d8ec7043f",
+      "bytes": 1173772
     }
   ]
 }

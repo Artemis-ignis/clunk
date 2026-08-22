@@ -3499,6 +3499,61 @@ pre {
   font-size: var(--fs-1);
 }
 
+/* 판정이 먼저 읽혀야 한다. 95/100이면서 게임에 못 들어가는 파일이 실제로 있고,
+   숫자를 크게 두면 그걸 통과로 읽는다. 점수는 아래에서 근거로만 거든다. */
+.score-verdict {
+  display: flex;
+  align-items: flex-start;
+  word-break: keep-all;
+  gap: var(--sp-8);
+  margin: var(--sp-12) 0 var(--sp-16);
+}
+
+.score-verdict strong {
+  font-size: var(--fs-4);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: var(--ls-heading);
+}
+
+.score-verdict svg {
+  flex: none;
+  /* 두 줄로 넘어가도 아이콘은 첫 줄 옆에 선다. */
+  margin-top: 0.18em;
+}
+
+.score-verdict-ready {
+  color: var(--success);
+}
+
+.score-verdict-conditional {
+  color: var(--warning);
+}
+
+.score-verdict-blocked {
+  color: var(--danger);
+}
+
+.score-figure {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-8);
+  margin-top: var(--sp-12);
+  font-family: var(--font-mono);
+}
+
+.score-figure strong {
+  color: var(--text);
+  font-size: var(--fs-3);
+  font-weight: 400;
+  letter-spacing: var(--ls-heading);
+}
+
+.score-figure span {
+  color: var(--text-dim);
+  font-size: var(--fs-1);
+}
+
 .score-track {
   height: 5px;
   border-radius: var(--r-pill);
@@ -3511,7 +3566,20 @@ pre {
   height: 100%;
   border-radius: var(--r-pill);
   background: var(--accent);
-  transition: width var(--dur-2) var(--ease);
+  transition: width var(--dur-2) var(--ease), background var(--dur-2) var(--ease);
+}
+
+/* 빨간 판정 옆에 파란 막대가 차 있으면 그것만으로 통과처럼 보인다. */
+.score-card:has(.score-verdict-ready) .score-track span {
+  background: var(--success);
+}
+
+.score-card:has(.score-verdict-conditional) .score-track span {
+  background: var(--warning);
+}
+
+.score-card:has(.score-verdict-blocked) .score-track span {
+  background: var(--danger);
 }
 
 .score-note {
@@ -6380,7 +6448,7 @@ html.snap-y {
   margin: var(--sp-40) 0 var(--sp-12);
   font-size: var(--fs-3);
   font-weight: 620;
-  letter-spacing: var(--ls-tight);
+  letter-spacing: var(--ls-heading);
 }
 
 .legal-body h2:first-child {
@@ -6602,7 +6670,7 @@ html.snap-y {
   margin-bottom: var(--sp-20);
   font-size: var(--fs-3);
   font-weight: 620;
-  letter-spacing: var(--ls-tight);
+  letter-spacing: var(--ls-heading);
 }
 
 .support-grid {

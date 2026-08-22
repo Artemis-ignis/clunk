@@ -36,6 +36,18 @@ export function resolveStoredReadiness(run: {
   return hardBlockerCount > 0 ? "blocked" : "conditional";
 }
 
+/**
+ * 화면에서 가장 크게 읽혀야 하는 한 줄. 점수가 아니라 이게 답이다.
+ *
+ * 95/100인데 게임에 넣을 수 없는 파일이 실제로 있다. hard blocker 하나는 여섯 카테고리
+ * 평균에서 3점밖에 못 깎기 때문이다. 숫자를 크게 두면 사는 사람이 통과했다고 읽는다.
+ */
+export function readinessLabel(state: ReadinessState): string {
+  if (state === "ready") return "게임에 들어갑니다";
+  if (state === "conditional") return "확인이 필요합니다";
+  return "들어갈 수 없습니다";
+}
+
 export function readinessNote(state: ReadinessState): string {
   if (state === "ready") return "차단 finding이 없습니다. 선언된 정책을 충족합니다.";
   if (state === "conditional") {
