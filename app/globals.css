@@ -33,15 +33,25 @@
   --text: #24374a;
   --text-strong: #0b1622;
   --text-muted: #52677d;
-  --text-dim: #6f849c;
+  /* 4.5:1 on white and on the tinted surfaces. The old #6f849c measured 3.85:1 and 3.57:1,
+     which is why hashes, sub-values and captions across the whole site read as washed-out
+     grey filler rather than information. */
+  --text-dim: #5d7188;
   --text-on-accent: #f6fdff;
+  /* Foreground for anything filled with --accent. Referenced by several rules but never
+     defined, so those declarations were invalid and the text inherited its surroundings —
+     on the dark theme's cyan that measured 1.89:1. 5.21:1 here. */
+  --on-accent: #f6fdff;
 
   /* primary accent. --accent is contrast safe as text on --ink-0 and --ink-1. */
   --band-ink: #0b1622;
   --band-text: #f1f7fc;
   --band-muted: #a9bfd3;
   --band-line: rgba(255, 255, 255, 0.13);
-  --accent: #0a7ea8;
+  /* Deepened one step from #0a7ea8. That value measured 4.27:1 on the tinted surfaces and
+     4.47:1 as a control background, both under the bar; this clears 4.9:1 everywhere while
+     staying the same blue to the eye. */
+  --accent: #0a7398;
   --accent-strong: #075e80;
   --accent-bright: #16b8e8;
   --accent-glow: #7fe3ff;
@@ -159,8 +169,11 @@
   --band-line: rgba(255, 255, 255, 0.09);
   --text-strong: #f1f7fc;
   --text-muted: #90a7bc;
-  --text-dim: #66809a;
+  /* 4.38:1 on the raised surfaces was under the bar; #6f8aa5 clears 5:1 everywhere. */
+  --text-dim: #6f8aa5;
   --text-on-accent: #f6fdff;
+  /* The dark theme's accent is a bright cyan, so its foreground goes dark: 9.27:1. */
+  --on-accent: #04121b;
 
   --accent: #2ec4f0;
   --accent-strong: #0f97c7;
@@ -4896,7 +4909,7 @@ html.snap-y {
 .hero3-callout-label {
   color: var(--accent);
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: 0.72rem;
   letter-spacing: 0.1em;
 }
 
@@ -4909,7 +4922,7 @@ html.snap-y {
 
 .hero3-callout small {
   color: var(--text-dim);
-  font-size: 0.68rem;
+  font-size: 0.72rem;
 }
 
 .hero3-score {
@@ -6839,7 +6852,9 @@ html.snap-y {
   background: var(--ink-2);
   color: var(--accent);
   font-family: var(--font-mono);
-  font-size: 0.86em;
+  /* 0.86em of a 0.78rem parent landed at 10.7px. This is the command a recipient actually
+     types, so it gets an absolute floor rather than a relative shrink. */
+  font-size: 0.75rem;
   white-space: nowrap;
 }
 
@@ -7061,4 +7076,24 @@ html.snap-y {
    the band, not for code inside a panel that brought its own light surface. */
 .sec3-band .sur3-panel code {
   color: var(--text-muted);
+}
+
+/* Third time the same shape of bug: a band rule reaching into a panel that brought its own
+   light surface. The bright accent is for labels sitting on the dark band; on the white
+   showcase card it measured 2.32:1. Inside a panel the page's own accent applies. */
+.sec3-band .sur3-panel .mono-label,
+.sec3-band .sur3-panel .eyebrow {
+  color: var(--accent);
+}
+
+/* The footer sits on the band, so its tagline takes the band's muted tone rather than the
+   light theme's dim grey. */
+.sec3-band .site-footer-brand span {
+  color: var(--band-muted);
+}
+
+/* The sub-label inside a tab is a <code>, which the band colours for code sitting on the
+   band. Inside the filled active tab it has to follow the tab's own foreground. */
+.sec3-band .sur3-tab code {
+  color: inherit;
 }

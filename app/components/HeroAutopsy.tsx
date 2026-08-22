@@ -52,7 +52,7 @@ const CALLOUTS = [
     label: "SCENE",
     strong: `노드 ${MEASURED.nodes}`,
     small: `빈 노드 ${MEASURED.emptyNodes}`,
-    chip: { left: "33%", top: "2%" },
+    chip: { left: "33%", top: "0%" },
     line: [46, 12, 56, 24],
   },
   {
