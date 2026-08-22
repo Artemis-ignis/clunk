@@ -178,6 +178,35 @@ async page => {
     }
   }
 
+  // The two screens where money is at stake. A queue that cannot be paid for, and the panel
+  // that uploads a file for a signed verdict — if either renders wrong the user finds out
+  // after being charged, which is the same conversation as a refund.
+  const surplusDir = process.env.CLUNK_AUDIT_QUEUE_DIR;
+  if (surplusDir) {
+    const many = Array.from({ length: 30 }, (_, i) =>
+      `${surplusDir}/asset-${String(i).padStart(2, "0")}.glb`,
+    );
+    for (const [width, height, view] of [[1440, 950, "desktop"], [390, 900, "mobile"]]) {
+      await page.setViewportSize({ width, height });
+      await page.goto(base + "/app", { waitUntil: "networkidle" });
+      await page.waitForTimeout(2200);
+      await page.locator(assetInput).setInputFiles(many);
+      await page.waitForTimeout(3000);
+      await record(view + "/light · /app 크레딧 부족 경고");
+    }
+  }
+
+  for (const [width, height, view] of [[1440, 950, "desktop"], [390, 900, "mobile"]]) {
+    await page.setViewportSize({ width, height });
+    await page.goto(base + "/app", { waitUntil: "networkidle" });
+    await page.waitForTimeout(2200);
+    await page.locator(assetInput).setInputFiles(fixtures + "/clunk-messy-sample.glb");
+    await page.waitForTimeout(6000);
+    if (await page.locator(".verify-card").count()) {
+      await record(view + "/light · /app 서버 검증 카드");
+    }
+  }
+
   const failures = results.filter(
     (row) => row.tiny.length > 0 || row.lowContrast.length > 0 || row.clipped.length > 0,
   );

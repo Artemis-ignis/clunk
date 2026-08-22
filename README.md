@@ -57,6 +57,19 @@ npm.cmd run api:smoke  # local Sites/D1 auth, credit, and failure-boundary smoke
 npm.cmd test
 ```
 
+화면 품질은 별도 검사가 있습니다. 빌드도 단위 테스트도 잡아주지 않지만 제품을 미완성으로
+보이게 하는 세 가지 — 실제로 뒤에 칠해진 색 대비 WCAG AA 미달 텍스트, 읽히는 크기 아래로
+렌더된 텍스트, 말줄임 없이 잘린 텍스트 — 를 판정합니다.
+
+```powershell
+npm.cmd run dev            # 다른 터미널에서
+$env:CLUNK_AUDIT_BASE="http://localhost:3000"; npm.cmd run qa:render
+```
+
+데스크톱·모바일 × 라이트·다크 × 12개 화면에, 실제로 일이 벌어지는 상태(읽을 수 없는 파일,
+큐 대기·완료, 크레딧 부족 경고, 서버 검증 카드)를 더해 58개 화면을 훑습니다. 크레딧 부족
+상태를 포함하려면 `CLUNK_AUDIT_QUEUE_DIR`에 잔액보다 많은 수의 GLB가 든 폴더를 지정합니다.
+
 핵심 테스트는 동일 입력 3회 digest 일치, 원본 hash 불변, 새 출력 hash, Passport source/output hash, 출력 재파싱, malformed·missing resource 거부를 확인합니다. 브라우저 검증은 Playwright로 샘플 검사 → 최적화 → 다운로드 → 출력 hash 재오픈까지 확인합니다.
 `api:smoke`는 테스트용 SIWC 헤더로 실제 로컬 D1에 인증 거부, 검사·최적화 idempotency, 충돌 키, cross-origin write 거부, invalid/no-credit 무차감·무기록, 데모 업그레이드 중복 방지를 검증합니다.
 
