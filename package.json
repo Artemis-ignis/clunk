@@ -9,7 +9,7 @@
     "dev": "vinext dev",
     "build": "vinext build",
     "start": "vinext start",
-    "test": "npm run typecheck && npm run core:test && npm run surface:test && npm run profile:test && npm run build && node --test tests/rendered-html.test.mjs",
+    "test": "npm run typecheck && npm run evidence:check && npm run core:test && npm run surface:test && npm run profile:test && npm run build && node --test tests/rendered-html.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern .static-preview --ignore-pattern bin --ignore-pattern \"**/clunk-mcp.mjs\"",
     "typecheck": "tsc --noEmit",
     "core:test": "tsx tests/core.test.ts",
@@ -24,7 +24,9 @@
     "site:preflight": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\\site-preflight.ps1",
     "db:generate": "drizzle-kit generate",
     "build:mcp": "node scripts/build-mcp-bundle.mjs",
-    "qa:render": "node scripts/qa-run-flow.mjs scripts/playwright-render-audit-flow.js"
+    "qa:render": "node scripts/qa-run-flow.mjs scripts/playwright-render-audit-flow.js",
+    "evidence:check": "node scripts/refresh-pinned-evidence.mjs --check",
+    "evidence:refresh": "node scripts/refresh-pinned-evidence.mjs"
   },
   "dependencies": {
     "@gltf-transform/core": "^4.2.1",

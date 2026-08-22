@@ -49,6 +49,8 @@ export type RuleId =
   | "TEX-MISSING-UV0"
   | "TEX-MEMORY-BUDGET"
   | "TEX-DIMENSION-BUDGET"
+  | "TEX-UNREADABLE"
+  | "FORMAT-UNKNOWN-EXTENSION"
   | "RUNTIME-ANIMATION-SKIN";
 
 export interface RuleDescriptor {
@@ -77,6 +79,8 @@ export const RULE_CATALOG: readonly RuleDescriptor[] = [
   { id: "TEX-MISSING-UV0", category: "textures", defaultSeverity: "WARNING" },
   { id: "TEX-MEMORY-BUDGET", category: "textures", defaultSeverity: "ERROR" },
   { id: "TEX-DIMENSION-BUDGET", category: "textures", defaultSeverity: "ERROR" },
+  { id: "TEX-UNREADABLE", category: "textures", defaultSeverity: "ERROR" },
+  { id: "FORMAT-UNKNOWN-EXTENSION", category: "format", defaultSeverity: "ERROR" },
   { id: "RUNTIME-ANIMATION-SKIN", category: "runtime", defaultSeverity: "INFO" },
 ];
 
@@ -176,6 +180,10 @@ export interface AssetMetrics {
   imageCount: number;
   textureMaxDimension: number;
   textureMemoryBytes: number;
+  /** 크기를 읽지 못한 이미지 수. 0이 아니면 텍스처 예산 판정을 신뢰할 수 없다. */
+  unreadableImageCount: number;
+  /** extensionsRequired 중 우리가 해석 방법을 모르는 확장 수. */
+  unknownRequiredExtensionCount: number;
   animationCount: number;
   skinCount: number;
   missingNormalPrimitiveCount: number;
@@ -787,17 +795,22 @@ function collectMetrics(parsed: ParsedAsset): AssetMetrics {
   const textureDimensions = images.map((image: GltfDocument, index: number) =>
     imageDimensions(parsed, image, index),
   );
-  const validDimensions = textureDimensions.filter(
-    (value): value is [number, number] => value !== null,
-  );
-  const textureMaxDimension = validDimensions.reduce(
-    (max, [width, height]) => Math.max(max, width, height),
+  const readable = textureDimensions.filter((value): value is ImageInfo => value !== null);
+  const unreadableImageCount = textureDimensions.length - readable.length;
+  const textureMaxDimension = readable.reduce(
+    (max, { width, height }) => Math.max(max, width, height),
     0,
   );
-  const textureMemoryBytes = validDimensions.reduce(
-    (sum, [width, height]) => sum + width * height * 4,
+  // 포맷마다 GPU가 실제로 쥐는 바이트가 다르다. PNG·JPEG·WebP는 디코드되어 RGBA로
+  // 올라가지만, KTX2는 블록 압축된 채로 올라간다. 전부 4바이트로 세면 압축 텍스처를
+  // 4~8배 부풀려 없는 문제를 만든다. 가정은 IMAGE_BYTES_PER_PIXEL에 적어 둔다.
+  const textureMemoryBytes = readable.reduce(
+    (sum, { width, height, format }) => sum + width * height * IMAGE_BYTES_PER_PIXEL[format],
     0,
   );
+  const unknownRequiredExtensionCount = (
+    Array.isArray(json.extensionsRequired) ? json.extensionsRequired : []
+  ).filter((name: unknown) => !INTERPRETABLE_EXTENSIONS.has(String(name))).length;
 
   const materialKeys = materials.map((material: GltfDocument) =>
     stableStringify(removeKey(material, "name")),
@@ -865,6 +878,8 @@ function collectMetrics(parsed: ParsedAsset): AssetMetrics {
     imageCount: images.length,
     textureMaxDimension,
     textureMemoryBytes,
+    unreadableImageCount,
+    unknownRequiredExtensionCount,
     animationCount: animations.length,
     skinCount: skins.length,
     missingNormalPrimitiveCount,
@@ -1102,6 +1117,37 @@ function buildFindings(
       "Confirm the target engine's transform and import policy.",
     );
   }
+  // 측정하지 못한 것을 통과라고 말하지 않는다. Clunk의 READY는 "검사했고 통과했다"는
+  // 뜻이고, 읽지 못한 텍스처가 있으면 그 문장이 성립하지 않는다. 크기를 0으로 세던
+  // 때는 4096 KTX2 두 장짜리 에셋이 모든 텍스처 예산을 조용히 통과했다.
+  if (metrics.unreadableImageCount > 0) {
+    add(
+      "TEX-UNREADABLE",
+      "textures",
+      "ERROR",
+      "/images",
+      "Texture could not be measured",
+      "An image could not be decoded far enough to read its dimensions, so the texture budgets below were computed without it.",
+      metrics.unreadableImageCount,
+      0,
+      false,
+      "Re-export the texture as PNG, JPEG, WebP, or KTX2, or inspect it with the engine's own tooling.",
+    );
+  }
+  if (metrics.unknownRequiredExtensionCount > 0) {
+    add(
+      "FORMAT-UNKNOWN-EXTENSION",
+      "format",
+      "ERROR",
+      "/extensionsRequired",
+      "Required extension is not interpreted",
+      "The file declares an extension as required that Clunk does not interpret. The metrics may not describe what the engine actually loads.",
+      metrics.unknownRequiredExtensionCount,
+      0,
+      false,
+      "Check the extension against the target engine, or inspect a version of the asset without it.",
+    );
+  }
   if (metrics.remoteResourceCount > 0) {
     add(
       "SEC-REMOTE-RESOURCE",
@@ -1279,6 +1325,8 @@ function emptyMetrics(): AssetMetrics {
     imageCount: 0,
     textureMaxDimension: 0,
     textureMemoryBytes: 0,
+    unreadableImageCount: 0,
+    unknownRequiredExtensionCount: 0,
     animationCount: 0,
     skinCount: 0,
     missingNormalPrimitiveCount: 0,
@@ -1485,11 +1533,58 @@ function decodeDataUri(uri: string): Uint8Array | null {
   return written === capacity ? output : output.subarray(0, written);
 }
 
-function imageDimensions(
-  parsed: ParsedAsset,
-  image: GltfDocument,
-  index: number,
-): [number, number] | null {
+export type ImageFormat = "png" | "jpeg" | "webp" | "ktx2";
+
+interface ImageInfo {
+  width: number;
+  height: number;
+  format: ImageFormat;
+}
+
+/**
+ * GPU가 픽셀당 실제로 쥐는 바이트.
+ *
+ * PNG·JPEG·WebP는 디코드되어 RGBA8로 올라가므로 4다. KTX2/Basis Universal은 블록
+ * 압축된 채로 올라간다 — 기기에 따라 BC7·ASTC 4x4는 1, ETC2·BC1은 0.5로, 여기서는
+ * 보수적으로 큰 쪽인 1을 쓴다. 전부 4로 세던 때는 압축 텍스처를 4~8배 부풀려
+ * 없는 예산 초과를 만들어 냈다. 밉맵(약 +33%)은 어느 쪽도 세지 않는다.
+ */
+const IMAGE_BYTES_PER_PIXEL: Record<ImageFormat, number> = {
+  png: 4,
+  jpeg: 4,
+  webp: 4,
+  ktx2: 1,
+};
+
+/**
+ * 필수 확장 중 "있어도 우리 수치가 여전히 맞는" 것들.
+ *
+ * 여기 없는 확장이 extensionsRequired에 있으면 파일의 의미가 우리가 읽은 것과
+ * 다를 수 있다. 그때는 점수를 매기는 대신 못 읽었다고 말해야 한다.
+ * draco와 meshopt는 실제 데이터가 압축되어 있어도 accessor의 count·min·max가
+ * 그대로 남으므로 삼각형·정점·바운드 수치가 유효하다.
+ */
+const INTERPRETABLE_EXTENSIONS = new Set([
+  "KHR_draco_mesh_compression",
+  "EXT_meshopt_compression",
+  "KHR_mesh_quantization",
+  "KHR_texture_basisu",
+  "EXT_texture_webp",
+  "KHR_texture_transform",
+  "KHR_materials_unlit",
+  "KHR_materials_emissive_strength",
+  "KHR_materials_ior",
+  "KHR_materials_sheen",
+  "KHR_materials_specular",
+  "KHR_materials_clearcoat",
+  "KHR_materials_transmission",
+  "KHR_materials_volume",
+  "KHR_materials_variants",
+  "KHR_lights_punctual",
+  "KHR_texture_procedurals",
+]);
+
+function imageDimensions(parsed: ParsedAsset, image: GltfDocument, index: number): ImageInfo | null {
   const bytes = image.uri
     ? resolveUri(parsed, String(image.uri))
     : image.bufferView === undefined
@@ -1497,9 +1592,15 @@ function imageDimensions(
       : bufferViewBytes(parsed.json, Number(image.bufferView), parsed);
   if (!bytes) return null;
   const png = parsePngDimensions(bytes);
-  if (png) return png;
+  if (png) return { width: png[0], height: png[1], format: "png" };
   const jpeg = parseJpegDimensions(bytes);
-  if (jpeg) return jpeg;
+  if (jpeg) return { width: jpeg[0], height: jpeg[1], format: "jpeg" };
+  // KTX2와 WebP를 읽지 못하던 때는 크기를 0으로 셌고, 4096 텍스처 두 장짜리 에셋이
+  // "텍스처 메모리 0"으로 모든 예산을 통과했다. 못 읽은 것을 통과로 말한 셈이다.
+  const ktx2 = parseKtx2Dimensions(bytes);
+  if (ktx2) return { width: ktx2[0], height: ktx2[1], format: "ktx2" };
+  const webp = parseWebpDimensions(bytes);
+  if (webp) return { width: webp[0], height: webp[1], format: "webp" };
   void index;
   return null;
 }
@@ -1542,6 +1643,45 @@ function parseJpegDimensions(bytes: Uint8Array): [number, number] | null {
     }
     if (length < 2) return null;
     offset += 2 + length;
+  }
+  return null;
+}
+
+/** KTX2 헤더: 12바이트 식별자 뒤에 vkFormat, typeSize, pixelWidth, pixelHeight가 LE로 온다. */
+function parseKtx2Dimensions(bytes: Uint8Array): [number, number] | null {
+  const identifier = [0xab, 0x4b, 0x54, 0x58, 0x20, 0x32, 0x30, 0xbb, 0x0d, 0x0a, 0x1a, 0x0a];
+  if (bytes.byteLength < 32) return null;
+  if (!identifier.every((value, index) => bytes[index] === value)) return null;
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const width = view.getUint32(20, true);
+  // 큐브맵·1D 텍스처는 높이가 0으로 온다. 그때는 정사각으로 셈해 두는 편이
+  // 0으로 세는 것보다 진실에 가깝다.
+  const height = view.getUint32(24, true) || width;
+  return width > 0 ? [width, height] : null;
+}
+
+/** WebP: RIFF 컨테이너 안의 VP8 / VP8L / VP8X 청크마다 크기 필드 위치가 다르다. */
+function parseWebpDimensions(bytes: Uint8Array): [number, number] | null {
+  if (bytes.byteLength < 30) return null;
+  const tag = (offset: number) =>
+    String.fromCharCode(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
+  if (tag(0) !== "RIFF" || tag(8) !== "WEBP") return null;
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const chunk = tag(12);
+  if (chunk === "VP8X") {
+    const width = 1 + (bytes[24] | (bytes[25] << 8) | (bytes[26] << 16));
+    const height = 1 + (bytes[27] | (bytes[28] << 8) | (bytes[29] << 16));
+    return [width, height];
+  }
+  if (chunk === "VP8 ") {
+    // 키프레임 시작 코드 9d 01 2a 뒤에 14비트 폭·높이가 온다.
+    if (bytes[23] !== 0x9d || bytes[24] !== 0x01 || bytes[25] !== 0x2a) return null;
+    return [view.getUint16(26, true) & 0x3fff, view.getUint16(28, true) & 0x3fff];
+  }
+  if (chunk === "VP8L") {
+    if (bytes[20] !== 0x2f) return null;
+    const bits = view.getUint32(21, true);
+    return [(bits & 0x3fff) + 1, ((bits >> 14) & 0x3fff) + 1];
   }
   return null;
 }

@@ -202,7 +202,7 @@ export const CLI_SAMPLE = {
   profileId: "pc",
   byteLength: 1173772,
   inputHash: "9f2ab4cf4c750a711c431266e3c7d99d3b2e9f472ed11dba91ce906d8ec7043f",
-  resultDigest: "11a617469271ae806381501465145abf1e8d1283fd20103fb49fef7dd6fb2b70",
+  resultDigest: "c074c9454c7b221e66d42ea90aa0c37538b4e93ebb0fbed72946da910de7e997",
   score: 95,
   hardBlockerCount: 1,
   findings: [

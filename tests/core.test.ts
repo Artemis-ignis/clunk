@@ -345,3 +345,130 @@ test("ECDSA P-256 is a working fallback for a runtime without Ed25519", async ()
   assert.equal(passport.signature.algorithm, "ECDSA-P256-SHA256");
   assert.equal((await verifyVerificationPassport(passport, pair.publicKey)).ok, true);
 });
+
+/** KTX2 헤더만 갖춘 최소 파일. 크기 필드가 실제로 읽히는지 보기 위한 것이다. */
+function ktx2(width: number, height: number) {
+  const bytes = new Uint8Array(80);
+  bytes.set([0xab, 0x4b, 0x54, 0x58, 0x20, 0x32, 0x30, 0xbb, 0x0d, 0x0a, 0x1a, 0x0a], 0);
+  const view = new DataView(bytes.buffer);
+  view.setUint32(20, width, true);
+  view.setUint32(24, height, true);
+  return bytes;
+}
+
+function texturedGltf(images: Array<{ name: string; bytes: Uint8Array }>, required: string[] = []) {
+  const document = {
+    asset: { version: "2.0" },
+    extensionsUsed: required,
+    extensionsRequired: required,
+    scene: 0,
+    scenes: [{ nodes: [0] }],
+    nodes: [{ mesh: 0 }],
+    meshes: [{ primitives: [{ attributes: { POSITION: 0, NORMAL: 0, TEXCOORD_0: 1 }, material: 0 }] }],
+    materials: [{ pbrMetallicRoughness: { baseColorTexture: { index: 0 } } }],
+    textures: images.map((_, index) => ({ source: index })),
+    images: images.map((image) => ({ uri: image.name })),
+    accessors: [
+      { componentType: 5126, count: 3, type: "VEC3", min: [0, 0, 0], max: [1, 1, 1] },
+      { componentType: 5126, count: 3, type: "VEC2" },
+    ],
+    bufferViews: [],
+    buffers: [],
+  };
+  const files = new Map<string, Uint8Array>([
+    ["scene.gltf", new TextEncoder().encode(JSON.stringify(document))],
+  ]);
+  for (const image of images) files.set(image.name, image.bytes);
+  return { entry: "scene.gltf", files };
+}
+
+test("KTX2 텍스처의 크기를 실제로 읽는다", () => {
+  // 읽지 못하던 때는 4096 두 장짜리 에셋이 '텍스처 메모리 0'으로 모든 예산을 통과했다.
+  // 제대로 최적화한 모바일 게임 에셋이 정확히 이 포맷을 쓴다.
+  const bundle = texturedGltf(
+    [
+      { name: "a.ktx2", bytes: ktx2(4096, 4096) },
+      { name: "b.ktx2", bytes: ktx2(4096, 4096) },
+    ],
+    ["KHR_texture_basisu"],
+  );
+  const report = inspectAsset(bundle);
+  assert.equal(report.metrics.textureMaxDimension, 4096);
+  assert.equal(report.metrics.unreadableImageCount, 0);
+  // 블록 압축이므로 픽셀당 1바이트로 센다. 전부 RGBA 4바이트로 세면 4배 부풀려
+  // 없는 예산 초과를 만들어 낸다.
+  assert.equal(report.metrics.textureMemoryBytes, 4096 * 4096 * 2);
+
+  // 같은 파일이 프로파일에 따라 갈려야 한다.
+  assert.equal(inspectAsset(bundle, { profileId: "pc" }).score.ready, true);
+  const mobile = inspectAsset(bundle, { profileId: "mobile" });
+  assert.equal(mobile.score.ready, false);
+  assert.ok(mobile.findings.some((finding) => finding.ruleId === "TEX-DIMENSION-BUDGET"));
+});
+
+test("측정하지 못한 텍스처가 있으면 통과시키지 않는다", () => {
+  const bundle = texturedGltf([{ name: "weird.tga", bytes: new Uint8Array(64).fill(7) }]);
+  const report = inspectAsset(bundle);
+  assert.equal(report.metrics.unreadableImageCount, 1);
+  // READY는 '검사했고 통과했다'는 뜻이다. 읽지 못했으면 그 문장이 성립하지 않는다.
+  assert.equal(report.score.ready, false);
+  assert.ok(report.findings.some((finding) => finding.ruleId === "TEX-UNREADABLE"));
+});
+
+test("해석하지 못하는 필수 확장이 있으면 통과시키지 않는다", () => {
+  const known = texturedGltf(
+    [{ name: "a.ktx2", bytes: ktx2(512, 512) }],
+    ["KHR_draco_mesh_compression", "EXT_meshopt_compression", "KHR_texture_basisu"],
+  );
+  // draco·meshopt는 데이터가 압축돼 있어도 accessor의 count와 min/max가 남으므로
+  // 우리 수치가 유효하다. 그런 확장까지 막으면 실제 게임 에셋 대부분이 걸린다.
+  assert.equal(inspectAsset(known).metrics.unknownRequiredExtensionCount, 0);
+  assert.equal(inspectAsset(known).score.ready, true);
+
+  const unknown = texturedGltf([{ name: "a.ktx2", bytes: ktx2(512, 512) }], ["VENDOR_secret_sauce"]);
+  const report = inspectAsset(unknown);
+  assert.equal(report.metrics.unknownRequiredExtensionCount, 1);
+  assert.equal(report.score.ready, false);
+  assert.ok(report.findings.some((finding) => finding.ruleId === "FORMAT-UNKNOWN-EXTENSION"));
+});
+
+test("WebP 텍스처의 크기를 세 가지 청크 형식 모두에서 읽는다", () => {
+  const riff = (chunk: string, body: Uint8Array) => {
+    const bytes = new Uint8Array(12 + 8 + body.length);
+    const ascii = (text: string, offset: number) => {
+      for (let i = 0; i < text.length; i += 1) bytes[offset + i] = text.charCodeAt(i);
+    };
+    ascii("RIFF", 0);
+    new DataView(bytes.buffer).setUint32(4, bytes.length - 8, true);
+    ascii("WEBP", 8);
+    ascii(chunk, 12);
+    new DataView(bytes.buffer).setUint32(16, body.length, true);
+    bytes.set(body, 20);
+    return bytes;
+  };
+
+  const lossy = new Uint8Array(24);
+  lossy.set([0x9d, 0x01, 0x2a], 3);
+  new DataView(lossy.buffer).setUint16(6, 1024, true);
+  new DataView(lossy.buffer).setUint16(8, 512, true);
+
+  const lossless = new Uint8Array(24);
+  lossless[0] = 0x2f;
+  new DataView(lossless.buffer).setUint32(1, (1023 & 0x3fff) | ((511 & 0x3fff) << 14), true);
+
+  const extended = new Uint8Array(24);
+  extended[4] = 1023 & 0xff;
+  extended[5] = (1023 >> 8) & 0xff;
+  extended[7] = 511 & 0xff;
+  extended[8] = (511 >> 8) & 0xff;
+
+  for (const [label, bytes] of [
+    ["VP8 ", riff("VP8 ", lossy)],
+    ["VP8L", riff("VP8L", lossless)],
+    ["VP8X", riff("VP8X", extended)],
+  ] as const) {
+    const report = inspectAsset(texturedGltf([{ name: "t.webp", bytes }]));
+    assert.equal(report.metrics.unreadableImageCount, 0, label);
+    assert.equal(report.metrics.textureMaxDimension, 1024, label);
+  }
+});

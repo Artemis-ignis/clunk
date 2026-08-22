@@ -31,14 +31,14 @@ const execFileAsync = promisify(execFile);
  */
 const BUILT_IN_DIGESTS = {
   "clunk-messy-sample.glb": {
-    web: "9301fa0c34289f9dae1948fa5855c875af68f5f17b6e8a9d29baf94ed1e0f01c",
-    mobile: "ead78b88a07a367cfe78d443d0f20161962daa7ab74a6314b00a84cb6c993da0",
-    pc: "11a617469271ae806381501465145abf1e8d1283fd20103fb49fef7dd6fb2b70",
+    web: "018e9ab7fe7f3aba135d8d9c28806eddfdece54f0e0fdae2e216575e4e19bf4e",
+    mobile: "cb37713b70c3d0794a834c5a101a3b83d814c0ba68e4e043931fbff09bc13d20",
+    pc: "c074c9454c7b221e66d42ea90aa0c37538b4e93ebb0fbed72946da910de7e997",
   },
   "clunk-ready-sample.glb": {
-    web: "21936e6f631a9ba340b8e0b128417a565c482c43395c27325fc0a34885f4fc42",
-    mobile: "c3906bffc27c5c16ec63fd433e6d84d2bb1b02581efacc4d31af7d05e940db9d",
-    pc: "692ae9f56c553210be6b6069faf2908d6556886fac64e043f9f19381e6c3eec6",
+    web: "03721bf37a2ce4d754c9c3ab225df5faf647c5915684b7457201dfb00dd31484",
+    mobile: "888326201ae55718e179ea2727584de98bae8754e7519927a59e864c9e708fdf",
+    pc: "3333f3d95c947580abc428d799bbe216be4b4c7ae88ea818d8622cd203a0bcee",
   },
 } as const;
 
@@ -86,7 +86,7 @@ test("built-in profiles keep the digests, scores, and findings recorded before c
 
   const optimized = optimizeAsset(await sample("clunk-messy-sample.glb"), { profileId: "web" });
   assert.equal(optimized.outputHash, "be4610c3e378f2f9799eff6312f6ab9d1e6a4dc54e03bae3ebf3f275398c8151");
-  assert.equal(optimized.after.resultDigest, "18cd12876360d645cb6565a655ec95c578f412ada89e6a3fd3e9070df68e0ad0");
+  assert.equal(optimized.after.resultDigest, "dd1406442c3615bb2ebe394d698a6056820c3f2e60d92ceba645052a088fe00f");
   assert.equal(optimized.passport.ruleSetId, RULE_SET_ID);
 });
 
@@ -302,7 +302,9 @@ test("invalid custom profile definitions are rejected with the offending value",
   assert.equal(commented.thresholds.maxMaterials, 4);
   assert.deepEqual(commented.rules["MAT-DUPLICATES"], { enabled: true, severity: "ERROR" });
   assert.ok(RULE_IDS.includes("MAT-DUPLICATES"));
-  assert.equal(RULE_IDS.length, 15);
+  // 15 → 17: TEX-UNREADABLE, FORMAT-UNKNOWN-EXTENSION. 규칙이 늘면 프로젝트 프로파일이
+  // 알던 목록도 늘어나므로, 이 수는 손으로 확인하고 올려야 한다.
+  assert.equal(RULE_IDS.length, 17);
 });
 
 test("the CLI loads a custom profile file and reports the same canonical result as Core", async () => {

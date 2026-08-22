@@ -21,6 +21,8 @@ const titles: Record<string, string> = {
   "TEX-MISSING-UV0": "UV 좌표 누락",
   "TEX-MEMORY-BUDGET": "텍스처 메모리 예산 초과",
   "TEX-DIMENSION-BUDGET": "텍스처 해상도 예산 초과",
+  "TEX-UNREADABLE": "텍스처를 측정하지 못했습니다",
+  "FORMAT-UNKNOWN-EXTENSION": "해석하지 못하는 필수 확장",
   "SEC-REMOTE-RESOURCE": "외부 주소를 참조합니다",
   "SEC-MISSING-RESOURCE": "참조한 파일이 없습니다",
   "RUNTIME-ANIMATION-SKIN": "애니메이션·스킨 있음",
@@ -41,6 +43,10 @@ const messages: Record<string, string> = {
   "TEX-MEMORY-BUDGET":
     "텍스처가 차지하는 GPU 메모리가 예산을 넘습니다. 파일 크기가 아니라 해상도로 정해지므로, 압축을 더 해도 줄지 않습니다.",
   "TEX-DIMENSION-BUDGET": "텍스처 한 변의 길이가 예산을 넘습니다. 줄이려면 다시 굽거나 리사이즈해야 합니다.",
+  "TEX-UNREADABLE":
+    "이미지에서 가로·세로 크기를 읽지 못했습니다. 아래 텍스처 예산은 이 이미지를 빼고 계산한 값이라 그대로 믿을 수 없습니다.",
+  "FORMAT-UNKNOWN-EXTENSION":
+    "이 파일이 필수라고 선언한 확장 중 Clunk가 해석하지 못하는 것이 있습니다. 엔진이 실제로 읽는 내용과 위 수치가 다를 수 있습니다.",
   "SEC-REMOTE-RESOURCE": "원격 주소를 참조합니다. Clunk는 로컬 번들 밖의 파일을 가져오지 않습니다.",
   "SEC-MISSING-RESOURCE": "이 파일이 참조하는 로컬 파일이 함께 있지 않습니다.",
   "RUNTIME-ANIMATION-SKIN": "애니메이션과 스킨 데이터는 무손실 최적화가 그대로 보존합니다.",
