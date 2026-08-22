@@ -1,4 +1,10 @@
-import { env } from "cloudflare:workers";
+/**
+ * Bindings come from what the worker stashes on the global, not from a `cloudflare:workers`
+ * import. That import is a virtual module that only resolves inside workerd, so pulling it in
+ * here made every API route throw ERR_UNSUPPORTED_ESM_URL_SCHEME under plain Node — the
+ * production server answered 500 for all of them, and no test could exercise a real save.
+ */
+type RuntimeGlobal = typeof globalThis & { __clunkRuntimeEnv?: Record<string, unknown> };
 import { getCurrentUser, type AuthUser } from "../../auth-provider";
 import { sha256Hex, stableStringify } from "../../../packages/core/src/index";
 
@@ -9,7 +15,9 @@ export type ClunkUserContext = {
 
 type RuntimeEnv = { DB?: D1Database };
 
-const runtime = env as unknown as RuntimeEnv;
+function runtime(): RuntimeEnv {
+  return ((globalThis as RuntimeGlobal).__clunkRuntimeEnv ?? {}) as RuntimeEnv;
+}
 
 const SCHEMA_STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS clunk_users (id TEXT PRIMARY KEY, email TEXT NOT NULL, display_name TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
@@ -46,7 +54,8 @@ export async function requireClunkContext(): Promise<ClunkUserContext> {
 }
 
 export function getRuntimeDb(): D1Database {
-  if (!runtime.DB) {
+  const db = runtime().DB;
+  if (!db) {
     // The binding name and the hosting config path are operator information, not
     // user information: the visitor can do nothing with it, so it stays in the
     // server log and never reaches the response body.
@@ -59,7 +68,7 @@ export function getRuntimeDb(): D1Database {
       "storage_unavailable",
     );
   }
-  return runtime.DB;
+  return db;
 }
 
 let schemaReady: Promise<void> | null = null;

@@ -35,11 +35,25 @@ async page => {
       };
       return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
     };
-    // Walk up until something actually paints: a transparent parent tells us nothing.
+    // Walk up until something actually paints. A gradient counts: buttons here are painted by
+    // background-image with a transparent background-color, and ignoring that made the audit
+    // compare white button text against the white panel underneath and call it 1.07:1.
     const behind = (el) => {
       let node = el;
       while (node && node !== document.documentElement) {
-        const colour = getComputedStyle(node).backgroundColor;
+        const style = getComputedStyle(node);
+        const image = style.backgroundImage;
+        if (image && image !== "none" && image.includes("gradient")) {
+          const stops = image.match(/rgba?([^)]+)/g);
+          if (stops && stops.length) {
+            // Darkest stop: the worst case a glyph can land on.
+            return stops
+              .map(rgb)
+              .filter((c) => c.length < 4 || c[3] > 0.5)
+              .sort((a, b) => a[0] + a[1] + a[2] - (b[0] + b[1] + b[2]))[0] ?? [255, 255, 255];
+          }
+        }
+        const colour = style.backgroundColor;
         const parts = rgb(colour);
         if (parts.length >= 4 ? parts[3] > 0.5 : colour !== "rgba(0, 0, 0, 0)") return parts;
         node = node.parentElement;
@@ -120,6 +134,47 @@ async page => {
         await page.waitForTimeout(2000);
         await record(`${view}/${theme} · ${path}`);
       }
+    }
+  }
+
+  // Static screens are the easy half. The states a paying user actually hits — a file that
+  // will not parse, a queue mid-run, a save that failed — render markup the default screens
+  // never show, so they get audited too.
+  const fixtures = "C:/Users/50106/Desktop/Clunk/public/samples";
+  const assetInput = 'input[aria-label="GLB 또는 GLTF 파일 선택"]';
+
+  for (const [width, height, view] of [[1440, 950, "desktop"], [390, 900, "mobile"]]) {
+    await page.setViewportSize({ width, height });
+
+    // A file the core cannot read: the diagnostic and the refusal notice.
+    await page.goto(base + "/app", { waitUntil: "networkidle" });
+    await page.waitForTimeout(2200);
+    await page.evaluate(() => {
+      const input = document.querySelector('input[aria-label="GLB 또는 GLTF 파일 선택"]');
+      const file = new File([new TextEncoder().encode("this is not a glb")], "broken.glb");
+      const data = new DataTransfer();
+      data.items.add(file);
+      input.files = data.files;
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    await page.waitForTimeout(4000);
+    await record(view + "/light · /app 파싱 실패");
+
+    // A batch queue: rows, progress, per-file verdicts.
+    await page.goto(base + "/app", { waitUntil: "networkidle" });
+    await page.waitForTimeout(2200);
+    await page.locator(assetInput).setInputFiles([
+      fixtures + "/clunk-messy-sample.glb",
+      fixtures + "/clunk-ready-sample.glb",
+    ]);
+    await page.waitForTimeout(2500);
+    await record(view + "/light · /app 큐 대기");
+
+    const start = page.getByRole("button", { name: /일괄 검사 시작/ });
+    if (await start.count()) {
+      await start.first().click();
+      await page.waitForTimeout(9000);
+      await record(view + "/light · /app 큐 완료");
     }
   }
 
