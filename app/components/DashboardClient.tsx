@@ -49,26 +49,41 @@ export function DashboardClient() {
   const [passports, setPassports] = useState<Passport[]>([]);
   const [ledger, setLedger] = useState<CreditEntry[]>([]);
   const [credits, setCredits] = useState<number | null>(null);
-  const [message, setMessage] = useState("워크스페이스 불러오는 중...");
+  const [message, setMessage] = useState("");
   const [userLabel, setUserLabel] = useState("사용자");
-  const [connection, setConnection] = useState<"checking" | "connected" | "error">("checking");
+  const [connection, setConnection] = useState<"checking" | "connected" | "auth-required" | "error">("checking");
   const [expandedRunId, setExpandedRunId] = useState<string | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
-    void Promise.all([fetch("/api/me"), fetch("/api/runs"), fetch("/api/passports"), fetch("/api/credits")])
-      .then(async ([me, runResponse, passportResponse, creditResponse]) => {
+    async function loadWorkspace() {
+      setConnection("checking");
+      setMessage("");
+      try {
+        const [me, runResponse, passportResponse, creditResponse] = await Promise.all([
+          fetch("/api/me", { cache: "no-store" }),
+          fetch("/api/runs", { cache: "no-store" }),
+          fetch("/api/passports", { cache: "no-store" }),
+          fetch("/api/credits", { cache: "no-store" }),
+        ]);
         if (cancelled) return;
         if (!me.ok) {
-          setConnection("error");
-          setMessage("ChatGPT로 로그인하면 비공개 워크스페이스 이력을 불러옵니다.");
+          if (me.status === 401 || me.status === 403) {
+            setConnection("auth-required");
+            setMessage("ChatGPT 로그인 후 비공개 워크스페이스 이력을 불러옵니다.");
+          } else {
+            setConnection("error");
+            setMessage("인증 경계가 " + me.status + " 상태를 돌려주었습니다.");
+          }
           return;
         }
-        if (!runResponse.ok || !passportResponse.ok || !creditResponse.ok) {
+        const failedResponse = [runResponse, passportResponse, creditResponse].find((response) => !response.ok);
+        if (failedResponse) {
           setCredits(null);
           setLedger([]);
           setConnection("error");
-          setMessage("워크스페이스 데이터를 불러오지 못했습니다. 인증과 D1 연결 상태를 확인하세요.");
+          setMessage("워크스페이스 데이터를 불러오지 못했습니다. API 상태 " + failedResponse.status + "입니다.");
           return;
         }
         const meBody = await me.json() as MeResponse;
@@ -84,15 +99,16 @@ export function DashboardClient() {
         setRuns(runBody.runs ?? []);
         setPassports(passportBody.passports ?? []);
         setLedger(creditBody.ledger ?? []);
-        setCredits(creditBody.credits ?? 0);
-        setMessage("");
-      })
-      .catch(() => {
+        setCredits(creditBody.credits);
+      } catch {
+        if (cancelled) return;
         setConnection("error");
-        setMessage("워크스페이스 데이터를 불러오지 못했습니다.");
-      });
+        setMessage("워크스페이스 데이터를 불러오지 못했습니다. 네트워크와 D1 연결 상태를 확인하세요.");
+      }
+    }
+    void loadWorkspace();
     return () => { cancelled = true; };
-  }, []);
+  }, [loadAttempt]);
 
   const findingCount = useMemo(() => runs.reduce((total, run) => total + run.findingCount, 0), [runs]);
   const readyCount = useMemo(() => runs.filter((run) => run.status === "ready").length, [runs]);
@@ -102,7 +118,13 @@ export function DashboardClient() {
     <span className={`conn-chip conn-chip-${connection}`}>
       <span className="conn-dot" />
       <span className="conn-label">
-        {connection === "connected" ? "SIWC 연결됨" : connection === "error" ? "연결 확인 필요" : "연결 확인 중"}
+        {connection === "connected"
+          ? "SIWC 연결됨"
+          : connection === "auth-required"
+            ? "로그인 필요"
+            : connection === "error"
+              ? "데이터 오류"
+              : "연결 확인 중"}
       </span>
     </span>
   );
@@ -120,14 +142,30 @@ export function DashboardClient() {
         </Link>
       </section>
 
-      {message ? (
-        <div className="banner banner-info ws-banner">
-          <Icon name="info" size={16} />
+      {connection === "checking" ? (
+        <div className="banner banner-info ws-banner" role="status" aria-live="polite">
+          <span className="spinner" />
+          <p>워크스페이스와 SIWC 인증을 확인하는 중입니다...</p>
+        </div>
+      ) : null}
+      {connection === "auth-required" ? (
+        <div className="banner banner-info ws-banner" role="alert">
+          <Icon name="shield" size={16} />
           <p>{message}</p>
-          <Link href="/login" className="text-link">
-            로그인
+          <Link href="/login?return_to=%2Fdashboard" className="text-link">
+            로그인 · 회원가입
             <Icon name="arrowRight" size={13} />
           </Link>
+        </div>
+      ) : null}
+      {connection === "error" ? (
+        <div className="banner banner-warning ws-banner" role="alert">
+          <Icon name="triangleAlert" size={16} />
+          <p>{message}</p>
+          <button type="button" className="button button-quiet button-xs" onClick={() => setLoadAttempt((attempt) => attempt + 1)}>
+            다시 시도
+            <Icon name="reset" size={13} />
+          </button>
         </div>
       ) : null}
 
@@ -234,12 +272,14 @@ export function DashboardClient() {
               ))}
             </ul>
           ) : (
-            <p className="muted-note">인증 후 실제 원장 내역이 나타납니다.</p>
+            <p className="muted-note">
+              {connection === "connected" ? "아직 기록된 크레딧 변동이 없습니다." : "인증 후 실제 원장 내역이 나타납니다."}
+            </p>
           )}
           <p className="muted-note">
             파일럿을 위한 작동하는 데모 원장입니다. 결제 제공자는 아직 연결하지 않았습니다.
           </p>
-          <DemoUpgradeButton />
+          {connection === "connected" ? <DemoUpgradeButton /> : null}
           <Link href="/pricing" className="text-link">
             플랜과 데모 업그레이드
             <Icon name="arrowRight" size={13} />

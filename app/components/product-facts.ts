@@ -168,8 +168,8 @@ export const MCP_SERVER = {
 export const MCP_CONFIG_SNIPPET = `{
   "mcpServers": {
     "clunk": {
-      "command": "npm",
-      "args": ["run", "mcp"],
+      "command": "cmd.exe",
+      "args": ["/d", "/s", "/c", "call", "npm.cmd", "run", "mcp"],
       "cwd": "/path/to/clunk"
     }
   }

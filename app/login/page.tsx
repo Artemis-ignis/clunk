@@ -19,11 +19,20 @@ export const metadata: Metadata = {
  * The template's email, password and three social buttons are removed. Clunk stores no
  * password of its own, so the card offers exactly one route in.
  */
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ return_to?: string }>;
+}) {
   const user = await getChatGPTUser();
+  const params = await searchParams;
+  const returnTo =
+    params.return_to?.startsWith("/") && !params.return_to.startsWith("//")
+      ? params.return_to
+      : "/app";
   if (user) {
     const { redirect } = await import("next/navigation");
-    redirect("/app");
+    redirect(returnTo);
   }
 
   return (
@@ -59,7 +68,7 @@ export default async function LoginPage() {
           ChatGPT 계정으로 로그인하면 곧 회원가입입니다. 따로 가입 절차를 밟지 않아도 워크스페이스가 만들어집니다.
         </p>
 
-        <Link className="button button-primary button-block login-cta" href={chatGPTSignInPath("/app")}>
+        <Link className="button button-primary button-block login-cta" href={chatGPTSignInPath(returnTo)}>
           ChatGPT 계정으로 시작하기
           <Icon name="arrowUpRight" size={16} />
         </Link>

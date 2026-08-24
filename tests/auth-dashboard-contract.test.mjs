@@ -1,0 +1,45 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+
+async function render(pathname) {
+  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
+  workerUrl.searchParams.set("test", String(process.pid) + "-" + String(Date.now()) + "-" + pathname);
+  const { default: worker } = await import(workerUrl.href);
+  return worker.fetch(
+    new Request("http://localhost" + pathname, {
+      headers: { accept: "text/html" },
+    }),
+    { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
+    { waitUntil() {}, passThroughOnException() {} },
+  );
+}
+
+test("login preserves the dashboard return path and explains ChatGPT signup", async () => {
+  const response = await render("/login?return_to=%2Fdashboard");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /곧 회원가입/);
+  assert.match(html, /\/signin-with-chatgpt\?return_to=%2Fdashboard/);
+});
+
+test("dashboard keeps unauthenticated users behind the host sign-in gate", async () => {
+  const response = await render("/dashboard");
+  assert.ok([307, 308].includes(response.status));
+  const location = response.headers.get("location");
+  assert.ok(location);
+  const target = new URL(location, "http://localhost");
+  assert.equal(target.pathname, "/signin-with-chatgpt");
+  assert.equal(target.searchParams.get("return_to"), "/dashboard");
+});
+
+test("dashboard client exposes loading, auth-required, error, and retry states", async () => {
+  const source = await readFile(
+    new URL("../app/components/DashboardClient.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(source, /auth-required/);
+  assert.match(source, /다시 시도/);
+  assert.match(source, /연결 확인 중/);
+  assert.match(source, /로그인 · 회원가입/);
+});

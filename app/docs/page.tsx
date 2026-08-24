@@ -80,6 +80,10 @@ export default function DocsPage() {
               caption="initialize에서 tools/list, clunk_inspect까지 실제로 확인한 값입니다."
             />
           </div>
+          <Link className="text-link" href="/agents">
+            Claude Code · Codex · Cursor별 연결 탭 보기
+            <Icon name="arrowRight" size={15} />
+          </Link>
 
           <ul className="tool-table">
             {MCP_TOOLS.map((tool) => (
