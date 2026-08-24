@@ -42,6 +42,7 @@ test("authenticated evidence parser returns normalized asset provenance", () => 
     coreBuildId: "0.1.0",
     ruleSetId: "harvest-frontier-runtime-v1",
     ruleSetVersion: "0.1.0",
+    profileId: "pc",
     freshness: "CURRENT",
   }));
 
@@ -61,10 +62,29 @@ test("authenticated evidence parser maps malformed provenance to HTTP 400", () =
       coreBuildId: "0.1.0",
       ruleSetId: "harvest-frontier-runtime-v1",
       ruleSetVersion: "0.1.0",
+      profileId: "pc",
       freshness: "CURRENT",
     })),
     (error: unknown) => error instanceof ClunkHttpError
       && error.status === 400
       && /evidenceRef\.inputHash must match/.test(error.message),
+  );
+});
+
+test("current evidence requires the concrete Core profile", () => {
+  assert.throws(
+    () => parseEvidencePayload(manifestWithEvidence({
+      schema: "clunk.asset-evidence-ref.v1",
+      inputHash,
+      resultDigest,
+      byteLength: 680412,
+      coreBuildId: "0.1.0",
+      ruleSetId: "harvest-frontier-runtime-v1",
+      ruleSetVersion: "0.1.0",
+      freshness: "CURRENT",
+    })),
+    (error: unknown) => error instanceof ClunkHttpError
+      && error.status === 400
+      && /evidenceRef\.profileId is required/.test(error.message),
   );
 });

@@ -16,9 +16,10 @@ authenticated `/api/*` routes below are workspace-scoped and are not a public ag
   and `resultDigest` for every run.
 - `clunk.asset-evidence-ref.v1` links a frame manifest to a real source inspection with
   `inputHash`, `resultDigest`, `byteLength`, `coreBuildId`, `ruleSetId`, `ruleSetVersion`,
-  optional `profileId`/`analysisId`, and `freshness: CURRENT|STALE|UNKNOWN`. Every fresh HF
-  `assetInspections[]` entry also requires `inspectionRunId` and `targetProfileId`; `profileId`
-  identifies the concrete Core profile when supplied. `CURRENT` is a
+  `profileId` for CURRENT evidence, optional `analysisId`, and `freshness: CURRENT|STALE|UNKNOWN`.
+  Every fresh HF `assetInspections[]` entry also requires `inspectionRunId` and `targetProfileId`;
+  CURRENT `profileId` identifies the concrete Core profile and is required. Legacy STALE/UNKNOWN
+  refs may omit it. `CURRENT` is a
   producer-supplied current reinspection; `STALE EVIDENCE · NOT CURRENT APPROVAL` and
   `FRESHNESS UNKNOWN · NOT CURRENT APPROVAL` never promote `reviewStatus`, `visualRuntime`,
   or `playerFacing`. A malformed ref or evidence input-hash mismatch is `INVALID` and is

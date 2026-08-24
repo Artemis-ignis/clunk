@@ -121,6 +121,7 @@ test("collaboration UI keeps capture integrity, asset audit, and human visual re
   assert.match(agents, /NOT CURRENT APPROVAL/);
   assert.match(panel, /inspectionRunId/);
   assert.match(facts, /fresh HF.*inspectionRunId/);
+  assert.match(facts, /profileId is required for CURRENT/);
   assert.match(docsPage, /inspectionRunId[\s\S]*required/);
   assert.match(llms, /inspectionRunId[\s\S]*requires/);
   assert.match(facts, /status: "NON_BLOCKING"/);

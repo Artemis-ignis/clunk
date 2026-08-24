@@ -700,6 +700,9 @@ function normalizeAssetEvidenceRef(value: unknown, label: string, expectedInputH
     freshness,
   };
   const profileId = optionalText(record, "profileId", label, 160);
+  if (freshness === "CURRENT" && !profileId) {
+    throw new Error(`${label}.profileId is required for CURRENT fresh evidence`);
+  }
   if (profileId) evidenceRef.profileId = profileId;
   const analysisId = optionalText(record, "analysisId", label, 240);
   if (analysisId) evidenceRef.analysisId = analysisId;
