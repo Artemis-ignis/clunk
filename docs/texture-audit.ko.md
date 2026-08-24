@@ -113,14 +113,27 @@ RGBA8 + 전체 밉체인(×4/3) 합산 vs `gpuMemoryBudgetBytes`. 가정은 리�
 ## 4) UI readability auditor의 현재 계약
 
 텍스처 감사와 초상화·작은 화면 UI readability 감사는 서로 다른 입력과 측정기입니다.
-Clunk는 아직 실제 UI readability 측정기를 제공하지 않습니다. 외부 CI가 명령 누락으로
-멈추지 않도록 아래의 안정된 명시 계약만 제공합니다.
+Clunk는 이제 초상화 raster auditor를 제공합니다. 외부 CI는 아래의 안정된 명령을 호출할 수
+있습니다.
 
 ```powershell
-npm.cmd run asset:ui-readability -- --config portrait-ui.json --format json
+npm.cmd run asset:ui-readability -- --config portrait-ui.json --format json --strict
 ```
 
-현재 결과는 `clunk.ui-readability.v1`, `status: "UNAVAILABLE"`,
-`capability: "not-shipped"`, exit `4`입니다. `violations`와 `findings`는 비어 있고,
-이 결과는 UI PASS·player-facing readiness PASS가 아닙니다. 실제 auditor가 출시되기 전까지
-HF CI는 texture PASS와 UI 미제공 상태를 별도 게이트로 보존해야 합니다.
+config의 각 group은 `sourcePx`(기본 128), 실제 CSS draw size인 `renderPx`, `baseDir`, `files`를
+선언합니다. auditor는 실제 이미지 bytes를 읽고 `renderPx`로 Lanczos 재래스터화한 뒤 다음을
+판정합니다.
+
+- p05–p95 luminance range
+- edge density와 mean gradient
+- 3×3 local contrast coverage
+- 같은 group 안의 pairwise CIE Lab ΔE76
+
+결과는 `clunk.ui-readability.v1` envelope이며 `status`는 `PASS` 또는 `FAIL`,
+`capability`는 `shipped`입니다. `--strict`에서 FAIL은 exit `2`, PASS는 exit `0`입니다.
+지원하지 않는 입력 형식 또는 decoder 환경은 `status: "UNAVAILABLE"`, exit `4`로 남깁니다.
+모든 결과에는 `inputHash`, `configHash`, `groups`, `findings`, `violations`가 포함됩니다.
+
+중요한 경계: 이 auditor의 PASS는 **portrait-ui-raster PASS**입니다. envelope의
+`assetAudit.status`와 `playerFacing.status`는 각각 `NOT_EVALUATED`로 남으며, 엔진 import/runtime,
+실제 HUD가 들어간 게임 화면, 실브라우저 프레임을 player-facing PASS로 승격하지 않습니다.

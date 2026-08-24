@@ -184,8 +184,8 @@ export default function Home() {
               <h2>점수 하나로 <em>게임 준비를 가장하지 않습니다.</em></h2>
               <p>
                 PNG부터 Spine, glTF animation, GLB까지 실제 바이트를 읽고, Godot·Unity·Unreal·Web/Three.js와
-                모바일 대상 조건을 분리합니다. 엔진 import나 player-facing runtime을 호출하지 못한 단계는
-                PASS가 아니라 미사용·미지원으로 남깁니다.
+                모바일 대상 조건을 분리합니다. 초상화 UI는 원본을 실제 renderPx로 재래스터화해 읽힘을 측정하지만,
+                엔진 import·player-facing runtime·실브라우저 프레임을 호출하지 못한 결과는 끝까지 별도 상태로 남깁니다.
               </p>
             </div>
             <div className="landing-coverage-grid">

@@ -39,9 +39,9 @@ $ npm run clunk -- passport public/samples/clunk-messy-sample.glb out/quad.glb`;
 const ASSET_AUDIT_COMMANDS = `# 3D / 2D target contract
 $ npm.cmd run asset:readability -- --config examples/texture-audit/harvest-frontier.textures.json --format json --strict
 
-# UI readability is an explicit unavailable contract until a real auditor ships
-$ npm.cmd run asset:ui-readability -- --config portrait-ui.json --format json
-# exit 4 · clunk.ui-readability.v1 · status UNAVAILABLE · capability not-shipped`;
+# Portrait UI readability at the actual draw size
+$ npm.cmd run asset:ui-readability -- --config portrait-ui.json --format json --strict
+# exit 0 PASS · exit 2 FAIL · exit 4 UNAVAILABLE · clunk.ui-readability.v1`;
 
 const AGENT_SESSION = `$ echo '{"jsonrpc":"2.0","id":1,"method":"initialize"}' | npm run mcp
   protocolVersion  ${MCP_SERVER.protocolVersion}
@@ -138,12 +138,12 @@ export default function DocsPage() {
           <h2>외부 프로젝트 CI 계약</h2>
           <p className="doc-lead">
             Harvest Frontier처럼 외부 프로젝트가 호출할 수 있는 명령은 측정 종류별로 분리합니다.
-            텍스처 PASS와 UI readability 미제공을 하나의 READY로 합치지 않습니다.
+            텍스처 PASS와 UI raster PASS를 하나의 player-facing READY로 합치지 않습니다.
           </p>
           <CodeBlock title="asset-audit" language="bash" code={ASSET_AUDIT_COMMANDS} />
           <div className="doc-ci-contracts">
             <article><span className="mono-label">TEXTURE · SHIPPED</span><code>{TEXTURE_AUDIT_CONTRACT.schema}</code><p>exit {TEXTURE_AUDIT_CONTRACT.passExit}=PASS · {TEXTURE_AUDIT_CONTRACT.policyExit}=strict 위반 · {TEXTURE_AUDIT_CONTRACT.unavailableExit}=미지원</p></article>
-            <article><span className="mono-label">UI READABILITY · EXPLICIT</span><code>{UI_READABILITY_CONTRACT.schema}</code><p>{UI_READABILITY_CONTRACT.status} · {UI_READABILITY_CONTRACT.capability} · exit {UI_READABILITY_CONTRACT.exit}. 실제 초상화·작은 화면 측정기는 아직 없습니다.</p></article>
+            <article><span className="mono-label">UI RASTER · SHIPPED</span><code>{UI_READABILITY_CONTRACT.schema}</code><p>{UI_READABILITY_CONTRACT.status} · {UI_READABILITY_CONTRACT.capability} · exit {UI_READABILITY_CONTRACT.exit}. {UI_READABILITY_CONTRACT.render} · player-facing {UI_READABILITY_CONTRACT.playerFacing}.</p></article>
           </div>
         </section>
 

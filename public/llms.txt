@@ -107,15 +107,18 @@ texture, animation, and device constraints. An engine import/runtime/device stag
 actually invoked remains `notRun`, `environmentUnavailable`, or `unsupported`; it cannot become
 READY by declaration alone.
 
-Portrait/UI readability is not shipped yet. The stable explicit contract is:
+Portrait/UI raster readability is shipped as a separate contract. The stable command is:
 
 ```powershell
-npm.cmd run asset:ui-readability -- --config portrait-ui.json --format json
+npm.cmd run asset:ui-readability -- --config portrait-ui.json --format json --strict
 ```
 
-It returns `clunk.ui-readability.v1`, `status: UNAVAILABLE`, `capability: not-shipped`, and exit
-4. It is not a UI or player-facing PASS. When a real auditor ships, it must keep this v1 envelope
-and return PASS/FAIL with input/config hashes.
+It returns `clunk.ui-readability.v1` with `status: PASS` or `FAIL`, `capability: shipped`,
+`inputHash`, `configHash`, per-image raster metrics at `renderPx`, and exit `0` or `2` under
+`--strict`. Unsupported image formats or an unavailable decoder remain `status: UNAVAILABLE`
+with exit `4`. The auditor measures the actual 46px HUD raster when `renderPx: 46` is declared;
+it does not execute an engine import/runtime or player-facing frame. `assetAudit.status` and
+`playerFacing.status` therefore remain `NOT_EVALUATED` and must not be promoted to READY.
 
 ## Authenticated collaboration
 

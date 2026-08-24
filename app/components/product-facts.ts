@@ -233,11 +233,14 @@ export const TEXTURE_AUDIT_CONTRACT = {
 } as const;
 
 export const UI_READABILITY_CONTRACT = {
-  command: "npm.cmd run asset:ui-readability -- --config <config.json> --format json",
+  command: "npm.cmd run asset:ui-readability -- --config <config.json> --format json --strict",
   schema: "clunk.ui-readability.v1",
-  status: "UNAVAILABLE",
-  capability: "not-shipped",
-  exit: 4,
+  status: "PASS | FAIL | UNAVAILABLE",
+  capability: "shipped",
+  exit: "0 PASS · 2 FAIL · 4 UNAVAILABLE",
+  scope: "portrait-ui-raster",
+  render: "config renderPx (HF: 128px → 46px)",
+  playerFacing: "NOT_EVALUATED",
 } as const;
 
 export const COLLABORATION_CONTRACT = {

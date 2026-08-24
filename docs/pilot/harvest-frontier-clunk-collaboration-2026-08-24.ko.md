@@ -162,3 +162,77 @@ M84 shipped-path 무-HUD 실사용 플레이테스트에서 발견한 다음 문
 - 실제 portrait auditor가 준비되면 같은 v1 envelope에서 PASS/FAIL을 반환하도록 확장하고,
   현재의 `capability: not-shipped` 계약과 혼동되지 않게 toolVersion·inputHash·configHash를
   유지한다. HF는 그때 128px 초상화 5종을 46px 실제 렌더 크기로 재측정한다.
+
+## 2026-08-24 HF M94 r11 공식 협업 입력 및 UI auditor 출시
+
+- HF M84 무-HUD 실브라우저 프레임에서 반복 식생·프롭 관통·캐릭터 디테일·간판 판독 gap이
+  남아 있다는 결과를 전달받았다. Clunk GLB/texture 정적 PASS와 이 player-facing gap은
+  서로 다른 상태이며, 어느 쪽도 다른 쪽을 덮어쓰지 않는다.
+- HF M94 r11 오디오 측정도 같은 경계를 확인한다. 5개 WAV는 무클리핑, 레벨 spread
+  `2.41 dB`, stereo side/mid 약 `-10.5~-12.2 dB`였지만, 고역 2–6 kHz는
+  `0.16~0.33%`, 6–20 kHz는 대부분 `0~0.49%`였다. 이는 정적 신호 수치이지 실제 청취
+  품질 PASS가 아니며, Clunk의 portrait raster PASS와도 별도다.
+- Clunk는 이제 `scripts/ui-readability-cli.mjs`에서 실제 raster 측정을 제공한다. HF 설정의
+  128×128 PNG를 `renderPx: 46`으로 Lanczos 재래스터화하고 luminance range, edge density,
+  local contrast coverage, group pairwise CIE Lab ΔE76을 측정한다. 현재 HF 5종 실제 호출은
+  exit `0` / `PASS`였고, luminance range `0.5470~0.6503`, edge density `0.1493~0.1700`,
+  local contrast coverage `0.4137~0.4504`, 최저 pairwise mean ΔE76 `11.6431`이었다.
+- 최종 외부 호출 계약은 다음과 같다.
+
+```powershell
+npm.cmd run asset:ui-readability -- --config tools/asset-pipeline/ui-readability.config.json --format json --strict
+```
+
+  - schema: `clunk.ui-readability.v1`
+  - `PASS` → exit `0`
+  - `FAIL` + `--strict` → exit `2`
+  - 지원하지 않는 입력 형식 또는 decoder 불가 → `UNAVAILABLE`, exit `4`
+  - 정상 auditor envelope의 `capability`는 `shipped`이며 `inputHash`·`configHash`·group별
+    `renderPx`·metrics·violations를 포함한다.
+
+정상 PASS의 축약 샘플은 다음과 같다. 전체 입력은 HF의 `HF-M94-clunk-ui-readability-r02.json`
+같은 경로에 보존하면 된다.
+
+```json
+{
+  "schema": "clunk.ui-readability.v1",
+  "toolVersion": "clunk-ui-readability/1.1.0",
+  "status": "PASS",
+  "capability": "shipped",
+  "inputHash": "<64-hex>",
+  "configHash": "<64-hex>",
+  "groups": [{
+    "name": "NPC 대화 초상화",
+    "sourcePx": 128,
+    "renderPx": 46,
+    "status": "PASS",
+    "images": [{
+      "path": "npc.choi-minseo.png",
+      "status": "PASS",
+      "rendered": { "width": 46, "height": 46, "channels": 4 },
+      "metrics": {
+        "luminanceRange": 0.6503,
+        "edgeDensity": 0.1563,
+        "localContrastCoverage": 0.4499,
+        "resizedPixelHash": "<64-hex>"
+      },
+      "violations": []
+    }],
+    "violations": []
+  }],
+  "assetAudit": { "status": "NOT_EVALUATED" },
+  "playerFacing": { "status": "NOT_EVALUATED" },
+  "engineReadiness": "not-evaluated"
+}
+```
+
+이 구현의 PASS는 portrait-ui-raster PASS일 뿐이다. HF는 이후 WebGPU/무-HUD 실브라우저
+프레임을 별도 player-facing gate로 재검증해야 하며, Clunk API·문서·랜딩·에이전트 화면도
+이 경계를 동일하게 표시한다. 이전 M94 `UNAVAILABLE`/exit 4 결과는 당시의 실제 계약
+증거로 그대로 보존하고, 새 PASS는 그것을 소급해 바꾸지 않는다.
+
+## 2026-08-24 HF M94 r11 협업 입력 보존
+
+- 위 UI·오디오·M84 visual/runtime gap을 현재 Clunk 인증 협업 스레드의 공식 입력으로
+  저장한다. thread status는 정적 결과가 아니라 `SCENE_GAP` 또는 `BLOCKED`로 유지할 수
+  있으며, `assetAudit`·`visualRuntime`·`playerFacing`을 한 숫자로 합치지 않는다.

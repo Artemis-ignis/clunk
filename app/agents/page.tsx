@@ -170,12 +170,12 @@ export default function AgentsPage() {
               <pre><code>{TEXTURE_AUDIT_CONTRACT.command}</code></pre>
               <small>GPU 밉 메모리·심리스·판독성 측정. 엔진 import/runtime 또는 플레이어 화면 PASS가 아닙니다.</small>
             </article>
-            <article className="agents-ci-card agents-ci-card-unavailable">
-              <span className="mono-label">EXPLICIT · UI READABILITY</span>
+            <article className="agents-ci-card agents-ci-card-pass">
+              <span className="mono-label">SHIPPED · UI RASTER</span>
               <code>{UI_READABILITY_CONTRACT.schema}</code>
               <p><strong>{UI_READABILITY_CONTRACT.status}</strong> · capability <strong>{UI_READABILITY_CONTRACT.capability}</strong> · exit <strong>{UI_READABILITY_CONTRACT.exit}</strong></p>
               <pre><code>{UI_READABILITY_CONTRACT.command}</code></pre>
-              <small>초상화·작은 화면 텍스트 측정기는 아직 제공하지 않습니다. 없는 auditor를 PASS로 위장하지 않고 안정 JSON으로 알립니다.</small>
+              <small>원본 128px을 config의 실제 renderPx( HF는 46px )로 재래스터화해 명도 범위·엣지·국소 대비·그룹 ΔE76을 측정합니다. PASS여도 엔진 import/runtime과 실제 플레이어 프레임은 <strong>NOT_EVALUATED</strong>입니다.</small>
             </article>
           </div>
         </section>
