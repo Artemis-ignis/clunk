@@ -1,0 +1,496 @@
+{
+  "$exampleKind": "ACTUAL_EVIDENCE_NOT_SCHEMA_TEMPLATE",
+  "$sourceNote": "Captured and hashed by Harvest Frontier at sourceCommit 781a551c5c6eb577f2326ecb84deb22af93eaa3d; normalized for Clunk acceptance. Static PASS does not approve the player-facing scene.",
+  "schema": "clunk.frame-manifest.v1",
+  "runId": "HF-M99-clunk-evidence-r01",
+  "sourceProject": "Harvest Frontier",
+  "sourceCommit": "781a551c5c6eb577f2326ecb84deb22af93eaa3d",
+  "reviewStatus": "NOT_EVALUATED",
+  "visualRuntime": "GAP",
+  "playerFacing": "NOT_EVALUATED",
+  "frames": [
+    {
+      "id": "hf-m99-webgpu-nohud",
+      "path": "C:/Users/50106/Desktop/Harvest Frontier/.logs/screenshots/M99/shipped-visual/HF-M99-packaged-visual-webgpu-03-game-nohud.png",
+      "sha256": "e225f58f2ef5b12f45c24c3b00418a63ba33ba7c038267183cb02da83ce12061",
+      "bytes": 2821461,
+      "frameSourceCommit": "781a551c5c6eb577f2326ecb84deb22af93eaa3d",
+      "viewport": { "width": 1920, "height": 1080, "dpr": 1 },
+      "renderer": "auto/WebGPU",
+      "hud": "off",
+      "shippedPath": true,
+      "console": { "errors": 0, "warnings": 0 },
+      "scene": "M99 packaged shipped-path no-HUD baseline",
+      "note": "Actual shipped-path frame; commercial visual approval remains pending."
+    },
+    {
+      "id": "hf-m99-webgpu-realwalk",
+      "path": "C:/Users/50106/Desktop/Harvest Frontier/.logs/screenshots/M99/shipped-visual/HF-M99-packaged-visual-webgpu-04-after-real-walk.png",
+      "sha256": "17d57a92ae76c510f1a7d32ec71df5e551498a305abdb3e6481881faa2496543",
+      "bytes": 2781233,
+      "frameSourceCommit": "781a551c5c6eb577f2326ecb84deb22af93eaa3d",
+      "viewport": { "width": 1920, "height": 1080, "dpr": 1 },
+      "renderer": "auto/WebGPU",
+      "hud": "off",
+      "shippedPath": true,
+      "console": { "errors": 0, "warnings": 0 },
+      "scene": "M99 packaged shipped-path after real walk",
+      "note": "Actual shipped-path frame; runtime flow PASS is not human visual approval."
+    },
+    {
+      "id": "hf-m99-croplab-sheet",
+      "path": "C:/Users/50106/Desktop/Harvest Frontier/.logs/screenshots/M99/croplab/after-sheet-all.png",
+      "sha256": "d34adfe0a25c77d04fe445896b2cf8eaa400a7011591f0c0f57b2145d3dc9f49",
+      "bytes": 331798,
+      "renderer": "WebGL2",
+      "hud": "unknown",
+      "shippedPath": false,
+      "console": { "errors": 0, "warnings": 0 },
+      "scene": "M99 procedural crop lab",
+      "note": "30 cells: six crops × five growth stages, plus 18 close plates in the source run."
+    }
+  ],
+  "sceneGaps": [
+    {
+      "id": "distant-terrain-band",
+      "severity": "major",
+      "category": "terrain",
+      "note": "Distant terrain/hill band and boundary readability still require human review in the no-HUD shipped frame.",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"]
+    },
+    {
+      "id": "simplified-hedge-rock-silhouettes",
+      "severity": "major",
+      "category": "vegetation",
+      "note": "Hedge and rock silhouettes remain simplified/repetitive at player-facing distance.",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"]
+    },
+    {
+      "id": "sign-legibility",
+      "severity": "major",
+      "category": "signage",
+      "note": "Sign text is small/soft in the shipped frame; numeric camera/runtime PASS does not establish readable signage.",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"]
+    },
+    {
+      "id": "dealer-camera-composition",
+      "severity": "major",
+      "category": "camera",
+      "note": "Dealer approach composition still needs human inspection for player/facility relationship and near-fill.",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"]
+    },
+    {
+      "id": "dialogue-composition",
+      "severity": "major",
+      "category": "dialogue",
+      "note": "Dialogue/NPC composition is not cleared by this no-HUD frame set; submit a same-commit dialogue capture for review.",
+      "frameIds": ["hf-m99-webgpu-nohud"]
+    }
+  ],
+  "prescriptions": [
+    {
+      "id": "texture-grass-close-15m",
+      "kind": "texture-gameplay-band",
+      "status": "NON_BLOCKING",
+      "priority": "P1",
+      "observation": "grass-meadow close layer is grade D at the 15m gameplay band; the wider layer remains A/B.",
+      "action": "Keep the static seam/memory PASS, then test a gameplay second layer or a scale change toward the measured 5.6m/tile prescription and recapture the shipped frame; do not treat upscaling alone as visual approval.",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"]
+    },
+    {
+      "id": "texture-dirt-path-15m",
+      "kind": "texture-gameplay-band",
+      "status": "NON_BLOCKING",
+      "priority": "P1",
+      "observation": "dirt-path is grade C at 15m against the required B.",
+      "action": "Evaluate a secondary structure layer or the measured 4.7m/tile scale prescription in the shipped material, then recheck the actual path frame.",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"]
+    },
+    {
+      "id": "texture-tilled-soil-15m",
+      "kind": "texture-gameplay-band",
+      "status": "NON_BLOCKING",
+      "priority": "P1",
+      "observation": "tilled soil is grade D at 15m on both the apron and bed usage.",
+      "action": "Prefer a gameplay material/secondary structure or scale experiment grounded in the 4.7m/tile prescription; verify crop-bed readability in the shipped frame.",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"]
+    },
+    {
+      "id": "texture-wood-soft-seam",
+      "kind": "texture-seam-and-gameplay-band",
+      "status": "NON_BLOCKING",
+      "priority": "P2",
+      "observation": "wood-planks is grade C at 15m and reports a horizontal SOFT-SEAM.",
+      "action": "Test UV/tile-boundary or a small secondary structure treatment at the world-box use site; keep the input byte unchanged until HF reviews before/after captures.",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"]
+    },
+    {
+      "id": "texture-plaster-15m",
+      "kind": "texture-gameplay-band",
+      "status": "NON_BLOCKING",
+      "priority": "P2",
+      "observation": "plaster-wall is grade C at the 15m gameplay band.",
+      "action": "Evaluate material scale/secondary structure at the building shell, using the measured 2.8m/tile prescription as a test point and a shipped capture as the decision evidence.",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"]
+    },
+    {
+      "id": "texture-roof-15m",
+      "kind": "texture-gameplay-band",
+      "status": "NON_BLOCKING",
+      "priority": "P3",
+      "observation": "roof-tiles is grade B at 15m and meets the current required grade; repeat declaration is 3.77 horizontal × 2.7 vertical.",
+      "action": "No automatic replacement or resolution increase. Keep the declared repeat policy and confirm roof readability in the next human frame review.",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"]
+    }
+  ],
+  "runtimeChecks": [
+    {
+      "id": "hf-m99-glb-static-validation",
+      "kind": "asset-static-policy",
+      "status": "PASS",
+      "evidencePath": "C:/Users/50106/Desktop/Harvest Frontier/.logs/verification/M99/HF-M99-clunk-mcp-inspect-all-runtime.json",
+      "checks": {
+        "assets": 8,
+        "score100": 8,
+        "hardBlockers": 0,
+        "profileId": "harvest-frontier-runtime-v1",
+        "optimizerInvoked": false
+      }
+    },
+    {
+      "id": "hf-m99-packaged-webgpu-flow",
+      "kind": "shipped-path-runtime-contract",
+      "status": "PASS",
+      "renderer": "WebGPU",
+      "evidencePath": "C:/Users/50106/Desktop/Harvest Frontier/.logs/verification/M99/HF-M99-packaged-visual-webgpu.json",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"],
+      "checks": {
+        "shippedPath": true,
+        "viewportWidth": 1920,
+        "viewportHeight": 1080,
+        "consoleErrors": 0,
+        "consoleWarnings": 0,
+        "devGlobals": 0,
+        "debugToggle": 0,
+        "qaMeta": 0
+      }
+    },
+    {
+      "id": "hf-m99-croplab-webgl2-flow",
+      "kind": "procedural-crop-runtime-contract",
+      "status": "PASS",
+      "renderer": "WebGL2",
+      "evidencePath": "C:/Users/50106/Desktop/Harvest Frontier/.logs/verification/M99/HF-M99-croplab-webgl2.json",
+      "frameIds": ["hf-m99-croplab-sheet"],
+      "checks": {
+        "cells": 30,
+        "cropKinds": 6,
+        "growthStages": 5,
+        "closePlates": 18,
+        "drawCalls": 12,
+        "triangles": 473053,
+        "consoleErrors": 0
+      }
+    },
+    {
+      "id": "hf-m99-texture-static-policy",
+      "kind": "texture-static-policy",
+      "status": "PASS",
+      "evidencePath": "C:/Users/50106/Desktop/Clunk/.static-preview/hf-m99-texture-audit-r01.json",
+      "checks": {
+        "textureCount": 7,
+        "gpuMemoryBytesWithMips": 22369619,
+        "gpuBudgetBytes": 41943040,
+        "seamViolations": 0,
+        "measurementScope": "texture-only",
+        "visualRuntime": "NOT_EVALUATED"
+      }
+    }
+  ],
+  "assetInspections": [
+    {
+      "id": "glb-cultivator-near",
+      "sourcePath": "C:/Users/50106/Desktop/Harvest Frontier/public/assets/runtime/cultivator.compact.m1.glb",
+      "inputHash": "18a720e4e55878eb64cdcd5da39fb02187741d0e1af7ed06ca2a279540519a50",
+      "assetKind": "3d-model",
+      "targetProfileId": "harvest-frontier-runtime-v1",
+      "inspectionRunId": "HF-M99-clunk-mcp-inspect-all-runtime",
+      "evidenceStatus": "READY",
+      "productionReady": true,
+      "origin": "file",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"],
+      "numericContract": { "status": "PASS", "valid": true, "score": 100, "threshold": 90, "hardBlockerCount": 0, "observations": { "meshes": 42, "triangles": 16196, "drawCalls": 42 } }
+    },
+    {
+      "id": "glb-cultivator-lod1",
+      "sourcePath": "C:/Users/50106/Desktop/Harvest Frontier/public/assets/runtime/cultivator.compact.m1.lod1.glb",
+      "inputHash": "464106711b59289dc0fd432b323fae691aec66deefff68e7f67c37306a098c3a",
+      "assetKind": "3d-model",
+      "targetProfileId": "harvest-frontier-runtime-v1",
+      "inspectionRunId": "HF-M99-clunk-mcp-inspect-all-runtime",
+      "evidenceStatus": "READY",
+      "productionReady": true,
+      "origin": "file",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"],
+      "numericContract": { "status": "PASS", "valid": true, "score": 100, "threshold": 90, "hardBlockerCount": 0, "observations": { "meshes": 33, "triangles": 7824, "drawCalls": 33 } }
+    },
+    {
+      "id": "glb-processing-near",
+      "sourcePath": "C:/Users/50106/Desktop/Harvest Frontier/public/assets/runtime/processing.line.m1.glb",
+      "inputHash": "dc2de953592988384f2cd0fed87350b8f6d4226003567ab837fc06a09f305fed",
+      "assetKind": "3d-model",
+      "targetProfileId": "harvest-frontier-runtime-v1",
+      "inspectionRunId": "HF-M99-clunk-mcp-inspect-all-runtime",
+      "evidenceStatus": "READY",
+      "productionReady": true,
+      "origin": "file",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"],
+      "numericContract": { "status": "PASS", "valid": true, "score": 100, "threshold": 90, "hardBlockerCount": 0, "observations": { "meshes": 78, "triangles": 24936, "drawCalls": 78 } }
+    },
+    {
+      "id": "glb-processing-lod1",
+      "sourcePath": "C:/Users/50106/Desktop/Harvest Frontier/public/assets/runtime/processing.line.m1.lod1.glb",
+      "inputHash": "2605f6fa3f477b569566b4db9b371c5c87554221c61a5edbf10317e3f3e2ba49",
+      "assetKind": "3d-model",
+      "targetProfileId": "harvest-frontier-runtime-v1",
+      "inspectionRunId": "HF-M99-clunk-mcp-inspect-all-runtime",
+      "evidenceStatus": "READY",
+      "productionReady": true,
+      "origin": "file",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"],
+      "numericContract": { "status": "PASS", "valid": true, "score": 100, "threshold": 90, "hardBlockerCount": 0, "observations": { "meshes": 63, "triangles": 14906, "drawCalls": 63 } }
+    },
+    {
+      "id": "glb-seeder-near",
+      "sourcePath": "C:/Users/50106/Desktop/Harvest Frontier/public/assets/runtime/seeder.compact.m1.glb",
+      "inputHash": "b5ece82b0c814ad8ac7c028a5d14303ee2e0da9462bb386c47fdc58000733570",
+      "assetKind": "3d-model",
+      "targetProfileId": "harvest-frontier-runtime-v1",
+      "inspectionRunId": "HF-M99-clunk-mcp-inspect-all-runtime",
+      "evidenceStatus": "READY",
+      "productionReady": true,
+      "origin": "file",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"],
+      "numericContract": { "status": "PASS", "valid": true, "score": 100, "threshold": 90, "hardBlockerCount": 0, "observations": { "meshes": 75, "triangles": 11318, "drawCalls": 75 } }
+    },
+    {
+      "id": "glb-seeder-lod1",
+      "sourcePath": "C:/Users/50106/Desktop/Harvest Frontier/public/assets/runtime/seeder.compact.m1.lod1.glb",
+      "inputHash": "72a6937833549abf43ecaf498ee4e950d2c91b0c824488b894e7cab8aaf3667c",
+      "assetKind": "3d-model",
+      "targetProfileId": "harvest-frontier-runtime-v1",
+      "inspectionRunId": "HF-M99-clunk-mcp-inspect-all-runtime",
+      "evidenceStatus": "READY",
+      "productionReady": true,
+      "origin": "file",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"],
+      "numericContract": { "status": "PASS", "valid": true, "score": 100, "threshold": 90, "hardBlockerCount": 0, "observations": { "meshes": 55, "triangles": 6460, "drawCalls": 55 } }
+    },
+    {
+      "id": "glb-tractor-near",
+      "sourcePath": "C:/Users/50106/Desktop/Harvest Frontier/public/assets/runtime/tractor.compact.m1.glb",
+      "inputHash": "d92ae93240cc9b4d477df13cbddd0342738feb57ed9b8551e73d68fd83b3222c",
+      "assetKind": "3d-model",
+      "targetProfileId": "harvest-frontier-runtime-v1",
+      "inspectionRunId": "HF-M99-clunk-mcp-inspect-all-runtime",
+      "evidenceStatus": "READY",
+      "productionReady": true,
+      "origin": "file",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"],
+      "numericContract": { "status": "PASS", "valid": true, "score": 100, "threshold": 90, "hardBlockerCount": 0, "observations": { "meshes": 88, "triangles": 30188, "drawCalls": 88 } }
+    },
+    {
+      "id": "glb-tractor-lod1",
+      "sourcePath": "C:/Users/50106/Desktop/Harvest Frontier/public/assets/runtime/tractor.compact.m1.lod1.glb",
+      "inputHash": "5b457fc118613961793662111a3e69b75c7200c25f89368d3fb44841a056cf5f",
+      "assetKind": "3d-model",
+      "targetProfileId": "harvest-frontier-runtime-v1",
+      "inspectionRunId": "HF-M99-clunk-mcp-inspect-all-runtime",
+      "evidenceStatus": "READY",
+      "productionReady": true,
+      "origin": "file",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"],
+      "numericContract": { "status": "PASS", "valid": true, "score": 100, "threshold": 90, "hardBlockerCount": 0, "observations": { "meshes": 77, "triangles": 18668, "drawCalls": 77 } }
+    },
+    {
+      "id": "texture-grass-meadow",
+      "sourcePath": "C:/Users/50106/Desktop/Harvest Frontier/public/assets/textures/grass-meadow.png",
+      "inputHash": "321f88b736e1d92868cf7cb9f42611b9ad1174e0cc646fd2438cfb9aeb3e03e3",
+      "assetKind": "2d-image",
+      "targetProfileId": "harvest-frontier-texture-audit-v1",
+      "inspectionRunId": "HF-M99-texture-audit-r01",
+      "evidenceStatus": "READY",
+      "productionReady": true,
+      "origin": "file",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"],
+      "qualityWarningIds": ["gameplay-15m-grade-D"],
+      "numericContract": { "status": "PASS", "valid": true, "observations": { "grade15m": "D", "seam": "SEAMLESS", "measurementScope": "texture-only" } }
+    },
+    {
+      "id": "texture-ridge-woodland",
+      "sourcePath": "C:/Users/50106/Desktop/Harvest Frontier/public/assets/textures/ridge-woodland.png",
+      "inputHash": "2a0ca1bfaf4416e981d70735b514ed9d4a180744f0d0cb5fde77d2a96f918c62",
+      "assetKind": "2d-image",
+      "targetProfileId": "harvest-frontier-texture-audit-v1",
+      "inspectionRunId": "HF-M99-texture-audit-r01",
+      "evidenceStatus": "READY",
+      "productionReady": true,
+      "origin": "file",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"],
+      "numericContract": { "status": "PASS", "valid": true, "observations": { "grade15m": "A", "seam": "SEAMLESS", "measurementScope": "texture-only" } }
+    },
+    {
+      "id": "texture-dirt-path",
+      "sourcePath": "C:/Users/50106/Desktop/Harvest Frontier/public/assets/textures/dirt-path.png",
+      "inputHash": "1c4766ffd7f6d45c5462506adca6bc5f70ebd5f2012c217c233e047248162ca8",
+      "assetKind": "2d-image",
+      "targetProfileId": "harvest-frontier-texture-audit-v1",
+      "inspectionRunId": "HF-M99-texture-audit-r01",
+      "evidenceStatus": "READY",
+      "productionReady": true,
+      "origin": "file",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"],
+      "qualityWarningIds": ["gameplay-15m-grade-C"],
+      "numericContract": { "status": "PASS", "valid": true, "observations": { "grade15m": "C", "seam": "SEAMLESS", "measurementScope": "texture-only" } }
+    },
+    {
+      "id": "texture-soil-tilled",
+      "sourcePath": "C:/Users/50106/Desktop/Harvest Frontier/public/assets/textures/soil-tilled.png",
+      "inputHash": "0d2ac4dad4f3f6531f6a9f85091b1a226042f635bdd3478b9b3baf8c9eefc7d0",
+      "assetKind": "2d-image",
+      "targetProfileId": "harvest-frontier-texture-audit-v1",
+      "inspectionRunId": "HF-M99-texture-audit-r01",
+      "evidenceStatus": "READY",
+      "productionReady": true,
+      "origin": "file",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"],
+      "qualityWarningIds": ["gameplay-15m-grade-D"],
+      "numericContract": { "status": "PASS", "valid": true, "observations": { "grade15m": "D", "seam": "SEAMLESS", "measurementScope": "texture-only" } }
+    },
+    {
+      "id": "texture-wood-planks",
+      "sourcePath": "C:/Users/50106/Desktop/Harvest Frontier/public/assets/textures/wood-planks-weathered.png",
+      "inputHash": "1eb1a1d56fcf8543c8ff1af732ff1c6f3c31445d7a59b146eb2811b05ab77453",
+      "assetKind": "2d-image",
+      "targetProfileId": "harvest-frontier-texture-audit-v1",
+      "inspectionRunId": "HF-M99-texture-audit-r01",
+      "evidenceStatus": "READY",
+      "productionReady": true,
+      "origin": "file",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"],
+      "qualityWarningIds": ["gameplay-15m-grade-C", "horizontal-soft-seam"],
+      "numericContract": { "status": "PASS", "valid": true, "observations": { "grade15m": "C", "seam": "SOFT-SEAM", "measurementScope": "texture-only" } }
+    },
+    {
+      "id": "texture-plaster-wall",
+      "sourcePath": "C:/Users/50106/Desktop/Harvest Frontier/public/assets/textures/plaster-wall.png",
+      "inputHash": "c1e857d9ab5af74e5d84d639764f8adc85518f22d2c083aad37bb44afc259243",
+      "assetKind": "2d-image",
+      "targetProfileId": "harvest-frontier-texture-audit-v1",
+      "inspectionRunId": "HF-M99-texture-audit-r01",
+      "evidenceStatus": "READY",
+      "productionReady": true,
+      "origin": "file",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"],
+      "qualityWarningIds": ["gameplay-15m-grade-C"],
+      "numericContract": { "status": "PASS", "valid": true, "observations": { "grade15m": "C", "seam": "SEAMLESS", "measurementScope": "texture-only" } }
+    },
+    {
+      "id": "texture-roof-tiles",
+      "sourcePath": "C:/Users/50106/Desktop/Harvest Frontier/public/assets/textures/roof-tiles.png",
+      "inputHash": "acd8bfd1250694d2ad7cde93ebcb8375164fa5c044229116ff6e2fc751c18ffb",
+      "assetKind": "2d-image",
+      "targetProfileId": "harvest-frontier-texture-audit-v1",
+      "inspectionRunId": "HF-M99-texture-audit-r01",
+      "evidenceStatus": "READY",
+      "productionReady": true,
+      "origin": "file",
+      "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"],
+      "numericContract": { "status": "PASS", "valid": true, "observations": { "grade15m": "B", "seam": "SEAMLESS", "declaredRepeats": "3.77x2.7", "measurementScope": "texture-only" } }
+    },
+    {
+      "id": "crop-rice-procedural",
+      "sourcePath": "C:/Users/50106/Desktop/Harvest Frontier/src/engine/assets/crops.ts#crop.rice",
+      "inputHash": "d5319fd5b58516d18b8a9526f37fecf0525967a7ae769526a81ed4162d70a7d4",
+      "assetKind": "3d-model",
+      "targetProfileId": "harvest-frontier-procedural-crop-v1",
+      "inspectionRunId": "HF-M99-croplab-webgl2",
+      "evidenceStatus": "CONDITIONAL",
+      "productionReady": false,
+      "origin": "procedural",
+      "provenance": { "sourceRef": "C:/Users/50106/Desktop/Harvest Frontier/src/engine/assets/crops.ts", "sourceCommit": "781a551c5c6eb577f2326ecb84deb22af93eaa3d", "generator": "Harvest Frontier authored Three.js createCropField/createCropPlant", "recipeId": "crop.rice" },
+      "frameIds": ["hf-m99-croplab-sheet"],
+      "numericContract": { "status": "UNAVAILABLE", "valid": false, "observations": { "reason": "runtime-generated; no standalone GLB bytes", "growthStages": 5 } }
+    },
+    {
+      "id": "crop-potato-procedural",
+      "sourcePath": "C:/Users/50106/Desktop/Harvest Frontier/src/engine/assets/crops.ts#crop.potato",
+      "inputHash": "d5319fd5b58516d18b8a9526f37fecf0525967a7ae769526a81ed4162d70a7d4",
+      "assetKind": "3d-model",
+      "targetProfileId": "harvest-frontier-procedural-crop-v1",
+      "inspectionRunId": "HF-M99-croplab-webgl2",
+      "evidenceStatus": "CONDITIONAL",
+      "productionReady": false,
+      "origin": "procedural",
+      "provenance": { "sourceRef": "C:/Users/50106/Desktop/Harvest Frontier/src/engine/assets/crops.ts", "sourceCommit": "781a551c5c6eb577f2326ecb84deb22af93eaa3d", "generator": "Harvest Frontier authored Three.js createCropField/createCropPlant", "recipeId": "crop.potato" },
+      "frameIds": ["hf-m99-croplab-sheet"],
+      "numericContract": { "status": "UNAVAILABLE", "valid": false, "observations": { "reason": "runtime-generated; no standalone GLB bytes", "growthStages": 5 } }
+    },
+    {
+      "id": "crop-tomato-procedural",
+      "sourcePath": "C:/Users/50106/Desktop/Harvest Frontier/src/engine/assets/crops.ts#crop.tomato",
+      "inputHash": "d5319fd5b58516d18b8a9526f37fecf0525967a7ae769526a81ed4162d70a7d4",
+      "assetKind": "3d-model",
+      "targetProfileId": "harvest-frontier-procedural-crop-v1",
+      "inspectionRunId": "HF-M99-croplab-webgl2",
+      "evidenceStatus": "CONDITIONAL",
+      "productionReady": false,
+      "origin": "procedural",
+      "provenance": { "sourceRef": "C:/Users/50106/Desktop/Harvest Frontier/src/engine/assets/crops.ts", "sourceCommit": "781a551c5c6eb577f2326ecb84deb22af93eaa3d", "generator": "Harvest Frontier authored Three.js createCropField/createCropPlant", "recipeId": "crop.tomato" },
+      "frameIds": ["hf-m99-croplab-sheet"],
+      "numericContract": { "status": "UNAVAILABLE", "valid": false, "observations": { "reason": "runtime-generated; no standalone GLB bytes", "growthStages": 5 } }
+    },
+    {
+      "id": "crop-strawberry-procedural",
+      "sourcePath": "C:/Users/50106/Desktop/Harvest Frontier/src/engine/assets/crops.ts#crop.strawberry",
+      "inputHash": "d5319fd5b58516d18b8a9526f37fecf0525967a7ae769526a81ed4162d70a7d4",
+      "assetKind": "3d-model",
+      "targetProfileId": "harvest-frontier-procedural-crop-v1",
+      "inspectionRunId": "HF-M99-croplab-webgl2",
+      "evidenceStatus": "CONDITIONAL",
+      "productionReady": false,
+      "origin": "procedural",
+      "provenance": { "sourceRef": "C:/Users/50106/Desktop/Harvest Frontier/src/engine/assets/crops.ts", "sourceCommit": "781a551c5c6eb577f2326ecb84deb22af93eaa3d", "generator": "Harvest Frontier authored Three.js createCropField/createCropPlant", "recipeId": "crop.strawberry" },
+      "frameIds": ["hf-m99-croplab-sheet"],
+      "numericContract": { "status": "UNAVAILABLE", "valid": false, "observations": { "reason": "runtime-generated; no standalone GLB bytes", "growthStages": 5 } }
+    },
+    {
+      "id": "crop-grape-procedural",
+      "sourcePath": "C:/Users/50106/Desktop/Harvest Frontier/src/engine/assets/crops.ts#crop.grape",
+      "inputHash": "d5319fd5b58516d18b8a9526f37fecf0525967a7ae769526a81ed4162d70a7d4",
+      "assetKind": "3d-model",
+      "targetProfileId": "harvest-frontier-procedural-crop-v1",
+      "inspectionRunId": "HF-M99-croplab-webgl2",
+      "evidenceStatus": "CONDITIONAL",
+      "productionReady": false,
+      "origin": "procedural",
+      "provenance": { "sourceRef": "C:/Users/50106/Desktop/Harvest Frontier/src/engine/assets/crops.ts", "sourceCommit": "781a551c5c6eb577f2326ecb84deb22af93eaa3d", "generator": "Harvest Frontier authored Three.js createCropField/createCropPlant", "recipeId": "crop.grape" },
+      "frameIds": ["hf-m99-croplab-sheet"],
+      "numericContract": { "status": "UNAVAILABLE", "valid": false, "observations": { "reason": "runtime-generated; no standalone GLB bytes", "growthStages": 5 } }
+    },
+    {
+      "id": "crop-cherry-procedural",
+      "sourcePath": "C:/Users/50106/Desktop/Harvest Frontier/src/engine/assets/crops.ts#crop.cherry",
+      "inputHash": "d5319fd5b58516d18b8a9526f37fecf0525967a7ae769526a81ed4162d70a7d4",
+      "assetKind": "3d-model",
+      "targetProfileId": "harvest-frontier-procedural-crop-v1",
+      "inspectionRunId": "HF-M99-croplab-webgl2",
+      "evidenceStatus": "CONDITIONAL",
+      "productionReady": false,
+      "origin": "procedural",
+      "provenance": { "sourceRef": "C:/Users/50106/Desktop/Harvest Frontier/src/engine/assets/crops.ts", "sourceCommit": "781a551c5c6eb577f2326ecb84deb22af93eaa3d", "generator": "Harvest Frontier authored Three.js createCropField/createCropPlant", "recipeId": "crop.cherry" },
+      "frameIds": ["hf-m99-croplab-sheet"],
+      "numericContract": { "status": "UNAVAILABLE", "valid": false, "observations": { "reason": "runtime-generated; no standalone GLB bytes", "growthStages": 5 } }
+    }
+  ]
+}

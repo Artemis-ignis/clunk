@@ -406,6 +406,15 @@ Both commands print normalized JSON and return exit `0` for valid evidence or ex
 malformed evidence/invalid cross-run append. The dashboard form exposes the same choice as
 `replace · full snapshot` and `append · keep existing IDs`.
 
+Clunk's actual HF M99 acceptance fixture is committed at
+`examples/frame-manifest/harvest-frontier-m99-packaged-webgpu.json` (not a schema template).
+It links three real M99 frames, eight read-only GLB inspections, seven texture observations, and
+six procedural crop provenance records for HF source commit
+`781a551c5c6eb577f2326ecb84deb22af93eaa3d`. Its static evidence is PASS where applicable, while
+the top-level boundary intentionally remains `reviewStatus: NOT_EVALUATED`,
+`visualRuntime: GAP`, `playerFacing: NOT_EVALUATED`, `readiness: conditional`, and human review
+`PENDING`; the M99 no-HUD frame is not commercial approval.
+
 ## Safety boundaries
 
 - The input file is never overwritten. Optimization always writes a separate artifact.

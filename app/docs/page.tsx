@@ -118,6 +118,21 @@ const HF_M98_HANDOFF = `// EXTERNAL HF HANDOFF · M98 current pointer, not a new
   "readiness": "SCENE_GAP"
 }`;
 
+const HF_M99_ACCEPTANCE_FIXTURE = `// ACTUAL CLUNK ACCEPTANCE FIXTURE · not a schema template
+{
+  "path": "examples/frame-manifest/harvest-frontier-m99-packaged-webgpu.json",
+  "sourceCommit": "781a551c5c6eb577f2326ecb84deb22af93eaa3d",
+  "frames": 3,
+  "runtimeGlbInspections": 8,
+  "proceduralCropInspections": 6,
+  "staticTextureSet": { "status": "PASS", "count": 7, "gpuMiB": 21.333, "budgetMiB": 40, "seamViolations": 0 },
+  "reviewStatus": "NOT_EVALUATED",
+  "visualRuntime": "GAP",
+  "playerFacing": "NOT_EVALUATED",
+  "readiness": "conditional",
+  "humanReview": "PENDING"
+}`;
+
 const TEXTURE_PROFILE_SCHEMA_EXAMPLE = `// SCHEMA EXAMPLE · clunk.texture-audit.v1 profile; output remains texture-only
 {
   "evaluationProfile": {
@@ -413,6 +428,7 @@ export default function DocsPage() {
           </div>
           <CodeBlock title="HF M98 handoff" language="json" code={HF_M98_HANDOFF} caption="카메라 숫자 계약 PASS와 사람의 visual approval을 분리한 최신 HF 상태입니다. live M94 frame row를 덮어쓰지 않습니다." />
           <CodeBlock title="HF M98/M99 integration update" language="json" code={HF_M98_RUNTIME_UPDATE} caption="HF 781a551의 8/8 WebGL2/WebGPU 흐름 PASS와 8개 GLB numeric contract를 visual review와 분리한 외부 증거입니다." />
+          <CodeBlock title="HF M99 actual acceptance fixture" language="json" code={HF_M99_ACCEPTANCE_FIXTURE} caption="Clunk 저장소에 커밋된 실제 M99 증거 fixture입니다. schema template가 아니며, shipped frame은 human visual review PENDING/GAP로 남습니다." />
         </section>
 
         <section className="doc-section">
