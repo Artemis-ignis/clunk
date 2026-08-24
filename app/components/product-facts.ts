@@ -363,6 +363,7 @@ export const COLLABORATION_CONTRACT = {
   evidenceReadApi: "GET /api/collaboration/threads/:threadId/evidence · normalized evidence only; no status promotion",
   comparisonSchema: "comparison: clunk.frame-comparison.v1 · beforeFrameId/afterFrameId require identical cameraPose + cameraPoseHash, renderer, viewport, and sourceTreeHash; every frame must be shippedPath with sha256/bytes/console",
   comparisonMismatch: "mismatch errors are explicit: cameraPoseHash mismatch, cameraPose mismatch, renderer mismatch, viewport mismatch, sourceTreeHash mismatch",
+  comparisonIngest: "candidate frames may be received as frame-manifest.v1 evidence, but comparison.v1 is NOT_EVALUATED until a same-renderer before/after pair supplies real sha256+bytes, cameraPose/cameraPoseHash, viewport, sourceTreeHash, and console metadata",
   gapCloseout: "sceneGaps[].closeout is per-gap OPEN|CLOSED|REOPENED|NOT_EVALUATED with owner, humanDecision, comparisonId, and after-frame evidence; CLOSED gaps do not promote visualRuntime",
   runtimeStatuses: "visualRuntime: NOT_RUN | PASS | GAP | BLOCKED | UNAVAILABLE · UNAVAILABLE is never PASS",
   readinessReason: "STATIC_AUDIT_NOT_RUN | STATIC_AUDIT_FAILED | STATIC_AUDIT_BLOCKED | VISUAL_RUNTIME_NOT_EVALUATED | ENGINE_ENVIRONMENT_UNAVAILABLE | PLAYER_FACING_REVIEW_INPUT_INCOMPLETE | PLAYER_FACING_SCENE_GAP | VISUAL_RUNTIME_BLOCKED | PLAYER_FACING_REVIEW_PASS",
@@ -371,6 +372,8 @@ export const COLLABORATION_CONTRACT = {
   linkedAssetInspection: "assetInspections[] links frameIds to sourcePath/inputHash/targetProfileId/inspectionRunId and optional numericContract observations; it never promotes playerFacing",
   assetOrigin: "assetInspections[].origin is file, procedural, or runtime-generated; ownership asset|runtime|unknown and runtimeUsage USED_IN_FRAME|NOT_USED_IN_FRAME|UNKNOWN are explicit; textureCount=0 never infers a defect",
   numericAssetContract: "numericContract.status/score/hardBlockerCount/drawCall observations are static contract evidence; visualRuntime and human review remain separate",
+  numericFindingBoundary: "score=100 is only the active rule-set contract; INFO findings such as missing normals, missing UVs, non-unit scales, draw-call count, bounds, and textureCount=0 are retained as observations and require explicit ownership/runtimeUsage review; textureCount=0 is not a defect by itself",
+  reinspectionWorkflow: "stale evidence is not an execution error: retain the old session as STALE, run a fresh read-only inspect against current bytes, compare inputHash/resultDigest, then submit a new manifest; ERROR/BLOCKED means the fresh run itself failed",
   runtimeChecks: "runtimeChecks[] stores numeric pose/on-screen/coverage/lens contracts; PASS never changes reviewStatus or visualRuntime",
   sceneReview: "POST/CLI clunk.player-facing-scene-review.v1 returns PASS_WITH_FOLLOW_UP|NO_GO|UNAVAILABLE with severity, linked evidence path/hash, affected scene/assets, ownership, nextStep, and per-gap closeout; visualRuntime stays GAP and humanReview PENDING",
   sceneReviewCli: "npm.cmd run collaboration:frame-manifest -- scene-review --input <manifest.json> --format json · exit 0 follow-up, 2 NO_GO, 4 incomplete/unavailable",
@@ -399,6 +402,90 @@ export const HF_M104_CURRENT_HANDOFF = `// EXTERNAL HF HANDOFF · received, not 
   },
   "reason": "M104 pair path/hash/cameraPose/renderer/viewport/sourceTreeHash were not included in this handoff; submit the pair before normalizing or closing a gap.",
   "boundary": "reviewStatus NOT_EVALUATED · visualRuntime GAP · playerFacing NOT_EVALUATED"
+}`;
+
+export const HF_M105_CURRENT_HANDOFF = `// EXTERNAL HF HANDOFF · M105 received, not normalized comparison.v1 evidence
+{
+  "schema": "clunk.external-frame-handoff.v1",
+  "sourceProject": "Harvest Frontier",
+  "sourceHead": "NOT_SUPPLIED_BY_HANDOFF",
+  "runId": "HF-M105-terrain-boundary",
+  "handoffState": "RECEIVED_EXTERNAL_REFERENCES",
+  "localVerification": "NOT_RUN_IN_CLUNK_CHECKOUT",
+  "frames": [
+    {
+      "id": "hf-m105-terrain-boundary-webgpu-r02-nohud",
+      "path": ".logs/screenshots/M105/shipped-visual/HF-M105-terrain-boundary-webgpu-r02-03-game-nohud.png",
+      "sha256": "7899c348128359f0bc1992680ea1844306663458b2b815b2b012b01bbcf2eb3a",
+      "bytes": null,
+      "renderer": "WebGPU",
+      "viewport": { "width": 1920, "height": 1080 },
+      "shippedPath": true,
+      "console": { "errors": 0, "warnings": 0 },
+      "pathStatus": "EXTERNAL_HF_PATH_NOT_LOCALLY_VERIFIED"
+    },
+    {
+      "id": "hf-m105-terrain-boundary-webgl2-r01-nohud",
+      "path": ".logs/screenshots/M105/shipped-visual/HF-M105-terrain-boundary-webgl2-r01-03-game-nohud.png",
+      "sha256": "ab720e8037485b2ce85cb7c0e3d4b40fee5a194eaf0bac51a570b4441f139745",
+      "bytes": null,
+      "renderer": "WebGL2",
+      "viewport": { "width": 1920, "height": 1080 },
+      "shippedPath": true,
+      "console": { "errors": 0, "warnings": 0 },
+      "pathStatus": "EXTERNAL_HF_PATH_NOT_LOCALLY_VERIFIED"
+    }
+  ],
+  "comparison": {
+    "schema": "clunk.frame-comparison.v1",
+    "status": "NOT_EVALUATED",
+    "reason": "Two renderer-specific candidate frames were received, but no same-renderer before/after pair with cameraPose/cameraPoseHash/sourceTreeHash/bytes was supplied. Clunk must reject a fabricated pair rather than compare WebGPU with WebGL2."
+  },
+  "automatedGates": {
+    "static": "PASS",
+    "tsc": "PASS",
+    "eslint": "PASS",
+    "vitest": "834/834 PASS",
+    "content": "PASS",
+    "assets": "PASS",
+    "build": "PASS",
+    "perf": { "WebGPU": "3 valid runs, p95 median 16.3ms", "WebGL2": "2 valid runs, 16.05ms" }
+  },
+  "humanDecision": "NO_GO",
+  "visualRuntime": "GAP",
+  "reviewStatus": "NOT_EVALUATED",
+  "playerFacing": "NOT_EVALUATED",
+  "carriedForwardGaps": ["distant-ridge-repetition", "hard-terrain-boundaries", "foreground-prop-vegetation-intersections", "dealer-market-dialogue-framing"],
+  "optimization": "NOT_RUN"
+}`;
+
+export const HF_M105_TRACTOR_INSPECTION = `// EXTERNAL HF HANDOFF · fresh read-only MCP observation; static contract only
+{
+  "asset": "public/assets/runtime/tractor.compact.m1.glb",
+  "profileFile": "C:/Users/50106/Desktop/Clunk/examples/profiles/harvest-frontier.example.json",
+  "inputHash": "d92ae93240cc9b4d477df13cbddd0342738feb57ed9b8551e73d68fd83b3222c",
+  "resultDigest": "4789a69a70cecbd4f3cc30e70c17293c1776823747095467da9b8c5b4dc008df",
+  "numericContract": { "status": "PASS", "valid": true, "score": 100, "ready": true, "hardBlockerCount": 0 },
+  "observations": { "drawCallCount": 88, "textureCount": 0, "missingNormalPrimitiveCount": 7, "missingUvPrimitiveCount": 88, "nonUnitScaleNodeCount": 181, "bounds": "±32767" },
+  "ownership": "UNKNOWN",
+  "runtimeUsage": "UNKNOWN",
+  "visualRuntime": "GAP",
+  "playerFacing": "NOT_EVALUATED",
+  "optimization": "NOT_RUN",
+  "interpretation": "INFO observations remain actionable evidence. textureCount=0 may be procedural/material runtime authoring and is not a defect without ownership and shipped-frame evidence."
+}`;
+
+export const HF_HANDOFF_VERIFIER_STATUS = `// EXTERNAL HF HANDOFF · stale notarisation is not current approval
+{
+  "manifestSession": "62a04389",
+  "hfCommit": "bcf3523c",
+  "readOnly": true,
+  "optimizerAllowed": false,
+  "coverage": { "shippedTotal": 41, "notarised": 14, "neverNotarised": 27 },
+  "status": "STALE_NOTARISATION_NOT_CURRENT_APPROVAL",
+  "staleNotarisations": ["roof-tiles.png", "assets/provenance.json", "public/assets/provenance.json"],
+  "currentAction": "fresh read-only reinspection of current HF bytes, new inputHash/resultDigest, then a new manifest",
+  "boundary": "STALE is historical evidence; ERROR/BLOCKED means the fresh reinspection failed. Neither status is player-facing approval."
 }`;
 
 export const HF_M98_RUNTIME_UPDATE = `// EXTERNAL HF HANDOFF · M98/M99 current integration, not a player-facing approval

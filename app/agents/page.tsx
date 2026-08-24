@@ -15,6 +15,9 @@ import {
   UI_READABILITY_CONTRACT,
   QUALITY_WARNING_CONTRACT,
   HF_TEXTURE_SCENE_GAPS,
+  HF_M105_CURRENT_HANDOFF,
+  HF_M105_TRACTOR_INSPECTION,
+  HF_HANDOFF_VERIFIER_STATUS,
 } from "../components/product-facts";
 
 export const metadata: Metadata = {
@@ -325,6 +328,10 @@ npm.cmd run --silent mcp
               <code>visualRuntime: GAP</code>·<code>playerFacing: NOT_EVALUATED</code>·human review PENDING을 유지합니다.
               before/after 증거는 <code>{COLLABORATION_CONTRACT.comparisonSchema}</code>로 묶고,
               <code>{COLLABORATION_CONTRACT.comparisonMismatch}</code>가 하나라도 있으면 저장을 거부합니다.
+              M105처럼 renderer가 다른 두 후보 frame은 <code>{COLLABORATION_CONTRACT.comparisonIngest}</code>로
+              수신만 하고 pair를 만들지 않습니다. score 100과 INFO 관찰은
+              <code>{COLLABORATION_CONTRACT.numericFindingBoundary}</code>로 표시하며,
+              stale notarisation은 <code>{COLLABORATION_CONTRACT.reinspectionWorkflow}</code>를 따릅니다.
               gap별 closeout은 <code>{COLLABORATION_CONTRACT.gapCloseout}</code>이며,
               <code>{COLLABORATION_CONTRACT.proceduralRule}</code>입니다.
               최신 HF handoff의 sourceHead <code>3e5fffa</code>와 M84 capture 경로는 수신했지만,
@@ -343,6 +350,12 @@ npm.cmd run --silent mcp
               바이트 검사는 <code>{ASSET_INSPECTION_CONTRACT.request}</code>의 인증 API 또는
               <code>{ASSET_INSPECTION_CONTRACT.cli}</code>로 실행합니다.
             </p>
+            <details className="agents-handoff-details">
+              <summary>HF M105 및 최신 read-only 관찰 상태 펼치기</summary>
+              <pre><code>{HF_M105_CURRENT_HANDOFF}</code></pre>
+              <pre><code>{HF_M105_TRACTOR_INSPECTION}</code></pre>
+              <pre><code>{HF_HANDOFF_VERIFIER_STATUS}</code></pre>
+            </details>
           </div>
           <a className="button button-quiet button-sm" href="/dashboard">대시보드에서 메모 남기기 <span aria-hidden="true">→</span></a>
         </section>

@@ -25,6 +25,9 @@ import {
   HF_3E5FFFA_ONGOING_HANDOFF,
   HF_M103_CURRENT_VISUAL_HANDOFF,
   HF_M104_CURRENT_HANDOFF,
+  HF_M105_CURRENT_HANDOFF,
+  HF_M105_TRACTOR_INSPECTION,
+  HF_HANDOFF_VERIFIER_STATUS,
   VSCODE_COMMANDS,
 } from "../components/product-facts";
 
@@ -498,6 +501,9 @@ export default function DocsPage() {
             <code>visualRuntime: GAP</code>와 human review를 바꾸지 않습니다.
             before/after를 비교할 때는 <code>{COLLABORATION_CONTRACT.comparisonSchema}</code>를 사용하며,
             <code>{COLLABORATION_CONTRACT.comparisonMismatch}</code> 오류를 그대로 반환합니다.
+            외부 frame path만 받은 후보는 <code>{COLLABORATION_CONTRACT.comparisonIngest}</code>로
+            수신 기록과 normalized comparison을 구분하며, <code>{COLLABORATION_CONTRACT.numericFindingBoundary}</code>를
+            적용합니다. 오래된 notarisation은 <code>{COLLABORATION_CONTRACT.reinspectionWorkflow}</code>로 갱신합니다.
             gap별 <code>{COLLABORATION_CONTRACT.gapCloseout}</code>이고, procedural/runtime-generated 표면은
             <code>{COLLABORATION_CONTRACT.proceduralRule}</code>입니다.
           </p>
@@ -553,6 +559,9 @@ export default function DocsPage() {
           <CodeBlock title="HF 3e5fffa ongoing handoff" language="json" code={HF_3E5FFFA_ONGOING_HANDOFF} caption="최신 HF 경로는 수신했지만 Clunk checkout에서 M84 파일의 실제 byte/hash를 확인하기 전까지 PATH_RECEIVED_HASH_PENDING으로 보존합니다. 이 값은 scene-review 입력으로 승격하지 않습니다." />
           <CodeBlock title="HF M103 packaged WebGPU received evidence" language="json" code={HF_M103_CURRENT_VISUAL_HANDOFF} caption="M103 frame/title/HUD/walk hash를 HF 수신 증거로 고정했습니다. report PASS와 human NO_GO/GAP를 분리하며, local bytes 확인 전에는 scene-review 입력이나 player-facing PASS로 승격하지 않습니다." />
           <CodeBlock title="HF M104 current handoff" language="json" code={HF_M104_CURRENT_HANDOFF} caption="HF M104 human NO_GO/GAP를 수신했지만 pair/hash 메타데이터가 없는 상태입니다. 네 gap은 OPEN, pair 자체는 NOT_EVALUATED이며 CLOSED/REOPENED는 주장하지 않습니다." />
+          <CodeBlock title="HF M105 WebGPU/WebGL2 handoff" language="json" code={HF_M105_CURRENT_HANDOFF} caption="M105의 두 실제 shipped-path frame hash는 외부 참조로 보존합니다. 서로 다른 renderer라 comparison.v1 pair로 합치지 않으며, 동일 renderer before/after 메타데이터가 오기 전까지 NOT_EVALUATED/GAP입니다." />
+          <CodeBlock title="HF M105 fresh tractor inspection" language="json" code={HF_M105_TRACTOR_INSPECTION} caption="score=100은 harvest-frontier rule contract PASS일 뿐입니다. missing normals/UV, non-unit scale, draw calls, bounds, textureCount=0은 별도 관찰·ownership/runtime usage 검토로 남깁니다." />
+          <CodeBlock title="HF handoff verifier · stale vs error" language="json" code={HF_HANDOFF_VERIFIER_STATUS} caption="오래된 session/notarisation은 current-artifact approval이 아닙니다. STALE은 fresh read-only reinspection으로 갱신하고, ERROR/BLOCKED와 구분합니다." />
           <CodeBlock title="HF M99 actual acceptance + consumer bridge" language="json" code={HF_M99_ACCEPTANCE_FIXTURE} caption="Clunk 저장소에 커밋된 실제 M99 증거 fixture와 HF consumer bridge 결과입니다. schema template가 아니며, shipped frame은 human visual review PENDING/GAP로 남습니다." />
         </section>
 

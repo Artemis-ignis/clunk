@@ -534,6 +534,42 @@ camera pose/hash, renderer, viewport, and sourceTreeHash. No `CLOSED` or `REOPEN
 claimed until that pair normalizes; the default boundary remains
 `reviewStatus=NOT_EVALUATED`, `visualRuntime=GAP`, `playerFacing=NOT_EVALUATED`.
 
+HF M105 supplied two external shipped-path no-HUD frame references after terrain-boundary
+refinement. WebGPU is
+`.logs/screenshots/M105/shipped-visual/HF-M105-terrain-boundary-webgpu-r02-03-game-nohud.png`
+with SHA-256
+`7899c348128359f0bc1992680ea1844306663458b2b815b2b012b01bbcf2eb3a`; WebGL2 is
+`.logs/screenshots/M105/shipped-visual/HF-M105-terrain-boundary-webgl2-r01-03-game-nohud.png`
+with SHA-256
+`ab720e8037485b2ce85cb7c0e3d4b40fee5a194eaf0bac51a570b4441f139745`. Both are 1920x1080,
+shipped-path, and reported console `0/0`. Bytes, cameraPose/cameraPoseHash, and sourceTreeHash
+were not supplied, and the two frames use different renderers. Clunk therefore records them as
+external candidate evidence but does not fabricate a `clunk.frame-comparison.v1` pair;
+comparison status is `NOT_EVALUATED`, `visualRuntime=GAP`, human decision `NO_GO`, and
+`playerFacing=NOT_EVALUATED`. The carried-forward gaps remain distant-ridge repetition,
+hard-terrain boundaries, foreground prop/vegetation intersections, and dealer/market/dialogue
+framing. A valid comparison needs same-renderer before/after frames plus real bytes, camera pose
+and hash, viewport, sourceTreeHash, and console metadata.
+
+The fresh HF tractor read-only observation has inputHash
+`d92ae93240cc9b4d477df13cbddd0342738feb57ed9b8551e73d68fd83b3222c` and resultDigest
+`4789a69a70cecbd4f3cc30e70c17293c1776823747095467da9b8c5b4dc008df`. Under the Harvest
+Frontier profile it is numeric `score=100`, `ready=true`, `hardBlocker=0`, while retaining
+`drawCallCount=88`, `textureCount=0`, `missingNormalPrimitiveCount=7`,
+`missingUvPrimitiveCount=88`, `nonUnitScaleNodeCount=181`, and `bounds=+/-32767`.
+These are observations, not visual/runtime approval. `textureCount=0` may be procedural/material
+authoring and must carry explicit ownership and runtime usage; Clunk does not recommend
+`clunk_optimize` without HF approval.
+
+HF's read-only handoff verifier currently reports `shippedTotal=41`, `notarised=14`,
+`neverNotarised=27`, with stale notarisation for `roof-tiles.png`, `assets/provenance.json`,
+and `public/assets/provenance.json`. The manifest session is `62a04389` for HF commit
+`bcf3523c`, `readOnly=true`, `optimizerAllowed=false`. This is
+`STALE_NOTARISATION_NOT_CURRENT_APPROVAL`, not a current-artifact approval: retain the old
+session, run a fresh read-only inspection against current bytes, compare inputHash/resultDigest,
+and submit a new manifest. A fresh `ERROR` or `BLOCKED` is an execution result and is separate
+from historical `STALE`.
+
 The `harvest-frontier-web-three` target applies semantic rule
 `harvest-frontier-runtime-v1` inside the unified AssetOps pipeline. It checks named runtime
 root, pivot, attachment socket, collider proxy and `EXT_meshopt_compression` as structural or

@@ -44,6 +44,7 @@ test("collaboration D1 schema stores append-only messages and status snapshots",
 test("frame manifest evidence has a versioned migration and API envelope", async () => {
   const migration = await source("drizzle/0004_motionless_captain_midlands.sql");
   const contract = await source("packages/core/src/collaboration-contract.ts");
+  const facts = await source("app/components/product-facts.ts");
   const docs = await source("public/llms.txt");
   assert.match(migration, /ADD `evidence_json` text/);
   assert.match(contract, /clunk\.frame-manifest\.v1/);
@@ -64,6 +65,12 @@ test("frame manifest evidence has a versioned migration and API envelope", async
   assert.match(docs, /ENGINE_ENVIRONMENT_UNAVAILABLE/);
   assert.match(docs, /clunk\.frame-comparison\.v1/);
   assert.match(docs, /harvest-frontier-m104-comparison-closeout/);
+  assert.match(docs, /HF-M105-terrain-boundary-webgpu-r02-03-game-nohud/);
+  assert.match(docs, /7899c348128359f0bc1992680ea1844306663458b2b815b2b012b01bbcf2eb3a/i);
+  assert.match(docs, /STALE_NOTARISATION_NOT_CURRENT_APPROVAL/);
+  assert.match(facts, /same-renderer before\/after/);
+  assert.match(facts, /textureCount=0 is not a defect/);
+  assert.match(facts, /stale evidence is not an execution error/);
 });
 
 test("frame evidence writes expose explicit append and replace semantics", async () => {
@@ -121,6 +128,10 @@ test("collaboration UI keeps capture integrity, asset audit, and human visual re
   assert.match(facts, /HF_M98_RUNTIME_UPDATE/);
   assert.match(docsPage, /player-facing scene review output/);
   assert.match(docsPage, /M104 comparison acceptance/);
+  assert.match(docsPage, /HF M105 WebGPU\/WebGL2 handoff/);
+  assert.match(docsPage, /HF M105 fresh tractor inspection/);
+  assert.match(agents, /HF M105/);
+  assert.match(facts, /STALE_NOTARISATION_NOT_CURRENT_APPROVAL/);
   assert.match(facts, /comparisonSchema/);
   assert.match(docsPage, /npm\.cmd exec -- tsx scripts\/frame-manifest-cli\.ts/);
 });
