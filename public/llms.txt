@@ -414,6 +414,11 @@ six procedural crop provenance records for HF source commit
 the top-level boundary intentionally remains `reviewStatus: NOT_EVALUATED`,
 `visualRuntime: GAP`, `playerFacing: NOT_EVALUATED`, `readiness: conditional`, and human review
 `PENDING`; the M99 no-HUD frame is not commercial approval.
+HF's read-only consumer bridge validates the same handoff with:
+`npm.cmd run validate:clunk-frame -- --input .logs/verification/M99/HF-M99-clunk-frame-manifest.json --required`.
+The reported result is `PASS` for three frame hashes, eight file-asset hashes, and
+`clunk.frame-manifest.v1` normalization only; it intentionally preserves
+`reviewStatus: NOT_EVALUATED`, `visualRuntime: GAP`, and `playerFacing: NOT_EVALUATED`.
 
 ## Safety boundaries
 
