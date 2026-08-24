@@ -93,3 +93,15 @@ M84 shipped-path 무-HUD 실사용 플레이테스트에서 발견한 다음 문
 사용하려면 MCP 연결 활성화 또는 상태/피드백의 명시적 저장·조회 계약이 필요하다.
 
 이 메모 자체는 Clunk 제품팀이 다음 상태 확인에서 읽을 수 있는 파일럿 전달물이다.
+
+## 2026-08-24 재검사 추가 관찰
+
+최신 MCP `clunk_inspect`를 HF 프로파일 파일로 8종에 다시 호출했다. 결과의 최상위
+`ruleSetId`와 score의 `ruleSetId`는 `harvest-frontier-runtime-v1`로 바뀌었지만,
+각 report 안의 `profileId`는 여전히 `pc`로 남았다. 즉 커스텀 판정은 적용되지만 결과
+라벨의 profile 필드가 기본 프로파일을 가리키는 제품 결함이다. UI·Passport·저장 이력에서
+`profileId`와 `ruleSetId`를 혼동하지 않도록, custom profile id를 정확히 전달하거나
+`profileId: custom`과 `baseProfileId: pc`처럼 두 값을 분리해 주기를 요청한다.
+
+이 관찰은 점수 100/READY를 홍보하기 위한 것이 아니라, 동일 입력·동일 프로파일의
+재현성과 판정 기준의 설명 가능성을 확보하기 위한 것이다.
