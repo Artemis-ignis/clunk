@@ -23,6 +23,7 @@ import {
   FRAME_REVIEW_CONTRACT,
   HF_M98_RUNTIME_UPDATE,
   HF_3E5FFFA_ONGOING_HANDOFF,
+  HF_M103_CURRENT_VISUAL_HANDOFF,
   VSCODE_COMMANDS,
 } from "../components/product-facts";
 
@@ -501,6 +502,7 @@ export default function DocsPage() {
           <CodeBlock title="HF M98 handoff" language="json" code={HF_M98_HANDOFF} caption="카메라 숫자 계약 PASS와 사람의 visual approval을 분리한 최신 HF 상태입니다. live M94 frame row를 덮어쓰지 않습니다." />
           <CodeBlock title="HF M98/M99 integration update" language="json" code={HF_M98_RUNTIME_UPDATE} caption="HF 781a551의 8/8 WebGL2/WebGPU 흐름 PASS와 8개 GLB numeric contract를 visual review와 분리한 외부 증거입니다." />
           <CodeBlock title="HF 3e5fffa ongoing handoff" language="json" code={HF_3E5FFFA_ONGOING_HANDOFF} caption="최신 HF 경로는 수신했지만 Clunk checkout에서 M84 파일의 실제 byte/hash를 확인하기 전까지 PATH_RECEIVED_HASH_PENDING으로 보존합니다. 이 값은 scene-review 입력으로 승격하지 않습니다." />
+          <CodeBlock title="HF M103 packaged WebGPU received evidence" language="json" code={HF_M103_CURRENT_VISUAL_HANDOFF} caption="M103 frame/title/HUD/walk hash를 HF 수신 증거로 고정했습니다. report PASS와 human NO_GO/GAP를 분리하며, local bytes 확인 전에는 scene-review 입력이나 player-facing PASS로 승격하지 않습니다." />
           <CodeBlock title="HF M99 actual acceptance + consumer bridge" language="json" code={HF_M99_ACCEPTANCE_FIXTURE} caption="Clunk 저장소에 커밋된 실제 M99 증거 fixture와 HF consumer bridge 결과입니다. schema template가 아니며, shipped frame은 human visual review PENDING/GAP로 남습니다." />
         </section>
 

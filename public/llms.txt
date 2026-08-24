@@ -484,6 +484,22 @@ must be submitted with `severity`, `ownership`, `affectedScene` or `affectedAsse
 `nextStep`, and an evidence `path` plus real `sha256`/`bytes`. Until then, the stored boundary
 remains `reviewStatus: NOT_EVALUATED`, `visualRuntime: GAP`, `playerFacing: NOT_EVALUATED`.
 
+HF M103 packaged WebGPU handoff (`sourceHead=3e5fffa`, run
+`HF-M103-current-visual-webgpu-r02`) is recorded as received evidence. The no-HUD frame
+is `C:/Users/50106/Desktop/Harvest Frontier/.logs/screenshots/M103/shipped-visual/HF-M103-current-visual-webgpu-r02-03-game-nohud.png`,
+`2844135` bytes, SHA-256
+`f1b65c61a2cf322bafaea659cd6871111b98c3351d67aaed4a566aab078185e8`. The received
+auxiliary hashes are title
+`1c8475db1b5a8cacff47ff0c2dbcc08d99e5028d71ac20658fbfd9bdab8e7ab0`, HUD
+`3bfe0fc515c72dc3f74fca4e188cc53cf0b61e99f59ba62faac9ad2c80403f1f`, and walk
+`4e15b4591150646aa310f96d998a1368f5f6c9ede2d54e8ee20463365dc21874`. HF reports
+`status=PASS`, `shippedPath=true`, WebGPU, console `0/0`, globals/debug/qa `0`; the human
+decision remains `NO_GO / PLAYER_FACING_SCENE_GAP` for ridge repetition, hard terrain
+boundaries, foreground vegetation intersections, and dealer/market/dialogue framing.
+These hashes are marked `HANDOFF_RECEIVED` with local hash verification pending; they are
+not a scene-review input or player-facing PASS. The olive terrain transition experiment was
+rejected and the source was reverted. `optimization=NOT_RUN`.
+
 The `harvest-frontier-web-three` target applies semantic rule
 `harvest-frontier-runtime-v1` inside the unified AssetOps pipeline. It checks named runtime
 root, pivot, attachment socket, collider proxy and `EXT_meshopt_compression` as structural or

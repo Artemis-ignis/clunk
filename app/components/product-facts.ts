@@ -450,3 +450,55 @@ export const HF_3E5FFFA_ONGOING_HANDOFF = `// EXTERNAL HF HANDOFF · sourceHead 
     }
   ]
 }`;
+
+export const HF_M103_CURRENT_VISUAL_HANDOFF = `// EXTERNAL HF HANDOFF · M103 packaged WebGPU · hashes received, local bytes pending
+{
+  "schema": "clunk.external-handoff.v1",
+  "sourceProject": "Harvest Frontier",
+  "sourceHead": "3e5fffa",
+  "runId": "HF-M103-current-visual-webgpu-r02",
+  "handoffState": "HANDOFF_RECEIVED",
+  "localVerification": "HASH_VERIFICATION_PENDING",
+  "automatedReport": {
+    "path": ".logs/verification/M103/HF-M103-current-visual-webgpu-r02.json",
+    "sha256": null,
+    "sha256Status": "NOT_SUPPLIED",
+    "status": "PASS",
+    "renderer": "WebGPU",
+    "shippedPath": true,
+    "console": { "errors": 0, "warnings": 0 },
+    "globals": 0,
+    "debug": 0,
+    "qa": 0
+  },
+  "artifacts": [
+    {
+      "id": "hf-m103-current-visual-webgpu-r02-nohud",
+      "role": "shipped-visual-nohud",
+      "path": ".logs/screenshots/M103/shipped-visual/HF-M103-current-visual-webgpu-r02-03-game-nohud.png",
+      "bytes": 2844135,
+      "sha256": "f1b65c61a2cf322bafaea659cd6871111b98c3351d67aaed4a566aab078185e8",
+      "pathStatus": "RECEIVED_NOT_LOCALLY_VERIFIED"
+    },
+    { "id": "title", "role": "auxiliary-capture", "path": null, "bytes": null, "sha256": "1c8475db1b5a8cacff47ff0c2dbcc08d99e5028d71ac20658fbfd9bdab8e7ab0", "pathStatus": "PATH_NOT_SUPPLIED" },
+    { "id": "hud", "role": "auxiliary-capture", "path": null, "bytes": null, "sha256": "3bfe0fc515c72dc3f74fca4e188cc53cf0b61e99f59ba62faac9ad2c80403f1f", "pathStatus": "PATH_NOT_SUPPLIED" },
+    { "id": "walk", "role": "auxiliary-capture", "path": null, "bytes": null, "sha256": "4e15b4591150646aa310f96d998a1368f5f6c9ede2d54e8ee20463365dc21874", "pathStatus": "PATH_NOT_SUPPLIED" }
+  ],
+  "humanDecision": {
+    "status": "NO_GO",
+    "readiness": "conditional",
+    "reason": "PLAYER_FACING_SCENE_GAP",
+    "gaps": [
+      { "id": "distant-ridge-repetition", "severity": "major", "ownership": "scene" },
+      { "id": "hard-terrain-boundaries", "severity": "major", "ownership": "scene" },
+      { "id": "foreground-vegetation-intersections", "severity": "major", "ownership": "mixed" },
+      { "id": "dealer-market-dialogue-framing", "severity": "major", "ownership": "camera" }
+    ]
+  },
+  "experiment": { "olive-terrain-transition": "REJECTED", "sourceReverted": true },
+  "reviewStatus": "NOT_EVALUATED",
+  "visualRuntime": "GAP",
+  "playerFacing": "NOT_EVALUATED",
+  "optimization": "NOT_RUN",
+  "promotion": "NOT_A_SCENE_REVIEW_INPUT_UNTIL_LOCAL_BYTES_ARE_VERIFIED"
+}`;

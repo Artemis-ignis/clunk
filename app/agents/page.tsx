@@ -295,6 +295,10 @@ export default function AgentsPage() {
               Clunk가 실제 파일 bytes/hash를 확인하기 전까지는 <code>PATH_RECEIVED_HASH_PENDING</code>으로 기록합니다.
               따라서 그 네 scene gap은 실제 hash가 제출되기 전에는 <code>scene-review</code>의 reviewable evidence로
               승격되지 않습니다.
+              M103 packaged WebGPU의 no-HUD frame hash, title/hud/walk auxiliary hash와 report PASS도
+              <code>HANDOFF_RECEIVED</code>로 별도 보존했지만, report PASS는 human visual approval이 아닙니다.
+              현재 M103 human decision은 <code>NO_GO / PLAYER_FACING_SCENE_GAP</code>이며
+              <code>reviewStatus: NOT_EVALUATED</code>·<code>visualRuntime: GAP</code>·<code>playerFacing: NOT_EVALUATED</code>를 유지합니다.
               바이트 검사는 <code>{ASSET_INSPECTION_CONTRACT.request}</code>의 인증 API 또는
               <code>{ASSET_INSPECTION_CONTRACT.cli}</code>로 실행합니다.
             </p>
