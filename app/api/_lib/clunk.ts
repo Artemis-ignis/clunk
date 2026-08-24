@@ -23,8 +23,8 @@ const SCHEMA_STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS clunk_analysis_runs (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL, asset_id TEXT NOT NULL, input_hash TEXT NOT NULL, profile_id TEXT NOT NULL, rule_set_id TEXT NOT NULL, status TEXT NOT NULL, score INTEGER NOT NULL, hard_blocker_count INTEGER NOT NULL, finding_count INTEGER NOT NULL, report_json TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
   `CREATE TABLE IF NOT EXISTS clunk_optimization_runs (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL, asset_id TEXT NOT NULL, source_hash TEXT NOT NULL, output_hash TEXT NOT NULL, status TEXT NOT NULL, operations_json TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
   `CREATE TABLE IF NOT EXISTS clunk_passports (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL, asset_id TEXT NOT NULL, optimization_run_id TEXT, source_hash TEXT NOT NULL, output_hash TEXT NOT NULL, passport_json TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
-  `CREATE TABLE IF NOT EXISTS clunk_collaboration_threads (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL, subject TEXT NOT NULL, asset_id TEXT, input_hash TEXT NOT NULL, target_profile_id TEXT NOT NULL, rule_set_id TEXT NOT NULL, status_json TEXT NOT NULL, created_by TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
-  `CREATE TABLE IF NOT EXISTS clunk_collaboration_messages (id TEXT PRIMARY KEY, thread_id TEXT NOT NULL, workspace_id TEXT NOT NULL, author_user_id TEXT NOT NULL, body TEXT NOT NULL, asset_id TEXT, input_hash TEXT NOT NULL, target_profile_id TEXT NOT NULL, status_json TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
+  `CREATE TABLE IF NOT EXISTS clunk_collaboration_threads (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL, subject TEXT NOT NULL, asset_id TEXT, input_hash TEXT NOT NULL, target_profile_id TEXT NOT NULL, rule_set_id TEXT NOT NULL, status_json TEXT NOT NULL, evidence_json TEXT, created_by TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
+  `CREATE TABLE IF NOT EXISTS clunk_collaboration_messages (id TEXT PRIMARY KEY, thread_id TEXT NOT NULL, workspace_id TEXT NOT NULL, author_user_id TEXT NOT NULL, body TEXT NOT NULL, asset_id TEXT, input_hash TEXT NOT NULL, target_profile_id TEXT NOT NULL, status_json TEXT NOT NULL, evidence_json TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
   `CREATE INDEX IF NOT EXISTS idx_clunk_analysis_workspace_created ON clunk_analysis_runs(workspace_id, created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_clunk_assets_workspace_created ON clunk_assets(workspace_id, created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_clunk_credits_workspace_created ON clunk_credit_ledger(workspace_id, created_at DESC)`,
@@ -55,6 +55,8 @@ export function getRuntimeDb(): D1Database {
 
 export async function ensureSchema(db: D1Database): Promise<void> {
   await db.batch(SCHEMA_STATEMENTS.map((statement) => db.prepare(statement)));
+  await ensureColumn(db, "clunk_collaboration_threads");
+  await ensureColumn(db, "clunk_collaboration_messages");
   await db.batch([
     db.prepare(
       `INSERT OR IGNORE INTO clunk_plans (id, name, monthly_credits, is_demo) VALUES ('demo', 'Clunk Demo', 25, 1)`,
@@ -63,6 +65,18 @@ export async function ensureSchema(db: D1Database): Promise<void> {
       `INSERT OR IGNORE INTO clunk_plans (id, name, monthly_credits, is_demo) VALUES ('builder-demo', 'Builder Demo', 100, 1)`,
     ),
   ]);
+}
+
+async function ensureColumn(db: D1Database, table: "clunk_collaboration_threads" | "clunk_collaboration_messages"): Promise<void> {
+  try {
+    await db.prepare(`SELECT evidence_json FROM ${table} LIMIT 1`).first();
+  } catch {
+    try {
+      await db.prepare(`ALTER TABLE ${table} ADD COLUMN evidence_json TEXT`).run();
+    } catch (error) {
+      if (!String(error).toLowerCase().includes("duplicate column")) throw error;
+    }
+  }
 }
 
 export async function ensureWorkspace(

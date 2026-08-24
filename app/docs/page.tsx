@@ -153,8 +153,10 @@ export default function DocsPage() {
             인증된 workspace 스레드에 inputHash, custom/base profile, rule-set, Clunk 감사 상태와
             visual/runtime 상태를 함께 기록합니다. {COLLABORATION_CONTRACT.statuses.join(" · ")} 상태를
             사용하며, <code>SCENE_GAP</code>은 Clunk asset audit PASS 이후에도 게임 화면 검토가 남았다는 뜻입니다.
+            스크린샷/frame manifest는 <code>{COLLABORATION_CONTRACT.evidence}</code>로 저장하고, 그 안의
+            <code>reviewStatus: NOT_EVALUATED</code>는 실제 WebGPU/무-HUD 화면 판정을 대신하지 않습니다.
           </p>
-          <div className="doc-api-contract"><code>{COLLABORATION_CONTRACT.list}</code><code>{COLLABORATION_CONTRACT.create}</code><code>{COLLABORATION_CONTRACT.message}</code></div>
+          <div className="doc-api-contract"><code>{COLLABORATION_CONTRACT.list}</code><code>{COLLABORATION_CONTRACT.create}</code><code>{COLLABORATION_CONTRACT.detail}</code><code>{COLLABORATION_CONTRACT.message}</code></div>
         </section>
 
         <section className="doc-section">

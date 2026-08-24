@@ -9,7 +9,9 @@ import {
   ClunkHttpError,
 } from "../../../_lib/clunk";
 import {
+  evidenceJson,
   parseThreadPayload,
+  parseStoredEvidence,
   resolveStoredStatus,
   statusJson,
 } from "../../../_lib/collaboration";
@@ -38,7 +40,7 @@ async function findThread(db: D1Database, workspaceId: string, threadId: string)
       `SELECT id, subject, asset_id AS assetId, input_hash AS inputHash,
         target_profile_id AS targetProfileId, rule_set_id AS ruleSetId,
         status_json AS status, created_by AS createdBy, created_at AS createdAt,
-        updated_at AS updatedAt
+        updated_at AS updatedAt, evidence_json AS evidence
        FROM clunk_collaboration_threads WHERE id = ? AND workspace_id = ?`,
     )
     .bind(threadId, workspaceId)
@@ -56,7 +58,7 @@ export async function GET(_request: Request, context: RouteContext) {
       .prepare(
         `SELECT id, author_user_id AS authorUserId, body, asset_id AS assetId,
           input_hash AS inputHash, target_profile_id AS targetProfileId,
-          status_json AS status, created_at AS createdAt
+          status_json AS status, created_at AS createdAt, evidence_json AS evidence
          FROM clunk_collaboration_messages
          WHERE thread_id = ? AND workspace_id = ? ORDER BY created_at ASC, id ASC`,
       )
@@ -70,7 +72,9 @@ export async function GET(_request: Request, context: RouteContext) {
         messages: (messages.results ?? []).map((message) => ({
           ...message,
           status: readStatus(String((message as Record<string, unknown>).status ?? "{}")),
+          evidence: parseStoredEvidence((message as Record<string, unknown>).evidence),
         })),
+        evidence: parseStoredEvidence(row.evidence),
       },
     });
   } catch (error) {
@@ -93,6 +97,7 @@ export async function PATCH(request: Request, context: RouteContext) {
         `UPDATE clunk_collaboration_threads
          SET subject = ?, asset_id = ?, input_hash = ?, target_profile_id = ?,
            rule_set_id = ?, status_json = ?, updated_at = CURRENT_TIMESTAMP
+           , evidence_json = ?
          WHERE id = ? AND workspace_id = ?`,
       )
       .bind(
@@ -102,11 +107,12 @@ export async function PATCH(request: Request, context: RouteContext) {
         payload.profileId,
         payload.ruleSetId,
         statusJson(status),
+        evidenceJson(payload.evidence),
         threadId,
         workspaceId,
       )
       .run();
-    return privateJson({ ok: true, threadId, status });
+    return privateJson({ ok: true, threadId, status, evidence: payload.evidence ?? null });
   } catch (error) {
     return jsonError(error);
   }

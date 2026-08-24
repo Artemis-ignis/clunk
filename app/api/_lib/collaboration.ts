@@ -1,7 +1,10 @@
 import {
+  FRAME_MANIFEST_SCHEMA,
+  normalizeFrameManifest,
   resolveCollaborationStatus,
   type AuditStatus,
   type CollaborationStatus,
+  type FrameManifest,
   type RuntimeReviewStatus,
 } from "../../../packages/core/src/collaboration-contract";
 import { ClunkHttpError, isSafeRecordId } from "./clunk";
@@ -19,6 +22,7 @@ export type CollaborationStatusPayload = {
 export type ThreadPayload = CollaborationStatusPayload & {
   subject: string;
   assetId?: string;
+  evidence?: FrameManifest;
 };
 
 export type MessagePayload = {
@@ -27,6 +31,13 @@ export type MessagePayload = {
   inputHash: string;
   targetProfileId: string;
   status?: CollaborationStatusPayload;
+  evidence?: FrameManifest;
+};
+
+export type StoredEvidence = FrameManifest | {
+  schema: typeof FRAME_MANIFEST_SCHEMA;
+  status: "INVALID";
+  error: string;
 };
 
 const AUDIT_STATUSES = new Set<AuditStatus>(["NOT_RUN", "PASS", "FAIL", "BLOCKED"]);
@@ -86,12 +97,23 @@ export function resolveStoredStatus(payload: CollaborationStatusPayload): Collab
   return resolveCollaborationStatus(payload);
 }
 
+export function parseEvidencePayload(value: unknown): FrameManifest | undefined {
+  if (value === undefined || value === null) return undefined;
+  try {
+    return normalizeFrameManifest(value);
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : "invalid frame manifest";
+    throw new ClunkHttpError(`Invalid collaboration evidence: ${detail}`, 400);
+  }
+}
+
 export function parseThreadPayload(value: unknown): ThreadPayload {
   const source = record(value);
   return {
     ...parseStatusPayload(source.status ?? source),
     subject: text(source.subject, "subject", 240),
     assetId: optionalId(source.assetId, "assetId"),
+    evidence: parseEvidencePayload(source.evidence),
   };
 }
 
@@ -106,6 +128,7 @@ export function parseMessagePayload(value: unknown): MessagePayload {
     inputHash,
     targetProfileId,
     status: source.status === undefined ? undefined : parseStatusPayload(source.status),
+    evidence: parseEvidencePayload(source.evidence),
   };
 }
 
@@ -118,4 +141,22 @@ export function parseStoredStatus(value: unknown): CollaborationStatus {
   const payload = parseStatusPayload(source);
   const resolved = resolveStoredStatus(payload);
   return typeof source.stale === "boolean" ? { ...resolved, stale: source.stale } : resolved;
+}
+
+export function parseStoredEvidence(value: unknown): StoredEvidence | null {
+  if (value === undefined || value === null || value === "") return null;
+  try {
+    const decoded = typeof value === "string" ? JSON.parse(value) : value;
+    return normalizeFrameManifest(decoded);
+  } catch (error) {
+    return {
+      schema: FRAME_MANIFEST_SCHEMA,
+      status: "INVALID",
+      error: error instanceof Error ? error.message : "Stored collaboration evidence is invalid.",
+    };
+  }
+}
+
+export function evidenceJson(evidence: FrameManifest | undefined): string | null {
+  return evidence ? JSON.stringify(evidence) : null;
 }

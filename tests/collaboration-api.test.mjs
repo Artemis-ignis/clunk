@@ -24,6 +24,12 @@ test("collaboration thread routes require authentication and workspace scoping",
   }
   assert.match(collection, /assertSameOrigin/);
   assert.match(messages, /assertSameOrigin/);
+  assert.match(collection, /evidence_json/);
+  assert.match(collection, /parseStoredEvidence/);
+  assert.match(item, /evidence_json/);
+  assert.match(item, /evidenceJson/);
+  assert.match(messages, /evidence_json/);
+  assert.match(messages, /parseStoredEvidence/);
 });
 
 test("collaboration D1 schema stores append-only messages and status snapshots", async () => {
@@ -33,4 +39,16 @@ test("collaboration D1 schema stores append-only messages and status snapshots",
   assert.match(schema, /status_json/);
   assert.match(schema, /input_hash/);
   assert.match(schema, /workspace_id/);
+});
+
+test("frame manifest evidence has a versioned migration and API envelope", async () => {
+  const migration = await source("drizzle/0004_motionless_captain_midlands.sql");
+  const contract = await source("packages/core/src/collaboration-contract.ts");
+  const docs = await source("public/llms.txt");
+  assert.match(migration, /ADD `evidence_json` text/);
+  assert.match(contract, /clunk\.frame-manifest\.v1/);
+  assert.match(contract, /reviewStatus/);
+  assert.match(docs, /clunk\.frame-manifest\.v1/);
+  assert.match(docs, /sceneGaps/);
+  assert.match(docs, /NOT_EVALUATED/);
 });

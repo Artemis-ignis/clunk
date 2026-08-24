@@ -246,6 +246,11 @@ export const UI_READABILITY_CONTRACT = {
 export const COLLABORATION_CONTRACT = {
   list: "GET /api/collaboration/threads",
   create: "POST /api/collaboration/threads",
+  update: "PATCH /api/collaboration/threads/:threadId",
   message: "POST /api/collaboration/threads/:threadId/messages",
+  detail: "GET /api/collaboration/threads/:threadId",
+  evidence: "evidence: clunk.frame-manifest.v1",
+  evidenceReview: "reviewStatus: NOT_EVALUATED",
+  playerFacing: "playerFacing: NOT_EVALUATED",
   statuses: ["ASSET_READY", "ASSET_CONDITIONAL", "SCENE_GAP", "PLAYER_FACING_READY", "BLOCKED"],
 } as const;

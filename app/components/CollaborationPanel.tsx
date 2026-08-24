@@ -2,7 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
-import { resolveCollaborationStatus, type CollaborationStatus } from "../../packages/core/src/collaboration-contract";
+import {
+  normalizeFrameManifest,
+  resolveCollaborationStatus,
+  type CollaborationStatus,
+  type FrameManifest,
+} from "../../packages/core/src/collaboration-contract";
 import { Icon } from "./Icon";
 
 type RunContext = {
@@ -19,6 +24,7 @@ type Thread = {
   ruleSetId: string;
   status: CollaborationStatus;
   updatedAt: string;
+  evidence?: StoredEvidence | null;
 };
 
 type ThreadDetail = Thread & {
@@ -33,6 +39,13 @@ type Message = {
   targetProfileId: string;
   status: CollaborationStatus;
   createdAt: string;
+  evidence?: StoredEvidence | null;
+};
+
+type StoredEvidence = FrameManifest | {
+  schema: "clunk.frame-manifest.v1";
+  status: "INVALID";
+  error: string;
 };
 
 type LoadState = "checking" | "ready" | "auth-required" | "error";
@@ -56,6 +69,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
   const [assetAudit, setAssetAudit] = useState<"PASS" | "FAIL" | "BLOCKED">("PASS");
   const [visualRuntime, setVisualRuntime] = useState<"NOT_RUN" | "PASS" | "GAP" | "BLOCKED">("GAP");
   const [messageDraft, setMessageDraft] = useState("");
+  const [evidenceDraft, setEvidenceDraft] = useState("");
   const [busy, setBusy] = useState(false);
 
   const runContext = useMemo(() => latestRun ? parseRunContext(latestRun) : null, [latestRun]);
@@ -115,22 +129,30 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
     setBusy(true);
     setError("");
     const status = collaborationStatus({ assetAudit, visualRuntime, profileId: effectiveProfileId, baseProfileId, ruleSetId: effectiveRuleSetId, inputHash: effectiveInputHash });
+    let evidence: FrameManifest | undefined;
+    try {
+      evidence = parseEvidenceDraft(evidenceDraft);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "frame manifest JSON을 읽지 못했습니다.");
+      return;
+    }
     try {
       const response = await fetch("/api/collaboration/threads", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ subject: subject.trim(), inputHash: effectiveInputHash, assetId: undefined, status }),
+        body: JSON.stringify({ subject: subject.trim(), inputHash: effectiveInputHash, assetId: undefined, status, evidence }),
       });
       const payload = await response.json() as { thread?: { id: string }; error?: string };
       if (!response.ok || !payload.thread) throw new Error(payload.error || "협업 스레드를 만들지 못했습니다.");
       const messageResponse = await fetch(`/api/collaboration/threads/${encodeURIComponent(payload.thread.id)}/messages`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ body: body.trim(), inputHash: effectiveInputHash, targetProfileId: effectiveProfileId, status }),
+        body: JSON.stringify({ body: body.trim(), inputHash: effectiveInputHash, targetProfileId: effectiveProfileId, status, evidence }),
       });
       const messagePayload = await messageResponse.json() as { error?: string };
       if (!messageResponse.ok) throw new Error(messagePayload.error || "스레드는 만들었지만 첫 메모를 저장하지 못했습니다.");
       setBody("");
+      setEvidenceDraft("");
       await refreshThreads();
       await openThread(payload.thread.id);
     } catch (caught) {
@@ -214,7 +236,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
               >
                 <span className={`collab-readiness collab-readiness-${slug(thread.status.readiness)}`}>{thread.status.readiness}</span>
                 <strong>{thread.subject}</strong>
-                <small>{thread.targetProfileId} · {shortHash(thread.inputHash)}</small>
+                <small>{thread.targetProfileId} · {shortHash(thread.inputHash)}{thread.evidence && " · " + evidenceLabel(thread.evidence)}</small>
               </button>
             )) : (
               <div className="collaboration-list-empty">
@@ -232,6 +254,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
             <form onSubmit={createThread} className="collaboration-form">
               <label>제목<input value={subject} onChange={(event) => setSubject(event.target.value)} maxLength={240} /></label>
               <label>메모<textarea value={body} onChange={(event) => setBody(event.target.value)} rows={3} placeholder="예: GLB audit PASS지만 shipped camera에서 작물 반복과 지형 경계가 보입니다." maxLength={10000} /></label>
+              <label>스크린샷/frame manifest <span className="field-hint">선택 · clunk.frame-manifest.v1 JSON</span><textarea className="collaboration-evidence-input" value={evidenceDraft} onChange={(event) => setEvidenceDraft(event.target.value)} rows={7} placeholder={FRAME_MANIFEST_PLACEHOLDER} maxLength={100000} /></label>
               <div className="collaboration-form-grid">
                 <label>inputHash<input value={effectiveInputHash} onChange={(event) => setInputHash(event.target.value.trim().toLowerCase())} placeholder="64자리 sha256" /></label>
                 <label>custom profile<input value={effectiveProfileId} onChange={(event) => setProfileId(event.target.value)} /></label>
@@ -257,6 +280,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
             <div><span className="mono-label">SELECTED THREAD</span><strong>{selected.subject}</strong></div>
             <span className={`collab-readiness collab-readiness-${slug(selected.status.readiness)}`}>{selected.status.readiness}</span>
           </div>
+          {selected.evidence ? <EvidenceCard evidence={selected.evidence} /> : null}
           <div className="collaboration-messages">
             {selected.messages.length ? selected.messages.map((message) => (
               <article className="collaboration-message" key={message.id}>
@@ -274,7 +298,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
       ) : null}
 
       {error ? <p className="collaboration-error" role="alert"><Icon name="triangleAlert" size={15} />{error}</p> : null}
-      <p className="collaboration-contract-note"><code>POST /api/collaboration/threads</code> · 인증된 workspace 범위 · inputHash 고정 · assetAudit와 visualRuntime 분리 · public HTTP MCP는 아직 제공하지 않습니다.</p>
+      <p className="collaboration-contract-note"><code>POST /api/collaboration/threads</code> · <code>evidence: clunk.frame-manifest.v1</code> · 인증된 workspace 범위 · inputHash 고정 · assetAudit와 visualRuntime/playerFacing 분리 · public HTTP MCP는 아직 제공하지 않습니다.</p>
     </section>
   );
 }
@@ -306,3 +330,55 @@ function parseRunContext(run: RunContext): { inputHash: string; profileId?: stri
 function validHash(value: string): boolean { return /^[a-f0-9]{64}$/i.test(value); }
 function shortHash(value: string): string { return `${value.slice(0, 8)}…${value.slice(-6)}`; }
 function slug(value: string): string { return value.toLowerCase().replace(/_/g, "-"); }
+
+const FRAME_MANIFEST_PLACEHOLDER = `{
+  "schema": "clunk.frame-manifest.v1",
+  "runId": "HF-M84-no-hud-r01",
+  "sourceProject": "Harvest Frontier",
+  "sourceCommit": "486fe66",
+  "reviewStatus": "NOT_EVALUATED",
+  "frames": [{ "id": "m84-no-hud-world", "path": ".logs/screenshots/M84/", "renderer": "webgpu", "hud": "off" }],
+  "sceneGaps": [{ "id": "terrain-seams", "severity": "major", "category": "environment", "note": "Describe the visible gap.", "frameIds": ["m84-no-hud-world"] }]
+}`;
+
+function parseEvidenceDraft(value: string): FrameManifest | undefined {
+  if (!value.trim()) return undefined;
+  try {
+    return normalizeFrameManifest(JSON.parse(value));
+  } catch (error) {
+    throw new Error(error instanceof Error ? `frame manifest가 유효하지 않습니다: ${error.message}` : "frame manifest가 유효하지 않습니다.");
+  }
+}
+
+function evidenceLabel(evidence: StoredEvidence): string {
+  return isInvalidEvidence(evidence) ? "manifest INVALID" : `${evidence.frames.length} frames · ${evidence.sceneGaps.length} gaps`;
+}
+
+function EvidenceCard({ evidence }: { evidence: StoredEvidence }) {
+  if (isInvalidEvidence(evidence)) {
+    return <div className="collaboration-evidence collaboration-evidence-invalid"><strong>FRAME MANIFEST INVALID</strong><p>{evidence.error}</p></div>;
+  }
+  return (
+    <div className="collaboration-evidence">
+      <div className="collaboration-evidence-head">
+        <div><span className="mono-label">FRAME EVIDENCE · {evidence.schema}</span><strong>{evidence.runId}</strong></div>
+        <span className="collab-readiness collab-readiness-scene-gap">PLAYER_FACING NOT_EVALUATED</span>
+      </div>
+      <div className="collaboration-evidence-grid">
+        <span><small>source</small><strong>{evidence.sourceProject} · {evidence.sourceCommit}</strong></span>
+        <span><small>frames</small><strong>{evidence.frames.length}</strong></span>
+        <span><small>scene gaps</small><strong>{evidence.sceneGaps.length}</strong></span>
+      </div>
+      <div className="collaboration-evidence-frames">
+        {evidence.frames.map((frame) => <span key={frame.id}><b>{frame.id}</b><small>{frame.hud} HUD · {frame.renderer ?? "renderer unknown"} · {frame.path}</small></span>)}
+      </div>
+      <div className="collaboration-evidence-gaps">
+        {evidence.sceneGaps.map((gap) => <span key={gap.id}><b>{gap.severity}</b>{gap.category} · {gap.note}</span>)}
+      </div>
+    </div>
+  );
+}
+
+function isInvalidEvidence(evidence: StoredEvidence): evidence is Extract<StoredEvidence, { status: "INVALID" }> {
+  return "status" in evidence && evidence.status === "INVALID";
+}

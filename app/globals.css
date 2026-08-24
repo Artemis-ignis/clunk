@@ -8157,6 +8157,8 @@ html:has(.benchmark-home) .landing-snap-section {
 }
 
 .collaboration-form textarea { min-height: 78px; resize: vertical; line-height: var(--lh-body); }
+.collaboration-form .field-hint { color: var(--text-dim); font-family: var(--font-mono); font-size: 0.66rem; font-weight: 400; }
+.collaboration-form .collaboration-evidence-input { min-height: 150px; font-family: var(--font-mono); font-size: 0.7rem; line-height: 1.5; tab-size: 2; }
 .collaboration-form input:focus,
 .collaboration-form textarea:focus,
 .collaboration-form select:focus,
@@ -8188,6 +8190,24 @@ html:has(.benchmark-home) .landing-snap-section {
 .collaboration-detail-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-12); }
 .collaboration-detail-head > div { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 .collaboration-detail-head strong { color: var(--text-strong); font-size: var(--fs-1); font-weight: 620; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.collaboration-evidence { display: flex; flex-direction: column; gap: var(--sp-12); margin-top: var(--sp-12); padding: var(--sp-14); border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--line)); border-radius: var(--r-control); background: linear-gradient(135deg, var(--accent-soft), var(--ink-1) 55%); }
+.collaboration-evidence-invalid { border-color: var(--danger, #c44); background: var(--warning-soft); }
+.collaboration-evidence-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--sp-12); }
+.collaboration-evidence-head > div { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.collaboration-evidence-head strong { color: var(--text-strong); font-size: 0.84rem; }
+.collaboration-evidence-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-8); }
+.collaboration-evidence-grid span { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.collaboration-evidence-grid small { color: var(--text-dim); font-family: var(--font-mono); font-size: 0.64rem; text-transform: uppercase; }
+.collaboration-evidence-grid strong { color: var(--text-muted); font-size: 0.74rem; overflow-wrap: anywhere; }
+.collaboration-evidence-frames { display: flex; flex-direction: column; gap: 5px; }
+.collaboration-evidence-frames span { display: flex; flex-direction: column; gap: 2px; padding: 6px 8px; border-left: 2px solid var(--accent); background: var(--ink-2); }
+.collaboration-evidence-frames b { color: var(--text-muted); font-family: var(--font-mono); font-size: 0.68rem; }
+.collaboration-evidence-frames small { color: var(--text-dim); font-size: 0.68rem; overflow-wrap: anywhere; }
+.collaboration-evidence-gaps { display: flex; flex-wrap: wrap; gap: 6px; }
+.collaboration-evidence-gaps span { display: inline-flex; align-items: baseline; gap: 5px; padding: 5px 7px; border: 1px solid var(--line); border-radius: var(--r-pill); color: var(--text-muted); font-size: 0.7rem; line-height: 1.35; }
+.collaboration-evidence-gaps b { color: var(--warning); font-family: var(--font-mono); font-size: 0.62rem; text-transform: uppercase; }
+.collaboration-evidence-invalid strong { color: var(--danger, #c44); font-family: var(--font-mono); font-size: 0.7rem; }
+.collaboration-evidence-invalid p { margin: 0; color: var(--text-muted); font-size: 0.78rem; }
 .collaboration-messages { display: flex; flex-direction: column; gap: var(--sp-8); margin-top: var(--sp-12); }
 .collaboration-message { padding: var(--sp-12); border: 1px solid var(--line); border-radius: var(--r-control); background: var(--ink-1); }
 .collaboration-message > div { display: flex; justify-content: space-between; gap: var(--sp-12); color: var(--text-dim); font-family: var(--font-mono); font-size: 0.68rem; }
@@ -8214,6 +8234,8 @@ html:has(.benchmark-home) .landing-snap-section {
   .collaboration-form-foot,
   .collaboration-reply-form { align-items: stretch; flex-direction: column; }
   .collaboration-reply-form .button { width: 100%; }
+  .collaboration-evidence-head { flex-direction: column; }
+  .collaboration-evidence-grid { grid-template-columns: 1fr; }
 }
 
 .conn-chip-checking {

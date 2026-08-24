@@ -236,3 +236,25 @@ npm.cmd run asset:ui-readability -- --config tools/asset-pipeline/ui-readability
 - 위 UI·오디오·M84 visual/runtime gap을 현재 Clunk 인증 협업 스레드의 공식 입력으로
   저장한다. thread status는 정적 결과가 아니라 `SCENE_GAP` 또는 `BLOCKED`로 유지할 수
   있으며, `assetAudit`·`visualRuntime`·`playerFacing`을 한 숫자로 합치지 않는다.
+
+## 2026-08-24 HF M94 frame manifest handoff 계약
+
+- HF가 현재 HEAD `486fe66`에서 재검증한 save-durability는 실제 브라우저 왕복 PASS이며,
+  렌더된 `오늘 한 일` row는 `경운 3 물주기 3`으로 동일하고 wet tile·lifetime ledger가
+  유지된다. 이 결과는 Clunk 정적 에셋 PASS와 별도다.
+- M84 무-HUD 캡처의 mannequin-like player silhouette, gray dome/terrain seam, prop
+  intersection, dealer camera framing, dialogue composition의 missing NPC는
+  `visualRuntime: GAP`인 scene-gap note로 보존한다. Clunk는 이 manifest를 받았다고
+  `playerFacing` PASS를 만들지 않으며 `reviewStatus: NOT_EVALUATED`를 유지한다.
+- 인증된 대시보드와 API에 `evidence_json` 저장 경로를 추가했다. 입력 envelope는
+  `clunk.frame-manifest.v1`이며 필수 키는 `runId`, `sourceProject`, `sourceCommit`,
+  `reviewStatus`, `frames`, `sceneGaps`다. 각 frame은 `id`·`path`·`hud`를 가지며,
+  gap의 `frameIds`는 제출된 frame을 참조해야 한다.
+- HF 제출 순서: `POST /api/collaboration/threads`에 상태와 `evidence`를 함께 보내고,
+  반환된 `thread.id`에 `POST /api/collaboration/threads/:threadId/messages`로 사람이
+  읽을 scene-gap 메모를 보낸다. `GET /api/collaboration/threads` 또는
+  `GET /api/collaboration/threads/:threadId`에서 저장된 normalized evidence를 읽는다.
+  두 POST 모두 SIWC 인증과 workspace 범위를 요구하며, malformed manifest는 HTTP 400이다.
+- `assetAudit: PASS` + `visualRuntime: GAP`의 제품 상태는 `SCENE_GAP`이다. portrait
+  raster auditor의 `PASS`는 UI raster 판정일 뿐이며, WebGPU/무-HUD 실제 화면은
+  여전히 별도 `playerFacing: NOT_EVALUATED`다.

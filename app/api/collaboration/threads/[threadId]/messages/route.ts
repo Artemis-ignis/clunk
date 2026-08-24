@@ -10,7 +10,9 @@ import {
   ClunkHttpError,
 } from "../../../../_lib/clunk";
 import {
+  evidenceJson,
   parseMessagePayload,
+  parseStoredEvidence,
   parseStoredStatus,
   resolveStoredStatus,
   statusJson,
@@ -35,7 +37,7 @@ export async function GET(_request: Request, context: RouteContext) {
       .prepare(
         `SELECT id, author_user_id AS authorUserId, body, asset_id AS assetId,
           input_hash AS inputHash, target_profile_id AS targetProfileId,
-          status_json AS status, created_at AS createdAt
+          status_json AS status, created_at AS createdAt, evidence_json AS evidence
          FROM clunk_collaboration_messages
          WHERE thread_id = ? AND workspace_id = ? ORDER BY created_at ASC, id ASC`,
       )
@@ -45,7 +47,11 @@ export async function GET(_request: Request, context: RouteContext) {
       ok: true,
       messages: (messages.results ?? []).map((message) => {
         const row = message as Record<string, unknown>;
-        return { ...row, status: parseStoredStatus(JSON.parse(String(row.status ?? "{}"))) };
+        return {
+          ...row,
+          status: parseStoredStatus(JSON.parse(String(row.status ?? "{}"))),
+          evidence: parseStoredEvidence(row.evidence),
+        };
       }),
     });
   } catch (error) {
@@ -63,7 +69,7 @@ export async function POST(request: Request, context: RouteContext) {
       .prepare(
         `SELECT id, asset_id AS assetId, input_hash AS inputHash,
           target_profile_id AS targetProfileId, rule_set_id AS ruleSetId,
-          status_json AS status
+          status_json AS status, evidence_json AS evidence
          FROM clunk_collaboration_threads WHERE id = ? AND workspace_id = ?`,
       )
       .bind(threadId, workspaceId)
@@ -78,8 +84,8 @@ export async function POST(request: Request, context: RouteContext) {
     await db
       .prepare(
         `INSERT INTO clunk_collaboration_messages
-         (id, thread_id, workspace_id, author_user_id, body, asset_id, input_hash, target_profile_id, status_json)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         (id, thread_id, workspace_id, author_user_id, body, asset_id, input_hash, target_profile_id, status_json, evidence_json)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .bind(
         messageId,
@@ -91,6 +97,7 @@ export async function POST(request: Request, context: RouteContext) {
         payload.inputHash,
         payload.targetProfileId,
         statusJson(status),
+        evidenceJson(payload.evidence),
       )
       .run();
     await db

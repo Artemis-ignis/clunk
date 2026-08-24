@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  FRAME_MANIFEST_SCHEMA,
+  normalizeFrameManifest,
   resolveCollaborationStatus,
   type CollaborationStatusInput,
 } from "../packages/core/src/collaboration-contract";
@@ -49,4 +51,52 @@ test("audit failure remains BLOCKED even when runtime was not run", () => {
     visualRuntime: "NOT_RUN",
   }));
   assert.equal(status.readiness, "BLOCKED");
+});
+
+test("frame manifest v1 normalizes screenshot evidence without changing player-facing verdict", () => {
+  const manifest = normalizeFrameManifest({
+    schema: FRAME_MANIFEST_SCHEMA,
+    runId: "HF-M84-no-hud-r01",
+    sourceProject: "Harvest Frontier",
+    sourceCommit: "486fe66",
+    reviewStatus: "NOT_EVALUATED",
+    frames: [{
+      id: "m84-no-hud-world",
+      path: ".logs/screenshots/M84/",
+      renderer: "webgpu",
+      hud: "off",
+      viewport: { width: 2560, height: 1440, dpr: 1 },
+      scene: "farm",
+    }],
+    sceneGaps: [{
+      id: "terrain-seams",
+      severity: "major",
+      category: "environment",
+      note: "Gray dome and terrain seams remain visible in the no-HUD frame.",
+      frameIds: ["m84-no-hud-world"],
+    }],
+  });
+
+  assert.equal(manifest.schema, "clunk.frame-manifest.v1");
+  assert.equal(manifest.reviewStatus, "NOT_EVALUATED");
+  assert.equal(manifest.frames[0]?.viewport?.width, 2560);
+  assert.deepEqual(manifest.sceneGaps[0]?.frameIds, ["m84-no-hud-world"]);
+});
+
+test("frame manifest v1 rejects a scene gap that references an unknown frame", () => {
+  assert.throws(() => normalizeFrameManifest({
+    schema: FRAME_MANIFEST_SCHEMA,
+    runId: "HF-M84-no-hud-r01",
+    sourceProject: "Harvest Frontier",
+    sourceCommit: "486fe66",
+    reviewStatus: "NOT_EVALUATED",
+    frames: [{ id: "known", path: ".logs/screenshots/M84/", hud: "off" }],
+    sceneGaps: [{
+      id: "missing-frame-reference",
+      severity: "minor",
+      category: "composition",
+      note: "This note points at a frame that was not submitted.",
+      frameIds: ["unknown"],
+    }],
+  }), /unknown frame/i);
 });

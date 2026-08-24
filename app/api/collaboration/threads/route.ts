@@ -8,7 +8,9 @@ import {
   scopedStorageId,
 } from "../../_lib/clunk";
 import {
+  evidenceJson,
   parseThreadPayload,
+  parseStoredEvidence,
   resolveStoredStatus,
   statusJson,
 } from "../../_lib/collaboration";
@@ -32,7 +34,7 @@ export async function GET() {
         `SELECT id, subject, asset_id AS assetId, input_hash AS inputHash,
           target_profile_id AS targetProfileId, rule_set_id AS ruleSetId,
           status_json AS status, created_by AS createdBy, created_at AS createdAt,
-          updated_at AS updatedAt
+          updated_at AS updatedAt, evidence_json AS evidence
          FROM clunk_collaboration_threads
          WHERE workspace_id = ? ORDER BY updated_at DESC, id DESC LIMIT 100`,
       )
@@ -43,6 +45,7 @@ export async function GET() {
       threads: (rows.results ?? []).map((row) => ({
         ...row,
         status: readStatus(String((row as Record<string, unknown>).status ?? "{}")),
+        evidence: parseStoredEvidence((row as Record<string, unknown>).evidence),
       })),
     });
   } catch (error) {
@@ -61,8 +64,8 @@ export async function POST(request: Request) {
     await db
       .prepare(
         `INSERT INTO clunk_collaboration_threads
-         (id, workspace_id, subject, asset_id, input_hash, target_profile_id, rule_set_id, status_json, created_by)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         (id, workspace_id, subject, asset_id, input_hash, target_profile_id, rule_set_id, status_json, evidence_json, created_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .bind(
         threadId,
@@ -73,6 +76,7 @@ export async function POST(request: Request) {
         payload.profileId,
         payload.ruleSetId,
         statusJson(status),
+        evidenceJson(payload.evidence),
         user.userId,
       )
       .run();
@@ -86,6 +90,7 @@ export async function POST(request: Request) {
         targetProfileId: payload.profileId,
         ruleSetId: payload.ruleSetId,
         status,
+        evidence: payload.evidence ?? null,
       },
     }, { status: 201 });
   } catch (error) {

@@ -129,9 +129,56 @@ rule-set, and separate `assetAudit` / `visualRuntime` states:
 - `POST /api/collaboration/threads`
 - `GET /api/collaboration/threads/:threadId`
 - `POST /api/collaboration/threads/:threadId/messages`
+- `PATCH /api/collaboration/threads/:threadId`
 
 `SCENE_GAP` means Clunk's static asset audit passed but the shipped scene or player-facing review
-still has a gap. This contract requires host authentication and workspace scoping.
+still has a gap. This contract requires host authentication and workspace scoping. A screenshot
+or frame manifest is optional on thread/message POST and uses `clunk.frame-manifest.v1`; it is
+evidence only and keeps `reviewStatus: NOT_EVALUATED`.
+
+The stable thread POST body is:
+
+```json
+{
+  "subject": "HF M84 no-HUD scene gaps",
+  "inputHash": "<64 lowercase hex from the real Clunk result>",
+  "status": {
+    "assetAudit": "PASS",
+    "visualRuntime": "GAP",
+    "profileId": "harvest-frontier-runtime-v1",
+    "baseProfileId": "pc",
+    "ruleSetId": "harvest-frontier-runtime-v1",
+    "inputHash": "<same 64-hex value>"
+  },
+  "evidence": {
+    "schema": "clunk.frame-manifest.v1",
+    "runId": "HF-M84-no-hud-r01",
+    "sourceProject": "Harvest Frontier",
+    "sourceCommit": "486fe66",
+    "reviewStatus": "NOT_EVALUATED",
+    "frames": [{
+      "id": "m84-no-hud-world",
+      "path": ".logs/screenshots/M84/real-capture.png",
+      "renderer": "webgpu",
+      "hud": "off",
+      "viewport": { "width": 2560, "height": 1440, "dpr": 1 }
+    }],
+    "sceneGaps": [{
+      "id": "terrain-seams",
+      "severity": "major",
+      "category": "environment",
+      "note": "Describe the visible gap and its player-facing impact.",
+      "frameIds": ["m84-no-hud-world"]
+    }]
+  }
+}
+```
+
+`GET /api/collaboration/threads` returns `threads[]` with `status` and normalized `evidence`;
+`GET /api/collaboration/threads/:threadId` returns the same thread plus `messages[]`, each with
+its own optional `evidence`. A successful thread POST returns `201` and `{ "ok": true,
+"thread": { "id": "...", "status": { ... }, "evidence": { ... } } }`. A malformed manifest is
+rejected with `400`; unsupported or unknown player-facing evaluation is never converted to PASS.
 
 ## Safety boundaries
 

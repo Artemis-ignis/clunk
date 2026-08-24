@@ -243,7 +243,9 @@ export default function AgentsPage() {
             <p>
               Clunk 감사 결과와 visual/runtime gap을 한 숫자로 합치지 않습니다. 로그인한 workspace에서
               <code>{COLLABORATION_CONTRACT.create}</code>로 스레드를 만들고, <code>inputHash</code>와
-              custom/base profile을 고정한 뒤 메모를 추가합니다. 공개 HTTP MCP는 여전히 제공하지 않습니다.
+              custom/base profile을 고정한 뒤 메모와 <code>{COLLABORATION_CONTRACT.evidence}</code>를 함께 추가합니다.
+              frame manifest의 <code>sceneGaps</code>는 증거를 보존하지만 player-facing 판정을 자동으로 PASS로 올리지
+              않고 <code>{COLLABORATION_CONTRACT.playerFacing}</code>로 남습니다. 공개 HTTP MCP는 여전히 제공하지 않습니다.
             </p>
           </div>
           <a className="button button-quiet button-sm" href="/dashboard">대시보드에서 메모 남기기 <span aria-hidden="true">→</span></a>
