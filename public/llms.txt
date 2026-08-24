@@ -76,6 +76,9 @@ Tools returned by `tools/list`:
   output: canonical `AssetEvidence` with bytes/structure/policy/import/runtime/device stages,
   `qualityWarnings[]`, source hash, and `productionReady`. Missing runners remain
   `ENVIRONMENT_UNAVAILABLE`; no runtime PASS is inferred.
+- `clunk_asset_inspection_evidence` - Build `clunk.asset-inspection-evidence.v2` from a real
+  asset. `evidenceKind` is `CONTRACT_FIXTURE` or `PLAYER_FACING_CAPTURE`; the latter requires
+  local capture-byte verification and an explicit human decision.
 
 Typical agent loop: `initialize` -> `tools/list` -> `clunk_inspect` -> (if fixable)
 `clunk_optimize` -> `clunk_passport`.
@@ -193,7 +196,9 @@ source artifact.
 The envelope includes structured `findings[]` (`code`, `severity`, `observed`, `threshold`,
 `rationale`, `recommendation`, `ownership`, and `enforcement`) and optional `audioEvidence[]`
 with queue id, channels, sample rate, duration, RMS/peak, L/R balance, side/mid, and clipping
-metadata. `qualityPolicy` is explicit and per rule: `OFF`, `ADVISORY`, or `BLOCKING`. Advisory
+metadata. `byteVerification` records the source and every capture/audio SHA and byte count with
+`verified: true`; CLI uses `LOCAL_CLI_READ`, MCP uses `MCP_READ`, and the authenticated API does
+not attest local paths. `qualityPolicy` is explicit and per rule: `OFF`, `ADVISORY`, or `BLOCKING`. Advisory
 violations make readiness `conditional`; blocking violations make it `blocked`; neither changes
 the legacy structural score. `textureCount: 0`, missing normals/UVs, non-unit scales, and bounds
 remain observations until asset/runtime ownership is supplied.
@@ -209,13 +214,17 @@ npm.cmd run asset:evidence -- normalize --input evidence.json
 ```
 
 The CLI exits `0` for a valid envelope and `2` for invalid input or a required validation
-failure. `--capture <path>` may be repeated for `PLAYER_FACING_CAPTURE`; it records absolute path,
-bytes, SHA-256, renderer, viewport, camera/source-tree hashes, and `--shipped-path`. `--audio
-<path>` plus `--audio-metadata '<json>'` records the audio lane. The read-only MCP equivalent is
+failure. `--capture <path>` may be repeated for `PLAYER_FACING_CAPTURE`; it reads each local file
+and records absolute path, bytes, SHA-256, renderer, viewport, camera/source-tree hashes,
+console counts (`--console-errors`, `--console-warnings`), and `--shipped-path`. `--audio <path>`
+plus `--audio-metadata '<json>'` records the audio lane. The CLI writes with exclusive create,
+so `--out` never overwrites an existing evidence file. The read-only MCP equivalent is
 `clunk_asset_inspection_evidence` or `clunk_inspect`/`clunk_validate` with `evidenceFormat: "v2"`;
-the authenticated validation endpoint is `POST /api/asset-inspection-evidence` with the same
-JSON envelope. It validates and normalizes evidence; it does not promote visual status or replace
-collaboration thread state.
+the authenticated validation endpoint is `POST /api/asset-inspection-evidence` for
+`CONTRACT_FIXTURE` envelopes only. CLI and MCP read the actual asset/capture bytes and emit
+`byteVerification`; the API cannot read a caller's local path and rejects
+`PLAYER_FACING_CAPTURE` with HTTP 422. All surfaces validate and normalize evidence; none
+promotes visual status or replaces collaboration thread state.
 
 ## Authenticated collaboration
 

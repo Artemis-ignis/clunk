@@ -495,6 +495,7 @@ export function inspectAsset(
       "FORMAT-PARSE",
       message,
       inputHash,
+      sourceBytes.byteLength,
     );
   }
 }
@@ -1270,6 +1271,7 @@ function makeFailureReport(
   ruleId: string,
   message: string,
   inputHash = "",
+  byteLength = 0,
 ): InspectionReport {
   const finding: Finding = {
     id: `${ruleId}:/asset`,
@@ -1294,7 +1296,7 @@ function makeFailureReport(
     profileId: policy.profileId,
     fileName,
     format,
-    byteLength: 0,
+    byteLength,
     inputHash,
     metrics,
     findings: [finding],

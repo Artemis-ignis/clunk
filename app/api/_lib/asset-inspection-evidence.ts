@@ -4,6 +4,12 @@ import { ClunkHttpError } from "./http-error";
 /** Authenticated API boundary for clunk.asset-inspection-evidence.v2. */
 export function parseAssetInspectionEvidencePayload(value: unknown): AssetInspectionEvidenceV2 {
   const candidate = isRecord(value) && "evidence" in value ? value.evidence : value;
+  if (isRecord(candidate) && candidate.evidenceKind === "PLAYER_FACING_CAPTURE") {
+    throw new ClunkHttpError(
+      "PLAYER_FACING_CAPTURE requires locally verified capture bytes; use asset:evidence CLI or MCP. This authenticated API accepts CONTRACT_FIXTURE only.",
+      422,
+    );
+  }
   try {
     return normalizeAssetInspectionEvidenceV2(candidate);
   } catch (error) {

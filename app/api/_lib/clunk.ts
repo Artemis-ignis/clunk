@@ -119,9 +119,24 @@ export async function ensureWorkspace(
   return workspaceId;
 }
 
-export async function parseJson<T>(request: Request): Promise<T> {
+const DEFAULT_JSON_BODY_BYTES = 8 * 1024 * 1024;
+
+export async function parseJson<T>(request: Request, maxBytes = DEFAULT_JSON_BODY_BYTES): Promise<T> {
+  const contentLength = Number(request.headers.get("content-length") ?? 0);
+  if (Number.isFinite(contentLength) && contentLength > maxBytes) {
+    throw new ClunkHttpError("Request body is too large.", 413);
+  }
+  let text: string;
   try {
-    return (await request.json()) as T;
+    text = await request.text();
+  } catch {
+    throw new ClunkHttpError("Invalid JSON request body.", 400);
+  }
+  if (new TextEncoder().encode(text).byteLength > maxBytes) {
+    throw new ClunkHttpError("Request body is too large.", 413);
+  }
+  try {
+    return JSON.parse(text) as T;
   } catch {
     throw new ClunkHttpError("Invalid JSON request body.", 400);
   }

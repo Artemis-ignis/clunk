@@ -382,10 +382,15 @@ function storedResultDigest(run: Run): string | null {
 
 function storedEvidenceBoundary(run: Run): string {
   try {
-    const parsed = JSON.parse(run.reportJson) as {
+    const stored = JSON.parse(run.reportJson) as {
+      evidenceV2?: {
+        schema?: string;
+        statuses?: { visualRuntime?: string; playerFacing?: string; humanDecision?: string };
+      };
       schema?: string;
       statuses?: { visualRuntime?: string; playerFacing?: string; humanDecision?: string };
     };
+    const parsed = stored.evidenceV2 ?? stored;
     if (parsed.schema === "clunk.asset-inspection-evidence.v2" && parsed.statuses) {
       return `v2 · visualRuntime ${parsed.statuses.visualRuntime ?? "GAP"} · playerFacing ${parsed.statuses.playerFacing ?? "NOT_EVALUATED"} · human ${parsed.statuses.humanDecision ?? "NOT_EVALUATED"}`;
     }

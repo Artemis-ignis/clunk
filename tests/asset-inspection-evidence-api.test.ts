@@ -20,3 +20,14 @@ test("asset inspection evidence API parser rejects malformed identity instead of
     /Invalid asset inspection evidence: identity is required/,
   );
 });
+
+test("authenticated API rejects PLAYER_FACING_CAPTURE without a byte-upload verifier", () => {
+  assert.throws(
+    () => parseAssetInspectionEvidencePayload({
+      schema: "clunk.asset-inspection-evidence.v2",
+      schemaVersion: "2",
+      evidenceKind: "PLAYER_FACING_CAPTURE",
+    }),
+    /PLAYER_FACING_CAPTURE requires locally verified capture bytes/,
+  );
+});

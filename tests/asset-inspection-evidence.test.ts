@@ -89,6 +89,12 @@ test("PLAYER_FACING_CAPTURE requires a real hashed capture and keeps human decis
     evidenceKind: "PLAYER_FACING_CAPTURE",
     inspectionRunId: "capture-no-go-01",
     captureEvidence: [capture],
+    byteVerification: {
+      method: "CORE_INSPECT",
+      source: { sha256: report.inputHash, bytes: report.byteLength, verified: true },
+      captures: [{ path: capture.path, sha256: capture.sha256, bytes: capture.bytes, verified: true }],
+      audio: [],
+    },
     humanDecision: "NO_GO",
   });
   assert.equal(evidence.statuses.visualRuntime, "GAP");
@@ -112,6 +118,36 @@ test("normalization rejects forged validation flags", async () => {
   assert.throws(
     () => normalizeAssetInspectionEvidenceV2({ ...evidence, validation: { valid: false, structuralValid: false, qualityPolicyValid: false } }),
     /validation fields must match/,
+  );
+});
+
+test("normalization rejects a report whose identity was copied or changed", async () => {
+  const { bundle } = await readySample();
+  const report = inspectAsset(bundle);
+  const evidence = createAssetInspectionEvidenceV2(report, { inspectionRunId: "report-boundary-01" });
+  assert.throws(
+    () => normalizeAssetInspectionEvidenceV2({
+      ...evidence,
+      report: { ...evidence.report, inputHash: "a".repeat(64) },
+    }),
+    /report\.inputHash must match identity\.inputHash/,
+  );
+  assert.throws(
+    () => normalizeAssetInspectionEvidenceV2({
+      ...evidence,
+      byteVerification: {
+        ...evidence.byteVerification,
+        source: { sha256: "b".repeat(64), bytes: report.byteLength, verified: true },
+      },
+    }),
+    /byteVerification\.source must match identity input bytes/,
+  );
+  assert.throws(
+    () => normalizeAssetInspectionEvidenceV2({
+      ...evidence,
+      findings: [],
+    }),
+    /findings must match the report observations and quality policy/,
   );
 });
 
@@ -181,6 +217,12 @@ test("audio evidence keeps capture bytes separate from measured audio metadata",
         leftRightBalanceDb: -0.4,
       },
     }],
+    byteVerification: {
+      method: "CORE_INSPECT",
+      source: { sha256: report.inputHash, bytes: report.byteLength, verified: true },
+      captures: [{ path: "C:/evidence/frame.png", sha256: "c".repeat(64), bytes: 1, verified: true }],
+      audio: [{ path: "C:/evidence/hoe.wav", sha256: "d".repeat(64), bytes: 48000, verified: true }],
+    },
   });
   assert.equal(audioEvidence.audioEvidence[0]?.audio?.queueId, "hoe-r01");
   assert.equal(audioEvidence.audioEvidence[0]?.audio?.sampleRateHz, 48000);

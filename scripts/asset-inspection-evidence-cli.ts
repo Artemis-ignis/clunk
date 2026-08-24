@@ -41,6 +41,8 @@ try {
     const loaded = await loadBundle(inputPath);
     const policy = await resolveProfilePolicy({ profile: args.get("profile"), profileFile: args.get("profile-file") });
     const report = command === "validate" ? validateAsset(loaded.bundle, policy).report : inspectAsset(loaded.bundle, policy);
+    const captureEvidence = await loadCaptures(args.values("capture"), false, args);
+    const audioEvidence = await loadCaptures(args.values("audio"), true, args);
     const evidence = createAssetInspectionEvidenceV2(report, {
       operation: command,
       evidenceKind: (args.get("evidence-kind") as AssetInspectionEvidenceKind | undefined) ?? "CONTRACT_FIXTURE",
@@ -48,8 +50,14 @@ try {
       coreBuildId: args.get("core-build-id"),
       profileHash: await resolveProfileHash(args.get("profile-file"), report),
       sourcePath: loaded.absolutePath,
-      captureEvidence: await loadCaptures(args.values("capture"), false, args),
-      audioEvidence: await loadCaptures(args.values("audio"), true, args),
+      captureEvidence,
+      audioEvidence,
+      byteVerification: {
+        method: "LOCAL_CLI_READ",
+        source: { sha256: report.inputHash, bytes: report.byteLength, verified: true },
+        captures: captureEvidence.map(({ path, sha256, bytes }) => ({ path, sha256, bytes, verified: true as const })),
+        audio: audioEvidence.map(({ path, sha256, bytes }) => ({ path, sha256, bytes, verified: true as const })),
+      },
       humanDecision: (args.get("human-decision") as HumanDecision | undefined) ?? "NOT_EVALUATED",
     });
     await emit(evidence, args.get("out"));
@@ -93,6 +101,7 @@ async function loadCaptures(paths: readonly string[], audioOnly: boolean, args: 
   const cameraPoseHash = args.get("camera-pose-hash");
   const shippedPath = args.has("shipped-path") ? true : undefined;
   const audioMetadata = audioOnly ? parseAudioMetadata(args.get("audio-metadata")) : undefined;
+  const consoleEvidence = audioOnly ? undefined : parseConsole(args);
   const captures: AssetCaptureEvidenceV2[] = [];
   for (const path of paths) {
     const absolute = resolve(path);
@@ -107,10 +116,26 @@ async function loadCaptures(paths: readonly string[], audioOnly: boolean, args: 
       ...(sourceTreeHash ? { sourceTreeHash } : {}),
       ...(cameraPoseHash ? { cameraPoseHash } : {}),
       ...(shippedPath === undefined ? {} : { shippedPath }),
+      ...(consoleEvidence ? { console: consoleEvidence } : {}),
       ...(audioMetadata ? { audio: audioMetadata } : {}),
     });
   }
   return captures;
+}
+
+function parseConsole(args: ParsedArgs): { errors: number; warnings: number } | undefined {
+  const errors = args.get("console-errors");
+  const warnings = args.get("console-warnings");
+  if (errors === undefined && warnings === undefined) return undefined;
+  return {
+    errors: parseNonNegativeInteger(errors ?? "0", "--console-errors"),
+    warnings: parseNonNegativeInteger(warnings ?? "0", "--console-warnings"),
+  };
+}
+
+function parseNonNegativeInteger(value: string, flag: string): number {
+  if (!/^\d+$/.test(value)) throw new Error(`${flag} must be a non-negative integer.`);
+  return Number(value);
 }
 
 function parseAudioMetadata(value: string | undefined): AudioEvidenceMetadataV2 | undefined {
@@ -139,7 +164,7 @@ async function resolveProfileHash(profilePath: string | undefined, report: Param
 
 async function emit(value: unknown, outPath: string | undefined): Promise<void> {
   const output = `${JSON.stringify(value, null, 2)}\n`;
-  if (outPath) await writeFile(resolve(outPath), output, "utf8");
+  if (outPath) await writeFile(resolve(outPath), output, { encoding: "utf8", flag: "wx" });
   process.stdout.write(output);
 }
 
@@ -184,7 +209,7 @@ function usage(): string {
     "Usage:",
     "  npm run asset:evidence -- inspect <asset> [--profile-file profile.json] [--evidence-kind CONTRACT_FIXTURE|PLAYER_FACING_CAPTURE]",
     "    [--inspection-run-id id] [--capture frame.png] [--audio capture.wav] [--renderer WEBGPU] [--viewport 1920x1080]",
-    "    [--source-tree-hash sha256] [--camera-pose-hash sha256] [--shipped-path] [--human-decision NO_GO|PASS_WITH_FOLLOW_UP|PASS]",
+    "    [--source-tree-hash sha256] [--camera-pose-hash sha256] [--shipped-path] [--console-errors 0] [--console-warnings 0]",
     "    [--audio-metadata '{\"channels\":2,\"sampleRateHz\":48000,\"durationMs\":1200,\"rmsDb\":-18,\"peakDb\":-1.2,\"leftRightBalanceDb\":-0.4,\"queueId\":\"hoe-r01\"}']",
     "  npm run asset:evidence -- validate <asset> [same options] [--required]",
     "  npm run asset:evidence -- passport <source> <output> [--profile-file profile.json]",

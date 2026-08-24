@@ -197,12 +197,19 @@ const ASSET_INSPECTION_EVIDENCE_V2_EXAMPLE = `// SCHEMA EXAMPLE · replace all <
     "humanDecision": "NOT_EVALUATED", "reviewStatus": "NOT_EVALUATED"
   },
   "qualityPolicy": { "declared": null, "status": "OFF", "blockingViolationCount": 0, "advisoryViolationCount": 0 },
+  "byteVerification": {
+    "method": "LOCAL_CLI_READ",
+    "source": { "sha256": "<64_HEX>", "bytes": 680412, "verified": true },
+    "captures": [], "audio": []
+  },
   "audioEvidence": [],
   "limitation": "STRUCTURAL_SCORE_IS_NOT_VISUAL_APPROVAL"
 }
 
 // PLAYER_FACING_CAPTURE changes only when a real hashed frame is supplied;
 // humanDecision=NO_GO remains visualRuntime=GAP/playerFacing=NO_GO.
+// POST /api/asset-inspection-evidence accepts CONTRACT_FIXTURE only;
+// PLAYER_FACING_CAPTURE must be produced by the local CLI or MCP after reading capture bytes.
 POST /api/asset-inspection-evidence
 { "evidence": <NORMALIZED_V2_ENVELOPE> }`;
 

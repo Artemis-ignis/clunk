@@ -2,6 +2,7 @@ import {
   applyCreditOperation,
   assertSameOrigin,
   canonicalFingerprint,
+  ClunkHttpError,
   getRuntimeDb,
   jsonError,
   parseJson,
@@ -11,6 +12,7 @@ import {
   isSafeRecordId,
   verifyClientLocalInspection,
 } from "../_lib/clunk";
+import { parseAssetInspectionEvidencePayload } from "../_lib/asset-inspection-evidence";
 
 export const dynamic = "force-dynamic";
 
@@ -53,6 +55,7 @@ export async function POST(request: Request) {
       hardBlockerCount?: number;
       findingCount?: number;
       report?: unknown;
+      evidenceV2?: unknown;
     }>(request);
     const fields = [
       payload.analysisId,
@@ -96,8 +99,24 @@ export async function POST(request: Request) {
       hardBlockerCount: Number(payload.hardBlockerCount),
       findingCount: Number(payload.findingCount),
     });
+    const evidenceV2 = payload.evidenceV2 === undefined
+      ? undefined
+      : parseAssetInspectionEvidencePayload(payload.evidenceV2);
+    if (evidenceV2 && (
+      evidenceV2.identity.inputHash !== verified.report.inputHash ||
+      evidenceV2.identity.resultDigest !== verified.report.resultDigest ||
+      evidenceV2.identity.byteLength !== verified.report.byteLength ||
+      evidenceV2.identity.coreBuildId !== verified.report.coreVersion ||
+      evidenceV2.identity.ruleSetId !== verified.report.ruleSetId ||
+      evidenceV2.identity.ruleSetVersion !== verified.report.ruleSetVersion ||
+      evidenceV2.identity.profileId !== verified.report.profileId ||
+      evidenceV2.report.resultDigest !== verified.report.resultDigest
+    )) {
+      throw new ClunkHttpError("evidenceV2 identity must match the locally verified report.", 400);
+    }
     const storedReport = {
       ...verified.report,
+      ...(evidenceV2 ? { evidenceV2 } : {}),
       verificationMode: "client-local-attested",
       verificationDigest: verified.resultDigest,
     };
@@ -126,6 +145,7 @@ export async function POST(request: Request) {
           score: Number(payload.score),
           hardBlockerCount: Number(payload.hardBlockerCount),
           findingCount: Number(payload.findingCount),
+          evidenceV2: evidenceV2 ?? null,
           report: verified.report,
         }),
         kind: "inspect",

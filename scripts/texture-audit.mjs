@@ -551,7 +551,7 @@ function auditTexture(config, textureConfig) {
     return {
       label: usage.label,
       mPerTile: usage.mPerTile,
-      worldScaleMPerTile: usage.mPerTile,
+      ...(textureConfig.worldScale || config.evaluationProfile.worldScale ? { worldScaleMPerTile: usage.mPerTile } : {}),
       texelMm: Number((texelWorldM * 1000).toFixed(2)),
       contrastEnergy80PctBelowCm: Number(cumulative80.toFixed(1)),
       bands,

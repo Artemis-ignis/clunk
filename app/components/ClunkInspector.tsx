@@ -139,10 +139,14 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
   async function saveRun(
     nextReport: InspectionReport,
   ): Promise<{ assetId: string | null; idempotent: boolean }> {
+    const evidenceV2 = createAssetInspectionEvidenceV2(nextReport, {
+      evidenceKind: "CONTRACT_FIXTURE",
+      inspectionRunId: `ui-${nextReport.analysisId}`,
+    });
     const response = await fetch("/api/runs", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
       analysisId: nextReport.analysisId, fileName: nextReport.fileName, format: nextReport.format, byteLength: nextReport.byteLength,
       inputHash: nextReport.inputHash, profileId: nextReport.profileId, ruleSetId: nextReport.ruleSetId, score: nextReport.score.score,
-      hardBlockerCount: nextReport.score.hardBlockerCount, findingCount: nextReport.findings.length, report: nextReport,
+      hardBlockerCount: nextReport.score.hardBlockerCount, findingCount: nextReport.findings.length, report: nextReport, evidenceV2,
     }) });
     const body = await response.json().catch(() => ({})) as { assetId?: string; idempotent?: boolean; error?: string };
     if (!response.ok) throw new Error(body.error ?? "워크스페이스 저장에 실패했습니다.");

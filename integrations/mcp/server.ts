@@ -81,15 +81,28 @@ async function handle(method: string, params?: { name?: string; arguments?: Reco
     const path = requiredString(args.path, "path");
     const loaded = await loadBundle(path);
     const report = inspectAsset(loaded.bundle, policy);
+    const captureEvidence = await readEvidenceRefs(args.captureEvidence, false);
+    const audioEvidence = await readEvidenceRefs(args.audioEvidence, true);
+    const declaredProfileHash = optionalString(args.profileHash);
+    const declaredProfileFileHash = await profileFileHash(optionalString(args.profileFile));
+    if (declaredProfileHash && declaredProfileFileHash && declaredProfileHash !== declaredProfileFileHash) {
+      throw new Error("profileHash does not match the supplied profileFile bytes.");
+    }
     const evidence = createAssetInspectionEvidenceV2(report, {
       operation: params.name === "clunk_validate" ? "validate" : "inspect",
       evidenceKind: (optionalString(args.evidenceKind) as AssetInspectionEvidenceKind | undefined) ?? "CONTRACT_FIXTURE",
       inspectionRunId: optionalString(args.inspectionRunId),
       coreBuildId: optionalString(args.coreBuildId),
-      profileHash: optionalString(args.profileHash) ?? await profileFileHash(optionalString(args.profileFile)),
+      profileHash: declaredProfileFileHash ?? declaredProfileHash,
       sourcePath: optionalString(args.sourcePath) ?? loaded.absolutePath,
-      captureEvidence: (Array.isArray(args.captureEvidence) ? args.captureEvidence : []) as AssetCaptureEvidenceV2[],
-      audioEvidence: (Array.isArray(args.audioEvidence) ? args.audioEvidence : []) as AssetCaptureEvidenceV2[],
+      captureEvidence,
+      audioEvidence,
+      byteVerification: {
+        method: "MCP_READ",
+        source: { sha256: report.inputHash, bytes: report.byteLength, verified: true },
+        captures: captureEvidence.map(({ path, sha256, bytes }) => ({ path, sha256, bytes, verified: true as const })),
+        audio: audioEvidence.map(({ path, sha256, bytes }) => ({ path, sha256, bytes, verified: true as const })),
+      },
       humanDecision: (optionalString(args.humanDecision) as HumanDecision | undefined) ?? "NOT_EVALUATED",
     });
     value = evidence;
@@ -134,6 +147,24 @@ async function profileFileHash(path: string | undefined): Promise<string | undef
   if (!path) return undefined;
   const bytes = new Uint8Array(await readFile(resolve(path)));
   return sha256Hex(bytes);
+}
+
+async function readEvidenceRefs(value: unknown, audioOnly: boolean): Promise<AssetCaptureEvidenceV2[]> {
+  if (value === undefined) return [];
+  if (!Array.isArray(value)) throw new Error(`${audioOnly ? "audioEvidence" : "captureEvidence"} must be an array.`);
+  const result: AssetCaptureEvidenceV2[] = [];
+  for (const [index, item] of value.entries()) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) throw new Error(`Evidence item ${index} must be an object.`);
+    const candidate = item as Record<string, unknown>;
+    if (typeof candidate.path !== "string" || !candidate.path.trim()) throw new Error(`Evidence item ${index}.path is required.`);
+    const absolute = resolve(candidate.path);
+    const bytes = new Uint8Array(await readFile(absolute));
+    const sha256 = sha256Hex(bytes);
+    if (candidate.sha256 !== undefined && candidate.sha256 !== sha256) throw new Error(`Evidence item ${index}.sha256 does not match local bytes.`);
+    if (candidate.bytes !== undefined && candidate.bytes !== bytes.byteLength) throw new Error(`Evidence item ${index}.bytes does not match local bytes.`);
+    result.push({ ...(candidate as unknown as AssetCaptureEvidenceV2), path: absolute, sha256, bytes: bytes.byteLength });
+  }
+  return result;
 }
 
 function send(value: unknown) { process.stdout.write(`${JSON.stringify(value)}\n`); }

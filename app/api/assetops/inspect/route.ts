@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   try {
     assertSameOrigin(request);
     await requireClunkContext();
-    const payload = await parseJson<unknown>(request);
+    const payload = await parseJson<unknown>(request, 90 * 1024 * 1024);
     const parsed = parseAssetInspectionRequest(payload);
     if (parsed.assetKind !== undefined && !ASSET_KINDS.has(parsed.assetKind)) {
       throw new ClunkHttpError("Unsupported assetKind.", 400);

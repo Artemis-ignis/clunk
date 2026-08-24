@@ -32,6 +32,7 @@ export type PlayerFacingStatus = "PASS" | "PASS_WITH_FOLLOW_UP" | "NO_GO" | "NOT
 export type HumanDecision = "PASS" | "PASS_WITH_FOLLOW_UP" | "NO_GO" | "NOT_EVALUATED";
 export type EvidenceReviewStatus = "EVALUATED" | "PENDING" | "NOT_EVALUATED";
 export type EvidenceReadiness = "ready" | "conditional" | "blocked" | "unavailable";
+export type EvidenceByteVerificationMethod = "CORE_INSPECT" | "LOCAL_CLI_READ" | "MCP_READ" | "API_UPLOAD";
 
 export interface AssetInspectionIdentityV2 {
   inputHash: string;
@@ -80,6 +81,20 @@ export interface AssetCaptureEvidenceV2 {
   hudHash?: string;
   walkHash?: string;
   audio?: AudioEvidenceMetadataV2;
+}
+
+export interface EvidenceByteVerificationRefV2 {
+  path: string;
+  sha256: string;
+  bytes: number;
+  verified: true;
+}
+
+export interface EvidenceByteVerificationV2 {
+  method: EvidenceByteVerificationMethod;
+  source: { sha256: string; bytes: number; verified: true };
+  captures: EvidenceByteVerificationRefV2[];
+  audio: EvidenceByteVerificationRefV2[];
 }
 
 export interface AudioEvidenceMetadataV2 {
@@ -139,6 +154,7 @@ export interface AssetInspectionEvidenceV2 {
   qualityPolicy: QualityPolicyEvaluationV2;
   captureEvidence: AssetCaptureEvidenceV2[];
   audioEvidence: AssetCaptureEvidenceV2[];
+  byteVerification?: EvidenceByteVerificationV2;
   statuses: AssetInspectionEvidenceStatusesV2;
   validation: {
     valid: boolean;
@@ -162,13 +178,15 @@ export interface CreateAssetInspectionEvidenceOptions {
   audioEvidence?: readonly AssetCaptureEvidenceV2[];
   humanDecision?: HumanDecision;
   qualityPolicy?: QualityPolicy;
+  byteVerification?: EvidenceByteVerificationV2;
 }
 
 const HASH = /^[a-f0-9]{64}$/i;
 
 /** Build a deterministic profile hash for built-in or already-normalized custom policy identity. */
 export function profileHashForReport(report: InspectionReport, profile?: CustomProfile | AssetPolicy): string {
-  const custom = profile && "customProfile" in profile ? profile.customProfile : profile;
+  if (profile && !(("id" in profile) && ("thresholds" in profile))) return profileHashForPolicy(profile as AssetPolicy);
+  const custom = profile;
   const identity = custom && "id" in custom
     ? { id: custom.id, version: custom.version, basedOn: custom.basedOn, thresholds: custom.thresholds, rules: custom.rules, qualityPolicy: custom.qualityPolicy ?? null }
     : {
@@ -178,6 +196,14 @@ export function profileHashForReport(report: InspectionReport, profile?: CustomP
         qualityPolicy: report.qualityPolicy ?? null,
       };
   return sha256Hex(new TextEncoder().encode(stableStringify(identity)));
+}
+
+/** Hash an explicit policy declaration when no profile file is available to hash byte-for-byte. */
+export function profileHashForPolicy(policy: AssetPolicy): string {
+  return sha256Hex(new TextEncoder().encode(stableStringify({
+    schema: "clunk.declared-profile.v1",
+    profile: policy,
+  })));
 }
 
 export function createAssetInspectionEvidenceV2(
@@ -239,6 +265,12 @@ export function createAssetInspectionEvidenceV2(
     qualityPolicy,
     captureEvidence,
     audioEvidence,
+    byteVerification: options.byteVerification ?? {
+      method: "CORE_INSPECT",
+      source: { sha256: identity.inputHash, bytes: identity.byteLength, verified: true },
+      captures: [],
+      audio: [],
+    },
     statuses,
     validation: {
       valid: report.score.hardBlockerCount === 0 && qualityPolicy.status !== "BLOCKED",
@@ -262,9 +294,8 @@ export function normalizeAssetInspectionEvidenceV2(value: unknown): AssetInspect
   const identity = requireIdentity(value.identity);
   const source = requireSource(value.source, identity);
   const relation = requireSourceOutputRelation(value.sourceOutputRelation, identity);
-  if (!isRecord(value.report)) throw new Error("report is required.");
-  if (!Array.isArray(value.findings)) throw new Error("findings must be an array.");
-  if (!isRecord(value.qualityPolicy)) throw new Error("qualityPolicy is required.");
+  const report = requireReportIdentity(value.report, identity);
+  if (source.fileName !== report.fileName) throw new Error("source.fileName must match report.fileName.");
   const captures = requireCaptureArray(value.captureEvidence, "captureEvidence", false);
   const audio = requireCaptureArray(value.audioEvidence, "audioEvidence", true);
   if (value.evidenceKind === "CONTRACT_FIXTURE" && (captures.length || audio.length)) {
@@ -274,22 +305,35 @@ export function normalizeAssetInspectionEvidenceV2(value: unknown): AssetInspect
     throw new Error("PLAYER_FACING_CAPTURE requires captureEvidence.");
   }
   if (value.evidenceKind === "PLAYER_FACING_CAPTURE") validatePlayerFacingCaptures(captures);
+  const byteVerification = requireByteVerification(value.byteVerification, identity, captures, audio, value.evidenceKind);
+  const qualityPolicy = evaluateQualityPolicy(report, report.qualityPolicy, captures.length > 0);
+  if (!isRecord(value.qualityPolicy) || stableStringify(value.qualityPolicy) !== stableStringify(qualityPolicy)) {
+    throw new Error("qualityPolicy must match the report and capture lane.");
+  }
+  const expectedFindings = buildStructuredFindings(report, qualityPolicy, captures.length > 0);
+  if (!Array.isArray(value.findings) || stableStringify(value.findings) !== stableStringify(expectedFindings)) {
+    throw new Error("findings must match the report observations and quality policy.");
+  }
   const statuses = deriveStatuses(
     value.evidenceKind,
     captures.length > 0,
     readHumanDecision(value.statuses),
-    value.report as unknown as InspectionReport,
+    report,
   );
   const normalized: AssetInspectionEvidenceV2 = {
     ...(value as unknown as AssetInspectionEvidenceV2),
     identity,
     source,
     sourceOutputRelation: relation,
+    report,
+    findings: expectedFindings,
+    qualityPolicy,
     captureEvidence: captures,
     audioEvidence: audio,
+    ...(byteVerification ? { byteVerification } : {}),
     statuses,
-    validation: requireValidation(value.validation, value.report as unknown as InspectionReport, value.qualityPolicy as unknown as QualityPolicyEvaluationV2),
-    readiness: deriveReadiness(statuses, value.qualityPolicy as unknown as QualityPolicyEvaluationV2),
+    validation: requireValidation(value.validation, report, qualityPolicy),
+    readiness: deriveReadiness(statuses, qualityPolicy),
     limitation: "STRUCTURAL_SCORE_IS_NOT_VISUAL_APPROVAL",
   };
   return normalized;
@@ -315,6 +359,86 @@ function requireValidation(
     throw new Error("validation fields must match the report hard blockers and qualityPolicy status.");
   }
   return expected;
+}
+
+function requireReportIdentity(value: unknown, identity: AssetInspectionIdentityV2): InspectionReport {
+  if (!isRecord(value)) throw new Error("report is required.");
+  const report = value as Partial<InspectionReport>;
+  if (report.inputHash !== identity.inputHash) throw new Error("report.inputHash must match identity.inputHash.");
+  if (report.resultDigest !== identity.resultDigest) throw new Error("report.resultDigest must match identity.resultDigest.");
+  if (report.byteLength !== identity.byteLength) throw new Error("report.byteLength must match identity.byteLength.");
+  if (report.coreVersion !== identity.coreBuildId) throw new Error("report.coreVersion must match identity.coreBuildId.");
+  if (report.ruleSetId !== identity.ruleSetId || report.ruleSetVersion !== identity.ruleSetVersion) {
+    throw new Error("report rule-set identity must match identity.");
+  }
+  if (report.profileId !== identity.profileId) throw new Error("report.profileId must match identity.profileId.");
+  if (!isRecord(report.score) || !Number.isInteger(report.score.hardBlockerCount) || report.score.hardBlockerCount < 0) {
+    throw new Error("report.score.hardBlockerCount must be a non-negative integer.");
+  }
+  if (!isRecord(report.metrics) || !Array.isArray(report.findings)) {
+    throw new Error("report.metrics and report.findings are required.");
+  }
+  return value as unknown as InspectionReport;
+}
+
+function requireByteVerification(
+  value: unknown,
+  identity: AssetInspectionIdentityV2,
+  captures: readonly AssetCaptureEvidenceV2[],
+  audio: readonly AssetCaptureEvidenceV2[],
+  evidenceKind: AssetInspectionEvidenceKind,
+): EvidenceByteVerificationV2 | undefined {
+  if (value === undefined) {
+    if (evidenceKind === "PLAYER_FACING_CAPTURE") {
+      throw new Error("PLAYER_FACING_CAPTURE requires byteVerification from a local CLI, MCP read, or upload verifier.");
+    }
+    return undefined;
+  }
+  if (!isRecord(value)) throw new Error("byteVerification must be an object.");
+  const method = value.method;
+  if (method !== "CORE_INSPECT" && method !== "LOCAL_CLI_READ" && method !== "MCP_READ" && method !== "API_UPLOAD") {
+    throw new Error("byteVerification.method is invalid.");
+  }
+  const source = requireVerifiedBytes(value.source, "byteVerification.source");
+  if (source.sha256 !== identity.inputHash || source.bytes !== identity.byteLength) {
+    throw new Error("byteVerification.source must match identity input bytes.");
+  }
+  const verifiedCaptures = requireVerifiedByteRefs(value.captures, "byteVerification.captures");
+  const verifiedAudio = requireVerifiedByteRefs(value.audio, "byteVerification.audio");
+  if (verifiedCaptures.length !== captures.length || verifiedAudio.length !== audio.length) {
+    throw new Error("byteVerification references must cover every captureEvidence and audioEvidence item exactly once.");
+  }
+  for (const [index, capture] of captures.entries()) {
+    const ref = verifiedCaptures[index];
+    if (ref.path !== capture.path || ref.sha256 !== capture.sha256 || ref.bytes !== capture.bytes) {
+      throw new Error(`byteVerification.captures[${index}] does not match captureEvidence[${index}].`);
+    }
+  }
+  for (const [index, capture] of audio.entries()) {
+    const ref = verifiedAudio[index];
+    if (ref.path !== capture.path || ref.sha256 !== capture.sha256 || ref.bytes !== capture.bytes) {
+      throw new Error(`byteVerification.audio[${index}] does not match audioEvidence[${index}].`);
+    }
+  }
+  return { method, source, captures: verifiedCaptures, audio: verifiedAudio };
+}
+
+function requireVerifiedBytes(value: unknown, field: string): { sha256: string; bytes: number; verified: true } {
+  if (!isRecord(value) || value.verified !== true) throw new Error(`${field}.verified must be true.`);
+  return {
+    sha256: requireHash(value.sha256, `${field}.sha256`),
+    bytes: requireBytes(value.bytes, `${field}.bytes`),
+    verified: true,
+  };
+}
+
+function requireVerifiedByteRefs(value: unknown, field: string): EvidenceByteVerificationRefV2[] {
+  if (!Array.isArray(value)) throw new Error(`${field} must be an array.`);
+  return value.map((item, index) => {
+    if (!isRecord(item)) throw new Error(`${field}[${index}] must be an object.`);
+    const verified = requireVerifiedBytes(item, `${field}[${index}]`);
+    return { path: nonEmpty(item.path, `${field}[${index}].path`), ...verified };
+  });
 }
 
 function buildStructuredFindings(

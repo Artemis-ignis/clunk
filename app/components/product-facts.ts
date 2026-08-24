@@ -281,10 +281,11 @@ export const ASSET_INSPECTION_EVIDENCE_V2_CONTRACT = {
   qualityPolicy: "maxDrawCalls · maxTriangles · requireTextures · requireNormals · requireUVs · maxAbsBounds · requireRuntimeEvidence; each OFF|ADVISORY|BLOCKING",
   findingFields: "code · severity · observed · threshold · rationale · recommendation · ownership(asset|runtime|unknown) · enforcement",
   audio: "audioEvidence[] accepts path/sha256/bytes plus channels, sampleRateHz, durationMs, rmsDb, peakDb, leftRightBalanceDb, sideMidDb, queueId",
+  byteVerification: "CLI=LOCAL_CLI_READ and MCP=MCP_READ read source/capture/audio bytes; API cannot read local paths and accepts CONTRACT_FIXTURE only",
   cli: "npm.cmd run asset:evidence -- inspect <asset> --profile-file <profile.json> --evidence-kind CONTRACT_FIXTURE --inspection-run-id <RUN_ID> --out evidence.json",
-  playerCaptureCli: "npm.cmd run asset:evidence -- inspect <asset> --evidence-kind PLAYER_FACING_CAPTURE --inspection-run-id <RUN_ID> --capture <absolute-frame.png> --renderer WEBGPU --viewport 1920x1080 --human-decision NO_GO",
-  mcp: "clunk_asset_inspection_evidence { path, profileFile?, evidenceKind?, inspectionRunId?, captureEvidence?, audioEvidence?, humanDecision? }",
-  api: "POST /api/asset-inspection-evidence (authenticated; validates and returns normalized v2 without credit charge or visual promotion)",
+  playerCaptureCli: "npm.cmd run asset:evidence -- inspect <asset> --profile-file <profile.json> --evidence-kind PLAYER_FACING_CAPTURE --inspection-run-id <RUN_ID> --capture <absolute-frame.png> --renderer WEBGPU --viewport 1920x1080 --source-tree-hash <SHA256> --camera-pose-hash <SHA256> --shipped-path --console-errors 0 --console-warnings 0 --human-decision NO_GO",
+  mcp: "clunk_asset_inspection_evidence { path, profileFile?, evidenceKind?, inspectionRunId?, captureEvidence:[{path,...}], audioEvidence:[{path,...}], humanDecision? } · MCP reads and re-hashes local evidence paths",
+  api: "POST /api/asset-inspection-evidence (authenticated; CONTRACT_FIXTURE normalization only, PLAYER_FACING_CAPTURE returns HTTP 422, no credit charge or visual promotion)",
   validation: "npm.cmd run asset:evidence -- normalize --input evidence.json; --required exits 2 only when v2 validation.valid is false",
 } as const;
 

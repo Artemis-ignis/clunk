@@ -42,7 +42,9 @@ test("safe optimization creates a new artifact and fresh reinspection", async ()
 });
 
 test("malformed and incomplete inputs are rejected with evidence", () => {
-  const malformed = inspectAsset(createAssetBundle("broken.glb", new Uint8Array([1, 2, 3, 4])));
+  const malformedBytes = new Uint8Array([1, 2, 3, 4]);
+  const malformed = inspectAsset(createAssetBundle("broken.glb", malformedBytes));
+  assert.equal(malformed.byteLength, malformedBytes.byteLength);
   assert.equal(malformed.score.ready, false);
   assert.ok(malformed.findings.some((finding) => finding.severity === "CRITICAL"));
   const missingResource = new TextEncoder().encode(JSON.stringify({ asset: { version: "2.0" }, buffers: [{ uri: "missing.bin", byteLength: 4 }] }));

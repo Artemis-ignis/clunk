@@ -62,6 +62,7 @@ test("JSON mode returns a stable versioned schema with input and config hashes",
     assert.equal(report.evaluationProfile.repetition.status, "DECLARED_ONLY");
     assert.equal(report.evaluationProfile.banding.status, "MEASURED_FROM_TEXTURE_BANDS");
     const usage = report.textures[0].usages[0];
+    assert.equal("worldScaleMPerTile" in usage, false);
     assert.equal(usage.bands[1].bandId, "gameplay");
     assert.equal(usage.bands[1].requiredGrade, "B");
     assert.ok(Array.isArray(usage.banding.transitions));
@@ -111,6 +112,7 @@ test("profile resolution and banding policies stay optional, explicit, and gatea
     assert.equal(report.textures[0].resolutionCheck.status, "FAIL");
     assert.match(report.violations[0], /source resolution/);
     assert.equal(report.visualRuntime, "NOT_EVALUATED");
+    assert.equal("worldScaleMPerTile" in report.textures[0].usages[0], false);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
