@@ -1,9 +1,17 @@
 import { createInterface } from "node:readline";
 import { writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
-import { createPassport, inspectAsset, optimizeAsset, validateAsset, type AssetPolicy } from "../../packages/core/src/index";
+import {
+  createPassport,
+  inspectAsset,
+  inspectAssetForTarget,
+  optimizeAsset,
+  validateAsset,
+  type AssetKind,
+  type AssetPolicy,
+} from "../../packages/core/src/index";
 import { inspectEnvelope, optimizeEnvelope, passportEnvelope, validateEnvelope } from "../../packages/core/src/contract";
-import { loadBundle, writeOutputBundle } from "../shared/node-asset";
+import { loadAssetOpsInput, loadBundle, writeOutputBundle } from "../shared/node-asset";
 import { resolveProfilePolicy } from "../shared/custom-profile";
 
 const profileFile = { type: "string", description: "Absolute path to a custom profile JSON. Cannot be combined with profile." };
@@ -12,6 +20,7 @@ const tools = [
   { name: "clunk_validate", description: "Validate a real GLB/GLTF against a declared policy.", inputSchema: { type: "object", required: ["path"], properties: { path: { type: "string" }, profile: { type: "string", enum: ["web", "mobile", "pc"] }, profileFile } } },
   { name: "clunk_optimize", description: "Apply only Clunk's allowlisted render-safe and metadata-only operations and write a new artifact.", inputSchema: { type: "object", required: ["path"], properties: { path: { type: "string" }, outputPath: { type: "string" }, profile: { type: "string", enum: ["web", "mobile", "pc"] }, profileFile } } },
   { name: "clunk_passport", description: "Create a Passport by freshly inspecting source and output artifacts.", inputSchema: { type: "object", required: ["sourcePath", "outputPath"], properties: { sourcePath: { type: "string" }, outputPath: { type: "string" }, profile: { type: "string", enum: ["web", "mobile", "pc"] }, profileFile } } },
+  { name: "clunk_asset_inspect", description: "Inspect a real asset against an engine-aware target profile and return canonical evidence JSON.", inputSchema: { type: "object", required: ["path", "targetProfileId"], properties: { path: { type: "string" }, targetProfileId: { type: "string" }, assetKind: { type: "string", enum: ["3d-model", "2d-image", "sprite-atlas", "spine-project", "animation-clip"] }, runId: { type: "string" }, profileFile: { type: "string", description: "Reserved for legacy tool parity; use targetProfileId for engine-aware inspection." } } } },
 ];
 
 const input = createInterface({ input: process.stdin, crlfDelay: Infinity });
@@ -33,6 +42,20 @@ async function handle(method: string, params?: { name?: string; arguments?: Reco
   if (method === "tools/list") return { tools };
   if (method !== "tools/call" || !params?.name) throw new Error(`Unsupported MCP method: ${method}`);
   const args = params.arguments ?? {};
+  if (params.name === "clunk_asset_inspect") {
+    const path = requiredString(args.path, "path");
+    const input = await loadAssetOpsInput(path);
+    const value = inspectAssetForTarget({
+      runId: optionalString(args.runId),
+      sourcePath: input.absolutePath,
+      fileName: input.fileName,
+      bytes: input.bytes,
+      targetProfileId: requiredString(args.targetProfileId, "targetProfileId"),
+      assetKind: optionalString(args.assetKind) as AssetKind | undefined,
+      bundleFiles: input.bundleFiles,
+    });
+    return { content: [{ type: "text", text: JSON.stringify(value) }] };
+  }
   const policy: AssetPolicy = await resolveProfilePolicy({
     profile: optionalString(args.profile),
     profileFile: optionalString(args.profileFile),

@@ -113,8 +113,93 @@ function loadConfig(configArgument) {
     configPath,
     configHash: sha256(configBytes),
     inputHash: inputHash.digest("hex"),
+    renderContext: normalizeRenderContext(config.renderContext, dirname(configPath)),
     groups,
   };
+}
+
+function normalizeRenderContext(value, configDirectory) {
+  const context = value && typeof value === "object" ? value : {};
+  const css = normalizeCssContext(context.css, configDirectory);
+  const viewport = normalizeViewportContext(context.viewport);
+  const font = normalizeFontContext(context.font);
+  const render = normalizeRenderDetails(context.render);
+  const cssPx = context.cssPx === undefined ? null : positiveInteger(context.cssPx, "renderContext.cssPx");
+  const complete = Boolean(css && viewport && font && render);
+  return {
+    css,
+    cssPx,
+    viewport,
+    font,
+    render,
+    metadataCompleteness: complete ? "COMPLETE" : "PARTIAL",
+  };
+}
+
+function normalizeCssContext(value, configDirectory) {
+  if (value === undefined || value === null) return null;
+  if (!value || typeof value !== "object") throw new InputError("renderContext.css must be an object.");
+  const path = typeof value.path === "string" && value.path.trim() ? value.path.replaceAll("\\", "/") : null;
+  const suppliedHash = value.sha256 === undefined ? null : String(value.sha256).toLowerCase();
+  if (suppliedHash !== null && !/^[a-f0-9]{64}$/.test(suppliedHash)) {
+    throw new InputError("renderContext.css.sha256 must be a 64-character hexadecimal hash.");
+  }
+  if (!path && !suppliedHash) throw new InputError("renderContext.css needs path or sha256.");
+  if (!path) return { sha256: suppliedHash };
+  if (isAbsolute(path)) throw new InputError("renderContext.css.path must be relative to the config.");
+  const cssPath = resolve(configDirectory, path);
+  const relativePath = relative(resolve(configDirectory), cssPath);
+  if (relativePath.startsWith("..") || isAbsolute(relativePath) || !existsSync(cssPath) || !statSync(cssPath).isFile()) {
+    throw new InputError(`renderContext.css.path not found: ${path}`);
+  }
+  const bytes = readFileSync(cssPath);
+  return { path, sha256: sha256(bytes) };
+}
+
+function normalizeViewportContext(value) {
+  if (value === undefined || value === null) return null;
+  if (!value || typeof value !== "object") throw new InputError("renderContext.viewport must be an object.");
+  const viewport = {
+    width: positiveInteger(value.width, "renderContext.viewport.width"),
+    height: positiveInteger(value.height, "renderContext.viewport.height"),
+  };
+  if (value.dpr !== undefined) viewport.dpr = positiveNumber(value.dpr, "renderContext.viewport.dpr");
+  return viewport;
+}
+
+function normalizeFontContext(value) {
+  if (value === undefined || value === null) return null;
+  if (!value || typeof value !== "object") throw new InputError("renderContext.font must be an object.");
+  if (typeof value.family !== "string" || !value.family.trim()) throw new InputError("renderContext.font.family is required.");
+  const font = { family: value.family.trim() };
+  if (value.sizePx !== undefined) font.sizePx = positiveNumber(value.sizePx, "renderContext.font.sizePx");
+  if (value.weight !== undefined) font.weight = positiveInteger(value.weight, "renderContext.font.weight");
+  if (value.lineHeight !== undefined) font.lineHeight = positiveNumber(value.lineHeight, "renderContext.font.lineHeight");
+  return font;
+}
+
+function normalizeRenderDetails(value) {
+  if (value === undefined || value === null) return { engine: "raster", renderer: "sharp-raster", kernel: "lanczos3" };
+  if (!value || typeof value !== "object") throw new InputError("renderContext.render must be an object.");
+  const render = {};
+  for (const key of ["engine", "renderer", "kernel", "colorSpace"]) {
+    if (value[key] !== undefined) {
+      if (typeof value[key] !== "string" || !value[key].trim()) throw new InputError(`renderContext.render.${key} must be a non-empty string.`);
+      render[key] = value[key].trim();
+    }
+  }
+  if (!render.engine || !render.renderer) throw new InputError("renderContext.render needs engine and renderer.");
+  return render;
+}
+
+function positiveInteger(value, label) {
+  if (!Number.isInteger(value) || value <= 0) throw new InputError(`${label} must be a positive integer.`);
+  return value;
+}
+
+function positiveNumber(value, label) {
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) throw new InputError(`${label} must be a positive number.`);
+  return value;
 }
 
 async function loadSharp() {
@@ -364,6 +449,16 @@ function buildEnvelope(input, args, groups) {
     strict: args.strict,
     inputHash: input.inputHash,
     configHash: input.configHash,
+    metadataCompleteness: input.renderContext.metadataCompleteness,
+    renderContext: input.renderContext,
+    criteria: {
+      deltaE76: groups.map((group) => ({
+        group: group.name,
+        metric: "meanDeltaE76",
+        threshold: group.thresholds.minPairwiseDeltaE76,
+        renderPx: group.renderPx,
+      })),
+    },
     auditScope: "portrait-ui-raster",
     groups,
     violations,
@@ -397,6 +492,9 @@ function writeError(args, error) {
     requestedConfig: args?.config ?? null,
     requestedInput: args?.input ?? null,
     strict: args?.strict ?? false,
+    metadataCompleteness: "UNKNOWN",
+    renderContext: null,
+    criteria: { deltaE76: [] },
     violations: [],
     findings: [],
     assetAudit: { status: "NOT_EVALUATED" },

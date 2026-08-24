@@ -1,10 +1,12 @@
 import {
   FRAME_MANIFEST_SCHEMA,
+  mergeFrameManifestEvidence,
   normalizeFrameManifest,
   resolveCollaborationStatus,
   type AuditStatus,
   type CollaborationStatus,
   type FrameManifest,
+  type FrameManifestWriteMode,
   type RuntimeReviewStatus,
 } from "../../../packages/core/src/collaboration-contract";
 import { ClunkHttpError, isSafeRecordId } from "./clunk";
@@ -23,6 +25,7 @@ export type ThreadPayload = CollaborationStatusPayload & {
   subject: string;
   assetId?: string;
   evidence?: FrameManifest;
+  evidenceMode: FrameManifestWriteMode;
 };
 
 export type MessagePayload = {
@@ -32,6 +35,7 @@ export type MessagePayload = {
   targetProfileId: string;
   status?: CollaborationStatusPayload;
   evidence?: FrameManifest;
+  evidenceMode: FrameManifestWriteMode;
 };
 
 export type StoredEvidence = FrameManifest | {
@@ -68,6 +72,14 @@ function hash(value: unknown, field: string): string {
     throw new ClunkHttpError(`Invalid collaboration ${field}.`, 400);
   }
   return value.toLowerCase();
+}
+
+function evidenceMode(value: unknown): FrameManifestWriteMode {
+  if (value === undefined || value === null) return "replace";
+  if (value !== "append" && value !== "replace") {
+    throw new ClunkHttpError("Invalid collaboration evidenceMode. Use append or replace.", 400);
+  }
+  return value;
 }
 
 export function parseStatusPayload(value: unknown): CollaborationStatusPayload {
@@ -114,6 +126,7 @@ export function parseThreadPayload(value: unknown): ThreadPayload {
     subject: text(source.subject, "subject", 240),
     assetId: optionalId(source.assetId, "assetId"),
     evidence: parseEvidencePayload(source.evidence),
+    evidenceMode: evidenceMode(source.evidenceMode),
   };
 }
 
@@ -129,6 +142,7 @@ export function parseMessagePayload(value: unknown): MessagePayload {
     targetProfileId,
     status: source.status === undefined ? undefined : parseStatusPayload(source.status),
     evidence: parseEvidencePayload(source.evidence),
+    evidenceMode: evidenceMode(source.evidenceMode),
   };
 }
 
@@ -159,4 +173,26 @@ export function parseStoredEvidence(value: unknown): StoredEvidence | null {
 
 export function evidenceJson(evidence: FrameManifest | undefined): string | null {
   return evidence ? JSON.stringify(evidence) : null;
+}
+
+export function mergeStoredEvidence(
+  current: StoredEvidence | null,
+  incoming: FrameManifest | undefined,
+  mode: FrameManifestWriteMode,
+): FrameManifest | null {
+  if (!incoming) {
+    if (!current) return null;
+    if (isInvalidStoredEvidence(current)) {
+      throw new ClunkHttpError("Stored collaboration evidence is invalid; replace it with a valid manifest.", 409);
+    }
+    return current;
+  }
+  if (current && isInvalidStoredEvidence(current)) {
+    throw new ClunkHttpError("Stored collaboration evidence is invalid; replace it with a valid manifest.", 409);
+  }
+  return mergeFrameManifestEvidence(current, incoming, mode);
+}
+
+function isInvalidStoredEvidence(value: StoredEvidence): value is Extract<StoredEvidence, { status: "INVALID" }> {
+  return "status" in value && value.status === "INVALID";
 }

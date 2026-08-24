@@ -70,6 +70,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
   const [visualRuntime, setVisualRuntime] = useState<"NOT_RUN" | "PASS" | "GAP" | "BLOCKED">("GAP");
   const [messageDraft, setMessageDraft] = useState("");
   const [evidenceDraft, setEvidenceDraft] = useState("");
+  const [evidenceMode, setEvidenceMode] = useState<"append" | "replace">("replace");
   const [busy, setBusy] = useState(false);
 
   const runContext = useMemo(() => latestRun ? parseRunContext(latestRun) : null, [latestRun]);
@@ -140,14 +141,14 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
       const response = await fetch("/api/collaboration/threads", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ subject: subject.trim(), inputHash: effectiveInputHash, assetId: undefined, status, evidence }),
+        body: JSON.stringify({ subject: subject.trim(), inputHash: effectiveInputHash, assetId: undefined, status, evidence, evidenceMode }),
       });
       const payload = await response.json() as { thread?: { id: string }; error?: string };
       if (!response.ok || !payload.thread) throw new Error(payload.error || "협업 스레드를 만들지 못했습니다.");
       const messageResponse = await fetch(`/api/collaboration/threads/${encodeURIComponent(payload.thread.id)}/messages`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ body: body.trim(), inputHash: effectiveInputHash, targetProfileId: effectiveProfileId, status, evidence }),
+        body: JSON.stringify({ body: body.trim(), inputHash: effectiveInputHash, targetProfileId: effectiveProfileId, status, evidence, evidenceMode }),
       });
       const messagePayload = await messageResponse.json() as { error?: string };
       if (!messageResponse.ok) throw new Error(messagePayload.error || "스레드는 만들었지만 첫 메모를 저장하지 못했습니다.");
@@ -254,7 +255,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
             <form onSubmit={createThread} className="collaboration-form">
               <label>제목<input value={subject} onChange={(event) => setSubject(event.target.value)} maxLength={240} /></label>
               <label>메모<textarea aria-label="협업 메모 입력" value={body} onChange={(event) => setBody(event.target.value)} rows={3} placeholder="예: GLB audit PASS지만 shipped camera에서 작물 반복과 지형 경계가 보입니다." maxLength={10000} /></label>
-              <label>스크린샷/frame manifest <span className="field-hint">선택 · clunk.frame-manifest.v1 JSON</span><textarea aria-label="frame manifest JSON 입력" className="collaboration-evidence-input" value={evidenceDraft} onChange={(event) => setEvidenceDraft(event.target.value)} rows={7} placeholder={FRAME_MANIFEST_PLACEHOLDER} maxLength={100000} /></label>
+              <label>스크린샷/frame manifest <span className="field-hint">선택 · clunk.frame-manifest.v1 JSON · 아래는 schema template</span><textarea aria-label="frame manifest JSON 입력" className="collaboration-evidence-input" value={evidenceDraft} onChange={(event) => setEvidenceDraft(event.target.value)} rows={7} placeholder={FRAME_MANIFEST_SCHEMA_TEMPLATE} maxLength={100000} /></label>
               <div className="collaboration-form-grid">
                 <label>inputHash<input value={effectiveInputHash} onChange={(event) => setInputHash(event.target.value.trim().toLowerCase())} placeholder="64자리 sha256" /></label>
                 <label>custom profile<input value={effectiveProfileId} onChange={(event) => setProfileId(event.target.value)} /></label>
@@ -264,6 +265,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
               <div className="collaboration-form-grid collaboration-form-grid-selects">
                 <label>Clunk 감사<select value={assetAudit} onChange={(event) => setAssetAudit(event.target.value as typeof assetAudit)}><option value="PASS">PASS · 100 READY</option><option value="FAIL">FAIL</option><option value="BLOCKED">BLOCKED</option></select></label>
                 <label>시각·런타임 검토<select value={visualRuntime} onChange={(event) => setVisualRuntime(event.target.value as typeof visualRuntime)}><option value="GAP">GAP · 후속 작업 필요</option><option value="NOT_RUN">NOT_RUN</option><option value="PASS">PASS</option><option value="BLOCKED">BLOCKED</option></select></label>
+                <label>evidence write mode<select value={evidenceMode} onChange={(event) => setEvidenceMode(event.target.value as typeof evidenceMode)}><option value="replace">replace · full snapshot</option><option value="append">append · keep existing IDs</option></select></label>
               </div>
               <div className="collaboration-form-foot">
                 <span>현재 상태: <strong className={`collab-readiness collab-readiness-${slug(collaborationStatus({ assetAudit, visualRuntime, profileId: effectiveProfileId, baseProfileId, ruleSetId: effectiveRuleSetId, inputHash: effectiveInputHash }).readiness)}`}>{collaborationStatus({ assetAudit, visualRuntime, profileId: effectiveProfileId, baseProfileId, ruleSetId: effectiveRuleSetId, inputHash: effectiveInputHash }).readiness}</strong></span>
@@ -331,14 +333,18 @@ function validHash(value: string): boolean { return /^[a-f0-9]{64}$/i.test(value
 function shortHash(value: string): string { return `${value.slice(0, 8)}…${value.slice(-6)}`; }
 function slug(value: string): string { return value.toLowerCase().replace(/_/g, "-"); }
 
-const FRAME_MANIFEST_PLACEHOLDER = `{
+const FRAME_MANIFEST_SCHEMA_TEMPLATE = `// SCHEMA TEMPLATE · NOT STORED HF-M94 EVIDENCE · replace every <...>
+{
   "schema": "clunk.frame-manifest.v1",
-  "runId": "HF-M84-no-hud-r01",
+  "runId": "<RUN_ID>",
   "sourceProject": "Harvest Frontier",
-  "sourceCommit": "486fe66",
+  "sourceCommit": "<SOURCE_COMMIT>",
   "reviewStatus": "NOT_EVALUATED",
-  "frames": [{ "id": "m84-no-hud-world", "path": ".logs/screenshots/M84/", "renderer": "webgpu", "hud": "off" }],
-  "sceneGaps": [{ "id": "terrain-seams", "severity": "major", "category": "environment", "note": "Describe the visible gap.", "frameIds": ["m84-no-hud-world"] }]
+  "frames": [{ "id": "<FRAME_ID>", "path": "<FRAME_PATH>", "sha256": "<64_HEX_SHA256>", "bytes": 1, "renderer": "<RENDERER>", "hud": "off", "viewport": { "width": 1920, "height": 1080 }, "console": { "errors": 0, "warnings": 0 } }],
+  "runtimeChecks": [{ "id": "<RUNTIME_CHECK_ID>", "kind": "dialogue-camera", "status": "PASS", "renderer": "<RENDERER>", "evidencePath": "<RUNTIME_EVIDENCE_JSON>", "frameIds": ["<FRAME_ID>"], "checks": { "poseFocusId": "<NPC_ID>", "poseFocusOnScreen": true, "poseFocusCoverage": 0.01517, "poseFocusLensInside": false } }],
+  "sceneGaps": [{ "id": "<SCENE_GAP_ID>", "severity": "major", "category": "<CATEGORY>", "note": "<OBSERVATION>", "frameIds": ["<FRAME_ID>"] }],
+  "prescriptions": [{ "id": "<PRESCRIPTION_ID>", "kind": "<KIND>", "status": "NON_BLOCKING", "priority": "P1", "observation": "<OBSERVATION>", "action": "<ACTION>", "frameIds": ["<FRAME_ID>"] }],
+  "assetInspections": [{ "id": "<ASSET_INSPECTION_ID>", "sourcePath": "<SOURCE_ASSET_PATH>", "inputHash": "<64_HEX_ASSET_HASH>", "assetKind": "3d-model", "targetProfileId": "<TARGET_PROFILE_ID>", "inspectionRunId": "<INSPECTION_RUN_ID>", "evidenceStatus": "ENVIRONMENT_UNAVAILABLE", "productionReady": false, "frameIds": ["<FRAME_ID>"], "qualityWarningIds": ["<QUALITY_WARNING_ID>"], "numericContract": { "status": "PASS", "valid": true, "score": 100, "threshold": 90, "hardBlockerCount": 0, "observations": { "drawCallCount": 88 } } }]
 }`;
 
 function parseEvidenceDraft(value: string): FrameManifest | undefined {
@@ -351,18 +357,50 @@ function parseEvidenceDraft(value: string): FrameManifest | undefined {
 }
 
 function evidenceLabel(evidence: StoredEvidence): string {
-  return isInvalidEvidence(evidence) ? "manifest INVALID" : `${evidence.frames.length} frames · ${evidence.sceneGaps.length} gaps`;
+  return isInvalidEvidence(evidence)
+    ? "manifest INVALID"
+    : `${evidence.frames.length} frames · ${evidence.sceneGaps.length} gaps${evidence.runtimeChecks?.length ? ` · ${evidence.runtimeChecks.length} numeric checks` : ""}`;
 }
 
 function EvidenceCard({ evidence }: { evidence: StoredEvidence }) {
   if (isInvalidEvidence(evidence)) {
     return <div className="collaboration-evidence collaboration-evidence-invalid"><strong>FRAME MANIFEST INVALID</strong><p>{evidence.error}</p></div>;
   }
+  const captureContract = captureContractStatus(evidence);
+  const runtimeChecks = evidence.runtimeChecks ?? [];
+  const numericPassCount = runtimeChecks.filter((check) => check.status === "PASS").length;
+  const linkedInspectionCount = evidence.assetInspections?.length ?? 0;
+  const qualityWarningCount = (evidence.assetInspections ?? []).reduce(
+    (total, inspection) => total + (inspection.qualityWarningIds?.length ?? 0),
+    0,
+  );
   return (
     <div className="collaboration-evidence">
       <div className="collaboration-evidence-head">
         <div><span className="mono-label">FRAME EVIDENCE · {evidence.schema}</span><strong>{evidence.runId}</strong></div>
         <span className="collab-readiness collab-readiness-scene-gap">PLAYER_FACING NOT_EVALUATED</span>
+      </div>
+      <div className="collaboration-verdict-grid" aria-label="증거 판정 분리">
+        <span className="collaboration-verdict collaboration-verdict-static">
+          <small>STATIC / ASSET AUDIT</small>
+          <strong>{linkedInspectionCount ? `${linkedInspectionCount} LINKED` : "SEPARATE"}</strong>
+          <em>source asset evidence only</em>
+        </span>
+        <span className={`collaboration-verdict collaboration-verdict-${numericPassCount === runtimeChecks.length && runtimeChecks.length > 0 ? "pass" : "review"}`}>
+          <small>NUMERIC RUNTIME CONTRACT</small>
+          <strong>{runtimeChecks.length > 0 && numericPassCount === runtimeChecks.length ? "NUMERIC CONTRACT PASS" : runtimeChecks.length ? `${numericPassCount}/${runtimeChecks.length} CHECKS` : "NOT_RECORDED"}</strong>
+          <em>pose/on-screen/coverage/lens fields only</em>
+        </span>
+        <span className={`collaboration-verdict collaboration-verdict-${captureContract.toLowerCase()}`}>
+          <small>CAPTURE CONTRACT</small>
+          <strong>{captureContract === "PASS" ? "CAPTURE CONTRACT PASS" : "CAPTURE CONTRACT INCOMPLETE"}</strong>
+          <em>hash · bytes · viewport · console · shipped path</em>
+        </span>
+        <span className="collaboration-verdict collaboration-verdict-review">
+          <small>HUMAN VISUAL REVIEW</small>
+          <strong>NOT_EVALUATED</strong>
+          <em>numeric/camera gates never auto-approve the scene</em>
+        </span>
       </div>
       <div className="collaboration-evidence-grid">
         <span><small>source</small><strong>{evidence.sourceProject} · {evidence.sourceCommit}</strong></span>
@@ -372,9 +410,35 @@ function EvidenceCard({ evidence }: { evidence: StoredEvidence }) {
       <div className="collaboration-evidence-frames">
         {evidence.frames.map((frame) => <span key={frame.id}><b>{frame.id}</b><small>{frame.hud} HUD · {frame.renderer ?? "renderer unknown"} · {frame.shippedPath === true ? "shipped path" : "path unverified"} · console {frame.console ? `${frame.console.errors}/${frame.console.warnings}` : "unknown"}{frame.frameSourceCommit ? ` · frame ${frame.frameSourceCommit}` : ""}{frame.bytes ? ` · ${frame.bytes.toLocaleString()} B` : ""} · {frame.path}</small></span>)}
       </div>
+      {runtimeChecks.length ? (
+        <div className="collaboration-runtime-checks">
+          <span className="mono-label">NUMERIC RUNTIME CHECKS · human review remains separate</span>
+          {runtimeChecks.map((check) => (
+            <article key={check.id}>
+              <div><b>{check.status}</b><strong>{check.kind}</strong><em>{check.renderer ?? "renderer not recorded"}</em></div>
+              <p>{Object.entries(check.checks).map(([key, value]) => `${key}=${String(value)}`).join(" · ")}</p>
+              {check.evidencePath ? <small>{check.evidencePath}</small> : null}
+            </article>
+          ))}
+        </div>
+      ) : null}
       <div className="collaboration-evidence-gaps">
         {evidence.sceneGaps.map((gap) => <span key={gap.id}><b>{gap.severity}</b>{gap.category} · {gap.note}</span>)}
       </div>
+      {linkedInspectionCount ? (
+        <div className="collaboration-evidence-inspections">
+          <span className="mono-label">LINKED ASSET EVIDENCE · qualityWarnings are non-blocking</span>
+          {evidence.assetInspections?.map((inspection) => (
+            <article key={inspection.id}>
+              <div><b>{inspection.assetKind}</b><strong>{inspection.evidenceStatus}</strong><em>{inspection.productionReady ? "production ready" : "not player-facing proof"}</em></div>
+              <p>{inspection.sourcePath} · {shortHash(inspection.inputHash)} · {inspection.targetProfileId}</p>
+              {inspection.numericContract ? <small>numeric contract · {inspection.numericContract.status}{inspection.numericContract.score !== undefined ? ` · score ${inspection.numericContract.score}/${inspection.numericContract.threshold ?? "?"}` : ""}{inspection.numericContract.hardBlockerCount !== undefined ? ` · hard blockers ${inspection.numericContract.hardBlockerCount}` : ""}{inspection.numericContract.observations ? ` · ${Object.entries(inspection.numericContract.observations).map(([key, value]) => `${key}=${String(value)}`).join(" · ")}` : ""}</small> : null}
+              {inspection.qualityWarningIds?.length ? <small>qualityWarnings · {inspection.qualityWarningIds.join(", ")}</small> : null}
+            </article>
+          ))}
+          {qualityWarningCount ? <small className="collaboration-quality-note">{qualityWarningCount} quality warning(s) remain NON_BLOCKING and do not change hard validation.</small> : null}
+        </div>
+      ) : null}
       {evidence.prescriptions?.length ? (
         <div className="collaboration-evidence-prescriptions">
           <span className="mono-label">NON-BLOCKING PRESCRIPTIONS · runtime/art follow-up</span>
@@ -393,4 +457,18 @@ function EvidenceCard({ evidence }: { evidence: StoredEvidence }) {
 
 function isInvalidEvidence(evidence: StoredEvidence): evidence is Extract<StoredEvidence, { status: "INVALID" }> {
   return "status" in evidence && evidence.status === "INVALID";
+}
+
+function captureContractStatus(evidence: FrameManifest): "PASS" | "INCOMPLETE" {
+  const complete = evidence.frames.every((frame) => (
+    typeof frame.sha256 === "string"
+    && typeof frame.bytes === "number"
+    && frame.bytes > 0
+    && Boolean(frame.viewport?.width && frame.viewport?.height)
+    && Boolean(frame.renderer)
+    && frame.shippedPath === true
+    && frame.console?.errors === 0
+    && frame.console?.warnings === 0
+  ));
+  return complete ? "PASS" : "INCOMPLETE";
 }

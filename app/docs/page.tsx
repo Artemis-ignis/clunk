@@ -6,6 +6,8 @@ import { SiteShell } from "../components/SiteShell";
 import {
   CLI_SAMPLE,
   ASSET_KIND_COVERAGE,
+  ASSET_INSPECTION_CONTRACT,
+  GENERATION_CONTRACT,
   COLLABORATION_CONTRACT,
   EDITOR_PACKAGES,
   MCP_CONFIG_SNIPPET,
@@ -16,6 +18,10 @@ import {
   TARGET_PROFILES,
   TEXTURE_AUDIT_CONTRACT,
   UI_READABILITY_CONTRACT,
+  QUALITY_WARNING_CONTRACT,
+  HF_TEXTURE_SCENE_GAPS,
+  FRAME_REVIEW_CONTRACT,
+  HF_M98_RUNTIME_UPDATE,
   VSCODE_COMMANDS,
 } from "../components/product-facts";
 
@@ -37,11 +43,150 @@ $ npm run clunk -- optimize public/samples/clunk-messy-sample.glb --out out/quad
 $ npm run clunk -- passport public/samples/clunk-messy-sample.glb out/quad.glb`;
 
 const ASSET_AUDIT_COMMANDS = `# 3D / 2D target contract
+$ npm.cmd run asset:inspect -- --path public/og.png --target-profile harvest-frontier-web-three --format json
+# exit 0 READY · exit 4 ENVIRONMENT_UNAVAILABLE · JSON is the canonical AssetEvidence envelope
+
 $ npm.cmd run asset:readability -- --config examples/texture-audit/harvest-frontier.textures.json --format json --strict
 
 # Portrait UI readability at the actual draw size
 $ npm.cmd run asset:ui-readability -- --config portrait-ui.json --format json --strict
-# exit 0 PASS · exit 2 FAIL · exit 4 UNAVAILABLE · clunk.ui-readability.v1`;
+# exit 0 PASS · exit 2 FAIL · exit 4 UNAVAILABLE · clunk.ui-readability.v1
+
+# profile-aware 3D authoring rail; writes only to a separate output directory
+$ npm.cmd run asset:generate -- --factory <factory.mjs> --target-profile <profile> --recipe-id threejs-factory-v1 --output-directory <separate-dir>`;
+
+const HF_M94_STORED_EVIDENCE = `// ACTUAL LIVE D1 SNAPSHOT · stored HF-M94 evidence, not a schema template
+{
+  "inputHash": "a8500559f6137a4ab35c3b7adb3a95e2d323198c11a0be00340ea3940db3552f",
+  "reviewStatus": "NOT_EVALUATED",
+  "visualRuntime": "GAP",
+  "playerFacing": "NOT_EVALUATED",
+  "runId": "HF-M94-packaged-r01",
+  "sourceCommit": "3e3e343",
+  "frameSourceCommit": "d3d56464",
+  "frameId": "hf-m94-packaged-r01-03-game-nohud",
+  "frameBytes": 2821399,
+  "frameSha256": "5978400B0DD77A5ED90EDE70617726B0DB838A5892075BDDD18DA5CCE0F58E15",
+  "sceneGaps": [
+    "distant-terrain-band", "simplified-hedge-rock-silhouettes", "tiny-soft-signage",
+    "dealer-camera-composition", "dialogue-composition"
+  ],
+  "prescriptions": [
+    "grass close layer D @ 15m", "dirt path C @ 15m", "tilled soil D @ 15m",
+    "wider grass layer A/B", "ridge/plaster/roof detail strengthening", "wood SOFT-SEAM"
+  ]
+}`;
+
+const HF_M95_M96_HANDOFF = `// EXTERNAL HF HANDOFF · current integration pointer, not a live frame row
+{
+  "sourceCommit": "8245921",
+  "standingInvariants": { "renderer": "WebGL2", "passed": 8, "total": 8, "retries": 0, "console": { "errors": 0, "warnings": 0 } },
+  "m96": { "tomorrowWeather": "player-visible deterministic forecast", "uiLayout": "ko/en PASS", "gates": { "tsc": "PASS", "eslint": "PASS", "vitest": "826/826 PASS", "validateContent": "PASS", "validateAssets": "PASS", "build": "PASS" } },
+  "uiReadability": { "schema": "clunk.ui-readability.v1", "status": "PASS", "assets": 5, "sourcePx": 128, "renderPx": 46, "minPairwiseDeltaE76": 11.6431 },
+  "textureQualityWarnings": ["grass-meadow 15m D", "dirt-path C", "soil-tilled D", "wood-planks C", "plaster C", "roof tiles B"],
+  "reviewStatus": "NOT_EVALUATED",
+  "visualRuntime": "GAP",
+  "playerFacing": "NOT_EVALUATED",
+  "readiness": "SCENE_GAP"
+}`;
+
+const HF_M98_HANDOFF = `// EXTERNAL HF HANDOFF · M98 current pointer, not a new live frame row
+{
+  "sourceCommit": "82459216c618a15f7588f57003e5f4f4ee99f40a",
+  "cameraClearance": { "WebGL2": "PASS", "WebGPU": "PASS", "visualApproval": "NOT_EVALUATED" },
+  "dialogueRuntimeCheck": {
+    "schema": "clunk.frame-manifest.v1.runtime-check",
+    "id": "dialogue-camera-webgl2-r2",
+    "status": "PASS",
+    "renderer": "WebGL2 fallback",
+    "evidencePath": ".logs/verification/M98/dialogue-camera-webgl2-r2.json",
+    "capture": { "path": ".logs/screenshots/M98/dialogue-camera-webgl2-r2-A-opened.png", "bytes": 1242189, "sha256": "EAB863CA9F8B03DA8DADBC72BD8D921CC7461753684B8B2CC7325D020B7EBC29", "shippedPath": false },
+    "checks": { "poseAssist": true, "poseFocusId": "npc.kang-taeho", "poseFocusOnScreen": true, "poseFocusCoverage": 0.01517, "poseFocusLensInside": false, "console": "0/0" },
+    "humanReview": "NOT_EVALUATED"
+  },
+  "playerFacingGaps": ["distant terrain/vegetation repetition", "prop intersections", "sign legibility", "commercial frame quality"],
+  "assetAudit": { "runtimeGlb": "8/8 valid", "hardBlocker": 0, "optimize": "NOT_RUN" },
+  "textureQualityWarnings": ["grass-meadow 15m D", "dirt-path C", "soil-tilled D", "wood-planks C", "plaster C", "roof tiles B"],
+  "reviewStatus": "NOT_EVALUATED",
+  "visualRuntime": "GAP",
+  "playerFacing": "NOT_EVALUATED",
+  "readiness": "SCENE_GAP"
+}`;
+
+const FRAME_MANIFEST_SCHEMA_EXAMPLE = `// SCHEMA EXAMPLE · replace every <...>; this is not stored HF evidence
+{
+  "schema": "clunk.frame-manifest.v1",
+  "runId": "<RUN_ID>",
+  "sourceProject": "<PROJECT>",
+  "sourceCommit": "<SOURCE_COMMIT>",
+  "reviewStatus": "NOT_EVALUATED",
+  "frames": [{
+    "id": "<FRAME_ID>", "path": "<FRAME_PATH>", "sha256": "<64_HEX_SHA256>", "bytes": 1,
+    "renderer": "<RENDERER>", "hud": "off", "viewport": { "width": 1920, "height": 1080 },
+    "console": { "errors": 0, "warnings": 0 }
+  }],
+  "runtimeChecks": [{
+    "id": "<RUNTIME_CHECK_ID>", "kind": "dialogue-camera", "status": "PASS", "renderer": "<RENDERER>",
+    "evidencePath": "<RUNTIME_EVIDENCE_JSON>", "frameIds": ["<FRAME_ID>"],
+    "checks": { "poseFocusId": "<NPC_ID>", "poseFocusOnScreen": true,
+      "poseFocusCoverage": 0.01517, "poseFocusLensInside": false }
+  }],
+  "sceneGaps": [{
+    "id": "<SCENE_GAP_ID>", "severity": "major", "category": "<CATEGORY>",
+    "note": "<OBSERVATION>", "frameIds": ["<FRAME_ID>"]
+  }],
+  "prescriptions": [{
+    "id": "<PRESCRIPTION_ID>", "kind": "<KIND>", "status": "NON_BLOCKING",
+    "priority": "P1", "observation": "<OBSERVATION>", "action": "<ACTION>",
+    "frameIds": ["<FRAME_ID>"]
+  }],
+  "assetInspections": [{
+    "id": "<ASSET_INSPECTION_ID>", "sourcePath": "<SOURCE_ASSET_PATH>", "inputHash": "<64_HEX_ASSET_HASH>",
+    "assetKind": "3d-model", "targetProfileId": "<TARGET_PROFILE_ID>", "inspectionRunId": "<INSPECTION_RUN_ID>",
+    "evidenceStatus": "ENVIRONMENT_UNAVAILABLE", "productionReady": false, "frameIds": ["<FRAME_ID>"],
+    "qualityWarningIds": ["<QUALITY_WARNING_ID>"],
+    "numericContract": { "status": "PASS", "valid": true, "score": 100, "threshold": 90, "hardBlockerCount": 0,
+      "findingIds": ["<INFO_FINDING_ID>"], "observations": { "drawCallCount": 88, "bounds": "<OBSERVED_BOUNDS>" } }
+  }]
+}`;
+
+const FRAME_MANIFEST_WRITE_RULES = `# append: same runId + sourceProject only; keep old IDs and upsert incoming IDs
+curl -X PATCH /api/collaboration/threads/<THREAD_ID> \
+  -H 'content-type: application/json' \
+  -d '{ "evidenceMode": "append", "evidence": <FULL_MANIFEST_OR_NEW_ITEMS> }'
+
+# replace: incoming manifest is the complete snapshot; omitted gaps/prescriptions are removed
+curl -X PATCH /api/collaboration/threads/<THREAD_ID> \
+  -H 'content-type: application/json' \
+  -d '{ "evidenceMode": "replace", "evidence": <FULL_MANIFEST> }'
+
+# local CI validation / merge (stdout is normalized JSON; exit 0 valid, exit 2 invalid)
+npm.cmd run collaboration:frame-manifest -- validate --input hf-frame-manifest.json --format json
+npm.cmd run collaboration:frame-manifest -- merge --current stored.json --incoming next.json --mode append --format json
+
+# linked asset inspection: frameIds must refer to frames in this manifest;
+# the link never promotes playerFacing or reviewStatus.
+# runtimeChecks[] is the numeric pose/on-screen/coverage/lens layer; PASS never changes human review.
+# append retains omitted IDs; replace removes omitted IDs from every evidence array.`;
+
+const ASSET_INSPECTION_API_EXAMPLE = `// AUTHENTICATED API · raw bytes are not persisted
+POST /api/assetops/inspect
+{
+  "schema": "clunk.asset-inspection-request.v1",
+  "fileName": "tractor.compact.m1.glb",
+  "bytesBase64": "<BASE64_BYTES>",
+  "targetProfileId": "harvest-frontier-web-three",
+  "assetKind": "3d-model",
+  "runId": "HF-M96-tractor-r01"
+}
+
+// response: clunk.asset-inspection-response.v1
+{ "ok": true, "evidence": {
+  "status": "ENVIRONMENT_UNAVAILABLE", "productionReady": false,
+  "source": { "sha256": "<64_HEX>" },
+  "stages": { "import": { "status": "environmentUnavailable" }, "runtime": { "status": "environmentUnavailable" } },
+  "qualityWarnings": []
+} }`;
 
 const AGENT_SESSION = `$ echo '{"jsonrpc":"2.0","id":1,"method":"initialize"}' | npm run mcp
   protocolVersion  ${MCP_SERVER.protocolVersion}
@@ -75,7 +220,7 @@ export default function DocsPage() {
         <section className="doc-section">
           <h2>MCP로 연결하기</h2>
           <p className="doc-lead">
-            서버는 stdio JSON-RPC로 동작합니다. 아래 설정을 에이전트의 MCP 클라이언트 설정 파일에 넣으면 도구 4개가
+            서버는 stdio JSON-RPC로 동작합니다. 아래 설정을 에이전트의 MCP 클라이언트 설정 파일에 넣으면 도구 5개가
             그대로 노출됩니다. MCP 표준을 지원하는 에이전트라면 별도 어댑터 없이 사용할 수 있습니다.
           </p>
           <div className="doc-split">
@@ -132,6 +277,10 @@ export default function DocsPage() {
           <div className="doc-profile-table">
             {TARGET_PROFILES.map((profile) => <div key={profile.id}><strong>{profile.label}</strong><code>{profile.id}</code><span>{profile.engine} · {profile.platform}{profile.requiresDeviceGate ? " · device gate" : ""}</span></div>)}
           </div>
+          <div className="doc-ci-contracts doc-generation-contract">
+            <article><span className="mono-label">PROFILE-AWARE AUTHORING</span><code>{GENERATION_CONTRACT.result}</code><p>{GENERATION_CONTRACT.supported}. {GENERATION_CONTRACT.verification}.</p><pre><code>{GENERATION_CONTRACT.command}</code></pre></article>
+            <article><span className="mono-label">HONEST LIMIT</span><code>{GENERATION_CONTRACT.request}</code><p>{GENERATION_CONTRACT.unavailable}. {GENERATION_CONTRACT.passport}.</p></article>
+          </div>
         </section>
 
         <section className="doc-section">
@@ -143,7 +292,26 @@ export default function DocsPage() {
           <CodeBlock title="asset-audit" language="bash" code={ASSET_AUDIT_COMMANDS} />
           <div className="doc-ci-contracts">
             <article><span className="mono-label">TEXTURE · SHIPPED</span><code>{TEXTURE_AUDIT_CONTRACT.schema}</code><p>exit {TEXTURE_AUDIT_CONTRACT.passExit}=PASS · {TEXTURE_AUDIT_CONTRACT.policyExit}=strict 위반 · {TEXTURE_AUDIT_CONTRACT.unavailableExit}=미지원</p></article>
-            <article><span className="mono-label">UI RASTER · SHIPPED</span><code>{UI_READABILITY_CONTRACT.schema}</code><p>{UI_READABILITY_CONTRACT.status} · {UI_READABILITY_CONTRACT.capability} · exit {UI_READABILITY_CONTRACT.exit}. {UI_READABILITY_CONTRACT.render} · player-facing {UI_READABILITY_CONTRACT.playerFacing}.</p></article>
+            <article><span className="mono-label">UI RASTER · SHIPPED</span><code>{UI_READABILITY_CONTRACT.schema}</code><p>{UI_READABILITY_CONTRACT.status} · {UI_READABILITY_CONTRACT.capability} · exit {UI_READABILITY_CONTRACT.exit}. {UI_READABILITY_CONTRACT.render} · {UI_READABILITY_CONTRACT.metadata} · {UI_READABILITY_CONTRACT.deltaE} · player-facing {UI_READABILITY_CONTRACT.playerFacing}.</p></article>
+          </div>
+          <p className="doc-lead">
+            정적 analyzer의 경고는 <code>{QUALITY_WARNING_CONTRACT.field}</code>로도 노출됩니다.
+            상태는 <code>{QUALITY_WARNING_CONTRACT.status}</code>이며 hard validation이나 player-facing 판정을
+            바꾸지 않습니다. HF의 grass-meadow 15m D, dirt-path C, soil-tilled D, wood-planks C,
+            plaster C, roof tiles B처럼 실제 shipped frame의 거리·사용처와 함께 다음 처방을 남깁니다.
+          </p>
+          <div className="doc-texture-prescriptions" aria-label="Harvest Frontier texture quality prescriptions">
+            <div className="doc-texture-prescriptions-head">
+              <span className="mono-label">HF-M94 PACKAGED NO-HUD · NON-BLOCKING</span>
+              <small>frame hf-m94-packaged-r01-03-game-nohud · shipped 1920×1080 · scene review remains separate</small>
+            </div>
+            {HF_TEXTURE_SCENE_GAPS.map((item) => (
+              <article key={item.id}>
+                <div><strong>{item.label} · {item.grade}</strong><span>{item.priority}</span></div>
+                <p>{item.context}</p>
+                <small>{item.prescription}</small>
+              </article>
+            ))}
           </div>
         </section>
 
@@ -155,10 +323,39 @@ export default function DocsPage() {
             사용하며, <code>SCENE_GAP</code>은 Clunk asset audit PASS 이후에도 게임 화면 검토가 남았다는 뜻입니다.
             스크린샷/frame manifest는 <code>{COLLABORATION_CONTRACT.evidence}</code>로 저장하고, 그 안의
             <code>reviewStatus: NOT_EVALUATED</code>는 실제 WebGPU/무-HUD 화면 판정을 대신하지 않습니다.
+            기본값은 <code>reviewStatus: NOT_EVALUATED</code> · <code>visualRuntime: GAP</code> ·
+            <code>playerFacing: NOT_EVALUATED</code>이며, static asset PASS나 raster PASS를 자동 승격하지 않습니다.
             gameplay-band detail loss 같은 후속 조치는 <code>{COLLABORATION_CONTRACT.prescriptions}</code>로
-            정적 PASS를 덮지 않고 기록합니다.
+            정적 PASS를 덮지 않고 기록합니다. `runtimeChecks[].status=PASS`는 pose/on-screen/coverage/lens 같은
+            숫자 계약만 통과했다는 뜻이고, <code>reviewStatus: NOT_EVALUATED</code>는 사람이 캡처를 읽어
+            visual approval을 하지 않았다는 뜻입니다. linked <code>assetInspections[].numericContract</code>에는
+            score/threshold/hardBlocker/draw-call/bounds 같은 정적 관찰값을 넣을 수 있지만,
+            <code>visualRuntime: GAP</code>와 human review를 바꾸지 않습니다.
           </p>
           <div className="doc-api-contract"><code>{COLLABORATION_CONTRACT.list}</code><code>{COLLABORATION_CONTRACT.create}</code><code>{COLLABORATION_CONTRACT.detail}</code><code>{COLLABORATION_CONTRACT.message}</code></div>
+          <div className="doc-review-contract">
+            <article><span className="mono-label">REVIEWABLE CAPTURE</span><p>{FRAME_REVIEW_CONTRACT.minimumCaptureSet}</p></article>
+            <article><span className="mono-label">REQUIRED METADATA</span><p>{FRAME_REVIEW_CONTRACT.requiredMetadata}</p></article>
+            <article><span className="mono-label">PROMOTION RULE</span><p>{FRAME_REVIEW_CONTRACT.reviewableWhen}. {FRAME_REVIEW_CONTRACT.closeWhen}</p></article>
+          </div>
+          <div className="doc-split">
+            <CodeBlock title="실제 저장값 · HF M94" language="json" code={HF_M94_STORED_EVIDENCE} caption="현재 live D1에 저장된 실제 값의 요약입니다. POST schema template와 섞지 않습니다." />
+            <CodeBlock title="schema template" language="json" code={FRAME_MANIFEST_SCHEMA_EXAMPLE} caption="다음 제출용 형식 예시입니다. <...> 값은 실제 캡처의 값으로 교체해야 합니다." />
+          </div>
+          <CodeBlock title="source asset link API" language="json" code={ASSET_INSPECTION_API_EXAMPLE} caption="인증 API의 schema example입니다. placeholder 값은 실제 저장 evidence가 아닙니다." />
+          <CodeBlock title="evidenceMode" language="bash" code={FRAME_MANIFEST_WRITE_RULES} caption="append는 기존 ID를 보존하고 같은 ID만 upsert합니다. 다른 runId/sourceProject append는 409로 거부합니다." />
+          <p className="doc-lead">
+            HF M95 standing invariant는 sourceHead <code>3e3e3435b2e378a2446dacd8d352d2d24437518a</code>,
+            renderer <code>WebGL2</code>, 실제 브라우저 입력 기준 8/8 PASS·재시도 0·console 0/0입니다.
+            이 결과와 questGuidance 보강은 플레이 흐름 증거이지 visual approval이 아니므로,
+            Clunk의 현재 저장 판정 <code>reviewStatus=NOT_EVALUATED</code> · <code>readiness=SCENE_GAP</code>를 유지합니다.
+          </p>
+          <div className="doc-split">
+            <CodeBlock title="HF M95/M96 handoff" language="json" code={HF_M95_M96_HANDOFF} caption="HF가 전달한 최신 커밋·게이트·readability 요약입니다. M94 live frame row와 분리합니다." />
+            <CodeBlock title="authenticated byte inspection" language="bash" code={`${ASSET_INSPECTION_CONTRACT.cli}\n${ASSET_INSPECTION_CONTRACT.request}\n${ASSET_INSPECTION_CONTRACT.unavailable}`} caption="CLI와 API 모두 unavailable을 PASS로 승격하지 않습니다." />
+          </div>
+          <CodeBlock title="HF M98 handoff" language="json" code={HF_M98_HANDOFF} caption="카메라 숫자 계약 PASS와 사람의 visual approval을 분리한 최신 HF 상태입니다. live M94 frame row를 덮어쓰지 않습니다." />
+          <CodeBlock title="HF M98 WebGPU invariant update" language="json" code={HF_M98_RUNTIME_UPDATE} caption="6/8 기능·카메라 불변식 PASS와 2건의 하니스 실패, tractor numeric contract를 visual review와 분리한 외부 증거입니다." />
         </section>
 
         <section className="doc-section">

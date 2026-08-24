@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   FRAME_MANIFEST_SCHEMA,
+  mergeFrameManifestEvidence,
   normalizeFrameManifest,
   resolveCollaborationStatus,
   type CollaborationStatusInput,
@@ -117,4 +118,174 @@ test("frame manifest v1 rejects a scene gap that references an unknown frame", (
       frameIds: ["unknown"],
     }],
   }), /unknown frame/i);
+});
+
+test("dialogue numeric runtime checks remain separate from human visual review", () => {
+  const manifest = normalizeFrameManifest({
+    schema: FRAME_MANIFEST_SCHEMA,
+    runId: "dialogue-camera-webgl2-r2",
+    sourceProject: "Harvest Frontier",
+    sourceCommit: "82459216c618a15f7588f57003e5f4f4ee99f40a",
+    reviewStatus: "NOT_EVALUATED",
+    frames: [{
+      id: "dialogue-camera-webgl2-r2-A-opened",
+      path: ".logs/screenshots/M98/dialogue-camera-webgl2-r2-A-opened.png",
+      sha256: "b".repeat(64),
+      bytes: 1242189,
+      frameSourceCommit: "82459216c618a15f7588f57003e5f4f4ee99f40a",
+      renderer: "WebGL2 fallback",
+      hud: "on",
+      shippedPath: false,
+      viewport: { width: 1600, height: 900, dpr: 1 },
+      console: { errors: 0, warnings: 0 },
+    }],
+    sceneGaps: [{ id: "dialogue-composition", severity: "major", category: "dialogue", note: "Human review remains open for final composition.", frameIds: ["dialogue-camera-webgl2-r2-A-opened"] }],
+    runtimeChecks: [{
+      id: "dialogue-camera-webgl2-r2",
+      kind: "dialogue-camera",
+      status: "PASS",
+      renderer: "WebGL2 fallback",
+      frameIds: ["dialogue-camera-webgl2-r2-A-opened"],
+      checks: {
+        poseAssist: true,
+        poseFocusId: "npc.kang-taeho",
+        poseFocusOnScreen: true,
+        poseFocusCoverage: 0.01517,
+        poseFocusLensInside: false,
+      },
+    }],
+  });
+
+  assert.equal(manifest.runtimeChecks?.[0]?.status, "PASS");
+  assert.equal(manifest.runtimeChecks?.[0]?.checks.poseFocusOnScreen, true);
+  assert.equal(manifest.runtimeChecks?.[0]?.checks.poseFocusCoverage, 0.01517);
+  assert.equal(manifest.reviewStatus, "NOT_EVALUATED");
+  assert.equal(manifest.frames[0]?.shippedPath, false);
+});
+
+test("frame manifest append preserves existing evidence and upserts stable ids", () => {
+  const base = normalizeFrameManifest({
+    schema: FRAME_MANIFEST_SCHEMA,
+    runId: "HF-M94-packaged-r01",
+    sourceProject: "Harvest Frontier",
+    sourceCommit: "3e3e343",
+    reviewStatus: "NOT_EVALUATED",
+    frames: [{ id: "baseline", path: "baseline.png", hud: "off" }],
+    sceneGaps: [
+      { id: "gap-1", severity: "major", category: "terrain", note: "Old terrain note.", frameIds: ["baseline"] },
+      { id: "gap-2", severity: "minor", category: "signage", note: "Old signage note.", frameIds: ["baseline"] },
+    ],
+    prescriptions: [
+      { id: "prescription-1", kind: "texture", status: "NON_BLOCKING", priority: "P1", observation: "Old observation.", action: "Old action.", frameIds: ["baseline"] },
+    ],
+  });
+  const incoming = normalizeFrameManifest({
+    schema: FRAME_MANIFEST_SCHEMA,
+    runId: "HF-M94-packaged-r01",
+    sourceProject: "Harvest Frontier",
+    sourceCommit: "3e3e343",
+    reviewStatus: "NOT_EVALUATED",
+    frames: [{ id: "follow-up", path: "follow-up.png", hud: "off" }],
+    sceneGaps: [
+      { id: "gap-1", severity: "minor", category: "terrain", note: "Updated terrain note.", frameIds: ["follow-up"] },
+      { id: "gap-3", severity: "major", category: "dealer", note: "New dealer composition note.", frameIds: ["follow-up"] },
+    ],
+    prescriptions: [
+      { id: "prescription-2", kind: "camera", status: "NON_BLOCKING", priority: "P2", observation: "New observation.", action: "New action.", frameIds: ["follow-up"] },
+    ],
+  });
+
+  const appended = mergeFrameManifestEvidence(base, incoming, "append");
+  assert.deepEqual(appended.frames.map((frame) => frame.id), ["baseline", "follow-up"]);
+  assert.deepEqual(appended.sceneGaps.map((gap) => gap.id), ["gap-1", "gap-2", "gap-3"]);
+  assert.equal(appended.sceneGaps[0]?.note, "Updated terrain note.");
+  assert.deepEqual(appended.prescriptions?.map((item) => item.id), ["prescription-1", "prescription-2"]);
+
+  const replaced = mergeFrameManifestEvidence(base, incoming, "replace");
+  assert.deepEqual(replaced.frames.map((frame) => frame.id), ["follow-up"]);
+  assert.deepEqual(replaced.sceneGaps.map((gap) => gap.id), ["gap-1", "gap-3"]);
+});
+
+test("frame manifest append rejects a different run identity", () => {
+  const manifest = normalizeFrameManifest({
+    schema: FRAME_MANIFEST_SCHEMA,
+    runId: "run-a",
+    sourceProject: "Harvest Frontier",
+    sourceCommit: "commit-a",
+    reviewStatus: "NOT_EVALUATED",
+    frames: [{ id: "frame-a", path: "a.png", hud: "off" }],
+    sceneGaps: [],
+  });
+  const otherRun = normalizeFrameManifest({
+    schema: FRAME_MANIFEST_SCHEMA,
+    runId: "run-b",
+    sourceProject: "Harvest Frontier",
+    sourceCommit: "commit-b",
+    reviewStatus: "NOT_EVALUATED",
+    frames: [{ id: "frame-b", path: "b.png", hud: "off" }],
+    sceneGaps: [],
+  });
+  assert.throws(() => mergeFrameManifestEvidence(manifest, otherRun, "append"), /same runId and sourceProject/i);
+});
+
+test("frame manifest links shipped frames to source asset evidence without promoting player-facing status", () => {
+  const manifest = normalizeFrameManifest({
+    schema: FRAME_MANIFEST_SCHEMA,
+    runId: "HF-M96-packaged-r01",
+    sourceProject: "Harvest Frontier",
+    sourceCommit: "8245921",
+    reviewStatus: "NOT_EVALUATED",
+    frames: [{ id: "nohud-r01", path: "shipped/nohud.png", hud: "off" }],
+    sceneGaps: [{ id: "dealer-camera", severity: "major", category: "camera", note: "Dealer framing remains under review.", frameIds: ["nohud-r01"] }],
+    assetInspections: [{
+      id: "tractor-runtime-r01",
+      sourcePath: "public/assets/runtime/tractor.compact.m1.glb",
+      inputHash: "a".repeat(64),
+      assetKind: "3d-model",
+      targetProfileId: "harvest-frontier-web-three",
+      inspectionRunId: "assetops-tractor-r01",
+      evidenceStatus: "ENVIRONMENT_UNAVAILABLE",
+      productionReady: false,
+      frameIds: ["nohud-r01"],
+      qualityWarningIds: ["grass-close-d-15m"],
+      numericContract: {
+        status: "PASS",
+        valid: true,
+        score: 100,
+        threshold: 90,
+        hardBlockerCount: 0,
+        findingIds: ["GEO-MISSING-NORMALS"],
+        observations: { drawCallCount: 88, missingUvPrimitiveCount: 88, bounds: "±32767" },
+      },
+    }],
+  });
+  assert.equal(manifest.assetInspections?.[0]?.inputHash, "a".repeat(64));
+  assert.equal(manifest.assetInspections?.[0]?.evidenceStatus, "ENVIRONMENT_UNAVAILABLE");
+  assert.equal(manifest.reviewStatus, "NOT_EVALUATED");
+  assert.equal(manifest.assetInspections?.[0]?.productionReady, false);
+  assert.equal(manifest.assetInspections?.[0]?.numericContract?.status, "PASS");
+  assert.equal(manifest.assetInspections?.[0]?.numericContract?.observations?.drawCallCount, 88);
+
+  const appended = mergeFrameManifestEvidence(manifest, normalizeFrameManifest({
+    schema: FRAME_MANIFEST_SCHEMA,
+    runId: "HF-M96-packaged-r01",
+    sourceProject: "Harvest Frontier",
+    sourceCommit: "8245921",
+    reviewStatus: "NOT_EVALUATED",
+    frames: [{ id: "nohud-r02", path: "shipped/nohud-r02.png", hud: "off" }],
+    sceneGaps: [],
+    assetInspections: [{
+      id: "tractor-runtime-r01",
+      sourcePath: "public/assets/runtime/tractor.compact.m1.glb",
+      inputHash: "b".repeat(64),
+      assetKind: "3d-model",
+      targetProfileId: "harvest-frontier-web-three",
+      inspectionRunId: "assetops-tractor-r02",
+      evidenceStatus: "ENVIRONMENT_UNAVAILABLE",
+      productionReady: false,
+      frameIds: ["nohud-r02"],
+    }],
+  }), "append");
+  assert.deepEqual(appended.assetInspections?.map((item) => item.id), ["tractor-runtime-r01"]);
+  assert.equal(appended.assetInspections?.[0]?.inputHash, "b".repeat(64));
 });

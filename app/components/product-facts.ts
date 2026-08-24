@@ -111,6 +111,13 @@ export const MCP_TOOLS = [
     input: "sourcePath, outputPath, profile",
     output: "passport, resultDigest",
   },
+  {
+    name: "clunk_asset_inspect",
+    description: "Inspect a real asset against an engine-aware target profile and return canonical evidence JSON.",
+    summary: "2D·Sprite·Spine·3D 실제 바이트를 선택한 엔진 프로파일에 대조해 게이트별 evidence를 돌려줍니다.",
+    input: "path, targetProfileId, assetKind?, runId?",
+    output: "AssetEvidence, stages, findings, productionReady",
+  },
 ] as const;
 
 /**
@@ -240,7 +247,97 @@ export const UI_READABILITY_CONTRACT = {
   exit: "0 PASS · 2 FAIL · 4 UNAVAILABLE",
   scope: "portrait-ui-raster",
   render: "config renderPx (HF: 128px → 46px)",
+  metadata: "renderContext: css.sha256 · viewport · font · render; metadataCompleteness COMPLETE | PARTIAL",
+  deltaE: "criteria.deltaE76[].threshold with per-group meanDeltaE76",
   playerFacing: "NOT_EVALUATED",
+} as const;
+
+export const ASSET_INSPECTION_CONTRACT = {
+  request: "POST /api/assetops/inspect · authenticated workspace · fileName + bytesBase64 + targetProfileId",
+  response: "clunk.asset-inspection-response.v1 · evidence: AssetEvidence",
+  unavailable: "ENVIRONMENT_UNAVAILABLE · productionReady false",
+  persistence: "raw bytes are not persisted; submit returned evidence in collaboration evidence",
+  cli: "npm.cmd run asset:inspect -- --path <asset> --target-profile <profile> --format json",
+} as const;
+
+export const GENERATION_CONTRACT = {
+  request: "clunk.asset-generation-request.v1",
+  result: "clunk.asset-generation-result.v1",
+  command: "npm.cmd run asset:generate -- --factory <factory.mjs> --target-profile <profile> --recipe-id threejs-factory-v1 --output-directory <separate-dir>",
+  supported: "threejs-factory-v1 · texture-free 3D model",
+  unavailable: "2D image · Sprite atlas · Spine · animation authoring is AUTHORING_UNAVAILABLE until a verified adapter ships",
+  verification: "same target profile output reopen; environmentUnavailable remains exit 4",
+  passport: "procedural source does not receive a fabricated Passport; real source/output files use clunk_passport",
+} as const;
+
+export const QUALITY_WARNING_CONTRACT = {
+  field: "qualityWarnings[]",
+  status: "NON_BLOCKING",
+  meaning: "texture/readability/scene follow-up; does not change hard gate status by itself",
+} as const;
+
+/**
+ * HF's real M94 shipped no-HUD baseline prescriptions. These are evidence-linked observations,
+ * not synthetic PASS/FAIL results; the source frame and distance/use context stay attached so a
+ * later capture can replace or append them without losing the visual reason for the change.
+ */
+export const HF_TEXTURE_SCENE_GAPS = [
+  {
+    id: "grass-meadow-15m",
+    label: "grass-meadow",
+    grade: "D",
+    priority: "P1",
+    context: "15m gameplay band · repeated meadow/vegetation in the shipped no-HUD frame",
+    prescription: "Keep base texel scale; add a controlled secondary macro/detail layer or break tiling before changing resolution, then recheck at 15m.",
+  },
+  {
+    id: "dirt-path-15m",
+    label: "dirt-path",
+    grade: "C",
+    priority: "P1",
+    context: "15m gameplay band · path readability where the player reads the route",
+    prescription: "Preserve path width and UV scale; add edge blend/macro variation or a distance LOD material, then verify the path in the same camera band.",
+  },
+  {
+    id: "soil-tilled-15m",
+    label: "soil-tilled",
+    grade: "D",
+    priority: "P1",
+    context: "15m gameplay band · tilled apron/bed surface around planted plots",
+    prescription: "Add furrow/secondary structure or an LOD-specific detail layer at the bed surface; do not treat a larger source image as proof of runtime readability.",
+  },
+  {
+    id: "wood-planks-seam",
+    label: "wood-planks",
+    grade: "C",
+    priority: "P1",
+    context: "near/intermediate wood props in the dealer/market composition · existing SOFT-SEAM observation",
+    prescription: "Fix UV seam/scale and secondary roughness/normal breakup on the bound wood material; confirm the same prop in a shipped frame before any byte-changing output.",
+  },
+  {
+    id: "plaster-distance",
+    label: "plaster",
+    grade: "C",
+    priority: "P1",
+    context: "building/market plaster surfaces in the shipped camera distance",
+    prescription: "Use macro breakup and a distance-aware material/LOD rather than blanket upscaling; remeasure the facade after the dealer/dialogue camera is corrected.",
+  },
+  {
+    id: "roof-tiles-distance",
+    label: "roof tiles",
+    grade: "B",
+    priority: "P2",
+    context: "dealer/market roof read in the same shipped approach frame",
+    prescription: "Keep as a non-blocking observation; only add secondary structure or LOD work if the corrected camera still loses roof rhythm or silhouette.",
+  },
+] as const;
+
+export const FRAME_REVIEW_CONTRACT = {
+  minimumCaptureSet: "no-HUD shipped baseline + dealer approach/counter + dialogue NPC/camera + distant terrain/vegetation/sign frames",
+  requiredMetadata: "runId, sourceCommit, frameSourceCommit, frame id/path/sha256/bytes, renderer, viewport, shippedPath, hud, console, sceneGaps.frameIds",
+  reviewableWhen: "all submitted frames normalize and their hashes, viewport, renderer, shipped path, and console metadata are present",
+  closeWhen: "a human review explicitly clears every linked scene gap in a fresh shipped-path capture; numeric/camera PASS alone never closes it",
+  defaultBoundary: "reviewStatus: NOT_EVALUATED · visualRuntime: GAP · playerFacing: NOT_EVALUATED",
 } as const;
 
 export const COLLABORATION_CONTRACT = {
@@ -252,6 +349,32 @@ export const COLLABORATION_CONTRACT = {
   evidence: "evidence: clunk.frame-manifest.v1",
   prescriptions: "prescriptions[]: NON_BLOCKING observation + action",
   evidenceReview: "reviewStatus: NOT_EVALUATED",
+  evidenceDefaults: "reviewStatus: NOT_EVALUATED · visualRuntime: GAP · playerFacing: NOT_EVALUATED",
+  evidenceWriteMode: "evidenceMode: append (stable-id upsert) | replace (full snapshot)",
+  linkedAssetInspection: "assetInspections[] links frameIds to sourcePath/inputHash/targetProfileId/inspectionRunId and optional numericContract observations; it never promotes playerFacing",
+  numericAssetContract: "numericContract.status/score/hardBlockerCount/drawCall observations are static contract evidence; visualRuntime and human review remain separate",
+  runtimeChecks: "runtimeChecks[] stores numeric pose/on-screen/coverage/lens contracts; PASS never changes reviewStatus or visualRuntime",
+  assetInspectionApi: ASSET_INSPECTION_CONTRACT.request,
+  qualityWarnings: QUALITY_WARNING_CONTRACT.field,
+  storedM94: "live D1: inputHash a8500559…db3552f · frame hf-m94-packaged-r01-03-game-nohud · 5 gaps · 6 prescriptions",
   playerFacing: "playerFacing: NOT_EVALUATED",
   statuses: ["ASSET_READY", "ASSET_CONDITIONAL", "SCENE_GAP", "PLAYER_FACING_READY", "BLOCKED"],
 } as const;
+
+export const HF_M98_RUNTIME_UPDATE = `// EXTERNAL HF HANDOFF · M98 WebGPU invariant evidence, not a player-facing approval
+{
+  "runId": "HF-M98-invariant-set",
+  "renderer": "webgpu",
+  "results": { "passed": 6, "total": 8, "retries": 0, "console": "0/0 on passed flows" },
+  "passed": ["ui-layout ko", "ui-layout en", "mechanization", "tile-farming", "camera-clearance", "onboarding"],
+  "harnessFailures": ["save-durability: No tile can accept water (water 0)", "day-labour-save: 밭 텔레포트 click timeout"],
+  "tractorNumericContract": {
+    "status": "PASS", "valid": true, "score": 100, "threshold": 90, "hardBlockerCount": 0,
+    "triangles": 30188, "meshes": 88, "drawCall": 88, "byteLength": 680412,
+    "textureCount": 0, "missingUvPrimitiveCount": 88, "bounds": "±32767",
+    "infoFindings": ["GEO-MISSING-NORMALS ×7", "SCENE-NONUNIT-SCALE ×181"]
+  },
+  "reviewStatus": "NOT_EVALUATED",
+  "visualRuntime": "GAP",
+  "playerFacing": "NOT_EVALUATED"
+}`;

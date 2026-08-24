@@ -293,3 +293,155 @@ npm.cmd run asset:ui-readability -- --config tools/asset-pipeline/ui-readability
 ridge/plaster/roof detail strengthening, wood `SOFT-SEAM`. 이 목록은 texture audit의
 actionable prescription이며, 정적 asset PASS를 FAIL로 바꾸거나 player-facing PASS로
 승격하는 판정 필드가 아니다.
+
+## 2026-08-24 HF M95 standing invariant 후속 입력
+
+- HF sourceHead는 `3e3e3435b2e378a2446dacd8d352d2d24437518a`, renderer는 `WebGL2`다.
+  실제 브라우저 입력 기준 ui-layout ko/en, mechanization, tile-farming, camera-clearance,
+  onboarding, save-durability, day-labour-save까지 8/8 PASS, 재시도 0, console 오류/경고
+  0/0이다. 심은 자리가 0인 현장 기록 dead-end를 위한 `questGuidance` 순수 함수·ko/en
+  메시지·단위 테스트도 HF에 추가됐다.
+- 이 invariant PASS는 player-facing visual approval을 대체하지 않는다. Clunk 협업 상태는
+  `reviewStatus: NOT_EVALUATED`, `visualRuntime: GAP`, `playerFacing: NOT_EVALUATED`,
+  `readiness: SCENE_GAP`를 유지한다.
+- 다음 M95 캡처는 기존 M94의 실제 inputHash
+  `a8500559f6137a4ab35c3b7adb3a95e2d323198c11a0be00340ea3940db3552f`, frame id
+  `hf-m94-packaged-r01-03-game-nohud`, scene gap 5건, NON_BLOCKING prescription 6건과
+  혼동하지 않도록 실제 manifest 값을 제출한다. `evidenceMode: append`는 같은
+  `runId`·`sourceProject`에서 안정 ID를 기준으로 기존 항목을 보존하고 새 항목을 추가하며,
+  같은 ID는 incoming 항목으로 upsert한다. `evidenceMode: replace`는 누락된 항목을 제거하는
+  완전한 snapshot 교체이므로, 일부 배열만 보내 기존 5/6건을 지우지 않도록 HF는 full
+  manifest를 함께 보낸다.
+
+## 2026-08-24 HF M96 최신 협업 입력
+
+- 현재 HF 통합 기준 커밋은 `8245921`이다. WebGL2 실제 브라우저 입력에서 M95 불변식
+  `ui-layout ko/en`, mechanization, tile-farming, camera-clearance, onboarding,
+  save-durability, day-labour-save가 8/8 PASS이며 재시도 0, console 오류/경고 0/0이다.
+  M96의 player-visible deterministic next-day forecast와 작물 심은 자리 0 회복 안내도
+  ko/en UI layout 검증에 포함되었다. 이 내용은 플레이 흐름·기능 증거이지 visual approval이
+  아니므로 현재 `reviewStatus: NOT_EVALUATED`, `visualRuntime: GAP`,
+  `playerFacing: NOT_EVALUATED`, `readiness: SCENE_GAP`를 유지한다.
+- HF 정적 UI raster 결과는 `clunk.ui-readability.v1`, 128px 원본 5종을 CSS 46px에서
+  측정한 `PASS`, 최소 pairwise ΔE76 `11.6431`이다. texture strict 결과는 7종,
+  `21.33MB / 40MB`, seam 위반 0의 PASS지만 scene quality warning은 별도다:
+  `grass-meadow 15m D`, `dirt-path C`, `soil-tilled D`, `wood-planks C`, `plaster C`,
+  `roof tiles B`. 자동 그래프·raster·texture PASS를 청취 품질이나 player-facing PASS로
+  승격하지 않는다.
+- scene-gap 우선순위는 (P0) 딜러 접근 시 지붕 위/플레이어 미표시와 장터 카운터-차양
+  충돌을 shipped camera에서 바로 고정하고, (P0) 대화 시 NPC와 카메라 관계를 복원한 뒤,
+  (P1) 원경 지형 band와 반복 식생을 거리별로 재구성하고, (P1) hedge/rock silhouette를
+  contact·overlap이 읽히는 수준으로 보강하고, (P1) 간판은 실제 화면의 render size에서
+  판독성을 재검증한다. camera-clearance 숫자 PASS만으로 이 순서를 완료 처리하지 않는다.
+- 다음 제출은 하나의 `clunk.frame-manifest.v1`에 shipped frame과 `assetInspections[]`를
+  함께 넣을 수 있다. 각 asset inspection은 `sourcePath`, 실제 64-hex `inputHash`,
+  `targetProfileId`, `inspectionRunId`, `evidenceStatus`, `productionReady`, 연결할
+  `frameIds`, `qualityWarningIds`를 가진다. `frameIds`는 같은 manifest의 제출 frame만
+  참조해야 하며, 이 링크는 source asset evidence를 붙일 뿐 `reviewStatus`나
+  `playerFacing`를 승격하지 않는다.
+- `append`는 같은 `runId`·`sourceProject`만 허용하고 frames/sceneGaps/prescriptions/
+  assetInspections를 안정 ID로 upsert한다. incoming에 빠진 ID는 보존한다. `replace`는
+  incoming 배열이 완전한 snapshot이며 빠진 ID를 삭제한다. 일부 5개 gap 또는 6개
+  prescription만 보낼 때는 `replace`를 사용하지 않는다.
+
+## 2026-08-24 HF M98 최신 카메라·화면 협업 입력
+
+- HF 기준 커밋은 `82459216c618a15f7588f57003e5f4f4ee99f40a`다. 딜러/장터 접근 카메라는
+  건물 충돌 회피 숫자만 보지 않고 플레이어와 시설이 같은 프레임에 있는지, 렌즈가 시설
+  내부에 들어가지 않는지, near-fill이 과하지 않은지까지 보정했다. WebGL2/WebGPU
+  camera-clearance 계약은 PASS지만 이는 카메라·런타임 증거이며 GLB 바이트 최적화 결과가 아니다.
+- M84 무-HUD 플레이테스트에는 여전히 원경 지형·식생 반복, 일부 프롭 관통, 간판 판독성,
+  캐릭터·시설의 상업용 프레임 품질 리스크가 남아 있다. 따라서 Clunk는
+  `reviewStatus: NOT_EVALUATED`, `visualRuntime: GAP`, `playerFacing: NOT_EVALUATED`,
+  `readiness: SCENE_GAP`를 유지한다.
+- texture strict 경고는 8개 runtime GLB의 hard blocker와 섞지 않는다. 실제 shipped
+  no-HUD frame `hf-m94-packaged-r01-03-game-nohud`의 거리·사용처를 기준으로
+  `grass-meadow`·`dirt-path`·`soil-tilled`의 15m gameplay-band 처방은 P1, wood/plaster
+  표면은 seam·macro·LOD 확인 후 P1, roof tiles B는 카메라 수정 뒤에도 읽기 손실이 있을
+  때만 P2로 둔다. 권장 해상도는 일괄 상향이 아니라 기존 base texel/UV scale을 보존하고
+  secondary structure, macro breakup, edge blend, distance LOD 중 관찰에 맞는 방법을
+  선택하는 것이다.
+- 새 검토 가능 캡처는 no-HUD shipped baseline, dealer approach/counter, dialogue
+  NPC-camera, distant terrain/vegetation/sign 프레임을 같은 source/build lineage로 보내야
+  한다. 각 frame에는 `runId`, `sourceCommit`, `frameSourceCommit`, id/path/sha256/bytes,
+  renderer, viewport, `shippedPath`, `hud`, console counts, scene-gap `frameIds`를 붙인다.
+  이 메타데이터가 완전하면 capture contract는 PASS로 표시할 수 있지만, 사람의 visual
+  review가 끝나기 전에는 player-facing PASS로 승격하지 않는다.
+- `clunk.ui-readability.v1`는 `status: PASS|FAIL|UNAVAILABLE`, exit `0|2|4`를 유지하고,
+  `renderContext.css.sha256`, viewport, font, renderer, `metadataCompleteness`, 그리고
+  `criteria.deltaE76[].threshold`를 envelope에 보존한다. raster PASS는 엔진 import/runtime
+  또는 player-facing frame PASS가 아니다.
+- M98 대화 카메라는 `runtimeChecks[]`의 숫자 계약으로 연결할 수 있다. `id`는
+  `dialogue-camera-webgl2-r2`, `status: PASS`, renderer는 `WebGL2 fallback`,
+  `poseAssist: true`, `poseFocusId: npc.kang-taeho`, `poseFocusOnScreen: true`,
+  `poseFocusCoverage: 0.01517`, `poseFocusLensInside: false`, console `0/0`이다. 근거 JSON은
+  `.logs/verification/M98/dialogue-camera-webgl2-r2.json`, 캡처는
+  `.logs/screenshots/M98/dialogue-camera-webgl2-r2-A-opened.png`이며 1,242,189 bytes,
+  SHA-256 `EAB863CA9F8B03DA8DADBC72BD8D921CC7461753684B8B2CC7325D020B7EBC29`다. 이 캡처는
+  local Vite 기반이라 `shippedPath: false`다. 따라서 numeric runtime check는 PASS로 둘 수
+  있지만 `humanReview: NOT_EVALUATED`와 전체 `reviewStatus: NOT_EVALUATED`는 유지한다.
+
+## 2026-08-24 HF M98 runtime GLB MCP 재검증
+
+- `public/assets/runtime/tractor.compact.m1.glb`를
+  `examples/profiles/harvest-frontier.example.json`으로 read-only validate한 결과는
+  `valid: true`, score `100/100`, threshold `90`, hardBlocker `0`이다. inputHash는
+  `d92ae93240cc9b4d477df13cbddd0342738feb57ed9b8551e73d68fd83b3222c`, byteLength는
+  `680,412`, triangles `30,188`, meshes `88`, drawCall `88`이다.
+- findings의 `GEO-MISSING-NORMALS` info 7건과 `SCENE-NONUNIT-SCALE` info 181건,
+  `missingUvPrimitiveCount: 88`, bounds `±32767`, textureCount `0`는 numeric/structural
+  observation으로 보존한다. 이 PASS는 Three.js 실제 import·material·화면 가독성을 증명하지
+  않으며, `runtimeChecks[]` 또는 새 shipped frame의 human review와 분리한다.
+- Clunk는 HF 승인 없이 optimize를 호출하지 않는다. byte-changing output이 필요해지는
+  경우에만 source/output hash와 Passport, 변경 전후 renderer capture, fresh reopen 결과를
+  먼저 제출하고 HF visual review 뒤에 별도 실행한다.
+
+## 2026-08-24 HF M98 WebGPU 불변식 후속
+
+- 원문 파일은 `Harvest Frontier/.logs/verification/M98/HF-M98-inv-camera-clearance.json`과
+  `Harvest Frontier/.logs/verification/M98/HF-M98-invariant-set.json`이다. 후자의 실제
+  결과는 8개 중 6개 PASS, 2개 FAIL이다. ui-layout ko/en, mechanization, tile-farming,
+  camera-clearance, onboarding은 WebGPU·Chrome에서 console 0/0으로 PASS였고,
+  save-durability는 `No tile can accept 'water' (water 0)`, day-labour-save는
+  `밭 텔레포트` click timeout으로 실패했다. 이 두 실패는 현재 asset audit FAIL이나
+  player-facing visual approval로 분류하지 않고, HF 하니스 재현/기능 증거로 별도 보존한다.
+- camera-clearance 원문은 `renderer: webgpu`, `shippedPath: false`, `flowStatus: passed`,
+  console 0/0이며 딜러·장터·축사·과수원 spot의 `playerVisible`, `subjectOnScreen`,
+  `subjectLensInside`, `nearFillFraction`, `poseFocusCoverage`를 기록한다. 이는
+  `runtimeChecks[]`의 numeric layer에 넣을 수 있지만, 캡처가 실제 출하 경로가 아니므로
+  `reviewStatus: NOT_EVALUATED`, `visualRuntime: GAP`, `playerFacing: NOT_EVALUATED`는
+  바꾸지 않는다. HF evidence의 `sourceTree.clean: false`도 같은 lineage 주의사항으로 남긴다.
+- tractor MCP 숫자 계약은 다음처럼 보존한다: `valid: true`, score `100/100`, threshold
+  `90`, hardBlocker `0`, triangles `30,188`, meshes `88`, drawCall `88`, bytes `680,412`,
+  textureCount `0`, missingUvPrimitiveCount `88`, bounds `±32767`. `GEO-MISSING-NORMALS`
+  info `7`과 `SCENE-NONUNIT-SCALE` info `181`은 즉시 runtime FAIL이 아니라 관찰값이다.
+  다만 normals/UV 부재, 극단 bounds, 텍스처 0은 Three.js material·조명·카메라 거리에서
+  별도 검토할 위험 신호이므로 숫자 PASS와 화면 품질을 합치지 않는다.
+- `clunk.frame-manifest.v1`의 linked `assetInspections[].numericContract`를 사용하면
+  `status`, score/threshold, hardBlockerCount, findingIds와 `drawCallCount`,
+  `missingUvPrimitiveCount`, bounds 같은 실제 관찰값을 frameIds와 함께 저장할 수 있다.
+  이 필드는 static/numeric evidence이고 `visualRuntime`·`reviewStatus`를 절대 승격하지
+  않는다. append는 numericContract도 안정 ID로 upsert하고, replace는 전체 snapshot으로
+  취급한다.
+
+### Clunk 다음 제품 개선 우선순위
+
+1. **linked evidence bundle**: 한 제출에 shipped frame hash/viewport/renderer/console,
+   draw-call·asset manifest·inputHash·numeric findings를 연결하고, `capture contract`,
+   `numeric contract`, `human visual review`를 세 개의 독립 상태로 표시한다. WebGPU
+   camera gate PASS와 frame visual approval을 한 배지로 만들지 않는다.
+2. **frame-to-asset impact view**: scene gap 또는 draw-call/UV/normals/bounds observation을
+   클릭하면 연결 frame과 해당 asset의 source hash, target profile, 사용 거리/씬을 같이
+   보여준다. HF의 원경 지형·식생 반복, 6종 작물 구분, 캐릭터 silhouette/간판 판독성은
+   static GLB finding이 아니라 이 화면에서 우선순위를 매길 대상이다.
+3. **reproducible shipped-path capture runner**: HF가 runId/sourceCommit/frameSourceCommit,
+   renderer 선택, viewport, asset manifest와 capture hash를 한 번에 제출하고 Clunk가
+   같은 run의 draw-call/texture/material/animation manifest를 read-only로 재검사하게
+   한다. WebGPU unavailable이면 PASS 대신 `UNAVAILABLE`을 남기고, WebGL2 fallback은
+   renderer 차이를 숨기지 않는다.
+
+HF 6종 작물·식생·캐릭터 에셋에 가장 유용한 즉시 단계는 (a) 작물별 source asset hash와
+semantic role을 연결한 manifest, (b) 근거리/15m/원거리 shipped frame 세트, (c) 캐릭터
+portrait 46px raster와 실제 월드 silhouette frame을 같은 runId로 제출하는 것이다. Clunk는
+현재 bytes/구조/정적 texture·UI raster와 evidence linkage를 제공하고, 작물의 실제 게임
+가독성·식생 반복·캐릭터 상업적 품질은 HF의 브라우저 캡처 human review로 남긴다.

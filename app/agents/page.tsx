@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { SiteShell } from "../components/SiteShell";
 import { AgentsClient } from "./AgentsClient";
 import {
+  ASSET_INSPECTION_CONTRACT,
+  GENERATION_CONTRACT,
   ASSET_KIND_COVERAGE,
   COLLABORATION_CONTRACT,
   MCP_SERVER,
@@ -11,6 +13,8 @@ import {
   TARGET_PROFILES,
   TEXTURE_AUDIT_CONTRACT,
   UI_READABILITY_CONTRACT,
+  QUALITY_WARNING_CONTRACT,
+  HF_TEXTURE_SCENE_GAPS,
 } from "../components/product-facts";
 
 export const metadata: Metadata = {
@@ -105,7 +109,7 @@ export default function AgentsPage() {
         <section className="agents-tools-section">
           <div className="agents-section-head agents-section-head-tight">
             <span className="eyebrow">TOOLS THE AGENT CAN CALL</span>
-            <h2>에이전트가 실제로 부르는 네 가지 도구</h2>
+            <h2>에이전트가 실제로 부르는 다섯 가지 도구</h2>
           </div>
           <div className="agents-tools-grid">
             {MCP_TOOLS.map((tool, index) => (
@@ -155,6 +159,19 @@ export default function AgentsPage() {
               </article>
             ))}
           </div>
+          <div className="agents-ci-grid agents-generation-contract">
+            <article className="agents-ci-card">
+              <span className="mono-label">PROFILE-AWARE AUTHORING</span>
+              <code>{GENERATION_CONTRACT.result}</code>
+              <p>{GENERATION_CONTRACT.supported}. {GENERATION_CONTRACT.verification}.</p>
+              <pre><code>{GENERATION_CONTRACT.command}</code></pre>
+            </article>
+            <article className="agents-ci-card">
+              <span className="mono-label">NO PRETEND OUTPUT</span>
+              <code>{GENERATION_CONTRACT.request}</code>
+              <p>{GENERATION_CONTRACT.unavailable}. {GENERATION_CONTRACT.passport}.</p>
+            </article>
+          </div>
         </section>
 
         <section className="agents-ci-section" aria-labelledby="ci-contract-heading">
@@ -175,8 +192,22 @@ export default function AgentsPage() {
               <code>{UI_READABILITY_CONTRACT.schema}</code>
               <p><strong>{UI_READABILITY_CONTRACT.status}</strong> · capability <strong>{UI_READABILITY_CONTRACT.capability}</strong> · exit <strong>{UI_READABILITY_CONTRACT.exit}</strong></p>
               <pre><code>{UI_READABILITY_CONTRACT.command}</code></pre>
-              <small>원본 128px을 config의 실제 renderPx( HF는 46px )로 재래스터화해 명도 범위·엣지·국소 대비·그룹 ΔE76을 측정합니다. PASS여도 엔진 import/runtime과 실제 플레이어 프레임은 <strong>NOT_EVALUATED</strong>입니다.</small>
+              <small>원본 128px을 config의 실제 renderPx( HF는 46px )로 재래스터화해 명도 범위·엣지·국소 대비·그룹 ΔE76을 측정합니다. {UI_READABILITY_CONTRACT.metadata} · {UI_READABILITY_CONTRACT.deltaE}. PASS여도 엔진 import/runtime과 실제 플레이어 프레임은 <strong>NOT_EVALUATED</strong>입니다.</small>
             </article>
+          </div>
+          <p className="agents-section-note">
+            texture 품질 후속은 <code>{QUALITY_WARNING_CONTRACT.field}</code>의 <code>{QUALITY_WARNING_CONTRACT.status}</code>로
+            hard validation과 분리합니다. HF 경고인 grass-meadow 15m D, dirt-path C, soil-tilled D,
+            wood-planks C, plaster C, roof tiles B는 실제 shipped frame 거리와 사용처를 붙여 개선합니다.
+          </p>
+          <div className="agents-warning-list" aria-label="Harvest Frontier texture warning prescriptions">
+            {HF_TEXTURE_SCENE_GAPS.map((item) => (
+              <article key={item.id}>
+                <div><strong>{item.label} · {item.grade}</strong><span>{item.priority} · NON_BLOCKING</span></div>
+                <p>{item.context}</p>
+                <small>{item.prescription}</small>
+              </article>
+            ))}
           </div>
         </section>
 
@@ -185,9 +216,11 @@ export default function AgentsPage() {
             <span className="eyebrow">THE HANDOFF</span>
             <h2>Harvest Frontier처럼 실제 게임 프로젝트에 연결하는 흐름</h2>
             <p>
-              생성 에이전트가 GLB를 만든 뒤 Clunk를 호출하고, 게임 프로젝트는 원본과 검사 결과를
+              생성 에이전트가 에셋을 만든 뒤 Clunk를 호출하고, 게임 프로젝트는 원본과 검사 결과를
               분리해 받습니다. Clunk는 아직 게임 엔진을 대신 실행하지 않지만, 어느 파일을 어떤
-              규칙으로 넘겼는지 재현 가능한 증거를 남깁니다.
+              규칙으로 넘겼는지 재현 가능한 증거를 남깁니다. 엔진 인지 검사는
+              <code>clunk_asset_inspect</code>와 <code>npm.cmd run asset:inspect</code>에서 같은
+              <code>AssetEvidence</code>를 반환합니다.
             </p>
             <a className="text-link" href="/app">
               샘플 GLB 검사해 보기 <span aria-hidden="true">→</span>
@@ -246,7 +279,13 @@ export default function AgentsPage() {
               custom/base profile을 고정한 뒤 메모와 <code>{COLLABORATION_CONTRACT.evidence}</code>를 함께 추가합니다.
               frame manifest의 <code>sceneGaps</code>는 증거를 보존하지만 player-facing 판정을 자동으로 PASS로 올리지
               않고 <code>{COLLABORATION_CONTRACT.playerFacing}</code>로 남습니다. texture/gameplay-band detail loss는
-              <code>{COLLABORATION_CONTRACT.prescriptions}</code>로 다음 조치를 남길 수 있습니다. 공개 HTTP MCP는 여전히 제공하지 않습니다.
+              <code>{COLLABORATION_CONTRACT.prescriptions}</code>로 다음 조치를 남길 수 있습니다. 기본 상태는
+              <code>{COLLABORATION_CONTRACT.evidenceDefaults}</code>이며, 다음 캡처는
+              <code>{COLLABORATION_CONTRACT.evidenceWriteMode}</code>로 기존 gap/prescription 보존 여부를 명시합니다.
+              현재 실제 M94 저장값은 <code>{COLLABORATION_CONTRACT.storedM94}</code>입니다. 공개 HTTP MCP는 여전히 제공하지 않습니다.
+              원본 에셋을 frame과 묶을 때는 <code>{COLLABORATION_CONTRACT.linkedAssetInspection}</code>을 사용하며,
+              바이트 검사는 <code>{ASSET_INSPECTION_CONTRACT.request}</code>의 인증 API 또는
+              <code>{ASSET_INSPECTION_CONTRACT.cli}</code>로 실행합니다.
             </p>
           </div>
           <a className="button button-quiet button-sm" href="/dashboard">대시보드에서 메모 남기기 <span aria-hidden="true">→</span></a>

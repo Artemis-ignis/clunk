@@ -17,6 +17,27 @@ export async function loadBundle(entryPath: string): Promise<{ bundle: AssetBund
   return { absolutePath, bundle: createBundleFromFiles(entryName, files) };
 }
 
+export async function loadAssetOpsInput(entryPath: string): Promise<{
+  absolutePath: string;
+  fileName: string;
+  bytes: Uint8Array;
+  bundleFiles: ReadonlyMap<string, Uint8Array>;
+}> {
+  const absolutePath = resolve(entryPath);
+  const root = dirname(absolutePath);
+  const bytes = new Uint8Array(await readFile(absolutePath));
+  const bundleFiles = new Map<string, Uint8Array>();
+  for (const path of await collectFiles(root)) {
+    bundleFiles.set(relative(root, path).split(sep).join("/"), new Uint8Array(await readFile(path)));
+  }
+  return {
+    absolutePath,
+    fileName: absolutePath.slice(absolutePath.lastIndexOf(sep) + 1),
+    bytes,
+    bundleFiles,
+  };
+}
+
 export async function writeOutputBundle(bundle: AssetBundle, outputPath: string, inputEntry?: string): Promise<void> {
   const outputAbsolute = resolve(outputPath);
   const outputRoot = dirname(outputAbsolute);

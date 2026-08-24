@@ -31,6 +31,20 @@ test("built-in target profiles declare engine and platform constraints", () => {
   }
 });
 
+test("Harvest Frontier target profile exposes all declared 2D and 3D asset kinds", () => {
+  const profile = getBuiltInTargetProfiles().find((item) => item.id === "harvest-frontier-web-three");
+  assert.ok(profile);
+  assert.deepEqual(profile.assetKinds, ["3d-model", "animation-clip", "2d-image", "sprite-atlas", "spine-project"]);
+  assert.ok(profile.acceptedFormats.includes("json"));
+  assert.ok(profile.acceptedFormats.includes("atlas"));
+  assert.deepEqual(profile.inspectionPolicy, {
+    maxTriangles: 40000,
+    maxMaterials: 64,
+    maxTextureMemoryBytes: 0,
+    maxTextureDimension: 0,
+  });
+});
+
 test("a skipped runtime gate cannot become READY", () => {
   const target = getBuiltInTargetProfiles().find((profile) => profile.id === "godot-4");
   assert.ok(target);
@@ -73,4 +87,32 @@ test("environment-unavailable evidence remains visible and non-production", () =
 
   assert.equal(evidence.status, "ENVIRONMENT_UNAVAILABLE");
   assert.equal(evidence.productionReady, false);
+});
+
+test("quality warnings are explicit non-blocking output separate from hard validation", () => {
+  const target = getBuiltInTargetProfiles().find((profile) => profile.id === "godot-4");
+  assert.ok(target);
+  const evidence = createEvidenceEnvelope({
+    runId: "run-quality-warning",
+    source: { path: "grass.png", bytes: 8, sha256: "sha-input", format: "png" },
+    target,
+    stages: {
+      bytes: gate("pass"),
+      structure: gate("pass"),
+      policy: gate("pass"),
+      import: gate("pass"),
+      runtime: gate("pass"),
+    },
+    findings: [],
+    qualityWarnings: [{
+      id: "grass-close-d-15m",
+      domain: "texture",
+      status: "NON_BLOCKING",
+      message: "Grass close layer loses detail at 15m.",
+    }],
+  });
+  assert.equal(evidence.status, "READY");
+  assert.equal(evidence.qualityWarnings[0]?.domain, "texture");
+  assert.equal(evidence.qualityWarnings[0]?.status, "NON_BLOCKING");
+  assert.equal(evidence.productionReady, true);
 });

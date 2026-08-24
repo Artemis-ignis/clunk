@@ -85,6 +85,43 @@ test("UI readability CLI writes the same PASS envelope to --out", async () => {
   }
 });
 
+test("UI readability preserves CSS, viewport, font, renderer, and DeltaE criteria metadata", async () => {
+  const directory = await mkdtemp("clunk-ui-readability-metadata-");
+  try {
+    await writePortrait(join(directory, "alpha.png"), "alpha");
+    await writePortrait(join(directory, "beta.png"), "beta");
+    await writeFile(join(directory, "portrait.css"), ".portrait { image-rendering: auto; }", "utf8");
+    const configPath = join(directory, "portrait-ui.json");
+    await writeFile(configPath, JSON.stringify({
+      renderContext: {
+        css: { path: "portrait.css" },
+        viewport: { width: 1920, height: 1080, dpr: 1 },
+        font: { family: "Inter", sizePx: 16, weight: 600, lineHeight: 1.2 },
+        render: { engine: "browser-css", renderer: "sharp-raster", kernel: "lanczos3" },
+      },
+      groups: [{
+        name: "metadata portraits",
+        sourcePx: 128,
+        renderPx: 46,
+        files: ["alpha.png", "beta.png"],
+        thresholds: { minLuminanceRange: 0.12, minEdgeDensity: 0.01, minLocalContrastCoverage: 0.02, minPairwiseDeltaE76: 0.25 },
+      }],
+    }, null, 2), "utf8");
+    const result = runCli(["--config", configPath, "--format", "json", "--strict"]);
+
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(result.payload.metadataCompleteness, "COMPLETE");
+    assert.equal(result.payload.renderContext.viewport.width, 1920);
+    assert.equal(result.payload.renderContext.font.family, "Inter");
+    assert.equal(result.payload.renderContext.render.renderer, "sharp-raster");
+    assert.match(result.payload.renderContext.css.sha256, /^[a-f0-9]{64}$/);
+    assert.equal(result.payload.criteria.deltaE76[0].metric, "meanDeltaE76");
+    assert.equal(result.payload.criteria.deltaE76[0].threshold, 0.25);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
 function runCli(args) {
   try {
     const stdout = execFileSync(process.execPath, [cli, ...args], { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });

@@ -33,6 +33,38 @@ npm 라이브러리가 아니라 에이전트 스킬이다. 이미지를 근거�
   `blades_pivot`, 중복 없는 머티리얼 5종, userData(sockets)가 glTF extras로 보존된다.
 - 이후 단계는 기존 Clunk 표면 그대로: CLI/MCP/웹 검사기·`watch` 모드.
 
+## 엔진 프로파일 생성 계약
+
+프로파일 기반 생성은 산출물을 만들었다는 문장만 저장하지 않습니다. 요청 hash, source
+provenance, recipe hash, target profile, 별도 output directory를 함께 기록하고, 생성 직후
+같은 profile로 새 프로세스에서 output reopen을 수행합니다. 입력 factory 디렉터리와 output
+directory가 겹치거나 output 파일이 이미 있으면 덮어쓰지 않고 중단합니다.
+
+현재 실제 authoring adapter는 텍스처 없는 `threejs-factory-v1` 하나입니다.
+
+```powershell
+npm.cmd run asset:generate -- `
+  --factory examples/generated/windmill.factory.mjs `
+  --target-profile godot-4 `
+  --recipe-id threejs-factory-v1 `
+  --recipe-version 1.0.0 `
+  --source-kind reference `
+  --license Apache-2.0 `
+  --output-directory $env:TEMP\clunk-generation\godot-windmill `
+  --out $env:TEMP\clunk-generation\godot-windmill.json
+```
+
+결과 schema는 `clunk.asset-generation-result.v1`입니다. `artifact.path`, `artifact.bytes`,
+`artifact.sha256`, `plan.recipeHash`, `evidence.stages.outputReopen`, 그리고 동일 target의
+`evidence`를 확인해야 합니다. 엔진 importer/runtime이 실행되지 않은 환경에서는 exit `4`와
+`ENVIRONMENT_UNAVAILABLE`을 반환하며, 구조 PASS를 READY나 플레이어 화면 PASS로 승격하지
+않습니다. 2D 이미지·Sprite·Spine 생성 adapter는 아직 출하되지 않았으므로 요청은
+`AUTHORING_UNAVAILABLE` 및 exit `4`로 끝나고 pretend 파일을 만들지 않습니다.
+
+`passport`는 procedural factory 자체를 원본 asset인 것처럼 꾸미지 않기 위해 자동 생성하지
+않습니다. 실제 source asset과 output asset이 모두 있을 때에만 `clunk_passport`로 두 파일을
+새로 검사해 source/output hash와 inspection digest를 연결합니다.
+
 ## 실증 기록 (2026-08-21, 전부 실측)
 
 | 단계 | 결과 |

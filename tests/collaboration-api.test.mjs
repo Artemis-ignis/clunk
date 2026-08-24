@@ -50,5 +50,46 @@ test("frame manifest evidence has a versioned migration and API envelope", async
   assert.match(contract, /reviewStatus/);
   assert.match(docs, /clunk\.frame-manifest\.v1/);
   assert.match(docs, /sceneGaps/);
+  assert.match(docs, /runtimeChecks/);
   assert.match(docs, /NOT_EVALUATED/);
+});
+
+test("frame evidence writes expose explicit append and replace semantics", async () => {
+  const helper = await source("app/api/_lib/collaboration.ts");
+  const item = await source("app/api/collaboration/threads/[threadId]/route.ts");
+  const messages = await source("app/api/collaboration/threads/[threadId]/messages/route.ts");
+  const docs = await source("app/docs/page.tsx");
+  assert.match(helper, /FrameManifestWriteMode/);
+  assert.match(helper, /evidenceMode/);
+  assert.match(item, /mergeStoredEvidence/);
+  assert.match(messages, /evidenceMode/);
+  assert.match(docs, /append/);
+  assert.match(docs, /replace/);
+  assert.match(docs, /5978400B0DD77A5ED90EDE70617726B0DB838A5892075BDDD18DA5CCE0F58E15/i);
+  assert.match(docs, /distant-terrain-band/);
+  assert.match(docs, /dialogue-composition/);
+  assert.match(docs, /wood SOFT-SEAM/);
+  assert.match(docs, /poseFocusCoverage/);
+});
+
+test("collaboration UI keeps capture integrity, asset audit, and human visual review separate", async () => {
+  const panel = await source("app/components/CollaborationPanel.tsx");
+  const agents = await source("app/agents/page.tsx");
+  const facts = await source("app/components/product-facts.ts");
+  const docsPage = await source("app/docs/page.tsx");
+  assert.match(panel, /CAPTURE CONTRACT PASS/);
+  assert.match(panel, /NUMERIC CONTRACT PASS/);
+  assert.match(panel, /HUMAN VISUAL REVIEW/);
+  assert.match(panel, /runtimeChecks/);
+  assert.match(panel, /assetInspections/);
+  assert.match(panel, /numericContract/);
+  assert.match(panel, /qualityWarnings/);
+  assert.match(agents, /environmentUnavailable/);
+  assert.match(facts, /status: "NON_BLOCKING"/);
+  assert.match(facts, /grass-meadow-15m/);
+  assert.match(facts, /secondary macro\/detail/);
+  assert.match(docsPage, /HF-M94-packaged-r01-03-game-nohud/i);
+  assert.match(facts, /dealer approach/);
+  assert.match(facts, /frameSourceCommit/);
+  assert.match(facts, /HF_M98_RUNTIME_UPDATE/);
 });

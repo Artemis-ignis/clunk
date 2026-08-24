@@ -61,5 +61,5 @@ const exporter = new GLTFExporter();
 const result = await exporter.parseAsync(scene, { binary: true });
 if (!(result instanceof ArrayBuffer)) throw new Error("Expected a binary GLB ArrayBuffer.");
 
-await writeFile(resolve(outPath), Buffer.from(result));
+await writeFile(resolve(outPath), Buffer.from(result), { flag: "wx" });
 process.stdout.write(`[threejs-to-glb] ${outPath} (${result.byteLength.toLocaleString()} bytes)\n`);

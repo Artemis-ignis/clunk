@@ -15,6 +15,14 @@ export interface TargetPlugin {
   required: boolean;
 }
 
+export interface TargetInspectionPolicy {
+  maxTriangles?: number;
+  maxMaterials?: number;
+  maxTextureMemoryBytes?: number;
+  maxTextureDimension?: number;
+  readyScoreThreshold?: number;
+}
+
 export interface TargetProfile {
   id: string;
   label: string;
@@ -37,6 +45,7 @@ export interface TargetProfile {
     memoryBudgetBytes?: number;
     compression?: readonly string[];
   };
+  inspectionPolicy?: TargetInspectionPolicy;
   animationPolicy?: {
     requiredClips?: readonly string[];
     maxClipCount?: number;
@@ -72,6 +81,16 @@ export interface GateResult {
 export interface AssetEvidenceFinding {
   id: string;
   severity: "INFO" | "WARNING" | "ERROR" | "CRITICAL";
+  message: string;
+  path?: string;
+}
+
+export type AssetQualityWarningDomain = "texture" | "sprite" | "spine" | "animation" | "model";
+
+export interface AssetQualityWarning {
+  id: string;
+  domain: AssetQualityWarningDomain;
+  status: "NON_BLOCKING";
   message: string;
   path?: string;
 }
@@ -117,10 +136,13 @@ export interface AssetEvidence {
   runId: string;
   assetKind: AssetKind;
   source: AssetEvidenceSource;
+  ruleSetId?: string;
+  ruleSetVersion?: string;
   recipe?: AssetEvidenceRecipe;
   target: TargetProfile;
   stages: AssetEvidenceStages;
   findings: readonly AssetEvidenceFinding[];
+  qualityWarnings: readonly AssetQualityWarning[];
   artifact?: AssetEvidenceArtifact;
   status: AssetEvidenceStatus;
   productionReady: boolean;
@@ -130,10 +152,13 @@ export interface CreateEvidenceEnvelopeInput {
   runId: string;
   assetKind?: AssetKind;
   source: AssetEvidenceSource;
+  ruleSetId?: string;
+  ruleSetVersion?: string;
   recipe?: AssetEvidenceRecipe;
   target: TargetProfile;
   stages: AssetEvidenceStages;
   findings: readonly AssetEvidenceFinding[];
+  qualityWarnings?: readonly AssetQualityWarning[];
   artifact?: AssetEvidenceArtifact;
 }
 
@@ -173,10 +198,13 @@ export function createEvidenceEnvelope(input: CreateEvidenceEnvelopeInput): Asse
     runId: input.runId,
     assetKind: input.assetKind ?? "3d-model",
     source: input.source,
+    ...(input.ruleSetId ? { ruleSetId: input.ruleSetId } : {}),
+    ...(input.ruleSetVersion ? { ruleSetVersion: input.ruleSetVersion } : {}),
     ...(input.recipe ? { recipe: input.recipe } : {}),
     target: input.target,
     stages: input.stages,
     findings: input.findings,
+    qualityWarnings: input.qualityWarnings ?? [],
     ...(input.artifact ? { artifact: input.artifact } : {}),
     status: hasBlockingFinding && status === "READY" ? "BLOCKED" : status,
     productionReady: status === "READY" && !hasBlockingFinding,

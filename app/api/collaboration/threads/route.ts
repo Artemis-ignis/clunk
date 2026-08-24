@@ -91,6 +91,7 @@ export async function POST(request: Request) {
         ruleSetId: payload.ruleSetId,
         status,
         evidence: payload.evidence ?? null,
+        evidenceMode: payload.evidenceMode,
       },
     }, { status: 201 });
   } catch (error) {

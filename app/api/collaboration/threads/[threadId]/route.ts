@@ -10,6 +10,7 @@ import {
 } from "../../../_lib/clunk";
 import {
   evidenceJson,
+  mergeStoredEvidence,
   parseThreadPayload,
   parseStoredEvidence,
   resolveStoredStatus,
@@ -92,6 +93,11 @@ export async function PATCH(request: Request, context: RouteContext) {
     const db = getRuntimeDb();
     const existing = await findThread(db, workspaceId, threadId);
     if (!existing) return privateJson({ ok: false, error: "Collaboration thread not found." }, { status: 404 });
+    const evidence = mergeStoredEvidence(
+      parseStoredEvidence(existing.evidence),
+      payload.evidence,
+      payload.evidenceMode,
+    );
     await db
       .prepare(
         `UPDATE clunk_collaboration_threads
@@ -107,12 +113,12 @@ export async function PATCH(request: Request, context: RouteContext) {
         payload.profileId,
         payload.ruleSetId,
         statusJson(status),
-        evidenceJson(payload.evidence),
+        evidenceJson(evidence ?? undefined),
         threadId,
         workspaceId,
       )
       .run();
-    return privateJson({ ok: true, threadId, status, evidence: payload.evidence ?? null });
+    return privateJson({ ok: true, threadId, status, evidence: evidence ?? null, evidenceMode: payload.evidenceMode });
   } catch (error) {
     return jsonError(error);
   }

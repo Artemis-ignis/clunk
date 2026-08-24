@@ -11,6 +11,7 @@ import {
 } from "../../../../_lib/clunk";
 import {
   evidenceJson,
+  mergeStoredEvidence,
   parseMessagePayload,
   parseStoredEvidence,
   parseStoredStatus,
@@ -80,6 +81,11 @@ export async function POST(request: Request, context: RouteContext) {
     const status = payload.status
       ? resolveStoredStatus(payload.status)
       : parseStoredStatus(JSON.parse(String(thread.status ?? "{}")));
+    const evidence = mergeStoredEvidence(
+      parseStoredEvidence(thread.evidence),
+      payload.evidence,
+      payload.evidenceMode,
+    );
     const messageId = scopedStorageId("message", workspaceId, `${threadId}:${crypto.randomUUID()}`);
     await db
       .prepare(
@@ -97,14 +103,21 @@ export async function POST(request: Request, context: RouteContext) {
         payload.inputHash,
         payload.targetProfileId,
         statusJson(status),
-        evidenceJson(payload.evidence),
+        evidenceJson(evidence ?? undefined),
       )
       .run();
-    await db
-      .prepare(`UPDATE clunk_collaboration_threads SET updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ?`)
-      .bind(threadId, workspaceId)
-      .run();
-    return privateJson({ ok: true, messageId, status }, { status: 201 });
+    if (payload.evidence !== undefined) {
+      await db
+        .prepare(`UPDATE clunk_collaboration_threads SET evidence_json = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ?`)
+        .bind(evidenceJson(evidence ?? undefined), threadId, workspaceId)
+        .run();
+    } else {
+      await db
+        .prepare(`UPDATE clunk_collaboration_threads SET updated_at = CURRENT_TIMESTAMP WHERE id = ? AND workspace_id = ?`)
+        .bind(threadId, workspaceId)
+        .run();
+    }
+    return privateJson({ ok: true, messageId, status, evidence: evidence ?? null, evidenceMode: payload.evidenceMode }, { status: 201 });
   } catch (error) {
     return jsonError(error);
   }
