@@ -63,6 +63,8 @@ test("frame manifest v1 normalizes screenshot evidence without changing player-f
     frames: [{
       id: "m84-no-hud-world",
       path: ".logs/screenshots/M84/",
+      frameSourceCommit: "d3d56464",
+      bytes: 2821399,
       renderer: "webgpu",
       hud: "off",
       viewport: { width: 2560, height: 1440, dpr: 1 },
@@ -92,6 +94,8 @@ test("frame manifest v1 normalizes screenshot evidence without changing player-f
   assert.equal(manifest.reviewStatus, "NOT_EVALUATED");
   assert.equal(manifest.frames[0]?.viewport?.width, 2560);
   assert.equal(manifest.frames[0]?.shippedPath, true);
+  assert.equal(manifest.frames[0]?.frameSourceCommit, "d3d56464");
+  assert.equal(manifest.frames[0]?.bytes, 2821399);
   assert.deepEqual(manifest.frames[0]?.console, { errors: 0, warnings: 0 });
   assert.deepEqual(manifest.sceneGaps[0]?.frameIds, ["m84-no-hud-world"]);
   assert.equal(manifest.prescriptions?.[0]?.status, "NON_BLOCKING");

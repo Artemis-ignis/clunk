@@ -31,6 +31,8 @@ export interface FrameManifestFrame {
   id: string;
   path: string;
   sha256?: string;
+  bytes?: number;
+  frameSourceCommit?: string;
   viewport?: FrameViewport;
   renderer?: string;
   hud: FrameHudState;
@@ -158,6 +160,9 @@ function normalizeFrame(value: unknown, index: number): FrameManifestFrame {
     if (!/^[a-f0-9]{64}$/.test(sha256)) throw new Error(`${label}.sha256 must be a 64-character hexadecimal hash`);
     frame.sha256 = sha256;
   }
+  if (record.bytes !== undefined) frame.bytes = positiveNumber(record, "bytes", label, true);
+  const frameSourceCommit = optionalText(record, "frameSourceCommit", label, 160);
+  if (frameSourceCommit) frame.frameSourceCommit = frameSourceCommit;
   if (record.viewport !== undefined) frame.viewport = normalizeViewport(record.viewport, `${label}.viewport`);
   const renderer = optionalText(record, "renderer", label, 120);
   if (renderer) frame.renderer = renderer;

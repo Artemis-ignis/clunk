@@ -279,3 +279,17 @@ npm.cmd run asset:ui-readability -- --config tools/asset-pipeline/ui-readability
   `A/B`, ridge/plaster/roof는 stronger다. 이 항목들은 `prescriptions[].status:
   NON_BLOCKING`으로 두고, HF가 shipped-frame 캡처를 기준으로 runtime material 또는
   second-layer 변경 여부를 결정한다. texture PASS를 blanket player-facing PASS로 승격하지 않는다.
+
+### 최종 manifest payload
+
+현재 HF 문서 기준 커밋은 `sourceCommit: 3e3e343`이며, 해당 프레임을 생성한 빌드는
+`frameSourceCommit: d3d56464`로 분리 기록한다. frame entry에는 `bytes: 2821399`,
+`shippedPath: true`, `renderer: auto/WebGPU`, viewport `1920×1080`, console
+`{ errors: 0, warnings: 0 }`, 그리고 다음 SHA-256을 보존한다:
+`5978400B0DD77A5ED90EDE70617726B0DB838A5892075BDDD18DA5CCE0F58E15`.
+
+`prescriptions[]`에는 다음을 모두 `status: NON_BLOCKING`으로 기록한다: grass close layer
+`D @ 15m`, dirt path `C @ 15m`, tilled soil `D @ 15m`, wider grass layer `A/B`,
+ridge/plaster/roof detail strengthening, wood `SOFT-SEAM`. 이 목록은 texture audit의
+actionable prescription이며, 정적 asset PASS를 FAIL로 바꾸거나 player-facing PASS로
+승격하는 판정 필드가 아니다.

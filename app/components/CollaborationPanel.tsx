@@ -253,8 +253,8 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
             </div>
             <form onSubmit={createThread} className="collaboration-form">
               <label>제목<input value={subject} onChange={(event) => setSubject(event.target.value)} maxLength={240} /></label>
-              <label>메모<textarea value={body} onChange={(event) => setBody(event.target.value)} rows={3} placeholder="예: GLB audit PASS지만 shipped camera에서 작물 반복과 지형 경계가 보입니다." maxLength={10000} /></label>
-              <label>스크린샷/frame manifest <span className="field-hint">선택 · clunk.frame-manifest.v1 JSON</span><textarea className="collaboration-evidence-input" value={evidenceDraft} onChange={(event) => setEvidenceDraft(event.target.value)} rows={7} placeholder={FRAME_MANIFEST_PLACEHOLDER} maxLength={100000} /></label>
+              <label>메모<textarea aria-label="협업 메모 입력" value={body} onChange={(event) => setBody(event.target.value)} rows={3} placeholder="예: GLB audit PASS지만 shipped camera에서 작물 반복과 지형 경계가 보입니다." maxLength={10000} /></label>
+              <label>스크린샷/frame manifest <span className="field-hint">선택 · clunk.frame-manifest.v1 JSON</span><textarea aria-label="frame manifest JSON 입력" className="collaboration-evidence-input" value={evidenceDraft} onChange={(event) => setEvidenceDraft(event.target.value)} rows={7} placeholder={FRAME_MANIFEST_PLACEHOLDER} maxLength={100000} /></label>
               <div className="collaboration-form-grid">
                 <label>inputHash<input value={effectiveInputHash} onChange={(event) => setInputHash(event.target.value.trim().toLowerCase())} placeholder="64자리 sha256" /></label>
                 <label>custom profile<input value={effectiveProfileId} onChange={(event) => setProfileId(event.target.value)} /></label>
@@ -370,7 +370,7 @@ function EvidenceCard({ evidence }: { evidence: StoredEvidence }) {
         <span><small>scene gaps</small><strong>{evidence.sceneGaps.length}</strong></span>
       </div>
       <div className="collaboration-evidence-frames">
-        {evidence.frames.map((frame) => <span key={frame.id}><b>{frame.id}</b><small>{frame.hud} HUD · {frame.renderer ?? "renderer unknown"} · {frame.shippedPath === true ? "shipped path" : "path unverified"} · console {frame.console ? `${frame.console.errors}/${frame.console.warnings}` : "unknown"} · {frame.path}</small></span>)}
+        {evidence.frames.map((frame) => <span key={frame.id}><b>{frame.id}</b><small>{frame.hud} HUD · {frame.renderer ?? "renderer unknown"} · {frame.shippedPath === true ? "shipped path" : "path unverified"} · console {frame.console ? `${frame.console.errors}/${frame.console.warnings}` : "unknown"}{frame.frameSourceCommit ? ` · frame ${frame.frameSourceCommit}` : ""}{frame.bytes ? ` · ${frame.bytes.toLocaleString()} B` : ""} · {frame.path}</small></span>)}
       </div>
       <div className="collaboration-evidence-gaps">
         {evidence.sceneGaps.map((gap) => <span key={gap.id}><b>{gap.severity}</b>{gap.category} · {gap.note}</span>)}

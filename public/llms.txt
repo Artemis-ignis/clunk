@@ -164,6 +164,8 @@ The stable thread POST body is:
       "path": ".logs/screenshots/M84/real-capture.png",
       "renderer": "webgpu",
       "hud": "off",
+      "bytes": 2821399,
+      "frameSourceCommit": "d3d56464",
       "shippedPath": true,
       "console": { "errors": 0, "warnings": 0 },
       "viewport": { "width": 2560, "height": 1440, "dpr": 1 }
