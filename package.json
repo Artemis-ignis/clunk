@@ -21,7 +21,7 @@
     "assetops:bundle:test": "tsx tests/assetops-bundle-contract.test.ts",
     "assetops:api:test": "node --test tests/assetops-api-contract.test.mjs",
     "assetops:test": "npm run assetops:2d:test && npm run assetops:pipeline:test && npm run assetops:bundle:test && npm run assetops:api:test",
-    "collaboration:test": "tsx tests/collaboration-contract.test.ts && tsx tests/collaboration-acceptance.test.ts && node --test tests/collaboration-api.test.mjs tests/frame-manifest-cli.test.mjs tests/mcp-stdio.test.mjs",
+    "collaboration:test": "tsx tests/collaboration-contract.test.ts && tsx tests/collaboration-acceptance.test.ts && tsx tests/collaboration-api-runtime.test.ts && node --test tests/collaboration-api.test.mjs tests/frame-manifest-cli.test.mjs tests/mcp-stdio.test.mjs",
     "api:smoke": "tsx scripts/api-credit-smoke.ts",
     "e2e": "node scripts/e2e.mjs",
     "generate:samples": "node scripts/generate-sample-assets.mjs",

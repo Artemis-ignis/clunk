@@ -23,6 +23,7 @@ export type CollaborationReadinessReason =
 
 export const FRAME_MANIFEST_SCHEMA = "clunk.frame-manifest.v1" as const;
 export const FRAME_COMPARISON_SCHEMA = "clunk.frame-comparison.v1" as const;
+export const FRAME_ASSET_EVIDENCE_SCHEMA = "clunk.asset-evidence-ref.v1" as const;
 
 export type FrameHudState = "on" | "off" | "unknown";
 export type FrameReviewStatus = "NOT_EVALUATED";
@@ -45,6 +46,7 @@ export type FrameComparisonHumanDecision = "NOT_EVALUATED" | "PASS" | "NO_GO";
 export type SceneGapCloseoutStatus = "OPEN" | "CLOSED" | "REOPENED" | "NOT_EVALUATED";
 export type SceneGapCloseoutHumanDecision = "NOT_EVALUATED" | "PASS" | "NO_GO";
 export type FrameManifestAssetPlayerFacingStatus = "NOT_EVALUATED";
+export type FrameManifestAssetEvidenceFreshness = "CURRENT" | "STALE" | "UNKNOWN";
 
 export interface FrameViewport {
   width: number;
@@ -173,6 +175,8 @@ export interface FrameManifestAssetInspection {
   runtimeUsage?: FrameManifestAssetRuntimeUsage;
   /** Procedural/runtime-generated surfaces never become player-facing PASS automatically. */
   playerFacing: FrameManifestAssetPlayerFacingStatus;
+  /** Canonical source inspection provenance; freshness is producer-supplied and never visual approval. */
+  evidenceRef?: FrameManifestAssetEvidenceRef;
   provenance?: FrameManifestAssetProvenance;
   frameIds?: readonly string[];
   qualityWarningIds?: readonly string[];
@@ -184,6 +188,19 @@ export interface FrameManifestAssetProvenance {
   sourceCommit?: string;
   generator?: string;
   recipeId?: string;
+}
+
+export interface FrameManifestAssetEvidenceRef {
+  schema: typeof FRAME_ASSET_EVIDENCE_SCHEMA;
+  inputHash: string;
+  resultDigest: string;
+  byteLength: number;
+  coreBuildId: string;
+  ruleSetId: string;
+  ruleSetVersion: string;
+  profileId?: string;
+  analysisId?: string;
+  freshness: FrameManifestAssetEvidenceFreshness;
 }
 
 export type NumericContractValue = string | number | boolean;
@@ -242,6 +259,7 @@ export interface PlayerFacingSceneReview {
     evidenceStatus: FrameManifestAssetEvidenceStatus;
     runtimeUsage: FrameManifestAssetRuntimeUsage;
     playerFacing: FrameManifestAssetPlayerFacingStatus;
+    evidenceRef?: FrameManifestAssetEvidenceRef;
     numericContract?: Pick<FrameManifestNumericContract, "status" | "score" | "hardBlockerCount">;
   }[];
   comparison?: FrameManifestComparison;
@@ -653,8 +671,39 @@ function normalizeAssetInspection(value: unknown, index: number): FrameManifestA
   if (frameIds) inspection.frameIds = frameIds;
   const qualityWarningIds = normalizeStringArray(record.qualityWarningIds, `${label}.qualityWarningIds`, 128);
   if (qualityWarningIds) inspection.qualityWarningIds = qualityWarningIds;
+  if (record.evidenceRef !== undefined) inspection.evidenceRef = normalizeAssetEvidenceRef(record.evidenceRef, `${label}.evidenceRef`, inputHash);
   if (record.numericContract !== undefined) inspection.numericContract = normalizeNumericContract(record.numericContract, `${label}.numericContract`);
   return inspection;
+}
+
+function normalizeAssetEvidenceRef(value: unknown, label: string, expectedInputHash: string): FrameManifestAssetEvidenceRef {
+  const record = asRecord(value, label);
+  if (record.schema !== FRAME_ASSET_EVIDENCE_SCHEMA) {
+    throw new Error(`${label}.schema must be ${FRAME_ASSET_EVIDENCE_SCHEMA}`);
+  }
+  const inputHash = normalizeHash(record, "inputHash", label);
+  if (inputHash !== expectedInputHash) {
+    throw new Error(`${label}.inputHash must match assetInspections inputHash`);
+  }
+  const freshness = record.freshness;
+  if (freshness !== "CURRENT" && freshness !== "STALE" && freshness !== "UNKNOWN") {
+    throw new Error(`${label}.freshness must be CURRENT, STALE, or UNKNOWN`);
+  }
+  const evidenceRef: FrameManifestAssetEvidenceRef = {
+    schema: FRAME_ASSET_EVIDENCE_SCHEMA,
+    inputHash,
+    resultDigest: normalizeHash(record, "resultDigest", label),
+    byteLength: positiveNumber(record, "byteLength", label, true),
+    coreBuildId: requiredText(record, "coreBuildId", label, 160),
+    ruleSetId: requiredText(record, "ruleSetId", label, 160),
+    ruleSetVersion: requiredText(record, "ruleSetVersion", label, 80),
+    freshness,
+  };
+  const profileId = optionalText(record, "profileId", label, 160);
+  if (profileId) evidenceRef.profileId = profileId;
+  const analysisId = optionalText(record, "analysisId", label, 240);
+  if (analysisId) evidenceRef.analysisId = analysisId;
+  return evidenceRef;
 }
 
 function normalizeAssetProvenance(value: unknown, label: string): FrameManifestAssetProvenance {
@@ -931,6 +980,7 @@ export function evaluatePlayerFacingSceneReview(manifest: FrameManifest): Player
     evidenceStatus: asset.evidenceStatus,
     runtimeUsage: asset.runtimeUsage ?? "UNKNOWN" as const,
     playerFacing: asset.playerFacing,
+    ...(asset.evidenceRef ? { evidenceRef: asset.evidenceRef } : {}),
     ...(asset.numericContract
       ? { numericContract: {
         status: asset.numericContract.status,

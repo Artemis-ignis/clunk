@@ -147,3 +147,28 @@ test("dedicated evidence route keeps frame and asset review writes authenticated
   assert.match(helper, /parseEvidenceOnlyPayload/);
   assert.match(helper, /evidenceMode/);
 });
+
+test("asset evidence UI exposes digest, byte provenance, and freshness without changing visual status", async () => {
+  const contract = await source("packages/core/src/collaboration-contract.ts");
+  const panel = await source("app/components/CollaborationPanel.tsx");
+  const inspector = await source("app/components/ClunkInspector.tsx");
+  const dashboard = await source("app/components/DashboardClient.tsx");
+  const docs = await source("app/docs/page.tsx");
+  const llms = await source("public/llms.txt");
+  assert.match(contract, /clunk\.asset-evidence-ref\.v1/);
+  assert.match(contract, /evidenceRef/);
+  assert.match(contract, /resultDigest/);
+  assert.match(contract, /freshness/);
+  assert.match(panel, /RESULT DIGEST/);
+  assert.match(panel, /BYTE LENGTH/);
+  assert.match(panel, /CURRENT REINSPECTION/);
+  assert.match(panel, /STALE EVIDENCE/);
+  assert.match(panel, /FRESHNESS UNKNOWN/);
+  assert.match(panel, /STRUCTURAL ONLY/);
+  assert.match(inspector, /STRUCTURAL ONLY.*NOT VISUAL APPROVAL/);
+  assert.match(inspector, /resultDigest/);
+  assert.match(dashboard, /resultDigest/);
+  assert.match(docs, /clunk\.asset-evidence-ref\.v1/);
+  assert.match(docs, /STALE.*NOT CURRENT APPROVAL/);
+  assert.match(llms, /clunk\.asset-evidence-ref\.v1/);
+});

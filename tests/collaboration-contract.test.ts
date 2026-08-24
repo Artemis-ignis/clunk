@@ -571,6 +571,129 @@ test("frame manifest links shipped frames to source asset evidence without promo
   assert.equal(appended.assetInspections?.[0]?.inputHash, "b".repeat(64));
 });
 
+test("asset evidence reference preserves fresh hash provenance without promoting visual approval", () => {
+  const manifest = normalizeFrameManifest({
+    schema: FRAME_MANIFEST_SCHEMA,
+    runId: "HF-M113-tractor-r01",
+    sourceProject: "Harvest Frontier",
+    sourceCommit: "7a9433e",
+    reviewStatus: "NOT_EVALUATED",
+    visualRuntime: "GAP",
+    playerFacing: "NOT_EVALUATED",
+    frames: [{ id: "frame", path: "frame.png", hud: "off" }],
+    sceneGaps: [],
+    assetInspections: [{
+      id: "tractor-runtime-r01",
+      sourcePath: "public/assets/runtime/tractor.compact.m1.glb",
+      inputHash: "d92ae93240cc9b4d477df13cbddd0342738feb57ed9b8551e73d68fd83b3222c",
+      assetKind: "3d-model",
+      targetProfileId: "harvest-frontier-runtime-v1",
+      inspectionRunId: "analysis-d92ae93240cc-4789a69a",
+      evidenceStatus: "CONDITIONAL",
+      productionReady: false,
+      origin: "file",
+      playerFacing: "NOT_EVALUATED",
+      evidenceRef: {
+        schema: "clunk.asset-evidence-ref.v1",
+        inputHash: "d92ae93240cc9b4d477df13cbddd0342738feb57ed9b8551e73d68fd83b3222c",
+        resultDigest: "4789a69a70cecbd4f3cc30e70c17293c1776823747095467da9b8c5b4dc008df",
+        byteLength: 680412,
+        coreBuildId: "0.1.0",
+        ruleSetId: "harvest-frontier-runtime-v1",
+        ruleSetVersion: "0.1.0",
+        profileId: "pc",
+        analysisId: "analysis-d92ae93240cc-4789a69a",
+        freshness: "CURRENT",
+      },
+      numericContract: { status: "PASS", valid: true, score: 100, threshold: 90, hardBlockerCount: 0 },
+    }],
+  });
+
+  const evidenceRef = manifest.assetInspections?.[0]?.evidenceRef;
+  assert.equal(evidenceRef?.schema, "clunk.asset-evidence-ref.v1");
+  assert.equal(evidenceRef?.inputHash, "d92ae93240cc9b4d477df13cbddd0342738feb57ed9b8551e73d68fd83b3222c");
+  assert.equal(evidenceRef?.resultDigest, "4789a69a70cecbd4f3cc30e70c17293c1776823747095467da9b8c5b4dc008df");
+  assert.equal(evidenceRef?.byteLength, 680412);
+  assert.equal(evidenceRef?.freshness, "CURRENT");
+  assert.equal(manifest.reviewStatus, "NOT_EVALUATED");
+  assert.equal(manifest.visualRuntime, "GAP");
+  assert.equal(manifest.playerFacing, "NOT_EVALUATED");
+});
+
+test("stale asset evidence remains valid but never becomes current approval", () => {
+  const raw = {
+    schema: FRAME_MANIFEST_SCHEMA,
+    runId: "HF-stale-r01",
+    sourceProject: "Harvest Frontier",
+    sourceCommit: "old-head",
+    reviewStatus: "NOT_EVALUATED",
+    visualRuntime: "GAP",
+    playerFacing: "NOT_EVALUATED",
+    frames: [{ id: "frame", path: "frame.png", hud: "off" }],
+    sceneGaps: [],
+    assetInspections: [{
+      id: "tractor-old",
+      sourcePath: "public/assets/runtime/tractor.compact.m1.glb",
+      inputHash: "a".repeat(64),
+      assetKind: "3d-model",
+      targetProfileId: "harvest-frontier-runtime-v1",
+      inspectionRunId: "old-run",
+      evidenceStatus: "CONDITIONAL",
+      productionReady: false,
+      origin: "file",
+      evidenceRef: {
+        schema: "clunk.asset-evidence-ref.v1",
+        inputHash: "a".repeat(64),
+        resultDigest: "b".repeat(64),
+        byteLength: 100,
+        coreBuildId: "0.1.0",
+        ruleSetId: "harvest-frontier-runtime-v1",
+        ruleSetVersion: "0.1.0",
+        freshness: "STALE",
+      },
+    }],
+  };
+  const manifest = normalizeFrameManifest(raw);
+  assert.equal(manifest.assetInspections?.[0]?.evidenceRef?.freshness, "STALE");
+  assert.equal(manifest.visualRuntime, "GAP");
+  assert.equal(manifest.playerFacing, "NOT_EVALUATED");
+});
+
+test("mismatched asset evidence hash is rejected as invalid provenance", () => {
+  assert.throws(() => normalizeFrameManifest({
+    schema: FRAME_MANIFEST_SCHEMA,
+    runId: "HF-invalid-evidence-r01",
+    sourceProject: "Harvest Frontier",
+    sourceCommit: "7a9433e",
+    reviewStatus: "NOT_EVALUATED",
+    visualRuntime: "GAP",
+    playerFacing: "NOT_EVALUATED",
+    frames: [{ id: "frame", path: "frame.png", hud: "off" }],
+    sceneGaps: [],
+    assetInspections: [{
+      id: "tractor-invalid",
+      sourcePath: "public/assets/runtime/tractor.compact.m1.glb",
+      inputHash: "a".repeat(64),
+      assetKind: "3d-model",
+      targetProfileId: "harvest-frontier-runtime-v1",
+      inspectionRunId: "invalid-run",
+      evidenceStatus: "CONDITIONAL",
+      productionReady: false,
+      origin: "file",
+      evidenceRef: {
+        schema: "clunk.asset-evidence-ref.v1",
+        inputHash: "b".repeat(64),
+        resultDigest: "c".repeat(64),
+        byteLength: 100,
+        coreBuildId: "0.1.0",
+        ruleSetId: "harvest-frontier-runtime-v1",
+        ruleSetVersion: "0.1.0",
+        freshness: "CURRENT",
+      },
+    }],
+  }), /evidenceRef\.inputHash must match/);
+});
+
 test("frame manifest keeps procedural and runtime-generated asset provenance explicit", () => {
   const manifest = normalizeFrameManifest({
     schema: FRAME_MANIFEST_SCHEMA,

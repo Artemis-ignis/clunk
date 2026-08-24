@@ -334,6 +334,11 @@ function parseRunContext(run: RunContext): { inputHash: string; profileId?: stri
 function validHash(value: string): boolean { return /^[a-f0-9]{64}$/i.test(value); }
 function shortHash(value: string): string { return `${value.slice(0, 8)}…${value.slice(-6)}`; }
 function slug(value: string): string { return value.toLowerCase().replace(/_/g, "-"); }
+function freshnessLabel(freshness: "CURRENT" | "STALE" | "UNKNOWN"): string {
+  if (freshness === "CURRENT") return "CURRENT REINSPECTION";
+  if (freshness === "STALE") return "STALE EVIDENCE · NOT CURRENT APPROVAL";
+  return "FRESHNESS UNKNOWN · NOT CURRENT APPROVAL";
+}
 function collaborationLabel(status: CollaborationStatus): string {
   return `${collaborationReadinessLevel(status).toUpperCase()} · ${status.readiness} · ${status.readinessReason}`;
 }
@@ -458,6 +463,25 @@ function EvidenceCard({ evidence }: { evidence: StoredEvidence }) {
               <p>{inspection.sourcePath} · {shortHash(inspection.inputHash)} · {inspection.targetProfileId}</p>
               <small>origin · {inspection.origin} · ownership · {inspection.ownership ?? "unknown"} · runtime usage · {inspection.runtimeUsage ?? "UNKNOWN"} · player-facing · {inspection.playerFacing}{inspection.provenance ? ` · provenance ${inspection.provenance.sourceRef}${inspection.provenance.sourceCommit ? ` @ ${inspection.provenance.sourceCommit}` : ""}` : ""}</small>
               {inspection.numericContract ? <small>numeric contract · {inspection.numericContract.status}{inspection.numericContract.score !== undefined ? ` · score ${inspection.numericContract.score}/${inspection.numericContract.threshold ?? "?"}` : ""}{inspection.numericContract.hardBlockerCount !== undefined ? ` · hard blockers ${inspection.numericContract.hardBlockerCount}` : ""}{inspection.numericContract.observations ? ` · ${Object.entries(inspection.numericContract.observations).map(([key, value]) => `${key}=${String(value)}`).join(" · ")}` : ""}</small> : null}
+              <div className={`collaboration-asset-evidence-ref collaboration-evidence-freshness-${(inspection.evidenceRef?.freshness ?? "UNKNOWN").toLowerCase()}`}>
+                  <span className="mono-label">ASSET EVIDENCE REF · clunk.asset-evidence-ref.v1</span>
+                  {inspection.evidenceRef ? (
+                    <>
+                      <div className="collaboration-provenance-grid">
+                        <EvidenceHash label="INPUT HASH" value={inspection.evidenceRef.inputHash} />
+                        <EvidenceHash label="RESULT DIGEST" value={inspection.evidenceRef.resultDigest} />
+                        <div className="collaboration-provenance-field"><small>BYTE LENGTH</small><strong>{inspection.evidenceRef.byteLength.toLocaleString()} B</strong></div>
+                        <div className="collaboration-provenance-field"><small>RULE SET</small><strong>{inspection.evidenceRef.ruleSetId} · v{inspection.evidenceRef.ruleSetVersion}</strong></div>
+                      </div>
+                      <small>core build · {inspection.evidenceRef.coreBuildId}{inspection.evidenceRef.profileId ? ` · profile ${inspection.evidenceRef.profileId}` : ""}{inspection.evidenceRef.analysisId ? ` · analysis ${inspection.evidenceRef.analysisId}` : ""}</small>
+                    </>
+                  ) : (
+                    <small>이 legacy asset inspection에는 asset-evidence-ref.v1이 없습니다. 새 read-only 재검사 결과를 제출해야 provenance를 current로 확인할 수 있습니다.</small>
+                  )}
+                  <strong className="collaboration-evidence-freshness-label">{freshnessLabel(inspection.evidenceRef?.freshness ?? "UNKNOWN")}</strong>
+                  <strong className="collaboration-evidence-freshness-label">STRUCTURAL ONLY · NOT VISUAL APPROVAL</strong>
+                  <small>구조적 재검사 provenance만 표시합니다. 이 값은 visualRuntime 또는 playerFacing 승인을 올리지 않습니다.</small>
+                </div>
               {inspection.qualityWarningIds?.length ? <small>qualityWarnings · {inspection.qualityWarningIds.join(", ")}</small> : null}
             </article>
           ))}
@@ -496,4 +520,26 @@ function captureContractStatus(evidence: FrameManifest): "PASS" | "INCOMPLETE" {
     && frame.console?.warnings === 0
   ));
   return complete ? "PASS" : "INCOMPLETE";
+}
+
+function EvidenceHash({ label, value }: { label: string; value: string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1200);
+    } catch {
+      setCopied(false);
+    }
+  };
+  return (
+    <div className="collaboration-provenance-field">
+      <small>{label}</small>
+      <code title={value}>{value}</code>
+      <button type="button" className="button button-quiet button-sm" aria-label={`${label} 복사`} onClick={() => void copy()}>
+        {copied ? "복사됨" : "복사"}
+      </button>
+    </div>
+  );
 }

@@ -267,6 +267,26 @@ const FRAME_COMPARISON_SCHEMA_EXAMPLE = `// SCHEMA EXAMPLE · clunk.frame-compar
 // humanDecision=PASS plus evidence equal to the after frame. A closed gap never
 // changes visualRuntime=GAP or playerFacing=NOT_EVALUATED.`;
 
+const ASSET_EVIDENCE_REF_SCHEMA_EXAMPLE = `// SCHEMA EXAMPLE · clunk.asset-evidence-ref.v1
+// The values below are a real HF canonical reinspection example, not placeholders.
+{
+  "schema": "clunk.asset-evidence-ref.v1",
+  "inputHash": "d92ae93240cc9b4d477df13cbddd0342738feb57ed9b8551e73d68fd83b3222c",
+  "resultDigest": "4789a69a70cecbd4f3cc30e70c17293c1776823747095467da9b8c5b4dc008df",
+  "byteLength": 680412,
+  "coreBuildId": "0.1.0",
+  "ruleSetId": "harvest-frontier-runtime-v1",
+  "ruleSetVersion": "0.1.0",
+  "profileId": "pc",
+  "analysisId": "analysis-d92ae93240cc-4789a69a",
+  "freshness": "CURRENT"
+}
+
+// Semantics: CURRENT REINSPECTION is structural provenance only.
+// STALE EVIDENCE · NOT CURRENT APPROVAL and FRESHNESS UNKNOWN · NOT CURRENT APPROVAL
+// remain valid evidence states but never promote reviewStatus, visualRuntime, or playerFacing.
+// A malformed ref or inputHash mismatch is INVALID and is rejected by normalization/API.`;
+
 const PLAYER_FACING_SCENE_REVIEW_EXAMPLE = `// SCHEMA EXAMPLE · clunk.player-facing-scene-review.v1 · not a visual approval
 {
   "schema": "clunk.player-facing-scene-review.v1",
@@ -518,6 +538,7 @@ export default function DocsPage() {
             <CodeBlock title="schema template" language="json" code={FRAME_MANIFEST_SCHEMA_EXAMPLE} caption="다음 제출용 형식 예시입니다. <...> 값은 실제 캡처의 값으로 교체해야 합니다." />
           </div>
           <CodeBlock title="comparison.v1 + gap closeout" language="json" code={FRAME_COMPARISON_SCHEMA_EXAMPLE} caption="before/after는 동일 cameraPose·cameraPoseHash·renderer·viewport·sourceTreeHash를 강제합니다. closeout은 gap별로 닫히며 전체 visualRuntime을 승격하지 않습니다." />
+          <CodeBlock title="asset-evidence-ref.v1 · hash provenance" language="json" code={ASSET_EVIDENCE_REF_SCHEMA_EXAMPLE} caption="실제 값과 schema example을 분리해 표시합니다. CURRENT는 최신 구조 재검사 provenance일 뿐이며 STALE/UNKNOWN은 NOT CURRENT APPROVAL입니다. inputHash 불일치나 malformed ref는 INVALID입니다." />
           <CodeBlock title="source asset link API" language="json" code={`${ASSET_INSPECTION_API_EXAMPLE}\n\n// frame + asset evidence merge (authenticated)\nPOST /api/collaboration/threads/<THREAD_ID>/evidence\n{ "evidenceMode": "append", "evidence": <FULL_FRAME_MANIFEST> }`} caption="바이트 검사 응답과 frame manifest 저장은 분리됩니다. API는 인증된 workspace에서만 동작하며 placeholder는 실제 저장 evidence가 아닙니다." />
           <CodeBlock title="procedural/runtime provenance" language="json" code={PROCEDURAL_ASSET_SCHEMA_EXAMPLE} caption="procedural crop·vegetation·NPC는 GLB 바이트 PASS를 발명하지 않습니다. sourceRef/sourceCommit/generator/recipeId와 실제 frame을 함께 검토 대상으로 등록합니다." />
           <CodeBlock title="evidenceMode" language="bash" code={FRAME_MANIFEST_WRITE_RULES} caption="append는 기존 ID를 보존하고 같은 ID만 upsert합니다. 다른 runId/sourceProject append는 409로 거부합니다." />

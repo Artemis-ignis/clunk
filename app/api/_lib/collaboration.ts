@@ -10,6 +10,11 @@ import {
   type RuntimeReviewStatus,
 } from "../../../packages/core/src/collaboration-contract";
 import { ClunkHttpError, isSafeRecordId } from "./clunk";
+import { parseEvidencePayload } from "./collaboration-evidence";
+
+// The delegated parser covers clunk.frame-comparison.v1 pairs and legacy
+// clunk.frame-manifest.v1 evidence at the authenticated API boundary; procedural/runtime-generated NOT_EVALUATED remains enforced by Core.
+export { parseEvidencePayload } from "./collaboration-evidence";
 
 export type CollaborationStatusPayload = {
   assetAudit: AuditStatus;
@@ -114,19 +119,6 @@ export function parseStatusPayload(value: unknown): CollaborationStatusPayload {
 
 export function resolveStoredStatus(payload: CollaborationStatusPayload): CollaborationStatus {
   return resolveCollaborationStatus(payload);
-}
-
-export function parseEvidencePayload(value: unknown): FrameManifest | undefined {
-  if (value === undefined || value === null) return undefined;
-  try {
-    // normalizeFrameManifest is the authenticated evidence API boundary. It validates
-    // legacy frame-manifest.v1 plus comparison.v1 pairs, gap closeouts, and the
-    // procedural/runtime-generated NOT_EVALUATED rule before anything reaches D1.
-    return normalizeFrameManifest(value);
-  } catch (error) {
-    const detail = error instanceof Error ? error.message : "invalid frame manifest";
-    throw new ClunkHttpError(`Invalid collaboration evidence: ${detail}`, 400);
-  }
 }
 
 export function parseThreadPayload(value: unknown): ThreadPayload {

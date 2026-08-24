@@ -299,6 +299,7 @@ export function DashboardClient() {
 }
 
 function RunRow({ run, expanded, onToggle }: { run: Run; expanded: boolean; onToggle: () => void }) {
+  const resultDigest = storedResultDigest(run);
   return (
     <>
       <tr
@@ -344,6 +345,7 @@ function RunRow({ run, expanded, onToggle }: { run: Run; expanded: boolean; onTo
                 sha256 {run.inputHash} · {run.byteLength ? `${run.byteLength.toLocaleString()} B · ` : ""}
                 {run.profileId ?? "pc"} 프로파일
               </small>
+              <small className="num">resultDigest {resultDigest ?? "not recorded"}</small>
             </div>
           </td>
         </tr>
@@ -362,6 +364,18 @@ function storedFindings(run: Run): { ruleId: string; severity: string }[] {
     }));
   } catch {
     return [];
+  }
+}
+
+function storedResultDigest(run: Run): string | null {
+  try {
+    const parsed = JSON.parse(run.reportJson) as { resultDigest?: unknown };
+    if (parsed.resultDigest === undefined) return null;
+    return typeof parsed.resultDigest === "string" && /^[a-f0-9]{64}$/i.test(parsed.resultDigest)
+      ? parsed.resultDigest
+      : "INVALID";
+  } catch {
+    return null;
   }
 }
 

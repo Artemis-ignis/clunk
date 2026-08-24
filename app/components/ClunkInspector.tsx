@@ -649,6 +649,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
             <div className="score-track">
               <span style={{ width: `${report?.score.score ?? 0}%` }} />
             </div>
+            <strong className="evidence-boundary-note">STRUCTURAL ONLY · NOT VISUAL APPROVAL</strong>
             <p className="score-note">
               {readiness
                 ? `${readinessNote(readiness)} 브라우저 화면과 visualRuntime은 별도이며 현재 player-facing: NOT_EVALUATED입니다.`
@@ -759,6 +760,10 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
           <EvidenceItem label="새 재검사" value={optimization ? "확인됨" : "최적화 후"} />
           <EvidenceItem label="다운로드 바이트" value={downloadGate === "verified" ? "재오픈 확인" : "최적화 후 확인"} />
         </dl>
+        <div className="evidence-hash-grid" aria-label="검사 provenance">
+          <InspectorHash label="inputHash" value={report?.inputHash} />
+          <InspectorHash label="resultDigest" value={report?.resultDigest} />
+        </div>
       </section>
     </WorkspaceShell>
   );
@@ -791,6 +796,27 @@ function EvidenceItem({ label, value }: { label: string; value: string }) {
     <div>
       <dt>{label}</dt>
       <dd>{value}</dd>
+    </div>
+  );
+}
+
+function InspectorHash({ label, value }: { label: string; value?: string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1200);
+    } catch {
+      setCopied(false);
+    }
+  };
+  return (
+    <div className="evidence-hash-field">
+      <span>{label}</span>
+      <code title={value ?? "검사 후 표시"}>{value ?? "검사 후 표시"}</code>
+      {value ? <button type="button" className="button button-quiet button-sm" onClick={() => void copy()}>{copied ? "복사됨" : "복사"}</button> : null}
     </div>
   );
 }

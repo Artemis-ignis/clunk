@@ -14,6 +14,14 @@ authenticated `/api/*` routes below are workspace-scoped and are not a public ag
 - Parses real GLB and glTF 2.0 bytes. No screenshot, no fixture, no mock metric.
 - Records `inputHash` (SHA-256 of the input bytes), `coreBuildId`, `ruleSetId`, `ruleSetVersion`
   and `resultDigest` for every run.
+- `clunk.asset-evidence-ref.v1` links a frame manifest to a real source inspection with
+  `inputHash`, `resultDigest`, `byteLength`, `coreBuildId`, `ruleSetId`, `ruleSetVersion`,
+  optional `profileId`/`analysisId`, and `freshness: CURRENT|STALE|UNKNOWN`. `CURRENT` is a
+  producer-supplied current reinspection; `STALE EVIDENCE · NOT CURRENT APPROVAL` and
+  `FRESHNESS UNKNOWN · NOT CURRENT APPROVAL` never promote `reviewStatus`, `visualRuntime`,
+  or `playerFacing`. A malformed ref or evidence input-hash mismatch is `INVALID` and is
+  rejected by normalization/API. The dashboard displays the full input hash, result digest,
+  byte length, rule set, build, and freshness beside the linked asset inspection.
 - Evaluates 17 rules across 6 categories (format, scene, geometry, materials, textures, runtime).
   Rule set: `clunk-game-ready-v1` v`1.0.0`. Ready score threshold: 90.
 - Every finding carries `ruleId`, `severity`, `path`, `observed` and `threshold`.
