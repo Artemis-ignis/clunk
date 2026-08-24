@@ -98,6 +98,7 @@ test("collaboration UI keeps capture integrity, asset audit, and human visual re
   const agents = await source("app/agents/page.tsx");
   const facts = await source("app/components/product-facts.ts");
   const docsPage = await source("app/docs/page.tsx");
+  const llms = await source("public/llms.txt");
   assert.match(panel, /CAPTURE CONTRACT PASS/);
   assert.match(panel, /NUMERIC CONTRACT PASS/);
   assert.match(panel, /HUMAN VISUAL REVIEW/);
@@ -116,6 +117,12 @@ test("collaboration UI keeps capture integrity, asset audit, and human visual re
   assert.match(agents, /environmentUnavailable/);
   assert.match(agents, /readinessReason/);
   assert.match(agents, /sceneReviewCli/);
+  assert.match(agents, /assetEvidenceRef/);
+  assert.match(agents, /NOT CURRENT APPROVAL/);
+  assert.match(panel, /inspectionRunId/);
+  assert.match(facts, /fresh HF.*inspectionRunId/);
+  assert.match(docsPage, /inspectionRunId[\s\S]*required/);
+  assert.match(llms, /inspectionRunId[\s\S]*requires/);
   assert.match(facts, /status: "NON_BLOCKING"/);
   assert.match(facts, /PLAYER_FACING_SCENE_GAP/);
   assert.match(facts, /ENGINE_ENVIRONMENT_UNAVAILABLE/);

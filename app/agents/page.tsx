@@ -321,6 +321,10 @@ npm.cmd run --silent mcp
               원본 에셋을 frame과 묶을 때는 <code>{COLLABORATION_CONTRACT.linkedAssetInspection}</code>을 사용하며,
               frame manifest만 갱신할 때는 <code>{COLLABORATION_CONTRACT.evidenceOnlyApi}</code>를 사용합니다. procedural/runtime-generated
               작물·식생·NPC는 <code>origin</code>과 <code>provenance.sourceRef</code>를 함께 기록하지만 별도 GLB 바이트 PASS로 만들지 않습니다.
+              연결된 정적 에셋의 fresh provenance는 <code>{COLLABORATION_CONTRACT.assetEvidenceRef}</code>로 표시하며,
+              <code>CURRENT</code>는 구조 재검사 provenance일 뿐 시각 승인 이력이 아니고 <code>STALE</code>·<code>UNKNOWN</code>은
+              모두 <code>NOT CURRENT APPROVAL</code>입니다. 해시 불일치나 잘못된 digest는 저장을 거부합니다.
+              fresh HF asset entry에는 <code>inspectionRunId</code>와 <code>targetProfileId</code>도 필수입니다.
               협업 상태의 <code>readinessReason</code>은 <code>{COLLABORATION_CONTRACT.readinessReason}</code> enum으로 남으며,
               <code>ENGINE_ENVIRONMENT_UNAVAILABLE</code>은 Godot/Unity/Unreal/mobile 런너 미제공을 뜻할 뿐 PASS가 아닙니다.
               플레이어 화면 gap을 구조화하려면 <code>{COLLABORATION_CONTRACT.sceneReviewCli}</code>를 사용합니다.

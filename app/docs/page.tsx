@@ -269,6 +269,9 @@ const FRAME_COMPARISON_SCHEMA_EXAMPLE = `// SCHEMA EXAMPLE · clunk.frame-compar
 
 const ASSET_EVIDENCE_REF_SCHEMA_EXAMPLE = `// SCHEMA EXAMPLE · clunk.asset-evidence-ref.v1
 // The values below are a real HF canonical reinspection example, not placeholders.
+// In the enclosing clunk.frame-manifest.v1 assetInspections[] entry, inspectionRunId and
+// targetProfileId are required for every fresh HF submission; profileId below identifies the
+// concrete Core profile used by that inspection.
 {
   "schema": "clunk.asset-evidence-ref.v1",
   "inputHash": "d92ae93240cc9b4d477df13cbddd0342738feb57ed9b8551e73d68fd83b3222c",
