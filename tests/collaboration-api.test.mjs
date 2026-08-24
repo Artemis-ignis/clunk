@@ -51,9 +51,19 @@ test("frame manifest evidence has a versioned migration and API envelope", async
   assert.match(docs, /clunk\.frame-manifest\.v1/);
   assert.match(docs, /sceneGaps/);
   assert.match(docs, /runtimeChecks/);
+  assert.match(docs, /clunk\.frame-comparison\.v1/);
+  assert.match(docs, /cameraPoseHash mismatch/);
+  assert.match(docs, /closeout/);
+  assert.match(docs, /playerFacing.*NOT_EVALUATED/);
   assert.match(docs, /NOT_EVALUATED/);
   assert.match(contract, /readinessReason/);
+  assert.match(contract, /FRAME_COMPARISON_SCHEMA/);
+  assert.match(contract, /SceneGapCloseout/);
+  assert.match(contract, /cameraPoseHash mismatch/);
+  assert.match(contract, /sourceTreeHash mismatch/);
   assert.match(docs, /ENGINE_ENVIRONMENT_UNAVAILABLE/);
+  assert.match(docs, /clunk\.frame-comparison\.v1/);
+  assert.match(docs, /harvest-frontier-m104-comparison-closeout/);
 });
 
 test("frame evidence writes expose explicit append and replace semantics", async () => {
@@ -62,6 +72,8 @@ test("frame evidence writes expose explicit append and replace semantics", async
   const messages = await source("app/api/collaboration/threads/[threadId]/messages/route.ts");
   const docs = await source("app/docs/page.tsx");
   assert.match(helper, /FrameManifestWriteMode/);
+  assert.match(helper, /comparison\.v1/);
+  assert.match(helper, /procedural\/runtime-generated NOT_EVALUATED/);
   assert.match(helper, /evidenceMode/);
   assert.match(item, /mergeStoredEvidence/);
   assert.match(messages, /evidenceMode/);
@@ -85,6 +97,8 @@ test("collaboration UI keeps capture integrity, asset audit, and human visual re
   assert.match(panel, /CONDITIONAL/);
   assert.match(panel, /VISUAL RUNTIME \{evidence\.visualRuntime\}/);
   assert.match(panel, /runtimeChecks/);
+  assert.match(panel, /COMPARISON\.V1/);
+  assert.match(panel, /closeout/);
   assert.match(panel, /assetInspections/);
   assert.match(panel, /numericContract/);
   assert.match(panel, /qualityWarnings/);
@@ -106,6 +120,9 @@ test("collaboration UI keeps capture integrity, asset audit, and human visual re
   assert.match(facts, /frameSourceCommit/);
   assert.match(facts, /HF_M98_RUNTIME_UPDATE/);
   assert.match(docsPage, /player-facing scene review output/);
+  assert.match(docsPage, /M104 comparison acceptance/);
+  assert.match(facts, /comparisonSchema/);
+  assert.match(docsPage, /npm\.cmd exec -- tsx scripts\/frame-manifest-cli\.ts/);
 });
 
 test("dedicated evidence route keeps frame and asset review writes authenticated", async () => {

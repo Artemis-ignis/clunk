@@ -21,7 +21,7 @@ export type AgentGuide = {
   status: "available" | "not-shipped";
 };
 
-const WINDOWS_ARGS = ["/d", "/s", "/c", "call", "npm.cmd", "run", "mcp"];
+const WINDOWS_ARGS = ["/d", "/s", "/c", "call", "npm.cmd", "run", "--silent", "mcp"];
 
 export const AGENT_GUIDES: AgentGuide[] = [
   {
@@ -31,30 +31,30 @@ export const AGENT_GUIDES: AgentGuide[] = [
     title: "프로젝트 MCP로 등록",
     description: "Clunk 저장소 루트에서 명령 한 번으로 프로젝트 범위 MCP를 추가합니다.",
     fileLabel: "terminal",
-    code: "claude mcp add clunk --scope project --transport stdio -- cmd.exe /d /s /c call npm.cmd run mcp",
-    note: "Windows에서는 npm 대신 npm.cmd를 호출해야 합니다. 명령은 현재 폴더를 Clunk 저장소로 연 상태에서 실행하세요.",
+    code: "claude mcp add clunk --scope project --transport stdio -- cmd.exe /d /s /c call npm.cmd run --silent mcp",
+    note: "Windows에서는 반드시 --silent를 포함하세요. 명령은 실제 Clunk 저장소 루트에서 실행해야 하며, 다른 폴더에서 등록하면 npm이 package.json을 찾지 못합니다.",
     status: "available",
   },
   {
     key: "codex",
     label: "Codex",
-    kicker: "Codex 플러그인",
-    title: "플러그인에 이미 포함된 서버",
-    description: "저장소의 Clunk AssetOps 플러그인을 설치하면 같은 .mcp.json이 MCP 서버로 등록됩니다.",
-    fileLabel: "plugins/clunk-assetops/.mcp.json",
+    kicker: "프로젝트 MCP",
+    title: "프로젝트 설정에 연결",
+    description: "Codex가 읽는 프로젝트 MCP 설정에 같은 stdio 서버를 등록합니다. 저장소에 있는 플러그인 폴더는 자동 설치가 아니라 배포 가능한 소스 패키지입니다.",
+    fileLabel: ".mcp.json",
     code: MCP_CONFIG_SNIPPET,
-    note: "Codex에서 플러그인을 사용할 수 없는 환경이라면 아래 공통 stdio 설정을 프로젝트 MCP 설정에 그대로 옮기면 됩니다.",
+    note: "<CLUNK_ROOT>를 실제 절대 경로로 바꾸고 프로젝트 설정에 저장하세요. Codex에 Clunk AssetOps 플러그인이 설치되지 않은 상태에서도 이 설정으로 MCP만 연결할 수 있습니다.",
     status: "available",
   },
   {
     key: "cursor",
     label: "Cursor",
     kicker: "IDE · CLI",
-    title: "Workspace MCP로 연결",
-    description: "Cursor의 프로젝트 MCP 설정이나 agent CLI에서 같은 stdio 서버를 추가합니다.",
-    fileLabel: "terminal",
-    code: "agent mcp add clunk -- cmd.exe /d /s /c call npm.cmd run mcp",
-    note: "Cursor는 프로젝트 설정과 CLI가 같은 MCP 구성을 공유합니다. 연결 후 agent mcp list에서 상태를 확인하세요.",
+    title: "mcp.json으로 연결",
+    description: "Cursor IDE와 cursor-agent CLI는 프로젝트 mcp.json을 함께 읽습니다. 지원되지 않는 agent mcp add 명령 대신 설정 파일을 사용하세요.",
+    fileLabel: ".cursor/mcp.json",
+    code: MCP_CONFIG_SNIPPET,
+    note: "<CLUNK_ROOT>를 실제 절대 경로로 바꾼 뒤 .cursor/mcp.json에 저장하고 cursor-agent mcp list 또는 Cursor의 MCP 목록에서 확인하세요.",
     status: "available",
   },
   {
@@ -69,8 +69,8 @@ export const AGENT_GUIDES: AgentGuide[] = [
       "  \"mcpServers\": {",
       "    \"clunk\": {",
       "      \"command\": \"cmd.exe\",",
-      "      \"args\": [\"/d\", \"/s\", \"/c\", \"call\", \"npm.cmd\", \"run\", \"mcp\"],",
-      "      \"cwd\": \"C:\\\\path\\\\to\\\\Clunk\"",
+      "      \"args\": [\"/d\", \"/s\", \"/c\", \"call\", \"npm.cmd\", \"run\", \"--silent\", \"mcp\"],",
+      "      \"cwd\": \"<CLUNK_ROOT>\"",
       "    }",
       "  }",
       "}",
@@ -91,7 +91,7 @@ export const AGENT_GUIDES: AgentGuide[] = [
       "    \"clunk\": {",
       "      \"type\": \"stdio\",",
       "      \"command\": \"cmd.exe\",",
-      "      \"args\": [\"/d\", \"/s\", \"/c\", \"call\", \"npm.cmd\", \"run\", \"mcp\"],",
+      "      \"args\": [\"/d\", \"/s\", \"/c\", \"call\", \"npm.cmd\", \"run\", \"--silent\", \"mcp\"],",
       '      "cwd": "' + "$" + '{workspaceFolder}"',
       "    }",
       "  }",
@@ -113,7 +113,7 @@ export const AGENT_GUIDES: AgentGuide[] = [
       "    \"clunk\": {",
       "      \"command\": \"cmd.exe\",",
       "      \"args\": [\"" + WINDOWS_ARGS.join("\", \"") + "\"],",
-      "      \"cwd\": \"C:\\\\path\\\\to\\\\Clunk\"",
+      "      \"cwd\": \"<CLUNK_ROOT>\"",
       "    }",
       "  }",
       "}",

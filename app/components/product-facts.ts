@@ -172,13 +172,13 @@ export const MCP_SERVER = {
   protocolVersion: "2025-06-18",
 } as const;
 
-/** Config shape from plugins/clunk-assetops/.mcp.json, with the machine-specific cwd removed. */
+/** Portable project MCP config shape, with the machine-specific cwd represented by <CLUNK_ROOT>. */
 export const MCP_CONFIG_SNIPPET = `{
   "mcpServers": {
     "clunk": {
       "command": "cmd.exe",
-      "args": ["/d", "/s", "/c", "call", "npm.cmd", "run", "mcp"],
-      "cwd": "/path/to/clunk"
+      "args": ["/d", "/s", "/c", "call", "npm.cmd", "run", "--silent", "mcp"],
+      "cwd": "<CLUNK_ROOT>"
     }
   }
 }`;
@@ -340,8 +340,10 @@ export const HF_TEXTURE_SCENE_GAPS = [
 export const FRAME_REVIEW_CONTRACT = {
   minimumCaptureSet: "no-HUD shipped baseline + dealer approach/counter + dialogue NPC/camera + distant terrain/vegetation/sign frames",
   requiredMetadata: "runId, sourceCommit, frameSourceCommit, frame id/path/sha256/bytes, renderer, viewport, distanceBandId/distanceM when applicable, shippedPath, hud, console, sceneGaps.frameIds + severity/ownership/affectedScene or affectedAssetIds/nextStep/evidence path+sha256",
+  comparisonMetadata: "comparison.v1 pair requires before/after frame ids, identical cameraPose/cameraPoseHash, renderer, viewport, sourceTreeHash, and after evidence for closeout",
   reviewableWhen: "all submitted frames normalize and their hashes, viewport, renderer, shipped path, and console metadata are present",
   closeWhen: "a human review explicitly clears every linked scene gap in a fresh shipped-path capture; numeric/camera PASS alone never closes it",
+  closeoutStates: "OPEN active gap · CLOSED only after PASS pair + after evidence · REOPENED when a prior closeout is contradicted by a fresh pair · NOT_EVALUATED when no human decision/pair is supplied",
   defaultBoundary: "reviewStatus: NOT_EVALUATED · visualRuntime: GAP · playerFacing: NOT_EVALUATED",
   presentation: "static PASS + visual pending/GAP = CONDITIONAL · human-cleared runtime PASS = READY · hard blocker = BLOCKED",
 } as const;
@@ -359,6 +361,9 @@ export const COLLABORATION_CONTRACT = {
   evidenceWriteMode: "evidenceMode: append (stable-id upsert) | replace (full snapshot)",
   evidenceOnlyApi: "POST /api/collaboration/threads/:threadId/evidence · evidence-only merge, same auth/workspace boundary",
   evidenceReadApi: "GET /api/collaboration/threads/:threadId/evidence · normalized evidence only; no status promotion",
+  comparisonSchema: "comparison: clunk.frame-comparison.v1 · beforeFrameId/afterFrameId require identical cameraPose + cameraPoseHash, renderer, viewport, and sourceTreeHash; every frame must be shippedPath with sha256/bytes/console",
+  comparisonMismatch: "mismatch errors are explicit: cameraPoseHash mismatch, cameraPose mismatch, renderer mismatch, viewport mismatch, sourceTreeHash mismatch",
+  gapCloseout: "sceneGaps[].closeout is per-gap OPEN|CLOSED|REOPENED|NOT_EVALUATED with owner, humanDecision, comparisonId, and after-frame evidence; CLOSED gaps do not promote visualRuntime",
   runtimeStatuses: "visualRuntime: NOT_RUN | PASS | GAP | BLOCKED | UNAVAILABLE · UNAVAILABLE is never PASS",
   readinessReason: "STATIC_AUDIT_NOT_RUN | STATIC_AUDIT_FAILED | STATIC_AUDIT_BLOCKED | VISUAL_RUNTIME_NOT_EVALUATED | ENGINE_ENVIRONMENT_UNAVAILABLE | PLAYER_FACING_REVIEW_INPUT_INCOMPLETE | PLAYER_FACING_SCENE_GAP | VISUAL_RUNTIME_BLOCKED | PLAYER_FACING_REVIEW_PASS",
   readinessSemantics: "static PASS + visual pending/GAP/UNAVAILABLE = conditional · runtime PASS + human review = ready · hard blocker = blocked",
@@ -367,14 +372,34 @@ export const COLLABORATION_CONTRACT = {
   assetOrigin: "assetInspections[].origin is file, procedural, or runtime-generated; ownership asset|runtime|unknown and runtimeUsage USED_IN_FRAME|NOT_USED_IN_FRAME|UNKNOWN are explicit; textureCount=0 never infers a defect",
   numericAssetContract: "numericContract.status/score/hardBlockerCount/drawCall observations are static contract evidence; visualRuntime and human review remain separate",
   runtimeChecks: "runtimeChecks[] stores numeric pose/on-screen/coverage/lens contracts; PASS never changes reviewStatus or visualRuntime",
-  sceneReview: "POST/CLI clunk.player-facing-scene-review.v1 returns PASS_WITH_FOLLOW_UP|NO_GO|UNAVAILABLE with severity, linked evidence path/hash, affected scene/assets, ownership, nextStep; visualRuntime stays GAP and humanReview PENDING",
+  sceneReview: "POST/CLI clunk.player-facing-scene-review.v1 returns PASS_WITH_FOLLOW_UP|NO_GO|UNAVAILABLE with severity, linked evidence path/hash, affected scene/assets, ownership, nextStep, and per-gap closeout; visualRuntime stays GAP and humanReview PENDING",
   sceneReviewCli: "npm.cmd run collaboration:frame-manifest -- scene-review --input <manifest.json> --format json · exit 0 follow-up, 2 NO_GO, 4 incomplete/unavailable",
+  sceneReviewExactCli: "CI exact exit propagation: npm.cmd exec -- tsx scripts/frame-manifest-cli.ts scene-review --input <manifest.json> --format json · exit 0/2/4",
+  proceduralRule: "origin procedural|runtime-generated is always playerFacing: NOT_EVALUATED; a real linked frame is necessary but not sufficient, and no numeric score can become player-facing PASS",
   assetInspectionApi: ASSET_INSPECTION_CONTRACT.request,
   qualityWarnings: QUALITY_WARNING_CONTRACT.field,
   storedM94: "live D1: inputHash a8500559…db3552f · frame hf-m94-packaged-r01-03-game-nohud · 5 gaps · 6 prescriptions",
   playerFacing: "playerFacing: NOT_EVALUATED",
   statuses: ["ASSET_READY", "ASSET_CONDITIONAL", "SCENE_GAP", "PLAYER_FACING_READY", "BLOCKED"],
 } as const;
+
+export const HF_M104_CURRENT_HANDOFF = `// EXTERNAL HF HANDOFF · received, not normalized Clunk scene-review evidence
+{
+  "sourceHead": "ed6302b",
+  "humanDecision": "NO_GO",
+  "visualRuntime": "GAP",
+  "pairStatus": "NOT_EVALUATED",
+  "closeoutClassification": {
+    "dialogue-npc-world-readability": "OPEN",
+    "dealer-market-camera-composition": "OPEN",
+    "terrain-boundary-stair-step-triangles": "OPEN",
+    "repeating-vegetation-terrain-and-foreground-intersections": "OPEN",
+    "closed": [],
+    "reopened": []
+  },
+  "reason": "M104 pair path/hash/cameraPose/renderer/viewport/sourceTreeHash were not included in this handoff; submit the pair before normalizing or closing a gap.",
+  "boundary": "reviewStatus NOT_EVALUATED · visualRuntime GAP · playerFacing NOT_EVALUATED"
+}`;
 
 export const HF_M98_RUNTIME_UPDATE = `// EXTERNAL HF HANDOFF · M98/M99 current integration, not a player-facing approval
 {

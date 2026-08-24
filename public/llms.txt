@@ -36,9 +36,9 @@ Client config:
 {
   "mcpServers": {
     "clunk": {
-      "command": "npm",
-      "args": ["run", "mcp"],
-      "cwd": "/path/to/clunk"
+      "command": "cmd.exe",
+      "args": ["/d", "/s", "/c", "call", "npm.cmd", "run", "--silent", "mcp"],
+      "cwd": "<CLUNK_ROOT>"
     }
   }
 }
@@ -450,8 +450,25 @@ Both commands print normalized JSON and return exit `0` for valid evidence or ex
 malformed evidence/invalid cross-run append. The dashboard form exposes the same choice as
 `replace · full snapshot` and `append · keep existing IDs`.
 
+Frame comparisons use `clunk.frame-comparison.v1` nested inside the compatible
+`clunk.frame-manifest.v1` envelope. Each pair references `beforeFrameId` and `afterFrameId`;
+both frames must be shipped-path captures with SHA-256, bytes, renderer, viewport, console,
+camera pose, `cameraPoseHash`, and `sourceTreeHash`. The normalizer rejects each mismatch
+explicitly as `cameraPoseHash mismatch`, `cameraPose mismatch`, `renderer mismatch`,
+`viewport mismatch`, or `sourceTreeHash mismatch`. `append` preserves and stable-id-upserts
+comparison pairs; `replace` replaces the complete comparison snapshot.
+
+Every `sceneGaps[]` entry may carry a per-gap `closeout` with `status` `OPEN|CLOSED|REOPENED|NOT_EVALUATED`,
+`owner`, `humanDecision`, `comparisonId`, and evidence. `CLOSED` requires a PASS comparison
+decision plus after-frame evidence, but a closed gap never promotes the manifest's
+`visualRuntime=GAP` or `playerFacing=NOT_EVALUATED`. Procedural and runtime-generated asset
+inspections always normalize to `playerFacing: NOT_EVALUATED`; a linked real frame is necessary
+but not sufficient, and no numeric score can become a player-facing PASS.
+
 The player-facing scene contract is a separate evidence check:
 `npm.cmd run collaboration:frame-manifest -- scene-review --input hf-frame-manifest.json --format json`.
+For CI that must preserve the child process's exact exit code on Windows, use
+`npm.cmd exec -- tsx scripts/frame-manifest-cli.ts scene-review --input hf-frame-manifest.json --format json`.
 It returns `clunk.player-facing-scene-review.v1` with `PASS_WITH_FOLLOW_UP`, `NO_GO`, or
 `UNAVAILABLE`; exit codes are `0`, `2`, and `4` respectively. Each enriched `sceneGaps[]` item
 must carry severity, `ownership`, affected scene or asset IDs, `nextStep`, and linked evidence
@@ -474,6 +491,14 @@ HF's read-only consumer bridge validates the same handoff with:
 The reported result is `PASS` for three frame hashes, eight file-asset hashes, and
 `clunk.frame-manifest.v1` normalization only; it intentionally preserves
 `reviewStatus: NOT_EVALUATED`, `visualRuntime: GAP`, and `playerFacing: NOT_EVALUATED`.
+
+The M104 comparison/closeout regression fixture is
+`examples/frame-manifest/harvest-frontier-m104-comparison-closeout.example.json`. It links
+shipped before/after frames, a read-only GLB numeric `PASS`, and a procedural crop provenance
+record. Its scene-review result is intentionally `UNAVAILABLE` with `readiness=conditional`,
+`humanReview=PENDING`, `visualRuntime=GAP`, and `playerFacing=NOT_EVALUATED` because the
+procedural surface has no human visual approval. Run it with:
+`npm.cmd run collaboration:frame-manifest -- scene-review --input examples/frame-manifest/harvest-frontier-m104-comparison-closeout.example.json --format json`.
 
 The current HF ongoing handoff has sourceHead `3e5fffa` and reports four player-facing gaps:
 repeating distant ridge/dome silhouettes, hard soil-grass-path boundaries, foreground
@@ -499,6 +524,15 @@ boundaries, foreground vegetation intersections, and dealer/market/dialogue fram
 These hashes are marked `HANDOFF_RECEIVED` with local hash verification pending; they are
 not a scene-review input or player-facing PASS. The olive terrain transition experiment was
 rejected and the source was reverted. `optimization=NOT_RUN`.
+
+HF M104 controller handoff is received at source head `ed6302b` with human decision `NO_GO` and
+`visualRuntime=GAP`. The reported gaps are classified `OPEN`: dialogue NPC/player world-model
+readability, dealer/market camera composition, stair-step soil/grass/path boundary, and repeated
+vegetation/terrain plus foreground intersections. The M104 before/after pair itself is
+`NOT_EVALUATED` because this handoff did not include the pair's real paths, SHA-256 values,
+camera pose/hash, renderer, viewport, and sourceTreeHash. No `CLOSED` or `REOPENED` closeout is
+claimed until that pair normalizes; the default boundary remains
+`reviewStatus=NOT_EVALUATED`, `visualRuntime=GAP`, `playerFacing=NOT_EVALUATED`.
 
 The `harvest-frontier-web-three` target applies semantic rule
 `harvest-frontier-runtime-v1` inside the unified AssetOps pipeline. It checks named runtime

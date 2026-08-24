@@ -4,11 +4,11 @@ import { AuthEntryCard } from "../components/AuthEntryCard";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "로그인",
-  description: "ChatGPT 계정으로 Clunk 비공개 워크스페이스에 입장합니다. 별도 회원가입 절차는 없습니다.",
+  title: "회원가입",
+  description: "ChatGPT 계정으로 Clunk 비공개 워크스페이스를 만듭니다.",
 };
 
-export default async function LoginPage({
+export default async function SignupPage({
   searchParams,
 }: {
   searchParams: Promise<{ return_to?: string }>;
@@ -18,7 +18,7 @@ export default async function LoginPage({
   const returnTo =
     params.return_to?.startsWith("/") && !params.return_to.startsWith("//")
       ? params.return_to
-      : "/app";
+      : "/dashboard";
 
-  return <AuthEntryCard mode="login" user={user} returnTo={returnTo} />;
+  return <AuthEntryCard mode="signup" user={user} returnTo={returnTo} />;
 }

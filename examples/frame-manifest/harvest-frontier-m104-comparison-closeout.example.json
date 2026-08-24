@@ -1,0 +1,165 @@
+{
+  "schema": "clunk.frame-manifest.v1",
+  "runId": "HF-M104-comparison-closeout-fixture-r01",
+  "sourceProject": "Harvest Frontier",
+  "sourceCommit": "3e5fffa",
+  "reviewStatus": "NOT_EVALUATED",
+  "visualRuntime": "GAP",
+  "playerFacing": "NOT_EVALUATED",
+  "frames": [
+    {
+      "id": "hf-m104-before-nohud",
+      "path": "fixtures/harvest-frontier/M103-before-nohud.png",
+      "sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "bytes": 2844134,
+      "frameSourceCommit": "3e5fffa",
+      "renderer": "WebGPU",
+      "hud": "off",
+      "shippedPath": true,
+      "viewport": { "width": 1920, "height": 1080, "dpr": 1 },
+      "cameraPose": { "position": [10, 4, 12], "target": [0, 1, 0], "fov": 52 },
+      "cameraPoseHash": "2222222222222222222222222222222222222222222222222222222222222222",
+      "sourceTreeHash": "3333333333333333333333333333333333333333333333333333333333333333",
+      "console": { "errors": 0, "warnings": 0 },
+      "scene": "farm-nohud"
+    },
+    {
+      "id": "hf-m104-after-nohud",
+      "path": "fixtures/harvest-frontier/M104-after-nohud.png",
+      "sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+      "bytes": 2844135,
+      "frameSourceCommit": "3e5fffa",
+      "renderer": "WebGPU",
+      "hud": "off",
+      "shippedPath": true,
+      "viewport": { "width": 1920, "height": 1080, "dpr": 1 },
+      "cameraPose": { "position": [10, 4, 12], "target": [0, 1, 0], "fov": 52 },
+      "cameraPoseHash": "2222222222222222222222222222222222222222222222222222222222222222",
+      "sourceTreeHash": "3333333333333333333333333333333333333333333333333333333333333333",
+      "console": { "errors": 0, "warnings": 0 },
+      "scene": "farm-nohud"
+    }
+  ],
+  "comparison": {
+    "schema": "clunk.frame-comparison.v1",
+    "pairs": [
+      {
+        "id": "hf-m104-farm-before-after",
+        "beforeFrameId": "hf-m104-before-nohud",
+        "afterFrameId": "hf-m104-after-nohud",
+        "cameraPose": { "position": [10, 4, 12], "target": [0, 1, 0], "fov": 52 },
+        "cameraPoseHash": "2222222222222222222222222222222222222222222222222222222222222222",
+        "renderer": "WebGPU",
+        "viewport": { "width": 1920, "height": 1080, "dpr": 1 },
+        "sourceTreeHash": "3333333333333333333333333333333333333333333333333333333333333333",
+        "humanDecision": "NOT_EVALUATED",
+        "note": "Fixture shape only; replace paths and hashes with real HF evidence."
+      }
+    ]
+  },
+  "runtimeChecks": [
+    {
+      "id": "hf-m104-camera-contract",
+      "kind": "camera-clearance",
+      "status": "PASS",
+      "renderer": "WebGPU",
+      "frameIds": ["hf-m104-after-nohud"],
+      "checks": { "playerAndFacilitySameFrame": true, "lensInside": false }
+    }
+  ],
+  "sceneGaps": [
+    {
+      "id": "distant-ridge-band",
+      "severity": "major",
+      "category": "terrain",
+      "note": "Repeated rounded distant ridge remains a player-facing review item.",
+      "ownership": "environment",
+      "affectedScene": "farm-nohud",
+      "nextStep": "Submit a same-pose shipped before/after pair after the ridge silhouette pass.",
+      "evidence": { "path": "fixtures/harvest-frontier/M104-after-nohud.png", "sha256": "4444444444444444444444444444444444444444444444444444444444444444", "bytes": 2844135 },
+      "frameIds": ["hf-m104-after-nohud"],
+      "closeout": { "status": "OPEN", "owner": "hf-scene-art", "humanDecision": "NOT_EVALUATED" }
+    },
+    {
+      "id": "dealer-dialogue-composition",
+      "severity": "major",
+      "category": "camera",
+      "note": "Dealer and dialogue hero composition still needs human review.",
+      "ownership": "camera",
+      "affectedScene": "dealer-dialogue",
+      "nextStep": "Capture dealer and NPC hero frames at the shipped renderer and fixed pose.",
+      "evidence": { "path": "fixtures/harvest-frontier/M104-after-nohud.png", "sha256": "4444444444444444444444444444444444444444444444444444444444444444", "bytes": 2844135 },
+      "frameIds": ["hf-m104-after-nohud"],
+      "closeout": { "status": "OPEN", "owner": "hf-camera", "humanDecision": "NOT_EVALUATED" }
+    },
+    {
+      "id": "soil-grass-path-boundary",
+      "severity": "major",
+      "category": "terrain-transition",
+      "note": "Hard stair-step triangle boundary remains visible at the gameplay distance.",
+      "ownership": "scene",
+      "affectedScene": "farm-nohud",
+      "nextStep": "Re-capture the same pose after a terrain transition change and review the actual shipped frame.",
+      "evidence": { "path": "fixtures/harvest-frontier/M104-after-nohud.png", "sha256": "4444444444444444444444444444444444444444444444444444444444444444", "bytes": 2844135 },
+      "frameIds": ["hf-m104-after-nohud"],
+      "closeout": { "status": "OPEN", "owner": "hf-scene-art", "humanDecision": "NOT_EVALUATED" }
+    },
+    {
+      "id": "vegetation-prop-intersections",
+      "severity": "major",
+      "category": "vegetation",
+      "note": "Repeated vegetation and foreground prop intersections remain in the no-HUD frame.",
+      "ownership": "runtime",
+      "affectedScene": "farm-nohud",
+      "nextStep": "Review density, placement, and contact/intersection behavior in a fresh shipped capture.",
+      "evidence": { "path": "fixtures/harvest-frontier/M104-after-nohud.png", "sha256": "4444444444444444444444444444444444444444444444444444444444444444", "bytes": 2844135 },
+      "frameIds": ["hf-m104-after-nohud"],
+      "closeout": { "status": "OPEN", "owner": "hf-runtime-art", "humanDecision": "NOT_EVALUATED" }
+    }
+  ],
+  "prescriptions": [
+    {
+      "id": "terrain-secondary-structure",
+      "kind": "scene-readability",
+      "status": "NON_BLOCKING",
+      "priority": "P1",
+      "observation": "Distant terrain and foreground transitions remain visually unresolved.",
+      "action": "Evaluate secondary structure, tiling, and LOD at the shipped gameplay distance.",
+      "frameIds": ["hf-m104-after-nohud"]
+    }
+  ],
+  "assetInspections": [
+    {
+      "id": "tractor-compact-m1",
+      "sourcePath": "public/assets/runtime/tractor.compact.m1.glb",
+      "inputHash": "5555555555555555555555555555555555555555555555555555555555555555",
+      "assetKind": "3d-model",
+      "targetProfileId": "harvest-frontier-runtime-v1",
+      "inspectionRunId": "HF-M104-tractor-readonly-r01",
+      "evidenceStatus": "CONDITIONAL",
+      "productionReady": false,
+      "origin": "file",
+      "ownership": "asset",
+      "runtimeUsage": "USED_IN_FRAME",
+      "frameIds": ["hf-m104-after-nohud"],
+      "qualityWarningIds": ["GEO-MISSING-NORMALS", "SCENE-NONUNIT-SCALE"],
+      "numericContract": { "status": "PASS", "valid": true, "score": 100, "threshold": 90, "hardBlockerCount": 0, "observations": { "textureCount": 0, "drawCallCount": 88 } }
+    },
+    {
+      "id": "crop-tomato-procedural",
+      "sourcePath": "src/game/world/crops.ts#tomato",
+      "inputHash": "6666666666666666666666666666666666666666666666666666666666666666",
+      "assetKind": "3d-model",
+      "targetProfileId": "harvest-frontier-web-three",
+      "inspectionRunId": "HF-M104-croplab-r01",
+      "evidenceStatus": "CONDITIONAL",
+      "productionReady": false,
+      "origin": "procedural",
+      "ownership": "runtime",
+      "runtimeUsage": "USED_IN_FRAME",
+      "provenance": { "sourceRef": "src/game/world/crops.ts#tomato", "sourceCommit": "3e5fffa", "generator": "HarvestFrontierCropFactory", "recipeId": "crop-tomato-v1" },
+      "frameIds": ["hf-m104-after-nohud"],
+      "numericContract": { "status": "PASS", "valid": true, "hardBlockerCount": 0 }
+    }
+  ]
+}

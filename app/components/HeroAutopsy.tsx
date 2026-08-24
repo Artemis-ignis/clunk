@@ -108,7 +108,7 @@ export function HeroAutopsy() {
             검사하고 점수, 근거, Passport를 남깁니다.
           </p>
           <div className="hero-actions" style={rise(3)}>
-            <Link className="button button-primary" href="/app">
+            <Link className="button button-primary" href="/app" prefetch={false}>
               검사기 열기
               <Icon name="arrowUpRight" size={15} />
             </Link>

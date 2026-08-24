@@ -7,7 +7,7 @@
 Harvest Frontier 폴더의 Claude Code에서 아래 명령 하나면 됩니다. `--scope local`이면 해당 프로젝트에만 등록되고 **HF 저장소 파일은 변경되지 않습니다**(동결 유지).
 
 ```bash
-claude mcp add clunk --scope local -- cmd.exe /d /s /c "cd /d C:\Users\50106\Desktop\Clunk && npm.cmd run mcp"
+claude mcp add clunk --scope local -- cmd.exe /d /s /c "cd /d C:\Users\50106\Desktop\Clunk && npm.cmd run --silent mcp"
 ```
 
 등록 확인: 그 세션에서 `/mcp` 실행 → `clunk` 서버와 tool 4개(`clunk_inspect`, `clunk_validate`, `clunk_optimize`, `clunk_passport`)가 보이면 성공.

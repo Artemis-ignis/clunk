@@ -119,6 +119,9 @@ export function resolveStoredStatus(payload: CollaborationStatusPayload): Collab
 export function parseEvidencePayload(value: unknown): FrameManifest | undefined {
   if (value === undefined || value === null) return undefined;
   try {
+    // normalizeFrameManifest is the authenticated evidence API boundary. It validates
+    // legacy frame-manifest.v1 plus comparison.v1 pairs, gap closeouts, and the
+    // procedural/runtime-generated NOT_EVALUATED rule before anything reaches D1.
     return normalizeFrameManifest(value);
   } catch (error) {
     const detail = error instanceof Error ? error.message : "invalid frame manifest";

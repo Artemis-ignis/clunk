@@ -48,7 +48,7 @@ export function WorkspaceShell({
   // duplicate SVG ids make the second mark render as broken shards.
   const rail = (idSuffix: string) => (
     <div className="rail-body">
-      <Link className="rail-brand" href="/">
+      <Link className="rail-brand" href="/" prefetch={false}>
         <span className="brand-mark">
           <BrandMark size={30} gradientId={`clunk-rail-${idSuffix}`} />
         </span>
@@ -64,6 +64,7 @@ export function WorkspaceShell({
           <Link
             key={item.href}
             href={item.href}
+            prefetch={false}
             className={`rail-link${active === item.section ? " rail-link-active" : ""}`}
             aria-current={active === item.section ? "page" : undefined}
             onClick={() => setDrawerOpen(false)}
@@ -77,6 +78,7 @@ export function WorkspaceShell({
           <Link
             key={item.href}
             href={item.href}
+            prefetch={false}
             className={`rail-link${active === item.section ? " rail-link-active" : ""}`}
             aria-current={active === item.section ? "page" : undefined}
             onClick={() => setDrawerOpen(false)}
@@ -90,6 +92,7 @@ export function WorkspaceShell({
       <div className="rail-foot">
         <Link
           href="/settings"
+          prefetch={false}
           className={`rail-link${active === "settings" ? " rail-link-active" : ""}`}
           aria-current={active === "settings" ? "page" : undefined}
           onClick={() => setDrawerOpen(false)}

@@ -57,7 +57,7 @@ export function SiteNav({ active }: { active?: ShellSection }) {
     <div className="sitenav-dock" data-scrolled={scrolled ? "true" : "false"}>
       <div className="sitenav-inner">
         <nav className={`sitenav${scrolled ? " sitenav-scrolled" : ""}`} aria-label="주요 메뉴">
-          <Link className="brand" href="/" aria-label="Clunk 홈">
+          <Link className="brand" href="/" prefetch={false} aria-label="Clunk 홈">
             <BrandLockup gradientId="clunk-nav" />
           </Link>
 
@@ -67,6 +67,7 @@ export function SiteNav({ active }: { active?: ShellSection }) {
                 <Link
                   className={`sitenav-link${active === link.section ? " sitenav-link-active" : ""}`}
                   href={link.href}
+                  prefetch={false}
                   aria-current={active === link.section ? "page" : undefined}
                 >
                   {link.label}
@@ -77,10 +78,13 @@ export function SiteNav({ active }: { active?: ShellSection }) {
 
           <div className="sitenav-actions">
             <ThemeToggle />
-            <Link className="button button-quiet button-sm sitenav-login" href="/login">
+            <Link className="button button-quiet button-sm sitenav-login" href="/login" prefetch={false}>
               로그인
             </Link>
-            <Link className="button button-primary button-sm sitenav-cta" href="/app">
+            <Link className="button button-quiet button-sm sitenav-signup" href="/signup" prefetch={false}>
+              회원가입
+            </Link>
+            <Link className="button button-primary button-sm sitenav-cta" href="/app" prefetch={false}>
               검사기 열기
               <Icon name="arrowUpRight" size={14} />
             </Link>
@@ -108,6 +112,7 @@ export function SiteNav({ active }: { active?: ShellSection }) {
               <Link
                 key={link.href}
                 href={link.href}
+                prefetch={false}
                 className="sitenav-drawer-link"
                 onClick={() => setOpen(false)}
               >
@@ -116,10 +121,13 @@ export function SiteNav({ active }: { active?: ShellSection }) {
               </Link>
             ))}
             <div className="sitenav-drawer-actions">
-              <Link className="button button-quiet button-sm" href="/login" onClick={() => setOpen(false)}>
+              <Link className="button button-quiet button-sm" href="/login" prefetch={false} onClick={() => setOpen(false)}>
                 로그인
               </Link>
-              <Link className="button button-primary button-sm" href="/app" onClick={() => setOpen(false)}>
+              <Link className="button button-quiet button-sm" href="/signup" prefetch={false} onClick={() => setOpen(false)}>
+                회원가입
+              </Link>
+              <Link className="button button-primary button-sm" href="/app" prefetch={false} onClick={() => setOpen(false)}>
                 검사기 열기
                 <Icon name="arrowUpRight" size={14} />
               </Link>

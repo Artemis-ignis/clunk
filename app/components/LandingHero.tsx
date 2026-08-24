@@ -68,11 +68,11 @@ export function LandingHero() {
           생성 직후 clunk_inspect를 호출하면 실제 바이트에서 계산한 점수와 finding, Passport가 남습니다.
         </p>
         <div className="hero-actions" style={rise(3)}>
-          <Link className="button button-primary" href="/app">
+          <Link className="button button-primary" href="/app" prefetch={false}>
             검사기 열기
             <Icon name="arrowUpRight" size={15} />
           </Link>
-          <Link className="button button-quiet" href="/docs">
+          <Link className="button button-quiet" href="/docs" prefetch={false}>
             연동 방법 보기
             <Icon name="arrowRight" size={15} />
           </Link>

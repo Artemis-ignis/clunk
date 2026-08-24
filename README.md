@@ -103,14 +103,14 @@ npx.cmd tsx scripts/texture-audit.mjs examples/texture-audit/harvest-frontier.te
 ## MCP
 
 ```powershell
-npx.cmd tsx integrations/mcp/server.ts
+npm.cmd run --silent mcp
 ```
 
 stdio JSON-RPC 서버가 `clunk_inspect`, `clunk_validate`, `clunk_optimize`, `clunk_passport`를 제공합니다. 실제 MCP 클라이언트에 연결할 때는 작업 폴더의 절대 경로와 위 Windows 명령을 사용하고, 원본과 출력 경로를 분리합니다.
 
 ## Codex Plugin·Skill
 
-`plugins/clunk-assetops/`에는 Clunk의 제품 표면을 재사용하기 위한 검증된 Codex Plugin과 `clunk-assetops` Skill이 있습니다. 이 Skill은 Web·CLI·MCP·VS Code가 `packages/core`의 단일 계약을 사용하도록 라우팅하고, 원본 보존·hash·fresh reinspection·Passport·Windows PowerShell 경계를 강제합니다. Plugin의 `.mcp.json`은 이 저장소의 `npm.cmd run mcp`를 Windows stdio 서버로 연결합니다.
+`plugins/clunk-assetops/`에는 Clunk의 제품 표면을 재사용하기 위한 검증된 Codex Plugin과 `clunk-assetops` Skill이 있습니다. 이 Skill은 Web·CLI·MCP·VS Code가 `packages/core`의 단일 계약을 사용하도록 라우팅하고, 원본 보존·hash·fresh reinspection·Passport·Windows PowerShell 경계를 강제합니다. Plugin의 `.mcp.json`은 이 저장소의 `npm.cmd run --silent mcp`를 Windows stdio 서버로 연결합니다. `--silent`는 MCP stdout을 JSON-RPC 전용으로 유지하기 위한 필수 옵션입니다.
 
 ## 저장·인증·결제 경계
 

@@ -22,6 +22,7 @@ export type CollaborationReadinessReason =
   | "PLAYER_FACING_REVIEW_PASS";
 
 export const FRAME_MANIFEST_SCHEMA = "clunk.frame-manifest.v1" as const;
+export const FRAME_COMPARISON_SCHEMA = "clunk.frame-comparison.v1" as const;
 
 export type FrameHudState = "on" | "off" | "unknown";
 export type FrameReviewStatus = "NOT_EVALUATED";
@@ -40,6 +41,10 @@ export type FrameManifestAssetOwnership = "asset" | "runtime" | "unknown";
 export type FrameManifestAssetRuntimeUsage = "USED_IN_FRAME" | "NOT_USED_IN_FRAME" | "UNKNOWN";
 export type FrameManifestAssetEvidenceStatus = "READY" | "CONDITIONAL" | "BLOCKED" | "UNSUPPORTED" | "ENVIRONMENT_UNAVAILABLE";
 export type FrameManifestNumericContractStatus = "PASS" | "FAIL" | "UNAVAILABLE";
+export type FrameComparisonHumanDecision = "NOT_EVALUATED" | "PASS" | "NO_GO";
+export type SceneGapCloseoutStatus = "OPEN" | "CLOSED" | "REOPENED" | "NOT_EVALUATED";
+export type SceneGapCloseoutHumanDecision = "NOT_EVALUATED" | "PASS" | "NO_GO";
+export type FrameManifestAssetPlayerFacingStatus = "NOT_EVALUATED";
 
 export interface FrameViewport {
   width: number;
@@ -50,6 +55,13 @@ export interface FrameViewport {
 export interface FrameConsoleSummary {
   errors: number;
   warnings: number;
+}
+
+export interface FrameCameraPose {
+  position: readonly [number, number, number];
+  target: readonly [number, number, number];
+  up?: readonly [number, number, number];
+  fov?: number;
 }
 
 export interface FrameManifestFrame {
@@ -68,6 +80,28 @@ export interface FrameManifestFrame {
   console?: FrameConsoleSummary;
   scene?: string;
   note?: string;
+  cameraPose?: FrameCameraPose;
+  cameraPoseHash?: string;
+  sourceTreeHash?: string;
+}
+
+export interface FrameComparisonPair {
+  schema: typeof FRAME_COMPARISON_SCHEMA;
+  id: string;
+  beforeFrameId: string;
+  afterFrameId: string;
+  cameraPose: FrameCameraPose;
+  cameraPoseHash: string;
+  renderer: string;
+  viewport: FrameViewport;
+  sourceTreeHash: string;
+  humanDecision: FrameComparisonHumanDecision;
+  note?: string;
+}
+
+export interface FrameManifestComparison {
+  schema: typeof FRAME_COMPARISON_SCHEMA;
+  pairs: readonly FrameComparisonPair[];
 }
 
 export interface SceneGapNote {
@@ -82,12 +116,22 @@ export interface SceneGapNote {
   nextStep?: string;
   evidence?: SceneGapEvidence;
   frameIds?: readonly string[];
+  closeout?: SceneGapCloseout;
 }
 
 export interface SceneGapEvidence {
   path: string;
   sha256: string;
   bytes?: number;
+}
+
+export interface SceneGapCloseout {
+  status: SceneGapCloseoutStatus;
+  owner: string;
+  comparisonId?: string;
+  humanDecision: SceneGapCloseoutHumanDecision;
+  evidence?: SceneGapEvidence;
+  note?: string;
 }
 
 export interface EvidencePrescription {
@@ -127,6 +171,8 @@ export interface FrameManifestAssetInspection {
   ownership?: FrameManifestAssetOwnership;
   /** Do not infer loader usage from sourcePath or frameIds; producers must state it. */
   runtimeUsage?: FrameManifestAssetRuntimeUsage;
+  /** Procedural/runtime-generated surfaces never become player-facing PASS automatically. */
+  playerFacing: FrameManifestAssetPlayerFacingStatus;
   provenance?: FrameManifestAssetProvenance;
   frameIds?: readonly string[];
   qualityWarningIds?: readonly string[];
@@ -163,6 +209,7 @@ export interface FrameManifest {
   playerFacing: FrameManifestPlayerFacingStatus;
   frames: readonly FrameManifestFrame[];
   sceneGaps: readonly SceneGapNote[];
+  comparison?: FrameManifestComparison;
   prescriptions?: readonly EvidencePrescription[];
   runtimeChecks?: readonly FrameRuntimeCheck[];
   assetInspections?: readonly FrameManifestAssetInspection[];
@@ -194,8 +241,10 @@ export interface PlayerFacingSceneReview {
     ownership: FrameManifestAssetOwnership;
     evidenceStatus: FrameManifestAssetEvidenceStatus;
     runtimeUsage: FrameManifestAssetRuntimeUsage;
+    playerFacing: FrameManifestAssetPlayerFacingStatus;
     numericContract?: Pick<FrameManifestNumericContract, "status" | "score" | "hardBlockerCount">;
   }[];
+  comparison?: FrameManifestComparison;
   issues?: readonly string[];
 }
 
@@ -262,6 +311,41 @@ function nonNegativeInteger(record: JsonRecord, key: string, label: string): num
   return value;
 }
 
+function finiteNumber(value: unknown, label: string): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) throw new Error(`${label} must be a finite number`);
+  return value;
+}
+
+function normalizeVector3(value: unknown, label: string): readonly [number, number, number] {
+  if (!Array.isArray(value) || value.length !== 3) throw new Error(`${label} must be a 3-number array`);
+  return [
+    finiteNumber(value[0], `${label}[0]`),
+    finiteNumber(value[1], `${label}[1]`),
+    finiteNumber(value[2], `${label}[2]`),
+  ];
+}
+
+function normalizeHash(record: JsonRecord, key: string, label: string): string {
+  const value = requiredText(record, key, label, 128).toLowerCase();
+  if (!/^[a-f0-9]{64}$/.test(value)) throw new Error(`${label}.${key} must be a 64-character hexadecimal hash`);
+  return value;
+}
+
+function normalizeCameraPose(value: unknown, label: string): FrameCameraPose {
+  const record = asRecord(value, label);
+  const pose: FrameCameraPose = {
+    position: normalizeVector3(record.position, `${label}.position`),
+    target: normalizeVector3(record.target, `${label}.target`),
+  };
+  if (record.up !== undefined) pose.up = normalizeVector3(record.up, `${label}.up`);
+  if (record.fov !== undefined) {
+    const fov = finiteNumber(record.fov, `${label}.fov`);
+    if (fov <= 0 || fov >= 180) throw new Error(`${label}.fov must be greater than 0 and less than 180`);
+    pose.fov = fov;
+  }
+  return pose;
+}
+
 function normalizeViewport(value: unknown, label: string): FrameViewport {
   const record = asRecord(value, label);
   const viewport: FrameViewport = {
@@ -313,6 +397,9 @@ function normalizeFrame(value: unknown, index: number): FrameManifestFrame {
   if (scene) frame.scene = scene;
   const note = optionalText(record, "note", label, 1000);
   if (note) frame.note = note;
+  if (record.cameraPose !== undefined) frame.cameraPose = normalizeCameraPose(record.cameraPose, `${label}.cameraPose`);
+  if (record.cameraPoseHash !== undefined) frame.cameraPoseHash = normalizeHash(record, "cameraPoseHash", label);
+  if (record.sourceTreeHash !== undefined) frame.sourceTreeHash = normalizeHash(record, "sourceTreeHash", label);
   return frame;
 }
 
@@ -356,6 +443,7 @@ function normalizeSceneGap(value: unknown, index: number): SceneGapNote {
     if (new Set(frameIds).size !== frameIds.length) throw new Error(`${label}.frameIds must not contain duplicates`);
     gap.frameIds = frameIds;
   }
+  if (record.closeout !== undefined) gap.closeout = normalizeSceneGapCloseout(record.closeout, `${label}.closeout`);
   return gap;
 }
 
@@ -369,6 +457,75 @@ function normalizeSceneGapEvidence(value: unknown, label: string): SceneGapEvide
   };
   if (record.bytes !== undefined) evidence.bytes = nonNegativeInteger(record, "bytes", label);
   return evidence;
+}
+
+function normalizeSceneGapCloseout(value: unknown, label: string): SceneGapCloseout {
+  const record = asRecord(value, label);
+  const status = record.status;
+  if (status !== "OPEN" && status !== "CLOSED" && status !== "REOPENED" && status !== "NOT_EVALUATED") {
+    throw new Error(`${label}.status must be OPEN, CLOSED, REOPENED, or NOT_EVALUATED`);
+  }
+  const humanDecision = record.humanDecision ?? "NOT_EVALUATED";
+  if (humanDecision !== "NOT_EVALUATED" && humanDecision !== "PASS" && humanDecision !== "NO_GO") {
+    throw new Error(`${label}.humanDecision must be NOT_EVALUATED, PASS, or NO_GO`);
+  }
+  const closeout: SceneGapCloseout = {
+    status,
+    owner: requiredText(record, "owner", label, 240),
+    humanDecision,
+  };
+  const comparisonId = optionalText(record, "comparisonId", label, 160);
+  if (comparisonId) closeout.comparisonId = comparisonId;
+  if (record.evidence !== undefined) closeout.evidence = normalizeSceneGapEvidence(record.evidence, `${label}.evidence`);
+  const note = optionalText(record, "note", label, 2000);
+  if (note) closeout.note = note;
+  if (status === "CLOSED" || status === "REOPENED") {
+    if (!closeout.comparisonId) throw new Error(`${label}.comparisonId is required for ${status} closeout`);
+    if (!closeout.evidence) throw new Error(`${label}.evidence is required for ${status} closeout`);
+  }
+  if (status === "CLOSED" && humanDecision !== "PASS") {
+    throw new Error(`${label}.humanDecision must be PASS for CLOSED closeout`);
+  }
+  return closeout;
+}
+
+function normalizeComparison(value: unknown): FrameManifestComparison {
+  const record = asRecord(value, "manifest.comparison");
+  if (record.schema !== FRAME_COMPARISON_SCHEMA) {
+    throw new Error(`manifest.comparison.schema must be ${FRAME_COMPARISON_SCHEMA}`);
+  }
+  if (!Array.isArray(record.pairs) || record.pairs.length === 0 || record.pairs.length > 128) {
+    throw new Error("manifest.comparison.pairs must contain between 1 and 128 pairs");
+  }
+  const pairs = record.pairs.map((pair, index) => normalizeComparisonPair(pair, index));
+  if (new Set(pairs.map((pair) => pair.id)).size !== pairs.length) {
+    throw new Error("manifest.comparison.pairs must not contain duplicate ids");
+  }
+  return { schema: FRAME_COMPARISON_SCHEMA, pairs };
+}
+
+function normalizeComparisonPair(value: unknown, index: number): FrameComparisonPair {
+  const label = `manifest.comparison.pairs[${index}]`;
+  const record = asRecord(value, label);
+  const humanDecision = record.humanDecision;
+  if (humanDecision !== "NOT_EVALUATED" && humanDecision !== "PASS" && humanDecision !== "NO_GO") {
+    throw new Error(`${label}.humanDecision must be NOT_EVALUATED, PASS, or NO_GO`);
+  }
+  const pair: FrameComparisonPair = {
+    schema: FRAME_COMPARISON_SCHEMA,
+    id: requiredText(record, "id", label, 160),
+    beforeFrameId: requiredText(record, "beforeFrameId", label, 120),
+    afterFrameId: requiredText(record, "afterFrameId", label, 120),
+    cameraPose: normalizeCameraPose(record.cameraPose, `${label}.cameraPose`),
+    cameraPoseHash: normalizeHash(record, "cameraPoseHash", label),
+    renderer: requiredText(record, "renderer", label, 120),
+    viewport: normalizeViewport(record.viewport, `${label}.viewport`),
+    sourceTreeHash: normalizeHash(record, "sourceTreeHash", label),
+    humanDecision,
+  };
+  const note = optionalText(record, "note", label, 2000);
+  if (note) pair.note = note;
+  return pair;
 }
 
 function normalizePrescription(value: unknown, index: number): EvidencePrescription {
@@ -466,8 +623,14 @@ function normalizeAssetInspection(value: unknown, index: number): FrameManifestA
     evidenceStatus,
     productionReady: record.productionReady === true,
     origin,
+    playerFacing: "NOT_EVALUATED",
   };
   if (record.productionReady !== true && record.productionReady !== false) throw new Error(`${label}.productionReady must be a boolean`);
+  const playerFacing = record.playerFacing ?? "NOT_EVALUATED";
+  if (playerFacing !== "NOT_EVALUATED") throw new Error(`${label}.playerFacing must be NOT_EVALUATED`);
+  if (origin !== "file" && (evidenceStatus === "READY" || inspection.productionReady)) {
+    throw new Error(`${label}.${origin} assets cannot be READY or productionReady without player-facing human review`);
+  }
   const runtimeUsage = record.runtimeUsage;
   if (runtimeUsage !== undefined) {
     if (runtimeUsage !== "USED_IN_FRAME" && runtimeUsage !== "NOT_USED_IN_FRAME" && runtimeUsage !== "UNKNOWN") {
@@ -562,6 +725,60 @@ function normalizeStringArray(value: unknown, label: string, maxLength: number):
   return values;
 }
 
+function sameViewport(left: FrameViewport, right: FrameViewport): boolean {
+  return left.width === right.width && left.height === right.height && left.dpr === right.dpr;
+}
+
+function sameCameraPose(left: FrameCameraPose, right: FrameCameraPose): boolean {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function validateComparisonAgainstFrames(
+  comparison: FrameManifestComparison,
+  frames: readonly FrameManifestFrame[],
+  sceneGaps: readonly SceneGapNote[],
+): void {
+  const frameById = new Map(frames.map((frame) => [frame.id, frame]));
+  const pairById = new Map(comparison.pairs.map((pair) => [pair.id, pair]));
+  for (const pair of comparison.pairs) {
+    const label = `manifest.comparison.pairs.${pair.id}`;
+    if (pair.beforeFrameId === pair.afterFrameId) throw new Error(`${label}.beforeFrameId and afterFrameId must differ`);
+    const before = frameById.get(pair.beforeFrameId);
+    const after = frameById.get(pair.afterFrameId);
+    if (!before || !after) throw new Error(`${label} references unknown beforeFrameId or afterFrameId`);
+    for (const frame of [before, after]) {
+      if (frame.shippedPath !== true) throw new Error(`${label}.${frame.id} must have shippedPath=true`);
+      if (!frame.sha256 || frame.bytes === undefined || !frame.renderer || !frame.viewport || !frame.cameraPose || !frame.cameraPoseHash || !frame.sourceTreeHash || !frame.console) {
+        throw new Error(`${label}.${frame.id} lacks required capture, camera pose, or sourceTree metadata`);
+      }
+    }
+    if (before.cameraPoseHash !== after.cameraPoseHash) throw new Error(`${label}.cameraPoseHash mismatch between ${before.id} and ${after.id}`);
+    if (!sameCameraPose(before.cameraPose!, after.cameraPose!)) throw new Error(`${label}.cameraPose mismatch between ${before.id} and ${after.id}`);
+    if (before.renderer !== after.renderer) throw new Error(`${label}.renderer mismatch between ${before.id} and ${after.id}`);
+    if (!sameViewport(before.viewport!, after.viewport!)) throw new Error(`${label}.viewport mismatch between ${before.id} and ${after.id}`);
+    if (before.sourceTreeHash !== after.sourceTreeHash) throw new Error(`${label}.sourceTreeHash mismatch between ${before.id} and ${after.id}`);
+    if (!sameCameraPose(pair.cameraPose, before.cameraPose!)) throw new Error(`${label}.cameraPose does not match beforeFrame ${before.id}`);
+    if (pair.cameraPoseHash !== before.cameraPoseHash) throw new Error(`${label}.cameraPoseHash does not match beforeFrame ${before.id}`);
+    if (pair.renderer !== before.renderer) throw new Error(`${label}.renderer does not match beforeFrame ${before.id}`);
+    if (!sameViewport(pair.viewport, before.viewport!)) throw new Error(`${label}.viewport does not match beforeFrame ${before.id}`);
+    if (pair.sourceTreeHash !== before.sourceTreeHash) throw new Error(`${label}.sourceTreeHash does not match beforeFrame ${before.id}`);
+  }
+  for (const gap of sceneGaps) {
+    const closeout = gap.closeout;
+    if (!closeout?.comparisonId) continue;
+    const pair = pairById.get(closeout.comparisonId);
+    if (!pair) throw new Error(`sceneGaps.${gap.id}.closeout.comparisonId references unknown comparison pair`);
+    if (closeout.status === "CLOSED" && pair.humanDecision !== "PASS") {
+      throw new Error(`sceneGaps.${gap.id}.closeout requires comparison ${pair.id}.humanDecision=PASS`);
+    }
+    const after = frameById.get(pair.afterFrameId)!;
+    if (!closeout.evidence) continue;
+    if (closeout.evidence.path !== after.path) throw new Error(`sceneGaps.${gap.id}.closeout.evidence.path must match comparison afterFrame`);
+    if (closeout.evidence.sha256 !== after.sha256) throw new Error(`sceneGaps.${gap.id}.closeout.evidence.sha256 must match comparison afterFrame`);
+    if (closeout.evidence.bytes !== undefined && closeout.evidence.bytes !== after.bytes) throw new Error(`sceneGaps.${gap.id}.closeout.evidence.bytes must match comparison afterFrame`);
+  }
+}
+
 export function normalizeFrameManifest(value: unknown): FrameManifest {
   const record = asRecord(value, "manifest");
   if (record.schema !== FRAME_MANIFEST_SCHEMA) {
@@ -586,6 +803,8 @@ export function normalizeFrameManifest(value: unknown): FrameManifest {
   const frameIds = frames.map((frame) => frame.id);
   if (new Set(frameIds).size !== frameIds.length) throw new Error("manifest.frames must not contain duplicate ids");
   const sceneGaps = record.sceneGaps.map(normalizeSceneGap);
+  const comparison = record.comparison === undefined ? undefined : normalizeComparison(record.comparison);
+  if (comparison) validateComparisonAgainstFrames(comparison, frames, sceneGaps);
   const prescriptions = record.prescriptions === undefined
     ? undefined
     : (!Array.isArray(record.prescriptions) || record.prescriptions.length > 128
@@ -635,6 +854,7 @@ export function normalizeFrameManifest(value: unknown): FrameManifest {
     playerFacing: "NOT_EVALUATED",
     frames,
     sceneGaps,
+    ...(comparison ? { comparison } : {}),
     ...(prescriptions ? { prescriptions } : {}),
     ...(runtimeChecks ? { runtimeChecks } : {}),
     ...(assetInspections ? { assetInspections } : {}),
@@ -661,7 +881,8 @@ export function evaluatePlayerFacingSceneReview(manifest: FrameManifest): Player
     if (!gap.affectedScene && !(gap.affectedAssetIds && gap.affectedAssetIds.length > 0)) {
       issues.push(`sceneGaps.${gap.id} must identify affectedScene or affectedAssetIds`);
     }
-    if (!gap.evidence) issues.push(`sceneGaps.${gap.id}.evidence with path and sha256 is required for scene review`);
+    const reviewEvidence = gap.evidence ?? gap.closeout?.evidence;
+    if (!reviewEvidence) issues.push(`sceneGaps.${gap.id}.evidence with path and sha256 is required for scene review`);
     for (const assetId of gap.affectedAssetIds ?? []) {
       if (!assetById.has(assetId)) issues.push(`sceneGaps.${gap.id} references unknown asset ${assetId}`);
     }
@@ -673,6 +894,11 @@ export function evaluatePlayerFacingSceneReview(manifest: FrameManifest): Player
       }
     }
   }
+  for (const asset of manifest.assetInspections ?? []) {
+    if (asset.origin !== "file") {
+      issues.push(`assetInspections.${asset.id}.${asset.origin} player-facing review remains NOT_EVALUATED until real frame evidence and human review are recorded`);
+    }
+  }
 
   const knownEvidence = new Map<string, { sha256?: string; bytes?: number }>();
   for (const frame of manifest.frames) knownEvidence.set(frame.path, { sha256: frame.sha256, bytes: frame.bytes });
@@ -681,16 +907,18 @@ export function evaluatePlayerFacingSceneReview(manifest: FrameManifest): Player
   }
   for (const asset of manifest.assetInspections ?? []) knownEvidence.set(asset.sourcePath, { sha256: asset.inputHash });
   for (const gap of manifest.sceneGaps) {
-    if (!gap.evidence) continue;
-    const linked = knownEvidence.get(gap.evidence.path);
+    const reviewEvidence = gap.evidence ?? gap.closeout?.evidence;
+    if (!reviewEvidence) continue;
+    const linked = knownEvidence.get(reviewEvidence.path);
     if (!linked) issues.push(`sceneGaps.${gap.id}.evidence.path is not linked to a frame, runtime check, or asset`);
-    else if (linked.sha256 && linked.sha256 !== gap.evidence.sha256) issues.push(`sceneGaps.${gap.id}.evidence.sha256 does not match its linked source`);
-    else if (linked.bytes !== undefined && gap.evidence.bytes !== undefined && linked.bytes !== gap.evidence.bytes) issues.push(`sceneGaps.${gap.id}.evidence.bytes does not match its linked source`);
+    else if (linked.sha256 && linked.sha256 !== reviewEvidence.sha256) issues.push(`sceneGaps.${gap.id}.evidence.sha256 does not match its linked source`);
+    else if (linked.bytes !== undefined && reviewEvidence.bytes !== undefined && linked.bytes !== reviewEvidence.bytes) issues.push(`sceneGaps.${gap.id}.evidence.bytes does not match its linked source`);
   }
 
+  const activeSceneGaps = manifest.sceneGaps.filter((gap) => gap.closeout?.status !== "CLOSED");
   const status: SceneReviewDisposition = issues.length > 0
     ? "UNAVAILABLE"
-    : manifest.sceneGaps.some((gap) => gap.severity === "blocker" || gap.severity === "major")
+    : activeSceneGaps.some((gap) => gap.severity === "blocker" || gap.severity === "major")
       ? "NO_GO"
       : "PASS_WITH_FOLLOW_UP";
   const linkedAssets = (manifest.assetInspections ?? []).map((asset) => ({
@@ -702,6 +930,7 @@ export function evaluatePlayerFacingSceneReview(manifest: FrameManifest): Player
     ownership: asset.ownership ?? "unknown",
     evidenceStatus: asset.evidenceStatus,
     runtimeUsage: asset.runtimeUsage ?? "UNKNOWN" as const,
+    playerFacing: asset.playerFacing,
     ...(asset.numericContract
       ? { numericContract: {
         status: asset.numericContract.status,
@@ -718,7 +947,7 @@ export function evaluatePlayerFacingSceneReview(manifest: FrameManifest): Player
     readiness: "conditional",
     readinessReason: issues.length > 0
       ? "PLAYER_FACING_REVIEW_INPUT_INCOMPLETE"
-      : manifest.sceneGaps.length > 0
+      : activeSceneGaps.length > 0
         ? "PLAYER_FACING_SCENE_GAP"
         : "VISUAL_RUNTIME_NOT_EVALUATED",
     reviewStatus: "NOT_EVALUATED",
@@ -733,6 +962,7 @@ export function evaluatePlayerFacingSceneReview(manifest: FrameManifest): Player
       consoleWarnings,
     },
     sceneGaps: manifest.sceneGaps,
+    ...(manifest.comparison ? { comparison: manifest.comparison } : {}),
     linkedAssets,
     ...(issues.length > 0 ? { issues } : {}),
   };
@@ -763,6 +993,9 @@ export function mergeFrameManifestEvidence(
     ...incoming,
     frames: upsertById(current.frames, incoming.frames),
     sceneGaps: upsertById(current.sceneGaps, incoming.sceneGaps),
+    ...(current.comparison || incoming.comparison
+      ? { comparison: mergeFrameManifestComparison(current.comparison, incoming.comparison) }
+      : {}),
     ...(current.prescriptions || incoming.prescriptions
       ? { prescriptions: upsertById(current.prescriptions ?? [], incoming.prescriptions ?? []) }
       : {}),
@@ -773,6 +1006,18 @@ export function mergeFrameManifestEvidence(
       ? { assetInspections: upsertById(current.assetInspections ?? [], incoming.assetInspections ?? []) }
       : {}),
   });
+}
+
+function mergeFrameManifestComparison(
+  current: FrameManifestComparison | undefined,
+  incoming: FrameManifestComparison | undefined,
+): FrameManifestComparison | undefined {
+  if (!current) return incoming;
+  if (!incoming) return current;
+  return {
+    schema: FRAME_COMPARISON_SCHEMA,
+    pairs: upsertById(current.pairs, incoming.pairs),
+  };
 }
 
 function upsertById<T extends { id: string }>(current: readonly T[], incoming: readonly T[]): T[] {

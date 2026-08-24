@@ -2,13 +2,13 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-async function render(pathname) {
+async function render(pathname, requestHeaders = {}) {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", String(process.pid) + "-" + String(Date.now()) + "-" + pathname);
   const { default: worker } = await import(workerUrl.href);
   return worker.fetch(
     new Request("http://localhost" + pathname, {
-      headers: { accept: "text/html" },
+      headers: { accept: "text/html", ...requestHeaders },
     }),
     { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
     { waitUntil() {}, passThroughOnException() {} },
@@ -21,6 +21,29 @@ test("login preserves the dashboard return path and explains ChatGPT signup", as
   const html = await response.text();
   assert.match(html, /곧 회원가입/);
   assert.match(html, /\/signin-with-chatgpt\?return_to=%2Fdashboard/);
+});
+
+test("signup is a first-class route and links back to login", async () => {
+  const response = await render("/signup");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /회원가입/);
+  assert.match(html, /회원가입하기/);
+  assert.match(html, /href="\/login/);
+});
+
+test("authenticated login remains visible instead of redirecting away", async () => {
+  const response = await render("/login?return_to=%2Fdashboard", {
+    "oai-authenticated-user-id": "auth-route-test-user",
+    "oai-authenticated-user-email": "master@example.test",
+    "oai-authenticated-user-full-name": "Master",
+    "oai-authenticated-user-full-name-encoding": "percent-encoded-utf-8",
+  });
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("location"), null);
+  const html = await response.text();
+  assert.match(html, /이미 Clunk에/);
+  assert.match(html, /href="\/dashboard/);
 });
 
 test("dashboard keeps unauthenticated users behind the host sign-in gate", async () => {

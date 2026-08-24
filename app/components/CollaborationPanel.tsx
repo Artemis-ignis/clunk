@@ -302,7 +302,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
       ) : null}
 
       {error ? <p className="collaboration-error" role="alert"><Icon name="triangleAlert" size={15} />{error}</p> : null}
-      <p className="collaboration-contract-note"><code>POST /api/collaboration/threads</code> · <code>GET/POST /api/collaboration/threads/:threadId/evidence</code> · <code>evidence: clunk.frame-manifest.v1</code> · 인증된 workspace 범위 · inputHash 고정 · assetAudit와 visualRuntime/playerFacing 분리 · readinessReason으로 conditional 원인을 기계 판독 · public HTTP MCP는 아직 제공하지 않습니다.</p>
+      <p className="collaboration-contract-note"><code>POST /api/collaboration/threads</code> · <code>GET/POST /api/collaboration/threads/:threadId/evidence</code> · <code>evidence: clunk.frame-manifest.v1</code> · <code>comparison: clunk.frame-comparison.v1</code> · gap closeout은 개별 상태 · 인증된 workspace 범위 · inputHash 고정 · assetAudit와 visualRuntime/playerFacing 분리 · readinessReason으로 conditional 원인을 기계 판독 · public HTTP MCP는 아직 제공하지 않습니다.</p>
     </section>
   );
 }
@@ -338,16 +338,19 @@ function collaborationLabel(status: CollaborationStatus): string {
   return `${collaborationReadinessLevel(status).toUpperCase()} · ${status.readiness} · ${status.readinessReason}`;
 }
 
-const FRAME_MANIFEST_SCHEMA_TEMPLATE = `// SCHEMA TEMPLATE · NOT STORED HF-M94 EVIDENCE · replace every <...>
+const FRAME_MANIFEST_SCHEMA_TEMPLATE = `// SCHEMA TEMPLATE · NOT STORED HF EVIDENCE · replace every <...>
 {
   "schema": "clunk.frame-manifest.v1",
   "runId": "<RUN_ID>",
   "sourceProject": "Harvest Frontier",
   "sourceCommit": "<SOURCE_COMMIT>",
   "reviewStatus": "NOT_EVALUATED",
+  "visualRuntime": "GAP",
+  "playerFacing": "NOT_EVALUATED",
   "frames": [{ "id": "<FRAME_ID>", "path": "<FRAME_PATH>", "sha256": "<64_HEX_SHA256>", "bytes": 1, "renderer": "<RENDERER>", "hud": "off", "viewport": { "width": 1920, "height": 1080 }, "distanceBandId": "gameplay", "distanceM": 15, "console": { "errors": 0, "warnings": 0 } }],
+  "comparison": { "schema": "clunk.frame-comparison.v1", "pairs": [{ "id": "<PAIR_ID>", "beforeFrameId": "<BEFORE_FRAME_ID>", "afterFrameId": "<AFTER_FRAME_ID>", "cameraPose": { "position": [0, 0, 0], "target": [0, 0, 0], "fov": 52 }, "cameraPoseHash": "<64_HEX_SHA256>", "renderer": "<RENDERER>", "viewport": { "width": 1920, "height": 1080 }, "sourceTreeHash": "<64_HEX_SHA256>", "humanDecision": "NOT_EVALUATED" }] },
   "runtimeChecks": [{ "id": "<RUNTIME_CHECK_ID>", "kind": "dialogue-camera", "status": "PASS", "renderer": "<RENDERER>", "evidencePath": "<RUNTIME_EVIDENCE_JSON>", "frameIds": ["<FRAME_ID>"], "checks": { "poseFocusId": "<NPC_ID>", "poseFocusOnScreen": true, "poseFocusCoverage": 0.01517, "poseFocusLensInside": false } }],
-  "sceneGaps": [{ "id": "<SCENE_GAP_ID>", "severity": "major", "category": "<CATEGORY>", "note": "<OBSERVATION>", "frameIds": ["<FRAME_ID>"] }],
+  "sceneGaps": [{ "id": "<SCENE_GAP_ID>", "severity": "major", "category": "<CATEGORY>", "note": "<OBSERVATION>", "ownership": "scene", "affectedScene": "<SCENE_ID>", "nextStep": "<ACTION>", "evidence": { "path": "<FRAME_PATH>", "sha256": "<64_HEX_SHA256>", "bytes": 1 }, "frameIds": ["<FRAME_ID>"], "closeout": { "status": "OPEN", "owner": "<OWNER>", "humanDecision": "NOT_EVALUATED" } }],
   "prescriptions": [{ "id": "<PRESCRIPTION_ID>", "kind": "<KIND>", "status": "NON_BLOCKING", "priority": "P1", "observation": "<OBSERVATION>", "action": "<ACTION>", "frameIds": ["<FRAME_ID>"] }],
   "assetInspections": [{ "id": "<ASSET_INSPECTION_ID>", "sourcePath": "<SOURCE_ASSET_PATH>", "inputHash": "<64_HEX_ASSET_HASH>", "assetKind": "3d-model", "targetProfileId": "<TARGET_PROFILE_ID>", "inspectionRunId": "<INSPECTION_RUN_ID>", "evidenceStatus": "ENVIRONMENT_UNAVAILABLE", "productionReady": false, "origin": "file", "frameIds": ["<FRAME_ID>"], "qualityWarningIds": ["<QUALITY_WARNING_ID>"], "numericContract": { "status": "PASS", "valid": true, "score": 100, "threshold": 90, "hardBlockerCount": 0, "observations": { "drawCallCount": 88 } } }]
 }`;
@@ -364,7 +367,7 @@ function parseEvidenceDraft(value: string): FrameManifest | undefined {
 function evidenceLabel(evidence: StoredEvidence): string {
   return isInvalidEvidence(evidence)
     ? "manifest INVALID"
-    : `${evidence.frames.length} frames · ${evidence.sceneGaps.length} gaps${evidence.runtimeChecks?.length ? ` · ${evidence.runtimeChecks.length} numeric checks` : ""}`;
+    : `${evidence.frames.length} frames · ${evidence.sceneGaps.length} gaps${evidence.comparison?.pairs.length ? ` · ${evidence.comparison.pairs.length} comparisons` : ""}${evidence.runtimeChecks?.length ? ` · ${evidence.runtimeChecks.length} numeric checks` : ""}`;
 }
 
 function EvidenceCard({ evidence }: { evidence: StoredEvidence }) {
@@ -375,6 +378,8 @@ function EvidenceCard({ evidence }: { evidence: StoredEvidence }) {
   const runtimeChecks = evidence.runtimeChecks ?? [];
   const numericPassCount = runtimeChecks.filter((check) => check.status === "PASS").length;
   const linkedInspectionCount = evidence.assetInspections?.length ?? 0;
+  const comparisonPairs = evidence.comparison?.pairs ?? [];
+  const closedGapCount = evidence.sceneGaps.filter((gap) => gap.closeout?.status === "CLOSED").length;
   const qualityWarningCount = (evidence.assetInspections ?? []).reduce(
     (total, inspection) => total + (inspection.qualityWarningIds?.length ?? 0),
     0,
@@ -410,11 +415,25 @@ function EvidenceCard({ evidence }: { evidence: StoredEvidence }) {
       <div className="collaboration-evidence-grid">
         <span><small>source</small><strong>{evidence.sourceProject} · {evidence.sourceCommit}</strong></span>
         <span><small>frames</small><strong>{evidence.frames.length}</strong></span>
-        <span><small>scene gaps</small><strong>{evidence.sceneGaps.length}</strong></span>
+        <span><small>scene gaps</small><strong>{evidence.sceneGaps.length} · {closedGapCount} closed</strong></span>
+        <span><small>comparison pairs</small><strong>{comparisonPairs.length || "NOT_RECORDED"}</strong></span>
       </div>
       <div className="collaboration-evidence-frames">
         {evidence.frames.map((frame) => <span key={frame.id}><b>{frame.id}</b><small>{frame.hud} HUD · {frame.renderer ?? "renderer unknown"} · {frame.shippedPath === true ? "shipped path" : "path unverified"}{frame.distanceBandId ? ` · band ${frame.distanceBandId}${frame.distanceM !== undefined ? ` @ ${frame.distanceM}m` : ""}` : ""} · console {frame.console ? `${frame.console.errors}/${frame.console.warnings}` : "unknown"}{frame.frameSourceCommit ? ` · frame ${frame.frameSourceCommit}` : ""}{frame.bytes ? ` · ${frame.bytes.toLocaleString()} B` : ""} · {frame.path}</small></span>)}
       </div>
+      {comparisonPairs.length ? (
+        <div className="collaboration-comparisons">
+          <span className="mono-label">COMPARISON.V1 · SAME POSE / RENDERER / VIEWPORT / SOURCE TREE</span>
+          {comparisonPairs.map((pair) => (
+            <article key={pair.id}>
+              <div><b>{pair.humanDecision}</b><strong>{pair.id}</strong><em>{pair.beforeFrameId} → {pair.afterFrameId}</em></div>
+              <p>{pair.renderer} · {pair.viewport.width}×{pair.viewport.height}{pair.viewport.dpr ? ` @ ${pair.viewport.dpr}dpr` : ""} · camera {shortHash(pair.cameraPoseHash)} · source {shortHash(pair.sourceTreeHash)}</p>
+              {pair.note ? <small>{pair.note}</small> : null}
+            </article>
+          ))}
+          <small className="collaboration-quality-note">개별 comparison/closeout PASS는 전체 visualRuntime 또는 playerFacing을 승격하지 않습니다.</small>
+        </div>
+      ) : null}
       {runtimeChecks.length ? (
         <div className="collaboration-runtime-checks">
           <span className="mono-label">NUMERIC RUNTIME CHECKS · human review remains separate</span>
@@ -428,7 +447,7 @@ function EvidenceCard({ evidence }: { evidence: StoredEvidence }) {
         </div>
       ) : null}
       <div className="collaboration-evidence-gaps">
-        {evidence.sceneGaps.map((gap) => <span key={gap.id}><b>{gap.severity}</b>{gap.category} · {gap.ownership ?? "ownership unknown"} · {gap.affectedScene ?? gap.affectedAssetIds?.join(", ") ?? "scene/asset unknown"} · {gap.note}{gap.nextStep ? <small>next: {gap.nextStep}</small> : null}{gap.evidence ? <small>evidence: {shortHash(gap.evidence.sha256)} · {gap.evidence.path}</small> : null}</span>)}
+        {evidence.sceneGaps.map((gap) => <span key={gap.id}><b>{gap.severity}</b>{gap.category} · {gap.ownership ?? "ownership unknown"} · {gap.affectedScene ?? gap.affectedAssetIds?.join(", ") ?? "scene/asset unknown"} · {gap.note}<small>closeout: {gap.closeout?.status ?? "NOT_EVALUATED"}{gap.closeout ? ` · owner ${gap.closeout.owner} · human ${gap.closeout.humanDecision}${gap.closeout.comparisonId ? ` · ${gap.closeout.comparisonId}` : ""}` : ""}</small>{gap.nextStep ? <small>next: {gap.nextStep}</small> : null}{gap.evidence ? <small>evidence: {shortHash(gap.evidence.sha256)} · {gap.evidence.path}</small> : gap.closeout?.evidence ? <small>closeout evidence: {shortHash(gap.closeout.evidence.sha256)} · {gap.closeout.evidence.path}</small> : null}</span>)}
       </div>
       {linkedInspectionCount ? (
         <div className="collaboration-evidence-inspections">
@@ -437,7 +456,7 @@ function EvidenceCard({ evidence }: { evidence: StoredEvidence }) {
             <article key={inspection.id}>
               <div><b>{inspection.assetKind}</b><strong>{inspection.evidenceStatus}</strong><em>{inspection.productionReady ? "production ready" : "not player-facing proof"}</em></div>
               <p>{inspection.sourcePath} · {shortHash(inspection.inputHash)} · {inspection.targetProfileId}</p>
-              <small>origin · {inspection.origin} · ownership · {inspection.ownership ?? "unknown"} · runtime usage · {inspection.runtimeUsage ?? "UNKNOWN"}{inspection.provenance ? ` · provenance ${inspection.provenance.sourceRef}${inspection.provenance.sourceCommit ? ` @ ${inspection.provenance.sourceCommit}` : ""}` : ""}</small>
+              <small>origin · {inspection.origin} · ownership · {inspection.ownership ?? "unknown"} · runtime usage · {inspection.runtimeUsage ?? "UNKNOWN"} · player-facing · {inspection.playerFacing}{inspection.provenance ? ` · provenance ${inspection.provenance.sourceRef}${inspection.provenance.sourceCommit ? ` @ ${inspection.provenance.sourceCommit}` : ""}` : ""}</small>
               {inspection.numericContract ? <small>numeric contract · {inspection.numericContract.status}{inspection.numericContract.score !== undefined ? ` · score ${inspection.numericContract.score}/${inspection.numericContract.threshold ?? "?"}` : ""}{inspection.numericContract.hardBlockerCount !== undefined ? ` · hard blockers ${inspection.numericContract.hardBlockerCount}` : ""}{inspection.numericContract.observations ? ` · ${Object.entries(inspection.numericContract.observations).map(([key, value]) => `${key}=${String(value)}`).join(" · ")}` : ""}</small> : null}
               {inspection.qualityWarningIds?.length ? <small>qualityWarnings · {inspection.qualityWarningIds.join(", ")}</small> : null}
             </article>

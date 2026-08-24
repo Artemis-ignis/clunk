@@ -19,7 +19,10 @@ test("server-renders the client connection guide", async () => {
   assert.match(html, /Claude Code/);
   assert.match(html, /Claude Desktop/);
   assert.match(html, /VS Code/);
-  assert.match(html, /npm\.cmd run mcp/);
+  assert.match(html, /npm\.cmd run --silent mcp/);
+  assert.match(html, /npm stdout/);
+  assert.match(html, /\.cursor\/mcp\.json/);
+  assert.match(html, /cursor-agent mcp list/);
   assert.match(html, /clunk_inspect/);
   assert.match(html, /공개 HTTP MCP는 아직 제공하지 않습니다/);
   assert.match(html, /복사/);

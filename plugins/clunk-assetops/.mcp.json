@@ -9,6 +9,7 @@
         "call",
         "npm.cmd",
         "run",
+        "--silent",
         "mcp"
       ],
       "cwd": "C:\\Users\\50106\\Desktop\\Clunk",

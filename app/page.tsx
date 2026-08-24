@@ -84,11 +84,11 @@ export default function Home() {
                 검사하고, 점수와 근거, Passport를 남깁니다.
               </p>
               <div className="landing-hero-actions">
-                <Link className="button button-primary" href="/app">
+                <Link className="button button-primary" href="/app" prefetch={false}>
                   검사기 열기
                   <Icon name="arrowUpRight" size={15} />
                 </Link>
-                <Link className="button button-quiet" href="/agents">
+                <Link className="button button-quiet" href="/agents" prefetch={false}>
                   에이전트 연결
                   <Icon name="arrowRight" size={15} />
                 </Link>
@@ -215,7 +215,7 @@ export default function Home() {
                   현재 Clunk의 정식 외부 연결은 Windows stdio MCP입니다. Claude Code, Codex, Cursor,
                   Claude Desktop, VS Code와 같은 Core를 연결합니다.
                 </p>
-                <Link className="text-link" href="/agents">
+                <Link className="text-link" href="/agents" prefetch={false}>
                   클라이언트별 설정 보기 <Icon name="arrowRight" size={15} />
                 </Link>
               </div>
@@ -289,7 +289,7 @@ export default function Home() {
                   진행 중입니다. 게임 원본은 그대로 두고, 검사 결과와 별도 출력만 Clunk 쪽에 기록합니다.
                 </p>
               </div>
-              <Link className="text-link" href="/agents">연결 흐름 <Icon name="arrowRight" size={15} /></Link>
+                <Link className="text-link" href="/agents" prefetch={false}>연결 흐름 <Icon name="arrowRight" size={15} /></Link>
             </div>
           </div>
         </section>
@@ -300,10 +300,10 @@ export default function Home() {
             <h2>에셋 하나로 <em>바로 확인해 보세요.</em></h2>
             <p>샘플로 시작하거나 직접 만든 GLB를 검사기에 넣어 보세요. 실제 파일에서 계산한 결과만 남습니다.</p>
             <div className="landing-hero-actions">
-              <Link className="button button-primary" href="/app">
+              <Link className="button button-primary" href="/app" prefetch={false}>
                 검사기 열기 <Icon name="arrowUpRight" size={15} />
               </Link>
-              <Link className="button button-quiet" href="/login">
+              <Link className="button button-quiet" href="/login" prefetch={false}>
                 워크스페이스 시작 <Icon name="arrowRight" size={15} />
               </Link>
             </div>
@@ -314,10 +314,10 @@ export default function Home() {
               <div><strong>Clunk</strong><span>팀을 위한 실시간 3D 에셋 품질 게이트</span></div>
             </div>
             <nav className="site-footer-nav" aria-label="사이트 링크">
-              <Link href="/app">검사기</Link>
-              <Link href="/agents">에이전트 연결</Link>
-              <Link href="/dashboard">대시보드</Link>
-              <Link href="/docs">문서</Link>
+              <Link href="/app" prefetch={false}>검사기</Link>
+              <Link href="/agents" prefetch={false}>에이전트 연결</Link>
+              <Link href="/dashboard" prefetch={false}>대시보드</Link>
+              <Link href="/docs" prefetch={false}>문서</Link>
               <a href="/llms.txt">llms.txt</a>
             </nav>
             <span className="demo-marker">DEMO MODE · 실제 결제 아님</span>

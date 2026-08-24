@@ -323,6 +323,192 @@ test("frame manifest append rejects a different run identity", () => {
   assert.throws(() => mergeFrameManifestEvidence(manifest, otherRun, "append"), /same runId and sourceProject/i);
 });
 
+function comparisonManifest(overrides: Record<string, unknown> = {}) {
+  const pose = { position: [10, 4, 12], target: [0, 1, 0], fov: 42 };
+  const poseHash = "a".repeat(64);
+  const sourceTreeHash = "b".repeat(64);
+  return {
+    schema: FRAME_MANIFEST_SCHEMA,
+    runId: "HF-M104-comparison-r01",
+    sourceProject: "Harvest Frontier",
+    sourceCommit: "3e5fffa",
+    reviewStatus: "NOT_EVALUATED",
+    visualRuntime: "GAP",
+    playerFacing: "NOT_EVALUATED",
+    frames: [
+      {
+        id: "before",
+        path: "before.png",
+        sha256: "c".repeat(64),
+        bytes: 1000,
+        renderer: "WebGPU",
+        hud: "off",
+        shippedPath: true,
+        viewport: { width: 1920, height: 1080, dpr: 1 },
+        cameraPose: pose,
+        cameraPoseHash: poseHash,
+        sourceTreeHash,
+        console: { errors: 0, warnings: 0 },
+      },
+      {
+        id: "after",
+        path: "after.png",
+        sha256: "d".repeat(64),
+        bytes: 1001,
+        renderer: "WebGPU",
+        hud: "off",
+        shippedPath: true,
+        viewport: { width: 1920, height: 1080, dpr: 1 },
+        cameraPose: pose,
+        cameraPoseHash: poseHash,
+        sourceTreeHash,
+        console: { errors: 0, warnings: 0 },
+      },
+    ],
+    comparison: {
+      schema: "clunk.frame-comparison.v1",
+      pairs: [{
+        id: "terrain-before-after",
+        beforeFrameId: "before",
+        afterFrameId: "after",
+        cameraPose: pose,
+        cameraPoseHash: poseHash,
+        renderer: "WebGPU",
+        viewport: { width: 1920, height: 1080, dpr: 1 },
+        sourceTreeHash,
+        humanDecision: "PASS",
+      }],
+    },
+    sceneGaps: [{
+      id: "hard-terrain-boundary",
+      severity: "major",
+      category: "terrain",
+      note: "Boundary requires before/after review.",
+      ownership: "scene",
+      affectedScene: "farm-approach",
+      nextStep: "Review the paired shipped frames at the same pose.",
+      frameIds: ["before", "after"],
+      closeout: {
+        status: "CLOSED",
+        owner: "hf-scene-art",
+        comparisonId: "terrain-before-after",
+        humanDecision: "PASS",
+        evidence: { path: "after.png", sha256: "d".repeat(64), bytes: 1001 },
+      },
+    }],
+    ...overrides,
+  };
+}
+
+test("comparison.v1 rejects camera pose, renderer, viewport, and sourceTree mismatches", () => {
+  const mismatchCases = [
+    { name: "cameraPoseHash", mutate: (manifest: ReturnType<typeof comparisonManifest>) => { (manifest.frames[1] as Record<string, unknown>).cameraPoseHash = "e".repeat(64); } },
+    { name: "cameraPose", mutate: (manifest: ReturnType<typeof comparisonManifest>) => { (manifest.frames[1] as Record<string, unknown>).cameraPose = { position: [10, 4, 13], target: [0, 1, 0], fov: 42 }; } },
+    { name: "renderer", mutate: (manifest: ReturnType<typeof comparisonManifest>) => { (manifest.frames[1] as Record<string, unknown>).renderer = "WebGL2"; } },
+    { name: "viewport", mutate: (manifest: ReturnType<typeof comparisonManifest>) => { (manifest.frames[1] as Record<string, unknown>).viewport = { width: 1280, height: 720, dpr: 1 }; } },
+    { name: "sourceTreeHash", mutate: (manifest: ReturnType<typeof comparisonManifest>) => { (manifest.frames[1] as Record<string, unknown>).sourceTreeHash = "f".repeat(64); } },
+  ];
+  for (const mismatch of mismatchCases) {
+    const manifest = comparisonManifest();
+    mismatch.mutate(manifest);
+    assert.throws(() => normalizeFrameManifest(manifest), new RegExp(`${mismatch.name} mismatch`, "i"));
+  }
+});
+
+test("comparison append preserves existing pairs and upserts a changed pair by id", () => {
+  const current = normalizeFrameManifest(comparisonManifest());
+  const incomingRaw = comparisonManifest();
+  const incomingPair = (incomingRaw.comparison as { pairs: Array<Record<string, unknown>> }).pairs[0];
+  incomingPair.note = "same camera, newly reviewed note";
+  const incoming = normalizeFrameManifest(incomingRaw);
+  const merged = mergeFrameManifestEvidence(current, incoming, "append");
+  assert.equal(merged.comparison?.pairs.length, 1);
+  assert.equal(merged.comparison?.pairs[0]?.note, "same camera, newly reviewed note");
+});
+
+test("comparison.v1 preserves an individual gap closeout without promoting visualRuntime", () => {
+  const manifest = normalizeFrameManifest(comparisonManifest());
+  assert.equal(manifest.comparison?.pairs[0]?.id, "terrain-before-after");
+  assert.equal(manifest.sceneGaps[0]?.closeout?.status, "CLOSED");
+  assert.equal(manifest.sceneGaps[0]?.closeout?.owner, "hf-scene-art");
+  const review = evaluatePlayerFacingSceneReview(manifest);
+  assert.equal(review.status, "PASS_WITH_FOLLOW_UP");
+  assert.equal(review.readinessReason, "VISUAL_RUNTIME_NOT_EVALUATED");
+  assert.equal(review.visualRuntime, "GAP");
+  assert.equal(review.playerFacing, "NOT_EVALUATED");
+  assert.equal(review.sceneGaps[0]?.closeout?.status, "CLOSED");
+});
+
+test("closed gap closeout requires a comparison and linked after evidence", () => {
+  const manifest = comparisonManifest();
+  const gap = (manifest.sceneGaps[0] as Record<string, unknown>);
+  gap.closeout = { status: "CLOSED", owner: "hf-scene-art", humanDecision: "PASS" };
+  assert.throws(() => normalizeFrameManifest(manifest), /closeout.*comparisonId/i);
+});
+
+test("gap closeout states remain per-gap and distinguish reopened from not evaluated", () => {
+  const reopenedRaw = comparisonManifest();
+  const reopenedGap = reopenedRaw.sceneGaps[0] as Record<string, unknown>;
+  reopenedGap.closeout = {
+    status: "REOPENED",
+    owner: "hf-scene-art",
+    comparisonId: "terrain-before-after",
+    humanDecision: "NO_GO",
+    evidence: { path: "after.png", sha256: "d".repeat(64), bytes: 1001 },
+  };
+  const reopened = normalizeFrameManifest(reopenedRaw);
+  assert.equal(reopened.sceneGaps[0]?.closeout?.status, "REOPENED");
+  assert.equal(evaluatePlayerFacingSceneReview(reopened).status, "NO_GO");
+
+  const notEvaluatedRaw = comparisonManifest();
+  const notEvaluatedGap = notEvaluatedRaw.sceneGaps[0] as Record<string, unknown>;
+  notEvaluatedGap.closeout = { status: "NOT_EVALUATED", owner: "hf-scene-art", humanDecision: "NOT_EVALUATED" };
+  const notEvaluated = normalizeFrameManifest(notEvaluatedRaw);
+  assert.equal(notEvaluated.sceneGaps[0]?.closeout?.status, "NOT_EVALUATED");
+});
+
+test("procedural assets cannot become READY and remain player-facing NOT_EVALUATED", () => {
+  const readyManifest = comparisonManifest({
+    assetInspections: [{
+      id: "crop-rice",
+      sourcePath: "src/crops.ts#rice",
+      inputHash: "1".repeat(64),
+      assetKind: "3d-model",
+      targetProfileId: "harvest-frontier-web-three",
+      inspectionRunId: "crop-r01",
+      evidenceStatus: "READY",
+      productionReady: true,
+      origin: "procedural",
+      provenance: { sourceRef: "src/crops.ts#rice" },
+      frameIds: ["after"],
+    }],
+  });
+  assert.throws(() => normalizeFrameManifest(readyManifest), /procedural.*READY|runtime-generated.*READY/i);
+
+  const conditionalManifest = normalizeFrameManifest(comparisonManifest({
+    assetInspections: [{
+      id: "crop-rice",
+      sourcePath: "src/crops.ts#rice",
+      inputHash: "1".repeat(64),
+      assetKind: "3d-model",
+      targetProfileId: "harvest-frontier-web-three",
+      inspectionRunId: "crop-r01",
+      evidenceStatus: "CONDITIONAL",
+      productionReady: false,
+      origin: "procedural",
+      provenance: { sourceRef: "src/crops.ts#rice" },
+      frameIds: ["after"],
+      numericContract: { status: "PASS", score: 100, hardBlockerCount: 0 },
+    }],
+  }));
+  assert.equal(conditionalManifest.assetInspections?.[0]?.playerFacing, "NOT_EVALUATED");
+  assert.equal(conditionalManifest.assetInspections?.[0]?.numericContract?.status, "PASS");
+  const conditionalReview = evaluatePlayerFacingSceneReview(conditionalManifest);
+  assert.equal(conditionalReview.status, "UNAVAILABLE");
+  assert.equal(conditionalReview.readinessReason, "PLAYER_FACING_REVIEW_INPUT_INCOMPLETE");
+  assert.match(conditionalReview.issues?.join("\n") ?? "", /procedural.*NOT_EVALUATED/i);
+});
+
 test("frame manifest links shipped frames to source asset evidence without promoting player-facing status", () => {
   const manifest = normalizeFrameManifest({
     schema: FRAME_MANIFEST_SCHEMA,

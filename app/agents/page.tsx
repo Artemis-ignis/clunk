@@ -56,7 +56,7 @@ export default function AgentsPage() {
             </div>
             <div className="agents-terminal-line">
               <span className="tok-prompt">$</span>
-              <span>npm.cmd run mcp</span>
+              <span>npm.cmd run --silent mcp</span>
             </div>
             <div className="agents-hero-metrics">
               <div>
@@ -92,6 +92,38 @@ export default function AgentsPage() {
             <strong>점수보다 근거를 저장</strong>
             <p>hash, finding, fresh reinspection과 Passport를 구분합니다.</p>
           </div>
+        </section>
+
+        <section className="agents-connection-status" aria-labelledby="mcp-status-heading">
+          <div>
+            <span className="eyebrow">현재 연결 상태</span>
+            <h2 id="mcp-status-heading">왜 연결이 안 됐는지 먼저 확인하세요.</h2>
+            <p>
+              외부 HTTP MCP는 아직 출시하지 않았습니다. 지금 실제로 동작하는 정식 경로는 각 클라이언트가 Clunk 저장소의
+              로컬 Windows stdio 프로세스를 실행하는 방식입니다.
+            </p>
+          </div>
+          <div className="agents-connection-checks">
+            <article>
+              <strong>1. npm stdout 오염</strong>
+              <p><code>npm.cmd run mcp</code>는 npm 시작 문구를 JSON-RPC stdout에 섞을 수 있습니다. 안내와 플러그인은 모두 <code>npm.cmd run --silent mcp</code>로 고정했습니다.</p>
+            </article>
+            <article>
+              <strong>2. cwd는 placeholder가 아닙니다</strong>
+              <p><code>&lt;CLUNK_ROOT&gt;</code> 또는 <code>C:\path\to\Clunk</code>를 실제 절대 경로로 바꿔야 합니다. 예: <code>C:\Users\50106\Desktop\Clunk</code></p>
+            </article>
+            <article>
+              <strong>3. HTTP / API 탭</strong>
+              <p>공개 HTTP MCP는 미출시입니다. 웹 API 라우트는 로그인된 Clunk 앱 내부용이므로 외부 MCP endpoint로 호출하면 동작하지 않습니다.</p>
+            </article>
+            <article>
+              <strong>4. Cursor는 mcp.json을 읽습니다</strong>
+              <p>현재 Cursor CLI 경로는 <code>.cursor/mcp.json</code>과 <code>cursor-agent mcp list</code>입니다. 안내에서 제거한 <code>agent mcp add</code>를 복사하지 마세요.</p>
+            </article>
+          </div>
+          <pre className="agents-connection-smoke"><code>{`Set-Location 'C:\\Users\\50106\\Desktop\\Clunk'
+npm.cmd run --silent mcp
+# initialize → tools/list 에서 5개 도구가 JSON으로 나와야 합니다.`}</code></pre>
         </section>
 
         <section className="agents-connect-section" id="connect">
@@ -291,8 +323,17 @@ export default function AgentsPage() {
               플레이어 화면 gap을 구조화하려면 <code>{COLLABORATION_CONTRACT.sceneReviewCli}</code>를 사용합니다.
               이 결과는 severity, evidence path/hash, affected scene/asset, ownership, nextStep을 반환하지만
               <code>visualRuntime: GAP</code>·<code>playerFacing: NOT_EVALUATED</code>·human review PENDING을 유지합니다.
+              before/after 증거는 <code>{COLLABORATION_CONTRACT.comparisonSchema}</code>로 묶고,
+              <code>{COLLABORATION_CONTRACT.comparisonMismatch}</code>가 하나라도 있으면 저장을 거부합니다.
+              gap별 closeout은 <code>{COLLABORATION_CONTRACT.gapCloseout}</code>이며,
+              <code>{COLLABORATION_CONTRACT.proceduralRule}</code>입니다.
               최신 HF handoff의 sourceHead <code>3e5fffa</code>와 M84 capture 경로는 수신했지만,
               Clunk가 실제 파일 bytes/hash를 확인하기 전까지는 <code>PATH_RECEIVED_HASH_PENDING</code>으로 기록합니다.
+              최신 M104 컨트롤러 판정 sourceHead <code>ed6302b</code>는 human <code>NO_GO</code>·
+              <code>visualRuntime: GAP</code>로 수신했으며, 대화 NPC 가독성·딜러/장터 구도·흙/잔디/길
+              경계·반복 식생/지형/전경 관통의 네 gap은 <code>OPEN</code>으로 기록합니다.
+              pair/hash/camera 메타데이터가 아직 없으므로 pair 자체는 <code>NOT_EVALUATED</code>이고,
+              <code>CLOSED</code>나 <code>REOPENED</code> closeout은 주장하지 않습니다.
               따라서 그 네 scene gap은 실제 hash가 제출되기 전에는 <code>scene-review</code>의 reviewable evidence로
               승격되지 않습니다.
               M103 packaged WebGPU의 no-HUD frame hash, title/hud/walk auxiliary hash와 report PASS도

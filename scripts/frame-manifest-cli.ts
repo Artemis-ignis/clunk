@@ -22,7 +22,7 @@ try {
       ? await merge(args)
       : command === "scene-review"
         ? await sceneReview(args)
-        : (() => { throw new Error("Usage: validate --input <manifest.json> | merge --current <manifest.json> --incoming <manifest.json> --mode append|replace (API evidenceMode) | scene-review --input <manifest.json> [--required]"); })();
+      : (() => { throw new Error("Usage: validate --input <manifest.json> | merge --current <manifest.json> --incoming <manifest.json> --mode append|replace (API evidenceMode) | scene-review --input <manifest.json> [--required] (comparison.v1 + per-gap closeout supported)"); })();
 
   const output = `${JSON.stringify(result, null, 2)}\n`;
   const outputPath = args.get("out");

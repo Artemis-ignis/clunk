@@ -24,6 +24,7 @@ import {
   HF_M98_RUNTIME_UPDATE,
   HF_3E5FFFA_ONGOING_HANDOFF,
   HF_M103_CURRENT_VISUAL_HANDOFF,
+  HF_M104_CURRENT_HANDOFF,
   VSCODE_COMMANDS,
 } from "../components/product-facts";
 
@@ -141,6 +142,16 @@ const HF_M99_ACCEPTANCE_FIXTURE = `// ACTUAL CLUNK ACCEPTANCE FIXTURE · not a s
   }
 }`;
 
+const HF_M104_ACCEPTANCE_FIXTURE = `// CLUNK ACCEPTANCE FIXTURE · examples/frame-manifest/harvest-frontier-m104-comparison-closeout.example.json
+{
+  "contract": "clunk.frame-manifest.v1 + clunk.frame-comparison.v1",
+  "linked": ["shipped before/after frames", "read-only GLB numeric PASS", "procedural tomato provenance"],
+  "comparison": "same cameraPose/cameraPoseHash + renderer + viewport + sourceTreeHash",
+  "sceneGapCloseout": "per-gap OPEN/CLOSED/REOPENED; CLOSED requires PASS pair + after evidence",
+  "expectedReview": { "status": "UNAVAILABLE", "readiness": "conditional", "humanReview": "PENDING", "visualRuntime": "GAP", "playerFacing": "NOT_EVALUATED" },
+  "cli": "npm.cmd run collaboration:frame-manifest -- scene-review --input examples/frame-manifest/harvest-frontier-m104-comparison-closeout.example.json --format json"
+}`;
+
 const TEXTURE_PROFILE_SCHEMA_EXAMPLE = `// SCHEMA EXAMPLE · clunk.texture-audit.v1 profile; output remains texture-only
 {
   "evaluationProfile": {
@@ -216,12 +227,42 @@ const FRAME_MANIFEST_SCHEMA_EXAMPLE = `// SCHEMA EXAMPLE · replace every <...>;
   "assetInspections": [{
     "id": "<ASSET_INSPECTION_ID>", "sourcePath": "<SOURCE_ASSET_PATH>", "inputHash": "<64_HEX_ASSET_HASH>",
     "assetKind": "3d-model", "targetProfileId": "<TARGET_PROFILE_ID>", "inspectionRunId": "<INSPECTION_RUN_ID>",
-    "evidenceStatus": "ENVIRONMENT_UNAVAILABLE", "productionReady": false, "origin": "file", "ownership": "unknown", "runtimeUsage": "UNKNOWN", "frameIds": ["<FRAME_ID>"],
+    "evidenceStatus": "ENVIRONMENT_UNAVAILABLE", "productionReady": false, "origin": "file", "ownership": "unknown", "runtimeUsage": "UNKNOWN", "playerFacing": "NOT_EVALUATED", "frameIds": ["<FRAME_ID>"],
     "qualityWarningIds": ["<QUALITY_WARNING_ID>"],
     "numericContract": { "status": "PASS", "valid": true, "score": 100, "threshold": 90, "hardBlockerCount": 0,
       "findingIds": ["<INFO_FINDING_ID>"], "observations": { "drawCallCount": 88, "bounds": "<OBSERVED_BOUNDS>" } }
   }]
 }`;
+
+const FRAME_COMPARISON_SCHEMA_EXAMPLE = `// SCHEMA EXAMPLE · clunk.frame-comparison.v1 · not stored HF evidence
+{
+  "schema": "clunk.frame-manifest.v1",
+  "reviewStatus": "NOT_EVALUATED",
+  "visualRuntime": "GAP",
+  "playerFacing": "NOT_EVALUATED",
+  "frames": [
+    { "id": "before", "path": "<BEFORE_PATH>", "sha256": "<BEFORE_SHA256>", "bytes": 1, "renderer": "WebGPU", "shippedPath": true,
+      "viewport": { "width": 1920, "height": 1080, "dpr": 1 }, "cameraPose": { "position": [10, 4, 12], "target": [0, 1, 0], "fov": 42 },
+      "cameraPoseHash": "<POSE_HASH>", "sourceTreeHash": "<SOURCE_TREE_HASH>", "hud": "off", "console": { "errors": 0, "warnings": 0 } },
+    { "id": "after", "path": "<AFTER_PATH>", "sha256": "<AFTER_SHA256>", "bytes": 1, "renderer": "WebGPU", "shippedPath": true,
+      "viewport": { "width": 1920, "height": 1080, "dpr": 1 }, "cameraPose": { "position": [10, 4, 12], "target": [0, 1, 0], "fov": 42 },
+      "cameraPoseHash": "<POSE_HASH>", "sourceTreeHash": "<SOURCE_TREE_HASH>", "hud": "off", "console": { "errors": 0, "warnings": 0 } }
+  ],
+  "comparison": { "schema": "clunk.frame-comparison.v1", "pairs": [{
+    "id": "terrain-before-after", "beforeFrameId": "before", "afterFrameId": "after",
+    "cameraPose": { "position": [10, 4, 12], "target": [0, 1, 0], "fov": 42 }, "cameraPoseHash": "<POSE_HASH>",
+    "renderer": "WebGPU", "viewport": { "width": 1920, "height": 1080, "dpr": 1 }, "sourceTreeHash": "<SOURCE_TREE_HASH>",
+    "humanDecision": "NOT_EVALUATED"
+  }] },
+  "sceneGaps": [{ "id": "hard-terrain-boundary", "severity": "major", "category": "terrain", "note": "<OBSERVATION>",
+    "ownership": "scene", "affectedScene": "farm", "nextStep": "<ACTION>", "frameIds": ["before", "after"],
+    "closeout": { "status": "OPEN", "owner": "<OWNER>", "humanDecision": "NOT_EVALUATED" } }]
+}
+
+// comparison validation: before and after must share cameraPose/cameraPoseHash,
+// renderer, viewport, and sourceTreeHash. CLOSED closeout additionally requires
+// humanDecision=PASS plus evidence equal to the after frame. A closed gap never
+// changes visualRuntime=GAP or playerFacing=NOT_EVALUATED.`;
 
 const PLAYER_FACING_SCENE_REVIEW_EXAMPLE = `// SCHEMA EXAMPLE · clunk.player-facing-scene-review.v1 · not a visual approval
 {
@@ -259,6 +300,8 @@ npm.cmd run collaboration:frame-manifest -- merge --current stored.json --incomi
 
 # player-facing scene evidence contract; this is not a renderer or human approval
 npm.cmd run collaboration:frame-manifest -- scene-review --input hf-frame-manifest.json --format json
+# CI exact exit propagation (0 / 2 / 4):
+npm.cmd exec -- tsx scripts/frame-manifest-cli.ts scene-review --input hf-frame-manifest.json --format json
 # output schema: clunk.player-facing-scene-review.v1
 # exit 0 PASS_WITH_FOLLOW_UP · exit 2 NO_GO (major/blocker gap) · exit 4 UNAVAILABLE (missing shipped/evidence metadata)
 # visualRuntime remains GAP, playerFacing remains NOT_EVALUATED, humanReview remains PENDING.
@@ -306,7 +349,7 @@ POST /api/assetops/inspect
 // v1 remains valid; v2 rejects unsafe/duplicate names, missing entry, malformed base64,
 // invalid role/relation references, >256 files, or >64 MiB decoded. Structural PASS is not runtime or player-facing approval.`;
 
-const AGENT_SESSION = `$ echo '{"jsonrpc":"2.0","id":1,"method":"initialize"}' | npm run mcp
+const AGENT_SESSION = `$ echo '{"jsonrpc":"2.0","id":1,"method":"initialize"}' | npm.cmd run --silent mcp
   protocolVersion  ${MCP_SERVER.protocolVersion}
   serverInfo       ${MCP_SERVER.name} v${MCP_SERVER.version}
 
@@ -453,6 +496,10 @@ export default function DocsPage() {
             visual approval을 하지 않았다는 뜻입니다. linked <code>assetInspections[].numericContract</code>에는
             score/threshold/hardBlocker/draw-call/bounds 같은 정적 관찰값을 넣을 수 있지만,
             <code>visualRuntime: GAP</code>와 human review를 바꾸지 않습니다.
+            before/after를 비교할 때는 <code>{COLLABORATION_CONTRACT.comparisonSchema}</code>를 사용하며,
+            <code>{COLLABORATION_CONTRACT.comparisonMismatch}</code> 오류를 그대로 반환합니다.
+            gap별 <code>{COLLABORATION_CONTRACT.gapCloseout}</code>이고, procedural/runtime-generated 표면은
+            <code>{COLLABORATION_CONTRACT.proceduralRule}</code>입니다.
           </p>
           <div className="doc-api-contract"><code>{COLLABORATION_CONTRACT.list}</code><code>{COLLABORATION_CONTRACT.create}</code><code>{COLLABORATION_CONTRACT.detail}</code><code>{COLLABORATION_CONTRACT.message}</code><code>{COLLABORATION_CONTRACT.evidenceReadApi}</code><code>{COLLABORATION_CONTRACT.evidenceOnlyApi}</code></div>
           <div className="doc-review-contract">
@@ -464,10 +511,12 @@ export default function DocsPage() {
             <CodeBlock title="실제 저장값 · HF M94" language="json" code={HF_M94_STORED_EVIDENCE} caption="현재 live D1에 저장된 실제 값의 요약입니다. POST schema template와 섞지 않습니다." />
             <CodeBlock title="schema template" language="json" code={FRAME_MANIFEST_SCHEMA_EXAMPLE} caption="다음 제출용 형식 예시입니다. <...> 값은 실제 캡처의 값으로 교체해야 합니다." />
           </div>
+          <CodeBlock title="comparison.v1 + gap closeout" language="json" code={FRAME_COMPARISON_SCHEMA_EXAMPLE} caption="before/after는 동일 cameraPose·cameraPoseHash·renderer·viewport·sourceTreeHash를 강제합니다. closeout은 gap별로 닫히며 전체 visualRuntime을 승격하지 않습니다." />
           <CodeBlock title="source asset link API" language="json" code={`${ASSET_INSPECTION_API_EXAMPLE}\n\n// frame + asset evidence merge (authenticated)\nPOST /api/collaboration/threads/<THREAD_ID>/evidence\n{ "evidenceMode": "append", "evidence": <FULL_FRAME_MANIFEST> }`} caption="바이트 검사 응답과 frame manifest 저장은 분리됩니다. API는 인증된 workspace에서만 동작하며 placeholder는 실제 저장 evidence가 아닙니다." />
           <CodeBlock title="procedural/runtime provenance" language="json" code={PROCEDURAL_ASSET_SCHEMA_EXAMPLE} caption="procedural crop·vegetation·NPC는 GLB 바이트 PASS를 발명하지 않습니다. sourceRef/sourceCommit/generator/recipeId와 실제 frame을 함께 검토 대상으로 등록합니다." />
           <CodeBlock title="evidenceMode" language="bash" code={FRAME_MANIFEST_WRITE_RULES} caption="append는 기존 ID를 보존하고 같은 ID만 upsert합니다. 다른 runId/sourceProject append는 409로 거부합니다." />
           <CodeBlock title="player-facing scene review output" language="json" code={PLAYER_FACING_SCENE_REVIEW_EXAMPLE} caption="NO_GO/PASS_WITH_FOLLOW_UP는 evidence disposition입니다. score 100과 runtime/player-facing 판정을 합치지 않고, 실제 shipped capture·evidence hash·소유권을 모두 요구합니다." />
+          <CodeBlock title="M104 comparison acceptance" language="json" code={HF_M104_ACCEPTANCE_FIXTURE} caption="Clunk 저장소의 회귀 fixture입니다. procedural crop은 numeric PASS가 있어도 human review 없이는 NOT_EVALUATED이며, 전체 readiness는 conditional입니다." />
           <p className="doc-lead">
             HF M95 standing invariant는 sourceHead <code>3e3e3435b2e378a2446dacd8d352d2d24437518a</code>,
             renderer <code>WebGL2</code>, 실제 브라우저 입력 기준 8/8 PASS·재시도 0·console 0/0입니다.
@@ -503,6 +552,7 @@ export default function DocsPage() {
           <CodeBlock title="HF M98/M99 integration update" language="json" code={HF_M98_RUNTIME_UPDATE} caption="HF 781a551의 8/8 WebGL2/WebGPU 흐름 PASS와 8개 GLB numeric contract를 visual review와 분리한 외부 증거입니다." />
           <CodeBlock title="HF 3e5fffa ongoing handoff" language="json" code={HF_3E5FFFA_ONGOING_HANDOFF} caption="최신 HF 경로는 수신했지만 Clunk checkout에서 M84 파일의 실제 byte/hash를 확인하기 전까지 PATH_RECEIVED_HASH_PENDING으로 보존합니다. 이 값은 scene-review 입력으로 승격하지 않습니다." />
           <CodeBlock title="HF M103 packaged WebGPU received evidence" language="json" code={HF_M103_CURRENT_VISUAL_HANDOFF} caption="M103 frame/title/HUD/walk hash를 HF 수신 증거로 고정했습니다. report PASS와 human NO_GO/GAP를 분리하며, local bytes 확인 전에는 scene-review 입력이나 player-facing PASS로 승격하지 않습니다." />
+          <CodeBlock title="HF M104 current handoff" language="json" code={HF_M104_CURRENT_HANDOFF} caption="HF M104 human NO_GO/GAP를 수신했지만 pair/hash 메타데이터가 없는 상태입니다. 네 gap은 OPEN, pair 자체는 NOT_EVALUATED이며 CLOSED/REOPENED는 주장하지 않습니다." />
           <CodeBlock title="HF M99 actual acceptance + consumer bridge" language="json" code={HF_M99_ACCEPTANCE_FIXTURE} caption="Clunk 저장소에 커밋된 실제 M99 증거 fixture와 HF consumer bridge 결과입니다. schema template가 아니며, shipped frame은 human visual review PENDING/GAP로 남습니다." />
         </section>
 
