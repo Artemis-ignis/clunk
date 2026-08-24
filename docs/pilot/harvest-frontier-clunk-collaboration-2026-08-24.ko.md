@@ -105,3 +105,24 @@ M84 shipped-path 무-HUD 실사용 플레이테스트에서 발견한 다음 문
 
 이 관찰은 점수 100/READY를 홍보하기 위한 것이 아니라, 동일 입력·동일 프로파일의
 재현성과 판정 기준의 설명 가능성을 확보하기 위한 것이다.
+
+## 2026-08-24 HF 재검증 및 연동 결함
+
+- HF가 현재 `public/assets/runtime`의 near/far GLB 8종에 대해 Clunk MCP
+  `clunk_inspect`와 `clunk_validate`를 다시 호출했다. 8/8이 score 100, READY true,
+  hard blocker 0이었다. 동일 트랙터 입력에 `clunk_passport`도 호출해 source/output
+  hash와 inspection digest가 동일한 무변경 Passport를 반환하는 것까지 확인했다.
+- HF의 `npm run asset:readability`는 현재 Clunk checkout에
+  `scripts/ui-readability-audit.mjs`가 없어 SKIP되었다. HF 쪽 wrapper와 config는
+  존재하지만, 이 상태는 “상시 감사가 통과했다”가 아니라 “감사기가 없어 실행하지
+  못했다”이다. Clunk가 auditor를 다시 제공하거나 버전이 있는 CLI 경로를 선언할
+  때까지 HF는 해당 검사를 PASS로 홍보하지 않는다.
+- `clunk_passport`의 `outputPath`는 새 JSON을 생성하는 경로가 아니라 이미 존재하는
+  output artifact를 요구하는 것으로 보인다. 새 경로를 주면 ENOENT가 나고, source와
+  동일한 기존 GLB를 주면 정상 응답한다. API 설명이 생성물 저장 경로처럼 읽히므로
+  `sourcePath`/`outputPath` 의미와 Passport JSON 저장 기능을 분리해 설명해 주기를
+  요청한다.
+- 이번 재검증에서도 최상위 `ruleSetId`는
+  `harvest-frontier-runtime-v1`이지만 report/passport의 `profileId`는 `pc`로 남았다.
+  custom profile과 base profile을 별도 필드로 반환하지 않으면 사용자가 판정 기준을
+  오해할 수 있다는 기존 요청을 유지한다.
