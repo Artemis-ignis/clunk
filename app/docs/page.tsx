@@ -439,7 +439,7 @@ export default function DocsPage() {
         <section className="doc-section">
           <h2>MCP로 연결하기</h2>
           <p className="doc-lead">
-            서버는 stdio JSON-RPC로 동작합니다. 아래 설정을 에이전트의 MCP 클라이언트 설정 파일에 넣으면 도구 5개가
+            서버는 stdio JSON-RPC로 동작합니다. 아래 설정을 에이전트의 MCP 클라이언트 설정 파일에 넣으면 도구 {MCP_TOOLS.length}개가
             그대로 노출됩니다. MCP 표준을 지원하는 에이전트라면 별도 어댑터 없이 사용할 수 있습니다.
           </p>
           <div className="doc-split">

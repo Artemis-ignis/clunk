@@ -127,7 +127,7 @@ export default function AgentsPage() {
           </div>
           <pre className="agents-connection-smoke"><code>{`Set-Location 'C:\\Users\\50106\\Desktop\\Clunk'
 npm.cmd run --silent mcp
-# initialize → tools/list 에서 5개 도구가 JSON으로 나와야 합니다.`}</code></pre>
+# initialize → tools/list 에서 ${MCP_TOOLS.length}개 도구가 JSON으로 나와야 합니다.`}</code></pre>
         </section>
 
         <section className="agents-connect-section" id="connect">
@@ -145,7 +145,7 @@ npm.cmd run --silent mcp
         <section className="agents-tools-section">
           <div className="agents-section-head agents-section-head-tight">
             <span className="eyebrow">TOOLS THE AGENT CAN CALL</span>
-            <h2>에이전트가 실제로 부르는 다섯 가지 도구</h2>
+            <h2>에이전트가 실제로 부르는 {MCP_TOOLS.length}가지 도구</h2>
           </div>
           <div className="agents-tools-grid">
             {MCP_TOOLS.map((tool, index) => (
