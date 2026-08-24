@@ -3,6 +3,7 @@ import { SiteShell } from "../components/SiteShell";
 import { AgentsClient } from "./AgentsClient";
 import {
   ASSET_INSPECTION_CONTRACT,
+  ASSET_INSPECTION_EVIDENCE_V2_CONTRACT,
   GENERATION_CONTRACT,
   ASSET_KIND_COVERAGE,
   COLLABORATION_CONTRACT,
@@ -250,7 +251,7 @@ npm.cmd run --silent mcp
           <div className="agents-loop-copy">
             <span className="eyebrow">THE HANDOFF</span>
             <h2>Harvest Frontier처럼 실제 게임 프로젝트에 연결하는 흐름</h2>
-            <p>
+              <p>
               생성 에이전트가 에셋을 만든 뒤 Clunk를 호출하고, 게임 프로젝트는 원본과 검사 결과를
               분리해 받습니다. Clunk는 아직 게임 엔진을 대신 실행하지 않지만, 어느 파일을 어떤
               규칙으로 넘겼는지 재현 가능한 증거를 남깁니다. 엔진 인지 검사는
@@ -284,6 +285,17 @@ npm.cmd run --silent mcp
               </div>
             </li>
           </ol>
+          <div className="agents-contract-callout">
+            <span className="eyebrow">V2 EVIDENCE LANE</span>
+            <h3>{ASSET_INSPECTION_EVIDENCE_V2_CONTRACT.schema}</h3>
+            <p>
+              CI에서 <code>CONTRACT_FIXTURE</code>와 <code>PLAYER_FACING_CAPTURE</code>를 분리해 제출합니다.
+              identity는 {ASSET_INSPECTION_EVIDENCE_V2_CONTRACT.identity}를 보존하고,
+              {ASSET_INSPECTION_EVIDENCE_V2_CONTRACT.defaultBoundary}.
+              오디오 캡처는 {ASSET_INSPECTION_EVIDENCE_V2_CONTRACT.audio}.
+            </p>
+            <code>{ASSET_INSPECTION_EVIDENCE_V2_CONTRACT.cli}</code>
+          </div>
         </section>
 
         <section className="agents-boundary">

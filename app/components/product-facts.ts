@@ -118,6 +118,13 @@ export const MCP_TOOLS = [
     input: "path, targetProfileId, assetKind?, runId?",
     output: "AssetEvidence, stages, findings, productionReady",
   },
+  {
+    name: "clunk_asset_inspection_evidence",
+    description: "Create clunk.asset-inspection-evidence.v2 for a real asset. CONTRACT_FIXTURE is structural-only; PLAYER_FACING_CAPTURE requires hashed capture evidence and keeps human decision explicit.",
+    summary: "구조 점수·캡처·사람 판정을 v2 provenance envelope로 묶되 자동 시각 승격은 하지 않습니다.",
+    input: "path, profile?, evidenceKind?, inspectionRunId?, captureEvidence?, audioEvidence?",
+    output: "identity, structured findings, qualityPolicy, visualRuntime/playerFacing/humanDecision",
+  },
 ] as const;
 
 /**
@@ -237,7 +244,7 @@ export const TEXTURE_AUDIT_CONTRACT = {
   policyExit: 2,
   inputExit: 3,
   unavailableExit: 4,
-  profile: "evaluationProfile: id · renderer · viewport · camera · distanceBands[id,distanceM,requiredGrade] · resolutionPolicy · repetition · banding",
+  profile: "evaluationProfile: id · renderer · viewport · camera · worldScale · distanceBands[id,distanceM,requiredGrade] · resolutionPolicy · repetition · banding; each texture may declare sceneRole/surfaceRole/worldScale and each usage mPerTile",
   measurement: "measurementScope: texture-only · visualRuntime: NOT_EVALUATED · repetition.status: DECLARED_ONLY; banding is derived from texture bands only",
   strictClasses: "seam · memory · readability · optional banding · optional resolution",
 } as const;
@@ -263,6 +270,22 @@ export const ASSET_INSPECTION_CONTRACT = {
   persistence: "raw bytes are not persisted; submit returned evidence in collaboration evidence",
   cli: "npm.cmd run asset:inspect -- --path <asset> --target-profile <profile> --format json",
   visualLink: "POST /api/collaboration/threads/:threadId/evidence · evidenceMode append|replace",
+} as const;
+
+export const ASSET_INSPECTION_EVIDENCE_V2_CONTRACT = {
+  schema: "clunk.asset-inspection-evidence.v2",
+  identity: "inputHash · resultDigest · byteLength · coreBuildId · ruleSetId · ruleSetVersion · profileId · profileHash · inspectionRunId",
+  evidenceKind: "CONTRACT_FIXTURE (static only) | PLAYER_FACING_CAPTURE (hashed screenshot/frame required)",
+  statuses: "structural · visualRuntime · playerFacing · humanDecision · reviewStatus are independent; no score/ready auto-promotion",
+  defaultBoundary: "CONTRACT_FIXTURE or missing capture => structural result only, visualRuntime GAP, playerFacing NOT_EVALUATED, humanDecision NOT_EVALUATED",
+  qualityPolicy: "maxDrawCalls · maxTriangles · requireTextures · requireNormals · requireUVs · maxAbsBounds · requireRuntimeEvidence; each OFF|ADVISORY|BLOCKING",
+  findingFields: "code · severity · observed · threshold · rationale · recommendation · ownership(asset|runtime|unknown) · enforcement",
+  audio: "audioEvidence[] accepts path/sha256/bytes plus channels, sampleRateHz, durationMs, rmsDb, peakDb, leftRightBalanceDb, sideMidDb, queueId",
+  cli: "npm.cmd run asset:evidence -- inspect <asset> --profile-file <profile.json> --evidence-kind CONTRACT_FIXTURE --inspection-run-id <RUN_ID> --out evidence.json",
+  playerCaptureCli: "npm.cmd run asset:evidence -- inspect <asset> --evidence-kind PLAYER_FACING_CAPTURE --inspection-run-id <RUN_ID> --capture <absolute-frame.png> --renderer WEBGPU --viewport 1920x1080 --human-decision NO_GO",
+  mcp: "clunk_asset_inspection_evidence { path, profileFile?, evidenceKind?, inspectionRunId?, captureEvidence?, audioEvidence?, humanDecision? }",
+  api: "POST /api/asset-inspection-evidence (authenticated; validates and returns normalized v2 without credit charge or visual promotion)",
+  validation: "npm.cmd run asset:evidence -- normalize --input evidence.json; --required exits 2 only when v2 validation.valid is false",
 } as const;
 
 export const GENERATION_CONTRACT = {

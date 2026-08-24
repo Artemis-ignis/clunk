@@ -116,6 +116,33 @@ test("profile resolution and banding policies stay optional, explicit, and gatea
   }
 });
 
+test("world-scale and surface-role metadata travel with gameplay-distance prescriptions", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "clunk-texture-contract-"));
+  try {
+    const configPath = await makeConfig(directory);
+    const config = JSON.parse(await readFile(configPath, "utf8"));
+    config.evaluationProfile.worldScale = { unit: "meter", metersPerWorldUnit: 1, coverageWidthM: 12, coverageHeightM: 12 };
+    config.textures[0].sceneRole = "farm-ground";
+    config.textures[0].surfaceRole = "grass-close";
+    config.textures[0].worldScale = { unit: "meter", metersPerWorldUnit: 1, coverageWidthM: 6, coverageHeightM: 6 };
+    await writeFile(configPath, JSON.stringify(config, null, 2), "utf8");
+    const outputPath = join(directory, "report.json");
+    const result = spawnSync("node", [cli, "--config", configPath, "--format", "json", "--out", outputPath], {
+      cwd: root,
+      encoding: "utf8",
+    });
+    assert.equal(result.status, 0, result.stderr);
+    const report = JSON.parse(await readFile(outputPath, "utf8"));
+    assert.deepEqual(report.evaluationProfile.worldScale, { unit: "meter", metersPerWorldUnit: 1, coverageWidthM: 12, coverageHeightM: 12 });
+    assert.equal(report.textures[0].sceneRole, "farm-ground");
+    assert.equal(report.textures[0].surfaceRole, "grass-close");
+    assert.deepEqual(report.textures[0].worldScale, { unit: "meter", metersPerWorldUnit: 1, coverageWidthM: 6, coverageHeightM: 6 });
+    assert.equal(report.textures[0].usages[0].worldScaleMPerTile, 3);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
 test("legacy camera and distance-band configs remain accepted for existing HF consumers", async () => {
   const directory = await mkdtemp(join(tmpdir(), "clunk-texture-contract-"));
   try {

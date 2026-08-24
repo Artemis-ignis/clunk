@@ -551,6 +551,7 @@ function auditTexture(config, textureConfig) {
     return {
       label: usage.label,
       mPerTile: usage.mPerTile,
+      worldScaleMPerTile: usage.mPerTile,
       texelMm: Number((texelWorldM * 1000).toFixed(2)),
       contrastEnergy80PctBelowCm: Number(cumulative80.toFixed(1)),
       bands,
@@ -566,6 +567,9 @@ function auditTexture(config, textureConfig) {
 
   return {
     path: textureConfig.path,
+    ...(textureConfig.sceneRole ? { sceneRole: textureConfig.sceneRole } : {}),
+    ...(textureConfig.surfaceRole ? { surfaceRole: textureConfig.surfaceRole } : {}),
+    ...(textureConfig.worldScale ? { worldScale: textureConfig.worldScale } : {}),
     resolution: `${image.width}x${image.height}`,
     resolutionCheck: resolutionCheck(image, config.evaluationProfile.resolutionPolicy),
     baseSigmaLinear: Number(baseStd.toFixed(4)),
@@ -682,6 +686,15 @@ function normalizeEvaluationProfile(rawConfig) {
     : null;
   const bandingSource = source.banding && typeof source.banding === "object" ? source.banding : {};
   const maxGradeDrop = asNonNegativeNumber(bandingSource.maxGradeDrop, "evaluationProfile.banding.maxGradeDrop", null);
+  const worldScaleSource = source.worldScale && typeof source.worldScale === "object" ? source.worldScale : null;
+  const worldScale = worldScaleSource
+    ? {
+      ...(typeof worldScaleSource.unit === "string" && worldScaleSource.unit.trim() ? { unit: worldScaleSource.unit.trim() } : {}),
+      ...(worldScaleSource.metersPerWorldUnit === undefined ? {} : { metersPerWorldUnit: requiredPositiveNumber(worldScaleSource.metersPerWorldUnit, "evaluationProfile.worldScale.metersPerWorldUnit") }),
+      ...(worldScaleSource.coverageWidthM === undefined ? {} : { coverageWidthM: requiredPositiveNumber(worldScaleSource.coverageWidthM, "evaluationProfile.worldScale.coverageWidthM") }),
+      ...(worldScaleSource.coverageHeightM === undefined ? {} : { coverageHeightM: requiredPositiveNumber(worldScaleSource.coverageHeightM, "evaluationProfile.worldScale.coverageHeightM") }),
+    }
+    : null;
   return {
     id: typeof source.id === "string" && source.id.trim() ? source.id.trim() : "legacy-distance-bands-v1",
     renderer: typeof source.renderer === "string" && source.renderer.trim() ? source.renderer.trim() : "unspecified",
@@ -700,6 +713,7 @@ function normalizeEvaluationProfile(rawConfig) {
       status: maxGradeDrop === null ? "NOT_EVALUATED" : "MEASURED_FROM_TEXTURE_BANDS",
       maxGradeDrop,
     },
+    ...(worldScale ? { worldScale } : {}),
   };
 }
 

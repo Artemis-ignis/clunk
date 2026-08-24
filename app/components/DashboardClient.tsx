@@ -346,6 +346,7 @@ function RunRow({ run, expanded, onToggle }: { run: Run; expanded: boolean; onTo
                 {run.profileId ?? "pc"} 프로파일
               </small>
               <small className="num">resultDigest {resultDigest ?? "not recorded"}</small>
+              <small className="num">{storedEvidenceBoundary(run)}</small>
             </div>
           </td>
         </tr>
@@ -377,6 +378,21 @@ function storedResultDigest(run: Run): string | null {
   } catch {
     return null;
   }
+}
+
+function storedEvidenceBoundary(run: Run): string {
+  try {
+    const parsed = JSON.parse(run.reportJson) as {
+      schema?: string;
+      statuses?: { visualRuntime?: string; playerFacing?: string; humanDecision?: string };
+    };
+    if (parsed.schema === "clunk.asset-inspection-evidence.v2" && parsed.statuses) {
+      return `v2 · visualRuntime ${parsed.statuses.visualRuntime ?? "GAP"} · playerFacing ${parsed.statuses.playerFacing ?? "NOT_EVALUATED"} · human ${parsed.statuses.humanDecision ?? "NOT_EVALUATED"}`;
+    }
+  } catch {
+    // The saved row remains readable even if an old report cannot be parsed.
+  }
+  return "static policy only · visualRuntime GAP · playerFacing NOT_EVALUATED · humanDecision NOT_EVALUATED";
 }
 
 function Summary({ label, value, detail, tone }: { label: string; value: string; detail: string; tone?: string }) {

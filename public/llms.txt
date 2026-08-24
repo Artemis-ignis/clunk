@@ -122,6 +122,12 @@ or promote a hard validation result. `evaluationProfile` supports `id`, `rendere
 input. `strictChecks` may independently opt into `seam`, `memory`, `readability`, `banding`, or
 `resolution` without changing the default HF seam/memory gate.
 
+Measured world context is also supported without turning a texture-only result into a runtime
+approval: `evaluationProfile.worldScale` and per-texture `sceneRole`, `surfaceRole`, and
+`worldScale` record the HF soil/grass/ridge scale. Each usage returns `worldScaleMPerTile` beside
+`mPerTile`. These fields are prescriptions for shipped-frame follow-up, not evidence that the
+material reads correctly in a browser or game.
+
 The target-aware local command returns the same Core envelope as `clunk_asset_inspect`:
 
 ```powershell
@@ -165,6 +171,51 @@ It returns `clunk.ui-readability.v1` with `status: PASS` or `FAIL`, `capability:
 with exit `4`. The auditor measures the actual 46px HUD raster when `renderPx: 46` is declared;
 it does not execute an engine import/runtime or player-facing frame. `assetAudit.status` and
 `playerFacing.status` therefore remain `NOT_EVALUATED` and must not be promoted to READY.
+
+## Asset inspection evidence v2
+
+The committed v2 evidence contract is `clunk.asset-inspection-evidence.v2`. It is separate from
+`clunk.frame-manifest.v1` and preserves the structural inspection identity: `inputHash`,
+`resultDigest`, `byteLength`, `coreBuildId`, `ruleSetId`, `ruleSetVersion`, `profileId`,
+`profileHash`, and `inspectionRunId`. `source` repeats the input bytes/hash;
+`sourceOutputRelation` is `SOURCE`, `OUTPUT`, or `SOURCE_OUTPUT_PAIR` and never overwrites the
+source artifact.
+
+`evidenceKind` has two explicit lanes:
+
+- `CONTRACT_FIXTURE`: structural/technical evidence only. It normalizes to
+  `visualRuntime: GAP`, `playerFacing: NOT_EVALUATED`, `humanDecision: NOT_EVALUATED`, and
+  `reviewStatus: NOT_EVALUATED`.
+- `PLAYER_FACING_CAPTURE`: requires hashed screenshot/frame evidence with bytes. It may retain
+  `humanDecision: NO_GO`, `PASS_WITH_FOLLOW_UP`, or `PASS`, but a numeric score never supplies a
+  human decision. A capture without a decision remains `reviewStatus: PENDING`.
+
+The envelope includes structured `findings[]` (`code`, `severity`, `observed`, `threshold`,
+`rationale`, `recommendation`, `ownership`, and `enforcement`) and optional `audioEvidence[]`
+with queue id, channels, sample rate, duration, RMS/peak, L/R balance, side/mid, and clipping
+metadata. `qualityPolicy` is explicit and per rule: `OFF`, `ADVISORY`, or `BLOCKING`. Advisory
+violations make readiness `conditional`; blocking violations make it `blocked`; neither changes
+the legacy structural score. `textureCount: 0`, missing normals/UVs, non-unit scales, and bounds
+remain observations until asset/runtime ownership is supplied.
+
+Stable local CLI:
+
+```powershell
+npm.cmd run asset:evidence -- inspect <asset.glb> --profile-file <profile.json> `
+  --evidence-kind CONTRACT_FIXTURE --inspection-run-id <run-id> --out evidence.json
+npm.cmd run asset:evidence -- validate <asset.glb> --profile-file <profile.json> `
+  --evidence-kind CONTRACT_FIXTURE --required
+npm.cmd run asset:evidence -- normalize --input evidence.json
+```
+
+The CLI exits `0` for a valid envelope and `2` for invalid input or a required validation
+failure. `--capture <path>` may be repeated for `PLAYER_FACING_CAPTURE`; it records absolute path,
+bytes, SHA-256, renderer, viewport, camera/source-tree hashes, and `--shipped-path`. `--audio
+<path>` plus `--audio-metadata '<json>'` records the audio lane. The read-only MCP equivalent is
+`clunk_asset_inspection_evidence` or `clunk_inspect`/`clunk_validate` with `evidenceFormat: "v2"`;
+the authenticated validation endpoint is `POST /api/asset-inspection-evidence` with the same
+JSON envelope. It validates and normalizes evidence; it does not promote visual status or replace
+collaboration thread state.
 
 ## Authenticated collaboration
 

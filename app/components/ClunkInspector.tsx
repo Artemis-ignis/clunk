@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import {
   BUILTIN_PROFILE_BUDGETS,
   createAssetBundle,
+  createAssetInspectionEvidenceV2,
   createCustomProfile,
   inspectAsset,
   optimizeAsset,
@@ -305,6 +306,17 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
   }
 
   const blocked = Boolean(report && report.findings.some((finding) => finding.severity === "CRITICAL"));
+  const evidenceV2 = useMemo(() => {
+    if (!report) return null;
+    try {
+      return createAssetInspectionEvidenceV2(report, {
+        evidenceKind: "CONTRACT_FIXTURE",
+        inspectionRunId: `ui-${report.analysisId}`,
+      });
+    } catch {
+      return null;
+    }
+  }, [report]);
 
   return (
     <WorkspaceShell
@@ -655,6 +667,30 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
                 ? `${readinessNote(readiness)} 브라우저 화면과 visualRuntime은 별도이며 현재 player-facing: NOT_EVALUATED입니다.`
                 : "점수는 실제 검사 보고서에서 계산됩니다. 화면 판정은 이 점수에 포함되지 않습니다."}
             </p>
+          </div>
+
+          <div className="panel evidence-v2-card">
+            <div className="panel-head">
+              <div>
+                <span className="mono-label">PROVENANCE · V2</span>
+                <h3>시각 판정은 별도 레인.</h3>
+              </div>
+              <span className="mono-label">{evidenceV2?.schema ?? "대기"}</span>
+            </div>
+            {evidenceV2 ? (
+              <>
+                <div className="evidence-v2-status-grid">
+                  <span><small>structural</small><strong>{evidenceV2.statuses.structural}</strong></span>
+                  <span><small>visualRuntime</small><strong>{evidenceV2.statuses.visualRuntime}</strong></span>
+                  <span><small>playerFacing</small><strong>{evidenceV2.statuses.playerFacing}</strong></span>
+                  <span><small>humanDecision</small><strong>{evidenceV2.statuses.humanDecision}</strong></span>
+                </div>
+                <p className="score-note">
+                  <code>CONTRACT_FIXTURE</code> · inspectionRunId <code>{evidenceV2.identity.inspectionRunId}</code> · profileHash <code>{evidenceV2.identity.profileHash.slice(0, 12)}…</code>
+                </p>
+                <p className="score-note">{evidenceV2.limitation}. 실제 WebGPU/WebGL2 캡처와 사람 판정이 없으면 GAP/NOT_EVALUATED입니다.</p>
+              </>
+            ) : <p className="score-note">v2 provenance envelope를 만들 수 있는 실제 검사 결과를 기다리는 중입니다.</p>}
           </div>
 
           <div className="panel findings-card">

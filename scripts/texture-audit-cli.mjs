@@ -75,6 +75,7 @@ function loadConfig(configArgument) {
     if (extension !== ".png") {
       throw new UnavailableError(`Texture format is not supported by the current auditor: ${relativePath}`);
     }
+    validateTextureWorldContext(texture, relativePath);
     const filePath = resolve(baseDir, relativePath);
     if (!isAbsolute(filePath) || !existsSync(filePath) || !statSync(filePath).isFile()) {
       throw new InputError(`Texture input not found: ${relativePath}`);
@@ -91,6 +92,23 @@ function loadConfig(configArgument) {
     configHash: sha256(configBytes),
     inputHash: inputHash.digest("hex"),
   };
+}
+
+function validateTextureWorldContext(texture, relativePath) {
+  for (const key of ["sceneRole", "surfaceRole"]) {
+    if (texture[key] !== undefined && (typeof texture[key] !== "string" || !texture[key].trim())) {
+      throw new InputError(`${relativePath}.${key} must be non-empty text.`);
+    }
+  }
+  if (texture.worldScale !== undefined) validateWorldScale(texture.worldScale, `${relativePath}.worldScale`);
+}
+
+function validateWorldScale(value, label) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new InputError(`${label} must be an object.`);
+  if (value.unit !== undefined && (typeof value.unit !== "string" || !value.unit.trim())) throw new InputError(`${label}.unit must be non-empty text.`);
+  for (const key of ["metersPerWorldUnit", "coverageWidthM", "coverageHeightM"]) {
+    if (value[key] !== undefined && (!Number.isFinite(value[key]) || value[key] <= 0)) throw new InputError(`${label}.${key} must be positive.`);
+  }
 }
 
 function validateEvaluationProfile(config) {
@@ -130,6 +148,7 @@ function validateEvaluationProfile(config) {
   if (profile.banding?.maxGradeDrop !== undefined && (!Number.isFinite(profile.banding.maxGradeDrop) || profile.banding.maxGradeDrop < 0)) {
     throw new InputError("evaluationProfile.banding.maxGradeDrop must be non-negative.");
   }
+  if (profile.worldScale !== undefined) validateWorldScale(profile.worldScale, "evaluationProfile.worldScale");
 }
 
 function collectViolations(report) {

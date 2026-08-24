@@ -7,6 +7,7 @@ import {
   CLI_SAMPLE,
   ASSET_KIND_COVERAGE,
   ASSET_INSPECTION_CONTRACT,
+  ASSET_INSPECTION_EVIDENCE_V2_CONTRACT,
   GENERATION_CONTRACT,
   COLLABORATION_CONTRACT,
   EDITOR_PACKAGES,
@@ -171,9 +172,39 @@ const TEXTURE_PROFILE_SCHEMA_EXAMPLE = `// SCHEMA EXAMPLE · clunk.texture-audit
     "repetition": { "mode": "declared", "maxExpectedRepeats": { "horizontal": 4, "vertical": 4 } },
     "banding": { "maxGradeDrop": 1 }
   },
+  "worldScale": { "unit": "meter", "metersPerWorldUnit": 1 },
+  "textures": [
+    { "path": "grass-meadow.png", "sceneRole": "farm-ground", "surfaceRole": "grass-close",
+      "worldScale": { "unit": "meter", "metersPerWorldUnit": 1 },
+      "usages": [{ "label": "gameplay grass", "mPerTile": 3.4 }] }
+  ],
   "strictChecks": ["seam", "memory"],
   "outputBoundary": { "measurementScope": "texture-only", "visualRuntime": "NOT_EVALUATED" }
 }`;
+
+const ASSET_INSPECTION_EVIDENCE_V2_EXAMPLE = `// SCHEMA EXAMPLE · replace all <...>; not actual HF evidence
+{
+  "schema": "clunk.asset-inspection-evidence.v2",
+  "evidenceKind": "CONTRACT_FIXTURE",
+  "identity": {
+    "inputHash": "<64_HEX>", "resultDigest": "<64_HEX>", "byteLength": 680412,
+    "coreBuildId": "0.1.0", "ruleSetId": "harvest-frontier-runtime-v1", "ruleSetVersion": "0.1.0",
+    "profileId": "pc", "profileHash": "<64_HEX>", "inspectionRunId": "HF-M117-tractor-r01"
+  },
+  "sourceOutputRelation": { "kind": "SOURCE", "sourceHash": "<64_HEX>", "sourceInspectionDigest": "<64_HEX>" },
+  "statuses": {
+    "structural": "PASS", "visualRuntime": "GAP", "playerFacing": "NOT_EVALUATED",
+    "humanDecision": "NOT_EVALUATED", "reviewStatus": "NOT_EVALUATED"
+  },
+  "qualityPolicy": { "declared": null, "status": "OFF", "blockingViolationCount": 0, "advisoryViolationCount": 0 },
+  "audioEvidence": [],
+  "limitation": "STRUCTURAL_SCORE_IS_NOT_VISUAL_APPROVAL"
+}
+
+// PLAYER_FACING_CAPTURE changes only when a real hashed frame is supplied;
+// humanDecision=NO_GO remains visualRuntime=GAP/playerFacing=NO_GO.
+POST /api/asset-inspection-evidence
+{ "evidence": <NORMALIZED_V2_ENVELOPE> }`;
 
 const PROCEDURAL_ASSET_SCHEMA_EXAMPLE = `// SCHEMA EXAMPLE · procedural/runtime-generated review; no fabricated GLB bytes
 {
@@ -481,8 +512,10 @@ export default function DocsPage() {
           <div className="doc-ci-contracts">
             <article><span className="mono-label">TEXTURE · SHIPPED</span><code>{TEXTURE_AUDIT_CONTRACT.schema}</code><p>exit {TEXTURE_AUDIT_CONTRACT.passExit}=PASS · {TEXTURE_AUDIT_CONTRACT.policyExit}=strict 위반 · {TEXTURE_AUDIT_CONTRACT.unavailableExit}=미지원</p></article>
             <article><span className="mono-label">UI RASTER · SHIPPED</span><code>{UI_READABILITY_CONTRACT.schema}</code><p>{UI_READABILITY_CONTRACT.status} · {UI_READABILITY_CONTRACT.capability} · exit {UI_READABILITY_CONTRACT.exit}. {UI_READABILITY_CONTRACT.render} · {UI_READABILITY_CONTRACT.metadata} · {UI_READABILITY_CONTRACT.deltaE} · player-facing {UI_READABILITY_CONTRACT.playerFacing}.</p></article>
+            <article><span className="mono-label">INSPECTION EVIDENCE · V2</span><code>{ASSET_INSPECTION_EVIDENCE_V2_CONTRACT.schema}</code><p>{ASSET_INSPECTION_EVIDENCE_V2_CONTRACT.identity}. {ASSET_INSPECTION_EVIDENCE_V2_CONTRACT.evidenceKind}. {ASSET_INSPECTION_EVIDENCE_V2_CONTRACT.defaultBoundary}.</p></article>
           </div>
           <CodeBlock title="texture evaluationProfile" language="json" code={TEXTURE_PROFILE_SCHEMA_EXAMPLE} caption="distance band와 banding은 실제 texture 측정값을 남기지만, repetition은 DECLARED_ONLY이며 visualRuntime은 자동 승격하지 않습니다." />
+          <CodeBlock title="asset-inspection-evidence.v2" language="json" code={ASSET_INSPECTION_EVIDENCE_V2_EXAMPLE} caption="실제 바이트 identity와 구조 finding, qualityPolicy, 캡처, 사람 판정을 한 envelope에 담되 서로 자동 승격하지 않습니다. CONTRACT_FIXTURE와 PLAYER_FACING_CAPTURE를 구분합니다." />
           <p className="doc-lead">
             정적 analyzer의 경고는 <code>{QUALITY_WARNING_CONTRACT.field}</code>로도 노출됩니다.
             상태는 <code>{QUALITY_WARNING_CONTRACT.status}</code>이며 hard validation이나 player-facing 판정을

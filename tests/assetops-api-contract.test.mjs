@@ -38,5 +38,5 @@ test("authenticated asset inspection API exposes the canonical byte-upload contr
   assert.match(docs, /entryFileName/);
   assert.match(docs, /fileCount/);
   assert.match(docs, /relatesTo/);
-  assert.equal(packageJson.scripts["assetops:test"], "npm run assetops:2d:test && npm run assetops:pipeline:test && npm run assetops:bundle:test && npm run assetops:api:test");
+  assert.equal(packageJson.scripts["assetops:test"], "npm run assetops:2d:test && npm run assetops:pipeline:test && npm run assetops:bundle:test && npm run assetops:api:test && npm run assetops:texture:test");
 });

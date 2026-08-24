@@ -12,6 +12,7 @@ export * from "./assetops-profiles";
 export * from "./assetops-pipeline";
 export * from "./generation-contract";
 export * from "./collaboration-contract";
+export * from "./asset-inspection-evidence";
 export * from "./analyzers/asset-analyzers";
 export * from "./semantic-contracts/harvest-frontier";
 
@@ -99,11 +100,35 @@ export interface AssetPolicy {
   maxTextureDimension?: number;
   readyScoreThreshold?: number;
   /**
+   * Optional explicit quality observations. These are deliberately separate from the legacy
+   * score/findings contract so a project can turn a policy on without changing the meaning of
+   * an existing structural PASS.
+   */
+  qualityPolicy?: QualityPolicy;
+  /**
    * A validated custom profile from `createCustomProfile`. When present it supplies the rule set
    * id/version, the budgets, and the per-rule overrides, and its `basedOn` value is the reported
    * `profileId`. Explicit numeric fields on this policy still win over the profile budgets.
    */
   customProfile?: CustomProfile;
+}
+
+export type QualityPolicyMode = "OFF" | "ADVISORY" | "BLOCKING";
+
+export interface QualityPolicyRule<T extends number | boolean> {
+  value: T;
+  mode: QualityPolicyMode;
+  rationale?: string;
+}
+
+export interface QualityPolicy {
+  maxDrawCalls?: QualityPolicyRule<number>;
+  maxTriangles?: QualityPolicyRule<number>;
+  requireTextures?: QualityPolicyRule<boolean>;
+  requireNormals?: QualityPolicyRule<boolean>;
+  requireUVs?: QualityPolicyRule<boolean>;
+  maxAbsBounds?: QualityPolicyRule<number>;
+  requireRuntimeEvidence?: QualityPolicyRule<boolean>;
 }
 
 export interface CustomProfileThresholds {
@@ -137,6 +162,7 @@ export interface CustomProfileDefinition {
   description?: string;
   thresholds?: CustomProfileThresholds;
   rules?: Partial<Record<RuleId, CustomProfileRuleOverride>>;
+  qualityPolicy?: QualityPolicy;
 }
 
 export interface ResolvedRuleSetting {
@@ -155,6 +181,7 @@ export interface CustomProfile {
   description: string | null;
   thresholds: Required<CustomProfileThresholds>;
   rules: Partial<Record<RuleId, ResolvedRuleSetting>>;
+  qualityPolicy?: QualityPolicy;
 }
 
 export interface AssetBounds {
@@ -240,6 +267,8 @@ export interface InspectionReport {
   findings: Finding[];
   score: ScoreReport;
   resultDigest: string;
+  /** Present only when an explicit quality policy was supplied; never part of legacy defaults. */
+  qualityPolicy?: QualityPolicy;
 }
 
 export type RepairOperationId =
@@ -328,6 +357,7 @@ interface ResolvedPolicy extends ProfileBudget {
   ruleSetId: string;
   ruleSetVersion: string;
   rules: Partial<Record<RuleId, ResolvedRuleSetting>>;
+  qualityPolicy?: QualityPolicy;
 }
 
 const PROFILE_DEFAULTS: Record<ProfileId, ProfileBudget> = {
@@ -447,6 +477,7 @@ export function inspectAsset(
       metrics,
       findings,
       score,
+      ...(defaults.qualityPolicy ? { qualityPolicy: defaults.qualityPolicy } : {}),
     };
     const resultDigest = sha256Hex(utf8(stableStringify(canonical)));
     const analysisId = `analysis-${inputHash.slice(0, 12)}-${resultDigest.slice(0, 8)}`;
@@ -555,6 +586,9 @@ export function createCustomProfile(definition: unknown): CustomProfile {
     description: requireOptionalText(source.description, "description"),
     thresholds,
     rules,
+    ...(source.qualityPolicy === undefined
+      ? {}
+      : { qualityPolicy: parseQualityPolicy(source.qualityPolicy) }),
   };
 }
 
@@ -567,6 +601,7 @@ const CUSTOM_PROFILE_KEYS = [
   "description",
   "thresholds",
   "rules",
+  "qualityPolicy",
 ];
 const CUSTOM_PROFILE_THRESHOLD_KEYS = [
   "maxTriangles",
@@ -576,6 +611,16 @@ const CUSTOM_PROFILE_THRESHOLD_KEYS = [
   "readyScoreThreshold",
 ];
 const CUSTOM_PROFILE_RULE_KEYS = ["enabled", "severity"];
+const QUALITY_POLICY_KEYS = [
+  "maxDrawCalls",
+  "maxTriangles",
+  "requireTextures",
+  "requireNormals",
+  "requireUVs",
+  "maxAbsBounds",
+  "requireRuntimeEvidence",
+];
+const QUALITY_POLICY_RULE_KEYS = ["value", "mode", "rationale"];
 const PROFILE_IDENTIFIER_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
 const RULE_ID_SET: ReadonlySet<string> = new Set(RULE_IDS);
 const SEVERITY_VALUES: readonly Severity[] = ["INFO", "WARNING", "ERROR", "CRITICAL"];
@@ -658,6 +703,42 @@ function requireOptionalText(value: unknown, name: string): string | null {
   return value;
 }
 
+function parseQualityPolicy(value: unknown): QualityPolicy {
+  const source = requireProfileObject(value, "custom profile qualityPolicy");
+  assertKnownKeys(source, QUALITY_POLICY_KEYS, "custom profile qualityPolicy");
+  const policy: QualityPolicy = {};
+  for (const key of QUALITY_POLICY_KEYS) {
+    if (source[key] === undefined) continue;
+    const rule = requireProfileObject(source[key], `custom profile qualityPolicy.${key}`);
+    assertKnownKeys(rule, QUALITY_POLICY_RULE_KEYS, `custom profile qualityPolicy.${key}`);
+    const mode = rule.mode === undefined ? "OFF" : rule.mode;
+    if (mode !== "OFF" && mode !== "ADVISORY" && mode !== "BLOCKING") {
+      throw new Error(
+        `Custom profile qualityPolicy.${key} mode must be OFF, ADVISORY, or BLOCKING: ${describeValue(mode)}`,
+      );
+    }
+    const rawValue = rule.value;
+    const numeric = key === "maxDrawCalls" || key === "maxTriangles" || key === "maxAbsBounds";
+    if (numeric) {
+      if (typeof rawValue !== "number" || !Number.isFinite(rawValue) || rawValue < 0 || !Number.isInteger(rawValue)) {
+        throw new Error(`Custom profile qualityPolicy.${key} value must be an integer of 0 or more: ${describeValue(rawValue)}`);
+      }
+    } else if (typeof rawValue !== "boolean") {
+      throw new Error(`Custom profile qualityPolicy.${key} value must be a boolean: ${describeValue(rawValue)}`);
+    }
+    const rationale = rule.rationale === undefined ? undefined : rule.rationale;
+    if (rationale !== undefined && typeof rationale !== "string") {
+      throw new Error(`Custom profile qualityPolicy.${key} rationale must be a string: ${describeValue(rationale)}`);
+    }
+    (policy as Record<string, unknown>)[key] = {
+      value: rawValue,
+      mode,
+      ...(rationale === undefined ? {} : { rationale }),
+    };
+  }
+  return policy;
+}
+
 function describeValue(value: unknown): string {
   if (value === null) return "null";
   if (value === undefined) return "undefined";
@@ -687,6 +768,7 @@ function resolvePolicy(policy: AssetPolicy): ResolvedPolicy {
     ruleSetId: custom?.id ?? RULE_SET_ID,
     ruleSetVersion: custom?.version ?? RULE_SET_VERSION,
     rules: custom?.rules ?? EMPTY_RULE_SETTINGS,
+    qualityPolicy: policy.qualityPolicy ?? custom?.qualityPolicy,
   };
 }
 
@@ -1217,6 +1299,7 @@ function makeFailureReport(
     metrics,
     findings: [finding],
     score,
+    ...(policy.qualityPolicy ? { qualityPolicy: policy.qualityPolicy } : {}),
   };
   const resultDigest = sha256Hex(utf8(stableStringify(canonical)));
   return {
