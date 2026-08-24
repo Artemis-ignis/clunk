@@ -8,6 +8,27 @@ GLB 검사와 별개의 **이미지 세트 입력** 검사다 — 지형·타일
 
 ```bash
 npx tsx scripts/texture-audit.mjs <config.json> [--out report.json] [--strict] [--sigma-floor v] [--calibrate]
+
+외부 프로젝트 CI에서는 안정화된 wrapper를 사용합니다.
+
+```powershell
+npm.cmd run asset:readability -- --config <config.json> --format json --out <report.json> --strict
+```
+
+wrapper 결과의 JSON schema는 `clunk.texture-audit.v1`이며 `toolVersion`, 전체 입력의
+`inputHash`, 설정 파일의 `configHash`, `textures`, `textureSet`, `violations`, `status`를
+포함합니다. `--format json`에서는 stdout도 기계용 JSON이고, 사람이 읽는 기존 요약은
+legacy 측정기와 `--format human`에서 유지됩니다.
+
+CI exit code는 다음과 같이 고정합니다.
+
+- `0`: 정책 통과
+- `2`: `--strict` 정책 위반
+- `3`: config 또는 입력 파일 오류
+- `4`: 현재 auditor가 지원하지 않는 포맷 또는 실행 환경 부족
+
+`--strict` 없이 실행하면 측정은 반환하되 정책 위반은 `status: "WARN"`으로 남습니다.
+이 결과는 Clunk의 엔진 import/runtime PASS가 아니라 texture/readability 측정 결과입니다.
 ```
 
 - `--out` JSON 리포트 저장, `--strict` CI 게이트 모드(위반 시 exit 2: VISIBLE-SEAM /

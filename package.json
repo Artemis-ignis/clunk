@@ -18,6 +18,7 @@
     "api:smoke": "tsx scripts/api-credit-smoke.ts",
     "e2e": "node scripts/e2e.mjs",
     "generate:samples": "node scripts/generate-sample-assets.mjs",
+    "asset:readability": "node scripts/texture-audit-cli.mjs",
     "clunk": "tsx scripts/clunk-cli.ts",
     "mcp": "tsx integrations/mcp/server.ts",
     "site:preflight": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\\site-preflight.ps1",

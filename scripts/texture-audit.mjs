@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 /**
- * Clunk texture-set audit prototype — mip readability prediction (P0, HF spec).
+ * Clunk texture-set audit engine — mip readability prediction (P0, HF spec).
+ *
+ * The stable external entrypoint is scripts/texture-audit-cli.mjs. This file keeps the
+ * measurement implementation and legacy human-readable/--strict behavior.
  *
  * Answers, per texture and usage density: "at this camera distance, does the texture still
  * read, and if not, what exactly do I change?" The acceptance contract comes from the
