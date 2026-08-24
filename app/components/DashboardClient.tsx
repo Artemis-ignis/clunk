@@ -206,7 +206,7 @@ export function DashboardClient() {
                   <tr>
                     <th scope="col">에셋</th>
                     <th scope="col">결과</th>
-                    <th scope="col">점수</th>
+                    <th scope="col">정책 점수</th>
                     <th scope="col">Finding</th>
                     <th scope="col">기준</th>
                     <th scope="col">생성일</th>
@@ -247,7 +247,7 @@ export function DashboardClient() {
               <span className="mono-label">마지막 검사</span>
               <StatusPill status={resolveStoredReadiness(latestRun)} />
               <strong title={latestRun.fileName ?? latestRun.id}>{latestRun.fileName ?? latestRun.id}</strong>
-              <span>{latestRun.findingCount}개 finding, Score {latestRun.score}/100</span>
+              <span>{latestRun.findingCount}개 finding, 정책 점수 {latestRun.score}/100</span>
               {readinessHint(resolveStoredReadiness(latestRun)) ? (
                 <small className="latest-hint">{readinessHint(resolveStoredReadiness(latestRun))}</small>
               ) : null}

@@ -22,6 +22,7 @@ import {
   HF_TEXTURE_SCENE_GAPS,
   FRAME_REVIEW_CONTRACT,
   HF_M98_RUNTIME_UPDATE,
+  HF_3E5FFFA_ONGOING_HANDOFF,
   VSCODE_COMMANDS,
 } from "../components/product-facts";
 
@@ -480,12 +481,22 @@ export default function DocsPage() {
             <code>CONDITIONAL · SCENE_GAP</code>로 표시하고, terrain/hill 반복·경계와 crop/vegetation/NPC의
             procedural 화면 품질은 사람 검토 대기로 남깁니다.
           </p>
+          <p className="doc-lead">
+            3D 의미 계약은 <code>harvest-frontier-web-three</code> target의
+            <code>harvest-frontier-runtime-v1</code> semantic rule로 실제 unified AssetOps pipeline에 적용됩니다.
+            named runtime root·pivot·attachment socket·collider proxy·<code>EXT_meshopt_compression</code>을
+            structure/policy evidence로 확인하며, 누락된 필수 노드는 <code>BLOCKED</code>가 될 수 있습니다.
+            반대로 semantic PASS는 GLB 구조·정책 결과일 뿐이며, Three.js import/runtime, procedural crop·vegetation·NPC,
+            shipped camera와 사람의 visual review를 대신하지 않습니다. HF의 textureCount 0, missing normals/UV,
+            non-unit scale, draw-call 관찰값도 이 계층 밖의 runtime/player-facing 품질 승인으로 승격하지 않습니다.
+          </p>
           <div className="doc-split">
             <CodeBlock title="HF M95/M96 handoff" language="json" code={HF_M95_M96_HANDOFF} caption="HF가 전달한 최신 커밋·게이트·readability 요약입니다. M94 live frame row와 분리합니다." />
             <CodeBlock title="authenticated byte inspection" language="bash" code={`${ASSET_INSPECTION_CONTRACT.cli}\n${ASSET_INSPECTION_CONTRACT.request}\n${ASSET_INSPECTION_CONTRACT.unavailable}`} caption="CLI와 API 모두 unavailable을 PASS로 승격하지 않습니다." />
           </div>
           <CodeBlock title="HF M98 handoff" language="json" code={HF_M98_HANDOFF} caption="카메라 숫자 계약 PASS와 사람의 visual approval을 분리한 최신 HF 상태입니다. live M94 frame row를 덮어쓰지 않습니다." />
           <CodeBlock title="HF M98/M99 integration update" language="json" code={HF_M98_RUNTIME_UPDATE} caption="HF 781a551의 8/8 WebGL2/WebGPU 흐름 PASS와 8개 GLB numeric contract를 visual review와 분리한 외부 증거입니다." />
+          <CodeBlock title="HF 3e5fffa ongoing handoff" language="json" code={HF_3E5FFFA_ONGOING_HANDOFF} caption="최신 HF 경로는 수신했지만 Clunk checkout에서 M84 파일의 실제 byte/hash를 확인하기 전까지 PATH_RECEIVED_HASH_PENDING으로 보존합니다. 이 값은 scene-review 입력으로 승격하지 않습니다." />
           <CodeBlock title="HF M99 actual acceptance + consumer bridge" language="json" code={HF_M99_ACCEPTANCE_FIXTURE} caption="Clunk 저장소에 커밋된 실제 M99 증거 fixture와 HF consumer bridge 결과입니다. schema template가 아니며, shipped frame은 human visual review PENDING/GAP로 남습니다." />
         </section>
 

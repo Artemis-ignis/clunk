@@ -291,6 +291,10 @@ export default function AgentsPage() {
               플레이어 화면 gap을 구조화하려면 <code>{COLLABORATION_CONTRACT.sceneReviewCli}</code>를 사용합니다.
               이 결과는 severity, evidence path/hash, affected scene/asset, ownership, nextStep을 반환하지만
               <code>visualRuntime: GAP</code>·<code>playerFacing: NOT_EVALUATED</code>·human review PENDING을 유지합니다.
+              최신 HF handoff의 sourceHead <code>3e5fffa</code>와 M84 capture 경로는 수신했지만,
+              Clunk가 실제 파일 bytes/hash를 확인하기 전까지는 <code>PATH_RECEIVED_HASH_PENDING</code>으로 기록합니다.
+              따라서 그 네 scene gap은 실제 hash가 제출되기 전에는 <code>scene-review</code>의 reviewable evidence로
+              승격되지 않습니다.
               바이트 검사는 <code>{ASSET_INSPECTION_CONTRACT.request}</code>의 인증 API 또는
               <code>{ASSET_INSPECTION_CONTRACT.cli}</code>로 실행합니다.
             </p>

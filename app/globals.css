@@ -6958,6 +6958,13 @@ html.snap-y {
   font-weight: 500;
 }
 
+.hero3-score-boundary {
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.02em;
+}
+
 .hero3-filestrip {
   position: absolute;
   left: 0;

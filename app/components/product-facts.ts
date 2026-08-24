@@ -403,3 +403,50 @@ export const HF_M98_RUNTIME_UPDATE = `// EXTERNAL HF HANDOFF · M98/M99 current 
   "visualRuntime": "GAP",
   "playerFacing": "NOT_EVALUATED"
 }`;
+
+export const HF_3E5FFFA_ONGOING_HANDOFF = `// EXTERNAL HF HANDOFF · sourceHead 3e5fffa · latest M84 paths received, hashes pending
+{
+  "sourceHead": "3e5fffa",
+  "evidenceState": "PATH_RECEIVED_HASH_PENDING",
+  "reviewStatus": "NOT_EVALUATED",
+  "visualRuntime": "GAP",
+  "playerFacing": "NOT_EVALUATED",
+  "gaps": [
+    {
+      "id": "distant-terrain-dome",
+      "severity": "major",
+      "ownership": "scene",
+      "affectedScene": "farm-long-shot",
+      "affectedAssetIds": ["hf-procedural-distant-terrain", "texture-ridge-woodland"],
+      "evidence": { "path": "C:/Users/50106/Desktop/Harvest Frontier/.logs/screenshots/M84/playtest/seg20-51-auto-1920x1080-nohud.png", "sha256": "<HF_SUPPLY_REAL_SHA256>", "bytes": "<HF_SUPPLY_BYTES>" },
+      "nextStep": "Submit the real frame hash/bytes, then recapture the same shipped WebGPU/WebGL2 camera after breaking repeated ridge/dome silhouettes and boundary bands."
+    },
+    {
+      "id": "hard-terrain-material-boundary",
+      "severity": "major",
+      "ownership": "scene",
+      "affectedScene": "farm-long-shot",
+      "affectedAssetIds": ["texture-grass-meadow", "texture-dirt-path", "texture-soil-tilled"],
+      "evidence": { "path": "C:/Users/50106/Desktop/Harvest Frontier/.logs/screenshots/M84/playtest/seg20-51-auto-1920x1080-nohud.png", "sha256": "<HF_SUPPLY_REAL_SHA256>", "bytes": "<HF_SUPPLY_BYTES>" },
+      "nextStep": "Use the 15m gameplay-band texture prescriptions (edge blend, macro variation, secondary structure or LOD) and verify the boundary in the same shipped frame."
+    },
+    {
+      "id": "foreground-prop-vegetation-density",
+      "severity": "major",
+      "ownership": "mixed",
+      "affectedScene": "farm-playtest",
+      "affectedAssetIds": ["hf-procedural-vegetation", "hf-procedural-props"],
+      "evidence": { "path": "C:/Users/50106/Desktop/Harvest Frontier/.logs/screenshots/M84/playtest/seg20-51-auto-1920x1080-nohud.png", "sha256": "<HF_SUPPLY_REAL_SHA256>", "bytes": "<HF_SUPPLY_BYTES>" },
+      "nextStep": "Separate placement/intersection fixes from asset authoring changes, then submit a same-build no-HUD frame with the affected runtime-generated assets marked USED_IN_FRAME."
+    },
+    {
+      "id": "dealer-market-dialogue-composition",
+      "severity": "major",
+      "ownership": "camera",
+      "affectedScene": "dealer-approach-and-dialogue-npc",
+      "affectedAssetIds": ["hf-dealer-facility", "hf-dialogue-npc"],
+      "evidence": { "path": "C:/Users/50106/Desktop/Harvest Frontier/.logs/screenshots/M84/playtest/seg4-21-machinery-dealer-close.png", "sha256": "<HF_SUPPLY_REAL_SHA256>", "bytes": "<HF_SUPPLY_BYTES>" },
+      "nextStep": "Submit dealer and dialogue shipped captures with player/facility/NPC co-framing; camera numeric PASS and pose checks remain separate from human composition review."
+    }
+  ]
+}`;

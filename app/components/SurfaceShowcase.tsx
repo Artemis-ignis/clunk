@@ -123,7 +123,7 @@ function WebSurface() {
       </div>
       <div className="sur3-web-body">
         <div className="sur3-web-score">
-          <span className="mono-label">Game-Ready Score</span>
+          <span className="mono-label">Static Policy Score</span>
           <strong className="num">
             {CLI_SAMPLE.score}
             <small>/100</small>
@@ -131,7 +131,7 @@ function WebSurface() {
           <span className="sur3-web-track" aria-hidden="true">
             <span style={{ width: `${CLI_SAMPLE.score}%` }} />
           </span>
-          <small className="muted-note">threshold {RULE_SET.readyScoreThreshold} · 하드 블로커 {CLI_SAMPLE.hardBlockerCount}</small>
+          <small className="muted-note">threshold {RULE_SET.readyScoreThreshold} · 하드 블로커 {CLI_SAMPLE.hardBlockerCount} · visualRuntime NOT_EVALUATED</small>
         </div>
         <ul className="sur3-web-findings" aria-label="정책 finding">
           {CLI_SAMPLE.findings.map((finding) => (

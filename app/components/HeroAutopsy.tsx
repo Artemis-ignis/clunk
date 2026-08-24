@@ -16,7 +16,8 @@ import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
  * in the callouts is copied from a live `clunk_inspect` MCP response measured on 2026-08-21
  * with examples/profiles/harvest-frontier.example.json; nothing here is invented:
  * inputHash d92ae932…b3222c, 680,412 bytes, 30,188 tris / 83,090 verts, 48 materials,
- * 88 draw calls, 249 nodes / 0 empty, score 100/100 READY (threshold 90, hard blocker 0).
+ * 88 draw calls, 249 nodes / 0 empty, static policy score 100/100 (threshold 90,
+ * hard blocker 0). This is not a shipped-scene or player-facing approval.
  */
 const MEASURED = {
   file: "tractor.compact.m1.glb",
@@ -154,15 +155,16 @@ export function HeroAutopsy() {
           ))}
 
           <div className="hero3-score" style={{ transitionDelay: "1150ms" }}>
-            <span className="hero3-score-label">GAME-READY SCORE</span>
+            <span className="hero3-score-label">STATIC POLICY SCORE</span>
             <span className="hero3-score-value num">
               {armed ? <CountUp value={MEASURED.score} duration={1300} /> : 0}
               <small>/100</small>
             </span>
-            <span className="status-pill status-ready">
+            <span className="status-pill status-conditional">
               <span className="status-dot" />
-              READY · 하드 블로커 0
+              STATIC PASS · 하드 블로커 0
             </span>
+            <small className="hero3-score-boundary">visualRuntime GAP · playerFacing NOT_EVALUATED</small>
           </div>
 
           <div className="hero3-filestrip" style={{ transitionDelay: "1500ms" }}>
