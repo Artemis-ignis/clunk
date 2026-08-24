@@ -1,4 +1,5 @@
 import { READY_SCORE_THRESHOLD, RULE_SET_ID, RULE_SET_VERSION } from "../../packages/core/src/index";
+import { getBuiltInTargetProfiles } from "../../packages/core/src/assetops-profiles";
 
 /**
  * Product facts shown on marketing surfaces.
@@ -202,3 +203,46 @@ export const CATEGORY_COUNT = FINDING_CATEGORIES.length;
 export const OPERATION_COUNT = REPAIR_OPERATIONS.length;
 export const SURFACE_COUNT = SURFACES.length;
 export const MCP_TOOL_COUNT = MCP_TOOLS.length;
+
+/** Target declarations surfaced in the product UI. A declaration is not an engine runtime PASS. */
+export const TARGET_PROFILES = getBuiltInTargetProfiles().map((profile) => ({
+  id: profile.id,
+  label: profile.label,
+  engine: profile.engine,
+  platform: profile.platform,
+  formats: profile.acceptedFormats.slice(0, 5),
+  assetKinds: profile.assetKinds,
+  requiresDeviceGate: Boolean(profile.requiresDeviceGate),
+}));
+
+export const ASSET_KIND_COVERAGE = [
+  { label: "3D", detail: "GLB / glTF 구조·정책·Passport" },
+  { label: "2D", detail: "PNG·JPG·WebP dimensions·GPU memory" },
+  { label: "Sprite", detail: "atlas page·region·trim reference" },
+  { label: "Spine", detail: "JSON skeleton·slot·attachment·animation" },
+  { label: "Animation", detail: "glTF clip·duration·root-motion policy" },
+] as const;
+
+export const TEXTURE_AUDIT_CONTRACT = {
+  command: "npm.cmd run asset:readability -- --config <config.json> --format json --strict",
+  schema: "clunk.texture-audit.v1",
+  passExit: 0,
+  policyExit: 2,
+  inputExit: 3,
+  unavailableExit: 4,
+} as const;
+
+export const UI_READABILITY_CONTRACT = {
+  command: "npm.cmd run asset:ui-readability -- --config <config.json> --format json",
+  schema: "clunk.ui-readability.v1",
+  status: "UNAVAILABLE",
+  capability: "not-shipped",
+  exit: 4,
+} as const;
+
+export const COLLABORATION_CONTRACT = {
+  list: "GET /api/collaboration/threads",
+  create: "POST /api/collaboration/threads",
+  message: "POST /api/collaboration/threads/:threadId/messages",
+  statuses: ["ASSET_READY", "ASSET_CONDITIONAL", "SCENE_GAP", "PLAYER_FACING_READY", "BLOCKED"],
+} as const;

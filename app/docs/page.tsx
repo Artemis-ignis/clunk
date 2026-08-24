@@ -5,12 +5,17 @@ import { Icon } from "../components/Icon";
 import { SiteShell } from "../components/SiteShell";
 import {
   CLI_SAMPLE,
+  ASSET_KIND_COVERAGE,
+  COLLABORATION_CONTRACT,
   EDITOR_PACKAGES,
   MCP_CONFIG_SNIPPET,
   MCP_SERVER,
   MCP_TOOLS,
   RULE_SET,
   SURFACES,
+  TARGET_PROFILES,
+  TEXTURE_AUDIT_CONTRACT,
+  UI_READABILITY_CONTRACT,
   VSCODE_COMMANDS,
 } from "../components/product-facts";
 
@@ -30,6 +35,13 @@ $ npm run clunk -- optimize public/samples/clunk-messy-sample.glb --out out/quad
 
 # Passport: 원본과 결과물을 각각 다시 검사해 하나로 묶습니다
 $ npm run clunk -- passport public/samples/clunk-messy-sample.glb out/quad.glb`;
+
+const ASSET_AUDIT_COMMANDS = `# 3D / 2D target contract
+$ npm.cmd run asset:readability -- --config examples/texture-audit/harvest-frontier.textures.json --format json --strict
+
+# UI readability is an explicit unavailable contract until a real auditor ships
+$ npm.cmd run asset:ui-readability -- --config portrait-ui.json --format json
+# exit 4 · clunk.ui-readability.v1 · status UNAVAILABLE · capability not-shipped`;
 
 const AGENT_SESSION = `$ echo '{"jsonrpc":"2.0","id":1,"method":"initialize"}' | npm run mcp
   protocolVersion  ${MCP_SERVER.protocolVersion}
@@ -104,6 +116,45 @@ export default function DocsPage() {
             code 2로 끝나므로 CI 게이트에 그대로 넣을 수 있습니다.
           </p>
           <CodeBlock title="terminal" language="bash" code={CLI_COMMANDS} />
+        </section>
+
+        <section className="doc-section">
+          <h2>2D·3D와 엔진 대상 계약</h2>
+          <p className="doc-lead">
+            GLB 숫자만으로 게임 준비 완료를 선언하지 않습니다. PNG·JPG·WebP 이미지, Sprite atlas,
+            Spine JSON, glTF animation clip도 실제 바이트를 읽어 구조·정책을 판정합니다. Godot,
+            Unity, Unreal, Web/Three.js와 Android·iOS 프로파일은 좌표·포맷·텍스처·애니메이션·디바이스
+            조건을 선언하며, 실제 import/runtime을 호출하지 못한 단계는 PASS가 아니라 환경 미사용으로 남습니다.
+          </p>
+          <div className="doc-coverage-grid">
+            {ASSET_KIND_COVERAGE.map((item) => <div className="doc-coverage-card" key={item.label}><strong>{item.label}</strong><span>{item.detail}</span></div>)}
+          </div>
+          <div className="doc-profile-table">
+            {TARGET_PROFILES.map((profile) => <div key={profile.id}><strong>{profile.label}</strong><code>{profile.id}</code><span>{profile.engine} · {profile.platform}{profile.requiresDeviceGate ? " · device gate" : ""}</span></div>)}
+          </div>
+        </section>
+
+        <section className="doc-section">
+          <h2>외부 프로젝트 CI 계약</h2>
+          <p className="doc-lead">
+            Harvest Frontier처럼 외부 프로젝트가 호출할 수 있는 명령은 측정 종류별로 분리합니다.
+            텍스처 PASS와 UI readability 미제공을 하나의 READY로 합치지 않습니다.
+          </p>
+          <CodeBlock title="asset-audit" language="bash" code={ASSET_AUDIT_COMMANDS} />
+          <div className="doc-ci-contracts">
+            <article><span className="mono-label">TEXTURE · SHIPPED</span><code>{TEXTURE_AUDIT_CONTRACT.schema}</code><p>exit {TEXTURE_AUDIT_CONTRACT.passExit}=PASS · {TEXTURE_AUDIT_CONTRACT.policyExit}=strict 위반 · {TEXTURE_AUDIT_CONTRACT.unavailableExit}=미지원</p></article>
+            <article><span className="mono-label">UI READABILITY · EXPLICIT</span><code>{UI_READABILITY_CONTRACT.schema}</code><p>{UI_READABILITY_CONTRACT.status} · {UI_READABILITY_CONTRACT.capability} · exit {UI_READABILITY_CONTRACT.exit}. 실제 초상화·작은 화면 측정기는 아직 없습니다.</p></article>
+          </div>
+        </section>
+
+        <section className="doc-section">
+          <h2>Harvest Frontier 협업 상태</h2>
+          <p className="doc-lead">
+            인증된 workspace 스레드에 inputHash, custom/base profile, rule-set, Clunk 감사 상태와
+            visual/runtime 상태를 함께 기록합니다. {COLLABORATION_CONTRACT.statuses.join(" · ")} 상태를
+            사용하며, <code>SCENE_GAP</code>은 Clunk asset audit PASS 이후에도 게임 화면 검토가 남았다는 뜻입니다.
+          </p>
+          <div className="doc-api-contract"><code>{COLLABORATION_CONTRACT.list}</code><code>{COLLABORATION_CONTRACT.create}</code><code>{COLLABORATION_CONTRACT.message}</code></div>
         </section>
 
         <section className="doc-section">

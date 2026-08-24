@@ -1,7 +1,17 @@
 import type { Metadata } from "next";
 import { SiteShell } from "../components/SiteShell";
 import { AgentsClient } from "./AgentsClient";
-import { MCP_SERVER, MCP_TOOLS, RULE_SET, SURFACES } from "../components/product-facts";
+import {
+  ASSET_KIND_COVERAGE,
+  COLLABORATION_CONTRACT,
+  MCP_SERVER,
+  MCP_TOOLS,
+  RULE_SET,
+  SURFACES,
+  TARGET_PROFILES,
+  TEXTURE_AUDIT_CONTRACT,
+  UI_READABILITY_CONTRACT,
+} from "../components/product-facts";
 
 export const metadata: Metadata = {
   title: "에이전트 연결",
@@ -118,6 +128,58 @@ export default function AgentsPage() {
           </div>
         </section>
 
+        <section className="agents-evidence-section" aria-labelledby="target-contract-heading">
+          <div className="agents-section-head">
+            <span className="eyebrow">ENGINE-AWARE · 2D + 3D</span>
+            <h2 id="target-contract-heading">숫자만 READY라고 부르지 않습니다.</h2>
+            <p>
+              같은 에셋도 Godot, Unity, Unreal, Web/Three.js, 모바일의 import·텍스처·좌표·디바이스
+              조건이 다릅니다. 아래는 검사 대상 계약이며, 실제 엔진을 호출하지 못한 단계는 PASS로 바꾸지
+              않고 <code>environmentUnavailable</code> 또는 <code>unsupported</code>로 남깁니다.
+            </p>
+          </div>
+          <div className="agents-coverage-grid">
+            {ASSET_KIND_COVERAGE.map((item) => (
+              <article key={item.label} className="agents-coverage-card">
+                <span className="mono-label">{item.label}</span>
+                <strong>{item.detail}</strong>
+              </article>
+            ))}
+          </div>
+          <div className="agents-profile-grid">
+            {TARGET_PROFILES.map((profile) => (
+              <article key={profile.id} className="agents-profile-card">
+                <div><strong>{profile.label}</strong><span>{profile.engine} · {profile.platform}{profile.requiresDeviceGate ? " · device gate" : ""}</span></div>
+                <code>{profile.id}</code>
+                <small>{profile.assetKinds.join(" · ")} · {profile.formats.join(", ")}</small>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="agents-ci-section" aria-labelledby="ci-contract-heading">
+          <div className="agents-section-head agents-section-head-tight">
+            <span className="eyebrow">CI CONTRACTS · NO BLIND SPOTS</span>
+            <h2 id="ci-contract-heading">텍스처와 UI readability는 별도 게이트입니다.</h2>
+          </div>
+          <div className="agents-ci-grid">
+            <article className="agents-ci-card agents-ci-card-pass">
+              <span className="mono-label">SHIPPED · TEXTURE</span>
+              <code>{TEXTURE_AUDIT_CONTRACT.schema}</code>
+              <p><strong>{TEXTURE_AUDIT_CONTRACT.passExit}</strong> PASS · <strong>{TEXTURE_AUDIT_CONTRACT.policyExit}</strong> strict 위반 · <strong>{TEXTURE_AUDIT_CONTRACT.unavailableExit}</strong> 미지원</p>
+              <pre><code>{TEXTURE_AUDIT_CONTRACT.command}</code></pre>
+              <small>GPU 밉 메모리·심리스·판독성 측정. 엔진 import/runtime 또는 플레이어 화면 PASS가 아닙니다.</small>
+            </article>
+            <article className="agents-ci-card agents-ci-card-unavailable">
+              <span className="mono-label">EXPLICIT · UI READABILITY</span>
+              <code>{UI_READABILITY_CONTRACT.schema}</code>
+              <p><strong>{UI_READABILITY_CONTRACT.status}</strong> · capability <strong>{UI_READABILITY_CONTRACT.capability}</strong> · exit <strong>{UI_READABILITY_CONTRACT.exit}</strong></p>
+              <pre><code>{UI_READABILITY_CONTRACT.command}</code></pre>
+              <small>초상화·작은 화면 텍스트 측정기는 아직 제공하지 않습니다. 없는 auditor를 PASS로 위장하지 않고 안정 JSON으로 알립니다.</small>
+            </article>
+          </div>
+        </section>
+
         <section className="agents-loop-section">
           <div className="agents-loop-copy">
             <span className="eyebrow">THE HANDOFF</span>
@@ -172,6 +234,19 @@ export default function AgentsPage() {
             <strong>HTTP MCP</strong>
             <code>stdio is the current contract</code>
           </div>
+        </section>
+
+        <section className="agents-collaboration-note" aria-labelledby="collaboration-contract-heading">
+          <div>
+            <span className="eyebrow">AUTHENTICATED COLLABORATION</span>
+            <h2 id="collaboration-contract-heading">Harvest Frontier 피드백은 workspace 스레드에 저장합니다.</h2>
+            <p>
+              Clunk 감사 결과와 visual/runtime gap을 한 숫자로 합치지 않습니다. 로그인한 workspace에서
+              <code>{COLLABORATION_CONTRACT.create}</code>로 스레드를 만들고, <code>inputHash</code>와
+              custom/base profile을 고정한 뒤 메모를 추가합니다. 공개 HTTP MCP는 여전히 제공하지 않습니다.
+            </p>
+          </div>
+          <a className="button button-quiet button-sm" href="/dashboard">대시보드에서 메모 남기기 <span aria-hidden="true">→</span></a>
         </section>
       </main>
     </SiteShell>

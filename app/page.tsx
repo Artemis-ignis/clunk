@@ -5,6 +5,7 @@ import { Icon, type IconName } from "./components/Icon";
 import { SiteNav } from "./components/SiteNav";
 import { SnapRoot } from "./components/SnapRoot";
 import {
+  ASSET_KIND_COVERAGE,
   CLI_SAMPLE,
   MCP_CONFIG_SNIPPET,
   MCP_TOOL_COUNT,
@@ -12,6 +13,7 @@ import {
   RULE_COUNT,
   RULE_SET,
   SURFACE_COUNT,
+  TARGET_PROFILES,
 } from "./components/product-facts";
 
 export const metadata: Metadata = {
@@ -171,6 +173,33 @@ export default function Home() {
                 </div>
                 <pre><code>{sampleTerminal}</code></pre>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="landing-snap-section landing-coverage-section" id="coverage">
+          <div className="landing-section-inner">
+            <div className="landing-section-heading">
+              <span className="eyebrow">ENGINE-AWARE · 2D + 3D</span>
+              <h2>점수 하나로 <em>게임 준비를 가장하지 않습니다.</em></h2>
+              <p>
+                PNG부터 Spine, glTF animation, GLB까지 실제 바이트를 읽고, Godot·Unity·Unreal·Web/Three.js와
+                모바일 대상 조건을 분리합니다. 엔진 import나 player-facing runtime을 호출하지 못한 단계는
+                PASS가 아니라 미사용·미지원으로 남깁니다.
+              </p>
+            </div>
+            <div className="landing-coverage-grid">
+              {ASSET_KIND_COVERAGE.map((item, index) => (
+                <article className="landing-coverage-card" key={item.label}>
+                  <span>0{index + 1}</span>
+                  <strong>{item.label}</strong>
+                  <p>{item.detail}</p>
+                </article>
+              ))}
+            </div>
+            <div className="landing-profile-band">
+              <div><span className="mono-label">TARGET PROFILES</span><strong>{TARGET_PROFILES.length}개 선언 · runtime PASS와 별도</strong></div>
+              <div className="landing-profile-list">{TARGET_PROFILES.slice(0, 5).map((profile) => <span key={profile.id}><i />{profile.label}</span>)}</div>
             </div>
           </div>
         </section>

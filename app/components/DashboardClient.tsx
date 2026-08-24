@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { DemoUpgradeButton } from "./DemoUpgradeButton";
+import { CollaborationPanel } from "./CollaborationPanel";
 import { Icon } from "./Icon";
 import { readinessHint, resolveStoredReadiness } from "./readiness";
 import { StatusPill } from "./StatusPill";
@@ -286,6 +287,12 @@ export function DashboardClient() {
           </Link>
         </aside>
       </section>
+
+      <CollaborationPanel latestRun={latestRun ? {
+        inputHash: latestRun.inputHash,
+        profileId: latestRun.profileId,
+        reportJson: latestRun.reportJson,
+      } : null} />
 
     </WorkspaceShell>
   );
