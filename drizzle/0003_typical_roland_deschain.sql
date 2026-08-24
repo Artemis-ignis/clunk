@@ -1,0 +1,2 @@
+CREATE INDEX `idx_clunk_collaboration_messages_thread_created` ON `clunk_collaboration_messages` (`workspace_id`,`thread_id`,`created_at`);--> statement-breakpoint
+CREATE INDEX `idx_clunk_collaboration_threads_workspace_updated` ON `clunk_collaboration_threads` (`workspace_id`,`updated_at`);

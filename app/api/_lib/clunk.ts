@@ -23,11 +23,15 @@ const SCHEMA_STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS clunk_analysis_runs (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL, asset_id TEXT NOT NULL, input_hash TEXT NOT NULL, profile_id TEXT NOT NULL, rule_set_id TEXT NOT NULL, status TEXT NOT NULL, score INTEGER NOT NULL, hard_blocker_count INTEGER NOT NULL, finding_count INTEGER NOT NULL, report_json TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
   `CREATE TABLE IF NOT EXISTS clunk_optimization_runs (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL, asset_id TEXT NOT NULL, source_hash TEXT NOT NULL, output_hash TEXT NOT NULL, status TEXT NOT NULL, operations_json TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
   `CREATE TABLE IF NOT EXISTS clunk_passports (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL, asset_id TEXT NOT NULL, optimization_run_id TEXT, source_hash TEXT NOT NULL, output_hash TEXT NOT NULL, passport_json TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
+  `CREATE TABLE IF NOT EXISTS clunk_collaboration_threads (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL, subject TEXT NOT NULL, asset_id TEXT, input_hash TEXT NOT NULL, target_profile_id TEXT NOT NULL, rule_set_id TEXT NOT NULL, status_json TEXT NOT NULL, created_by TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
+  `CREATE TABLE IF NOT EXISTS clunk_collaboration_messages (id TEXT PRIMARY KEY, thread_id TEXT NOT NULL, workspace_id TEXT NOT NULL, author_user_id TEXT NOT NULL, body TEXT NOT NULL, asset_id TEXT, input_hash TEXT NOT NULL, target_profile_id TEXT NOT NULL, status_json TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
   `CREATE INDEX IF NOT EXISTS idx_clunk_analysis_workspace_created ON clunk_analysis_runs(workspace_id, created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_clunk_assets_workspace_created ON clunk_assets(workspace_id, created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_clunk_credits_workspace_created ON clunk_credit_ledger(workspace_id, created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_clunk_optimization_workspace_created ON clunk_optimization_runs(workspace_id, created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_clunk_passports_workspace_created ON clunk_passports(workspace_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_clunk_collaboration_threads_workspace_updated ON clunk_collaboration_threads(workspace_id, updated_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_clunk_collaboration_messages_thread_created ON clunk_collaboration_messages(workspace_id, thread_id, created_at ASC)`,
 ];
 
 export async function requireClunkContext(): Promise<ClunkUserContext> {

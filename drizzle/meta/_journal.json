@@ -15,6 +15,20 @@
       "when": 1787217574939,
       "tag": "0001_skinny_roland_deschain",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1787540786354,
+      "tag": "0002_lovely_thunderbolt_ross",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1787540842743,
+      "tag": "0003_typical_roland_deschain",
+      "breakpoints": true
     }
   ]
 }

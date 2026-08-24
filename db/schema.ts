@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { integer, primaryKey, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { index, integer, primaryKey, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const users = sqliteTable("clunk_users", {
   id: text("id").primaryKey(),
@@ -114,3 +114,38 @@ export const passports = sqliteTable("clunk_passports", {
   passportJson: text("passport_json").notNull(),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
+
+export const collaborationThreads = sqliteTable(
+  "clunk_collaboration_threads",
+  {
+    id: text("id").primaryKey(),
+    workspaceId: text("workspace_id").notNull(),
+    subject: text("subject").notNull(),
+    assetId: text("asset_id"),
+    inputHash: text("input_hash").notNull(),
+    targetProfileId: text("target_profile_id").notNull(),
+    ruleSetId: text("rule_set_id").notNull(),
+    statusJson: text("status_json").notNull(),
+    createdBy: text("created_by").notNull(),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => ({ workspaceUpdated: index("idx_clunk_collaboration_threads_workspace_updated").on(table.workspaceId, table.updatedAt) }),
+);
+
+export const collaborationMessages = sqliteTable(
+  "clunk_collaboration_messages",
+  {
+    id: text("id").primaryKey(),
+    threadId: text("thread_id").notNull(),
+    workspaceId: text("workspace_id").notNull(),
+    authorUserId: text("author_user_id").notNull(),
+    body: text("body").notNull(),
+    assetId: text("asset_id"),
+    inputHash: text("input_hash").notNull(),
+    targetProfileId: text("target_profile_id").notNull(),
+    statusJson: text("status_json").notNull(),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => ({ threadCreated: index("idx_clunk_collaboration_messages_thread_created").on(table.workspaceId, table.threadId, table.createdAt) }),
+);
