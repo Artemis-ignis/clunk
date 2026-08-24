@@ -258,3 +258,24 @@ npm.cmd run asset:ui-readability -- --config tools/asset-pipeline/ui-readability
 - `assetAudit: PASS` + `visualRuntime: GAP`의 제품 상태는 `SCENE_GAP`이다. portrait
   raster auditor의 `PASS`는 UI raster 판정일 뿐이며, WebGPU/무-HUD 실제 화면은
   여전히 별도 `playerFacing: NOT_EVALUATED`다.
+
+## 2026-08-24 HF M94 packaged visual baseline 및 texture prescription
+
+- HF frame manifest의 run은 `HF-M94-packaged-r01`, source commit은 `d3d56464`다.
+  renderer는 packaged build의 `auto/WebGPU`, viewport는 `1920×1080`, `shippedPath: true`,
+  console은 `0/0`이다.
+- 기준 프레임은
+  `.logs/screenshots/M94/shipped-visual/HF-M94-packaged-r01-03-game-nohud.png`이며,
+  바이트 수는 `2,821,399`, SHA-256은
+  `5978400B0DD77A5ED90EDE70617726B0DB838A5892075BDDD18DA5CCE0F58E15`다.
+  현재 프레임은 식별 가능한 player, buildings, windmill, beds, vegetation을 보여주는
+  개선된 기준선이지만, low-poly/flat distant terrain band, 단순화된 hedge/rock silhouette,
+  tiny/soft sign text, dealer/dialogue composition·camera gap이 남아 있다.
+- 이 프레임은 `reviewStatus: NOT_EVALUATED`, 협업 상태는 `visualRuntime: GAP` /
+  `SCENE_GAP`으로 저장한다. static asset FAIL이나 player-facing PASS로 해석하지 않는다.
+- texture strict audit는 seam/memory 기준으로 7종 `PASS`, GPU mip memory `21.33MB / 40MB`다.
+  다만 gameplay-band detail loss는 별도 actionable prescription으로 보존한다: grass close
+  layer at 15m = `D`, dirt path = `C`, soil-tilled apron/bed = `D`; wider grass layer는
+  `A/B`, ridge/plaster/roof는 stronger다. 이 항목들은 `prescriptions[].status:
+  NON_BLOCKING`으로 두고, HF가 shipped-frame 캡처를 기준으로 runtime material 또는
+  second-layer 변경 여부를 결정한다. texture PASS를 blanket player-facing PASS로 승격하지 않는다.

@@ -8206,6 +8206,15 @@ html:has(.benchmark-home) .landing-snap-section {
 .collaboration-evidence-gaps { display: flex; flex-wrap: wrap; gap: 6px; }
 .collaboration-evidence-gaps span { display: inline-flex; align-items: baseline; gap: 5px; padding: 5px 7px; border: 1px solid var(--line); border-radius: var(--r-pill); color: var(--text-muted); font-size: 0.7rem; line-height: 1.35; }
 .collaboration-evidence-gaps b { color: var(--warning); font-family: var(--font-mono); font-size: 0.62rem; text-transform: uppercase; }
+.collaboration-evidence-prescriptions { display: flex; flex-direction: column; gap: 6px; padding-top: var(--sp-4); }
+.collaboration-evidence-prescriptions > .mono-label { color: var(--accent); }
+.collaboration-evidence-prescriptions article { padding: 8px 10px; border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line)); border-radius: var(--r-control); background: var(--ink-2); }
+.collaboration-evidence-prescriptions article > div { display: flex; align-items: center; gap: 7px; }
+.collaboration-evidence-prescriptions b { color: var(--accent); font-family: var(--font-mono); font-size: 0.64rem; }
+.collaboration-evidence-prescriptions strong { color: var(--text-muted); font-family: var(--font-mono); font-size: 0.68rem; }
+.collaboration-evidence-prescriptions em { color: var(--warning); font-family: var(--font-mono); font-size: 0.6rem; font-style: normal; }
+.collaboration-evidence-prescriptions p { margin: 5px 0 3px; color: var(--text-muted); font-size: 0.74rem; }
+.collaboration-evidence-prescriptions small { color: var(--text-dim); font-size: 0.7rem; overflow-wrap: anywhere; }
 .collaboration-evidence-invalid strong { color: var(--danger, #c44); font-family: var(--font-mono); font-size: 0.7rem; }
 .collaboration-evidence-invalid p { margin: 0; color: var(--text-muted); font-size: 0.78rem; }
 .collaboration-messages { display: flex; flex-direction: column; gap: var(--sp-8); margin-top: var(--sp-12); }

@@ -135,6 +135,9 @@ rule-set, and separate `assetAudit` / `visualRuntime` states:
 still has a gap. This contract requires host authentication and workspace scoping. A screenshot
 or frame manifest is optional on thread/message POST and uses `clunk.frame-manifest.v1`; it is
 evidence only and keeps `reviewStatus: NOT_EVALUATED`.
+Frame entries may also carry `sha256`, `viewport`, `renderer`, `shippedPath`, and
+`console: { errors, warnings }` so a packaged capture's provenance and browser/runtime smoke
+signal stay attached to the frame without becoming a player-facing verdict.
 
 The stable thread POST body is:
 
@@ -161,6 +164,8 @@ The stable thread POST body is:
       "path": ".logs/screenshots/M84/real-capture.png",
       "renderer": "webgpu",
       "hud": "off",
+      "shippedPath": true,
+      "console": { "errors": 0, "warnings": 0 },
       "viewport": { "width": 2560, "height": 1440, "dpr": 1 }
     }],
     "sceneGaps": [{
@@ -168,6 +173,15 @@ The stable thread POST body is:
       "severity": "major",
       "category": "environment",
       "note": "Describe the visible gap and its player-facing impact.",
+      "frameIds": ["m84-no-hud-world"]
+    }],
+    "prescriptions": [{
+      "id": "grass-close-detail",
+      "kind": "texture-detail",
+      "status": "NON_BLOCKING",
+      "priority": "P1",
+      "observation": "Gameplay-band close grass loses detail.",
+      "action": "Evaluate a runtime material or second detail layer from shipped captures.",
       "frameIds": ["m84-no-hud-world"]
     }]
   }
@@ -178,7 +192,9 @@ The stable thread POST body is:
 `GET /api/collaboration/threads/:threadId` returns the same thread plus `messages[]`, each with
 its own optional `evidence`. A successful thread POST returns `201` and `{ "ok": true,
 "thread": { "id": "...", "status": { ... }, "evidence": { ... } } }`. A malformed manifest is
-rejected with `400`; unsupported or unknown player-facing evaluation is never converted to PASS.
+rejected with `400`; optional `prescriptions[]` entries are explicitly `NON_BLOCKING` and carry
+an observation plus next action. Unsupported or unknown player-facing evaluation is never
+converted to PASS.
 
 ## Safety boundaries
 

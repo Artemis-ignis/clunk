@@ -14,11 +14,17 @@ export const FRAME_MANIFEST_SCHEMA = "clunk.frame-manifest.v1" as const;
 export type FrameHudState = "on" | "off" | "unknown";
 export type FrameReviewStatus = "NOT_EVALUATED";
 export type SceneGapSeverity = "blocker" | "major" | "minor";
+export type EvidencePrescriptionPriority = "P1" | "P2" | "P3";
 
 export interface FrameViewport {
   width: number;
   height: number;
   dpr?: number;
+}
+
+export interface FrameConsoleSummary {
+  errors: number;
+  warnings: number;
 }
 
 export interface FrameManifestFrame {
@@ -28,6 +34,8 @@ export interface FrameManifestFrame {
   viewport?: FrameViewport;
   renderer?: string;
   hud: FrameHudState;
+  shippedPath?: boolean;
+  console?: FrameConsoleSummary;
   scene?: string;
   note?: string;
 }
@@ -40,6 +48,16 @@ export interface SceneGapNote {
   frameIds?: readonly string[];
 }
 
+export interface EvidencePrescription {
+  id: string;
+  kind: string;
+  status: "NON_BLOCKING";
+  priority: EvidencePrescriptionPriority;
+  observation: string;
+  action: string;
+  frameIds?: readonly string[];
+}
+
 export interface FrameManifest {
   schema: typeof FRAME_MANIFEST_SCHEMA;
   runId: string;
@@ -48,6 +66,7 @@ export interface FrameManifest {
   reviewStatus: FrameReviewStatus;
   frames: readonly FrameManifestFrame[];
   sceneGaps: readonly SceneGapNote[];
+  prescriptions?: readonly EvidencePrescription[];
 }
 
 export interface CollaborationStatusInput {
@@ -104,6 +123,14 @@ function positiveNumber(record: JsonRecord, key: string, label: string, integer 
   return value;
 }
 
+function nonNegativeInteger(record: JsonRecord, key: string, label: string): number {
+  const value = record[key];
+  if (typeof value !== "number" || !Number.isInteger(value) || value < 0) {
+    throw new Error(`${label}.${key} must be a non-negative integer`);
+  }
+  return value;
+}
+
 function normalizeViewport(value: unknown, label: string): FrameViewport {
   const record = asRecord(value, label);
   const viewport: FrameViewport = {
@@ -134,6 +161,17 @@ function normalizeFrame(value: unknown, index: number): FrameManifestFrame {
   if (record.viewport !== undefined) frame.viewport = normalizeViewport(record.viewport, `${label}.viewport`);
   const renderer = optionalText(record, "renderer", label, 120);
   if (renderer) frame.renderer = renderer;
+  if (record.shippedPath !== undefined) {
+    if (typeof record.shippedPath !== "boolean") throw new Error(`${label}.shippedPath must be a boolean`);
+    frame.shippedPath = record.shippedPath;
+  }
+  if (record.console !== undefined) {
+    const consoleSummary = asRecord(record.console, `${label}.console`);
+    frame.console = {
+      errors: nonNegativeInteger(consoleSummary, "errors", `${label}.console`),
+      warnings: nonNegativeInteger(consoleSummary, "warnings", `${label}.console`),
+    };
+  }
   const scene = optionalText(record, "scene", label, 240);
   if (scene) frame.scene = scene;
   const note = optionalText(record, "note", label, 1000);
@@ -170,6 +208,39 @@ function normalizeSceneGap(value: unknown, index: number): SceneGapNote {
   return gap;
 }
 
+function normalizePrescription(value: unknown, index: number): EvidencePrescription {
+  const label = `prescriptions[${index}]`;
+  const record = asRecord(value, label);
+  const status = record.status;
+  const priority = record.priority;
+  if (status !== "NON_BLOCKING") throw new Error(`${label}.status must be NON_BLOCKING`);
+  if (priority !== "P1" && priority !== "P2" && priority !== "P3") {
+    throw new Error(`${label}.priority must be P1, P2, or P3`);
+  }
+  const prescription: EvidencePrescription = {
+    id: requiredText(record, "id", label, 120),
+    kind: requiredText(record, "kind", label, 120),
+    status: "NON_BLOCKING",
+    priority,
+    observation: requiredText(record, "observation", label, 2000),
+    action: requiredText(record, "action", label, 2000),
+  };
+  if (record.frameIds !== undefined) {
+    if (!Array.isArray(record.frameIds) || record.frameIds.length > 32) {
+      throw new Error(`${label}.frameIds must be an array of at most 32 frame ids`);
+    }
+    const frameIds = record.frameIds.map((frameId, frameIndex) => {
+      if (typeof frameId !== "string" || frameId.trim().length === 0 || frameId.length > 120) {
+        throw new Error(`${label}.frameIds[${frameIndex}] must be a non-empty string`);
+      }
+      return frameId.trim();
+    });
+    if (new Set(frameIds).size !== frameIds.length) throw new Error(`${label}.frameIds must not contain duplicates`);
+    prescription.frameIds = frameIds;
+  }
+  return prescription;
+}
+
 export function normalizeFrameManifest(value: unknown): FrameManifest {
   const record = asRecord(value, "manifest");
   if (record.schema !== FRAME_MANIFEST_SCHEMA) {
@@ -188,9 +259,19 @@ export function normalizeFrameManifest(value: unknown): FrameManifest {
   const frameIds = frames.map((frame) => frame.id);
   if (new Set(frameIds).size !== frameIds.length) throw new Error("manifest.frames must not contain duplicate ids");
   const sceneGaps = record.sceneGaps.map(normalizeSceneGap);
+  const prescriptions = record.prescriptions === undefined
+    ? undefined
+    : (!Array.isArray(record.prescriptions) || record.prescriptions.length > 128
+      ? (() => { throw new Error("manifest.prescriptions must be an array of at most 128 items"); })()
+      : record.prescriptions.map(normalizePrescription));
   for (const gap of sceneGaps) {
     for (const frameId of gap.frameIds ?? []) {
       if (!frameIds.includes(frameId)) throw new Error(`scene gap references unknown frame ${frameId}`);
+    }
+  }
+  for (const prescription of prescriptions ?? []) {
+    for (const frameId of prescription.frameIds ?? []) {
+      if (!frameIds.includes(frameId)) throw new Error(`prescription references unknown frame ${frameId}`);
     }
   }
   return {
@@ -201,6 +282,7 @@ export function normalizeFrameManifest(value: unknown): FrameManifest {
     reviewStatus: "NOT_EVALUATED",
     frames,
     sceneGaps,
+    ...(prescriptions ? { prescriptions } : {}),
   };
 }
 

@@ -67,6 +67,8 @@ test("frame manifest v1 normalizes screenshot evidence without changing player-f
       hud: "off",
       viewport: { width: 2560, height: 1440, dpr: 1 },
       scene: "farm",
+      shippedPath: true,
+      console: { errors: 0, warnings: 0 },
     }],
     sceneGaps: [{
       id: "terrain-seams",
@@ -75,12 +77,24 @@ test("frame manifest v1 normalizes screenshot evidence without changing player-f
       note: "Gray dome and terrain seams remain visible in the no-HUD frame.",
       frameIds: ["m84-no-hud-world"],
     }],
+    prescriptions: [{
+      id: "grass-close-detail",
+      kind: "texture-detail",
+      status: "NON_BLOCKING",
+      priority: "P1",
+      observation: "Close grass loses detail at the gameplay band.",
+      action: "Evaluate a runtime material or second detail layer from shipped captures.",
+      frameIds: ["m84-no-hud-world"],
+    }],
   });
 
   assert.equal(manifest.schema, "clunk.frame-manifest.v1");
   assert.equal(manifest.reviewStatus, "NOT_EVALUATED");
   assert.equal(manifest.frames[0]?.viewport?.width, 2560);
+  assert.equal(manifest.frames[0]?.shippedPath, true);
+  assert.deepEqual(manifest.frames[0]?.console, { errors: 0, warnings: 0 });
   assert.deepEqual(manifest.sceneGaps[0]?.frameIds, ["m84-no-hud-world"]);
+  assert.equal(manifest.prescriptions?.[0]?.status, "NON_BLOCKING");
 });
 
 test("frame manifest v1 rejects a scene gap that references an unknown frame", () => {

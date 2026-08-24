@@ -250,6 +250,7 @@ export const COLLABORATION_CONTRACT = {
   message: "POST /api/collaboration/threads/:threadId/messages",
   detail: "GET /api/collaboration/threads/:threadId",
   evidence: "evidence: clunk.frame-manifest.v1",
+  prescriptions: "prescriptions[]: NON_BLOCKING observation + action",
   evidenceReview: "reviewStatus: NOT_EVALUATED",
   playerFacing: "playerFacing: NOT_EVALUATED",
   statuses: ["ASSET_READY", "ASSET_CONDITIONAL", "SCENE_GAP", "PLAYER_FACING_READY", "BLOCKED"],

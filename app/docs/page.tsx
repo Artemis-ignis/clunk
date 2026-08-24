@@ -155,6 +155,8 @@ export default function DocsPage() {
             사용하며, <code>SCENE_GAP</code>은 Clunk asset audit PASS 이후에도 게임 화면 검토가 남았다는 뜻입니다.
             스크린샷/frame manifest는 <code>{COLLABORATION_CONTRACT.evidence}</code>로 저장하고, 그 안의
             <code>reviewStatus: NOT_EVALUATED</code>는 실제 WebGPU/무-HUD 화면 판정을 대신하지 않습니다.
+            gameplay-band detail loss 같은 후속 조치는 <code>{COLLABORATION_CONTRACT.prescriptions}</code>로
+            정적 PASS를 덮지 않고 기록합니다.
           </p>
           <div className="doc-api-contract"><code>{COLLABORATION_CONTRACT.list}</code><code>{COLLABORATION_CONTRACT.create}</code><code>{COLLABORATION_CONTRACT.detail}</code><code>{COLLABORATION_CONTRACT.message}</code></div>
         </section>

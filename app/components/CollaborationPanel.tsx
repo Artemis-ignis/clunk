@@ -370,11 +370,23 @@ function EvidenceCard({ evidence }: { evidence: StoredEvidence }) {
         <span><small>scene gaps</small><strong>{evidence.sceneGaps.length}</strong></span>
       </div>
       <div className="collaboration-evidence-frames">
-        {evidence.frames.map((frame) => <span key={frame.id}><b>{frame.id}</b><small>{frame.hud} HUD · {frame.renderer ?? "renderer unknown"} · {frame.path}</small></span>)}
+        {evidence.frames.map((frame) => <span key={frame.id}><b>{frame.id}</b><small>{frame.hud} HUD · {frame.renderer ?? "renderer unknown"} · {frame.shippedPath === true ? "shipped path" : "path unverified"} · console {frame.console ? `${frame.console.errors}/${frame.console.warnings}` : "unknown"} · {frame.path}</small></span>)}
       </div>
       <div className="collaboration-evidence-gaps">
         {evidence.sceneGaps.map((gap) => <span key={gap.id}><b>{gap.severity}</b>{gap.category} · {gap.note}</span>)}
       </div>
+      {evidence.prescriptions?.length ? (
+        <div className="collaboration-evidence-prescriptions">
+          <span className="mono-label">NON-BLOCKING PRESCRIPTIONS · runtime/art follow-up</span>
+          {evidence.prescriptions.map((prescription) => (
+            <article key={prescription.id}>
+              <div><b>{prescription.priority}</b><strong>{prescription.kind}</strong><em>NON_BLOCKING</em></div>
+              <p>{prescription.observation}</p>
+              <small>next: {prescription.action}</small>
+            </article>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
