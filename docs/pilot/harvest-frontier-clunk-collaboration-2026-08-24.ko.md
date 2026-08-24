@@ -117,6 +117,11 @@ M84 shipped-path 무-HUD 실사용 플레이테스트에서 발견한 다음 문
   존재하지만, 이 상태는 “상시 감사가 통과했다”가 아니라 “감사기가 없어 실행하지
   못했다”이다. Clunk가 auditor를 다시 제공하거나 버전이 있는 CLI 경로를 선언할
   때까지 HF는 해당 검사를 PASS로 홍보하지 않는다.
+- 이 연동 허점을 숨기지 않도록 HF wrapper를 보강했다. Clunk checkout이 없을 때만
+  `asset:readability`가 SKIP하고, checkout은 있는데 auditor가 없으면 BLOCKED(exit 2)로
+  구분한다. CI/release가 Clunk를 명시적으로 요구할 때는
+  `npm run asset:readability:required`를 사용한다. 따라서 현재 상태는 의도적으로
+  게이트 실패이며, auditor 제공 이후에만 실제 판정으로 승격된다.
 - `clunk_passport`의 `outputPath`는 새 JSON을 생성하는 경로가 아니라 이미 존재하는
   output artifact를 요구하는 것으로 보인다. 새 경로를 주면 ENOENT가 나고, source와
   동일한 기존 GLB를 주면 정상 응답한다. API 설명이 생성물 저장 경로처럼 읽히므로
