@@ -487,8 +487,12 @@ export default function DocsPage() {
             named runtime root·pivot·attachment socket·collider proxy·<code>EXT_meshopt_compression</code>을
             structure/policy evidence로 확인하며, 누락된 필수 노드는 <code>BLOCKED</code>가 될 수 있습니다.
             반대로 semantic PASS는 GLB 구조·정책 결과일 뿐이며, Three.js import/runtime, procedural crop·vegetation·NPC,
-            shipped camera와 사람의 visual review를 대신하지 않습니다. HF의 textureCount 0, missing normals/UV,
-            non-unit scale, draw-call 관찰값도 이 계층 밖의 runtime/player-facing 품질 승인으로 승격하지 않습니다.
+            shipped camera와 사람의 visual review를 대신하지 않습니다. 현재 HF tractor 측정값은
+            <code>textureCount=0</code>, <code>missingNormalPrimitiveCount=7</code>,
+            <code>nonUnitScaleNodeCount=181</code>, <code>drawCallCount=88</code>,
+            <code>bounds=±32767</code>입니다. 이는 inputHash가 고정된 정적 관찰값이며, 특히 texture 0은
+            procedural/material authoring일 수 있어 자동 결함으로 단정하지 않습니다. 이 값들은 ownership/runtime usage가
+            명시된 브라우저 evidence와 사람의 visual review 없이는 runtime/player-facing 품질 승인으로 승격되지 않습니다.
           </p>
           <div className="doc-split">
             <CodeBlock title="HF M95/M96 handoff" language="json" code={HF_M95_M96_HANDOFF} caption="HF가 전달한 최신 커밋·게이트·readability 요약입니다. M94 live frame row와 분리합니다." />

@@ -492,6 +492,16 @@ vegetation or NPC quality, shipped-camera composition, or human visual approval.
 engine runners remain `ENVIRONMENT_UNAVAILABLE`; Clunk does not optimize HF GLBs without
 explicit approval.
 
+The current real HF tractor MCP observation is fixed to inputHash
+`d92ae93240cc9b4d477df13cbddd0342738feb57ed9b8551e73d68fd83b3222c` under the Harvest
+Frontier profile: `score=100`, `ready=true`, `hardBlocker=0`,
+`textureCount=0`, `missingNormalPrimitiveCount=7`, `nonUnitScaleNodeCount=181`,
+`drawCallCount=88`, and `bounds=+/-32767`. These are static numeric observations, not a
+player-facing visual PASS. `textureCount=0` is not automatically a defect because it may
+belong to procedural/material runtime authoring; ownership and runtime usage must remain
+explicit in linked evidence, and a shipped WebGPU/WebGL2 frame plus human review is still
+required for player-facing approval.
+
 ## Safety boundaries
 
 - The input file is never overwritten. Optimization always writes a separate artifact.
