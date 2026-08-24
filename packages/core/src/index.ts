@@ -10,6 +10,7 @@ export type { BillingProvider, CheckoutReference, PaymentResult } from "./billin
 export * from "./assetops-contract";
 export * from "./assetops-profiles";
 export * from "./collaboration-contract";
+export * from "./analyzers/asset-analyzers";
 
 export const CORE_VERSION = "0.1.0";
 export const RULE_SET_ID = "clunk-game-ready-v1";
