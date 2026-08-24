@@ -1,8 +1,19 @@
 {
   "baseDir": "C:/Users/50106/Desktop/Harvest Frontier/public/assets/textures",
-  "camera": { "fovDeg": 52, "viewportWidthPx": 1600 },
-  "distanceBandsM": [5, 15, 30],
-  "gameplayBandIndex": 1,
+  "evaluationProfile": {
+    "id": "harvest-frontier-shipped-camera-v1",
+    "renderer": "WebGPU",
+    "viewport": { "widthPx": 1600, "heightPx": 900, "dpr": 1 },
+    "camera": { "fovDeg": 52 },
+    "distanceBands": [
+      { "id": "close", "label": "close / player-facing", "distanceM": 5, "requiredGrade": "B" },
+      { "id": "gameplay", "label": "gameplay band", "distanceM": 15, "requiredGrade": "B" },
+      { "id": "far", "label": "far / composition", "distanceM": 30, "requiredGrade": "C" }
+    ],
+    "resolutionPolicy": { "mode": "reported" },
+    "repetition": { "mode": "declared", "maxExpectedRepeats": { "horizontal": 4, "vertical": 4 } },
+    "banding": { "maxGradeDrop": 1 }
+  },
   "groundAnisotropy": 2.0,
   "gpuMemoryBudgetBytes": 41943040,
   "thresholds": { "A": 0.6, "B": 0.35, "C": 0.15, "washGradientPerSigma": 0.4 },

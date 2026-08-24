@@ -1,0 +1,37 @@
+{
+  "renderContext": {
+    "viewport": { "width": 1920, "height": 1080, "dpr": 1 },
+    "font": { "family": "Geist + Noto Sans KR", "sizePx": 16, "weight": 600, "lineHeight": 1.2 },
+    "render": { "engine": "browser-css", "renderer": "sharp-raster", "kernel": "lanczos3", "colorSpace": "sRGB" }
+  },
+  "groups": [
+    {
+      "name": "HF ko HUD portraits",
+      "note": "한국어 HUD의 46px portrait draw size; image input is local to Harvest Frontier.",
+      "baseDir": "C:/Users/50106/Desktop/Harvest Frontier/public/assets/portraits",
+      "sourcePx": 128,
+      "renderPx": 46,
+      "files": [
+        "npc.choi-minseo.png",
+        "npc.han-seojun.png",
+        "npc.kang-taeho.png",
+        "npc.lee-eunha.png",
+        "npc.park-yuna.png"
+      ]
+    },
+    {
+      "name": "HF en HUD portraits",
+      "note": "English HUD uses the same portrait raster assets; UI language is recorded as a separate group.",
+      "baseDir": "C:/Users/50106/Desktop/Harvest Frontier/public/assets/portraits",
+      "sourcePx": 128,
+      "renderPx": 46,
+      "files": [
+        "npc.choi-minseo.png",
+        "npc.han-seojun.png",
+        "npc.kang-taeho.png",
+        "npc.lee-eunha.png",
+        "npc.park-yuna.png"
+      ]
+    }
+  ]
+}

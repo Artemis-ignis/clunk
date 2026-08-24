@@ -22,6 +22,8 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { inflateSync } from "node:zlib";
 
+const GRADE_RANK = { A: 0, B: 1, C: 2, D: 3 };
+
 // --------------------------------------------------------------------------- PNG decoding
 
 function decodePng(buffer) {
@@ -442,7 +444,8 @@ function auditTexture(config, textureConfig) {
       return texelWorldM * 2 ** octaveEnergy.length * 100;
     })();
 
-    const bands = config.distanceBandsM.map((distance) => {
+    const bands = config.distanceBandsM.map((distance, bandIndex) => {
+      const bandDefinition = config.evaluationProfile.distanceBands[bandIndex];
       const texelsPerPixel = (worldPerPixelAt(distance) / texelWorldM) * anisotropy;
       const mipLevel = Math.max(0, Math.log2(Math.max(1e-6, texelsPerPixel)));
       const preservation = preservationAt(mipLevel);
@@ -459,7 +462,10 @@ function auditTexture(config, textureConfig) {
         washDemoted = true;
       }
       return {
+        bandId: bandDefinition.id,
+        ...(bandDefinition.label ? { bandLabel: bandDefinition.label } : {}),
         distanceM: distance,
+        ...(bandDefinition.requiredGrade ? { requiredGrade: bandDefinition.requiredGrade } : {}),
         effectiveMip: Number(mipLevel.toFixed(2)),
         contrastPreservedPct: Number((preservation * 100).toFixed(1)),
         absoluteSigmaLinear: Number(absoluteSigma.toFixed(4)),
@@ -469,13 +475,33 @@ function auditTexture(config, textureConfig) {
       };
     });
 
-    // Prescription against the gameplay band and the B threshold (ratio AND sigma floor).
+    const transitions = bands.slice(1).map((band, index) => ({
+      fromBandId: bands[index].bandId,
+      toBandId: band.bandId,
+      fromGrade: bands[index].grade,
+      toGrade: band.grade,
+      gradeDrop: Math.max(0, GRADE_RANK[band.grade] - GRADE_RANK[bands[index].grade]),
+    }));
+    const maxGradeDrop = transitions.reduce((max, transition) => Math.max(max, transition.gradeDrop), 0);
+    const allowedMaxGradeDrop = config.evaluationProfile.banding.maxGradeDrop;
+    const banding = {
+      status: allowedMaxGradeDrop === null
+        ? "NOT_EVALUATED"
+        : maxGradeDrop > allowedMaxGradeDrop ? "FAIL" : "PASS",
+      maxGradeDrop,
+      allowedMaxGradeDrop,
+      transitions,
+    };
+
+    // Prescription against the gameplay band and its declared required grade (ratio AND sigma floor).
     const gameplay = bands[config.gameplayBandIndex ?? 1];
+    const targetGrade = gameplay?.requiredGrade ?? "B";
+    const targetThreshold = config.thresholds[targetGrade] ?? config.thresholds.B;
     let prescription = null;
-    if (gameplay && gameplay.grade > "B") {
+    if (gameplay && GRADE_RANK[gameplay.grade] > GRADE_RANK[targetGrade]) {
       const passes = (level) => {
         const ratio = preservationAt(level);
-        if (ratio < config.thresholds.B) return false;
+        if (ratio < targetThreshold) return false;
         if (typeof config.thresholds.sigmaFloorLinear === "number") {
           return ratio * baseStd >= config.thresholds.sigmaFloorLinear;
         }
@@ -489,10 +515,10 @@ function auditTexture(config, textureConfig) {
       const usageNeeded = usage.mPerTile * 2 ** (gameplay.effectiveMip - readableMip);
       const structureWavelengthM = texelWorldM * 2 ** (gameplay.effectiveMip + 1);
       prescription = {
-        targetGrade: "B",
+        targetGrade,
         raiseUsageToMPerTile: Number(usageNeeded.toFixed(1)),
         orAddStructureWavelengthAtLeastM: Number(structureWavelengthM.toFixed(2)),
-        note: `게임플레이 밴드(${gameplay.distanceM}m)에서 B 등급이 되려면 usage를 ${usageNeeded.toFixed(1)} m/타일로 올리거나, 파장 ≥ ${structureWavelengthM.toFixed(2)}m 대역에 구조(제2 레이어 등)를 추가하세요.`,
+        note: `게임플레이 밴드(${gameplay.distanceM}m)에서 ${targetGrade} 등급이 되려면 usage를 ${usageNeeded.toFixed(1)} m/타일로 올리거나, 파장 ≥ ${structureWavelengthM.toFixed(2)}m 대역에 구조(제2 레이어 등)를 추가하세요.`,
       };
     }
 
@@ -528,6 +554,7 @@ function auditTexture(config, textureConfig) {
       texelMm: Number((texelWorldM * 1000).toFixed(2)),
       contrastEnergy80PctBelowCm: Number(cumulative80.toFixed(1)),
       bands,
+      banding,
       prescription,
       ...(calibration ? { calibration } : {}),
     };
@@ -540,12 +567,189 @@ function auditTexture(config, textureConfig) {
   return {
     path: textureConfig.path,
     resolution: `${image.width}x${image.height}`,
+    resolutionCheck: resolutionCheck(image, config.evaluationProfile.resolutionPolicy),
     baseSigmaLinear: Number(baseStd.toFixed(4)),
     gpuBytesWithMips,
     seam: seamCheck(image, config.thresholds, textureConfig.expectedRepeats, textureConfig.coveredEdges),
     preservationByMipPct: preservationByMip.map((value) => Number((value * 100).toFixed(1))),
     usages,
+    repetition: {
+      status: "DECLARED_ONLY",
+      expectedRepeats: textureConfig.expectedRepeats ?? null,
+      policy: config.evaluationProfile.repetition,
+      note: "반복 노출은 texture-only 정적 감사에서 실제 UV/씬 프레임으로 판정하지 않습니다.",
+    },
   };
+}
+
+function asPositiveNumber(value, label, fallback) {
+  if (value === undefined || value === null) return fallback;
+  const number = Number(value);
+  if (!Number.isFinite(number) || number <= 0) throw new Error(`${label} must be a positive number.`);
+  return number;
+}
+
+function requiredPositiveNumber(value, label) {
+  const number = Number(value);
+  if (!Number.isFinite(number) || number <= 0) throw new Error(`${label} must be a positive number.`);
+  return number;
+}
+
+function asNonNegativeNumber(value, label, fallback) {
+  if (value === undefined || value === null) return fallback;
+  const number = Number(value);
+  if (!Number.isFinite(number) || number < 0) throw new Error(`${label} must be a non-negative number.`);
+  return number;
+}
+
+function normalizeEvaluationProfile(rawConfig) {
+  const source = rawConfig.evaluationProfile && typeof rawConfig.evaluationProfile === "object"
+    ? rawConfig.evaluationProfile
+    : {};
+  const legacyCamera = rawConfig.camera && typeof rawConfig.camera === "object" ? rawConfig.camera : {};
+  const sourceCamera = source.camera && typeof source.camera === "object" ? source.camera : {};
+  const sourceViewport = source.viewport && typeof source.viewport === "object" ? source.viewport : {};
+  const viewportWidthPx = asPositiveNumber(
+    sourceViewport.widthPx ?? sourceViewport.width ?? sourceCamera.viewportWidthPx ?? legacyCamera.viewportWidthPx,
+    "evaluationProfile.viewport.widthPx",
+    1600,
+  );
+  const viewportHeightPx = sourceViewport.heightPx ?? sourceViewport.height;
+  const viewport = {
+    widthPx: viewportWidthPx,
+    heightPx: viewportHeightPx === undefined ? null : asPositiveNumber(viewportHeightPx, "evaluationProfile.viewport.heightPx", null),
+    dpr: asPositiveNumber(sourceViewport.dpr, "evaluationProfile.viewport.dpr", 1),
+  };
+  const camera = {
+    fovDeg: asPositiveNumber(sourceCamera.fovDeg ?? legacyCamera.fovDeg, "evaluationProfile.camera.fovDeg", 52),
+    viewportWidthPx,
+  };
+  const legacyDistances = Array.isArray(rawConfig.distanceBandsM) ? rawConfig.distanceBandsM : [5, 15, 30];
+  const sourceBands = Array.isArray(source.distanceBands) && source.distanceBands.length
+    ? source.distanceBands
+    : legacyDistances.map((distance, index) => ({
+      id: `distance-${distance}m`,
+      label: index === (rawConfig.gameplayBandIndex ?? 1) ? "gameplay" : `distance ${distance}m`,
+      distanceM: distance,
+      ...(index === (rawConfig.gameplayBandIndex ?? 1) ? { requiredGrade: "B" } : {}),
+    }));
+  const distanceBands = sourceBands.map((band, index) => {
+    if (!band || typeof band !== "object") throw new Error(`evaluationProfile.distanceBands[${index}] must be an object.`);
+    const distanceM = asPositiveNumber(band.distanceM, `evaluationProfile.distanceBands[${index}].distanceM`, null);
+    const id = typeof band.id === "string" && band.id.trim() ? band.id.trim() : `distance-${distanceM}m`;
+    const requiredGrade = band.requiredGrade === undefined || band.requiredGrade === null ? null : band.requiredGrade;
+    if (requiredGrade !== null && !Object.hasOwn(GRADE_RANK, requiredGrade)) {
+      throw new Error(`evaluationProfile.distanceBands[${index}].requiredGrade must be A, B, C, or D.`);
+    }
+    return {
+      id,
+      ...(typeof band.label === "string" && band.label.trim() ? { label: band.label.trim() } : {}),
+      distanceM,
+      ...(requiredGrade ? { requiredGrade } : {}),
+    };
+  });
+  if (new Set(distanceBands.map((band) => band.id)).size !== distanceBands.length) {
+    throw new Error("evaluationProfile.distanceBands ids must be unique.");
+  }
+  const gameplayBandId = typeof source.gameplayBandId === "string"
+    ? source.gameplayBandId
+    : distanceBands[rawConfig.gameplayBandIndex ?? 1]?.id ?? distanceBands[0].id;
+  const gameplayBandIndex = distanceBands.findIndex((band) => band.id === gameplayBandId);
+  if (gameplayBandIndex < 0) throw new Error(`evaluationProfile.gameplayBandId is not in distanceBands: ${gameplayBandId}`);
+
+  const resolutionSource = source.resolutionPolicy && typeof source.resolutionPolicy === "object"
+    ? source.resolutionPolicy
+    : {};
+  const resolutionMode = resolutionSource.mode ?? "reported";
+  if (!["reported", "minimum"].includes(resolutionMode)) {
+    throw new Error("evaluationProfile.resolutionPolicy.mode must be reported or minimum.");
+  }
+  const resolutionPolicy = {
+    mode: resolutionMode,
+    minWidthPx: resolutionMode === "minimum"
+      ? requiredPositiveNumber(resolutionSource.minWidthPx, "evaluationProfile.resolutionPolicy.minWidthPx")
+      : null,
+    minHeightPx: resolutionMode === "minimum"
+      ? requiredPositiveNumber(resolutionSource.minHeightPx, "evaluationProfile.resolutionPolicy.minHeightPx")
+      : null,
+  };
+  const repetitionSource = source.repetition && typeof source.repetition === "object" ? source.repetition : {};
+  const repetitionRepeats = repetitionSource.maxExpectedRepeats && typeof repetitionSource.maxExpectedRepeats === "object"
+    ? {
+      horizontal: requiredPositiveNumber(repetitionSource.maxExpectedRepeats.horizontal, "evaluationProfile.repetition.maxExpectedRepeats.horizontal"),
+      vertical: requiredPositiveNumber(repetitionSource.maxExpectedRepeats.vertical, "evaluationProfile.repetition.maxExpectedRepeats.vertical"),
+    }
+    : null;
+  const bandingSource = source.banding && typeof source.banding === "object" ? source.banding : {};
+  const maxGradeDrop = asNonNegativeNumber(bandingSource.maxGradeDrop, "evaluationProfile.banding.maxGradeDrop", null);
+  return {
+    id: typeof source.id === "string" && source.id.trim() ? source.id.trim() : "legacy-distance-bands-v1",
+    renderer: typeof source.renderer === "string" && source.renderer.trim() ? source.renderer.trim() : "unspecified",
+    viewport,
+    camera,
+    distanceBands,
+    gameplayBandId,
+    gameplayBandIndex,
+    resolutionPolicy,
+    repetition: {
+      mode: typeof repetitionSource.mode === "string" && repetitionSource.mode.trim() ? repetitionSource.mode.trim() : "declared-only",
+      status: "DECLARED_ONLY",
+      maxExpectedRepeats: repetitionRepeats,
+    },
+    banding: {
+      status: maxGradeDrop === null ? "NOT_EVALUATED" : "MEASURED_FROM_TEXTURE_BANDS",
+      maxGradeDrop,
+    },
+  };
+}
+
+function resolutionCheck(image, policy) {
+  if (policy.mode !== "minimum") {
+    return { status: "REPORTED", widthPx: image.width, heightPx: image.height };
+  }
+  const widthPass = image.width >= policy.minWidthPx;
+  const heightPass = image.height >= policy.minHeightPx;
+  return {
+    status: widthPass && heightPass ? "PASS" : "FAIL",
+    widthPx: image.width,
+    heightPx: image.height,
+    minWidthPx: policy.minWidthPx,
+    minHeightPx: policy.minHeightPx,
+  };
+}
+
+function collectStrictViolations(report, strictChecks) {
+  const violations = [];
+  for (const texture of report.textures ?? []) {
+    if (strictChecks.has("seam") && texture.seam?.exposure === "EXPOSED") {
+      violations.push(`${texture.path}: VISIBLE-SEAM 노출 (${texture.seam.exposedAxes.join(", ")})`);
+    }
+    if (strictChecks.has("readability")) {
+      for (const usage of texture.usages ?? []) {
+        const gameplay = usage.bands?.[report.evaluationProfile?.gameplayBandIndex ?? 1];
+        const requiredGrade = gameplay?.requiredGrade ?? "B";
+        if (gameplay && GRADE_RANK[gameplay.grade] > GRADE_RANK[requiredGrade]) {
+          violations.push(`${texture.path} @ ${usage.mPerTile} m/타일: 게임플레이 밴드 ${gameplay.grade} (required ${requiredGrade})`);
+        }
+      }
+    }
+    if (strictChecks.has("banding")) {
+      for (const usage of texture.usages ?? []) {
+        if (usage.banding?.status === "FAIL") violations.push(`${texture.path} @ ${usage.label ?? usage.mPerTile}: banding grade drop ${usage.banding.maxGradeDrop}`);
+      }
+    }
+    if (strictChecks.has("resolution") && texture.resolutionCheck?.status === "FAIL") {
+      violations.push(`${texture.path}: source resolution below evaluation profile minimum`);
+    }
+  }
+  if (
+    strictChecks.has("memory") &&
+    typeof report.textureSet?.budgetBytes === "number" &&
+    report.textureSet.totalGpuBytesWithMips > report.textureSet.budgetBytes
+  ) {
+    violations.push(`GPU 메모리 예산 초과: ${report.textureSet.totalGpuMB}MB`);
+  }
+  return violations;
 }
 
 // ----------------------------------------------------------------------------------- main
@@ -560,6 +764,10 @@ const outPath = outIndex >= 0 ? process.argv[outIndex + 1] : null;
 
 const config = JSON.parse(readFileSync(resolve(configPath), "utf8"));
 config.baseDir = config.baseDir ? resolve(dirname(resolve(configPath)), config.baseDir) : dirname(resolve(configPath));
+config.evaluationProfile = normalizeEvaluationProfile(config);
+config.camera = config.evaluationProfile.camera;
+config.distanceBandsM = config.evaluationProfile.distanceBands.map((band) => band.distanceM);
+config.gameplayBandIndex = config.evaluationProfile.gameplayBandIndex;
 
 // Calibration override without touching the config file: --sigma-floor <linear sigma>.
 const sigmaFloorIndex = process.argv.indexOf("--sigma-floor");
@@ -570,6 +778,9 @@ if (process.argv.includes("--calibrate")) config.debugCalibration = true;
 
 const report = {
   generatedBy: "clunk texture-audit prototype v0.1",
+  measurementScope: "texture-only",
+  visualRuntime: "NOT_EVALUATED",
+  evaluationProfile: config.evaluationProfile,
   assumptions: {
     camera: config.camera,
     distanceBandsM: config.distanceBandsM,
@@ -634,27 +845,7 @@ if (process.argv.includes("--strict")) {
   // only) + memory, while readability D stays informational for layers that are mitigated
   // by design (e.g. a second broad layer). Default is all three, conservative.
   const strictChecks = new Set(config.strictChecks ?? ["seam", "memory", "readability"]);
-  const violations = [];
-  for (const texture of report.textures) {
-    if (strictChecks.has("seam") && texture.seam.exposure === "EXPOSED") {
-      violations.push(`${texture.path}: VISIBLE-SEAM 노출 (${texture.seam.exposedAxes.join(", ")})`);
-    }
-    if (strictChecks.has("readability")) {
-      for (const usage of texture.usages) {
-        const gameplay = usage.bands[config.gameplayBandIndex ?? 1];
-        if (gameplay && gameplay.grade === "D") {
-          violations.push(`${texture.path} @ ${usage.mPerTile} m/타일: 게임플레이 밴드 D`);
-        }
-      }
-    }
-  }
-  if (
-    strictChecks.has("memory") &&
-    report.textureSet.budgetBytes &&
-    report.textureSet.totalGpuBytesWithMips > report.textureSet.budgetBytes
-  ) {
-    violations.push(`GPU 메모리 예산 초과: ${report.textureSet.totalGpuMB}MB`);
-  }
+  const violations = collectStrictViolations(report, strictChecks);
   if (violations.length) {
     process.stdout.write(`\n[texture-audit] STRICT 위반 ${violations.length}건:\n`);
     for (const violation of violations) process.stdout.write(`  - ${violation}\n`);

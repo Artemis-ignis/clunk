@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import {
+  collaborationReadinessLevel,
   normalizeFrameManifest,
   resolveCollaborationStatus,
   type CollaborationStatus,
@@ -235,7 +236,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
                 key={thread.id}
                 onClick={() => void openThread(thread.id)}
               >
-                <span className={`collab-readiness collab-readiness-${slug(thread.status.readiness)}`}>{thread.status.readiness}</span>
+                <span className={`collab-readiness collab-readiness-${slug(thread.status.readiness)}`}>{collaborationLabel(thread.status)}</span>
                 <strong>{thread.subject}</strong>
                 <small>{thread.targetProfileId} · {shortHash(thread.inputHash)}{thread.evidence && " · " + evidenceLabel(thread.evidence)}</small>
               </button>
@@ -263,12 +264,12 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
                 <label>rule set<input value={effectiveRuleSetId} onChange={(event) => setRuleSetId(event.target.value)} /></label>
               </div>
               <div className="collaboration-form-grid collaboration-form-grid-selects">
-                <label>Clunk 감사<select value={assetAudit} onChange={(event) => setAssetAudit(event.target.value as typeof assetAudit)}><option value="PASS">PASS · 100 READY</option><option value="FAIL">FAIL</option><option value="BLOCKED">BLOCKED</option></select></label>
+                <label>Clunk 감사<select value={assetAudit} onChange={(event) => setAssetAudit(event.target.value as typeof assetAudit)}><option value="PASS">PASS · static policy</option><option value="FAIL">FAIL</option><option value="BLOCKED">BLOCKED</option></select></label>
                 <label>시각·런타임 검토<select value={visualRuntime} onChange={(event) => setVisualRuntime(event.target.value as typeof visualRuntime)}><option value="GAP">GAP · 후속 작업 필요</option><option value="NOT_RUN">NOT_RUN</option><option value="PASS">PASS</option><option value="BLOCKED">BLOCKED</option></select></label>
                 <label>evidence write mode<select value={evidenceMode} onChange={(event) => setEvidenceMode(event.target.value as typeof evidenceMode)}><option value="replace">replace · full snapshot</option><option value="append">append · keep existing IDs</option></select></label>
               </div>
               <div className="collaboration-form-foot">
-                <span>현재 상태: <strong className={`collab-readiness collab-readiness-${slug(collaborationStatus({ assetAudit, visualRuntime, profileId: effectiveProfileId, baseProfileId, ruleSetId: effectiveRuleSetId, inputHash: effectiveInputHash }).readiness)}`}>{collaborationStatus({ assetAudit, visualRuntime, profileId: effectiveProfileId, baseProfileId, ruleSetId: effectiveRuleSetId, inputHash: effectiveInputHash }).readiness}</strong></span>
+                <span>현재 상태: <strong className={`collab-readiness collab-readiness-${slug(collaborationStatus({ assetAudit, visualRuntime, profileId: effectiveProfileId, baseProfileId, ruleSetId: effectiveRuleSetId, inputHash: effectiveInputHash }).readiness)}`}>{collaborationLabel(collaborationStatus({ assetAudit, visualRuntime, profileId: effectiveProfileId, baseProfileId, ruleSetId: effectiveRuleSetId, inputHash: effectiveInputHash }))}</strong></span>
                 <button type="submit" className="button button-primary button-sm" disabled={busy || loadState === "checking"}>{busy ? "저장 중..." : "스레드와 메모 저장"}<Icon name="arrowUpRight" size={14} /></button>
               </div>
             </form>
@@ -280,7 +281,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
         <div className="collaboration-detail">
           <div className="collaboration-detail-head">
             <div><span className="mono-label">SELECTED THREAD</span><strong>{selected.subject}</strong></div>
-            <span className={`collab-readiness collab-readiness-${slug(selected.status.readiness)}`}>{selected.status.readiness}</span>
+            <span className={`collab-readiness collab-readiness-${slug(selected.status.readiness)}`}>{collaborationLabel(selected.status)}</span>
           </div>
           {selected.evidence ? <EvidenceCard evidence={selected.evidence} /> : null}
           <div className="collaboration-messages">
@@ -300,7 +301,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
       ) : null}
 
       {error ? <p className="collaboration-error" role="alert"><Icon name="triangleAlert" size={15} />{error}</p> : null}
-      <p className="collaboration-contract-note"><code>POST /api/collaboration/threads</code> · <code>evidence: clunk.frame-manifest.v1</code> · 인증된 workspace 범위 · inputHash 고정 · assetAudit와 visualRuntime/playerFacing 분리 · public HTTP MCP는 아직 제공하지 않습니다.</p>
+      <p className="collaboration-contract-note"><code>POST /api/collaboration/threads</code> · <code>GET/POST /api/collaboration/threads/:threadId/evidence</code> · <code>evidence: clunk.frame-manifest.v1</code> · 인증된 workspace 범위 · inputHash 고정 · assetAudit와 visualRuntime/playerFacing 분리 · public HTTP MCP는 아직 제공하지 않습니다.</p>
     </section>
   );
 }
@@ -332,6 +333,9 @@ function parseRunContext(run: RunContext): { inputHash: string; profileId?: stri
 function validHash(value: string): boolean { return /^[a-f0-9]{64}$/i.test(value); }
 function shortHash(value: string): string { return `${value.slice(0, 8)}…${value.slice(-6)}`; }
 function slug(value: string): string { return value.toLowerCase().replace(/_/g, "-"); }
+function collaborationLabel(status: CollaborationStatus): string {
+  return `${collaborationReadinessLevel(status).toUpperCase()} · ${status.readiness}`;
+}
 
 const FRAME_MANIFEST_SCHEMA_TEMPLATE = `// SCHEMA TEMPLATE · NOT STORED HF-M94 EVIDENCE · replace every <...>
 {
@@ -340,11 +344,11 @@ const FRAME_MANIFEST_SCHEMA_TEMPLATE = `// SCHEMA TEMPLATE · NOT STORED HF-M94 
   "sourceProject": "Harvest Frontier",
   "sourceCommit": "<SOURCE_COMMIT>",
   "reviewStatus": "NOT_EVALUATED",
-  "frames": [{ "id": "<FRAME_ID>", "path": "<FRAME_PATH>", "sha256": "<64_HEX_SHA256>", "bytes": 1, "renderer": "<RENDERER>", "hud": "off", "viewport": { "width": 1920, "height": 1080 }, "console": { "errors": 0, "warnings": 0 } }],
+  "frames": [{ "id": "<FRAME_ID>", "path": "<FRAME_PATH>", "sha256": "<64_HEX_SHA256>", "bytes": 1, "renderer": "<RENDERER>", "hud": "off", "viewport": { "width": 1920, "height": 1080 }, "distanceBandId": "gameplay", "distanceM": 15, "console": { "errors": 0, "warnings": 0 } }],
   "runtimeChecks": [{ "id": "<RUNTIME_CHECK_ID>", "kind": "dialogue-camera", "status": "PASS", "renderer": "<RENDERER>", "evidencePath": "<RUNTIME_EVIDENCE_JSON>", "frameIds": ["<FRAME_ID>"], "checks": { "poseFocusId": "<NPC_ID>", "poseFocusOnScreen": true, "poseFocusCoverage": 0.01517, "poseFocusLensInside": false } }],
   "sceneGaps": [{ "id": "<SCENE_GAP_ID>", "severity": "major", "category": "<CATEGORY>", "note": "<OBSERVATION>", "frameIds": ["<FRAME_ID>"] }],
   "prescriptions": [{ "id": "<PRESCRIPTION_ID>", "kind": "<KIND>", "status": "NON_BLOCKING", "priority": "P1", "observation": "<OBSERVATION>", "action": "<ACTION>", "frameIds": ["<FRAME_ID>"] }],
-  "assetInspections": [{ "id": "<ASSET_INSPECTION_ID>", "sourcePath": "<SOURCE_ASSET_PATH>", "inputHash": "<64_HEX_ASSET_HASH>", "assetKind": "3d-model", "targetProfileId": "<TARGET_PROFILE_ID>", "inspectionRunId": "<INSPECTION_RUN_ID>", "evidenceStatus": "ENVIRONMENT_UNAVAILABLE", "productionReady": false, "frameIds": ["<FRAME_ID>"], "qualityWarningIds": ["<QUALITY_WARNING_ID>"], "numericContract": { "status": "PASS", "valid": true, "score": 100, "threshold": 90, "hardBlockerCount": 0, "observations": { "drawCallCount": 88 } } }]
+  "assetInspections": [{ "id": "<ASSET_INSPECTION_ID>", "sourcePath": "<SOURCE_ASSET_PATH>", "inputHash": "<64_HEX_ASSET_HASH>", "assetKind": "3d-model", "targetProfileId": "<TARGET_PROFILE_ID>", "inspectionRunId": "<INSPECTION_RUN_ID>", "evidenceStatus": "ENVIRONMENT_UNAVAILABLE", "productionReady": false, "origin": "file", "frameIds": ["<FRAME_ID>"], "qualityWarningIds": ["<QUALITY_WARNING_ID>"], "numericContract": { "status": "PASS", "valid": true, "score": 100, "threshold": 90, "hardBlockerCount": 0, "observations": { "drawCallCount": 88 } } }]
 }`;
 
 function parseEvidenceDraft(value: string): FrameManifest | undefined {
@@ -378,7 +382,7 @@ function EvidenceCard({ evidence }: { evidence: StoredEvidence }) {
     <div className="collaboration-evidence">
       <div className="collaboration-evidence-head">
         <div><span className="mono-label">FRAME EVIDENCE · {evidence.schema}</span><strong>{evidence.runId}</strong></div>
-        <span className="collab-readiness collab-readiness-scene-gap">PLAYER_FACING NOT_EVALUATED</span>
+        <span className="collab-readiness collab-readiness-scene-gap">VISUAL RUNTIME {evidence.visualRuntime} · PLAYER_FACING {evidence.playerFacing}</span>
       </div>
       <div className="collaboration-verdict-grid" aria-label="증거 판정 분리">
         <span className="collaboration-verdict collaboration-verdict-static">
@@ -408,7 +412,7 @@ function EvidenceCard({ evidence }: { evidence: StoredEvidence }) {
         <span><small>scene gaps</small><strong>{evidence.sceneGaps.length}</strong></span>
       </div>
       <div className="collaboration-evidence-frames">
-        {evidence.frames.map((frame) => <span key={frame.id}><b>{frame.id}</b><small>{frame.hud} HUD · {frame.renderer ?? "renderer unknown"} · {frame.shippedPath === true ? "shipped path" : "path unverified"} · console {frame.console ? `${frame.console.errors}/${frame.console.warnings}` : "unknown"}{frame.frameSourceCommit ? ` · frame ${frame.frameSourceCommit}` : ""}{frame.bytes ? ` · ${frame.bytes.toLocaleString()} B` : ""} · {frame.path}</small></span>)}
+        {evidence.frames.map((frame) => <span key={frame.id}><b>{frame.id}</b><small>{frame.hud} HUD · {frame.renderer ?? "renderer unknown"} · {frame.shippedPath === true ? "shipped path" : "path unverified"}{frame.distanceBandId ? ` · band ${frame.distanceBandId}${frame.distanceM !== undefined ? ` @ ${frame.distanceM}m` : ""}` : ""} · console {frame.console ? `${frame.console.errors}/${frame.console.warnings}` : "unknown"}{frame.frameSourceCommit ? ` · frame ${frame.frameSourceCommit}` : ""}{frame.bytes ? ` · ${frame.bytes.toLocaleString()} B` : ""} · {frame.path}</small></span>)}
       </div>
       {runtimeChecks.length ? (
         <div className="collaboration-runtime-checks">
@@ -432,6 +436,7 @@ function EvidenceCard({ evidence }: { evidence: StoredEvidence }) {
             <article key={inspection.id}>
               <div><b>{inspection.assetKind}</b><strong>{inspection.evidenceStatus}</strong><em>{inspection.productionReady ? "production ready" : "not player-facing proof"}</em></div>
               <p>{inspection.sourcePath} · {shortHash(inspection.inputHash)} · {inspection.targetProfileId}</p>
+              <small>origin · {inspection.origin}{inspection.provenance ? ` · provenance ${inspection.provenance.sourceRef}${inspection.provenance.sourceCommit ? ` @ ${inspection.provenance.sourceCommit}` : ""}` : ""}</small>
               {inspection.numericContract ? <small>numeric contract · {inspection.numericContract.status}{inspection.numericContract.score !== undefined ? ` · score ${inspection.numericContract.score}/${inspection.numericContract.threshold ?? "?"}` : ""}{inspection.numericContract.hardBlockerCount !== undefined ? ` · hard blockers ${inspection.numericContract.hardBlockerCount}` : ""}{inspection.numericContract.observations ? ` · ${Object.entries(inspection.numericContract.observations).map(([key, value]) => `${key}=${String(value)}`).join(" · ")}` : ""}</small> : null}
               {inspection.qualityWarningIds?.length ? <small>qualityWarnings · {inspection.qualityWarningIds.join(", ")}</small> : null}
             </article>

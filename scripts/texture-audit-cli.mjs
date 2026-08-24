@@ -9,6 +9,7 @@ const TOOL_VERSION = "clunk-texture-audit/1.0.0";
 const SCHEMA = "clunk.texture-audit.v1";
 const EXIT = { pass: 0, policy: 2, input: 3, unavailable: 4 };
 const AUDITOR = resolve(dirname(fileURLToPath(import.meta.url)), "texture-audit.mjs");
+const GRADE_RANK = { A: 0, B: 1, C: 2, D: 3 };
 
 function sha256(bytes) {
   return createHash("sha256").update(bytes).digest("hex");
@@ -61,6 +62,7 @@ function loadConfig(configArgument) {
   if (!config || typeof config !== "object" || !Array.isArray(config.textures) || config.textures.length === 0) {
     throw new InputError("Texture audit config must contain a non-empty textures array.");
   }
+  validateEvaluationProfile(config);
   const baseDir = config.baseDir ? resolve(dirname(configPath), config.baseDir) : dirname(configPath);
   const inputHash = createHash("sha256");
   const seen = new Set();
@@ -91,9 +93,46 @@ function loadConfig(configArgument) {
   };
 }
 
+function validateEvaluationProfile(config) {
+  const profile = config.evaluationProfile;
+  if (profile === undefined) return;
+  if (!profile || typeof profile !== "object") throw new InputError("evaluationProfile must be an object.");
+  if (profile.viewport !== undefined && (!profile.viewport || typeof profile.viewport !== "object")) {
+    throw new InputError("evaluationProfile.viewport must be an object.");
+  }
+  if (profile.distanceBands !== undefined) {
+    if (!Array.isArray(profile.distanceBands) || profile.distanceBands.length === 0) {
+      throw new InputError("evaluationProfile.distanceBands must be a non-empty array.");
+    }
+    const ids = new Set();
+    for (const [index, band] of profile.distanceBands.entries()) {
+      if (!band || typeof band !== "object" || typeof band.distanceM !== "number" || band.distanceM <= 0) {
+        throw new InputError(`evaluationProfile.distanceBands[${index}].distanceM must be positive.`);
+      }
+      if (band.id !== undefined) {
+        if (typeof band.id !== "string" || !band.id.trim() || ids.has(band.id)) {
+          throw new InputError(`evaluationProfile.distanceBands[${index}].id must be unique text.`);
+        }
+        ids.add(band.id);
+      }
+      if (band.requiredGrade !== undefined && !["A", "B", "C", "D"].includes(band.requiredGrade)) {
+        throw new InputError(`evaluationProfile.distanceBands[${index}].requiredGrade must be A, B, C, or D.`);
+      }
+    }
+  }
+  const resolution = profile.resolutionPolicy;
+  if (resolution !== undefined && (!resolution || typeof resolution !== "object" || !["reported", "minimum"].includes(resolution.mode ?? "reported"))) {
+    throw new InputError("evaluationProfile.resolutionPolicy.mode must be reported or minimum.");
+  }
+  if (resolution?.mode === "minimum" && (!["minWidthPx", "minHeightPx"].every((key) => Number.isFinite(resolution[key]) && resolution[key] > 0))) {
+    throw new InputError("evaluationProfile.resolutionPolicy minimum requires positive minWidthPx and minHeightPx.");
+  }
+  if (profile.banding?.maxGradeDrop !== undefined && (!Number.isFinite(profile.banding.maxGradeDrop) || profile.banding.maxGradeDrop < 0)) {
+    throw new InputError("evaluationProfile.banding.maxGradeDrop must be non-negative.");
+  }
+}
+
 function collectViolations(report) {
-  const config = report.assumptions ?? {};
-  const thresholds = config.thresholds ?? {};
   const strictChecks = new Set(report.strictChecks ?? []);
   const violations = [];
   for (const texture of report.textures ?? []) {
@@ -101,8 +140,23 @@ function collectViolations(report) {
       violations.push(`${texture.path}: VISIBLE-SEAM 노출`);
     }
     if (strictChecks.has("readability")) {
-      const gameplayBand = texture.usages?.[0]?.bands?.[report.gameplayBandIndex ?? 1];
-      if (gameplayBand?.grade === "D") violations.push(`${texture.path}: 게임플레이 밴드 D`);
+      for (const usage of texture.usages ?? []) {
+        const gameplayBand = usage.bands?.[report.evaluationProfile?.gameplayBandIndex ?? report.gameplayBandIndex ?? 1];
+        const requiredGrade = gameplayBand?.requiredGrade ?? "B";
+        if (gameplayBand && GRADE_RANK[gameplayBand.grade] > GRADE_RANK[requiredGrade]) {
+          violations.push(`${texture.path} @ ${usage.mPerTile} m/타일: 게임플레이 밴드 ${gameplayBand.grade} (required ${requiredGrade})`);
+        }
+      }
+    }
+    if (strictChecks.has("banding")) {
+      for (const usage of texture.usages ?? []) {
+        if (usage.banding?.status === "FAIL") {
+          violations.push(`${texture.path} @ ${usage.label ?? usage.mPerTile}: banding grade drop ${usage.banding.maxGradeDrop}`);
+        }
+      }
+    }
+    if (strictChecks.has("resolution") && texture.resolutionCheck?.status === "FAIL") {
+      violations.push(`${texture.path}: source resolution below evaluation profile minimum`);
     }
   }
   if (
@@ -112,7 +166,6 @@ function collectViolations(report) {
   ) {
     violations.push(`GPU 메모리 예산 초과: ${report.textureSet.totalGpuMB}MB`);
   }
-  void thresholds;
   return violations;
 }
 
@@ -120,7 +173,6 @@ function buildEnvelope(report, input) {
   const violations = collectViolations({
     ...report,
     strictChecks: input.config.strictChecks ?? ["seam", "memory", "readability"],
-    gameplayBandIndex: input.config.gameplayBandIndex ?? 1,
   });
   const status = violations.length ? (input.strict ? "FAIL" : "WARN") : "PASS";
   return {
@@ -129,6 +181,7 @@ function buildEnvelope(report, input) {
     status,
     inputHash: input.inputHash,
     configHash: input.configHash,
+    strictChecks: input.config.strictChecks ?? ["seam", "memory", "readability"],
     violations,
     ...report,
     generatedBy: TOOL_VERSION,

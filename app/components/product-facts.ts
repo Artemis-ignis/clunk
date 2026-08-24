@@ -237,6 +237,9 @@ export const TEXTURE_AUDIT_CONTRACT = {
   policyExit: 2,
   inputExit: 3,
   unavailableExit: 4,
+  profile: "evaluationProfile: id · renderer · viewport · camera · distanceBands[id,distanceM,requiredGrade] · resolutionPolicy · repetition · banding",
+  measurement: "measurementScope: texture-only · visualRuntime: NOT_EVALUATED · repetition.status: DECLARED_ONLY; banding is derived from texture bands only",
+  strictClasses: "seam · memory · readability · optional banding · optional resolution",
 } as const;
 
 export const UI_READABILITY_CONTRACT = {
@@ -258,6 +261,7 @@ export const ASSET_INSPECTION_CONTRACT = {
   unavailable: "ENVIRONMENT_UNAVAILABLE · productionReady false",
   persistence: "raw bytes are not persisted; submit returned evidence in collaboration evidence",
   cli: "npm.cmd run asset:inspect -- --path <asset> --target-profile <profile> --format json",
+  visualLink: "POST /api/collaboration/threads/:threadId/evidence · evidenceMode append|replace",
 } as const;
 
 export const GENERATION_CONTRACT = {
@@ -334,10 +338,11 @@ export const HF_TEXTURE_SCENE_GAPS = [
 
 export const FRAME_REVIEW_CONTRACT = {
   minimumCaptureSet: "no-HUD shipped baseline + dealer approach/counter + dialogue NPC/camera + distant terrain/vegetation/sign frames",
-  requiredMetadata: "runId, sourceCommit, frameSourceCommit, frame id/path/sha256/bytes, renderer, viewport, shippedPath, hud, console, sceneGaps.frameIds",
+  requiredMetadata: "runId, sourceCommit, frameSourceCommit, frame id/path/sha256/bytes, renderer, viewport, distanceBandId/distanceM when applicable, shippedPath, hud, console, sceneGaps.frameIds",
   reviewableWhen: "all submitted frames normalize and their hashes, viewport, renderer, shipped path, and console metadata are present",
   closeWhen: "a human review explicitly clears every linked scene gap in a fresh shipped-path capture; numeric/camera PASS alone never closes it",
   defaultBoundary: "reviewStatus: NOT_EVALUATED · visualRuntime: GAP · playerFacing: NOT_EVALUATED",
+  presentation: "static PASS + visual pending/GAP = CONDITIONAL · human-cleared runtime PASS = READY · hard blocker = BLOCKED",
 } as const;
 
 export const COLLABORATION_CONTRACT = {
@@ -351,7 +356,10 @@ export const COLLABORATION_CONTRACT = {
   evidenceReview: "reviewStatus: NOT_EVALUATED",
   evidenceDefaults: "reviewStatus: NOT_EVALUATED · visualRuntime: GAP · playerFacing: NOT_EVALUATED",
   evidenceWriteMode: "evidenceMode: append (stable-id upsert) | replace (full snapshot)",
+  evidenceOnlyApi: "POST /api/collaboration/threads/:threadId/evidence · evidence-only merge, same auth/workspace boundary",
+  evidenceReadApi: "GET /api/collaboration/threads/:threadId/evidence · normalized evidence only; no status promotion",
   linkedAssetInspection: "assetInspections[] links frameIds to sourcePath/inputHash/targetProfileId/inspectionRunId and optional numericContract observations; it never promotes playerFacing",
+  assetOrigin: "assetInspections[].origin is file, procedural, or runtime-generated; non-file origins require provenance.sourceRef and remain review evidence, not byte PASS",
   numericAssetContract: "numericContract.status/score/hardBlockerCount/drawCall observations are static contract evidence; visualRuntime and human review remain separate",
   runtimeChecks: "runtimeChecks[] stores numeric pose/on-screen/coverage/lens contracts; PASS never changes reviewStatus or visualRuntime",
   assetInspectionApi: ASSET_INSPECTION_CONTRACT.request,
@@ -361,19 +369,29 @@ export const COLLABORATION_CONTRACT = {
   statuses: ["ASSET_READY", "ASSET_CONDITIONAL", "SCENE_GAP", "PLAYER_FACING_READY", "BLOCKED"],
 } as const;
 
-export const HF_M98_RUNTIME_UPDATE = `// EXTERNAL HF HANDOFF · M98 WebGPU invariant evidence, not a player-facing approval
+export const HF_M98_RUNTIME_UPDATE = `// EXTERNAL HF HANDOFF · M98/M99 current integration, not a player-facing approval
 {
+  "sourceHead": "82459216c618a15f7588f57003e5f4f4ee99f40a",
+  "integrationCommit": "781a551",
   "runId": "HF-M98-invariant-set",
-  "renderer": "webgpu",
-  "results": { "passed": 6, "total": 8, "retries": 0, "console": "0/0 on passed flows" },
-  "passed": ["ui-layout ko", "ui-layout en", "mechanization", "tile-farming", "camera-clearance", "onboarding"],
-  "harnessFailures": ["save-durability: No tile can accept water (water 0)", "day-labour-save: 밭 텔레포트 click timeout"],
+  "renderer": "WebGL2/WebGPU",
+  "results": { "passed": 8, "total": 8, "retries": 0, "console": "0/0" },
+  "passed": ["ui-layout ko", "ui-layout en", "mechanization", "tile-farming", "camera-clearance", "onboarding", "save-durability", "day-labour-save"],
+  "cameraEvidence": [".logs/verification/M98/dialogue-camera-webgl2-r2.json", ".logs/verification/M98/dialogue-camera-webgpu-r1.json", ".logs/verification/M98/HF-M98-invariant-set.json"],
+  "runtimeGlbSummary": [
+    { "asset": "cultivator", "triangles": 16196, "drawCalls": 42, "textureCount": 0, "info": ["GEO-MISSING-NORMALS x6", "SCENE-NONUNIT-SCALE"] },
+    { "asset": "processing-line", "triangles": 24936, "drawCalls": 78, "textureCount": 0, "info": ["SCENE-EMPTY-NODES", "TEX-MISSING-UV0"] },
+    { "asset": "seeder", "triangles": 11318, "drawCalls": 75, "textureCount": 0, "info": ["SCENE-EMPTY-NODES", "TEX-MISSING-UV0"] },
+    { "asset": "tractor", "triangles": 30188, "drawCalls": 88, "textureCount": 0, "info": ["GEO-MISSING-NORMALS x7", "SCENE-NONUNIT-SCALE"] }
+  ],
+  "proceduralRuntimeAssets": { "crops": ["rice", "potato", "tomato", "strawberry", "grape", "cherry"], "standaloneGlb": false, "reviewOrigin": "procedural/runtime-generated" },
   "tractorNumericContract": {
     "status": "PASS", "valid": true, "score": 100, "threshold": 90, "hardBlockerCount": 0,
     "triangles": 30188, "meshes": 88, "drawCall": 88, "byteLength": 680412,
     "textureCount": 0, "missingUvPrimitiveCount": 88, "bounds": "±32767",
     "infoFindings": ["GEO-MISSING-NORMALS ×7", "SCENE-NONUNIT-SCALE ×181"]
   },
+  "assetAudit": { "runtimeGlb": "8/8 valid", "hardBlocker": 0, "optimize": "NOT_RUN" },
   "reviewStatus": "NOT_EVALUATED",
   "visualRuntime": "GAP",
   "playerFacing": "NOT_EVALUATED"

@@ -80,6 +80,7 @@ test("collaboration UI keeps capture integrity, asset audit, and human visual re
   assert.match(panel, /CAPTURE CONTRACT PASS/);
   assert.match(panel, /NUMERIC CONTRACT PASS/);
   assert.match(panel, /HUMAN VISUAL REVIEW/);
+  assert.match(panel, /VISUAL RUNTIME \{evidence\.visualRuntime\}/);
   assert.match(panel, /runtimeChecks/);
   assert.match(panel, /assetInspections/);
   assert.match(panel, /numericContract/);
@@ -92,4 +93,16 @@ test("collaboration UI keeps capture integrity, asset audit, and human visual re
   assert.match(facts, /dealer approach/);
   assert.match(facts, /frameSourceCommit/);
   assert.match(facts, /HF_M98_RUNTIME_UPDATE/);
+});
+
+test("dedicated evidence route keeps frame and asset review writes authenticated", async () => {
+  const route = await source("app/api/collaboration/threads/[threadId]/evidence/route.ts");
+  const helper = await source("app/api/_lib/collaboration.ts");
+  assert.match(route, /requireClunkContext/);
+  assert.match(route, /assertSameOrigin/);
+  assert.match(route, /evidence_json/);
+  assert.match(route, /mergeStoredEvidence/);
+  assert.match(route, /privateJson/);
+  assert.match(helper, /parseEvidenceOnlyPayload/);
+  assert.match(helper, /evidenceMode/);
 });

@@ -174,9 +174,9 @@ export function DashboardClient() {
         <Summary label="사용 가능 크레딧" value={credits === null ? "대기" : `${credits}`} detail="D1 데모 원장 · 성공 시에만 차감" tone="accent" />
         <Summary label="실제 검사" value={`${runs.length}`} detail={runs.length ? "이 워크스페이스에 저장됨" : "아직 실제 검사가 없음"} />
         <Summary
-          label="준비 완료"
+          label="정책 PASS"
           value={runs.length ? `${readyCount}/${runs.length}` : "0"}
-          detail={runs.length ? `finding 누적 ${findingCount}건` : "검사하면 채워집니다"}
+          detail={runs.length ? `finding 누적 ${findingCount}건 · 화면 검토 별도` : "검사하면 채워집니다"}
           tone={readyCount === runs.length && runs.length > 0 ? "success" : undefined}
         />
         <div className="summary-card summary-link">

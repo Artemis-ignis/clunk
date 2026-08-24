@@ -13,11 +13,14 @@ export const FRAME_MANIFEST_SCHEMA = "clunk.frame-manifest.v1" as const;
 
 export type FrameHudState = "on" | "off" | "unknown";
 export type FrameReviewStatus = "NOT_EVALUATED";
+export type FrameManifestVisualRuntimeStatus = "GAP";
+export type FrameManifestPlayerFacingStatus = "NOT_EVALUATED";
 export type NumericRuntimeCheckStatus = "NOT_RUN" | "PASS" | "FAIL" | "BLOCKED" | "UNAVAILABLE";
 export type SceneGapSeverity = "blocker" | "major" | "minor";
 export type EvidencePrescriptionPriority = "P1" | "P2" | "P3";
 export type FrameManifestWriteMode = "replace" | "append";
 export type FrameManifestAssetKind = "3d-model" | "2d-image" | "sprite-atlas" | "spine-project" | "animation-clip";
+export type FrameManifestAssetOrigin = "file" | "procedural" | "runtime-generated";
 export type FrameManifestAssetEvidenceStatus = "READY" | "CONDITIONAL" | "BLOCKED" | "UNSUPPORTED" | "ENVIRONMENT_UNAVAILABLE";
 export type FrameManifestNumericContractStatus = "PASS" | "FAIL" | "UNAVAILABLE";
 
@@ -40,6 +43,9 @@ export interface FrameManifestFrame {
   frameSourceCommit?: string;
   viewport?: FrameViewport;
   renderer?: string;
+  /** Stable id from the producer's camera/distance evaluation profile. */
+  distanceBandId?: string;
+  distanceM?: number;
   hud: FrameHudState;
   shippedPath?: boolean;
   console?: FrameConsoleSummary;
@@ -86,9 +92,19 @@ export interface FrameManifestAssetInspection {
   inspectionRunId: string;
   evidenceStatus: FrameManifestAssetEvidenceStatus;
   productionReady: boolean;
+  /** `file` is a byte artifact; other origins must carry source provenance. */
+  origin: FrameManifestAssetOrigin;
+  provenance?: FrameManifestAssetProvenance;
   frameIds?: readonly string[];
   qualityWarningIds?: readonly string[];
   numericContract?: FrameManifestNumericContract;
+}
+
+export interface FrameManifestAssetProvenance {
+  sourceRef: string;
+  sourceCommit?: string;
+  generator?: string;
+  recipeId?: string;
 }
 
 export type NumericContractValue = string | number | boolean;
@@ -109,6 +125,9 @@ export interface FrameManifest {
   sourceProject: string;
   sourceCommit: string;
   reviewStatus: FrameReviewStatus;
+  /** Evidence defaults to an open visual gap; status promotion belongs to the thread review contract. */
+  visualRuntime: FrameManifestVisualRuntimeStatus;
+  playerFacing: FrameManifestPlayerFacingStatus;
   frames: readonly FrameManifestFrame[];
   sceneGaps: readonly SceneGapNote[];
   prescriptions?: readonly EvidencePrescription[];
@@ -208,6 +227,9 @@ function normalizeFrame(value: unknown, index: number): FrameManifestFrame {
   if (record.bytes !== undefined) frame.bytes = positiveNumber(record, "bytes", label, true);
   const frameSourceCommit = optionalText(record, "frameSourceCommit", label, 160);
   if (frameSourceCommit) frame.frameSourceCommit = frameSourceCommit;
+  const distanceBandId = optionalText(record, "distanceBandId", label, 120);
+  if (distanceBandId) frame.distanceBandId = distanceBandId;
+  if (record.distanceM !== undefined) frame.distanceM = positiveNumber(record, "distanceM", label);
   if (record.viewport !== undefined) frame.viewport = normalizeViewport(record.viewport, `${label}.viewport`);
   const renderer = optionalText(record, "renderer", label, 120);
   if (renderer) frame.renderer = renderer;
@@ -337,6 +359,10 @@ function normalizeAssetInspection(value: unknown, index: number): FrameManifestA
   if (evidenceStatus !== "READY" && evidenceStatus !== "CONDITIONAL" && evidenceStatus !== "BLOCKED" && evidenceStatus !== "UNSUPPORTED" && evidenceStatus !== "ENVIRONMENT_UNAVAILABLE") {
     throw new Error(`${label}.evidenceStatus is not supported`);
   }
+  const origin = record.origin ?? "file";
+  if (origin !== "file" && origin !== "procedural" && origin !== "runtime-generated") {
+    throw new Error(`${label}.origin must be file, procedural, or runtime-generated`);
+  }
   const inputHash = requiredText(record, "inputHash", label, 64).toLowerCase();
   if (!/^[a-f0-9]{64}$/.test(inputHash)) throw new Error(`${label}.inputHash must be a 64-character hexadecimal hash`);
   const inspection: FrameManifestAssetInspection = {
@@ -348,14 +374,33 @@ function normalizeAssetInspection(value: unknown, index: number): FrameManifestA
     inspectionRunId: requiredText(record, "inspectionRunId", label, 160),
     evidenceStatus,
     productionReady: record.productionReady === true,
+    origin,
   };
   if (record.productionReady !== true && record.productionReady !== false) throw new Error(`${label}.productionReady must be a boolean`);
+  if (record.provenance !== undefined) inspection.provenance = normalizeAssetProvenance(record.provenance, `${label}.provenance`);
+  if (origin !== "file" && !inspection.provenance) {
+    throw new Error(`${label}.provenance.sourceRef is required for ${origin} assets`);
+  }
   const frameIds = normalizeStringArray(record.frameIds, `${label}.frameIds`, 32);
   if (frameIds) inspection.frameIds = frameIds;
   const qualityWarningIds = normalizeStringArray(record.qualityWarningIds, `${label}.qualityWarningIds`, 128);
   if (qualityWarningIds) inspection.qualityWarningIds = qualityWarningIds;
   if (record.numericContract !== undefined) inspection.numericContract = normalizeNumericContract(record.numericContract, `${label}.numericContract`);
   return inspection;
+}
+
+function normalizeAssetProvenance(value: unknown, label: string): FrameManifestAssetProvenance {
+  const record = asRecord(value, label);
+  const provenance: FrameManifestAssetProvenance = {
+    sourceRef: requiredText(record, "sourceRef", label, 1000),
+  };
+  const sourceCommit = optionalText(record, "sourceCommit", label, 160);
+  if (sourceCommit) provenance.sourceCommit = sourceCommit;
+  const generator = optionalText(record, "generator", label, 240);
+  if (generator) provenance.generator = generator;
+  const recipeId = optionalText(record, "recipeId", label, 160);
+  if (recipeId) provenance.recipeId = recipeId;
+  return provenance;
 }
 
 function normalizeNumericContract(value: unknown, label: string): FrameManifestNumericContract {
@@ -420,6 +465,12 @@ export function normalizeFrameManifest(value: unknown): FrameManifest {
   if (record.reviewStatus !== "NOT_EVALUATED") {
     throw new Error("manifest.reviewStatus must be NOT_EVALUATED");
   }
+  if (record.visualRuntime !== undefined && record.visualRuntime !== "GAP") {
+    throw new Error("manifest.visualRuntime must be GAP until human review is implemented");
+  }
+  if (record.playerFacing !== undefined && record.playerFacing !== "NOT_EVALUATED") {
+    throw new Error("manifest.playerFacing must be NOT_EVALUATED");
+  }
   if (!Array.isArray(record.frames) || record.frames.length === 0 || record.frames.length > 128) {
     throw new Error("manifest.frames must contain between 1 and 128 frames");
   }
@@ -475,6 +526,8 @@ export function normalizeFrameManifest(value: unknown): FrameManifest {
     sourceProject: requiredText(record, "sourceProject", "manifest", 160),
     sourceCommit: requiredText(record, "sourceCommit", "manifest", 160),
     reviewStatus: "NOT_EVALUATED",
+    visualRuntime: "GAP",
+    playerFacing: "NOT_EVALUATED",
     frames,
     sceneGaps,
     ...(prescriptions ? { prescriptions } : {}),
@@ -559,4 +612,16 @@ export function resolveCollaborationStatus(input: CollaborationStatusInput): Col
     inputHash: input.inputHash,
     stale: Boolean(input.previousInputHash && input.previousInputHash !== input.inputHash),
   };
+}
+
+/**
+ * Presentation-level label for product surfaces. Static PASS with an unreviewed or gapped
+ * player-facing surface is conditional; only an explicit runtime PASS is ready.
+ */
+export type CollaborationReadinessLevel = "ready" | "conditional" | "blocked";
+
+export function collaborationReadinessLevel(status: Pick<CollaborationStatus, "readiness">): CollaborationReadinessLevel {
+  if (status.readiness === "BLOCKED") return "blocked";
+  if (status.readiness === "PLAYER_FACING_READY") return "ready";
+  return "conditional";
 }

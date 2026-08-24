@@ -26,7 +26,20 @@ test("server-renders the Clunk landing page", async () => {
   assert.match(html, /clunk_passport/);
   assert.match(html, /clunk-game-ready-v1/);
   assert.match(html, /llms\.txt/);
+  assert.match(html, /STATIC POLICY SCORE/);
+  assert.match(html, /visualRuntime.*NOT_EVALUATED|NOT_EVALUATED.*visualRuntime/i);
+  assert.doesNotMatch(html, /GAME-READY SCORE/);
   assert.doesNotMatch(html, /Your site is taking shape|react-loading-skeleton|codex-preview/);
+});
+
+test("inspector explains that policy score is not player-facing approval", async () => {
+  const source = await import("node:fs/promises").then(({ readFile }) => readFile(
+    new URL("../app/components/ClunkInspector.tsx", import.meta.url),
+    "utf8",
+  ));
+  assert.match(source, /정적 정책 점수/);
+  assert.match(source, /player-facing/);
+  assert.match(source, /NOT_EVALUATED/);
 });
 
 test("server-renders public product routes", async () => {

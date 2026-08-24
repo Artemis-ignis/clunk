@@ -185,7 +185,7 @@ export default function AgentsPage() {
               <code>{TEXTURE_AUDIT_CONTRACT.schema}</code>
               <p><strong>{TEXTURE_AUDIT_CONTRACT.passExit}</strong> PASS · <strong>{TEXTURE_AUDIT_CONTRACT.policyExit}</strong> strict 위반 · <strong>{TEXTURE_AUDIT_CONTRACT.unavailableExit}</strong> 미지원</p>
               <pre><code>{TEXTURE_AUDIT_CONTRACT.command}</code></pre>
-              <small>GPU 밉 메모리·심리스·판독성 측정. 엔진 import/runtime 또는 플레이어 화면 PASS가 아닙니다.</small>
+              <small>GPU 밉 메모리·심리스·거리 band·밴딩 전이·판독성 측정. evaluationProfile의 renderer/viewport/distanceBands/requiredGrade/resolutionPolicy를 기록하지만 엔진 import/runtime 또는 플레이어 화면 PASS가 아닙니다.</small>
             </article>
             <article className="agents-ci-card agents-ci-card-pass">
               <span className="mono-label">SHIPPED · UI RASTER</span>
@@ -284,6 +284,8 @@ export default function AgentsPage() {
               <code>{COLLABORATION_CONTRACT.evidenceWriteMode}</code>로 기존 gap/prescription 보존 여부를 명시합니다.
               현재 실제 M94 저장값은 <code>{COLLABORATION_CONTRACT.storedM94}</code>입니다. 공개 HTTP MCP는 여전히 제공하지 않습니다.
               원본 에셋을 frame과 묶을 때는 <code>{COLLABORATION_CONTRACT.linkedAssetInspection}</code>을 사용하며,
+               frame manifest만 갱신할 때는 <code>{COLLABORATION_CONTRACT.evidenceOnlyApi}</code>를 사용합니다. procedural/runtime-generated
+              작물·식생·NPC는 <code>origin</code>과 <code>provenance.sourceRef</code>를 함께 기록하지만 별도 GLB 바이트 PASS로 만들지 않습니다.
               바이트 검사는 <code>{ASSET_INSPECTION_CONTRACT.request}</code>의 인증 API 또는
               <code>{ASSET_INSPECTION_CONTRACT.cli}</code>로 실행합니다.
             </p>

@@ -37,11 +37,11 @@ export function resolveStoredReadiness(run: {
 }
 
 export function readinessNote(state: ReadinessState): string {
-  if (state === "ready") return "차단 finding이 없습니다. 선언된 정책을 충족합니다.";
+  if (state === "ready") return "차단 finding이 없습니다. 선언된 정적 정책을 충족합니다.";
   if (state === "conditional") {
-    return "차단 finding은 없습니다. 무손실 정리로 고칠 수 없는 경고가 남아 있어 수동 확인이 필요합니다.";
+    return "차단 finding은 없습니다. 정적 정책 경고가 남아 있어 수동 확인이 필요합니다.";
   }
-  return "차단 finding이 남아 있습니다. 허용 목록 최적화 후 새 비교를 확인하세요.";
+  return "정적 정책 차단 finding이 남아 있습니다. 허용 목록 최적화 후 새 비교를 확인하세요.";
 }
 
 export function readinessHint(state: ReadinessState): string | null {

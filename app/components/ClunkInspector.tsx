@@ -639,7 +639,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
         <aside className="inspector-result">
           <div className="panel score-card">
             <div className="panel-head">
-              <span className="mono-label">Game-Ready Score</span>
+              <span className="mono-label">정적 정책 점수 · POLICY ONLY</span>
               <Icon name="gauge" size={16} />
             </div>
             <p className={`score-number${report ? "" : " score-number-idle"}`}>
@@ -649,7 +649,11 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
             <div className="score-track">
               <span style={{ width: `${report?.score.score ?? 0}%` }} />
             </div>
-            <p className="score-note">{readiness ? readinessNote(readiness) : "점수는 실제 검사 보고서에서 계산됩니다."}</p>
+            <p className="score-note">
+              {readiness
+                ? `${readinessNote(readiness)} 브라우저 화면과 visualRuntime은 별도이며 현재 player-facing: NOT_EVALUATED입니다.`
+                : "점수는 실제 검사 보고서에서 계산됩니다. 화면 판정은 이 점수에 포함되지 않습니다."}
+            </p>
           </div>
 
           <div className="panel findings-card">

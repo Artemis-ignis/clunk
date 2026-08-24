@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   FRAME_MANIFEST_SCHEMA,
+  collaborationReadinessLevel,
   mergeFrameManifestEvidence,
   normalizeFrameManifest,
   resolveCollaborationStatus,
@@ -93,6 +94,8 @@ test("frame manifest v1 normalizes screenshot evidence without changing player-f
 
   assert.equal(manifest.schema, "clunk.frame-manifest.v1");
   assert.equal(manifest.reviewStatus, "NOT_EVALUATED");
+  assert.equal(manifest.visualRuntime, "GAP");
+  assert.equal(manifest.playerFacing, "NOT_EVALUATED");
   assert.equal(manifest.frames[0]?.viewport?.width, 2560);
   assert.equal(manifest.frames[0]?.shippedPath, true);
   assert.equal(manifest.frames[0]?.frameSourceCommit, "d3d56464");
@@ -288,4 +291,128 @@ test("frame manifest links shipped frames to source asset evidence without promo
   }), "append");
   assert.deepEqual(appended.assetInspections?.map((item) => item.id), ["tractor-runtime-r01"]);
   assert.equal(appended.assetInspections?.[0]?.inputHash, "b".repeat(64));
+});
+
+test("frame manifest keeps procedural and runtime-generated asset provenance explicit", () => {
+  const manifest = normalizeFrameManifest({
+    schema: FRAME_MANIFEST_SCHEMA,
+    runId: "HF-M98-crops-r01",
+    sourceProject: "Harvest Frontier",
+    sourceCommit: "82459216c618a15f7588f57003e5f4f4ee99f40a",
+    reviewStatus: "NOT_EVALUATED",
+    frames: [{ id: "crop-distance-15m", path: "m98/crop-15m.png", hud: "off" }],
+    sceneGaps: [],
+    assetInspections: [{
+      id: "crop-rice-procedural-r01",
+      sourcePath: "src/game/render/crops.ts",
+      inputHash: "c".repeat(64),
+      assetKind: "3d-model",
+      targetProfileId: "harvest-frontier-web-three",
+      inspectionRunId: "assetops-crop-rice-r01",
+      evidenceStatus: "ENVIRONMENT_UNAVAILABLE",
+      productionReady: false,
+      origin: "procedural",
+      provenance: {
+        sourceRef: "src/game/render/crops.ts#rice",
+        sourceCommit: "82459216c618a15f7588f57003e5f4f4ee99f40a",
+        generator: "harvest-frontier-crop-factory",
+        recipeId: "crop-shape-v1",
+      },
+      frameIds: ["crop-distance-15m"],
+    }],
+  });
+
+  const inspection = manifest.assetInspections?.[0];
+  assert.equal(inspection?.origin, "procedural");
+  assert.equal(inspection?.provenance?.sourceRef, "src/game/render/crops.ts#rice");
+  assert.equal(inspection?.provenance?.generator, "harvest-frontier-crop-factory");
+  assert.equal(manifest.reviewStatus, "NOT_EVALUATED");
+});
+
+test("procedural asset evidence requires a source reference", () => {
+  assert.throws(() => normalizeFrameManifest({
+    schema: FRAME_MANIFEST_SCHEMA,
+    runId: "HF-M98-crops-r01",
+    sourceProject: "Harvest Frontier",
+    sourceCommit: "82459216c618a15f7588f57003e5f4f4ee99f40a",
+    reviewStatus: "NOT_EVALUATED",
+    frames: [{ id: "crop", path: "crop.png", hud: "off" }],
+    sceneGaps: [],
+    assetInspections: [{
+      id: "crop-rice-procedural-r01",
+      sourcePath: "src/game/render/crops.ts",
+      inputHash: "c".repeat(64),
+      assetKind: "3d-model",
+      targetProfileId: "harvest-frontier-web-three",
+      inspectionRunId: "assetops-crop-rice-r01",
+      evidenceStatus: "ENVIRONMENT_UNAVAILABLE",
+      productionReady: false,
+      origin: "runtime-generated",
+      provenance: { generator: "runtime" },
+    }],
+}), /provenance\.sourceRef/i);
+});
+
+test("HF acceptance bundle links a GLB and procedural crop to a frame while staying conditional", () => {
+  const manifest = normalizeFrameManifest({
+    schema: FRAME_MANIFEST_SCHEMA,
+    runId: "HF-M99-shipped-review-r01",
+    sourceProject: "Harvest Frontier",
+    sourceCommit: "781a551",
+    reviewStatus: "NOT_EVALUATED",
+    frames: [{
+      id: "hf-m99-nohud-gameplay-15m",
+      path: ".logs/screenshots/M94/shipped-visual/HF-M94-packaged-r01-03-game-nohud.png",
+      sha256: "5".repeat(64),
+      bytes: 2821399,
+      frameSourceCommit: "781a551",
+      renderer: "WebGPU",
+      hud: "off",
+      shippedPath: true,
+      viewport: { width: 1920, height: 1080, dpr: 1 },
+      distanceBandId: "gameplay",
+      distanceM: 15,
+      console: { errors: 0, warnings: 0 },
+    }],
+    sceneGaps: [{ id: "terrain-repetition", severity: "major", category: "environment", note: "Distant terrain and vegetation still need human visual review.", frameIds: ["hf-m99-nohud-gameplay-15m"] }],
+    prescriptions: [{ id: "grass-secondary-layer", kind: "texture-detail", status: "NON_BLOCKING", priority: "P1", observation: "Grass loses gameplay-band detail.", action: "Review a secondary structure layer from the same shipped frame.", frameIds: ["hf-m99-nohud-gameplay-15m"] }],
+    assetInspections: [
+      {
+        id: "tractor-runtime-r01",
+        sourcePath: "public/assets/runtime/tractor.compact.m1.glb",
+        inputHash: "d".repeat(64),
+        assetKind: "3d-model",
+        targetProfileId: "harvest-frontier-web-three",
+        inspectionRunId: "HF-M98-tractor-r01",
+        evidenceStatus: "CONDITIONAL",
+        productionReady: false,
+        origin: "file",
+        frameIds: ["hf-m99-nohud-gameplay-15m"],
+        numericContract: { status: "PASS", valid: true, score: 100, threshold: 90, hardBlockerCount: 0, observations: { drawCallCount: 88, textureCount: 0 } },
+      },
+      {
+        id: "tomato-procedural-r01",
+        sourcePath: "src/game/world/crops.ts#tomato",
+        inputHash: "e".repeat(64),
+        assetKind: "3d-model",
+        targetProfileId: "harvest-frontier-web-three",
+        inspectionRunId: "HF-M99-tomato-r01",
+        evidenceStatus: "ENVIRONMENT_UNAVAILABLE",
+        productionReady: false,
+        origin: "procedural",
+        provenance: { sourceRef: "src/game/world/crops.ts#tomato", sourceCommit: "781a551", generator: "HarvestFrontierCropFactory", recipeId: "crop-tomato-v1" },
+        frameIds: ["hf-m99-nohud-gameplay-15m"],
+        numericContract: { status: "UNAVAILABLE", valid: false, hardBlockerCount: 0 },
+      },
+    ],
+  });
+  const status = resolveCollaborationStatus(input({ visualRuntime: "GAP", inputHash: "d".repeat(64) }));
+  assert.equal(manifest.frames[0]?.distanceBandId, "gameplay");
+  assert.equal(manifest.frames[0]?.distanceM, 15);
+  assert.equal(manifest.assetInspections?.length, 2);
+  assert.equal(manifest.assetInspections?.[1]?.provenance?.sourceCommit, "781a551");
+  assert.equal(status.assetAudit, "PASS");
+  assert.equal(status.visualRuntime, "GAP");
+  assert.equal(status.readiness, "SCENE_GAP");
+  assert.equal(collaborationReadinessLevel(status), "conditional");
 });

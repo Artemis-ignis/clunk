@@ -82,6 +82,13 @@ function evidenceMode(value: unknown): FrameManifestWriteMode {
   return value;
 }
 
+export function parseEvidenceOnlyPayload(value: unknown): { evidence: FrameManifest; evidenceMode: FrameManifestWriteMode } {
+  const source = record(value);
+  const evidence = parseEvidencePayload(source.evidence);
+  if (!evidence) throw new ClunkHttpError("Collaboration evidence is required.", 400);
+  return { evidence, evidenceMode: evidenceMode(source.evidenceMode) };
+}
+
 export function parseStatusPayload(value: unknown): CollaborationStatusPayload {
   const source = record(value);
   const assetAudit = source.assetAudit;

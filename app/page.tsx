@@ -116,9 +116,10 @@ export default function Home() {
                 <small>triangles · {HARVEST_TRACTOR.vertices} vertices</small>
               </div>
               <div className="landing-stage-card landing-stage-card-score">
-                <span>GAME-READY SCORE</span>
+                <span>STATIC POLICY SCORE</span>
                 <strong>{HARVEST_TRACTOR.score}<small>/100</small></strong>
-                <b><i />READY · 하드 블로커 0</b>
+                <b><i />STATIC PASS · 하드 블로커 0</b>
+                <small>readiness CONDITIONAL · visualRuntime NOT_EVALUATED</small>
               </div>
               <div className="landing-stage-card landing-stage-card-file">
                 <code>{HARVEST_TRACTOR.file}</code>

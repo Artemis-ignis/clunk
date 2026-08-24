@@ -103,7 +103,13 @@ The stable external wrapper is `npm.cmd run asset:readability -- --config <confi
 --format json --strict` and returns schema `clunk.texture-audit.v1`. This is a texture policy
 result, not an engine import/runtime or player-facing result. Non-blocking texture follow-ups
 are also representable as `qualityWarnings[]` with `status: "NON_BLOCKING"`; they do not erase
-or promote a hard validation result.
+or promote a hard validation result. `evaluationProfile` supports `id`, `renderer`,
+`viewport`, `camera`, `distanceBands[{id,distanceM,requiredGrade}]`, `resolutionPolicy`,
+`repetition`, and `banding`. The report emits `measurementScope: "texture-only"`,
+`visualRuntime: "NOT_EVALUATED"`, per-band grades/transitions, source resolution, and
+`repetition.status: "DECLARED_ONLY"`; it does not claim repetition visibility from a texture-only
+input. `strictChecks` may independently opt into `seam`, `memory`, `readability`, `banding`, or
+`resolution` without changing the default HF seam/memory gate.
 
 The target-aware local command returns the same Core envelope as `clunk_asset_inspect`:
 
@@ -139,7 +145,7 @@ READY by declaration alone.
 Portrait/UI raster readability is shipped as a separate contract. The stable command is:
 
 ```powershell
-npm.cmd run asset:ui-readability -- --config portrait-ui.json --format json --strict
+npm.cmd run asset:ui-readability -- --config examples/ui-readability/harvest-frontier.portraits.json --format json --strict
 ```
 
 It returns `clunk.ui-readability.v1` with `status: PASS` or `FAIL`, `capability: shipped`,
@@ -159,18 +165,27 @@ rule-set, and separate `assetAudit` / `visualRuntime` states:
 - `GET /api/collaboration/threads/:threadId`
 - `POST /api/collaboration/threads/:threadId/messages`
 - `PATCH /api/collaboration/threads/:threadId`
+- `GET/POST /api/collaboration/threads/:threadId/evidence`
 
 `SCENE_GAP` means Clunk's static asset audit passed but the shipped scene or player-facing review
 still has a gap. This contract requires host authentication and workspace scoping. A screenshot
 or frame manifest is optional on thread/message POST and uses `clunk.frame-manifest.v1`; it is
 evidence only and keeps `reviewStatus: NOT_EVALUATED`.
+Normalized manifests also carry `visualRuntime: GAP` and `playerFacing: NOT_EVALUATED` by default;
+the current v1 evidence contract rejects promotion of those fields, so a status snapshot or human
+review cannot be smuggled in as a frame upload.
 Frame entries may also carry `sha256`, `viewport`, `renderer`, `shippedPath`, and
 `console: { errors, warnings }` so a packaged capture's provenance and browser/runtime smoke
-signal stay attached to the frame without becoming a player-facing verdict.
+signal stay attached to the frame without becoming a player-facing verdict. They may also carry
+`distanceBandId` and `distanceM`; linked `assetInspections[].frameIds` then connect a source asset
+or procedural origin to the same renderer/viewport/distance evidence.
 `runtimeChecks[]` is the separate numeric layer: each item has `id`, `kind`, `status`, optional
 renderer/evidencePath/frameIds, and a `checks` object such as `poseFocusId`,
 `poseFocusOnScreen`, `poseFocusCoverage`, and `poseFocusLensInside`. A numeric `PASS` is not a
 human visual review and does not change `reviewStatus` or `visualRuntime`.
+The evidence-only endpoint accepts the same normalized manifest with `evidenceMode: "append"` or
+`"replace"`; it requires the same host authentication and workspace scope as thread writes and
+does not change the thread status snapshot.
 
 The current live D1 HF-M94 evidence is not a placeholder. Its actual collaboration row has
 `inputHash` `a8500559f6137a4ab35c3b7adb3a95e2d323198c11a0be00340ea3940db3552f`,
@@ -221,14 +236,18 @@ replace every `<...>` value with the next real capture:
   "evidence": {
     "schema": "clunk.frame-manifest.v1",
     "runId": "<RUN_ID>",
-    "sourceProject": "<PROJECT>",
-    "sourceCommit": "<SOURCE_COMMIT>",
-    "reviewStatus": "NOT_EVALUATED",
-    "frames": [{
+  "sourceProject": "<PROJECT>",
+  "sourceCommit": "<SOURCE_COMMIT>",
+  "reviewStatus": "NOT_EVALUATED",
+  "visualRuntime": "GAP",
+  "playerFacing": "NOT_EVALUATED",
+  "frames": [{
       "id": "<FRAME_ID>",
       "path": "<FRAME_PATH>",
       "renderer": "<RENDERER>",
       "hud": "off",
+      "distanceBandId": "gameplay",
+      "distanceM": 15,
       "bytes": 2821399,
       "frameSourceCommit": "<FRAME_SOURCE_COMMIT>",
       "shippedPath": true,
@@ -270,6 +289,7 @@ replace every `<...>` value with the next real capture:
       "inspectionRunId": "<INSPECTION_RUN_ID>",
       "evidenceStatus": "ENVIRONMENT_UNAVAILABLE",
       "productionReady": false,
+      "origin": "file",
       "frameIds": ["<FRAME_ID>"],
       "qualityWarningIds": ["<QUALITY_WARNING_ID>"],
       "numericContract": {
@@ -303,6 +323,18 @@ use `replace` only when sending the full intended replacement list. The same rul
 manifest, and stable IDs are upserted on append. `assetInspections[].numericContract` is the
 static score/threshold/hard-blocker/draw-call/bounds layer; it never changes `visualRuntime` or
 `reviewStatus`.
+Each linked inspection also has `origin: "file" | "procedural" | "runtime-generated"`; non-file
+origins require `provenance.sourceRef` plus optional source commit, generator, and recipe id. A
+procedural crop or NPC can therefore be reviewed against its source module and shipped frame
+without inventing a GLB byte result.
+
+The displayed `score: 100` / `hardBlockerCount: 0` is a declared static policy contract. INFO
+findings such as missing normals, non-unit scale, empty nodes, missing UVs, or textureCount 0 may
+still be visible observations and can require renderer review. It is not a visual quality PASS,
+engine import PASS, or player-facing approval. Current HF M98 near observations include
+cultivator `16196 triangles / 42 draw calls`, processing `24936 / 78`, seeder `11318 / 75`, and
+tractor `30188 / 88`, all with textureCount 0; HF crops/vegetation/NPCs are procedural runtime
+surfaces rather than standalone GLBs and must use provenance-linked frame evidence.
 
 The authenticated byte-inspection API is not public HTTP MCP:
 
@@ -322,8 +354,9 @@ It requires the authenticated workspace context, returns `clunk.asset-inspection
 and does not persist raw bytes. Store the returned evidence or its `inputHash` in a collaboration
 manifest when linking a shipped frame.
 
-HF handoff pointer (external status, not the live M94 frame row): commit `8245921`; WebGL2
-M95 invariants 8/8, retries 0, console 0/0; M96 forecast/recovery and ko/en layout PASS;
+HF handoff pointer (external status, not the live M94 frame row): source head
+`82459216c618a15f7588f57003e5f4f4ee99f40a`, integration commit `781a551`; WebGL2/WebGPU
+M98/M99 invariants 8/8, retries 0, console 0/0; M96 forecast/recovery and ko/en layout PASS;
 portrait raster PASS for five 128px assets at 46px with minimum ΔE76 `11.6431`; texture quality
 follow-ups remain grass-meadow 15m D, dirt-path C, soil-tilled D, wood-planks C, plaster C,
 roof tiles B. Keep `reviewStatus: NOT_EVALUATED`, `visualRuntime: GAP`, `playerFacing:
