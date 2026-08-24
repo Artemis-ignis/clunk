@@ -35,6 +35,7 @@ try {
     const input = required(args, "input");
     const value = normalizeAssetInspectionEvidenceV2(JSON.parse(await readFile(resolve(input), "utf8")) as unknown);
     await emit(value, args.get("out"));
+    if (args.has("required") && !value.validation.valid) process.exitCode = 2;
   } else if (command === "inspect" || command === "validate") {
     const inputPath = args.positionals[0];
     if (!inputPath) throw new Error("Usage: asset:evidence inspect|validate <asset> [options].");
