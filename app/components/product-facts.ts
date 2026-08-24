@@ -256,8 +256,9 @@ export const UI_READABILITY_CONTRACT = {
 } as const;
 
 export const ASSET_INSPECTION_CONTRACT = {
-  request: "POST /api/assetops/inspect · authenticated workspace · fileName + bytesBase64 + targetProfileId",
-  response: "clunk.asset-inspection-response.v1 · evidence: AssetEvidence",
+  request: "POST /api/assetops/inspect · authenticated workspace · v1 fileName+bytesBase64 or v2 entryFileName+files[]",
+  bundle: "v2: Spine JSON + atlas + PNG or Sprite atlas + page files · per-file role/relatesTo/SHA-256/bytes · max 256 files · max 64 MiB decoded",
+  response: "clunk.asset-inspection-response.v1/v2 · evidence: AssetEvidence · v2 bundle summary includes per-file role, relations, SHA-256, and byte count",
   unavailable: "ENVIRONMENT_UNAVAILABLE · productionReady false",
   persistence: "raw bytes are not persisted; submit returned evidence in collaboration evidence",
   cli: "npm.cmd run asset:inspect -- --path <asset> --target-profile <profile> --format json",
@@ -338,7 +339,7 @@ export const HF_TEXTURE_SCENE_GAPS = [
 
 export const FRAME_REVIEW_CONTRACT = {
   minimumCaptureSet: "no-HUD shipped baseline + dealer approach/counter + dialogue NPC/camera + distant terrain/vegetation/sign frames",
-  requiredMetadata: "runId, sourceCommit, frameSourceCommit, frame id/path/sha256/bytes, renderer, viewport, distanceBandId/distanceM when applicable, shippedPath, hud, console, sceneGaps.frameIds",
+  requiredMetadata: "runId, sourceCommit, frameSourceCommit, frame id/path/sha256/bytes, renderer, viewport, distanceBandId/distanceM when applicable, shippedPath, hud, console, sceneGaps.frameIds + severity/ownership/affectedScene or affectedAssetIds/nextStep/evidence path+sha256",
   reviewableWhen: "all submitted frames normalize and their hashes, viewport, renderer, shipped path, and console metadata are present",
   closeWhen: "a human review explicitly clears every linked scene gap in a fresh shipped-path capture; numeric/camera PASS alone never closes it",
   defaultBoundary: "reviewStatus: NOT_EVALUATED · visualRuntime: GAP · playerFacing: NOT_EVALUATED",
@@ -358,10 +359,16 @@ export const COLLABORATION_CONTRACT = {
   evidenceWriteMode: "evidenceMode: append (stable-id upsert) | replace (full snapshot)",
   evidenceOnlyApi: "POST /api/collaboration/threads/:threadId/evidence · evidence-only merge, same auth/workspace boundary",
   evidenceReadApi: "GET /api/collaboration/threads/:threadId/evidence · normalized evidence only; no status promotion",
+  runtimeStatuses: "visualRuntime: NOT_RUN | PASS | GAP | BLOCKED | UNAVAILABLE · UNAVAILABLE is never PASS",
+  readinessReason: "STATIC_AUDIT_NOT_RUN | STATIC_AUDIT_FAILED | STATIC_AUDIT_BLOCKED | VISUAL_RUNTIME_NOT_EVALUATED | ENGINE_ENVIRONMENT_UNAVAILABLE | PLAYER_FACING_REVIEW_INPUT_INCOMPLETE | PLAYER_FACING_SCENE_GAP | VISUAL_RUNTIME_BLOCKED | PLAYER_FACING_REVIEW_PASS",
+  readinessSemantics: "static PASS + visual pending/GAP/UNAVAILABLE = conditional · runtime PASS + human review = ready · hard blocker = blocked",
+  stageSeparation: "static/structural, engine import/runtime, and human visual review are separate stages; missing Godot/Unity/Unreal/mobile runners are ENVIRONMENT_UNAVAILABLE",
   linkedAssetInspection: "assetInspections[] links frameIds to sourcePath/inputHash/targetProfileId/inspectionRunId and optional numericContract observations; it never promotes playerFacing",
-  assetOrigin: "assetInspections[].origin is file, procedural, or runtime-generated; non-file origins require provenance.sourceRef and remain review evidence, not byte PASS",
+  assetOrigin: "assetInspections[].origin is file, procedural, or runtime-generated; ownership asset|runtime|unknown and runtimeUsage USED_IN_FRAME|NOT_USED_IN_FRAME|UNKNOWN are explicit; textureCount=0 never infers a defect",
   numericAssetContract: "numericContract.status/score/hardBlockerCount/drawCall observations are static contract evidence; visualRuntime and human review remain separate",
   runtimeChecks: "runtimeChecks[] stores numeric pose/on-screen/coverage/lens contracts; PASS never changes reviewStatus or visualRuntime",
+  sceneReview: "POST/CLI clunk.player-facing-scene-review.v1 returns PASS_WITH_FOLLOW_UP|NO_GO|UNAVAILABLE with severity, linked evidence path/hash, affected scene/assets, ownership, nextStep; visualRuntime stays GAP and humanReview PENDING",
+  sceneReviewCli: "npm.cmd run collaboration:frame-manifest -- scene-review --input <manifest.json> --format json · exit 0 follow-up, 2 NO_GO, 4 incomplete/unavailable",
   assetInspectionApi: ASSET_INSPECTION_CONTRACT.request,
   qualityWarnings: QUALITY_WARNING_CONTRACT.field,
   storedM94: "live D1: inputHash a8500559…db3552f · frame hf-m94-packaged-r01-03-game-nohud · 5 gaps · 6 prescriptions",

@@ -45,7 +45,7 @@ export type StoredEvidence = FrameManifest | {
 };
 
 const AUDIT_STATUSES = new Set<AuditStatus>(["NOT_RUN", "PASS", "FAIL", "BLOCKED"]);
-const RUNTIME_STATUSES = new Set<RuntimeReviewStatus>(["NOT_RUN", "PASS", "GAP", "BLOCKED"]);
+const RUNTIME_STATUSES = new Set<RuntimeReviewStatus>(["NOT_RUN", "PASS", "GAP", "BLOCKED", "UNAVAILABLE"]);
 
 function record(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {

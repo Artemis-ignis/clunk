@@ -52,6 +52,8 @@ test("frame manifest evidence has a versioned migration and API envelope", async
   assert.match(docs, /sceneGaps/);
   assert.match(docs, /runtimeChecks/);
   assert.match(docs, /NOT_EVALUATED/);
+  assert.match(contract, /readinessReason/);
+  assert.match(docs, /ENGINE_ENVIRONMENT_UNAVAILABLE/);
 });
 
 test("frame evidence writes expose explicit append and replace semantics", async () => {
@@ -80,19 +82,30 @@ test("collaboration UI keeps capture integrity, asset audit, and human visual re
   assert.match(panel, /CAPTURE CONTRACT PASS/);
   assert.match(panel, /NUMERIC CONTRACT PASS/);
   assert.match(panel, /HUMAN VISUAL REVIEW/);
+  assert.match(panel, /CONDITIONAL/);
   assert.match(panel, /VISUAL RUNTIME \{evidence\.visualRuntime\}/);
   assert.match(panel, /runtimeChecks/);
   assert.match(panel, /assetInspections/);
   assert.match(panel, /numericContract/);
   assert.match(panel, /qualityWarnings/);
+  assert.match(panel, /readinessReason/);
+  assert.match(panel, /UNAVAILABLE/);
+  assert.match(panel, /runtime usage/);
+  assert.match(panel, /affectedScene/);
   assert.match(agents, /environmentUnavailable/);
+  assert.match(agents, /readinessReason/);
+  assert.match(agents, /sceneReviewCli/);
   assert.match(facts, /status: "NON_BLOCKING"/);
+  assert.match(facts, /PLAYER_FACING_SCENE_GAP/);
+  assert.match(facts, /ENGINE_ENVIRONMENT_UNAVAILABLE/);
+  assert.match(facts, /clunk\.player-facing-scene-review\.v1/);
   assert.match(facts, /grass-meadow-15m/);
   assert.match(facts, /secondary macro\/detail/);
   assert.match(docsPage, /HF-M94-packaged-r01-03-game-nohud/i);
   assert.match(facts, /dealer approach/);
   assert.match(facts, /frameSourceCommit/);
   assert.match(facts, /HF_M98_RUNTIME_UPDATE/);
+  assert.match(docsPage, /player-facing scene review output/);
 });
 
 test("dedicated evidence route keeps frame and asset review writes authenticated", async () => {

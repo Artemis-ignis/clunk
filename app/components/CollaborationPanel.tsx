@@ -68,7 +68,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
   const [baseProfileId, setBaseProfileId] = useState(DEFAULT_BASE_PROFILE);
   const [ruleSetId, setRuleSetId] = useState(DEFAULT_RULE_SET);
   const [assetAudit, setAssetAudit] = useState<"PASS" | "FAIL" | "BLOCKED">("PASS");
-  const [visualRuntime, setVisualRuntime] = useState<"NOT_RUN" | "PASS" | "GAP" | "BLOCKED">("GAP");
+  const [visualRuntime, setVisualRuntime] = useState<"NOT_RUN" | "PASS" | "GAP" | "BLOCKED" | "UNAVAILABLE">("GAP");
   const [messageDraft, setMessageDraft] = useState("");
   const [evidenceDraft, setEvidenceDraft] = useState("");
   const [evidenceMode, setEvidenceMode] = useState<"append" | "replace">("replace");
@@ -210,6 +210,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
 
       <div className="collaboration-status-strip" aria-label="협업 상태 모델">
         <StatusLegend label="ASSET_READY" detail="Clunk 바이트 판정 PASS" tone="asset" />
+        <StatusLegend label="CONDITIONAL" detail="runtime·사람 검토 대기 또는 환경 없음" tone="conditional" />
         <StatusLegend label="SCENE_GAP" detail="시각·런타임 gap 기록" tone="gap" />
         <StatusLegend label="PLAYER_FACING_READY" detail="게임 화면까지 PASS" tone="ready" />
         <StatusLegend label="BLOCKED" detail="수정 후 재검사" tone="blocked" />
@@ -265,7 +266,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
               </div>
               <div className="collaboration-form-grid collaboration-form-grid-selects">
                 <label>Clunk 감사<select value={assetAudit} onChange={(event) => setAssetAudit(event.target.value as typeof assetAudit)}><option value="PASS">PASS · static policy</option><option value="FAIL">FAIL</option><option value="BLOCKED">BLOCKED</option></select></label>
-                <label>시각·런타임 검토<select value={visualRuntime} onChange={(event) => setVisualRuntime(event.target.value as typeof visualRuntime)}><option value="GAP">GAP · 후속 작업 필요</option><option value="NOT_RUN">NOT_RUN</option><option value="PASS">PASS</option><option value="BLOCKED">BLOCKED</option></select></label>
+                <label>시각·런타임 검토<select value={visualRuntime} onChange={(event) => setVisualRuntime(event.target.value as typeof visualRuntime)}><option value="GAP">GAP · 후속 작업 필요</option><option value="NOT_RUN">NOT_RUN</option><option value="UNAVAILABLE">UNAVAILABLE · 엔진/런너 없음</option><option value="PASS">PASS</option><option value="BLOCKED">BLOCKED</option></select></label>
                 <label>evidence write mode<select value={evidenceMode} onChange={(event) => setEvidenceMode(event.target.value as typeof evidenceMode)}><option value="replace">replace · full snapshot</option><option value="append">append · keep existing IDs</option></select></label>
               </div>
               <div className="collaboration-form-foot">
@@ -301,7 +302,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
       ) : null}
 
       {error ? <p className="collaboration-error" role="alert"><Icon name="triangleAlert" size={15} />{error}</p> : null}
-      <p className="collaboration-contract-note"><code>POST /api/collaboration/threads</code> · <code>GET/POST /api/collaboration/threads/:threadId/evidence</code> · <code>evidence: clunk.frame-manifest.v1</code> · 인증된 workspace 범위 · inputHash 고정 · assetAudit와 visualRuntime/playerFacing 분리 · public HTTP MCP는 아직 제공하지 않습니다.</p>
+      <p className="collaboration-contract-note"><code>POST /api/collaboration/threads</code> · <code>GET/POST /api/collaboration/threads/:threadId/evidence</code> · <code>evidence: clunk.frame-manifest.v1</code> · 인증된 workspace 범위 · inputHash 고정 · assetAudit와 visualRuntime/playerFacing 분리 · readinessReason으로 conditional 원인을 기계 판독 · public HTTP MCP는 아직 제공하지 않습니다.</p>
     </section>
   );
 }
@@ -312,7 +313,7 @@ function StatusLegend({ label, detail, tone }: { label: string; detail: string; 
 
 function collaborationStatus(input: {
   assetAudit: "PASS" | "FAIL" | "BLOCKED";
-  visualRuntime: "NOT_RUN" | "PASS" | "GAP" | "BLOCKED";
+  visualRuntime: "NOT_RUN" | "PASS" | "GAP" | "BLOCKED" | "UNAVAILABLE";
   profileId: string;
   baseProfileId: string;
   ruleSetId: string;
@@ -334,7 +335,7 @@ function validHash(value: string): boolean { return /^[a-f0-9]{64}$/i.test(value
 function shortHash(value: string): string { return `${value.slice(0, 8)}…${value.slice(-6)}`; }
 function slug(value: string): string { return value.toLowerCase().replace(/_/g, "-"); }
 function collaborationLabel(status: CollaborationStatus): string {
-  return `${collaborationReadinessLevel(status).toUpperCase()} · ${status.readiness}`;
+  return `${collaborationReadinessLevel(status).toUpperCase()} · ${status.readiness} · ${status.readinessReason}`;
 }
 
 const FRAME_MANIFEST_SCHEMA_TEMPLATE = `// SCHEMA TEMPLATE · NOT STORED HF-M94 EVIDENCE · replace every <...>
@@ -427,7 +428,7 @@ function EvidenceCard({ evidence }: { evidence: StoredEvidence }) {
         </div>
       ) : null}
       <div className="collaboration-evidence-gaps">
-        {evidence.sceneGaps.map((gap) => <span key={gap.id}><b>{gap.severity}</b>{gap.category} · {gap.note}</span>)}
+        {evidence.sceneGaps.map((gap) => <span key={gap.id}><b>{gap.severity}</b>{gap.category} · {gap.ownership ?? "ownership unknown"} · {gap.affectedScene ?? gap.affectedAssetIds?.join(", ") ?? "scene/asset unknown"} · {gap.note}{gap.nextStep ? <small>next: {gap.nextStep}</small> : null}{gap.evidence ? <small>evidence: {shortHash(gap.evidence.sha256)} · {gap.evidence.path}</small> : null}</span>)}
       </div>
       {linkedInspectionCount ? (
         <div className="collaboration-evidence-inspections">
@@ -436,7 +437,7 @@ function EvidenceCard({ evidence }: { evidence: StoredEvidence }) {
             <article key={inspection.id}>
               <div><b>{inspection.assetKind}</b><strong>{inspection.evidenceStatus}</strong><em>{inspection.productionReady ? "production ready" : "not player-facing proof"}</em></div>
               <p>{inspection.sourcePath} · {shortHash(inspection.inputHash)} · {inspection.targetProfileId}</p>
-              <small>origin · {inspection.origin}{inspection.provenance ? ` · provenance ${inspection.provenance.sourceRef}${inspection.provenance.sourceCommit ? ` @ ${inspection.provenance.sourceCommit}` : ""}` : ""}</small>
+              <small>origin · {inspection.origin} · ownership · {inspection.ownership ?? "unknown"} · runtime usage · {inspection.runtimeUsage ?? "UNKNOWN"}{inspection.provenance ? ` · provenance ${inspection.provenance.sourceRef}${inspection.provenance.sourceCommit ? ` @ ${inspection.provenance.sourceCommit}` : ""}` : ""}</small>
               {inspection.numericContract ? <small>numeric contract · {inspection.numericContract.status}{inspection.numericContract.score !== undefined ? ` · score ${inspection.numericContract.score}/${inspection.numericContract.threshold ?? "?"}` : ""}{inspection.numericContract.hardBlockerCount !== undefined ? ` · hard blockers ${inspection.numericContract.hardBlockerCount}` : ""}{inspection.numericContract.observations ? ` · ${Object.entries(inspection.numericContract.observations).map(([key, value]) => `${key}=${String(value)}`).join(" · ")}` : ""}</small> : null}
               {inspection.qualityWarningIds?.length ? <small>qualityWarnings · {inspection.qualityWarningIds.join(", ")}</small> : null}
             </article>

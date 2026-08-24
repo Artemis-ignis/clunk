@@ -1,6 +1,9 @@
 import { env } from "cloudflare:workers";
 import { getChatGPTUser, type ChatGPTUser } from "../../chatgpt-auth";
 import { sha256Hex, stableStringify } from "../../../packages/core/src/index";
+import { ClunkHttpError } from "./http-error";
+
+export { ClunkHttpError } from "./http-error";
 
 export type ClunkUserContext = {
   user: ChatGPTUser;
@@ -302,13 +305,6 @@ export function assertSameOrigin(request: Request): void {
   } catch (error) {
     if (error instanceof ClunkHttpError) throw error;
     throw new ClunkHttpError("Invalid request origin.", 403);
-  }
-}
-
-export class ClunkHttpError extends Error {
-  constructor(message: string, public readonly status: number) {
-    super(message);
-    this.name = "ClunkHttpError";
   }
 }
 

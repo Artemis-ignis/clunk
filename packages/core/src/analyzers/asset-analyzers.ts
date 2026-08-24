@@ -208,6 +208,7 @@ export function analyzeSpriteAtlas(input: AnalyzeSpriteAtlasInput): SpriteAtlasA
 
   const atlasDirectory = directoryOf(entry);
   const checkedPages = new Set<string>();
+  const pageDimensions = new Map<string, { width: number; height: number }>();
   for (const page of parsed.pages) {
     const pagePath = resolveRelative(atlasDirectory, page);
     const pageBytes = getFile(input.files, pagePath);
@@ -218,6 +219,41 @@ export function analyzeSpriteAtlas(input: AnalyzeSpriteAtlasInput): SpriteAtlasA
     checkedPages.add(pagePath);
     const pageResult = analyzeImage({ fileName: pagePath, bytes: pageBytes, target: input.target });
     findings.push(...pageResult.findings);
+    if (pageResult.width > 0 && pageResult.height > 0) {
+      pageDimensions.set(pagePath, { width: pageResult.width, height: pageResult.height });
+    }
+  }
+
+  const regionNames = new Set<string>();
+  for (const region of parsed.regions) {
+    if (regionNames.has(region.name)) {
+      findings.push(finding(
+        "ATLAS-DUPLICATE-REGION",
+        "ERROR",
+        `Atlas region ${region.name} is declared more than once; region identifiers must be unambiguous.`,
+        `${entry}#${region.name}`,
+      ));
+    }
+    regionNames.add(region.name);
+
+    const pagePath = resolveRelative(atlasDirectory, region.page);
+    const dimensions = pageDimensions.get(pagePath);
+    if (!dimensions) continue;
+    const exceedsBounds =
+      region.x < 0 ||
+      region.y < 0 ||
+      region.width <= 0 ||
+      region.height <= 0 ||
+      region.x + region.width > dimensions.width ||
+      region.y + region.height > dimensions.height;
+    if (exceedsBounds) {
+      findings.push(finding(
+        "ATLAS-REGION-BOUNDS",
+        "ERROR",
+        `Atlas region ${region.name} (${region.x},${region.y} ${region.width}x${region.height}) exceeds page ${pagePath} bounds ${dimensions.width}x${dimensions.height}.`,
+        `${entry}#${region.name}`,
+      ));
+    }
   }
 
   if (checkedPages.size === 0 && parsed.pages.length > 0) {
@@ -273,6 +309,64 @@ export function analyzeSpineProject(input: AnalyzeSpineProjectInput): SpineProje
   const animationNames = animationNamesFrom(project.animations);
   if (bones.length === 0) findings.push(finding("SPINE-NO-BONES", "ERROR", "Spine project has no bones.", entry));
   if (slots.length === 0) findings.push(finding("SPINE-NO-SLOTS", "WARNING", "Spine project has no slots.", entry));
+
+  const boneNames = new Set(
+    bones.map((value) => stringValue(asRecord(value).name)).filter((name): name is string => Boolean(name)),
+  );
+  const slotNames = new Set(
+    slots.map((value) => stringValue(asRecord(value).name)).filter((name): name is string => Boolean(name)),
+  );
+  for (const slotValue of slots) {
+    const slot = asRecord(slotValue);
+    const slotName = stringValue(slot.name) ?? "<unnamed-slot>";
+    const boneName = stringValue(slot.bone);
+    if (!boneName || !boneNames.has(boneName)) {
+      findings.push(finding(
+        "SPINE-MISSING-BONE",
+        "ERROR",
+        `Slot ${slotName} references missing bone ${boneName ?? "<empty>"}.`,
+        `${entry}#slot/${slotName}`,
+      ));
+    }
+  }
+
+  for (const attachment of spineAttachments(project)) {
+    if (!slotNames.has(attachment.slot)) {
+      findings.push(finding(
+        "SPINE-MISSING-SLOT",
+        "ERROR",
+        `Attachment ${attachment.name} references missing slot ${attachment.slot}.`,
+        `${entry}#${attachment.slot}/${attachment.name}`,
+      ));
+    }
+  }
+
+  const animations = isRecord(project.animations) ? project.animations : {};
+  for (const [animationName, animationValue] of Object.entries(animations)) {
+    const animation = asRecord(animationValue);
+    const animatedBones = asRecord(animation.bones);
+    for (const boneName of Object.keys(animatedBones)) {
+      if (!boneNames.has(boneName)) {
+        findings.push(finding(
+          "SPINE-MISSING-ANIMATION-BONE",
+          "ERROR",
+          `Animation ${animationName} targets missing bone ${boneName}.`,
+          `${entry}#animation/${animationName}/bones/${boneName}`,
+        ));
+      }
+    }
+    const animatedSlots = asRecord(animation.slots);
+    for (const slotName of Object.keys(animatedSlots)) {
+      if (!slotNames.has(slotName)) {
+        findings.push(finding(
+          "SPINE-MISSING-ANIMATION-SLOT",
+          "ERROR",
+          `Animation ${animationName} targets missing slot ${slotName}.`,
+          `${entry}#animation/${animationName}/slots/${slotName}`,
+        ));
+      }
+    }
+  }
 
   const atlasPath = findSibling(input.files, entry, ".atlas");
   let atlasResult: SpriteAtlasAnalysis | undefined;
@@ -346,6 +440,7 @@ export function analyzeAnimation(input: AnalyzeAnimationInput): AnimationAnalysi
   const accessors = asArray(document.accessors);
   const nodes = asArray(document.nodes);
   const rootNodes = rootNodeIndices(document, nodes);
+  const animationTargetPaths = new Set(["translation", "rotation", "scale", "weights"]);
   const clips: AnimationClipAnalysis[] = animations.map((animation, index) => {
     const record = asRecord(animation);
     const samplers = asArray(record.samplers);
@@ -355,16 +450,55 @@ export function analyzeAnimation(input: AnalyzeAnimationInput): AnimationAnalysi
     for (const channelValue of channels) {
       const channel = asRecord(channelValue);
       const samplerIndex = numberValue(channel.sampler);
-      const sampler = samplerIndex === undefined ? undefined : asRecord(samplers[samplerIndex]);
+      const samplerIsValid = samplerIndex !== undefined && Number.isInteger(samplerIndex) && samplerIndex >= 0 && samplerIndex < samplers.length;
+      if (!samplerIsValid) {
+        findings.push(finding(
+          "ANIM-SAMPLER-INDEX",
+          "ERROR",
+          `Animation ${stringValue(record.name) ?? `animation-${index + 1}`} channel references missing sampler ${samplerIndex ?? "<empty>"}.`,
+          entry,
+        ));
+      }
+      const sampler = samplerIsValid ? asRecord(samplers[samplerIndex]) : undefined;
       const inputAccessor = sampler ? numberValue(sampler.input) : undefined;
-      const accessor = inputAccessor === undefined ? undefined : asRecord(accessors[inputAccessor]);
-      durationSeconds = Math.max(durationSeconds, accessorDuration(accessor));
+      const outputAccessor = sampler ? numberValue(sampler.output) : undefined;
+      const inputAccessorIsValid = inputAccessor !== undefined && Number.isInteger(inputAccessor) && inputAccessor >= 0 && inputAccessor < accessors.length;
+      const outputAccessorIsValid = outputAccessor !== undefined && Number.isInteger(outputAccessor) && outputAccessor >= 0 && outputAccessor < accessors.length;
+      if (sampler && (!inputAccessorIsValid || !outputAccessorIsValid)) {
+        findings.push(finding(
+          "ANIM-ACCESSOR-INDEX",
+          "ERROR",
+          `Animation ${stringValue(record.name) ?? `animation-${index + 1}`} channel references a missing sampler accessor.`,
+          entry,
+        ));
+      }
+      const accessor = inputAccessorIsValid ? asRecord(accessors[inputAccessor]) : undefined;
+      if (accessor) durationSeconds = Math.max(durationSeconds, accessorDuration(accessor));
       const targetRecord = asRecord(channel.target);
       const nodeIndex = numberValue(targetRecord.node);
       const path = stringValue(targetRecord.path);
+      if (nodeIndex === undefined || !Number.isInteger(nodeIndex) || nodeIndex < 0 || nodeIndex >= nodes.length) {
+        findings.push(finding(
+          "ANIM-TARGET-NODE",
+          "ERROR",
+          `Animation ${stringValue(record.name) ?? `animation-${index + 1}`} targets missing node ${nodeIndex ?? "<empty>"}.`,
+          entry,
+        ));
+      }
+      if (!path || !animationTargetPaths.has(path)) {
+        findings.push(finding(
+          "ANIM-TARGET-PATH",
+          "ERROR",
+          `Animation ${stringValue(record.name) ?? `animation-${index + 1}`} uses unsupported target path ${path ?? "<empty>"}.`,
+          entry,
+        ));
+      }
       if (nodeIndex !== undefined && rootNodes.has(nodeIndex) && path === "translation") hasRootMotion = true;
     }
     const name = stringValue(record.name) ?? `animation-${index + 1}`;
+    if (channels.length > 0 && durationSeconds <= 0) {
+      findings.push(finding("ANIM-ZERO-DURATION", "WARNING", `Animation ${name} has no positive duration.`, entry));
+    }
     return { name, durationSeconds, hasRootMotion, channelCount: channels.length };
   });
 

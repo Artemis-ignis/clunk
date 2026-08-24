@@ -16,6 +16,8 @@ test("frame manifest CLI exposes deterministic validate and merge commands", asy
   const packageJson = JSON.parse(await source("package.json"));
   assert.match(script, /normalizeFrameManifest/);
   assert.match(script, /mergeFrameManifestEvidence/);
+  assert.match(script, /evaluatePlayerFacingSceneReview/);
+  assert.match(script, /scene-review/);
   assert.match(script, /evidenceMode/);
   assert.match(script, /process\.exitCode = 2/);
   assert.equal(packageJson.scripts["collaboration:frame-manifest"], "tsx scripts/frame-manifest-cli.ts");
@@ -38,4 +40,6 @@ test("HF M99 acceptance fixture keeps static and visual verdicts separate", asyn
   assert.equal(manifest.frames.length, 3);
   assert.equal(manifest.prescriptions.length, 6);
   assert.ok(manifest.prescriptions.every((item) => item.status === "NON_BLOCKING"));
+  assert.ok(manifest.sceneGaps.every((gap) => gap.ownership && gap.affectedScene && gap.nextStep && gap.evidence?.path && gap.evidence?.sha256));
+  assert.equal(manifest.sceneGaps[0].evidence.sha256, noHud.sha256);
 });

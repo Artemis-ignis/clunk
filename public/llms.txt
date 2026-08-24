@@ -174,6 +174,13 @@ evidence only and keeps `reviewStatus: NOT_EVALUATED`.
 Normalized manifests also carry `visualRuntime: GAP` and `playerFacing: NOT_EVALUATED` by default;
 the current v1 evidence contract rejects promotion of those fields, so a status snapshot or human
 review cannot be smuggled in as a frame upload.
+The collaboration status also exposes a machine-readable `readinessReason`: `STATIC_AUDIT_NOT_RUN`,
+`STATIC_AUDIT_FAILED`, `STATIC_AUDIT_BLOCKED`, `VISUAL_RUNTIME_NOT_EVALUATED`,
+`ENGINE_ENVIRONMENT_UNAVAILABLE`, `PLAYER_FACING_REVIEW_INPUT_INCOMPLETE`, `PLAYER_FACING_SCENE_GAP`, `VISUAL_RUNTIME_BLOCKED`, or
+`PLAYER_FACING_REVIEW_PASS`. `visualRuntime` accepts `NOT_RUN|PASS|GAP|BLOCKED|UNAVAILABLE`;
+`UNAVAILABLE` means the requested engine/device runner is not shipped and is never a PASS. Static
+PASS plus visual pending/GAP/UNAVAILABLE is `conditional`; only an explicit runtime PASS with human
+review is `ready`; hard blockers are `blocked`.
 Frame entries may also carry `sha256`, `viewport`, `renderer`, `shippedPath`, and
 `console: { errors, warnings }` so a packaged capture's provenance and browser/runtime smoke
 signal stay attached to the frame without becoming a player-facing verdict. They may also carry
@@ -269,6 +276,11 @@ replace every `<...>` value with the next real capture:
       "severity": "major",
       "category": "environment",
       "note": "Describe the visible gap and its player-facing impact.",
+      "ownership": "scene",
+      "affectedScene": "farm-long-shot",
+      "affectedAssetIds": ["<ASSET_INSPECTION_ID>"],
+      "nextStep": "Describe the next shipped-path capture/action.",
+      "evidence": { "path": "<FRAME_OR_RUNTIME_EVIDENCE_PATH>", "sha256": "<64_HEX_SHA256>", "bytes": 1 },
       "frameIds": ["<FRAME_ID>"]
     }],
     "prescriptions": [{
@@ -290,6 +302,8 @@ replace every `<...>` value with the next real capture:
       "evidenceStatus": "ENVIRONMENT_UNAVAILABLE",
       "productionReady": false,
       "origin": "file",
+      "ownership": "unknown",
+      "runtimeUsage": "UNKNOWN",
       "frameIds": ["<FRAME_ID>"],
       "qualityWarningIds": ["<QUALITY_WARNING_ID>"],
       "numericContract": {
@@ -354,6 +368,36 @@ It requires the authenticated workspace context, returns `clunk.asset-inspection
 and does not persist raw bytes. Store the returned evidence or its `inputHash` in a collaboration
 manifest when linking a shipped frame.
 
+For Sprite Atlas and Spine projects, use the bounded multi-file request contract. This is the
+authenticated bundle path for a Spine JSON + atlas + PNG project; it is not a public HTTP MCP:
+
+```json
+POST /api/assetops/inspect
+{
+  "schema": "clunk.asset-inspection-request.v2",
+  "entryFileName": "spine/character.json",
+  "files": [
+    { "fileName": "spine/character.json", "role": "entry", "bytesBase64": "<SPINE_JSON>" },
+    { "fileName": "spine/character.atlas", "role": "atlas", "relatesTo": ["spine/character.json"], "bytesBase64": "<ATLAS_TEXT>" },
+    { "fileName": "spine/body.png", "role": "page", "relatesTo": ["spine/character.atlas"], "bytesBase64": "<PNG_BYTES>" }
+  ],
+  "targetProfileId": "harvest-frontier-web-three",
+  "assetKind": "spine-project",
+  "runId": "HF-M99-spine-r01"
+}
+```
+
+The v2 response is `clunk.asset-inspection-response.v2` and adds a non-persistent `bundle` summary:
+`entryFileName`, `fileCount`, `totalBytes`, and each member's `fileName`, byte count, SHA-256,
+optional `role`, and validated `relatesTo` file names. `role` is one of `entry|project|atlas|page|texture|skeleton|animation|buffer|sidecar|unknown`;
+relations must point to another submitted file. This makes an atlas+page or Spine JSON+atlas+texture
+relationship auditable without persisting raw bytes.
+Names are safe relative slash paths only; duplicate names, missing entries, malformed base64,
+more than 256 files, or decoded aggregate bytes over 64 MiB are rejected. The legacy v1
+`fileName` + `bytesBase64` request remains supported. A multi-file structural PASS only proves
+the references were reopened from supplied bytes; missing engine import/runtime remains
+`ENVIRONMENT_UNAVAILABLE`, and it never changes `visualRuntime`, `reviewStatus`, or `playerFacing`.
+
 HF handoff pointer (external status, not the live M94 frame row): source head
 `82459216c618a15f7588f57003e5f4f4ee99f40a`, integration commit `781a551`; WebGL2/WebGPU
 M98/M99 invariants 8/8, retries 0, console 0/0; M96 forecast/recovery and ko/en layout PASS;
@@ -405,6 +449,17 @@ npm.cmd run collaboration:frame-manifest -- merge --current stored.json --incomi
 Both commands print normalized JSON and return exit `0` for valid evidence or exit `2` for
 malformed evidence/invalid cross-run append. The dashboard form exposes the same choice as
 `replace · full snapshot` and `append · keep existing IDs`.
+
+The player-facing scene contract is a separate evidence check:
+`npm.cmd run collaboration:frame-manifest -- scene-review --input hf-frame-manifest.json --format json`.
+It returns `clunk.player-facing-scene-review.v1` with `PASS_WITH_FOLLOW_UP`, `NO_GO`, or
+`UNAVAILABLE`; exit codes are `0`, `2`, and `4` respectively. Each enriched `sceneGaps[]` item
+must carry severity, `ownership`, affected scene or asset IDs, `nextStep`, and linked evidence
+`path`/SHA-256. `linkedAssets[].numericContract.score` may still be `100`, while
+`ownership: asset|runtime|unknown` and `runtimeUsage: USED_IN_FRAME|NOT_USED_IN_FRAME|UNKNOWN`
+remain explicit. `textureCount: 0` is not itself a defect. This command is an evidence/metadata
+gate only: `visualRuntime` stays `GAP`, `playerFacing` stays `NOT_EVALUATED`, and
+`humanReview` stays `PENDING`; no headless result is visual approval.
 
 Clunk's actual HF M99 acceptance fixture is committed at
 `examples/frame-manifest/harvest-frontier-m99-packaged-webgpu.json` (not a schema template).

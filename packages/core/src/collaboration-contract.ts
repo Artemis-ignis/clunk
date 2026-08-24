@@ -1,6 +1,6 @@
 export type AuditStatus = "NOT_RUN" | "PASS" | "FAIL" | "BLOCKED";
 
-export type RuntimeReviewStatus = "NOT_RUN" | "PASS" | "GAP" | "BLOCKED";
+export type RuntimeReviewStatus = "NOT_RUN" | "PASS" | "GAP" | "BLOCKED" | "UNAVAILABLE";
 
 export type ProductReadiness =
   | "ASSET_READY"
@@ -8,6 +8,18 @@ export type ProductReadiness =
   | "SCENE_GAP"
   | "PLAYER_FACING_READY"
   | "BLOCKED";
+
+/** Stable machine-readable explanation for the product readiness enum. */
+export type CollaborationReadinessReason =
+  | "STATIC_AUDIT_NOT_RUN"
+  | "STATIC_AUDIT_FAILED"
+  | "STATIC_AUDIT_BLOCKED"
+  | "VISUAL_RUNTIME_NOT_EVALUATED"
+  | "ENGINE_ENVIRONMENT_UNAVAILABLE"
+  | "PLAYER_FACING_REVIEW_INPUT_INCOMPLETE"
+  | "PLAYER_FACING_SCENE_GAP"
+  | "VISUAL_RUNTIME_BLOCKED"
+  | "PLAYER_FACING_REVIEW_PASS";
 
 export const FRAME_MANIFEST_SCHEMA = "clunk.frame-manifest.v1" as const;
 
@@ -17,10 +29,15 @@ export type FrameManifestVisualRuntimeStatus = "GAP";
 export type FrameManifestPlayerFacingStatus = "NOT_EVALUATED";
 export type NumericRuntimeCheckStatus = "NOT_RUN" | "PASS" | "FAIL" | "BLOCKED" | "UNAVAILABLE";
 export type SceneGapSeverity = "blocker" | "major" | "minor";
+export type SceneGapOwnership = "asset" | "runtime" | "scene" | "camera" | "environment" | "mixed" | "unknown";
+export const PLAYER_FACING_SCENE_REVIEW_SCHEMA = "clunk.player-facing-scene-review.v1" as const;
+export type SceneReviewDisposition = "PASS_WITH_FOLLOW_UP" | "NO_GO" | "UNAVAILABLE";
 export type EvidencePrescriptionPriority = "P1" | "P2" | "P3";
 export type FrameManifestWriteMode = "replace" | "append";
 export type FrameManifestAssetKind = "3d-model" | "2d-image" | "sprite-atlas" | "spine-project" | "animation-clip";
 export type FrameManifestAssetOrigin = "file" | "procedural" | "runtime-generated";
+export type FrameManifestAssetOwnership = "asset" | "runtime" | "unknown";
+export type FrameManifestAssetRuntimeUsage = "USED_IN_FRAME" | "NOT_USED_IN_FRAME" | "UNKNOWN";
 export type FrameManifestAssetEvidenceStatus = "READY" | "CONDITIONAL" | "BLOCKED" | "UNSUPPORTED" | "ENVIRONMENT_UNAVAILABLE";
 export type FrameManifestNumericContractStatus = "PASS" | "FAIL" | "UNAVAILABLE";
 
@@ -58,7 +75,19 @@ export interface SceneGapNote {
   severity: SceneGapSeverity;
   category: string;
   note: string;
+  /** Optional enriched scene-review ownership; legacy v1 notes may omit it. */
+  ownership?: SceneGapOwnership;
+  affectedScene?: string;
+  affectedAssetIds?: readonly string[];
+  nextStep?: string;
+  evidence?: SceneGapEvidence;
   frameIds?: readonly string[];
+}
+
+export interface SceneGapEvidence {
+  path: string;
+  sha256: string;
+  bytes?: number;
 }
 
 export interface EvidencePrescription {
@@ -94,6 +123,10 @@ export interface FrameManifestAssetInspection {
   productionReady: boolean;
   /** `file` is a byte artifact; other origins must carry source provenance. */
   origin: FrameManifestAssetOrigin;
+  /** Explicit ownership of the observed surface; never infer from textureCount alone. */
+  ownership?: FrameManifestAssetOwnership;
+  /** Do not infer loader usage from sourcePath or frameIds; producers must state it. */
+  runtimeUsage?: FrameManifestAssetRuntimeUsage;
   provenance?: FrameManifestAssetProvenance;
   frameIds?: readonly string[];
   qualityWarningIds?: readonly string[];
@@ -135,6 +168,37 @@ export interface FrameManifest {
   assetInspections?: readonly FrameManifestAssetInspection[];
 }
 
+export interface PlayerFacingSceneReview {
+  schema: typeof PLAYER_FACING_SCENE_REVIEW_SCHEMA;
+  status: SceneReviewDisposition;
+  readiness: "conditional" | "blocked";
+  readinessReason: "PLAYER_FACING_SCENE_GAP" | "PLAYER_FACING_REVIEW_INPUT_INCOMPLETE" | "VISUAL_RUNTIME_NOT_EVALUATED";
+  reviewStatus: "NOT_EVALUATED";
+  visualRuntime: "GAP";
+  playerFacing: "NOT_EVALUATED";
+  humanReview: "PENDING";
+  source: { runId: string; sourceProject: string; sourceCommit: string };
+  captureSummary: {
+    totalFrames: number;
+    shippedFrames: number;
+    consoleErrors: number;
+    consoleWarnings: number;
+  };
+  sceneGaps: readonly SceneGapNote[];
+  linkedAssets: readonly {
+    id: string;
+    sourcePath: string;
+    inputHash: string;
+    assetKind: FrameManifestAssetKind;
+    origin: FrameManifestAssetOrigin;
+    ownership: FrameManifestAssetOwnership;
+    evidenceStatus: FrameManifestAssetEvidenceStatus;
+    runtimeUsage: FrameManifestAssetRuntimeUsage;
+    numericContract?: Pick<FrameManifestNumericContract, "status" | "score" | "hardBlockerCount">;
+  }[];
+  issues?: readonly string[];
+}
+
 export interface CollaborationStatusInput {
   assetAudit: AuditStatus;
   visualRuntime: RuntimeReviewStatus;
@@ -149,6 +213,7 @@ export interface CollaborationStatus {
   assetAudit: AuditStatus;
   visualRuntime: RuntimeReviewStatus;
   readiness: ProductReadiness;
+  readinessReason: CollaborationReadinessReason;
   profileId: string;
   baseProfileId?: string;
   ruleSetId: string;
@@ -264,6 +329,20 @@ function normalizeSceneGap(value: unknown, index: number): SceneGapNote {
     category: requiredText(record, "category", label, 120),
     note: requiredText(record, "note", label, 2000),
   };
+  const ownership = record.ownership;
+  if (ownership !== undefined) {
+    if (ownership !== "asset" && ownership !== "runtime" && ownership !== "scene" && ownership !== "camera" && ownership !== "environment" && ownership !== "mixed" && ownership !== "unknown") {
+      throw new Error(`${label}.ownership is not supported`);
+    }
+    gap.ownership = ownership;
+  }
+  const affectedScene = optionalText(record, "affectedScene", label, 240);
+  if (affectedScene) gap.affectedScene = affectedScene;
+  const affectedAssetIds = normalizeStringArray(record.affectedAssetIds, `${label}.affectedAssetIds`, 64);
+  if (affectedAssetIds) gap.affectedAssetIds = affectedAssetIds;
+  const nextStep = optionalText(record, "nextStep", label, 2000);
+  if (nextStep) gap.nextStep = nextStep;
+  if (record.evidence !== undefined) gap.evidence = normalizeSceneGapEvidence(record.evidence, `${label}.evidence`);
   if (record.frameIds !== undefined) {
     if (!Array.isArray(record.frameIds) || record.frameIds.length > 32) {
       throw new Error(`${label}.frameIds must be an array of at most 32 frame ids`);
@@ -278,6 +357,18 @@ function normalizeSceneGap(value: unknown, index: number): SceneGapNote {
     gap.frameIds = frameIds;
   }
   return gap;
+}
+
+function normalizeSceneGapEvidence(value: unknown, label: string): SceneGapEvidence {
+  const record = asRecord(value, label);
+  const sha256 = requiredText(record, "sha256", label, 128).toLowerCase();
+  if (!/^[a-f0-9]{64}$/.test(sha256)) throw new Error(`${label}.sha256 must be a 64-character hexadecimal hash`);
+  const evidence: SceneGapEvidence = {
+    path: requiredText(record, "path", label, 1000),
+    sha256,
+  };
+  if (record.bytes !== undefined) evidence.bytes = nonNegativeInteger(record, "bytes", label);
+  return evidence;
 }
 
 function normalizePrescription(value: unknown, index: number): EvidencePrescription {
@@ -377,6 +468,20 @@ function normalizeAssetInspection(value: unknown, index: number): FrameManifestA
     origin,
   };
   if (record.productionReady !== true && record.productionReady !== false) throw new Error(`${label}.productionReady must be a boolean`);
+  const runtimeUsage = record.runtimeUsage;
+  if (runtimeUsage !== undefined) {
+    if (runtimeUsage !== "USED_IN_FRAME" && runtimeUsage !== "NOT_USED_IN_FRAME" && runtimeUsage !== "UNKNOWN") {
+      throw new Error(`${label}.runtimeUsage must be USED_IN_FRAME, NOT_USED_IN_FRAME, or UNKNOWN`);
+    }
+    inspection.runtimeUsage = runtimeUsage;
+  }
+  const ownership = record.ownership;
+  if (ownership !== undefined) {
+    if (ownership !== "asset" && ownership !== "runtime" && ownership !== "unknown") {
+      throw new Error(`${label}.ownership must be asset, runtime, or unknown`);
+    }
+    inspection.ownership = ownership;
+  }
   if (record.provenance !== undefined) inspection.provenance = normalizeAssetProvenance(record.provenance, `${label}.provenance`);
   if (origin !== "file" && !inspection.provenance) {
     throw new Error(`${label}.provenance.sourceRef is required for ${origin} assets`);
@@ -537,6 +642,103 @@ export function normalizeFrameManifest(value: unknown): FrameManifest {
 }
 
 /**
+ * Evaluate the evidence contract for a player-facing scene review.
+ *
+ * This is deliberately not a renderer or computer-vision approval. It checks that a
+ * producer supplied a real shipped capture, linked hashes, ownership, and an actionable
+ * scene note. The returned visual verdict remains GAP/NOT_EVALUATED until a human review.
+ */
+export function evaluatePlayerFacingSceneReview(manifest: FrameManifest): PlayerFacingSceneReview {
+  const shippedFrames = manifest.frames.filter((frame) => frame.shippedPath === true);
+  const frameById = new Map(manifest.frames.map((frame) => [frame.id, frame]));
+  const assetById = new Map((manifest.assetInspections ?? []).map((asset) => [asset.id, asset]));
+  const issues: string[] = [];
+
+  if (shippedFrames.length === 0) issues.push("no shippedPath frame was submitted");
+  for (const gap of manifest.sceneGaps) {
+    if (!gap.ownership) issues.push(`sceneGaps.${gap.id}.ownership is required for scene review`);
+    if (!gap.nextStep) issues.push(`sceneGaps.${gap.id}.nextStep is required for scene review`);
+    if (!gap.affectedScene && !(gap.affectedAssetIds && gap.affectedAssetIds.length > 0)) {
+      issues.push(`sceneGaps.${gap.id} must identify affectedScene or affectedAssetIds`);
+    }
+    if (!gap.evidence) issues.push(`sceneGaps.${gap.id}.evidence with path and sha256 is required for scene review`);
+    for (const assetId of gap.affectedAssetIds ?? []) {
+      if (!assetById.has(assetId)) issues.push(`sceneGaps.${gap.id} references unknown asset ${assetId}`);
+    }
+    for (const frameId of gap.frameIds ?? []) {
+      const frame = frameById.get(frameId);
+      if (!frame) continue;
+      if (frame.shippedPath !== true || !frame.sha256 || frame.bytes === undefined || !frame.viewport || !frame.renderer || !frame.console) {
+        issues.push(`sceneGaps.${gap.id} frame ${frameId} lacks shipped capture metadata`);
+      }
+    }
+  }
+
+  const knownEvidence = new Map<string, { sha256?: string; bytes?: number }>();
+  for (const frame of manifest.frames) knownEvidence.set(frame.path, { sha256: frame.sha256, bytes: frame.bytes });
+  for (const check of manifest.runtimeChecks ?? []) {
+    if (check.evidencePath) knownEvidence.set(check.evidencePath, {});
+  }
+  for (const asset of manifest.assetInspections ?? []) knownEvidence.set(asset.sourcePath, { sha256: asset.inputHash });
+  for (const gap of manifest.sceneGaps) {
+    if (!gap.evidence) continue;
+    const linked = knownEvidence.get(gap.evidence.path);
+    if (!linked) issues.push(`sceneGaps.${gap.id}.evidence.path is not linked to a frame, runtime check, or asset`);
+    else if (linked.sha256 && linked.sha256 !== gap.evidence.sha256) issues.push(`sceneGaps.${gap.id}.evidence.sha256 does not match its linked source`);
+    else if (linked.bytes !== undefined && gap.evidence.bytes !== undefined && linked.bytes !== gap.evidence.bytes) issues.push(`sceneGaps.${gap.id}.evidence.bytes does not match its linked source`);
+  }
+
+  const status: SceneReviewDisposition = issues.length > 0
+    ? "UNAVAILABLE"
+    : manifest.sceneGaps.some((gap) => gap.severity === "blocker" || gap.severity === "major")
+      ? "NO_GO"
+      : "PASS_WITH_FOLLOW_UP";
+  const linkedAssets = (manifest.assetInspections ?? []).map((asset) => ({
+    id: asset.id,
+    sourcePath: asset.sourcePath,
+    inputHash: asset.inputHash,
+    assetKind: asset.assetKind,
+    origin: asset.origin,
+    ownership: asset.ownership ?? "unknown",
+    evidenceStatus: asset.evidenceStatus,
+    runtimeUsage: asset.runtimeUsage ?? "UNKNOWN" as const,
+    ...(asset.numericContract
+      ? { numericContract: {
+        status: asset.numericContract.status,
+        ...(asset.numericContract.score !== undefined ? { score: asset.numericContract.score } : {}),
+        ...(asset.numericContract.hardBlockerCount !== undefined ? { hardBlockerCount: asset.numericContract.hardBlockerCount } : {}),
+      } }
+      : {}),
+  }));
+  const consoleErrors = manifest.frames.reduce((total, frame) => total + (frame.console?.errors ?? 0), 0);
+  const consoleWarnings = manifest.frames.reduce((total, frame) => total + (frame.console?.warnings ?? 0), 0);
+  return {
+    schema: PLAYER_FACING_SCENE_REVIEW_SCHEMA,
+    status,
+    readiness: "conditional",
+    readinessReason: issues.length > 0
+      ? "PLAYER_FACING_REVIEW_INPUT_INCOMPLETE"
+      : manifest.sceneGaps.length > 0
+        ? "PLAYER_FACING_SCENE_GAP"
+        : "VISUAL_RUNTIME_NOT_EVALUATED",
+    reviewStatus: "NOT_EVALUATED",
+    visualRuntime: "GAP",
+    playerFacing: "NOT_EVALUATED",
+    humanReview: "PENDING",
+    source: { runId: manifest.runId, sourceProject: manifest.sourceProject, sourceCommit: manifest.sourceCommit },
+    captureSummary: {
+      totalFrames: manifest.frames.length,
+      shippedFrames: shippedFrames.length,
+      consoleErrors,
+      consoleWarnings,
+    },
+    sceneGaps: manifest.sceneGaps,
+    linkedAssets,
+    ...(issues.length > 0 ? { issues } : {}),
+  };
+}
+
+/**
  * Merge a new normalized frame snapshot into the current collaboration evidence.
  *
  * `replace` is an explicit full-snapshot replacement. `append` keeps existing items,
@@ -590,22 +792,36 @@ function upsertById<T extends { id: string }>(current: readonly T[], incoming: r
 
 export function resolveCollaborationStatus(input: CollaborationStatusInput): CollaborationStatus {
   let readiness: ProductReadiness;
+  let readinessReason: CollaborationReadinessReason;
   if (input.assetAudit === "FAIL" || input.assetAudit === "BLOCKED" || input.visualRuntime === "BLOCKED") {
     readiness = "BLOCKED";
+    readinessReason = input.assetAudit === "BLOCKED"
+      ? "STATIC_AUDIT_BLOCKED"
+      : input.assetAudit === "FAIL"
+        ? "STATIC_AUDIT_FAILED"
+        : "VISUAL_RUNTIME_BLOCKED";
   } else if (input.assetAudit !== "PASS") {
     readiness = "ASSET_CONDITIONAL";
+    readinessReason = "STATIC_AUDIT_NOT_RUN";
   } else if (input.visualRuntime === "GAP") {
     readiness = "SCENE_GAP";
+    readinessReason = "PLAYER_FACING_SCENE_GAP";
+  } else if (input.visualRuntime === "UNAVAILABLE") {
+    readiness = "ASSET_READY";
+    readinessReason = "ENGINE_ENVIRONMENT_UNAVAILABLE";
   } else if (input.visualRuntime === "PASS") {
     readiness = "PLAYER_FACING_READY";
+    readinessReason = "PLAYER_FACING_REVIEW_PASS";
   } else {
     readiness = "ASSET_READY";
+    readinessReason = "VISUAL_RUNTIME_NOT_EVALUATED";
   }
 
   return {
     assetAudit: input.assetAudit,
     visualRuntime: input.visualRuntime,
     readiness,
+    readinessReason,
     profileId: input.profileId,
     ...(input.baseProfileId ? { baseProfileId: input.baseProfileId } : {}),
     ruleSetId: input.ruleSetId,

@@ -25,7 +25,7 @@ function readStatus(value: string): unknown {
   try {
     return JSON.parse(value);
   } catch {
-    return { readiness: "BLOCKED", error: "Stored collaboration status is invalid." };
+    return { readiness: "BLOCKED", readinessReason: "STATIC_AUDIT_BLOCKED", error: "Stored collaboration status is invalid." };
   }
 }
 

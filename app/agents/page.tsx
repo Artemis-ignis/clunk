@@ -284,8 +284,13 @@ export default function AgentsPage() {
               <code>{COLLABORATION_CONTRACT.evidenceWriteMode}</code>로 기존 gap/prescription 보존 여부를 명시합니다.
               현재 실제 M94 저장값은 <code>{COLLABORATION_CONTRACT.storedM94}</code>입니다. 공개 HTTP MCP는 여전히 제공하지 않습니다.
               원본 에셋을 frame과 묶을 때는 <code>{COLLABORATION_CONTRACT.linkedAssetInspection}</code>을 사용하며,
-               frame manifest만 갱신할 때는 <code>{COLLABORATION_CONTRACT.evidenceOnlyApi}</code>를 사용합니다. procedural/runtime-generated
+              frame manifest만 갱신할 때는 <code>{COLLABORATION_CONTRACT.evidenceOnlyApi}</code>를 사용합니다. procedural/runtime-generated
               작물·식생·NPC는 <code>origin</code>과 <code>provenance.sourceRef</code>를 함께 기록하지만 별도 GLB 바이트 PASS로 만들지 않습니다.
+              협업 상태의 <code>readinessReason</code>은 <code>{COLLABORATION_CONTRACT.readinessReason}</code> enum으로 남으며,
+              <code>ENGINE_ENVIRONMENT_UNAVAILABLE</code>은 Godot/Unity/Unreal/mobile 런너 미제공을 뜻할 뿐 PASS가 아닙니다.
+              플레이어 화면 gap을 구조화하려면 <code>{COLLABORATION_CONTRACT.sceneReviewCli}</code>를 사용합니다.
+              이 결과는 severity, evidence path/hash, affected scene/asset, ownership, nextStep을 반환하지만
+              <code>visualRuntime: GAP</code>·<code>playerFacing: NOT_EVALUATED</code>·human review PENDING을 유지합니다.
               바이트 검사는 <code>{ASSET_INSPECTION_CONTRACT.request}</code>의 인증 API 또는
               <code>{ASSET_INSPECTION_CONTRACT.cli}</code>로 실행합니다.
             </p>

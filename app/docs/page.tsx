@@ -201,7 +201,10 @@ const FRAME_MANIFEST_SCHEMA_EXAMPLE = `// SCHEMA EXAMPLE · replace every <...>;
   }],
   "sceneGaps": [{
     "id": "<SCENE_GAP_ID>", "severity": "major", "category": "<CATEGORY>",
-    "note": "<OBSERVATION>", "frameIds": ["<FRAME_ID>"]
+    "note": "<OBSERVATION>", "ownership": "scene", "affectedScene": "<SCENE_ID>",
+    "affectedAssetIds": ["<ASSET_INSPECTION_ID>"], "nextStep": "<ACTIONABLE_NEXT_STEP>",
+    "evidence": { "path": "<FRAME_OR_RUNTIME_EVIDENCE_PATH>", "sha256": "<64_HEX_SHA256>", "bytes": 1 },
+    "frameIds": ["<FRAME_ID>"]
   }],
   "prescriptions": [{
     "id": "<PRESCRIPTION_ID>", "kind": "<KIND>", "status": "NON_BLOCKING",
@@ -211,11 +214,26 @@ const FRAME_MANIFEST_SCHEMA_EXAMPLE = `// SCHEMA EXAMPLE · replace every <...>;
   "assetInspections": [{
     "id": "<ASSET_INSPECTION_ID>", "sourcePath": "<SOURCE_ASSET_PATH>", "inputHash": "<64_HEX_ASSET_HASH>",
     "assetKind": "3d-model", "targetProfileId": "<TARGET_PROFILE_ID>", "inspectionRunId": "<INSPECTION_RUN_ID>",
-    "evidenceStatus": "ENVIRONMENT_UNAVAILABLE", "productionReady": false, "origin": "file", "frameIds": ["<FRAME_ID>"],
+    "evidenceStatus": "ENVIRONMENT_UNAVAILABLE", "productionReady": false, "origin": "file", "ownership": "unknown", "runtimeUsage": "UNKNOWN", "frameIds": ["<FRAME_ID>"],
     "qualityWarningIds": ["<QUALITY_WARNING_ID>"],
     "numericContract": { "status": "PASS", "valid": true, "score": 100, "threshold": 90, "hardBlockerCount": 0,
       "findingIds": ["<INFO_FINDING_ID>"], "observations": { "drawCallCount": 88, "bounds": "<OBSERVED_BOUNDS>" } }
   }]
+}`;
+
+const PLAYER_FACING_SCENE_REVIEW_EXAMPLE = `// SCHEMA EXAMPLE · clunk.player-facing-scene-review.v1 · not a visual approval
+{
+  "schema": "clunk.player-facing-scene-review.v1",
+  "status": "NO_GO",
+  "readiness": "conditional",
+  "readinessReason": "PLAYER_FACING_SCENE_GAP",
+  "reviewStatus": "NOT_EVALUATED",
+  "visualRuntime": "GAP",
+  "playerFacing": "NOT_EVALUATED",
+  "humanReview": "PENDING",
+  "captureSummary": { "totalFrames": 3, "shippedFrames": 2, "consoleErrors": 0, "consoleWarnings": 0 },
+  "sceneGaps": [{ "severity": "major", "ownership": "camera", "affectedScene": "dealer-approach", "nextStep": "<ACTION>", "evidence": { "path": "<REAL_PATH>", "sha256": "<REAL_HASH>" } }],
+  "linkedAssets": [{ "id": "<ASSET_ID>", "numericContract": { "status": "PASS", "score": 100 }, "ownership": "unknown", "runtimeUsage": "UNKNOWN" }]
 }`;
 
 const FRAME_MANIFEST_WRITE_RULES = `# append: same runId + sourceProject only; keep old IDs and upsert incoming IDs
@@ -235,9 +253,16 @@ npm.cmd run collaboration:frame-manifest -- merge --current stored.json --incomi
 # linked asset inspection: frameIds must refer to frames in this manifest;
 # the link never promotes playerFacing or reviewStatus.
 # runtimeChecks[] is the numeric pose/on-screen/coverage/lens layer; PASS never changes human review.
-# append retains omitted IDs; replace removes omitted IDs from every evidence array.`;
+# append retains omitted IDs; replace removes omitted IDs from every evidence array.
 
-const ASSET_INSPECTION_API_EXAMPLE = `// AUTHENTICATED API · raw bytes are not persisted
+# player-facing scene evidence contract; this is not a renderer or human approval
+npm.cmd run collaboration:frame-manifest -- scene-review --input hf-frame-manifest.json --format json
+# output schema: clunk.player-facing-scene-review.v1
+# exit 0 PASS_WITH_FOLLOW_UP · exit 2 NO_GO (major/blocker gap) · exit 4 UNAVAILABLE (missing shipped/evidence metadata)
+# visualRuntime remains GAP, playerFacing remains NOT_EVALUATED, humanReview remains PENDING.
+# score=100 is returned under linkedAssets[].numericContract only; runtimeUsage/ownership stay explicit.`;
+
+const ASSET_INSPECTION_API_EXAMPLE = `// SCHEMA EXAMPLE · AUTHENTICATED API · raw bytes are not persisted
 POST /api/assetops/inspect
 {
   "schema": "clunk.asset-inspection-request.v1",
@@ -254,7 +279,30 @@ POST /api/assetops/inspect
   "source": { "sha256": "<64_HEX>" },
   "stages": { "import": { "status": "environmentUnavailable" }, "runtime": { "status": "environmentUnavailable" } },
   "qualityWarnings": []
-} }`;
+} }
+
+// v2 multi-file bundle · required for Spine JSON + atlas + PNG or Sprite atlas + page
+POST /api/assetops/inspect
+{
+  "schema": "clunk.asset-inspection-request.v2",
+  "entryFileName": "spine/character.json",
+  "files": [
+    { "fileName": "spine/character.json", "role": "entry", "bytesBase64": "<SPINE_JSON>" },
+    { "fileName": "spine/character.atlas", "role": "atlas", "relatesTo": ["spine/character.json"], "bytesBase64": "<ATLAS_TEXT>" },
+    { "fileName": "spine/body.png", "role": "page", "relatesTo": ["spine/character.atlas"], "bytesBase64": "<PNG_BYTES>" }
+  ],
+  "targetProfileId": "harvest-frontier-web-three",
+  "assetKind": "spine-project",
+  "runId": "<RUN_ID>"
+}
+
+// response: clunk.asset-inspection-response.v2
+{ "ok": true, "bundle": {
+  "entryFileName": "spine/character.json", "fileCount": 3, "totalBytes": 1234,
+  "files": [{ "fileName": "spine/body.png", "bytes": 900, "sha256": "<64_HEX>", "role": "page", "relatesTo": ["spine/character.atlas"] }]
+} }
+// v1 remains valid; v2 rejects unsafe/duplicate names, missing entry, malformed base64,
+// invalid role/relation references, >256 files, or >64 MiB decoded. Structural PASS is not runtime or player-facing approval.`;
 
 const AGENT_SESSION = `$ echo '{"jsonrpc":"2.0","id":1,"method":"initialize"}' | npm run mcp
   protocolVersion  ${MCP_SERVER.protocolVersion}
@@ -394,6 +442,9 @@ export default function DocsPage() {
             <code>reviewStatus: NOT_EVALUATED</code>는 실제 WebGPU/무-HUD 화면 판정을 대신하지 않습니다.
             기본값은 <code>reviewStatus: NOT_EVALUATED</code> · <code>visualRuntime: GAP</code> ·
             <code>playerFacing: NOT_EVALUATED</code>이며, static asset PASS나 raster PASS를 자동 승격하지 않습니다.
+            협업 상태의 <code>readinessReason</code>은 승격 사유를 기계 판독 가능한 enum으로 보존합니다.
+            예를 들어 <code>PLAYER_FACING_SCENE_GAP</code>은 화면 gap, <code>ENGINE_ENVIRONMENT_UNAVAILABLE</code>은
+            Godot/Unity/Unreal/mobile 런너 미제공을 뜻하며 둘 다 PASS가 아닙니다.
             gameplay-band detail loss 같은 후속 조치는 <code>{COLLABORATION_CONTRACT.prescriptions}</code>로
             정적 PASS를 덮지 않고 기록합니다. `runtimeChecks[].status=PASS`는 pose/on-screen/coverage/lens 같은
             숫자 계약만 통과했다는 뜻이고, <code>reviewStatus: NOT_EVALUATED</code>는 사람이 캡처를 읽어
@@ -414,6 +465,7 @@ export default function DocsPage() {
           <CodeBlock title="source asset link API" language="json" code={`${ASSET_INSPECTION_API_EXAMPLE}\n\n// frame + asset evidence merge (authenticated)\nPOST /api/collaboration/threads/<THREAD_ID>/evidence\n{ "evidenceMode": "append", "evidence": <FULL_FRAME_MANIFEST> }`} caption="바이트 검사 응답과 frame manifest 저장은 분리됩니다. API는 인증된 workspace에서만 동작하며 placeholder는 실제 저장 evidence가 아닙니다." />
           <CodeBlock title="procedural/runtime provenance" language="json" code={PROCEDURAL_ASSET_SCHEMA_EXAMPLE} caption="procedural crop·vegetation·NPC는 GLB 바이트 PASS를 발명하지 않습니다. sourceRef/sourceCommit/generator/recipeId와 실제 frame을 함께 검토 대상으로 등록합니다." />
           <CodeBlock title="evidenceMode" language="bash" code={FRAME_MANIFEST_WRITE_RULES} caption="append는 기존 ID를 보존하고 같은 ID만 upsert합니다. 다른 runId/sourceProject append는 409로 거부합니다." />
+          <CodeBlock title="player-facing scene review output" language="json" code={PLAYER_FACING_SCENE_REVIEW_EXAMPLE} caption="NO_GO/PASS_WITH_FOLLOW_UP는 evidence disposition입니다. score 100과 runtime/player-facing 판정을 합치지 않고, 실제 shipped capture·evidence hash·소유권을 모두 요구합니다." />
           <p className="doc-lead">
             HF M95 standing invariant는 sourceHead <code>3e3e3435b2e378a2446dacd8d352d2d24437518a</code>,
             renderer <code>WebGL2</code>, 실제 브라우저 입력 기준 8/8 PASS·재시도 0·console 0/0입니다.

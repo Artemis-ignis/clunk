@@ -56,6 +56,11 @@
       "severity": "major",
       "category": "terrain",
       "note": "Distant terrain/hill band and boundary readability still require human review in the no-HUD shipped frame.",
+      "ownership": "scene",
+      "affectedScene": "farm-long-shot",
+      "affectedAssetIds": ["texture-ridge-woodland"],
+      "nextStep": "Recapture the same shipped no-HUD camera after breaking the distant ridge silhouette and boundary repetition.",
+      "evidence": { "path": "C:/Users/50106/Desktop/Harvest Frontier/.logs/screenshots/M99/shipped-visual/HF-M99-packaged-visual-webgpu-03-game-nohud.png", "sha256": "e225f58f2ef5b12f45c24c3b00418a63ba33ba7c038267183cb02da83ce12061", "bytes": 2821461 },
       "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"]
     },
     {
@@ -63,6 +68,10 @@
       "severity": "major",
       "category": "vegetation",
       "note": "Hedge and rock silhouettes remain simplified/repetitive at player-facing distance.",
+      "ownership": "scene",
+      "affectedScene": "farm-long-shot",
+      "nextStep": "Replace the repeated hedge/rock silhouette treatment or add authored variation, then recapture the same player-facing distance band.",
+      "evidence": { "path": "C:/Users/50106/Desktop/Harvest Frontier/.logs/screenshots/M99/shipped-visual/HF-M99-packaged-visual-webgpu-03-game-nohud.png", "sha256": "e225f58f2ef5b12f45c24c3b00418a63ba33ba7c038267183cb02da83ce12061", "bytes": 2821461 },
       "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"]
     },
     {
@@ -70,6 +79,10 @@
       "severity": "major",
       "category": "signage",
       "note": "Sign text is small/soft in the shipped frame; numeric camera/runtime PASS does not establish readable signage.",
+      "ownership": "scene",
+      "affectedScene": "dealer-approach",
+      "nextStep": "Submit a same-commit dealer/sign frame at the actual player distance and remeasure text readability before calling the sign cleared.",
+      "evidence": { "path": "C:/Users/50106/Desktop/Harvest Frontier/.logs/screenshots/M99/shipped-visual/HF-M99-packaged-visual-webgpu-03-game-nohud.png", "sha256": "e225f58f2ef5b12f45c24c3b00418a63ba33ba7c038267183cb02da83ce12061", "bytes": 2821461 },
       "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"]
     },
     {
@@ -77,6 +90,10 @@
       "severity": "major",
       "category": "camera",
       "note": "Dealer approach composition still needs human inspection for player/facility relationship and near-fill.",
+      "ownership": "camera",
+      "affectedScene": "dealer-approach",
+      "nextStep": "Capture the corrected dealer approach with player and facility co-framed, then keep numeric camera checks separate from human composition review.",
+      "evidence": { "path": "C:/Users/50106/Desktop/Harvest Frontier/.logs/screenshots/M99/shipped-visual/HF-M99-packaged-visual-webgpu-03-game-nohud.png", "sha256": "e225f58f2ef5b12f45c24c3b00418a63ba33ba7c038267183cb02da83ce12061", "bytes": 2821461 },
       "frameIds": ["hf-m99-webgpu-nohud", "hf-m99-webgpu-realwalk"]
     },
     {
@@ -84,6 +101,10 @@
       "severity": "major",
       "category": "dialogue",
       "note": "Dialogue/NPC composition is not cleared by this no-HUD frame set; submit a same-commit dialogue capture for review.",
+      "ownership": "runtime",
+      "affectedScene": "dialogue-npc",
+      "nextStep": "Submit a shipped-path dialogue capture with the NPC world model and camera relationship visible; numeric pose checks alone do not close this gap.",
+      "evidence": { "path": "C:/Users/50106/Desktop/Harvest Frontier/.logs/screenshots/M99/shipped-visual/HF-M99-packaged-visual-webgpu-03-game-nohud.png", "sha256": "e225f58f2ef5b12f45c24c3b00418a63ba33ba7c038267183cb02da83ce12061", "bytes": 2821461 },
       "frameIds": ["hf-m99-webgpu-nohud"]
     }
   ],

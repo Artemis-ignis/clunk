@@ -79,6 +79,48 @@ test("sprite atlas analyzer blocks a missing page instead of treating it as a va
   assert.ok(result.findings.some((finding) => finding.id === "ATLAS-MISSING-PAGE"));
 });
 
+test("sprite atlas analyzer blocks a region outside the actual page bounds", () => {
+  const outOfBounds = encoder.encode(`body.png
+size: 1672,941
+format: RGBA8888
+body
+  rotate: false
+  xy: 10000, 0
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+`);
+  const result = analyzeSpriteAtlas({
+    entry: "body.atlas",
+    files: new Map([["body.atlas", outOfBounds], ["body.png", image]]),
+    target,
+  });
+  assert.equal(result.gate.status, "fail");
+  assert.ok(result.findings.some((finding) => finding.id === "ATLAS-REGION-BOUNDS"));
+});
+
+test("sprite atlas analyzer blocks duplicate region identifiers", () => {
+  const duplicate = encoder.encode(`body.png
+size: 1672,941
+format: RGBA8888
+body
+  xy: 0, 0
+  size: 64, 64
+  orig: 64, 64
+body
+  xy: 64, 0
+  size: 64, 64
+  orig: 64, 64
+`);
+  const result = analyzeSpriteAtlas({
+    entry: "body.atlas",
+    files: new Map([["body.atlas", duplicate], ["body.png", image]]),
+    target,
+  });
+  assert.equal(result.gate.status, "fail");
+  assert.ok(result.findings.some((finding) => finding.id === "ATLAS-DUPLICATE-REGION"));
+});
+
 test("Spine analyzer checks skeleton, attachment, animation, and atlas references", () => {
   const files = new Map<string, Uint8Array>([
     ["character.json", spineJson()],
@@ -90,6 +132,34 @@ test("Spine analyzer checks skeleton, attachment, animation, and atlas reference
   assert.equal(result.boneCount, 1);
   assert.equal(result.slotCount, 1);
   assert.deepEqual(result.animationNames, ["idle"]);
+});
+
+test("Spine analyzer blocks slots and timelines that reference missing bones or slots", () => {
+  const invalidProject = encoder.encode(JSON.stringify({
+    skeleton: { spine: "4.1" },
+    bones: [{ name: "root" }],
+    slots: [{ name: "body-slot", bone: "missing-bone", attachment: "body" }],
+    skins: [{ name: "default", attachments: { "body-slot": { body: { type: "region", path: "body" } } } }],
+    animations: {
+      idle: {
+        bones: { "missing-bone": { rotate: [{ time: 0, angle: 0 }] } },
+        slots: { "missing-slot": { attachment: [{ time: 0, name: "body" }] } },
+      },
+    },
+  }));
+  const result = analyzeSpineProject({
+    entry: "character.json",
+    files: new Map([
+      ["character.json", invalidProject],
+      ["character.atlas", atlasText()],
+      ["body.png", image],
+    ]),
+    target,
+  });
+  assert.equal(result.gate.status, "fail");
+  assert.ok(result.findings.some((finding) => finding.id === "SPINE-MISSING-BONE"));
+  assert.ok(result.findings.some((finding) => finding.id === "SPINE-MISSING-ANIMATION-BONE"));
+  assert.ok(result.findings.some((finding) => finding.id === "SPINE-MISSING-ANIMATION-SLOT"));
 });
 
 test("Spine analyzer reports missing attachment regions and binary skel support honestly", () => {
@@ -139,4 +209,50 @@ test("animation analyzer reports clip duration and required clip policy", () => 
   assert.equal(result.clips[0]?.name, "idle");
   assert.equal(result.clips[0]?.durationSeconds, 1);
   assert.equal(result.clips[0]?.hasRootMotion, false);
+});
+
+test("animation analyzer blocks missing sampler, accessor, node, and target-path bindings", () => {
+  const gltf = {
+    asset: { version: "2.0" },
+    scenes: [{ nodes: [0] }],
+    scene: 0,
+    nodes: [{ name: "root" }],
+    buffers: [{ byteLength: 8 }],
+    accessors: [{ min: [0], max: [1] }],
+    animations: [{
+      name: "broken",
+      samplers: [{ input: 7, output: 8 }],
+      channels: [{ sampler: 4, target: { node: 9, path: "morph" } }],
+    }],
+  };
+  const result = analyzeAnimation({
+    bundle: createAssetBundle("broken.gltf", encoder.encode(JSON.stringify(gltf))),
+    target,
+  });
+  assert.equal(result.gate.status, "fail");
+  assert.ok(result.findings.some((finding) => finding.id === "ANIM-SAMPLER-INDEX"));
+  assert.ok(result.findings.some((finding) => finding.id === "ANIM-TARGET-NODE"));
+  assert.ok(result.findings.some((finding) => finding.id === "ANIM-TARGET-PATH"));
+});
+
+test("animation analyzer keeps zero-duration clips visible as a non-blocking quality warning", () => {
+  const gltf = {
+    asset: { version: "2.0" },
+    scenes: [{ nodes: [0] }],
+    scene: 0,
+    nodes: [{ name: "root" }],
+    buffers: [{ byteLength: 8 }],
+    accessors: [{ min: [0], max: [0] }],
+    animations: [{
+      name: "hold",
+      samplers: [{ input: 0, output: 0 }],
+      channels: [{ sampler: 0, target: { node: 0, path: "rotation" } }],
+    }],
+  };
+  const result = analyzeAnimation({
+    bundle: createAssetBundle("hold.gltf", encoder.encode(JSON.stringify(gltf))),
+    target,
+  });
+  assert.equal(result.gate.status, "pass");
+  assert.ok(result.findings.some((finding) => finding.id === "ANIM-ZERO-DURATION" && finding.severity === "WARNING"));
 });

@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   FRAME_MANIFEST_SCHEMA,
   collaborationReadinessLevel,
+  evaluatePlayerFacingSceneReview,
   mergeFrameManifestEvidence,
   normalizeFrameManifest,
   resolveCollaborationStatus,
@@ -24,9 +25,86 @@ function input(overrides: Partial<CollaborationStatusInput> = {}): Collaboration
 test("asset PASS plus visual runtime gap resolves to SCENE_GAP", () => {
   const status = resolveCollaborationStatus(input({ visualRuntime: "GAP" }));
   assert.equal(status.readiness, "SCENE_GAP");
+  assert.equal(status.readinessReason, "PLAYER_FACING_SCENE_GAP");
   assert.equal(status.assetAudit, "PASS");
   assert.equal(status.visualRuntime, "GAP");
   assert.equal(status.stale, false);
+});
+
+test("player-facing scene review keeps score 100 and runtime usage separate", () => {
+  const framePath = "C:/hf/.logs/screenshots/M100/nohud.png";
+  const frameHash = "a".repeat(64);
+  const manifest = normalizeFrameManifest({
+    schema: FRAME_MANIFEST_SCHEMA,
+    runId: "HF-M100-scene-review-r01",
+    sourceProject: "Harvest Frontier",
+    sourceCommit: "3e5fffa",
+    reviewStatus: "NOT_EVALUATED",
+    visualRuntime: "GAP",
+    playerFacing: "NOT_EVALUATED",
+    frames: [{
+      id: "hf-m100-nohud",
+      path: framePath,
+      sha256: frameHash,
+      bytes: 1024,
+      viewport: { width: 1920, height: 1080 },
+      renderer: "WebGPU",
+      hud: "off",
+      shippedPath: true,
+      console: { errors: 0, warnings: 0 },
+    }],
+    sceneGaps: [{
+      id: "distant-terrain-band",
+      severity: "major",
+      category: "terrain",
+      note: "Repeated distant ridge remains visible.",
+      ownership: "scene",
+      affectedScene: "farm-long-shot",
+      affectedAssetIds: ["tractor"],
+      nextStep: "Recapture the same no-HUD camera after breaking the ridge silhouette.",
+      evidence: { path: framePath, sha256: frameHash, bytes: 1024 },
+      frameIds: ["hf-m100-nohud"],
+    }],
+    assetInspections: [{
+      id: "tractor",
+      sourcePath: "C:/hf/public/assets/tractor.glb",
+      inputHash: "b".repeat(64),
+      assetKind: "3d-model",
+      targetProfileId: "harvest-frontier-runtime-v1",
+      inspectionRunId: "HF-M100-asset-r01",
+      evidenceStatus: "READY",
+      productionReady: true,
+      origin: "file",
+      runtimeUsage: "UNKNOWN",
+      numericContract: { status: "PASS", score: 100, hardBlockerCount: 0 },
+    }],
+  });
+
+  const review = evaluatePlayerFacingSceneReview(manifest);
+  assert.equal(review.status, "NO_GO");
+  assert.equal(review.readinessReason, "PLAYER_FACING_SCENE_GAP");
+  assert.equal(review.visualRuntime, "GAP");
+  assert.equal(review.playerFacing, "NOT_EVALUATED");
+  assert.equal(review.linkedAssets[0]?.numericContract?.score, 100);
+  assert.equal(review.linkedAssets[0]?.runtimeUsage, "UNKNOWN");
+});
+
+test("player-facing scene review returns UNAVAILABLE for legacy or incomplete gap metadata", () => {
+  const manifest = normalizeFrameManifest({
+    schema: FRAME_MANIFEST_SCHEMA,
+    runId: "HF-M100-scene-review-incomplete",
+    sourceProject: "Harvest Frontier",
+    sourceCommit: "3e5fffa",
+    reviewStatus: "NOT_EVALUATED",
+    visualRuntime: "GAP",
+    playerFacing: "NOT_EVALUATED",
+    frames: [{ id: "frame", path: "frame.png", hud: "off", shippedPath: true }],
+    sceneGaps: [{ id: "gap", severity: "minor", category: "scene", note: "needs review" }],
+  });
+  const review = evaluatePlayerFacingSceneReview(manifest);
+  assert.equal(review.status, "UNAVAILABLE");
+  assert.equal(review.readinessReason, "PLAYER_FACING_REVIEW_INPUT_INCOMPLETE");
+  assert.ok(review.issues?.length);
 });
 
 test("custom profile identity is separate from its base profile", () => {
@@ -45,6 +123,20 @@ test("a changed input hash marks the previous collaboration snapshot stale", () 
   }));
   assert.equal(status.stale, true);
   assert.equal(status.readiness, "ASSET_READY");
+  assert.equal(status.readinessReason, "VISUAL_RUNTIME_NOT_EVALUATED");
+});
+
+test("conditional readiness exposes a machine-readable runtime-unavailable reason", () => {
+  const status = resolveCollaborationStatus(input({ visualRuntime: "UNAVAILABLE" }));
+  assert.equal(status.readiness, "ASSET_READY");
+  assert.equal(status.readinessReason, "ENGINE_ENVIRONMENT_UNAVAILABLE");
+  assert.equal(collaborationReadinessLevel(status), "conditional");
+});
+
+test("static audit failures expose the blocking reason instead of a generic conditional", () => {
+  const status = resolveCollaborationStatus(input({ assetAudit: "FAIL" }));
+  assert.equal(status.readiness, "BLOCKED");
+  assert.equal(status.readinessReason, "STATIC_AUDIT_FAILED");
 });
 
 test("audit failure remains BLOCKED even when runtime was not run", () => {
