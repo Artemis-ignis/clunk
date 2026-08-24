@@ -8,6 +8,7 @@ GLB 검사와 별개의 **이미지 세트 입력** 검사다 — 지형·타일
 
 ```bash
 npx tsx scripts/texture-audit.mjs <config.json> [--out report.json] [--strict] [--sigma-floor v] [--calibrate]
+```
 
 외부 프로젝트 CI에서는 안정화된 wrapper를 사용합니다.
 
@@ -29,7 +30,6 @@ CI exit code는 다음과 같이 고정합니다.
 
 `--strict` 없이 실행하면 측정은 반환하되 정책 위반은 `status: "WARN"`으로 남습니다.
 이 결과는 Clunk의 엔진 import/runtime PASS가 아니라 texture/readability 측정 결과입니다.
-```
 
 - `--out` JSON 리포트 저장, `--strict` CI 게이트 모드(위반 시 exit 2: VISIBLE-SEAM /
   게임플레이 밴드 D / 메모리 예산 초과), `--calibrate` 캘리브레이션 프로브 필드 추가.
@@ -109,3 +109,18 @@ CI exit code는 다음과 같이 고정합니다.
 
 RGBA8 + 전체 밉체인(×4/3) 합산 vs `gpuMemoryBudgetBytes`. 가정은 리포트에 명시(압축 포맷
 사용 팀은 재배율). 실측: HF 6종 합산 20.00MB — HF 빌드 스크립트 수동 계산 19.98MB와 일치.
+
+## 4) UI readability auditor의 현재 계약
+
+텍스처 감사와 초상화·작은 화면 UI readability 감사는 서로 다른 입력과 측정기입니다.
+Clunk는 아직 실제 UI readability 측정기를 제공하지 않습니다. 외부 CI가 명령 누락으로
+멈추지 않도록 아래의 안정된 명시 계약만 제공합니다.
+
+```powershell
+npm.cmd run asset:ui-readability -- --config portrait-ui.json --format json
+```
+
+현재 결과는 `clunk.ui-readability.v1`, `status: "UNAVAILABLE"`,
+`capability: "not-shipped"`, exit `4`입니다. `violations`와 `findings`는 비어 있고,
+이 결과는 UI PASS·player-facing readiness PASS가 아닙니다. 실제 auditor가 출시되기 전까지
+HF CI는 texture PASS와 UI 미제공 상태를 별도 게이트로 보존해야 합니다.

@@ -7,6 +7,9 @@
 
 Status: private pilot (Korea first). Billing is a working demo ledger, not a payment provider.
 
+Public HTTP MCP: not provided. The published Site does not expose a public MCP server. The
+authenticated `/api/*` routes below are workspace-scoped and are not a public agent endpoint.
+
 ## What Clunk actually does
 
 - Parses real GLB and glTF 2.0 bytes. No screenshot, no fixture, no mock metric.
@@ -90,6 +93,42 @@ seam verdicts (SEAMLESS / SOFT-SEAM / MASKED / VISIBLE-SEAM with placement-conte
 and mip-inclusive GPU memory versus a budget. `--strict` exits 2 on exposed seams, gameplay-band
 D grades, or a blown budget (checks selectable via `strictChecks`). Calibrated against a real
 game team's visual ground truth (8/8 agreement); see docs/texture-audit.ko.md.
+
+The stable external wrapper is `npm.cmd run asset:readability -- --config <config.json>
+--format json --strict` and returns schema `clunk.texture-audit.v1`. This is a texture policy
+result, not an engine import/runtime or player-facing result.
+
+## 2D and engine target contract
+
+Core analyzers accept real PNG/JPG/WebP bytes, Sprite atlas text, Spine JSON projects, and glTF
+animation clips in addition to GLB/glTF models. Built-in target declarations cover Web/Three.js,
+Godot 4, Unity, Unreal, Web/Three.js Mobile, Android, and iOS. They describe format, coordinate,
+texture, animation, and device constraints. An engine import/runtime/device stage that was not
+actually invoked remains `notRun`, `environmentUnavailable`, or `unsupported`; it cannot become
+READY by declaration alone.
+
+Portrait/UI readability is not shipped yet. The stable explicit contract is:
+
+```powershell
+npm.cmd run asset:ui-readability -- --config portrait-ui.json --format json
+```
+
+It returns `clunk.ui-readability.v1`, `status: UNAVAILABLE`, `capability: not-shipped`, and exit
+4. It is not a UI or player-facing PASS. When a real auditor ships, it must keep this v1 envelope
+and return PASS/FAIL with input/config hashes.
+
+## Authenticated collaboration
+
+Workspace members can store and read asset-linked notes with `inputHash`, custom/base profile,
+rule-set, and separate `assetAudit` / `visualRuntime` states:
+
+- `GET /api/collaboration/threads`
+- `POST /api/collaboration/threads`
+- `GET /api/collaboration/threads/:threadId`
+- `POST /api/collaboration/threads/:threadId/messages`
+
+`SCENE_GAP` means Clunk's static asset audit passed but the shipped scene or player-facing review
+still has a gap. This contract requires host authentication and workspace scoping.
 
 ## Safety boundaries
 

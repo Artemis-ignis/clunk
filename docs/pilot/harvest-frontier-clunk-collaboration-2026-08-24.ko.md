@@ -131,3 +131,34 @@ M84 shipped-path 무-HUD 실사용 플레이테스트에서 발견한 다음 문
   `harvest-frontier-runtime-v1`이지만 report/passport의 `profileId`는 `pc`로 남았다.
   custom profile과 base profile을 별도 필드로 반환하지 않으면 사용자가 판정 기준을
   오해할 수 있다는 기존 요청을 유지한다.
+
+## 2026-08-24 HF M94 texture/readability 연동 후속
+
+- HF가 Clunk `7ffefd1`의 `scripts/texture-audit-cli.mjs`를 실제 프로젝트에 연결했다.
+  연결 표면은 `tools/check-texture-audit.cjs`,
+  `tools/asset-pipeline/texture-audit.config.json`, `npm run asset:texture-audit`이다.
+- 7종 텍스처에 대해 `clunk.texture-audit.v1 --strict`가 exit 0으로 끝났고,
+  GPU 밉 메모리는 `21.33MB / 40MB`, 심리스 정책 위반은 0건이었다. 원본 결과는
+  HF `/.logs/verification/M94/HF-M94-clunk-texture-audit-r01.json`에 저장됐다.
+- 이 PASS는 텍스처 정책·메모리·심리스 검사 결과이며, 게임 화면 또는 player-facing
+  readiness PASS로 승격하지 않는다.
+- 기존 HF 초상화용 `asset:readability`는 `scripts/ui-readability-audit.mjs`가 없어
+  BLOCKED(exit 2)였다. 이 상태를 명령 누락으로 방치하지 않도록 Clunk에는
+  `npm run asset:ui-readability -- --format json` 경로를 추가했다. 현재 안정 계약은
+  `schema: clunk.ui-readability.v1`, `status: UNAVAILABLE`,
+  `capability: not-shipped`, exit 4이며, UI readability 또는 player-facing PASS를
+  주장하지 않는다.
+- 실제 portrait/UI readability 측정기를 출시할 때까지 HF CI는 texture CLI와 UI auditor를
+  별도 게이트로 유지한다. UI 측정기가 없는 `UNAVAILABLE`은 텍스처 PASS를 덮어쓰지
+  않으며, release 정책에서 요구하면 별도 BLOCKED로 승격할 수 있다.
+
+## 2026-08-24 HF UI readability 안정 계약 확인
+
+- HF가 `tools/check-ui-readability.cjs`를 추가해 Clunk
+  `scripts/ui-readability-cli.mjs`를 `--config`/`--format json`으로 실제 호출했다.
+- 결과는 HF `/.logs/verification/M94/HF-M94-clunk-ui-readability-r01.json`에
+  `clunk.ui-readability.v1`, `UNAVAILABLE`, exit 4로 보존됐다. 이 결과는 auditor 미제공을
+  명시적으로 전달받은 것이며, asset PASS나 player-facing PASS가 아니다.
+- 실제 portrait auditor가 준비되면 같은 v1 envelope에서 PASS/FAIL을 반환하도록 확장하고,
+  현재의 `capability: not-shipped` 계약과 혼동되지 않게 toolVersion·inputHash·configHash를
+  유지한다. HF는 그때 128px 초상화 5종을 46px 실제 렌더 크기로 재측정한다.
