@@ -39,6 +39,8 @@ test("HTTP MCP advertises a Clunk-owned endpoint and remote-safe tools", () => {
   ]);
   assert.match(MCP_HTTP_TOOLS[1].description, /base64/i);
   assert.match(MCP_HTTP_TOOLS[1].description, /local path/i);
+  assert.match(MCP_HTTP_TOOLS[1].inputSchema.properties.targetProfileId.description, /harvest-frontier-web-three/);
+  assert.match(MCP_HTTP_TOOLS[2].inputSchema.properties.targetProfileId.description, /stdio profiles pc\/web\/mobile/i);
   assert.match(MCP_HTTP_TOOLS[3].description, /verified evidence/i);
   assert.match(MCP_HTTP_TOOLS[4].description, /workspace/i);
 });

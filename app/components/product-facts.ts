@@ -137,12 +137,12 @@ const HTTP_TOOL_COPY: Record<string, { summary: string; input: string; output: s
   },
   clunk_asset_inspect: {
     summary: "base64 파일 또는 안전한 multi-file bundle을 구조적으로 검사합니다.",
-    input: "bytesBase64 또는 files[], targetProfileId",
+    input: "bytesBase64 또는 files[], targetProfileId (예: harvest-frontier-web-three)",
     output: "AssetEvidence, findings, hashes",
   },
   clunk_asset_validate: {
     summary: "업로드한 바이트를 선언된 프로파일 정책과 대조합니다.",
-    input: "bytesBase64 또는 files[], targetProfileId",
+    input: "bytesBase64 또는 files[], targetProfileId (예: harvest-frontier-web-three)",
     output: "valid, score, hardBlockers, observations",
   },
   clunk_asset_inspection_evidence: {

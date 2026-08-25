@@ -43,7 +43,10 @@ export const MCP_HTTP_TOOLS = [
         bytesBase64: { type: "string" },
         entryFileName: { type: "string" },
         files: { type: "array" },
-        targetProfileId: { type: "string" },
+        targetProfileId: {
+          type: "string",
+          description: "Engine-aware target profile id, for example harvest-frontier-web-three. Local stdio profiles pc/web/mobile are not HTTP targetProfileId values.",
+        },
         assetKind: { type: "string" },
         runId: { type: "string" },
       },
@@ -63,7 +66,10 @@ export const MCP_HTTP_TOOLS = [
         bytesBase64: { type: "string" },
         entryFileName: { type: "string" },
         files: { type: "array" },
-        targetProfileId: { type: "string" },
+        targetProfileId: {
+          type: "string",
+          description: "Engine-aware target profile id, for example harvest-frontier-web-three. Local stdio profiles pc/web/mobile are not HTTP targetProfileId values.",
+        },
         assetKind: { type: "string" },
         runId: { type: "string" },
       },

@@ -70,6 +70,9 @@ locally verified capture bytes through the CLI or local MCP. `clunk_collaboratio
 The local stdio surface contains 6 tools, including `clunk_inspect`, `clunk_validate`,
 `clunk_optimize`, and `clunk_passport`. These catalogs are intentionally different: HTTP agents
 upload bytes/evidence, while local stdio is the only path that can read a local absolute path.
+For HTTP `clunk_asset_inspect` and `clunk_asset_validate`, use an engine-aware
+`targetProfileId` such as `harvest-frontier-web-three`; local stdio names `pc`, `web`, and
+`mobile` are not valid HTTP target profile IDs.
 
 ### Local stdio fallback
 
