@@ -6,6 +6,7 @@ export type AgentGuideKey =
   | "cursor"
   | "claude-desktop"
   | "vscode"
+  | "github-copilot"
   | "stdio"
   | "api";
 
@@ -46,6 +47,18 @@ function remoteJson(endpoint: string, key: string, root = "mcpServers"): string 
   );
 }
 
+function codexCommand(endpoint: string, key: string): string {
+  return [
+    `$env:CLUNK_API_KEY = "${key}"`,
+    `codex mcp add clunk --url "${endpoint}" --bearer-token-env-var CLUNK_API_KEY`,
+    "codex mcp get clunk --json",
+  ].join("\n");
+}
+
+function copilotCommand(endpoint: string, key: string): string {
+  return `copilot mcp add --transport http --header "Authorization: Bearer ${key}" clunk "${endpoint}"`;
+}
+
 export function buildAgentGuides(connection?: AgentConnection): AgentGuide[] {
   const endpoint = connection?.endpoint ?? DEFAULT_ENDPOINT;
   const key = connection?.apiKey ?? DEFAULT_KEY;
@@ -71,14 +84,14 @@ export function buildAgentGuides(connection?: AgentConnection): AgentGuide[] {
     {
       key: "codex",
       label: "Codex",
-      kicker: "원격 MCP · JSON",
-      title: "프로젝트 MCP 설정을 바로 다운로드",
-      description: "Clunk endpoint와 Authorization header가 채워진 JSON을 Codex MCP 설정에 넣습니다.",
-      fileLabel: "mcp.json",
-      code: remoteMcpJson,
+      kicker: "원격 MCP · CLI",
+      title: "Codex CLI에 한 번에 등록",
+      description: "Codex의 공식 streamable HTTP 등록 명령과 bearer-token 환경변수를 함께 생성합니다.",
+      fileLabel: "PowerShell + Codex",
+      code: codexCommand(endpoint, key),
       note: connection
-        ? "이 JSON은 Clunk 연결 키가 삽입된 완성본입니다. Codex의 MCP 서버 설정에 그대로 붙여 넣으세요."
-        : "키를 만들면 placeholder가 없는 완성 JSON을 복사·다운로드할 수 있습니다.",
+        ? "PowerShell에 그대로 붙여 넣으면 ~/.codex/config.toml에 등록됩니다. `codex mcp get clunk --json`으로 URL과 bearer 환경변수를 확인하세요."
+        : "키를 만들면 실제 endpoint와 키가 삽입된 PowerShell 명령이 생성됩니다.",
       status: "available",
       recommended: true,
     },
@@ -93,6 +106,20 @@ export function buildAgentGuides(connection?: AgentConnection): AgentGuide[] {
       note: connection
         ? "프로젝트의 .cursor/mcp.json에 그대로 저장한 뒤 cursor-agent mcp list로 확인하세요."
         : "키 발급 후 .cursor/mcp.json 완성본을 바로 복사할 수 있습니다.",
+      status: "available",
+      recommended: true,
+    },
+    {
+      key: "github-copilot",
+      label: "GitHub Copilot",
+      kicker: "원격 MCP · CLI",
+      title: "Copilot에 한 줄로 추가",
+      description: "GitHub Copilot CLI가 지원하는 HTTP 등록 명령에 Clunk endpoint와 Bearer 키를 넣습니다.",
+      fileLabel: "copilot mcp add",
+      code: copilotCommand(endpoint, key),
+      note: connection
+        ? "실행 후 `copilot mcp list`에서 Clunk를 확인하세요. 저장 위치는 Copilot 사용자 MCP 설정입니다."
+        : "키를 만들면 실제 endpoint와 키가 삽입된 Copilot 명령이 생성됩니다.",
       status: "available",
       recommended: true,
     },

@@ -20,6 +20,7 @@ test("server-renders the client connection guide", async () => {
   assert.match(html, /Claude Code/);
   assert.match(html, /Claude Desktop/);
   assert.match(html, /VS Code/);
+  assert.match(html, /GitHub Copilot/);
   assert.match(html, /clunk_inspect/);
   assert.match(html, /Clunk가 직접 운영하는 HTTP MCP/);
   assert.match(html, /Clunk 연결 키 만들기/);
@@ -35,6 +36,11 @@ test("server-renders the client connection guide", async () => {
 test("setup links preserve a real login return path", async () => {
   const pageSource = await readFile(new URL("../app/agents/page.tsx", import.meta.url), "utf8");
   const clientSource = await readFile(new URL("../app/agents/AgentsClient.tsx", import.meta.url), "utf8");
-  assert.match(pageSource, /href="\/agents#connect"/);
+  const guideSource = await readFile(new URL("../app/components/agent-guides.ts", import.meta.url), "utf8");
+  assert.match(pageSource, /href="#connect"/);
   assert.match(clientSource, /\/login\?return_to=%2Fagents%23connect/);
+  assert.match(clientSource, /connectionState !== "ready"/);
+  assert.match(guideSource, /codex mcp add clunk --url/);
+  assert.match(guideSource, /--bearer-token-env-var CLUNK_API_KEY/);
+  assert.match(guideSource, /copilot mcp add --transport http/);
 });

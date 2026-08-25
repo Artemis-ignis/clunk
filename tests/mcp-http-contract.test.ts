@@ -71,10 +71,13 @@ test("each client guide is generated from one Clunk endpoint and one issued key"
 
   assert.match(byKey.get("claude-code")?.code ?? "", /https:\/\/clunk\.honna1\.chatgpt\.site\/api\/mcp/);
   assert.match(byKey.get("claude-code")?.code ?? "", /clunk_live_test_key/);
-  assert.match(byKey.get("codex")?.code ?? "", /Authorization/);
+  assert.match(byKey.get("codex")?.code ?? "", /codex mcp add clunk --url/);
+  assert.match(byKey.get("codex")?.code ?? "", /CLUNK_API_KEY/);
   assert.match(byKey.get("cursor")?.code ?? "", /type.*http/);
   assert.match(byKey.get("claude-desktop")?.code ?? "", /type.*http/);
   assert.match(byKey.get("vscode")?.code ?? "", /type.*http/);
+  assert.match(byKey.get("github-copilot")?.code ?? "", /copilot mcp add --transport http/);
+  assert.match(byKey.get("github-copilot")?.code ?? "", /Authorization/);
   assert.match(byKey.get("stdio")?.code ?? "", /npm\.cmd/);
   assert.match(byKey.get("stdio")?.code ?? "", /"run"/);
   assert.match(byKey.get("api")?.code ?? "", /5 remote-safe tools/);

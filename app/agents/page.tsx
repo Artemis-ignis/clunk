@@ -44,7 +44,7 @@ export default function AgentsPage() {
               로컬 GLB는 stdio로, 원격 에이전트와 협업 증거는 HTTP로 같은 Clunk Core에 전달됩니다.
             </p>
             <div className="agents-hero-actions">
-              <a className="button button-primary" href="/agents#connect">
+              <a className="button button-primary" href="#connect">
                 연결 설정 보기
                 <span aria-hidden="true">↘</span>
               </a>
@@ -120,7 +120,7 @@ export default function AgentsPage() {
             </article>
             <article>
               <strong>3. 클라이언트 설정은 완성본</strong>
-              <p>키를 만든 뒤 Claude Code 명령, Codex/Cursor/Claude Desktop JSON, VS Code servers JSON에 실제 endpoint와 키가 들어갑니다.</p>
+              <p>키를 만든 뒤 Claude Code·Codex·GitHub Copilot 명령, Cursor·Claude Desktop JSON, VS Code servers JSON에 실제 endpoint와 키가 들어갑니다.</p>
             </article>
             <article>
               <strong>4. 결과의 경계</strong>

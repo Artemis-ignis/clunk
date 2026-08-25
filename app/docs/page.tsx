@@ -454,8 +454,8 @@ export default function DocsPage() {
           <p className="doc-lead">
             Clunk는 Clunk가 직접 운영하는 streamable HTTP endpoint와 로컬 stdio fallback을 함께 제공합니다.
             <a href="/agents">에이전트 연결</a>에서 workspace 키를 한 번 발급하면 Claude Code, Codex, Cursor,
-            Claude Desktop, VS Code 설정에 endpoint와 Authorization 헤더가 자동으로 채워집니다. 로컬 컴퓨터의
-            절대 경로를 읽어야 할 때만 아래 stdio fallback을 사용하세요.
+            Claude Desktop, VS Code, GitHub Copilot 설정에 맞는 명령/JSON이 endpoint와 Authorization 헤더까지
+            자동으로 채워집니다. 로컬 컴퓨터의 절대 경로를 읽어야 할 때만 아래 stdio fallback을 사용하세요.
           </p>
           <div className="doc-split">
             <CodeBlock
@@ -472,7 +472,7 @@ export default function DocsPage() {
             />
           </div>
           <Link className="text-link" href="/agents">
-            Claude Code · Codex · Cursor별 연결 탭 보기
+            Claude Code · Codex · Cursor · GitHub Copilot 연결 탭 보기
             <Icon name="arrowRight" size={15} />
           </Link>
 

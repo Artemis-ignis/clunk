@@ -13,6 +13,13 @@ workspace collaboration threads. It never reads a caller's local absolute path o
 local stdio MCP remains the correct transport for files that only exist on the caller's machine.
 The Sites access policy still controls whether an external client can reach the published URL.
 
+Client setup is generated per client from `/agents` after sign-in: Claude Code receives a
+`claude mcp add --transport http clunk <endpoint> --header "Authorization: Bearer <key>"` command;
+Codex receives `codex mcp add clunk --url <endpoint> --bearer-token-env-var CLUNK_API_KEY` plus a
+PowerShell environment assignment; GitHub Copilot receives `copilot mcp add --transport http` with
+the Authorization header; Cursor and Claude Desktop receive `mcpServers` JSON; VS Code receives
+`servers` JSON. These are client-specific forms, not a Polyfork command. The copied key is shown once.
+
 ## What Clunk actually does
 
 - Parses real GLB and glTF 2.0 bytes. No screenshot, no fixture, no mock metric.
