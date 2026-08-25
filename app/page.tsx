@@ -320,7 +320,7 @@ export default function Home() {
           <footer className="landing-footer">
             <div className="site-footer-brand">
               <span className="brand-mark"><BrandMark size={32} gradientId="clunk-benchmark-footer" /></span>
-              <div><strong>Clunk</strong><span>팀을 위한 실시간 3D 에셋 품질 게이트</span></div>
+              <div><strong>Clunk</strong><span>팀을 위한 2D + 3D 에셋 품질·근거 게이트</span></div>
             </div>
             <nav className="site-footer-nav" aria-label="사이트 링크">
               <Link href="/app" prefetch={false}>검사기</Link>

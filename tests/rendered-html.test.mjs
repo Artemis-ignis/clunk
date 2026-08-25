@@ -27,6 +27,7 @@ test("server-renders the Clunk landing page", async () => {
   assert.match(html, /clunk-game-ready-v1/);
   assert.match(html, /llms\.txt/);
   assert.match(html, /STATIC POLICY SCORE/);
+  assert.match(html, /2D + 3D 에셋 품질·근거 게이트/);
   assert.match(html, /visualRuntime.*NOT_EVALUATED|NOT_EVALUATED.*visualRuntime/i);
   assert.doesNotMatch(html, /GAME-READY SCORE/);
   assert.doesNotMatch(html, /Your site is taking shape|react-loading-skeleton|codex-preview/);
