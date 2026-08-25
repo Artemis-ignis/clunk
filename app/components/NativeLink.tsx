@@ -10,6 +10,7 @@ type NativeLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
  * deliberate here: they preserve browser navigation when the client router
  * is unavailable or hydration is delayed, instead of swallowing the click.
  */
-export default function NativeLink({ prefetch: _prefetch, ...props }: NativeLinkProps) {
-  return <a {...props} />;
+export default function NativeLink({ prefetch, children, ...props }: NativeLinkProps) {
+  void prefetch;
+  return <a {...props}>{children}</a>;
 }
