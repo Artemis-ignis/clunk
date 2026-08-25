@@ -17,20 +17,35 @@ test("server-renders the client connection guide", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   const html = await response.text();
+  const clientSource = await readFile(new URL("../app/agents/AgentsClient.tsx", import.meta.url), "utf8");
+  const guideSource = await readFile(new URL("../app/components/agent-guides.ts", import.meta.url), "utf8");
   assert.match(html, /Claude Code/);
   assert.match(html, /Claude Desktop/);
   assert.match(html, /VS Code/);
   assert.match(html, /GitHub Copilot/);
   assert.match(html, /clunk_inspect/);
   assert.match(html, /Clunk가 직접 운영하는 HTTP MCP/);
-  assert.match(html, /Clunk 연결 키 만들기/);
-  assert.match(html, /HTTP 원격 도구 5개/);
-  assert.match(html, /로컬 stdio 도구 6개/);
-  assert.match(html, /Authorization: Bearer/);
-  assert.match(html, /POST \/api\/mcp/);
-  assert.match(html, /로컬 stdio/);
-  assert.match(html, /키 발급 후 바로 연결/);
+  assert.match(html, /HTTP 원격 도구\s*<!-- -->\d+<!-- -->개/);
+  assert.match(html, /로컬 stdio 도구/);
+  assert.match(clientSource, /Clunk 연결 키 만들기/);
+  assert.match(clientSource, /const \[endpoint, setEndpoint\] = useState\("\/api\/mcp"\)/);
+  assert.match(clientSource, /fetch\(endpoint, \{[\s\S]*method: "POST"/);
+  assert.match(clientSource, /키 발급 후 바로 연결/);
+  assert.match(guideSource, /Authorization: Bearer/);
+  assert.match(guideSource, /로컬 stdio/);
   assert.doesNotMatch(html, /Polyfork/);
+});
+
+test("server-renders an actionable setup journey instead of a text wall", async () => {
+  const response = await render();
+  const html = await response.text();
+  assert.match(html, /agent-journey/);
+  assert.match(html, /1\. 키 발급/);
+  assert.match(html, /2\. 클라이언트 선택/);
+  assert.match(html, /4\. 연결 확인/);
+  assert.match(html, /agent-tab-purpose/);
+  assert.match(html, /선택한 클라이언트/);
+  assert.match(html, /로그인 후 키 발급/);
 });
 
 test("setup links preserve a real login return path", async () => {

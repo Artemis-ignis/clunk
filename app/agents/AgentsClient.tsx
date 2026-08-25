@@ -183,9 +183,15 @@ export function AgentsClient() {
               {busy === "create" ? "발급 중…" : "Clunk 연결 키 만들기"}
             </button>
           )}
-          <button className="button button-quiet button-sm" type="button" onClick={() => void verifyConnection()} disabled={busy !== null || !issuedSecret}>
-            {busy === "check" ? "확인 중…" : "연결 확인"}
-          </button>
+          {issuedSecret ? (
+            <button className="button button-quiet button-sm" type="button" onClick={() => void verifyConnection()} disabled={busy !== null}>
+              {busy === "check" ? "확인 중…" : "연결 확인"}
+            </button>
+          ) : (
+            <a className="button button-quiet button-sm" href={AGENT_CONNECT_LOGIN_HREF}>
+              로그인 후 연결 확인
+            </a>
+          )}
           {connectionState !== "ready" ? <a className="button button-quiet button-sm" href={AGENT_CONNECT_LOGIN_HREF}>로그인</a> : null}
         </div>
       </div>
@@ -224,6 +230,8 @@ export function AgentsClient() {
             role="tab"
             aria-selected={selected.key === guide.key}
             aria-controls="agent-guide-panel"
+            aria-label={`${guide.label} 설정 선택`}
+            data-client-key={guide.key}
             className={"agent-tab" + (selected.key === guide.key ? " agent-tab-active" : "")}
             onClick={() => setSelectedKey(guide.key)}
           >
@@ -231,6 +239,14 @@ export function AgentsClient() {
             {guide.recommended ? <span className="agent-tab-recommended">권장</span> : null}
           </button>
         ))}
+      </div>
+
+      <div className="agent-tab-purpose" aria-live="polite">
+        <div>
+          <span className="mono-label">2. 클라이언트 선택</span>
+          <strong>선택한 클라이언트: {selected.label}</strong>
+        </div>
+        <p>{selected.description}</p>
       </div>
 
       <div className="agent-guide-panel" id="agent-guide-panel" role="tabpanel" tabIndex={0}>

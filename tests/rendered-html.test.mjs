@@ -52,6 +52,18 @@ test("server-renders public product routes", async () => {
   }
 });
 
+test("docs expose a navigable GitBook-style information architecture", async () => {
+  const response = await render("/docs");
+  const html = await response.text();
+  assert.match(html, /docs-layout/);
+  assert.match(html, /docs-sidebar/);
+  assert.match(html, /문서 목차/);
+  assert.match(html, /빠른 시작/);
+  assert.match(html, /클라이언트별 설정/);
+  assert.match(html, /계약과 상태/);
+  assert.match(html, /문서 검색/);
+});
+
 test("public navigation uses browser-native anchors on the Sites runtime", async () => {
   const { readFile } = await import("node:fs/promises");
   const files = [
