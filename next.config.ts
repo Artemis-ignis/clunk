@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  async rewrites() {
+    return {
+      beforeFiles: [{ source: "/mcp", destination: "/api/mcp" }],
+    };
+  },
 };
 
 export default nextConfig;
