@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import "tailwindcss/index.css";
 
 /* ============================================================================
    Clunk design tokens
@@ -5052,12 +5052,66 @@ html.snap-y .landing-snap-section {
   content: "";
 }
 
+.landing-mcp-tabs button {
+  position: relative;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  color: #a7bac9;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.landing-mcp-tabs button:hover,
+.landing-mcp-tabs button:focus-visible,
+.landing-mcp-tabs button.is-active {
+  color: #f2f9fd;
+}
+
+.landing-mcp-tabs button.is-active::after {
+  position: absolute;
+  right: 0;
+  bottom: -17px;
+  left: 0;
+  height: 2px;
+  background: #3cc7ef;
+  content: "";
+}
+
 .landing-mcp-code {
   margin: 22px;
 }
 
 .landing-mcp-code pre {
   min-height: 210px;
+}
+
+.landing-mcp-code .landing-terminal-head {
+  align-items: center;
+  gap: 12px;
+}
+
+.landing-mcp-code .landing-terminal-head code {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.landing-mcp-copy {
+  flex: 0 0 auto;
+  min-height: 32px;
+  padding: 0 11px;
+  font-size: 0.68rem;
+}
+
+.landing-mcp-note {
+  margin: -8px 0 0;
+  color: #9eb3c3;
+  font-size: 0.74rem;
+  line-height: 1.5;
 }
 
 .landing-mcp-foot {
@@ -9164,6 +9218,23 @@ html.snap-y .docs-page-redesign .docs-final-card {
 .landing-mcp-panel .mcp-live-status-grid > div {
   border-color: rgba(151, 187, 218, 0.14);
   background: rgba(255, 255, 255, 0.035);
+}
+
+.landing-mcp-panel .mcp-live-status-grid > div small {
+  display: block;
+  margin-top: 5px;
+  color: #a7bac9;
+  font-size: 0.62rem;
+  line-height: 1.35;
+}
+
+.landing-mcp-panel .mcp-live-status-grid [data-webmcp-status="registered"] code {
+  color: #75e5b8;
+}
+
+.landing-mcp-panel .mcp-live-status-grid [data-webmcp-status="unavailable"] code,
+.landing-mcp-panel .mcp-live-status-grid [data-webmcp-status="error"] code {
+  color: #ffd48b;
 }
 
 .landing-mcp-panel .mcp-live-status .text-link {

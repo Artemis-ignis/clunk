@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "clunk.site-benchmark.v1",
+  "source": "https://clunk.honna1.chatgpt.site/",
+  "observedAt": "2026-08-25T21:30:17.634Z",
+  "surface": ["/", "/agents"],
+  "browser": { "pageReused": true, "newTabsCreated": false },
+  "productFlow": {
+    "landing": "real Harvest Frontier tractor evidence and structural/player-facing boundary",
+    "agents": "key issuance, client configuration, initialize, tools/list",
+    "docs": "GitBook-style navigation and contract reference",
+    "mcp": { "endpoint": "/api/mcp", "transport": "streamable-http", "webmcpBeforePatch": "not registered" }
+  },
+  "baselineGaps": [
+    "landing client labels were static spans rather than tabs",
+    "public status card checked GET only; authenticated handshake remained on /agents",
+    "WebMCP document.modelContext bridge was absent",
+    "contrast and heading-order follow-ups remained on the live surface"
+  ],
+  "boundary": {
+    "structural": "verified bytes and policy only",
+    "visualRuntime": "GAP until shipped renderer evidence is linked",
+    "playerFacing": "NOT_EVALUATED until human review exists",
+    "humanDecision": "independent state"
+  }
+}

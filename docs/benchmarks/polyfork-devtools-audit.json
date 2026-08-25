@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "clunk.site-benchmark.v1",
+  "source": "https://polyfork.dev/",
+  "surface": ["/", "/agents"],
+  "method": "Chrome DevTools MCP live inspection; one existing browser page reused",
+  "observedAt": "2026-08-25T21:30:17.634Z",
+  "viewport": { "width": 1037, "height": 583, "devicePixelRatio": 2 },
+  "visualSystem": {
+    "bodyBackground": "rgb(244, 246, 249)",
+    "bodyText": "rgb(18, 26, 38)",
+    "bodyFont": "Inter",
+    "headingFont": "Nunito",
+    "heroHeading": { "fontSize": "58px", "lineHeight": "59.8px", "fontWeight": 900, "letterSpacing": "-2px" },
+    "bodyCopy": { "fontSize": "15px", "lineHeight": "24.3px" },
+    "interactionPattern": "rounded cards, visible state change, copyable client-specific setup"
+  },
+  "layout": {
+    "sections": [
+      "hero with WebGL stage and remix controls",
+      "compatibility row",
+      "catalogue-to-scene three-step flow",
+      "asset/kit cards with metrics",
+      "AI agent replay and endpoint disclosure",
+      "pricing tabs and FAQ disclosure"
+    ],
+    "agentSurface": [
+      "API at a glance",
+      "three-step connection journey",
+      "Claude Code/Codex/Cursor/Claude Desktop/VS Code/stdio tabs",
+      "with-key toggle",
+      "copy action",
+      "same-endpoint explanation"
+    ]
+  },
+  "runtime": {
+    "canvasCount": 2,
+    "canvasSizes": ["1022x457", "503x380"],
+    "webgl": { "webgl2": true, "webgpu": false },
+    "scripts": ["/hero-stage.js", "/landing.js", "/agent-demo.js", "/kits-carousel.js", "Three.js", "GLTFLoader", "OrbitControls", "Anime.js"],
+    "assets": ["/cdn/*.glb", "/cdn/*.mjs", "/cdn/params.json", "image renders", "engine/client icons", "Inter/Nunito fonts"]
+  },
+  "verifiedInteractions": [
+    { "action": "toggle hero config", "observed": "cfgBtn gains on; cfgFly gains open" },
+    { "action": "change client tab", "observed": "aria-selected changes and code block changes" },
+    { "action": "copy setup", "observed": "button remained visually unchanged; feedback gap" }
+  ],
+  "lighthouse": {
+    "home": { "accessibility": 95, "bestPractices": 100, "seo": 100, "agenticBrowsing": 50, "findings": ["color contrast", "scroll cue label-content mismatch", "llms.txt recommendation"] },
+    "agents": { "accessibility": 91, "bestPractices": 100, "seo": 100, "agenticBrowsing": 50, "findings": ["color contrast", "heading order", "main landmark", "link color-only distinction", "llms.txt recommendation"] }
+  }
+}

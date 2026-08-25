@@ -76,6 +76,8 @@ test("docs expose a navigable GitBook-style information architecture", async () 
   assert.match(html, /문서 검색/);
   assert.match(html, /docs-evidence-visual/);
   assert.match(html, /ONE FILE · THREE STATES/);
+  assert.match(html, /브라우저 WebMCP/);
+  assert.match(html, /document\.modelContext/);
 });
 
 test("public navigation uses browser-native anchors on the Sites runtime", async () => {

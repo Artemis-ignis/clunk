@@ -5,6 +5,7 @@ import { Icon, type IconName } from "./components/Icon";
 import { SiteNav } from "./components/SiteNav";
 import { SnapRoot } from "./components/SnapRoot";
 import { McpEndpointStatus } from "./components/McpEndpointStatus";
+import { LandingMcpDemo } from "./components/LandingMcpDemo";
 import {
   ASSET_KIND_COVERAGE,
   CLI_SAMPLE,
@@ -220,29 +221,7 @@ export default function Home() {
                 </Link>
               </div>
               <div className="landing-mcp-panel">
-                <div className="landing-mcp-tabs">
-                  <span>Claude Code</span>
-                  <span>Codex</span>
-                  <span>Cursor</span>
-                  <span>Claude Desktop</span>
-                  <span>VS Code</span>
-                  <span>기타 stdio</span>
-                </div>
-                <div className="landing-mcp-code">
-                  <div className="landing-terminal-head">
-                    <span><i /><i /><i /></span>
-                    <code>plugins/clunk-assetops/.mcp.json</code>
-                  </div>
-                  <pre><code>{`{
-  "mcpServers": {
-    "clunk": {
-      "type": "http",
-      "url": "https://clunk.honna1.chatgpt.site/api/mcp",
-      "headers": { "Authorization": "Bearer <Clunk key from /agents>" }
-    }
-  }
-}`}</code></pre>
-                </div>
+                <LandingMcpDemo />
                 <div className="landing-mcp-foot">
                   <span>{MCP_TOOL_COUNT} tools · {RULE_SET.id}</span>
                   <span>Clunk HTTPS MCP · workspace key · local stdio fallback</span>

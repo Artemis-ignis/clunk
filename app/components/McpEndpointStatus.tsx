@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { WEBMCP_STATUS_EVENT } from "./WebMcpBridge";
 
 type EndpointPayload = {
   ok?: boolean;
@@ -11,6 +12,7 @@ type EndpointPayload = {
 };
 
 type EndpointState = "checking" | "online" | "auth_required" | "offline";
+type WebMcpState = "checking" | "registered" | "unavailable" | "error";
 
 const STATE_COPY: Record<EndpointState, { label: string; detail: string }> = {
   checking: { label: "확인 중", detail: "Clunk HTTP endpoint에 읽기 전용 상태를 요청하고 있습니다." },
@@ -22,6 +24,14 @@ const STATE_COPY: Record<EndpointState, { label: string; detail: string }> = {
 export function McpEndpointStatus() {
   const [state, setState] = useState<EndpointState>("checking");
   const [payload, setPayload] = useState<EndpointPayload | null>(null);
+  const [webmcpState, setWebmcpState] = useState<WebMcpState>(() => {
+    if (typeof document === "undefined") return "checking";
+    return (document.documentElement.dataset.webmcpStatus as WebMcpState | undefined) ?? "checking";
+  });
+  const [webmcpDetail, setWebmcpDetail] = useState(() => {
+    if (typeof document === "undefined") return "WebMCP imperative API 등록 상태를 확인하고 있습니다.";
+    return document.documentElement.dataset.webmcpDetail ?? "WebMCP imperative API 등록 상태를 확인하고 있습니다.";
+  });
 
   const refresh = useCallback(async () => {
     setState("checking");
@@ -44,7 +54,16 @@ export function McpEndpointStatus() {
 
   useEffect(() => {
     const timer = window.setTimeout(() => void refresh(), 0);
-    return () => window.clearTimeout(timer);
+    const onWebMcpStatus = (event: Event) => {
+      const detail = (event as CustomEvent<{ status?: WebMcpState; detail?: string }>).detail;
+      if (detail.status) setWebmcpState(detail.status);
+      if (detail.detail) setWebmcpDetail(detail.detail);
+    };
+    window.addEventListener(WEBMCP_STATUS_EVENT, onWebMcpStatus);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener(WEBMCP_STATUS_EVENT, onWebMcpStatus);
+    };
   }, [refresh]);
 
   const copy = STATE_COPY[state];
@@ -64,8 +83,9 @@ export function McpEndpointStatus() {
         <div><span>ENDPOINT</span><code>{payload?.endpoint ?? "/api/mcp"}</code></div>
         <div><span>TRANSPORT</span><code>{payload?.transport ?? "streamable-http"}</code></div>
         <div><span>LOCAL FILES</span><code>{payload?.localAssetPaths ?? "stdio fallback"}</code></div>
+        <div data-webmcp-status={webmcpState}><span>WEBMCP</span><code>{webmcpState.toUpperCase()}</code><small>{webmcpDetail}</small></div>
       </div>
-      <a className="text-link" href="/agents#connect">키 발급 · 실제 핸드셰이크 확인 →</a>
+      <a className="text-link" href="/agents#connect">키 발급 · initialize → tools/list 실제 확인 →</a>
     </aside>
   );
 }

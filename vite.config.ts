@@ -1,4 +1,6 @@
 import { sites } from "@openai/sites-vite-plugin";
+import { nitro } from "nitro/vite";
+import { fileURLToPath } from "node:url";
 import vinext from "vinext";
 import { defineConfig } from "vite";
 import hostingConfig from "./.openai/hosting.json";
@@ -10,6 +12,7 @@ const { d1, r2 } = hostingConfig;
 
 // macOS Seatbelt blocks FSEvents, so Codex previews need polling for HMR.
 const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
+const isNetlifyBuild = process.env.NITRO_PRESET === "netlify" || process.env.NITRO_PRESET === "netlify_edge";
 
 const localBindingConfig = {
   main: "./worker/index.ts",
@@ -44,6 +47,9 @@ export default defineConfig(async () => {
   const { cloudflare } = await import("@cloudflare/vite-plugin");
 
   return {
+    resolve: isNetlifyBuild
+      ? { alias: { "cloudflare:workers": fileURLToPath(new URL("./worker/netlify-workers-shim.ts", import.meta.url)) } }
+      : undefined,
     server: {
       watch: {
         ignored: ["**/.playwright-cli/**", "**/.clunk-evidence/**", "**/.wrangler/**", "**/dist/**"],
@@ -58,10 +64,12 @@ export default defineConfig(async () => {
     plugins: [
       vinext(),
       sites(),
-      cloudflare({
-        viteEnvironment: { name: "rsc", childEnvironments: ["ssr"] },
-        config: localBindingConfig,
-      }),
+      ...(isNetlifyBuild
+        ? [nitro()]
+        : [cloudflare({
+            viteEnvironment: { name: "rsc", childEnvironments: ["ssr"] },
+            config: localBindingConfig,
+          })]),
     ],
   };
 });

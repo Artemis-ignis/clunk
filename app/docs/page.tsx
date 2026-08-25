@@ -155,6 +155,19 @@ stale notarisation is not an execution error
 
 $ npm.cmd exec -- tsx scripts/frame-manifest-cli.ts validate --input evidence.json --required`;
 
+const WEBMCP_EXAMPLE = `// Chrome WebMCP imperative API
+// Clunk registers these only when the browser exposes document.modelContext.
+document.modelContext.getTools();
+
+// Read-only browser tools
+clunk_connection_check       // public /api/mcp status
+clunk_product_capabilities   // contracts + state boundary
+
+// The result never upgrades these states:
+visualRuntime: GAP
+playerFacing: NOT_EVALUATED
+humanDecision: PENDING`;
+
 export default function DocsPage() {
   return (
     <SiteShell active="docs">
@@ -203,7 +216,8 @@ export default function DocsPage() {
               <a href="#asset-studio"><span>04</span>Asset Studio</a>
               <a href="#contracts"><span>05</span>계약과 상태</a>
               <a href="#harvest-frontier"><span>06</span>Harvest Frontier</a>
-              <a href="#scope"><span>07</span>지원 범위</a>
+              <a href="#webmcp"><span>07</span>브라우저 WebMCP</a>
+              <a href="#scope"><span>08</span>지원 범위</a>
             </nav>
             <div className="docs-sidebar-callout">
               <span className="status-dot status-dot-on" />
@@ -302,9 +316,23 @@ export default function DocsPage() {
               <p className="docs-lead-v2 docs-footnote">협업 API는 {COLLABORATION_CONTRACT.evidenceWriteMode}, {COLLABORATION_CONTRACT.evidenceDefaults}, {COLLABORATION_CONTRACT.evidenceOnlyApi}를 사용합니다.</p>
             </section>
 
-            <section className="docs-section-v2" id="scope">
+            <section className="docs-section-v2" id="webmcp">
               <div className="docs-section-heading">
                 <span className="section-number">07</span>
+                <div><span className="eyebrow">BROWSER-NATIVE AGENT FLOW</span><h2>브라우저에서 직접 확인</h2></div>
+              </div>
+              <p className="docs-lead-v2">Clunk 사이트는 페이지를 설명하는 데서 끝나지 않고, WebMCP를 노출하는 브라우저에서 읽기 전용 도구를 등록합니다. 등록된 도구는 HTTP endpoint와 제품 경계를 조회하지만, 원본 파일을 바꾸거나 시각 승인을 만들지 않습니다.</p>
+              <div className="docs-status-grid docs-webmcp-status-grid">
+                <article className="docs-status-card docs-status-static"><span>HTTP MCP</span><strong>/api/mcp</strong><p>키 발급 후 initialize → tools/list를 실제 호출</p></article>
+                <article className="docs-status-card docs-status-runtime"><span>WEBMCP</span><strong>REGISTERED / UNAVAILABLE</strong><p>브라우저 API 노출 여부를 라이브 상태로 표시</p></article>
+                <article className="docs-status-card docs-status-human"><span>SAFETY BOUNDARY</span><strong>READ-ONLY</strong><p>structural PASS와 visualRuntime/GAP은 독립</p></article>
+              </div>
+              <CodeBlock title="document.modelContext" language="bash" code={WEBMCP_EXAMPLE} caption="현재 Chrome API는 document.modelContext를 우선 사용하고, 구형 호환 브라우저에서는 navigator.modelContext를 확인합니다." />
+            </section>
+
+            <section className="docs-section-v2" id="scope">
+              <div className="docs-section-heading">
+                <span className="section-number">08</span>
                 <div><span className="eyebrow">WHAT CLUNK CAN VERIFY</span><h2>지원 범위</h2></div>
               </div>
               <div className="docs-scope-grid">
