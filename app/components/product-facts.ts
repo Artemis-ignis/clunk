@@ -73,6 +73,7 @@ export const PASSPORT_FIELDS = [
 /** Adapters that call the same Core contract. Paths are real files in this repository. */
 export const SURFACES = [
   { label: "웹 검사기", path: "app/app" },
+  { label: "Asset Studio", path: "app/studio" },
   { label: "CLI", path: "scripts/clunk-cli.ts" },
   { label: "MCP 서버", path: "integrations/mcp" },
   { label: "VS Code 확장", path: "integrations/vscode" },
@@ -125,6 +126,13 @@ export const MCP_TOOLS = [
     summary: "구조 점수·캡처·사람 판정을 v2 provenance envelope로 묶되 자동 시각 승격은 하지 않습니다.",
     input: "path, profile?, evidenceKind?, inspectionRunId?, captureEvidence?, audioEvidence?",
     output: "identity, structured findings, qualityPolicy, visualRuntime/playerFacing/humanDecision",
+  },
+  {
+    name: "clunk_asset_author",
+    description: "Author a real 2D/Spine/animation or 3D factory output into a separate local directory and reopen it through AssetOps.",
+    summary: "2D Sprite·Atlas·Spine·Motion·3D 결과를 원본과 분리된 폴더에 만들고 즉시 재검사합니다.",
+    input: "assetKind, targetProfileId, outputDirectory, recipeId?, factoryPath?",
+    output: "generation sidecar, artifact hashes, structure, outputReopen, runtime status",
   },
 ] as const;
 

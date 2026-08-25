@@ -388,7 +388,11 @@ test("the MCP server accepts profileFile and matches the Core result", async () 
 
   assert.equal(initialize.result?.serverInfo?.name, "clunk");
   for (const tool of listed.result?.tools ?? []) {
-    assert.ok(tool.inputSchema.properties.profileFile, `${tool.name} exposes profileFile`);
+    if (tool.name === "clunk_asset_author") {
+      assert.ok(tool.inputSchema.properties.targetProfileId, `${tool.name} exposes targetProfileId`);
+    } else {
+      assert.ok(tool.inputSchema.properties.profileFile, `${tool.name} exposes profileFile`);
+    }
   }
   const envelope = JSON.parse(called.result?.content?.[0]?.text ?? "null") as typeof expected;
   assert.deepEqual(envelope, expected);

@@ -15,10 +15,11 @@ import "../workspace.css";
  * dead affordance, and the animated radial gradient behind the shell is reproduced in CSS.
  */
 
-export type WorkspaceSection = "overview" | "inspector" | "passports" | "pricing" | "docs" | "settings";
+export type WorkspaceSection = "overview" | "studio" | "inspector" | "passports" | "pricing" | "docs" | "settings";
 
 const PRIMARY_NAV: { section: WorkspaceSection; label: string; href: string; icon: IconName }[] = [
   { section: "overview", label: "개요", href: "/dashboard", icon: "layout" },
+  { section: "studio", label: "Asset Studio", href: "/studio", icon: "boxes" },
   { section: "inspector", label: "검사기", href: "/app", icon: "scan" },
   { section: "passports", label: "Passport", href: "/passport", icon: "badge" },
 ];

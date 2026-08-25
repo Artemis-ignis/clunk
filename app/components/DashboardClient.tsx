@@ -45,6 +45,117 @@ type MeResponse = {
   };
 };
 
+type EvidenceStatuses = {
+  structural: "PASS" | "CONDITIONAL" | "BLOCKED" | "NOT_RUN";
+  visualRuntime: "PASS" | "GAP" | "BLOCKED" | "UNAVAILABLE" | "NOT_EVALUATED";
+  playerFacing: "PASS" | "GAP" | "NOT_EVALUATED";
+  humanDecision: "PASS" | "PASS_WITH_FOLLOW_UP" | "NO_GO" | "PENDING" | "NOT_EVALUATED";
+};
+
+type NextVerification = {
+  eyebrow: string;
+  title: string;
+  detail: string;
+  action: string;
+  href: string;
+};
+
+const DEFAULT_EVIDENCE_STATUSES: EvidenceStatuses = {
+  structural: "NOT_RUN",
+  visualRuntime: "NOT_EVALUATED",
+  playerFacing: "NOT_EVALUATED",
+  humanDecision: "NOT_EVALUATED",
+};
+
+/**
+ * Read the stored evidence boundary without inferring visual approval from a score.
+ * Old v1 rows intentionally fall back to the conservative boundary.
+ */
+export function readStoredStatuses(run: Run | null): EvidenceStatuses {
+  if (!run) return DEFAULT_EVIDENCE_STATUSES;
+  const structural = resolveStoredReadiness(run);
+  const statuses: EvidenceStatuses = {
+    structural: structural === "ready" ? "PASS" : structural === "conditional" ? "CONDITIONAL" : "BLOCKED",
+    visualRuntime: "GAP",
+    playerFacing: "NOT_EVALUATED",
+    humanDecision: "NOT_EVALUATED",
+  };
+  try {
+    const stored = JSON.parse(run.reportJson) as {
+      evidenceV2?: { statuses?: Record<string, unknown> };
+      statuses?: Record<string, unknown>;
+      visualRuntime?: unknown;
+      playerFacing?: unknown;
+      humanDecision?: unknown;
+    };
+    const source = stored.evidenceV2?.statuses ?? stored.statuses ?? stored;
+    if (isVisualRuntime(source.visualRuntime)) statuses.visualRuntime = source.visualRuntime;
+    if (isPlayerFacing(source.playerFacing)) statuses.playerFacing = source.playerFacing;
+    if (isHumanDecision(source.humanDecision)) statuses.humanDecision = source.humanDecision;
+  } catch {
+    // Preserve the conservative default when an older report is malformed.
+  }
+  return statuses;
+}
+
+export function nextVerificationFor(run: Run | null, statuses: EvidenceStatuses): NextVerification {
+  if (!run) {
+    return {
+      eyebrow: "01 · START WITH REAL BYTES",
+      title: "첫 검사를 실행해 증거의 기준점을 만드세요.",
+      detail: "샘플 점수는 워크스페이스 지표에 섞지 않습니다. 실제 GLB/GLTF를 업로드하면 해시와 정책 결과가 저장됩니다.",
+      action: "검사기 열기",
+      href: "/app",
+    };
+  }
+  if (statuses.visualRuntime !== "PASS") {
+    return {
+      eyebrow: "01 · NEXT PROOF",
+      title: "실제 shipped-path 프레임을 연결하세요.",
+      detail: "구조 점수는 통과했지만 브라우저 화면은 아직 별도 증거가 없습니다. renderer·viewport·camera·bytes·SHA를 함께 제출하세요.",
+      action: "협업 증거 제출",
+      href: "#collaboration",
+    };
+  }
+  if (statuses.playerFacing !== "PASS") {
+    return {
+      eyebrow: "02 · PLAYER-FACING REVIEW",
+      title: "프레임을 사람의 시각 판정으로 닫으세요.",
+      detail: "runtime capture가 있어도 사람 검토가 끝나기 전에는 player-facing PASS가 아닙니다.",
+      action: "검토 기록 열기",
+      href: "#collaboration",
+    };
+  }
+  if (statuses.humanDecision !== "PASS") {
+    return {
+      eyebrow: "03 · HUMAN DECISION",
+      title: "마지막 사람 판정을 기록하세요.",
+      detail: "PASS_WITH_FOLLOW_UP과 NO_GO를 그대로 보존하고, 닫힌 gap마다 closeout evidence를 남깁니다.",
+      action: "협업 스레드 열기",
+      href: "#collaboration",
+    };
+  }
+  return {
+    eyebrow: "04 · REPEATABLE RELEASE",
+    title: "다음 변경도 같은 계약으로 비교하세요.",
+    detail: "before/after frame pair와 sourceTreeHash를 고정하면 재현 가능한 회귀 기록이 됩니다.",
+    action: "계약 문서 보기",
+    href: "/docs#contracts",
+  };
+}
+
+function isVisualRuntime(value: unknown): value is EvidenceStatuses["visualRuntime"] {
+  return value === "PASS" || value === "GAP" || value === "BLOCKED" || value === "UNAVAILABLE" || value === "NOT_EVALUATED";
+}
+
+function isPlayerFacing(value: unknown): value is EvidenceStatuses["playerFacing"] {
+  return value === "PASS" || value === "GAP" || value === "NOT_EVALUATED";
+}
+
+function isHumanDecision(value: unknown): value is EvidenceStatuses["humanDecision"] {
+  return value === "PASS" || value === "PASS_WITH_FOLLOW_UP" || value === "NO_GO" || value === "PENDING" || value === "NOT_EVALUATED";
+}
+
 export function DashboardClient() {
   const [runs, setRuns] = useState<Run[]>([]);
   const [passports, setPassports] = useState<Passport[]>([]);
@@ -114,6 +225,8 @@ export function DashboardClient() {
   const findingCount = useMemo(() => runs.reduce((total, run) => total + run.findingCount, 0), [runs]);
   const readyCount = useMemo(() => runs.filter((run) => run.status === "ready").length, [runs]);
   const latestRun = runs[0] ?? null;
+  const evidenceStatuses = readStoredStatuses(latestRun);
+  const nextVerification = nextVerificationFor(latestRun, evidenceStatuses);
 
   const connectionChip = (
     <span className={`conn-chip conn-chip-${connection}`}>
@@ -132,15 +245,22 @@ export function DashboardClient() {
 
   return (
     <WorkspaceShell active="overview" title="워크스페이스 개요" userLabel={userLabel} status={connectionChip}>
-      <section className="ws-welcome ws-welcome-compact">
+      <section className="ws-welcome ws-welcome-evidence">
         <div>
-          <span className="mono-label">지금 이 워크스페이스</span>
-          <h2>한눈에 보는 현황.</h2>
+          <span className="mono-label">CONTROL ROOM · EVIDENCE FIRST</span>
+          <h2>검사에서 승인까지,<br />증거의 빈칸을 보여줍니다.</h2>
+          <p>정적 에셋 계약, 실제 런타임 프레임, 플레이어 화면, 사람의 판정을 한 덩어리로 뭉개지 않습니다.</p>
         </div>
-        <Link className="button button-primary" href="/app">
-          새 검사 시작
-          <Icon name="arrowUpRight" size={15} />
-        </Link>
+        <div className="ws-welcome-actions">
+          <Link className="button button-primary" href="/app">
+            새 검사 시작
+            <Icon name="arrowUpRight" size={15} />
+          </Link>
+          <Link className="button button-quiet" href="#collaboration">
+            프레임 증거 연결
+            <Icon name="chevronDown" size={15} />
+          </Link>
+        </div>
       </section>
 
       {connection === "checking" ? (
@@ -170,6 +290,10 @@ export function DashboardClient() {
         </div>
       ) : null}
 
+      <EvidenceLanes statuses={evidenceStatuses} hasRun={Boolean(latestRun)} />
+
+      <NextVerificationRail next={nextVerification} />
+
       <section className="ws-summary ws-summary-4" aria-label="워크스페이스 요약">
         <Summary label="사용 가능 크레딧" value={credits === null ? "대기" : `${credits}`} detail="D1 데모 원장 · 성공 시에만 차감" tone="accent" />
         <Summary label="실제 검사" value={`${runs.length}`} detail={runs.length ? "이 워크스페이스에 저장됨" : "아직 실제 검사가 없음"} />
@@ -189,6 +313,12 @@ export function DashboardClient() {
           </Link>
         </div>
       </section>
+
+      <CollaborationPanel latestRun={latestRun ? {
+        inputHash: latestRun.inputHash,
+        profileId: latestRun.profileId,
+        reportJson: latestRun.reportJson,
+      } : null} />
 
       <section className="ws-split ws-split-wide">
         <div className="panel ws-runs">
@@ -288,13 +418,91 @@ export function DashboardClient() {
         </aside>
       </section>
 
-      <CollaborationPanel latestRun={latestRun ? {
-        inputHash: latestRun.inputHash,
-        profileId: latestRun.profileId,
-        reportJson: latestRun.reportJson,
-      } : null} />
-
     </WorkspaceShell>
+  );
+}
+
+function EvidenceLanes({ statuses, hasRun }: { statuses: EvidenceStatuses; hasRun: boolean }) {
+  const lanes = [
+    {
+      id: "structural-contract",
+      kicker: "01 · STATIC / STRUCTURAL",
+      title: "구조 계약",
+      value: statuses.structural,
+      detail: hasRun ? "바이트·파싱·정책 결과" : "실제 에셋 검사 전",
+      proof: "score와 hard blocker만 반영",
+    },
+    {
+      id: "visual-runtime",
+      kicker: "02 · SHIPPED RUNTIME",
+      title: "런타임 프레임",
+      value: statuses.visualRuntime,
+      detail: statuses.visualRuntime === "PASS" ? "캡처 계약 확인됨" : "브라우저/엔진 화면 증거 대기",
+      proof: "renderer · viewport · camera · SHA",
+    },
+    {
+      id: "player-facing",
+      kicker: "03 · PLAYER-FACING",
+      title: "플레이어 화면",
+      value: statuses.playerFacing,
+      detail: statuses.playerFacing === "PASS" ? "화면 품질 검토 완료" : "정적 점수로는 평가하지 않음",
+      proof: "실제 거리·구도·판독성 검토",
+    },
+    {
+      id: "human-review",
+      kicker: "04 · HUMAN DECISION",
+      title: "사람의 판정",
+      value: statuses.humanDecision,
+      detail: statuses.humanDecision === "PASS" ? "검토자가 승인함" : "NO_GO/PENDING을 보존",
+      proof: "gap closeout마다 별도 기록",
+    },
+  ] as const;
+
+  return (
+    <section className="evidence-lanes" id="evidence" aria-labelledby="evidence-lanes-heading">
+      <div className="evidence-lanes-head">
+        <div>
+          <span className="mono-label">READINESS IS A CHAIN, NOT A SCORE</span>
+          <h3 id="evidence-lanes-heading">지금 무엇을 믿을 수 있는지</h3>
+        </div>
+        <span className="evidence-lanes-count">4 separate decisions</span>
+      </div>
+      <div className="evidence-lane-grid">
+        {lanes.map((lane) => (
+          <article className={`evidence-lane evidence-lane-${stateSlug(lane.value)}`} data-testid={lane.id} key={lane.id}>
+            <span className="evidence-lane-kicker">{lane.kicker}</span>
+            <div className="evidence-lane-title-row">
+              <h4>{lane.title}</h4>
+              <strong>{lane.value}</strong>
+            </div>
+            <p>{lane.detail}</p>
+            <small>{lane.proof}</small>
+          </article>
+        ))}
+      </div>
+      <p className="evidence-boundary"><Icon name="shield" size={15} /> 정적 계약 PASS는 플레이어 화면 승인으로 승격되지 않습니다.</p>
+    </section>
+  );
+}
+
+function NextVerificationRail({ next }: { next: NextVerification }) {
+  return (
+    <section className="next-verification" id="next-verification" aria-labelledby="next-verification-heading">
+      <div className="next-verification-copy">
+        <span className="mono-label">{next.eyebrow}</span>
+        <h3 id="next-verification-heading">{next.title}</h3>
+        <p>{next.detail}</p>
+      </div>
+      <div className="next-verification-actions">
+        <Link className="button button-primary button-sm" href={next.href}>
+          {next.action}
+          <Icon name="arrowRight" size={14} />
+        </Link>
+        <Link className="button button-quiet button-sm" href="/studio">Asset Studio</Link>
+        <Link className="button button-quiet button-sm" href="/agents#connect">에이전트 연결</Link>
+        <Link className="button button-quiet button-sm" href="/docs#contracts">계약 보기</Link>
+      </div>
+    </section>
   );
 }
 
@@ -420,3 +628,4 @@ function creditReasonLabel(reason: string) {
   return reason;
 }
 function formatCreditAmount(amount: number) { return `${amount > 0 ? "+" : ""}${amount}`; }
+function stateSlug(value: string) { return value.toLowerCase().replace(/_/g, "-"); }

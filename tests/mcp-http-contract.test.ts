@@ -48,7 +48,7 @@ test("HTTP MCP advertises a Clunk-owned endpoint and remote-safe tools", () => {
 test("product capability facts keep HTTP and local stdio tool sets separate", () => {
   assert.deepEqual(MCP_HTTP_TOOL_NAMES, MCP_HTTP_TOOLS.map((tool) => tool.name));
   assert.equal(MCP_HTTP_TOOL_COUNT, 5);
-  assert.equal(MCP_TOOLS.length, 6);
+  assert.equal(MCP_TOOLS.length, 7);
 });
 
 test("MCP initialize and tools/list responses are stable JSON-RPC results", () => {

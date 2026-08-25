@@ -8941,6 +8941,11 @@ html:has(.benchmark-home) .landing-snap-section {
 .docs-contract-note { display: flex; align-items: center; gap: 14px; margin: 18px 0 0 44px; padding: 14px 16px; border-left: 3px solid var(--warning); background: var(--warning-soft); }
 .docs-contract-note strong { color: var(--warning); font-family: var(--font-mono); font-size: 0.68rem; }
 .docs-contract-note span { color: var(--text-muted); font-family: var(--font-mono); font-size: 0.68rem; overflow-wrap: anywhere; }
+.docs-studio-facts { display: grid; gap: 10px; margin: 12px 0 12px 44px; }
+.docs-studio-facts article { padding: 16px; border: 1px solid var(--line); border-radius: var(--r-control); background: var(--ink-1); }
+.docs-studio-facts article > span { color: var(--accent); font: 0.66rem var(--font-mono); letter-spacing: 0.08em; }
+.docs-studio-facts article strong { display: block; margin-top: 5px; color: var(--text-strong); font-size: 0.94rem; }
+.docs-studio-facts article p { margin-top: 5px; color: var(--text-muted); font-size: 0.76rem; line-height: 1.55; }
 .docs-hf-section { background: linear-gradient(180deg, transparent, rgba(10, 126, 168, 0.035)); }
 .docs-hf-snapshot { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; margin: 28px 0 24px 44px; }
 .docs-hf-snapshot > div { display: grid; gap: 5px; padding: 16px; border: 1px solid var(--line); border-radius: 13px; background: var(--ink-1); }
@@ -9000,7 +9005,7 @@ html:has(.benchmark-home) .landing-snap-section {
   .docs-hero-meta { width: 100%; }
   .docs-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .docs-section-v2 { padding: 46px 0; }
-  .docs-lead-v2, .docs-two-column, .docs-section-v2 .codeblock, .docs-next-card, .client-route-grid, .docs-inline-button, .docs-status-grid, .docs-contract-note, .docs-hf-snapshot, .docs-scope-grid, .docs-profile-list, .docs-final-card { margin-left: 0; }
+  .docs-lead-v2, .docs-two-column, .docs-section-v2 .codeblock, .docs-next-card, .client-route-grid, .docs-inline-button, .docs-status-grid, .docs-contract-note, .docs-hf-snapshot, .docs-scope-grid, .docs-profile-list, .docs-final-card, .docs-studio-facts { margin-left: 0; }
   .docs-two-column, .client-route-grid { grid-template-columns: 1fr; }
   .docs-contract-note, .docs-final-card { align-items: flex-start; flex-direction: column; }
   .docs-final-card > div:last-child { justify-content: flex-start; }

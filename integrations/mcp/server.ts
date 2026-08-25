@@ -1,6 +1,9 @@
+import { execFile as execFileCallback } from "node:child_process";
 import { createInterface } from "node:readline";
 import { readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
 import {
   createAssetInspectionEvidenceV2,
   createPassport,
@@ -18,6 +21,8 @@ import { loadAssetOpsInput, loadBundle, writeOutputBundle } from "../shared/node
 import { resolveProfilePolicy } from "../shared/custom-profile";
 
 const profileFile = { type: "string", description: "Absolute path to a custom profile JSON. Cannot be combined with profile." };
+const execFile = promisify(execFileCallback);
+const CLUNK_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const evidenceProperties = {
   evidenceFormat: { type: "string", enum: ["v2"] },
   evidenceKind: { type: "string", enum: ["CONTRACT_FIXTURE", "PLAYER_FACING_CAPTURE"] },
@@ -36,6 +41,7 @@ const tools = [
   { name: "clunk_passport", description: "Create a Passport by freshly inspecting source and output artifacts.", inputSchema: { type: "object", required: ["sourcePath", "outputPath"], properties: { sourcePath: { type: "string" }, outputPath: { type: "string" }, profile: { type: "string", enum: ["web", "mobile", "pc"] }, profileFile } } },
   { name: "clunk_asset_inspect", description: "Inspect a real asset against an engine-aware target profile and return canonical evidence JSON.", inputSchema: { type: "object", required: ["path", "targetProfileId"], properties: { path: { type: "string" }, targetProfileId: { type: "string" }, assetKind: { type: "string", enum: ["3d-model", "2d-image", "sprite-atlas", "spine-project", "animation-clip"] }, runId: { type: "string" }, profileFile: { type: "string", description: "Reserved for legacy tool parity; use targetProfileId for engine-aware inspection." } } } },
   { name: "clunk_asset_inspection_evidence", description: "Create clunk.asset-inspection-evidence.v2 for a real asset. CONTRACT_FIXTURE is structural-only; PLAYER_FACING_CAPTURE requires hashed capture evidence and keeps human decision explicit.", inputSchema: { type: "object", required: ["path"], properties: { path: { type: "string" }, profile: { type: "string", enum: ["web", "mobile", "pc"] }, profileFile, ...evidenceProperties } } },
+  { name: "clunk_asset_author", description: "Author a real 2D Sprite, Sprite Atlas, Spine JSON bundle, animation GLB, or 3D factory output into a separate local directory, then reopen it through AssetOps. Runtime and human visual approval stay separate.", inputSchema: { type: "object", required: ["assetKind", "targetProfileId", "outputDirectory"], properties: { assetKind: { type: "string", enum: ["2d-image", "sprite-atlas", "spine-project", "animation-clip", "3d-model"] }, targetProfileId: { type: "string" }, recipeId: { type: "string" }, recipeVersion: { type: "string" }, outputDirectory: { type: "string" }, label: { type: "string" }, prompt: { type: "string" }, factoryPath: { type: "string", description: "Required for 3d-model; a local Three.js factory module." } } } },
 ];
 
 const input = createInterface({ input: process.stdin, crlfDelay: Infinity });
@@ -70,6 +76,10 @@ async function handle(method: string, params?: { name?: string; arguments?: Reco
       assetKind: optionalString(args.assetKind) as AssetKind | undefined,
       bundleFiles: input.bundleFiles,
     });
+    return { content: [{ type: "text", text: JSON.stringify(value) }] };
+  }
+  if (params.name === "clunk_asset_author") {
+    const value = await runAuthoringCommand(args);
     return { content: [{ type: "text", text: JSON.stringify(value) }] };
   }
   const policy: AssetPolicy = await resolveProfilePolicy({
@@ -132,6 +142,53 @@ async function handle(method: string, params?: { name?: string; arguments?: Reco
     value = passportEnvelope(createPassport(before, after, []), after.resultDigest);
   } else throw new Error(`Unknown Clunk tool: ${params.name}`);
   return { content: [{ type: "text", text: JSON.stringify(value) }] };
+}
+
+async function runAuthoringCommand(args: Record<string, unknown>): Promise<unknown> {
+  const assetKind = requiredString(args.assetKind, "assetKind");
+  const targetProfileId = requiredString(args.targetProfileId, "targetProfileId");
+  const outputDirectory = requiredString(args.outputDirectory, "outputDirectory");
+  const recipeDefaults: Record<string, string> = {
+    "2d-image": "sprite-sheet-factory-v1",
+    "sprite-atlas": "sprite-atlas-factory-v1",
+    "spine-project": "spine-json-factory-v1",
+    "animation-clip": "threejs-animation-factory-v1",
+    "3d-model": "threejs-factory-v1",
+  };
+  const recipeId = optionalString(args.recipeId) ?? recipeDefaults[assetKind];
+  if (!recipeId) throw new Error(`Unsupported authoring asset kind: ${assetKind}`);
+  const script = assetKind === "3d-model" ? "scripts/assetops-generate.ts" : "scripts/assetops-author.ts";
+  const scriptArgs = assetKind === "3d-model"
+    ? [
+        "--factory", requiredString(args.factoryPath, "factoryPath"),
+        "--target-profile", targetProfileId,
+        "--recipe-id", recipeId,
+        "--recipe-version", optionalString(args.recipeVersion) ?? "1.0.0",
+        "--output-directory", outputDirectory,
+      ]
+    : [
+        "--asset-kind", assetKind,
+        "--target-profile", targetProfileId,
+        "--recipe-id", recipeId,
+        "--recipe-version", optionalString(args.recipeVersion) ?? "1.0.0",
+        "--output-directory", outputDirectory,
+        ...(optionalString(args.label) ? ["--label", optionalString(args.label)!] : []),
+        ...(optionalString(args.prompt) ? ["--prompt", optionalString(args.prompt)!] : []),
+      ];
+  const tsx = resolve(CLUNK_ROOT, "node_modules/tsx/dist/cli.mjs");
+  let stdout = "";
+  try {
+    ({ stdout } = await execFile(process.execPath, [tsx, resolve(CLUNK_ROOT, script), ...scriptArgs], { cwd: CLUNK_ROOT, maxBuffer: 8 * 1024 * 1024 }));
+  } catch (error) {
+    const candidate = error as { stdout?: string; stderr?: string };
+    stdout = candidate.stdout ?? "";
+    if (!stdout) throw new Error(candidate.stderr || "Asset authoring command failed.");
+  }
+  try {
+    return JSON.parse(stdout);
+  } catch {
+    throw new Error("Asset authoring command did not return JSON evidence.");
+  }
 }
 
 function optionalString(value: unknown): string | undefined {

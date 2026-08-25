@@ -52,15 +52,26 @@ test("prompt provenance gets a content hash without pretending authoring is a ru
   assert.equal(plan.verificationPolicy, "REOPEN_WITH_SAME_TARGET_PROFILE");
 });
 
-test("2D and Spine authoring stay explicitly unavailable until a real adapter is registered", () => {
+test("2D and Spine authoring use explicit verified adapter identities", () => {
   const plan = createGenerationPlan({
     ...baseRequest,
     assetKind: "spine-project",
-    recipeId: "spine-authoring-v1",
+    recipeId: "spine-json-factory-v1",
+  });
+
+  assert.equal(plan.status, "READY_TO_RUN");
+  assert.equal(plan.output?.authoringAdapter, "spine-json-factory-v1");
+});
+
+test("unregistered asset recipes remain unavailable instead of falling back to another writer", () => {
+  const plan = createGenerationPlan({
+    ...baseRequest,
+    assetKind: "sprite-atlas",
+    recipeId: "unknown-authoring-v1",
   });
 
   assert.equal(plan.status, "AUTHORING_UNAVAILABLE");
-  assert.equal(plan.message, "No verified Clunk authoring adapter is registered for spine-project.");
+  assert.match(plan.message, /sprite-atlas.*unknown-authoring-v1/);
   assert.equal(plan.output, undefined);
 });
 

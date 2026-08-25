@@ -36,6 +36,7 @@ export function SiteShell({
             </div>
           </div>
           <nav className="site-footer-nav" aria-label="사이트 링크">
+            <Link href="/studio">에셋 스튜디오</Link>
             <Link href="/app">검사기</Link>
             <Link href="/dashboard">대시보드</Link>
             <Link href="/pricing">요금</Link>

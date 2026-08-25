@@ -192,7 +192,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
   }
 
   return (
-    <section className="panel collaboration-panel" aria-labelledby="collaboration-heading">
+    <section className="panel collaboration-panel" id="collaboration" aria-labelledby="collaboration-heading">
       <div className="panel-head collaboration-head">
         <div>
           <span className="mono-label">HARVEST FRONTIER · COLLABORATION</span>

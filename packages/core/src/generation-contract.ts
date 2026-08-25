@@ -52,11 +52,22 @@ export interface GenerationPlan {
   passportPolicy: "REQUIRED_AFTER_ARTIFACT_REOPEN";
   message: string;
   output?: {
-    authoringAdapter: "threejs-factory-v1";
+    authoringAdapter:
+      | "threejs-factory-v1"
+      | "sprite-sheet-factory-v1"
+      | "sprite-atlas-factory-v1"
+      | "spine-json-factory-v1"
+      | "threejs-animation-factory-v1";
   };
 }
 
-const AUTHORING_ADAPTERS: ReadonlySet<string> = new Set(["3d-model:threejs-factory-v1"]);
+const AUTHORING_ADAPTERS: ReadonlyMap<string, NonNullable<GenerationPlan["output"]>["authoringAdapter"]> = new Map([
+  ["3d-model:threejs-factory-v1", "threejs-factory-v1"],
+  ["2d-image:sprite-sheet-factory-v1", "sprite-sheet-factory-v1"],
+  ["sprite-atlas:sprite-atlas-factory-v1", "sprite-atlas-factory-v1"],
+  ["spine-project:spine-json-factory-v1", "spine-json-factory-v1"],
+  ["animation-clip:threejs-animation-factory-v1", "threejs-animation-factory-v1"],
+]);
 
 export function createGenerationPlan(request: GenerationRequest): GenerationPlan {
   validateRequest(request);
@@ -112,18 +123,19 @@ export function createGenerationPlan(request: GenerationRequest): GenerationPlan
       message: `${request.assetKind} is not accepted by ${request.targetProfileId}.`,
     };
   }
-  if (!AUTHORING_ADAPTERS.has(`${request.assetKind}:${request.recipeId}`)) {
+  const authoringAdapter = AUTHORING_ADAPTERS.get(`${request.assetKind}:${request.recipeId}`);
+  if (!authoringAdapter) {
     return {
       ...base,
       status: "AUTHORING_UNAVAILABLE",
-      message: `No verified Clunk authoring adapter is registered for ${request.assetKind}.`,
+      message: `No verified Clunk authoring adapter is registered for ${request.assetKind} with recipe ${request.recipeId}.`,
     };
   }
   return {
     ...base,
     status: "READY_TO_RUN",
     message: "A verified authoring adapter can produce a separate artifact for this target profile.",
-    output: { authoringAdapter: "threejs-factory-v1" },
+    output: { authoringAdapter },
   };
 }
 

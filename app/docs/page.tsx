@@ -113,6 +113,20 @@ const BUNDLE_EXAMPLE = `{
   ]
 }`;
 
+const STUDIO_COMMANDS = `# 2D Sprite / Atlas / Spine JSON bundle
+$ npm.cmd run asset:author -- --asset-kind 2d-image --target-profile harvest-frontier-web-three --recipe-id sprite-sheet-factory-v1 --recipe-version 1.0.0 --output-directory output/generated
+$ npm.cmd run asset:author -- --asset-kind sprite-atlas --target-profile harvest-frontier-web-three --recipe-id sprite-atlas-factory-v1 --recipe-version 1.0.0 --output-directory output/generated
+$ npm.cmd run asset:author -- --asset-kind spine-project --target-profile harvest-frontier-web-three --recipe-id spine-json-factory-v1 --recipe-version 1.0.0 --output-directory output/generated
+
+# 3D model / animation
+$ npm.cmd run asset:generate -- --factory examples/generated/windmill.factory.mjs --target-profile harvest-frontier-web-three --recipe-id threejs-factory-v1 --recipe-version 1.0.0 --output-directory output/generated
+$ npm.cmd run asset:author -- --asset-kind animation-clip --target-profile harvest-frontier-web-three --recipe-id threejs-animation-factory-v1 --recipe-version 1.0.0 --output-directory output/generated
+
+# 모든 output은 별도 폴더에 쓰고 같은 target profile로 reopen합니다.
+# local stdio MCP: clunk_asset_author uses the same fields and writes only locally.
+# remote HTTPS MCP: upload the generated bundle; it never writes local paths.
+# structural PASS != visualRuntime PASS != human player-facing PASS`;
+
 const HF_EVIDENCE_RULES = `# player-facing scene review output
 comparisonSchema: clunk.frame-comparison.v1
 reviewStatus=NOT_EVALUATED · visualRuntime=GAP · playerFacing=NOT_EVALUATED
@@ -168,9 +182,10 @@ export default function DocsPage() {
               <a href="#quickstart"><span>01</span>빠른 시작</a>
               <a href="#clients"><span>02</span>클라이언트별 설정</a>
               <a href="#cli"><span>03</span>CLI와 CI</a>
-              <a href="#contracts"><span>04</span>계약과 상태</a>
-              <a href="#harvest-frontier"><span>05</span>Harvest Frontier</a>
-              <a href="#scope"><span>06</span>지원 범위</a>
+              <a href="#asset-studio"><span>04</span>Asset Studio</a>
+              <a href="#contracts"><span>05</span>계약과 상태</a>
+              <a href="#harvest-frontier"><span>06</span>Harvest Frontier</a>
+              <a href="#scope"><span>07</span>지원 범위</a>
             </nav>
             <div className="docs-sidebar-callout">
               <span className="status-dot status-dot-on" />
@@ -219,9 +234,26 @@ export default function DocsPage() {
               <CodeBlock title="multi-file AssetOps bundle" language="json" code={BUNDLE_EXAMPLE} caption="atlas·PNG·Spine처럼 함께 움직이는 파일은 entryFileName, fileCount, 역할, relatesTo를 한 요청으로 보존합니다." />
             </section>
 
-            <section className="docs-section-v2" id="contracts">
+            <section className="docs-section-v2 docs-studio-section" id="asset-studio">
               <div className="docs-section-heading">
                 <span className="section-number">04</span>
+                <div><span className="eyebrow">AUTHOR · INSPECT · ATTACH</span><h2>Asset Studio</h2></div>
+              </div>
+              <p className="docs-lead-v2">2D Sprite·Atlas·Spine과 3D Model·Animation을 같은 provenance로 만들고 검사합니다. 만들었다는 사실과 게임 화면에서 잘 보인다는 판정은 서로 다른 증거입니다.</p>
+              <div className="docs-two-column">
+                <div className="docs-studio-facts">
+                  <article><span>2D</span><strong>Sprite · Atlas · Spine JSON</strong><p>PNG page, region bounds, bones, slots, attachments, animation 이름과 atlas 관계를 검사합니다.</p></article>
+                  <article><span>3D</span><strong>Model · Mesh · Motion</strong><p>GLB/GLTF 구조, 재질, bounds, animation sampler와 target node를 검사합니다.</p></article>
+                  <article><span>ENGINE</span><strong>Web · Godot · Unity · Unreal · Mobile</strong><p>실제 runner가 없으면 import/runtime은 ENVIRONMENT_UNAVAILABLE로 남깁니다.</p></article>
+                </div>
+                <CodeBlock title="Asset Studio CLI" language="bash" code={STUDIO_COMMANDS} caption="생성 결과는 별도 output으로 작성하고, fresh reopen 후 AssetEvidence를 반환합니다." />
+              </div>
+              <div className="docs-contract-note"><strong>사용 제한</strong><span>로컬 stdio의 clunk_asset_author와 CLI만 출력 파일을 작성합니다. 원격 HTTPS MCP는 로컬 경로를 읽거나 쓰지 않고 업로드된 bundle만 검사합니다. .skel binary parser와 실제 엔진 playback은 아직 adapter/runner가 필요하며, CONTRACT_FIXTURE나 structural PASS만으로 player-facing 승인을 만들지 않습니다.</span></div>
+            </section>
+
+            <section className="docs-section-v2" id="contracts">
+              <div className="docs-section-heading">
+                <span className="section-number">05</span>
                 <div><span className="eyebrow">READ THE RESULT CORRECTLY</span><h2>계약과 상태</h2></div>
               </div>
               <p className="docs-lead-v2">점수는 구조 계약의 한 축입니다. 실제 게임 화면과 사람의 판단은 각각 별도 필드이며 자동 승격하지 않습니다.</p>
@@ -237,7 +269,7 @@ export default function DocsPage() {
 
             <section className="docs-section-v2 docs-hf-section" id="harvest-frontier">
               <div className="docs-section-heading">
-                <span className="section-number">05</span>
+                <span className="section-number">06</span>
                 <div><span className="eyebrow">COLLABORATION EXAMPLE</span><h2>Harvest Frontier</h2></div>
               </div>
               <p className="docs-lead-v2">HF는 Clunk의 구조 evidence를 소비하지만 원본 에셋과 최종 플레이어 화면 판정의 source of truth를 유지합니다.</p>
@@ -254,7 +286,7 @@ export default function DocsPage() {
 
             <section className="docs-section-v2" id="scope">
               <div className="docs-section-heading">
-                <span className="section-number">06</span>
+                <span className="section-number">07</span>
                 <div><span className="eyebrow">WHAT CLUNK CAN VERIFY</span><h2>지원 범위</h2></div>
               </div>
               <div className="docs-scope-grid">

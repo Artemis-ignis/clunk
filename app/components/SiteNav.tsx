@@ -12,9 +12,10 @@ import { ThemeToggle } from "./ThemeToggle";
  * Tinted for the dark palette and given a scrolled state so the bar reads against the hero image.
  */
 
-export type ShellSection = "home" | "app" | "dashboard" | "pricing" | "docs" | "agents";
+export type ShellSection = "home" | "studio" | "app" | "dashboard" | "pricing" | "docs" | "agents";
 
 const NAV_LINKS: { label: string; href: string; section: ShellSection }[] = [
+  { label: "에셋 스튜디오", href: "/studio", section: "studio" },
   { label: "검사기", href: "/app", section: "app" },
   { label: "대시보드", href: "/dashboard", section: "dashboard" },
   { label: "요금", href: "/pricing", section: "pricing" },
