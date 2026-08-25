@@ -51,3 +51,29 @@ test("server-renders public product routes", async () => {
     assert.doesNotMatch(html, /Your site is taking shape|SkeletonPreview/);
   }
 });
+
+test("public navigation uses browser-native anchors on the Sites runtime", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const files = [
+    "../app/page.tsx",
+    "../app/components/SiteNav.tsx",
+    "../app/components/AuthEntryCard.tsx",
+    "../app/components/DashboardClient.tsx",
+    "../app/components/WorkspaceShell.tsx",
+    "../app/docs/page.tsx",
+    "../app/pricing/page.tsx",
+    "../app/components/PassportClient.tsx",
+    "../app/components/SiteShell.tsx",
+    "../app/components/LandingHero.tsx",
+    "../app/components/HeroAutopsy.tsx",
+    "../app/settings/page.tsx",
+    "../app/signin-with-chatgpt/page.tsx",
+    "../app/not-found.tsx",
+  ];
+
+  for (const file of files) {
+    const source = await readFile(new URL(file, import.meta.url), "utf8");
+    assert.doesNotMatch(source, /from ["']next\/link["']/u, file);
+    assert.match(source, /NativeLink/u, file);
+  }
+});

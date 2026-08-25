@@ -2,7 +2,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
+import Link from "./NativeLink";
 import { Icon } from "./Icon";
 import { CountUp } from "./CountUp";
 import { IntroAnimation } from "./IntroAnimation";

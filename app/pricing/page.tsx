@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "../components/NativeLink";
 import { Icon } from "../components/Icon";
 import { SiteShell } from "../components/SiteShell";
 

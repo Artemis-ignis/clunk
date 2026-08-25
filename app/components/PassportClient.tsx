@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import Link from "./NativeLink";
 import type { Passport } from "../../packages/core/src/index";
 import { Icon } from "./Icon";
 import { resolveReadiness } from "./readiness";

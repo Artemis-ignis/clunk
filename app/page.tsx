@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "./components/NativeLink";
 import { BrandMark } from "./components/BrandMark";
 import { Icon, type IconName } from "./components/Icon";
 import { SiteNav } from "./components/SiteNav";

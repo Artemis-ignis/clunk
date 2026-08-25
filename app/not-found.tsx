@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "./components/NativeLink";
 import { BrandLockup } from "./components/BrandMark";
 import { Icon } from "./components/Icon";
 

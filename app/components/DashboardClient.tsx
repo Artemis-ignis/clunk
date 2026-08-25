@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import Link from "./NativeLink";
 import { DemoUpgradeButton } from "./DemoUpgradeButton";
 import { CollaborationPanel } from "./CollaborationPanel";
 import { Icon } from "./Icon";

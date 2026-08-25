@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import Link from "next/link";
+import Link from "./NativeLink";
 import { BrandMark } from "./BrandMark";
 import { SiteNav, type ShellSection } from "./SiteNav";
 

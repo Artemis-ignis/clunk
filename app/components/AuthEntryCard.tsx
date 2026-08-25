@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "./NativeLink";
 import { chatGPTSignInPath, chatGPTSignOutPath, type ChatGPTUser } from "../chatgpt-auth";
 import { BrandLockup } from "./BrandMark";
 import { Icon } from "./Icon";

@@ -2,7 +2,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
+import Link from "./NativeLink";
 import { Icon } from "./Icon";
 import { HERO_REVEAL_MS, IntroAnimation } from "./IntroAnimation";
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";

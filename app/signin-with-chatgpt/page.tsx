@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "../components/NativeLink";
 import { getChatGPTUser } from "../chatgpt-auth";
 import { BrandLockup } from "../components/BrandMark";
 import { Icon } from "../components/Icon";

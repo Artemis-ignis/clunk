@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import Link from "./NativeLink";
 import { BrandLockup } from "./BrandMark";
 import { Icon } from "./Icon";
 import { ThemeToggle } from "./ThemeToggle";
