@@ -40,6 +40,15 @@ const worker = {
       }, allowedWidths);
     }
 
+    // Sites' dispatcher does not forward the top-level dynamic /mcp route,
+    // while /api routes are available. Keep the public Clunk contract at the
+    // requested URL and dispatch it before vinext's page router.
+    if (url.pathname === "/mcp") {
+      const internalUrl = new URL(request.url);
+      internalUrl.pathname = "/api/mcp";
+      return handler.fetch(new Request(internalUrl, request), env, ctx);
+    }
+
     return handler.fetch(request, env, ctx);
   },
 };
