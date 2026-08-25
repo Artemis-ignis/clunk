@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import type { Metadata } from "next";
 import Link from "../components/NativeLink";
 import { CodeBlock } from "../components/CodeBlock";
@@ -170,6 +171,23 @@ export default function DocsPage() {
             <small>{RULE_SET.id} · {SURFACES.length} surfaces</small>
           </div>
         </header>
+
+        <section className="docs-evidence-visual" aria-label="Clunk 증거 판정 시각 안내">
+          <div className="docs-evidence-visual-art">
+            <img src="/landing/tractor-hero.png" alt="실제 GLB 검사 결과를 보여주는 Clunk 트랙터 렌더" width="900" height="560" />
+            <span className="docs-evidence-visual-tag">REAL BYTES · TRACTOR.GLB</span>
+          </div>
+          <div className="docs-evidence-visual-copy">
+            <span className="eyebrow">ONE FILE · THREE STATES</span>
+            <h2>검사 결과를 화면으로 읽는 법</h2>
+            <p>같은 에셋도 구조 계약, 실제 런타임, 사람의 화면 판정은 서로 다른 증거입니다.</p>
+            <div className="docs-evidence-state-row">
+              <div><span>STRUCTURAL</span><strong>PASS</strong><small>hash · policy · blocker</small></div>
+              <div><span>RUNTIME</span><strong>GAP</strong><small>shipped frame 필요</small></div>
+              <div><span>HUMAN</span><strong>대기</strong><small>자동 승격하지 않음</small></div>
+            </div>
+          </div>
+        </section>
 
         <div className="docs-layout">
           <aside className="docs-sidebar" aria-label="문서 목차">

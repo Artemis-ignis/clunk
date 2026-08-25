@@ -4,6 +4,7 @@ import { BrandMark } from "./components/BrandMark";
 import { Icon, type IconName } from "./components/Icon";
 import { SiteNav } from "./components/SiteNav";
 import { SnapRoot } from "./components/SnapRoot";
+import { McpEndpointStatus } from "./components/McpEndpointStatus";
 import {
   ASSET_KIND_COVERAGE,
   CLI_SAMPLE,
@@ -18,7 +19,7 @@ import {
 export const metadata: Metadata = {
   title: "모든 에셋을 근거 있게",
   description:
-    "AI 에이전트가 만든 GLB와 GLTF를 생성 직후 검사하고, 허용된 범위만 최적화하고, 결과를 다시 증명하는 품질 게이트입니다.",
+    "AI 에이전트가 만든 2D·3D 에셋을 생성 직후 검사하고, 실제 사용 경로와 근거를 연결하는 품질 게이트입니다.",
 };
 
 const STEPS: { index: string; icon: IconName; title: string; body: string; detail: string }[] = [
@@ -73,14 +74,14 @@ export default function Home() {
         <section className="landing-snap-section landing-hero" id="home">
           <div className="landing-hero-inner">
             <div className="landing-hero-copy">
-              <span className="eyebrow">GAME ASSETOPS · 3D 품질 게이트</span>
+              <span className="eyebrow">GAME ASSETOPS · 2D + 3D 품질 게이트</span>
               <h1>
-                에이전트가 만든 GLB를
+                에이전트가 만든 에셋을
                 <em>게임에 넣기 전에 판정합니다.</em>
               </h1>
               <p className="landing-hero-lead">
-                Claude Code, Codex 같은 에이전트가 쓴 에셋을 사람이 열어보기 전에 실제 바이트로
-                검사하고, 점수와 근거, Passport를 남깁니다.
+                Claude Code, Codex 같은 에이전트가 만든 Sprite, Atlas, Spine, animation, GLB를
+                실제 바이트로 검사하고, 게임에 넣기 전의 판정과 근거를 연결합니다.
               </p>
               <div className="landing-hero-actions">
                 <Link className="button button-primary" href="/app" prefetch={false}>
@@ -137,7 +138,7 @@ export default function Home() {
           <div className="landing-section-inner">
             <div className="landing-section-heading">
               <span className="eyebrow">HOW IT WORKS · 3 STEPS</span>
-              <h2>파일 하나가 <em>근거 있는 결과</em>가 되는 과정</h2>
+              <h2>파일 하나가 근거 있는<br /><em>결과가 되는 과정</em></h2>
               <p>
                 미리보기나 감으로 통과시키지 않습니다. 같은 Core가 입력 바이트부터 결과
                 Passport까지 이어지는 한 세션을 기록합니다.
@@ -246,6 +247,7 @@ export default function Home() {
                   <span>{MCP_TOOL_COUNT} tools · {RULE_SET.id}</span>
                   <span>Clunk HTTPS MCP · workspace key · local stdio fallback</span>
                 </div>
+                <McpEndpointStatus />
               </div>
             </div>
           </div>

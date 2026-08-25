@@ -59,3 +59,15 @@ test("setup links preserve a real login return path", async () => {
   assert.match(guideSource, /--bearer-token-env-var CLUNK_API_KEY/);
   assert.match(guideSource, /copilot mcp add --transport http/);
 });
+
+test("the connection surface exposes live endpoint status and a real MCP handshake", async () => {
+  const pageSource = await readFile(new URL("../app/agents/page.tsx", import.meta.url), "utf8");
+  const clientSource = await readFile(new URL("../app/agents/AgentsClient.tsx", import.meta.url), "utf8");
+  const statusSource = await readFile(new URL("../app/components/McpEndpointStatus.tsx", import.meta.url), "utf8");
+  assert.match(pageSource, /McpEndpointStatus/);
+  assert.match(clientSource, /initialize/);
+  assert.match(clientSource, /tools\/list/);
+  assert.match(clientSource, /agent-handshake-card/);
+  assert.match(statusSource, /fetch\("\/api\/mcp"/);
+  assert.match(statusSource, /LIVE MCP STATUS/);
+});

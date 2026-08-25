@@ -15,6 +15,7 @@ type ApiKeySummary = {
 };
 
 type ConnectionState = "loading" | "signed-out" | "ready" | "error";
+type HandshakeStep = "idle" | "checking" | "PASS" | "FAIL";
 
 const AGENT_CONNECT_LOGIN_HREF = "/login?return_to=%2Fagents%23connect";
 
@@ -27,6 +28,11 @@ export function AgentsClient() {
   const [busy, setBusy] = useState<"create" | "check" | string | null>(null);
   const [message, setMessage] = useState<string>("");
   const [checkResult, setCheckResult] = useState<"PASS" | "FAIL" | null>(null);
+  const [handshake, setHandshake] = useState<{ initialize: HandshakeStep; tools: HandshakeStep; toolCount: number }>({
+    initialize: "idle",
+    tools: "idle",
+    toolCount: 0,
+  });
 
   const connection = useMemo<AgentConnection | undefined>(
     () => (issuedSecret ? { endpoint, apiKey: issuedSecret } : undefined),
@@ -68,6 +74,7 @@ export function AgentsClient() {
     setBusy("create");
     setMessage("");
     setCheckResult(null);
+    setHandshake({ initialize: "idle", tools: "idle", toolCount: 0 });
     try {
       const response = await fetch("/api/mcp/keys", {
         method: "POST",
@@ -101,6 +108,8 @@ export function AgentsClient() {
     setBusy("check");
     setMessage("");
     setCheckResult(null);
+    setHandshake({ initialize: "checking", tools: "idle", toolCount: 0 });
+    let stage: "initialize" | "tools" = "initialize";
     try {
       const response = await fetch(endpoint, {
         method: "POST",
@@ -111,6 +120,8 @@ export function AgentsClient() {
       if (!response.ok || initialize.error || initialize.result?.serverInfo?.name !== "clunk") {
         throw new Error(initialize.error?.message ?? "Clunk initialize 응답이 올바르지 않습니다.");
       }
+      setHandshake({ initialize: "PASS", tools: "checking", toolCount: 0 });
+      stage = "tools";
       const toolsResponse = await fetch(endpoint, {
         method: "POST",
         headers: { "content-type": "application/json", Authorization: `Bearer ${issuedSecret}` },
@@ -120,9 +131,11 @@ export function AgentsClient() {
       if (!toolsResponse.ok || tools.error || !Array.isArray(tools.result?.tools)) {
         throw new Error(tools.error?.message ?? "Clunk tools/list 응답이 올바르지 않습니다.");
       }
+      setHandshake({ initialize: "PASS", tools: "PASS", toolCount: tools.result.tools.length });
       setCheckResult("PASS");
       setMessage(`연결 확인 PASS · ${tools.result.tools.length}개 원격 도구가 응답했습니다.`);
     } catch (error) {
+      setHandshake((current) => ({ ...current, [stage]: "FAIL" }));
       setCheckResult("FAIL");
       setMessage(error instanceof Error ? error.message : "Clunk 연결을 확인하지 못했습니다.");
     } finally {
@@ -208,6 +221,24 @@ export function AgentsClient() {
       ) : null}
 
       {message ? <p className={`agent-connection-message agent-connection-message-${checkResult?.toLowerCase() ?? "info"}`} role="status">{message}</p> : null}
+
+      <div className="agent-handshake-cards" aria-live="polite" aria-label="MCP 실제 연결 확인 단계">
+        <article className="agent-handshake-card">
+          <span className="mono-label">01 · INITIALIZE</span>
+          <strong>{handshake.initialize}</strong>
+          <p>서버 이름과 MCP protocol 응답을 확인합니다.</p>
+        </article>
+        <article className="agent-handshake-card">
+          <span className="mono-label">02 · TOOLS/LIST</span>
+          <strong>{handshake.tools}</strong>
+          <p>{handshake.toolCount ? `${handshake.toolCount}개 도구가 실제 응답했습니다.` : "키 발급 후 실제 도구 목록을 요청합니다."}</p>
+        </article>
+        <article className="agent-handshake-card agent-handshake-card-boundary">
+          <span className="mono-label">03 · BOUNDARY</span>
+          <strong>분리 유지</strong>
+          <p>이 핸드셰이크 PASS는 구조/연결 확인이며 player-facing 승인이 아닙니다.</p>
+        </article>
+      </div>
 
       {activeKeys.length ? (
         <div className="agent-key-list" aria-label="발급된 Clunk 연결 키">

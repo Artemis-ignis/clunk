@@ -4,6 +4,7 @@ import Link from "../components/NativeLink";
 import { AgentsClient } from "./AgentsClient";
 import { Icon } from "../components/Icon";
 import { SiteShell } from "../components/SiteShell";
+import { McpEndpointStatus } from "../components/McpEndpointStatus";
 import {
   ASSET_KIND_COVERAGE,
   MCP_HTTP_TOOL_CATALOG,
@@ -92,6 +93,7 @@ export default function AgentsPage() {
           <div><span className="mono-label">ENDPOINT</span><strong>/api/mcp</strong><small>streamable HTTP</small></div>
           <div><span className="mono-label">AUTH</span><strong>Bearer workspace key</strong><small>로그인 후 키 발급 · 1회 표시</small></div>
           <div><span className="mono-label">RESULT BOUNDARY</span><strong>구조 PASS ≠ 화면 PASS</strong><small>visualRuntime은 별도 상태</small></div>
+          <McpEndpointStatus />
         </section>
 
         <section className="agents-setup-section" aria-labelledby="setup-heading">

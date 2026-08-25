@@ -52,6 +52,17 @@ test("server-renders public product routes", async () => {
   }
 });
 
+test("landing language covers the full 2D and 3D asset path", async () => {
+  const response = await render("/");
+  const html = await response.text();
+  assert.match(html, /에이전트가 만든 에셋을/);
+  assert.match(html, /게임에 넣기 전에 판정합니다/);
+  assert.match(html, /파일 하나가 근거 있는/);
+  assert.match(html, /결과가 되는 과정/);
+  assert.match(html, /Sprite.*Atlas|Atlas.*Sprite/);
+  assert.match(html, /Spine/);
+});
+
 test("docs expose a navigable GitBook-style information architecture", async () => {
   const response = await render("/docs");
   const html = await response.text();
@@ -62,6 +73,8 @@ test("docs expose a navigable GitBook-style information architecture", async () 
   assert.match(html, /클라이언트별 설정/);
   assert.match(html, /계약과 상태/);
   assert.match(html, /문서 검색/);
+  assert.match(html, /docs-evidence-visual/);
+  assert.match(html, /ONE FILE · THREE STATES/);
 });
 
 test("public navigation uses browser-native anchors on the Sites runtime", async () => {

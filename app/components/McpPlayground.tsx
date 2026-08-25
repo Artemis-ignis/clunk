@@ -6,7 +6,7 @@ import { useInView } from "./useInView";
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 
 /**
- * Live-feeling MCP playground: picking a tool replays the recorded stdio session for that
+ * Verified MCP replay: picking a tool replays the recorded stdio session for that
  * tool line by line, at terminal pace. The transcript data is a real capture
  * (see mcp-transcript.ts) — this component only controls pacing, never content.
  */
@@ -101,7 +101,7 @@ function TranscriptPane({ tool, armed }: { tool: PlaygroundTool; armed: boolean 
           <i />
           <i />
         </span>
-        <span className="mono-label">clunk mcp · stdio · {tool.id}</span>
+        <span className="mono-label">VERIFIED RUN · stdio capture · {tool.id}</span>
         <button
           type="button"
           className="mcp3-replay"

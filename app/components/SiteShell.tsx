@@ -2,6 +2,7 @@
 import Link from "./NativeLink";
 import { BrandMark } from "./BrandMark";
 import { SiteNav, type ShellSection } from "./SiteNav";
+import { SnapRoot } from "./SnapRoot";
 
 export type { ShellSection };
 
@@ -14,6 +15,7 @@ export function SiteShell({
 }) {
   return (
     <div className="site-shell">
+      <SnapRoot />
       <SiteNav active={active} />
       {children}
       <footer className="site-footer">
@@ -32,7 +34,7 @@ export function SiteShell({
             </span>
             <div>
               <strong>Clunk</strong>
-              <span>팀을 위한 실시간 3D 에셋 품질 게이트</span>
+              <span>팀을 위한 2D + 3D 에셋 품질·근거 게이트</span>
             </div>
           </div>
           <nav className="site-footer-nav" aria-label="사이트 링크">
