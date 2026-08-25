@@ -42,5 +42,7 @@ test("the public MCP status card exposes a live WebMCP state", async () => {
   const sourceText = await source("app/components/McpEndpointStatus.tsx");
   assert.match(sourceText, /WEBMCP/);
   assert.match(sourceText, /data-webmcp-status/);
+  assert.match(sourceText, /dataset\.webmcpStatus/);
+  assert.match(sourceText, /syncTimer/);
   assert.match(sourceText, /initialize.*tools\/list|tools\/list.*initialize/);
 });

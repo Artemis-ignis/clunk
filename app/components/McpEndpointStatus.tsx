@@ -54,6 +54,12 @@ export function McpEndpointStatus() {
 
   useEffect(() => {
     const timer = window.setTimeout(() => void refresh(), 0);
+    const syncTimer = window.setTimeout(() => {
+      const status = document.documentElement.dataset.webmcpStatus as WebMcpState | undefined;
+      const detail = document.documentElement.dataset.webmcpDetail;
+      if (status) setWebmcpState(status);
+      if (detail) setWebmcpDetail(detail);
+    }, 0);
     const onWebMcpStatus = (event: Event) => {
       const detail = (event as CustomEvent<{ status?: WebMcpState; detail?: string }>).detail;
       if (detail.status) setWebmcpState(detail.status);
@@ -62,6 +68,7 @@ export function McpEndpointStatus() {
     window.addEventListener(WEBMCP_STATUS_EVENT, onWebMcpStatus);
     return () => {
       window.clearTimeout(timer);
+      window.clearTimeout(syncTimer);
       window.removeEventListener(WEBMCP_STATUS_EVENT, onWebMcpStatus);
     };
   }, [refresh]);
