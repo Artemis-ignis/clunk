@@ -4461,7 +4461,7 @@ pre {
 }
 
 /* ============================================================================
-   Polyfork benchmark surface: Clunk landing
+   Clunk landing surface
    ========================================================================= */
 
 .benchmark-home {
@@ -5693,7 +5693,7 @@ html.snap-y .landing-snap-section {
 }
 
 /* ============================================================================
-   Polyfork benchmark surface: agent connection guide
+   Agent connection surface
    ========================================================================= */
 
 .agents-page {
@@ -6007,6 +6007,142 @@ html.snap-y .landing-snap-section {
   border-radius: 22px;
   background: #111b2a;
   box-shadow: 0 28px 72px rgba(15, 33, 51, 0.15);
+}
+
+.agent-connection-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(151, 187, 218, 0.13);
+  background: linear-gradient(110deg, rgba(35, 196, 239, 0.12), rgba(20, 36, 54, 0.5));
+}
+
+.agent-connection-toolbar > div:first-child {
+  min-width: 0;
+}
+
+.agent-connection-toolbar strong,
+.agent-connection-toolbar small {
+  display: block;
+}
+
+.agent-connection-toolbar strong {
+  margin-top: 6px;
+  color: #f0f8fd;
+  font-size: 0.98rem;
+}
+
+.agent-connection-toolbar small {
+  margin-top: 5px;
+  color: #91a9bc;
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+
+.agent-connection-toolbar small code {
+  color: #b8e8f4;
+}
+
+.agent-connection-actions,
+.agent-code-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.agent-connection-actions .button {
+  white-space: nowrap;
+}
+
+.agent-issued-key {
+  display: grid;
+  grid-template-columns: minmax(160px, 0.7fr) minmax(240px, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(82, 220, 177, 0.2);
+  background: rgba(45, 207, 159, 0.08);
+}
+
+.agent-issued-key strong,
+.agent-issued-key small {
+  display: block;
+}
+
+.agent-issued-key strong {
+  color: #76e3bb;
+  font-size: 0.84rem;
+}
+
+.agent-issued-key small {
+  margin-top: 4px;
+  color: #9fc5b7;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.agent-issued-key > code {
+  overflow: hidden;
+  padding: 10px 12px;
+  border: 1px solid rgba(118, 227, 187, 0.2);
+  border-radius: 8px;
+  color: #effff8;
+  font: 0.76rem/1.4 var(--font-mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agent-connection-message {
+  margin: 0;
+  padding: 10px 24px;
+  color: #a9c4d4;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.agent-connection-message-pass { color: #73e2b9; }
+.agent-connection-message-fail { color: #f0a5a5; }
+
+.agent-key-list {
+  display: grid;
+  gap: 8px;
+  padding: 14px 24px 16px;
+  border-bottom: 1px solid rgba(151, 187, 218, 0.13);
+}
+
+.agent-key-list > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  color: #a2b8c9;
+  font-size: 0.76rem;
+}
+
+.agent-key-list > div code { color: #c9eaf4; }
+.agent-key-list > div span { overflow: hidden; flex: 1; text-overflow: ellipsis; white-space: nowrap; }
+.agent-key-list button {
+  padding: 3px 7px;
+  border: 1px solid rgba(232, 139, 139, 0.3);
+  border-radius: 6px;
+  background: transparent;
+  color: #e5a4a4;
+  font-size: 0.68rem;
+}
+.agent-key-list button:hover { border-color: rgba(232, 139, 139, 0.7); background: rgba(232, 139, 139, 0.08); }
+
+.agent-tab-recommended {
+  display: inline-block;
+  margin-left: 7px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: rgba(72, 205, 240, 0.12);
+  color: #6bd9f2;
+  font: 0.58rem/1.2 var(--font-mono);
+  vertical-align: middle;
 }
 
 .agent-tabs {
@@ -6531,6 +6667,15 @@ html.snap-y .landing-snap-section {
     padding: 22px;
   }
 
+  .agent-connection-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .agent-issued-key {
+    grid-template-columns: 1fr;
+  }
+
   .agents-connection-smoke {
     grid-column: auto;
   }
@@ -6620,6 +6765,24 @@ html.snap-y .landing-snap-section {
 
   .agent-tabs {
     padding: 0 8px;
+  }
+
+  .agent-connection-toolbar {
+    padding: 18px;
+  }
+
+  .agent-connection-actions {
+    width: 100%;
+  }
+
+  .agent-connection-actions .button {
+    flex: 1;
+  }
+
+  .agent-issued-key,
+  .agent-key-list {
+    padding-left: 18px;
+    padding-right: 18px;
   }
 
   .agent-tab {

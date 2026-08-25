@@ -7,7 +7,6 @@ import { SnapRoot } from "./components/SnapRoot";
 import {
   ASSET_KIND_COVERAGE,
   CLI_SAMPLE,
-  MCP_CONFIG_SNIPPET,
   MCP_TOOL_COUNT,
   OPERATION_COUNT,
   RULE_COUNT,
@@ -212,8 +211,8 @@ export default function Home() {
                 <span className="eyebrow">CONNECT IT · MCP</span>
                 <h2>에이전트가 <em>바로 부르는 도구</em></h2>
                 <p>
-                  현재 Clunk의 정식 외부 연결은 Windows stdio MCP입니다. Claude Code, Codex, Cursor,
-                  Claude Desktop, VS Code와 같은 Core를 연결합니다.
+                  Clunk가 직접 제공하는 HTTPS MCP endpoint 하나로 Claude Code, Codex, Cursor, Claude Desktop,
+                  VS Code를 연결합니다. 원격 에이전트는 workspace 키를 쓰고, 로컬 파일은 stdio fallback으로 읽습니다.
                 </p>
                 <Link className="text-link" href="/agents" prefetch={false}>
                   클라이언트별 설정 보기 <Icon name="arrowRight" size={15} />
@@ -233,11 +232,19 @@ export default function Home() {
                     <span><i /><i /><i /></span>
                     <code>plugins/clunk-assetops/.mcp.json</code>
                   </div>
-                  <pre><code>{MCP_CONFIG_SNIPPET}</code></pre>
+                  <pre><code>{`{
+  "mcpServers": {
+    "clunk": {
+      "type": "http",
+      "url": "https://clunk.honna1.chatgpt.site/mcp",
+      "headers": { "Authorization": "Bearer <Clunk key from /agents>" }
+    }
+  }
+}`}</code></pre>
                 </div>
                 <div className="landing-mcp-foot">
                   <span>{MCP_TOOL_COUNT} tools · {RULE_SET.id}</span>
-                  <span>공개 HTTP MCP는 아직 제공하지 않습니다</span>
+                  <span>Clunk HTTPS MCP · workspace key · local stdio fallback</span>
                 </div>
               </div>
             </div>

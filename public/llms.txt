@@ -6,8 +6,12 @@
 
 Status: private pilot (Korea first). Billing is a working demo ledger, not a payment provider.
 
-Public HTTP MCP: not provided. The published Site does not expose a public MCP server. The
-authenticated `/api/*` routes below are workspace-scoped and are not a public agent endpoint.
+Clunk HTTP MCP: shipped at `/mcp`. It is Clunk's own streamable HTTP route, authenticated with a
+workspace-scoped `Authorization: Bearer clunk_live_...` key issued from `/agents`. The route can
+inspect uploaded base64 asset bundles, store verified v2 evidence, and append frame manifests to
+workspace collaboration threads. It never reads a caller's local absolute path over HTTP. The
+local stdio MCP remains the correct transport for files that only exist on the caller's machine.
+The Sites access policy still controls whether an external client can reach the published URL.
 
 ## What Clunk actually does
 
@@ -37,6 +41,33 @@ authenticated `/api/*` routes below are workspace-scoped and are not a public ag
 - `차단됨` (blocked): at least one ERROR or CRITICAL finding remains.
 
 ## MCP server
+
+### Clunk-owned remote HTTP
+
+Open `/agents`, sign in, click `Clunk 연결 키 만들기`, and use the generated client block. The
+canonical endpoint is the same-origin `/mcp` route (production:
+`https://clunk.honna1.chatgpt.site/mcp`). The key is displayed once and can be revoked from the
+same page. A minimal request is:
+
+```http
+POST /mcp
+Authorization: Bearer clunk_live_<issued-key>
+Content-Type: application/json
+
+{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18"}}
+```
+
+The remote `tools/list` surface contains `clunk_connection_check`, `clunk_asset_inspect`,
+`clunk_asset_validate`, `clunk_asset_inspection_evidence`, and `clunk_collaboration_append`.
+`clunk_asset_inspect` and `clunk_asset_validate` accept the existing
+`clunk.asset-inspection-request.v1|v2` shape with `bytesBase64` or `files[]`; raw bytes are not
+persisted. `clunk_asset_inspection_evidence` accepts a normalized
+`clunk.asset-inspection-evidence.v2` `CONTRACT_FIXTURE`; `PLAYER_FACING_CAPTURE` still requires
+locally verified capture bytes through the CLI or local MCP. `clunk_collaboration_append` accepts
+`threadId`, `evidenceMode: append|replace`, and a normalized frame manifest. It never promotes
+`reviewStatus`, `visualRuntime`, `playerFacing`, or `humanDecision`.
+
+### Local stdio fallback
 
 Transport: stdio, JSON-RPC. `initialize` returns protocolVersion `2025-06-18` and
 serverInfo `{ "name": "clunk", "version": "0.1.0" }`. Works with any MCP capable agent.
@@ -421,7 +452,7 @@ cultivator `16196 triangles / 42 draw calls`, processing `24936 / 78`, seeder `1
 tractor `30188 / 88`, all with textureCount 0; HF crops/vegetation/NPCs are procedural runtime
 surfaces rather than standalone GLBs and must use provenance-linked frame evidence.
 
-The authenticated byte-inspection API is not public HTTP MCP:
+The same bundle shape is also available through the authenticated app API:
 
 ```json
 POST /api/assetops/inspect
@@ -436,11 +467,13 @@ POST /api/assetops/inspect
 ```
 
 It requires the authenticated workspace context, returns `clunk.asset-inspection-response.v1`,
-and does not persist raw bytes. Store the returned evidence or its `inputHash` in a collaboration
-manifest when linking a shipped frame.
+and does not persist raw bytes. The remote MCP uses the same request shape with the issued Bearer
+key. Store the returned evidence or its `inputHash` in a collaboration manifest when linking a
+shipped frame.
 
 For Sprite Atlas and Spine projects, use the bounded multi-file request contract. This is the
-authenticated bundle path for a Spine JSON + atlas + PNG project; it is not a public HTTP MCP:
+authenticated bundle path for a Spine JSON + atlas + PNG project. The same shape is accepted by
+the Clunk-owned remote HTTP MCP when sent with a workspace Bearer key:
 
 ```json
 POST /api/assetops/inspect

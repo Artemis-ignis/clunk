@@ -19,11 +19,12 @@ test("server-renders the client connection guide", async () => {
   assert.match(html, /Claude Code/);
   assert.match(html, /Claude Desktop/);
   assert.match(html, /VS Code/);
-  assert.match(html, /npm\.cmd run --silent mcp/);
-  assert.match(html, /npm stdout/);
-  assert.match(html, /\.cursor\/mcp\.json/);
-  assert.match(html, /cursor-agent mcp list/);
   assert.match(html, /clunk_inspect/);
-  assert.match(html, /공개 HTTP MCP는 아직 제공하지 않습니다/);
-  assert.match(html, /복사/);
+  assert.match(html, /Clunk가 직접 운영하는 HTTP MCP/);
+  assert.match(html, /Clunk 연결 키 만들기/);
+  assert.match(html, /Authorization: Bearer/);
+  assert.match(html, /POST \/mcp/);
+  assert.match(html, /로컬 stdio/);
+  assert.match(html, /키 발급 후 바로 연결/);
+  assert.doesNotMatch(html, /Polyfork/);
 });

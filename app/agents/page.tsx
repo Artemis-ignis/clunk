@@ -38,8 +38,8 @@ export default function AgentsPage() {
               <em>Clunk의 판정으로 넘기세요.</em>
             </h1>
             <p className="lead">
-              Clunk는 현재 Windows stdio MCP 서버로 동작합니다. 클라이언트별 설정은 달라도 호출하는
-              Core와 남는 근거는 같습니다.
+              Clunk가 직접 발급한 HTTPS MCP endpoint와 workspace 키를 클라이언트에 한 번 연결하세요.
+              로컬 GLB는 stdio로, 원격 에이전트와 협업 증거는 HTTP로 같은 Clunk Core에 전달됩니다.
             </p>
             <div className="agents-hero-actions">
               <a className="button button-primary" href="#connect">
@@ -55,12 +55,12 @@ export default function AgentsPage() {
           <div className="agents-hero-card" aria-label="Clunk MCP 서버 요약">
             <div className="agents-card-topline">
               <span className="status-dot status-dot-on" />
-              <span>stdio · local process</span>
+              <span>streamable HTTP · workspace key</span>
               <code>clunk v{MCP_SERVER.version}</code>
             </div>
             <div className="agents-terminal-line">
               <span className="tok-prompt">$</span>
-              <span>npm.cmd run --silent mcp</span>
+              <span>/mcp · Authorization: Bearer clunk_live_…</span>
             </div>
             <div className="agents-hero-metrics">
               <div>
@@ -83,13 +83,13 @@ export default function AgentsPage() {
         <section className="agents-proof-row" aria-label="Clunk MCP 계약">
           <div>
             <span className="mono-label">ONE ENDPOINT</span>
-            <strong>로컬 stdio 프로세스 하나</strong>
-            <p>클라이언트 설정에는 cmd.exe와 npm.cmd만 들어갑니다.</p>
+            <strong>Clunk HTTPS endpoint 하나</strong>
+            <p>키를 한 번 발급하면 클라이언트별 설정에 자동으로 삽입됩니다.</p>
           </div>
           <div>
             <span className="mono-label">SAME CORE</span>
             <strong>{SURFACES.length}개 표면, 같은 결과</strong>
-            <p>웹 검사기, CLI, MCP, VS Code가 같은 계약을 호출합니다.</p>
+            <p>웹 검사기·CLI·HTTP·stdio가 같은 계약을 호출합니다.</p>
           </div>
           <div>
             <span className="mono-label">NO FAKE READY</span>
@@ -101,33 +101,34 @@ export default function AgentsPage() {
         <section className="agents-connection-status" aria-labelledby="mcp-status-heading">
           <div>
             <span className="eyebrow">현재 연결 상태</span>
-            <h2 id="mcp-status-heading">왜 연결이 안 됐는지 먼저 확인하세요.</h2>
+            <h2 id="mcp-status-heading">이제 여기서 실제 연결을 확인하세요.</h2>
             <p>
-              외부 HTTP MCP는 아직 출시하지 않았습니다. 지금 실제로 동작하는 정식 경로는 각 클라이언트가 Clunk 저장소의
-              로컬 Windows stdio 프로세스를 실행하는 방식입니다.
+              ‘Clunk 연결 키 만들기’를 누르면 이 workspace 전용 Bearer 키가 발급됩니다. 연결 확인은
+              실제 <code>initialize</code>와 <code>tools/list</code> 요청을 보내므로, 설정 블록만 복사하고 끝나지 않습니다.
             </p>
           </div>
           <div className="agents-connection-checks">
             <article>
-              <strong>1. npm stdout 오염</strong>
-              <p><code>npm.cmd run mcp</code>는 npm 시작 문구를 JSON-RPC stdout에 섞을 수 있습니다. 안내와 플러그인은 모두 <code>npm.cmd run --silent mcp</code>로 고정했습니다.</p>
+              <strong>1. 원격 연결은 Clunk 키로 인증</strong>
+              <p>HTTPS endpoint에는 workspace에서 발급한 <code>Authorization: Bearer clunk_live_…</code>가 필요합니다. 키는 화면에서 한 번만 보여 줍니다.</p>
             </article>
             <article>
-              <strong>2. cwd는 placeholder가 아닙니다</strong>
-              <p><code>&lt;CLUNK_ROOT&gt;</code> 또는 <code>C:\path\to\Clunk</code>를 실제 절대 경로로 바꿔야 합니다. 예: <code>C:\Users\50106\Desktop\Clunk</code></p>
+              <strong>2. 로컬 파일은 stdio fallback</strong>
+              <p>원격 HTTP는 에이전트가 제출한 base64 asset bundle 또는 검증된 evidence만 받습니다. 컴퓨터의 절대 경로는 로컬 stdio에서만 읽습니다.</p>
             </article>
             <article>
-              <strong>3. HTTP / API 탭</strong>
-              <p>공개 HTTP MCP는 미출시입니다. 웹 API 라우트는 로그인된 Clunk 앱 내부용이므로 외부 MCP endpoint로 호출하면 동작하지 않습니다.</p>
+              <strong>3. 클라이언트 설정은 완성본</strong>
+              <p>키를 만든 뒤 Claude Code 명령, Codex/Cursor/Claude Desktop JSON, VS Code servers JSON에 실제 endpoint와 키가 들어갑니다.</p>
             </article>
             <article>
-              <strong>4. Cursor는 mcp.json을 읽습니다</strong>
-              <p>현재 Cursor CLI 경로는 <code>.cursor/mcp.json</code>과 <code>cursor-agent mcp list</code>입니다. 안내에서 제거한 <code>agent mcp add</code>를 복사하지 마세요.</p>
+              <strong>4. 결과의 경계</strong>
+              <p>구조 score=100은 구조 계약 PASS일 뿐입니다. visualRuntime, playerFacing, humanDecision은 사람이 확인하기 전까지 자동 승격하지 않습니다.</p>
             </article>
           </div>
-          <pre className="agents-connection-smoke"><code>{`Set-Location 'C:\\Users\\50106\\Desktop\\Clunk'
-npm.cmd run --silent mcp
-# initialize → tools/list 에서 ${MCP_TOOLS.length}개 도구가 JSON으로 나와야 합니다.`}</code></pre>
+          <pre className="agents-connection-smoke"><code>{`POST /mcp
+Authorization: Bearer clunk_live_…
+{ "jsonrpc": "2.0", "id": 1, "method": "initialize" }
+# Clunk 연결 확인 버튼이 위 요청과 tools/list를 실제 실행합니다.`}</code></pre>
         </section>
 
         <section className="agents-connect-section" id="connect">
@@ -135,8 +136,8 @@ npm.cmd run --silent mcp
             <span className="eyebrow">CLIENT SETUP</span>
             <h2>쓰는 클라이언트에 맞춰 한 블록만 복사하세요.</h2>
             <p>
-              Polyfork처럼 클라이언트별 연결 표면을 한곳에 모았습니다. 아래 예시는 현재 저장소의
-              실제 MCP 설정과 Windows 실행 경계를 기준으로 합니다.
+              클라이언트별 설정을 Clunk가 직접 생성합니다. 키를 발급한 뒤 한 블록을 복사하거나
+              파일로 다운로드하면 endpoint·인증 헤더·클라이언트별 루트가 이미 채워집니다.
             </p>
           </div>
           <AgentsClient />
@@ -301,18 +302,18 @@ npm.cmd run --silent mcp
         <section className="agents-boundary">
           <div>
             <span className="eyebrow">PUBLIC API STATUS</span>
-            <h2>HTTP URL을 문서에 먼저 쓰지 않은 이유</h2>
+            <h2>Clunk가 직접 운영하는 HTTP MCP</h2>
             <p>
-              공개 HTTP MCP는 아직 제공하지 않습니다. Clunk 웹의 <code>/api/me</code>, <code>/api/runs</code>,
-              <code>/api/passports</code>는 인증된 워크스페이스 내부 경계입니다. 외부 API를 열 때는
-              workspace 권한, rate limit, signed artifact 만료, 원본 보존 정책까지 함께 출시해야
-              합니다.
+              HTTP MCP는 Clunk가 직접 제공하는 <code>/mcp</code> endpoint로 출시되어 있습니다. 연결 키는
+              workspace에 묶이고 폐기할 수 있으며, HTTP는 local absolute path를 읽지 않고 업로드된 bytes나
+              검증된 evidence만 처리합니다. Clunk 웹의 <code>/api/me</code>, <code>/api/runs</code>,
+              <code>/api/passports</code>는 여전히 인증된 앱 경계입니다.
             </p>
           </div>
           <div className="agents-boundary-stamp">
-            <span className="status-pill status-conditional">NOT SHIPPED</span>
+            <span className="status-pill status-ready">SHIPPED</span>
             <strong>HTTP MCP</strong>
-            <code>stdio is the current contract</code>
+            <code>https endpoint + workspace bearer key</code>
           </div>
         </section>
 
@@ -329,7 +330,7 @@ npm.cmd run --silent mcp
               <code>{COLLABORATION_CONTRACT.prescriptions}</code>로 다음 조치를 남길 수 있습니다. 기본 상태는
               <code>{COLLABORATION_CONTRACT.evidenceDefaults}</code>이며, 다음 캡처는
               <code>{COLLABORATION_CONTRACT.evidenceWriteMode}</code>로 기존 gap/prescription 보존 여부를 명시합니다.
-              현재 실제 M94 저장값은 <code>{COLLABORATION_CONTRACT.storedM94}</code>입니다. 공개 HTTP MCP는 여전히 제공하지 않습니다.
+              현재 실제 M94 저장값은 <code>{COLLABORATION_CONTRACT.storedM94}</code>입니다. 협업 증거도 발급 키로 HTTP MCP에서 제출할 수 있습니다.
               원본 에셋을 frame과 묶을 때는 <code>{COLLABORATION_CONTRACT.linkedAssetInspection}</code>을 사용하며,
               frame manifest만 갱신할 때는 <code>{COLLABORATION_CONTRACT.evidenceOnlyApi}</code>를 사용합니다. procedural/runtime-generated
               작물·식생·NPC는 <code>origin</code>과 <code>provenance.sourceRef</code>를 함께 기록하지만 별도 GLB 바이트 PASS로 만들지 않습니다.

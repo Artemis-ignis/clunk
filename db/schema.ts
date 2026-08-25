@@ -115,6 +115,24 @@ export const passports = sqliteTable("clunk_passports", {
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
+export const apiKeys = sqliteTable(
+  "clunk_api_keys",
+  {
+    id: text("id").primaryKey(),
+    workspaceId: text("workspace_id").notNull(),
+    label: text("label").notNull(),
+    keyPrefix: text("key_prefix").notNull(),
+    keyHash: text("key_hash").notNull(),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    lastUsedAt: text("last_used_at"),
+    revokedAt: text("revoked_at"),
+  },
+  (table) => ({
+    keyHashUnique: uniqueIndex("clunk_api_keys_key_hash_unique").on(table.keyHash),
+    workspaceCreated: index("idx_clunk_api_keys_workspace_created").on(table.workspaceId, table.createdAt),
+  }),
+);
+
 export const collaborationThreads = sqliteTable(
   "clunk_collaboration_threads",
   {

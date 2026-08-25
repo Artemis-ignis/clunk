@@ -1,18 +1,211 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CopyCodeButton } from "../components/CopyCodeButton";
 import { Icon } from "../components/Icon";
-import { AGENT_GUIDES, DEFAULT_AGENT_GUIDE, type AgentGuideKey } from "../components/agent-guides";
+import { buildAgentGuides, DEFAULT_AGENT_GUIDE, type AgentConnection, type AgentGuideKey } from "../components/agent-guides";
+
+type ApiKeySummary = {
+  id: string;
+  label: string;
+  prefix: string;
+  createdAt: string;
+  lastUsedAt: string | null;
+  revokedAt: string | null;
+};
+
+type ConnectionState = "loading" | "signed-out" | "ready" | "error";
 
 export function AgentsClient() {
   const [selectedKey, setSelectedKey] = useState<AgentGuideKey>(DEFAULT_AGENT_GUIDE.key);
-  const selected = AGENT_GUIDES.find((guide) => guide.key === selectedKey) ?? DEFAULT_AGENT_GUIDE;
+  const [endpoint, setEndpoint] = useState("/mcp");
+  const [issuedSecret, setIssuedSecret] = useState<string | null>(null);
+  const [keys, setKeys] = useState<ApiKeySummary[]>([]);
+  const [connectionState, setConnectionState] = useState<ConnectionState>("loading");
+  const [busy, setBusy] = useState<"create" | "check" | string | null>(null);
+  const [message, setMessage] = useState<string>("");
+  const [checkResult, setCheckResult] = useState<"PASS" | "FAIL" | null>(null);
+
+  const connection = useMemo<AgentConnection | undefined>(
+    () => (issuedSecret ? { endpoint, apiKey: issuedSecret } : undefined),
+    [endpoint, issuedSecret],
+  );
+  const guides = useMemo(() => buildAgentGuides(connection), [connection]);
+  const selected = guides.find((guide) => guide.key === selectedKey) ?? guides[0];
+  const activeKeys = keys.filter((key) => !key.revokedAt);
+  const needsRemoteKey = selected.key !== "stdio" && !issuedSecret;
+  const selectedCode = needsRemoteKey
+    ? "‘Clunk 연결 키 만들기’를 누르면 이 설정에 실제 endpoint와 Bearer 키가 자동으로 채워집니다."
+    : selected.code;
+
+  const loadKeys = useCallback(async () => {
+    setConnectionState("loading");
+    try {
+      const response = await fetch("/api/mcp/keys", { cache: "no-store" });
+      const payload = (await response.json()) as { ok?: boolean; endpoint?: string; keys?: ApiKeySummary[] };
+      if (response.status === 401) {
+        setConnectionState("signed-out");
+        return;
+      }
+      if (!response.ok || !payload.ok) throw new Error("연결 키 목록을 불러오지 못했습니다.");
+      if (payload.endpoint) setEndpoint(payload.endpoint);
+      setKeys(payload.keys ?? []);
+      setConnectionState("ready");
+    } catch (error) {
+      setConnectionState("error");
+      setMessage(error instanceof Error ? error.message : "연결 상태를 확인하지 못했습니다.");
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => void loadKeys(), 0);
+    return () => window.clearTimeout(timer);
+  }, [loadKeys]);
+
+  async function createKey() {
+    setBusy("create");
+    setMessage("");
+    setCheckResult(null);
+    try {
+      const response = await fetch("/api/mcp/keys", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ label: "Clunk 에이전트 연결" }),
+      });
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        error?: string;
+        endpoint?: string;
+        key?: { secret: string };
+      };
+      if (!response.ok || !payload.ok || !payload.key?.secret) throw new Error(payload.error ?? "연결 키를 만들지 못했습니다.");
+      setEndpoint(payload.endpoint ?? "/mcp");
+      setIssuedSecret(payload.key.secret);
+      setMessage("연결 키를 만들었습니다. 보안상 이 화면을 떠나면 다시 볼 수 없으니 지금 설정을 복사하세요.");
+      await loadKeys();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "연결 키를 만들지 못했습니다.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function verifyConnection() {
+    if (!issuedSecret) {
+      setMessage("먼저 Clunk 연결 키를 만들어 주세요.");
+      setCheckResult("FAIL");
+      return;
+    }
+    setBusy("check");
+    setMessage("");
+    setCheckResult(null);
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "content-type": "application/json", Authorization: `Bearer ${issuedSecret}` },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-06-18" } }),
+      });
+      const initialize = (await response.json()) as { result?: { serverInfo?: { name?: string } }; error?: { message?: string } };
+      if (!response.ok || initialize.error || initialize.result?.serverInfo?.name !== "clunk") {
+        throw new Error(initialize.error?.message ?? "Clunk initialize 응답이 올바르지 않습니다.");
+      }
+      const toolsResponse = await fetch(endpoint, {
+        method: "POST",
+        headers: { "content-type": "application/json", Authorization: `Bearer ${issuedSecret}` },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 2, method: "tools/list" }),
+      });
+      const tools = (await toolsResponse.json()) as { result?: { tools?: unknown[] }; error?: { message?: string } };
+      if (!toolsResponse.ok || tools.error || !Array.isArray(tools.result?.tools)) {
+        throw new Error(tools.error?.message ?? "Clunk tools/list 응답이 올바르지 않습니다.");
+      }
+      setCheckResult("PASS");
+      setMessage(`연결 확인 PASS · ${tools.result.tools.length}개 원격 도구가 응답했습니다.`);
+    } catch (error) {
+      setCheckResult("FAIL");
+      setMessage(error instanceof Error ? error.message : "Clunk 연결을 확인하지 못했습니다.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  function downloadSelectedGuide() {
+    const filename = selected.fileLabel.endsWith(".json") ? selected.fileLabel : "clunk-mcp-setup.txt";
+    const code = selected.key === "stdio" || issuedSecret ? selected.code : "Clunk 연결 키를 먼저 발급하세요.";
+    const blob = new Blob([code], { type: filename.endsWith(".json") ? "application/json" : "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
+    setMessage(`${filename} 다운로드를 시작했습니다.`);
+  }
+
+  async function revokeKey(keyId: string) {
+    setBusy(keyId);
+    try {
+      const response = await fetch(`/api/mcp/keys/${encodeURIComponent(keyId)}`, { method: "DELETE" });
+      const payload = (await response.json()) as { ok?: boolean; error?: string };
+      if (!response.ok || !payload.ok) throw new Error(payload.error ?? "키를 폐기하지 못했습니다.");
+      if (issuedSecret) setIssuedSecret(null);
+      setMessage("연결 키를 폐기했습니다. 해당 키는 즉시 사용할 수 없습니다.");
+      await loadKeys();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "키를 폐기하지 못했습니다.");
+    } finally {
+      setBusy(null);
+    }
+  }
 
   return (
     <div className="agent-connect-ui">
+      <div className="agent-connection-toolbar" aria-label="Clunk 연결 도구">
+        <div>
+          <span className="mono-label">CLUNK-OWNED CONNECTION</span>
+          <strong>{connectionState === "signed-out" ? "로그인 후 연결 키를 발급하세요" : "한 번 발급하고 모든 클라이언트에서 사용"}</strong>
+          <small>endpoint <code>{endpoint}</code> · local file inspection은 stdio fallback · remote evidence는 HTTPS</small>
+        </div>
+        <div className="agent-connection-actions">
+          <button className="button button-primary button-sm" type="button" onClick={() => void createKey()} disabled={busy !== null || connectionState === "signed-out"}>
+            {busy === "create" ? "발급 중…" : "Clunk 연결 키 만들기"}
+          </button>
+          <button className="button button-quiet button-sm" type="button" onClick={() => void verifyConnection()} disabled={busy !== null || !issuedSecret}>
+            {busy === "check" ? "확인 중…" : "연결 확인"}
+          </button>
+          {connectionState === "signed-out" ? <a className="button button-quiet button-sm" href="/login?return_to=%2Fagents">로그인</a> : null}
+        </div>
+      </div>
+
+      {issuedSecret ? (
+        <div className="agent-issued-key" role="status">
+          <div>
+            <strong>이번에만 표시되는 연결 키</strong>
+            <small>다른 사람에게 공유하지 마세요. 설정을 복사한 뒤 연결 확인을 실행하세요.</small>
+          </div>
+          <code>{issuedSecret}</code>
+          <CopyCodeButton value={issuedSecret} />
+        </div>
+      ) : null}
+
+      {message ? <p className={`agent-connection-message agent-connection-message-${checkResult?.toLowerCase() ?? "info"}`} role="status">{message}</p> : null}
+
+      {activeKeys.length ? (
+        <div className="agent-key-list" aria-label="발급된 Clunk 연결 키">
+          <span className="mono-label">ISSUED KEYS</span>
+          {activeKeys.map((key) => (
+            <div key={key.id}>
+              <code>{key.prefix}••••</code>
+              <span>{key.label}</span>
+              <button type="button" onClick={() => void revokeKey(key.id)} disabled={busy !== null}>폐기</button>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
       <div className="agent-tabs" role="tablist" aria-label="클라이언트 선택">
-        {AGENT_GUIDES.map((guide) => (
+        {guides.map((guide) => (
           <button
             key={guide.key}
             type="button"
@@ -23,7 +216,7 @@ export function AgentsClient() {
             onClick={() => setSelectedKey(guide.key)}
           >
             {guide.label}
-            {guide.status === "not-shipped" ? <span className="agent-tab-dot" aria-label="현재 미제공" /> : null}
+            {guide.recommended ? <span className="agent-tab-recommended">권장</span> : null}
           </button>
         ))}
       </div>
@@ -33,13 +226,13 @@ export function AgentsClient() {
           <span className="mono-label">{selected.kicker}</span>
           <h3>{selected.title}</h3>
           <p>{selected.description}</p>
-          <div className={"agent-availability agent-availability-" + selected.status}>
-            <Icon name={selected.status === "available" ? "circleCheck" : "info"} size={15} />
-            {selected.status === "available" ? "현재 저장소에서 연결 가능한 경로" : "현재 공개하지 않는 경로"}
+          <div className="agent-availability agent-availability-available">
+            <Icon name="circleCheck" size={15} />
+            {selected.key === "stdio" ? "로컬 파일용 fallback" : issuedSecret ? "키 삽입 완료 · 연결 가능" : "키 발급 후 바로 연결"}
           </div>
         </div>
 
-        <figure className={"agent-code-card" + (selected.status === "not-shipped" ? " agent-code-card-muted" : "")}>
+        <figure className="agent-code-card">
           <figcaption>
             <span>
               <i />
@@ -47,28 +240,28 @@ export function AgentsClient() {
               <i />
               <code>{selected.fileLabel}</code>
             </span>
-            <CopyCodeButton value={selected.code} />
+            <div className="agent-code-actions">
+              {needsRemoteKey ? (
+                <button className="agent-code-copy" type="button" onClick={() => void createKey()} disabled={busy !== null || connectionState === "signed-out"}>
+                  {busy === "create" ? "발급 중…" : "키 발급하고 설정 채우기"}
+                </button>
+              ) : (
+                <>
+                  <button className="agent-code-copy" type="button" onClick={downloadSelectedGuide}>다운로드</button>
+                  <CopyCodeButton value={selected.code} />
+                </>
+              )}
+            </div>
           </figcaption>
-          <pre>
-            <code>{selected.code}</code>
-          </pre>
+          <pre><code>{selectedCode}</code></pre>
           <p>{selected.note}</p>
         </figure>
       </div>
 
       <div className="agent-guide-footer">
-        <span>
-          <Icon name="shield" size={15} />
-          원본 바이트는 덮어쓰지 않습니다.
-        </span>
-        <span>
-          <Icon name="fingerprint" size={15} />
-          입력 hash와 resultDigest를 남깁니다.
-        </span>
-        <span>
-          <Icon name="circleCheck" size={15} />
-          출력 파일은 fresh reinspection 후에만 준비 완료입니다.
-        </span>
+        <span><Icon name="shield" size={15} />연결 키는 workspace별로 폐기할 수 있습니다.</span>
+        <span><Icon name="fingerprint" size={15} />HTTP는 bytesBase64 업로드 또는 검증된 evidence만 받습니다.</span>
+        <span><Icon name="circleCheck" size={15} />구조 PASS와 visual/player review는 끝까지 분리합니다.</span>
       </div>
     </div>
   );
