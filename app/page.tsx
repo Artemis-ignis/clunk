@@ -236,7 +236,7 @@ export default function Home() {
   "mcpServers": {
     "clunk": {
       "type": "http",
-      "url": "https://clunk.honna1.chatgpt.site/mcp",
+      "url": "https://clunk.honna1.chatgpt.site/api/mcp",
       "headers": { "Authorization": "Bearer <Clunk key from /agents>" }
     }
   }

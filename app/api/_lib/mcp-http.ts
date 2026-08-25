@@ -1,4 +1,6 @@
-export const MCP_HTTP_ENDPOINT_PATH = "/mcp" as const;
+// Sites exposes authenticated server handlers under /api. Keep one stable
+// Clunk-owned endpoint instead of advertising the host's unsupported root route.
+export const MCP_HTTP_ENDPOINT_PATH = "/api/mcp" as const;
 export const MCP_HTTP_PROTOCOL_VERSION = "2025-06-18" as const;
 
 export type McpRequestId = string | number | null;

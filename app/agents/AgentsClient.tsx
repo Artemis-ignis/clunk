@@ -18,7 +18,7 @@ type ConnectionState = "loading" | "signed-out" | "ready" | "error";
 
 export function AgentsClient() {
   const [selectedKey, setSelectedKey] = useState<AgentGuideKey>(DEFAULT_AGENT_GUIDE.key);
-  const [endpoint, setEndpoint] = useState("/mcp");
+  const [endpoint, setEndpoint] = useState("/api/mcp");
   const [issuedSecret, setIssuedSecret] = useState<string | null>(null);
   const [keys, setKeys] = useState<ApiKeySummary[]>([]);
   const [connectionState, setConnectionState] = useState<ConnectionState>("loading");
@@ -79,7 +79,7 @@ export function AgentsClient() {
         key?: { secret: string };
       };
       if (!response.ok || !payload.ok || !payload.key?.secret) throw new Error(payload.error ?? "연결 키를 만들지 못했습니다.");
-      setEndpoint(payload.endpoint ?? "/mcp");
+      setEndpoint(payload.endpoint ?? "/api/mcp");
       setIssuedSecret(payload.key.secret);
       setMessage("연결 키를 만들었습니다. 보안상 이 화면을 떠나면 다시 볼 수 없으니 지금 설정을 복사하세요.");
       await loadKeys();

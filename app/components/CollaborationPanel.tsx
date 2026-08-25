@@ -302,7 +302,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
       ) : null}
 
       {error ? <p className="collaboration-error" role="alert"><Icon name="triangleAlert" size={15} />{error}</p> : null}
-      <p className="collaboration-contract-note"><code>POST /api/collaboration/threads</code> · <code>GET/POST /api/collaboration/threads/:threadId/evidence</code> · <code>evidence: clunk.frame-manifest.v1</code> · <code>comparison: clunk.frame-comparison.v1</code> · gap closeout은 개별 상태 · 인증된 workspace 범위 · inputHash 고정 · assetAudit와 visualRuntime/playerFacing 분리 · readinessReason으로 conditional 원인을 기계 판독 · HTTP MCP는 <code>/mcp</code> + workspace Bearer key로 evidence를 받을 수 있습니다.</p>
+      <p className="collaboration-contract-note"><code>POST /api/collaboration/threads</code> · <code>GET/POST /api/collaboration/threads/:threadId/evidence</code> · <code>evidence: clunk.frame-manifest.v1</code> · <code>comparison: clunk.frame-comparison.v1</code> · gap closeout은 개별 상태 · 인증된 workspace 범위 · inputHash 고정 · assetAudit와 visualRuntime/playerFacing 분리 · readinessReason으로 conditional 원인을 기계 판독 · HTTP MCP는 <code>/api/mcp</code> + workspace Bearer key로 evidence를 받을 수 있습니다.</p>
     </section>
   );
 }

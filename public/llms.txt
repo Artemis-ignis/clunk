@@ -6,7 +6,7 @@
 
 Status: private pilot (Korea first). Billing is a working demo ledger, not a payment provider.
 
-Clunk HTTP MCP: shipped at `/mcp`. It is Clunk's own streamable HTTP route, authenticated with a
+Clunk HTTP MCP: shipped at `/api/mcp`. It is Clunk's own streamable HTTP route, authenticated with a
 workspace-scoped `Authorization: Bearer clunk_live_...` key issued from `/agents`. The route can
 inspect uploaded base64 asset bundles, store verified v2 evidence, and append frame manifests to
 workspace collaboration threads. It never reads a caller's local absolute path over HTTP. The
@@ -45,12 +45,12 @@ The Sites access policy still controls whether an external client can reach the 
 ### Clunk-owned remote HTTP
 
 Open `/agents`, sign in, click `Clunk 연결 키 만들기`, and use the generated client block. The
-canonical endpoint is the same-origin `/mcp` route (production:
-`https://clunk.honna1.chatgpt.site/mcp`). The key is displayed once and can be revoked from the
+canonical endpoint is the same-origin `/api/mcp` route (production:
+`https://clunk.honna1.chatgpt.site/api/mcp`). The key is displayed once and can be revoked from the
 same page. A minimal request is:
 
 ```http
-POST /mcp
+POST /api/mcp
 Authorization: Bearer clunk_live_<issued-key>
 Content-Type: application/json
 

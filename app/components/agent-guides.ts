@@ -27,7 +27,7 @@ export type AgentGuide = {
   recommended?: boolean;
 };
 
-const DEFAULT_ENDPOINT = "/mcp";
+const DEFAULT_ENDPOINT = "/api/mcp";
 const DEFAULT_KEY = "${CLUNK_API_KEY}";
 
 function remoteJson(endpoint: string, key: string, root = "mcpServers"): string {

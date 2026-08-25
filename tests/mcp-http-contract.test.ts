@@ -22,7 +22,7 @@ test("remote MCP contract accepts only an Authorization Bearer token", () => {
 });
 
 test("HTTP MCP advertises a Clunk-owned endpoint and remote-safe tools", () => {
-  assert.equal(MCP_HTTP_ENDPOINT_PATH, "/mcp");
+  assert.equal(MCP_HTTP_ENDPOINT_PATH, "/api/mcp");
   assert.equal(MCP_HTTP_PROTOCOL_VERSION, "2025-06-18");
   const names = MCP_HTTP_TOOLS.map((tool) => tool.name);
   assert.deepEqual(names, [
@@ -50,13 +50,13 @@ test("MCP initialize and tools/list responses are stable JSON-RPC results", () =
 
 test("each client guide is generated from one Clunk endpoint and one issued key", () => {
   const connection: AgentConnection = {
-    endpoint: "https://clunk.honna1.chatgpt.site/mcp",
+    endpoint: "https://clunk.honna1.chatgpt.site/api/mcp",
     apiKey: "clunk_live_test_key",
   };
   const guides = buildAgentGuides(connection);
   const byKey = new Map(guides.map((guide) => [guide.key, guide]));
 
-  assert.match(byKey.get("claude-code")?.code ?? "", /https:\/\/clunk\.honna1\.chatgpt\.site\/mcp/);
+  assert.match(byKey.get("claude-code")?.code ?? "", /https:\/\/clunk\.honna1\.chatgpt\.site\/api\/mcp/);
   assert.match(byKey.get("claude-code")?.code ?? "", /clunk_live_test_key/);
   assert.match(byKey.get("codex")?.code ?? "", /Authorization/);
   assert.match(byKey.get("cursor")?.code ?? "", /type.*http/);

@@ -23,7 +23,7 @@ test("server-renders the client connection guide", async () => {
   assert.match(html, /Clunk가 직접 운영하는 HTTP MCP/);
   assert.match(html, /Clunk 연결 키 만들기/);
   assert.match(html, /Authorization: Bearer/);
-  assert.match(html, /POST \/mcp/);
+  assert.match(html, /POST \/api\/mcp/);
   assert.match(html, /로컬 stdio/);
   assert.match(html, /키 발급 후 바로 연결/);
   assert.doesNotMatch(html, /Polyfork/);

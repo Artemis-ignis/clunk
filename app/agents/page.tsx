@@ -60,7 +60,7 @@ export default function AgentsPage() {
             </div>
             <div className="agents-terminal-line">
               <span className="tok-prompt">$</span>
-              <span>/mcp · Authorization: Bearer clunk_live_…</span>
+              <span>/api/mcp · Authorization: Bearer clunk_live_…</span>
             </div>
             <div className="agents-hero-metrics">
               <div>
@@ -125,7 +125,7 @@ export default function AgentsPage() {
               <p>구조 score=100은 구조 계약 PASS일 뿐입니다. visualRuntime, playerFacing, humanDecision은 사람이 확인하기 전까지 자동 승격하지 않습니다.</p>
             </article>
           </div>
-          <pre className="agents-connection-smoke"><code>{`POST /mcp
+          <pre className="agents-connection-smoke"><code>{`POST /api/mcp
 Authorization: Bearer clunk_live_…
 { "jsonrpc": "2.0", "id": 1, "method": "initialize" }
 # Clunk 연결 확인 버튼이 위 요청과 tools/list를 실제 실행합니다.`}</code></pre>
@@ -304,7 +304,7 @@ Authorization: Bearer clunk_live_…
             <span className="eyebrow">PUBLIC API STATUS</span>
             <h2>Clunk가 직접 운영하는 HTTP MCP</h2>
             <p>
-              HTTP MCP는 Clunk가 직접 제공하는 <code>/mcp</code> endpoint로 출시되어 있습니다. 연결 키는
+              HTTP MCP는 Clunk가 직접 제공하는 <code>/api/mcp</code> endpoint로 출시되어 있습니다. 연결 키는
               workspace에 묶이고 폐기할 수 있으며, HTTP는 local absolute path를 읽지 않고 업로드된 bytes나
               검증된 evidence만 처리합니다. Clunk 웹의 <code>/api/me</code>, <code>/api/runs</code>,
               <code>/api/passports</code>는 여전히 인증된 앱 경계입니다.

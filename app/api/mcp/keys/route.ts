@@ -64,6 +64,6 @@ export async function POST(request: Request) {
 }
 
 function endpointForRequest(request?: Request): string {
-  if (!request) return "/mcp";
-  return `${new URL(request.url).origin}/mcp`;
+  if (!request) return "/api/mcp";
+  return `${new URL(request.url).origin}/api/mcp`;
 }
