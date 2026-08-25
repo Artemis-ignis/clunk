@@ -7,6 +7,8 @@ import {
   GENERATION_CONTRACT,
   ASSET_KIND_COVERAGE,
   COLLABORATION_CONTRACT,
+  MCP_HTTP_TOOL_CATALOG,
+  MCP_HTTP_TOOL_COUNT,
   MCP_SERVER,
   MCP_TOOLS,
   RULE_SET,
@@ -42,7 +44,7 @@ export default function AgentsPage() {
               로컬 GLB는 stdio로, 원격 에이전트와 협업 증거는 HTTP로 같은 Clunk Core에 전달됩니다.
             </p>
             <div className="agents-hero-actions">
-              <a className="button button-primary" href="#connect">
+              <a className="button button-primary" href="/agents#connect">
                 연결 설정 보기
                 <span aria-hidden="true">↘</span>
               </a>
@@ -64,8 +66,8 @@ export default function AgentsPage() {
             </div>
             <div className="agents-hero-metrics">
               <div>
-                <strong>{MCP_TOOLS.length}</strong>
-                <span>MCP tools</span>
+                <strong>{MCP_HTTP_TOOL_COUNT}</strong>
+                <span>HTTP 원격 도구</span>
               </div>
               <div>
                 <strong>{RULE_SET.id}</strong>
@@ -146,10 +148,11 @@ Authorization: Bearer clunk_live_…
         <section className="agents-tools-section">
           <div className="agents-section-head agents-section-head-tight">
             <span className="eyebrow">TOOLS THE AGENT CAN CALL</span>
-            <h2>에이전트가 실제로 부르는 {MCP_TOOLS.length}가지 도구</h2>
+            <h2>에이전트가 실제로 부르는 {MCP_HTTP_TOOL_COUNT}가지 HTTP 원격 도구</h2>
+            <p>{`HTTP 원격 도구 ${MCP_HTTP_TOOL_COUNT}개 · 로컬 stdio 도구 ${MCP_TOOLS.length}개. 파일을 직접 읽는 작업은 로컬 stdio로만 실행됩니다.`}</p>
           </div>
           <div className="agents-tools-grid">
-            {MCP_TOOLS.map((tool, index) => (
+            {MCP_HTTP_TOOL_CATALOG.map((tool, index) => (
               <article className="agents-tool-card" key={tool.name}>
                 <span className="agents-tool-index">0{index + 1}</span>
                 <code>{tool.name}</code>

@@ -22,7 +22,7 @@
     "assetops:api:test": "node --test tests/assetops-api-contract.test.mjs",
     "assetops:texture:test": "node --test tests/texture-audit-contract.test.mjs",
     "assetops:test": "npm run assetops:2d:test && npm run assetops:pipeline:test && npm run assetops:bundle:test && npm run assetops:api:test && npm run assetops:texture:test",
-    "collaboration:test": "tsx tests/collaboration-contract.test.ts && tsx tests/collaboration-acceptance.test.ts && tsx tests/collaboration-api-runtime.test.ts && tsx tests/asset-inspection-evidence-api.test.ts && tsx tests/mcp-http-contract.test.ts && tsx tests/mcp-api-key.test.ts && node --test tests/collaboration-api.test.mjs tests/frame-manifest-cli.test.mjs tests/mcp-stdio.test.mjs",
+    "collaboration:test": "tsx tests/collaboration-contract.test.ts && tsx tests/collaboration-acceptance.test.ts && tsx tests/harvest-frontier-m123-acceptance.test.ts && tsx tests/collaboration-api-runtime.test.ts && tsx tests/asset-inspection-evidence-api.test.ts && tsx tests/mcp-http-contract.test.ts && tsx tests/mcp-api-key.test.ts && node --test tests/collaboration-api.test.mjs tests/frame-manifest-cli.test.mjs tests/mcp-stdio.test.mjs",
     "api:smoke": "tsx scripts/api-credit-smoke.ts",
     "e2e": "node scripts/e2e.mjs",
     "generate:samples": "node scripts/generate-sample-assets.mjs",

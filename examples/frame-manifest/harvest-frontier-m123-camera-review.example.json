@@ -1,0 +1,183 @@
+{
+  "schema": "clunk.frame-manifest.v1",
+  "runId": "HF-M123-camera-review-r03",
+  "sourceProject": "Harvest Frontier",
+  "sourceCommit": "068432735ba21b89fce21e782e9d6f3ff8d06e7c",
+  "reviewStatus": "NOT_EVALUATED",
+  "visualRuntime": "GAP",
+  "playerFacing": "NOT_EVALUATED",
+  "frames": [
+    {
+      "id": "hf-m123-camera-market-side-webgpu-r3",
+      "path": ".logs/screenshots/M123/HF-M123-camera-market-side-webgpu-r3-chrome-webgpu.png",
+      "sha256": "0a5ea65e012e9b537574c975ad1d59896f51164272c0613b9ef5b13ddf9176ed",
+      "bytes": 2016350,
+      "frameSourceCommit": "068432735ba21b89fce21e782e9d6f3ff8d06e7c",
+      "renderer": "webgpu",
+      "viewport": { "width": 1920, "height": 1080 },
+      "hud": "off",
+      "shippedPath": false,
+      "console": { "errors": 0, "warnings": 0 },
+      "scene": "dealer-market-dialogue",
+      "note": "Actual HF M123 evidence; camera numeric flow passed, but this run was not marked shippedPath."
+    },
+    {
+      "id": "hf-m123-camera-market-side-webgl2-r2",
+      "path": ".logs/screenshots/M123/HF-M123-camera-market-side-webgl2-r2-chrome-webgl2.png",
+      "sha256": "5dfac570cdeba52a2d92db3d45feb5eac6fe0fb8ab2ef0fb9c3b8c96cc500b35",
+      "bytes": 2021945,
+      "frameSourceCommit": "068432735ba21b89fce21e782e9d6f3ff8d06e7c",
+      "renderer": "webgl2",
+      "viewport": { "width": 1920, "height": 1080 },
+      "hud": "off",
+      "shippedPath": false,
+      "console": { "errors": 0, "warnings": 0 },
+      "scene": "dealer-market-dialogue",
+      "note": "Separate renderer evidence; do not pair with WebGPU as comparison.v1."
+    }
+  ],
+  "runtimeChecks": [
+    {
+      "id": "hf-m123-camera-webgpu-numeric",
+      "kind": "camera-composition",
+      "status": "PASS",
+      "renderer": "webgpu",
+      "evidencePath": ".logs/verification/M123/HF-M123-camera-market-side-webgpu-r3.json",
+      "frameIds": ["hf-m123-camera-market-side-webgpu-r3"],
+      "checks": {
+        "playerAndFacilitySameFrame": true,
+        "facilityLensInside": false,
+        "poseFocusOnScreen": true,
+        "poseFocusCoverage": 0.01989
+      }
+    },
+    {
+      "id": "hf-m123-camera-webgl2-numeric",
+      "kind": "camera-composition",
+      "status": "PASS",
+      "renderer": "webgl2",
+      "evidencePath": ".logs/verification/M123/HF-M123-camera-market-side-webgl2-r2.json",
+      "frameIds": ["hf-m123-camera-market-side-webgl2-r2"],
+      "checks": {
+        "playerAndFacilitySameFrame": true,
+        "facilityLensInside": false,
+        "poseFocusOnScreen": true,
+        "poseFocusCoverage": 0.01989
+      }
+    }
+  ],
+  "sceneGaps": [
+    {
+      "id": "m123-distant-terrain-repeat",
+      "severity": "major",
+      "category": "terrain",
+      "note": "Distant terrain and ridge silhouettes remain repetitive at player distance.",
+      "ownership": "environment",
+      "affectedScene": "dealer-market-dialogue",
+      "nextStep": "Submit a shippedPath frame pair at the same renderer, viewport, and camera after the terrain pass.",
+      "evidence": { "path": ".logs/screenshots/M123/HF-M123-camera-market-side-webgpu-r3-chrome-webgpu.png", "sha256": "0a5ea65e012e9b537574c975ad1d59896f51164272c0613b9ef5b13ddf9176ed", "bytes": 2016350 },
+      "frameIds": ["hf-m123-camera-market-side-webgpu-r3", "hf-m123-camera-market-side-webgl2-r2"],
+      "closeout": { "status": "OPEN", "owner": "hf-scene-art", "humanDecision": "NO_GO" }
+    },
+    {
+      "id": "m123-foreground-prop-density",
+      "severity": "major",
+      "category": "vegetation-prop",
+      "note": "Foreground prop density and intersections remain a player-facing review item.",
+      "ownership": "runtime",
+      "affectedScene": "dealer-market-dialogue",
+      "nextStep": "Review placement and contact at the shipped gameplay camera, then submit a fresh capture with hashes.",
+      "evidence": { "path": ".logs/screenshots/M123/HF-M123-camera-market-side-webgpu-r3-chrome-webgpu.png", "sha256": "0a5ea65e012e9b537574c975ad1d59896f51164272c0613b9ef5b13ddf9176ed", "bytes": 2016350 },
+      "frameIds": ["hf-m123-camera-market-side-webgpu-r3"],
+      "closeout": { "status": "OPEN", "owner": "hf-runtime-art", "humanDecision": "NO_GO" }
+    },
+    {
+      "id": "m123-dealer-market-hero-framing",
+      "severity": "major",
+      "category": "camera",
+      "note": "Numeric camera checks pass, but dealer and market hero composition still requires human review.",
+      "ownership": "camera",
+      "affectedScene": "dealer-market",
+      "nextStep": "Capture a shippedPath before/after pair with identical cameraPoseHash and sourceTreeHash.",
+      "evidence": { "path": ".logs/screenshots/M123/HF-M123-camera-market-side-webgpu-r3-chrome-webgpu.png", "sha256": "0a5ea65e012e9b537574c975ad1d59896f51164272c0613b9ef5b13ddf9176ed", "bytes": 2016350 },
+      "frameIds": ["hf-m123-camera-market-side-webgpu-r3"],
+      "closeout": { "status": "OPEN", "owner": "hf-camera", "humanDecision": "NO_GO" }
+    },
+    {
+      "id": "m123-dialogue-world-character-readability",
+      "severity": "major",
+      "category": "dialogue-composition",
+      "note": "Dialogue pose numeric evidence is present, but player-facing NPC readability is not approved by this fixture.",
+      "ownership": "camera",
+      "affectedScene": "dialogue",
+      "nextStep": "Submit a shippedPath dialogue capture and record the human visual decision separately from poseFocus checks.",
+      "evidence": { "path": ".logs/screenshots/M123/HF-M123-camera-market-side-webgpu-r3-chrome-webgpu.png", "sha256": "0a5ea65e012e9b537574c975ad1d59896f51164272c0613b9ef5b13ddf9176ed", "bytes": 2016350 },
+      "frameIds": ["hf-m123-camera-market-side-webgpu-r3"],
+      "closeout": { "status": "OPEN", "owner": "hf-camera", "humanDecision": "NO_GO" }
+    }
+  ],
+  "prescriptions": [
+    {
+      "id": "m123-terrain-secondary-structure",
+      "kind": "scene-readability",
+      "status": "NON_BLOCKING",
+      "priority": "P1",
+      "observation": "Camera numeric PASS does not resolve repeated distant terrain or gameplay-distance readability.",
+      "action": "Evaluate secondary structure, material transitions, and LOD at the shipped camera before re-review.",
+      "frameIds": ["hf-m123-camera-market-side-webgpu-r3", "hf-m123-camera-market-side-webgl2-r2"]
+    },
+    {
+      "id": "m123-hero-composition-review",
+      "kind": "player-facing-review",
+      "status": "NON_BLOCKING",
+      "priority": "P1",
+      "observation": "Dealer, market, and dialogue numerical framing checks are not human visual approval.",
+      "action": "Provide same-renderer before/after capture pairs and a humanDecision for each scene gap.",
+      "frameIds": ["hf-m123-camera-market-side-webgpu-r3", "hf-m123-camera-market-side-webgl2-r2"]
+    }
+  ],
+  "assetInspections": [
+    {
+      "id": "hf-tractor-compact-m1",
+      "sourcePath": "C:/Users/50106/Desktop/Harvest Frontier/public/assets/runtime/tractor.compact.m1.glb",
+      "inputHash": "d92ae93240cc9b4d477df13cbddd0342738feb57ed9b8551e73d68fd83b3222c",
+      "assetKind": "3d-model",
+      "targetProfileId": "harvest-frontier-runtime-v1",
+      "inspectionRunId": "HF-M123-clunk-tractor-readonly-r01",
+      "evidenceStatus": "CONDITIONAL",
+      "productionReady": false,
+      "origin": "file",
+      "ownership": "unknown",
+      "runtimeUsage": "UNKNOWN",
+      "playerFacing": "NOT_EVALUATED",
+      "evidenceRef": {
+        "schema": "clunk.asset-evidence-ref.v1",
+        "inputHash": "d92ae93240cc9b4d477df13cbddd0342738feb57ed9b8551e73d68fd83b3222c",
+        "resultDigest": "4789a69a70cecbd4f3cc30e70c17293c1776823747095467da9b8c5b4dc008df",
+        "byteLength": 680412,
+        "coreBuildId": "0.1.0",
+        "ruleSetId": "harvest-frontier-runtime-v1",
+        "ruleSetVersion": "0.1.0",
+        "profileId": "pc",
+        "analysisId": "analysis-d92ae93240cc-4789a69a",
+        "freshness": "CURRENT"
+      },
+      "numericContract": {
+        "status": "PASS",
+        "valid": true,
+        "score": 100,
+        "threshold": 90,
+        "hardBlockerCount": 0,
+        "observations": {
+          "drawCallCount": 88,
+          "triangleCount": 30188,
+          "textureCount": 0,
+          "missingNormalPrimitiveCount": 7,
+          "missingUvPrimitiveCount": 88,
+          "nonUnitScaleNodeCount": 181,
+          "boundsAbsMax": 32767
+        }
+      }
+    }
+  ]
+}

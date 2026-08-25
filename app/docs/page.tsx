@@ -12,6 +12,8 @@ import {
   COLLABORATION_CONTRACT,
   EDITOR_PACKAGES,
   MCP_CONFIG_SNIPPET,
+  MCP_HTTP_TOOL_CATALOG,
+  MCP_HTTP_TOOL_COUNT,
   MCP_SERVER,
   MCP_TOOLS,
   RULE_SET,
@@ -414,7 +416,11 @@ POST /api/assetops/inspect
 // v1 remains valid; v2 rejects unsafe/duplicate names, missing entry, malformed base64,
 // invalid role/relation references, >256 files, or >64 MiB decoded. Structural PASS is not runtime or player-facing approval.`;
 
-const AGENT_SESSION = `$ echo '{"jsonrpc":"2.0","id":1,"method":"initialize"}' | npm.cmd run --silent mcp
+const AGENT_SESSION = `$ POST /api/mcp (HTTP)
+  Authorization: Bearer clunk_live_<issued-key>
+  tools/list -> ${MCP_HTTP_TOOL_CATALOG.map((tool) => tool.name).join(", ")}
+
+$ echo '{"jsonrpc":"2.0","id":1,"method":"initialize"}' | npm.cmd run --silent mcp
   protocolVersion  ${MCP_SERVER.protocolVersion}
   serverInfo       ${MCP_SERVER.name} v${MCP_SERVER.version}
 
@@ -471,7 +477,7 @@ export default function DocsPage() {
           </Link>
 
           <ul className="tool-table">
-            {MCP_TOOLS.map((tool) => (
+            {MCP_HTTP_TOOL_CATALOG.map((tool) => (
               <li key={tool.name}>
                 <code>{tool.name}</code>
                 <p>{tool.summary}</p>
@@ -480,6 +486,7 @@ export default function DocsPage() {
               </li>
             ))}
           </ul>
+          <p className="doc-note">HTTP 원격 도구 {MCP_HTTP_TOOL_COUNT}개와 로컬 stdio 도구 {MCP_TOOLS.length}개는 의도적으로 분리됩니다. HTTP는 로컬 절대 경로를 읽지 않습니다.</p>
         </section>
 
         <section className="doc-section">
@@ -578,6 +585,7 @@ export default function DocsPage() {
             <article><span className="mono-label">REVIEWABLE CAPTURE</span><p>{FRAME_REVIEW_CONTRACT.minimumCaptureSet}</p></article>
             <article><span className="mono-label">REQUIRED METADATA</span><p>{FRAME_REVIEW_CONTRACT.requiredMetadata}</p></article>
             <article><span className="mono-label">PROMOTION RULE</span><p>{FRAME_REVIEW_CONTRACT.reviewableWhen}. {FRAME_REVIEW_CONTRACT.closeWhen}</p></article>
+            <article><span className="mono-label">HF ACCEPTANCE FIXTURE</span><p>{FRAME_REVIEW_CONTRACT.acceptanceFixture}</p></article>
           </div>
           <div className="doc-split">
             <CodeBlock title="실제 저장값 · HF M94" language="json" code={HF_M94_STORED_EVIDENCE} caption="현재 live D1에 저장된 실제 값의 요약입니다. POST schema template와 섞지 않습니다." />

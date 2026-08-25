@@ -1,4 +1,4 @@
-import { MCP_CONFIG_SNIPPET, MCP_SERVER, MCP_TOOLS } from "./product-facts";
+import { MCP_CONFIG_SNIPPET, MCP_HTTP_TOOL_COUNT, MCP_SERVER, MCP_TOOLS } from "./product-facts";
 
 export type AgentGuideKey =
   | "claude-code"
@@ -146,7 +146,7 @@ export function buildAgentGuides(connection?: AgentConnection): AgentGuide[] {
         `endpoint: ${endpoint}`,
         "transport: streamable HTTP",
         "auth: Authorization: Bearer <issued Clunk key>",
-        `remote-safe tools: ${MCP_TOOLS.length} local tools + collaboration evidence lane`,
+        `remote-safe tools: ${MCP_HTTP_TOOL_COUNT} remote-safe tools · local stdio tools: ${MCP_TOOLS.length}`,
       ].join("\n"),
       note: connection
         ? "연결 확인 버튼이 initialize → tools/list를 실제로 호출합니다. 이 endpoint는 Clunk 소유 계약입니다."
@@ -160,4 +160,4 @@ export function buildAgentGuides(connection?: AgentConnection): AgentGuide[] {
 export const AGENT_GUIDES = buildAgentGuides();
 export const DEFAULT_AGENT_GUIDE = AGENT_GUIDES[0];
 
-export const AGENT_GUIDE_PROTOCOL_NOTE = `MCP ${MCP_SERVER.protocolVersion} · ${MCP_TOOLS.length} local stdio tools`;
+export const AGENT_GUIDE_PROTOCOL_NOTE = `MCP ${MCP_SERVER.protocolVersion} · ${MCP_HTTP_TOOL_COUNT} HTTP tools · ${MCP_TOOLS.length} local stdio tools`;

@@ -12,6 +12,11 @@ import {
   buildAgentGuides,
   type AgentConnection,
 } from "../app/components/agent-guides";
+import {
+  MCP_HTTP_TOOL_COUNT,
+  MCP_HTTP_TOOL_NAMES,
+  MCP_TOOLS,
+} from "../app/components/product-facts";
 
 test("remote MCP contract accepts only an Authorization Bearer token", () => {
   assert.equal(parseBearerToken(null), null);
@@ -36,6 +41,12 @@ test("HTTP MCP advertises a Clunk-owned endpoint and remote-safe tools", () => {
   assert.match(MCP_HTTP_TOOLS[1].description, /local path/i);
   assert.match(MCP_HTTP_TOOLS[3].description, /verified evidence/i);
   assert.match(MCP_HTTP_TOOLS[4].description, /workspace/i);
+});
+
+test("product capability facts keep HTTP and local stdio tool sets separate", () => {
+  assert.deepEqual(MCP_HTTP_TOOL_NAMES, MCP_HTTP_TOOLS.map((tool) => tool.name));
+  assert.equal(MCP_HTTP_TOOL_COUNT, 5);
+  assert.equal(MCP_TOOLS.length, 6);
 });
 
 test("MCP initialize and tools/list responses are stable JSON-RPC results", () => {
@@ -64,5 +75,6 @@ test("each client guide is generated from one Clunk endpoint and one issued key"
   assert.match(byKey.get("vscode")?.code ?? "", /type.*http/);
   assert.match(byKey.get("stdio")?.code ?? "", /npm\.cmd/);
   assert.match(byKey.get("stdio")?.code ?? "", /"run"/);
+  assert.match(byKey.get("api")?.code ?? "", /5 remote-safe tools/);
   assert.ok(guides.filter((guide) => guide.key !== "stdio").every((guide) => !guide.code.includes("<CLUNK_ROOT>")));
 });

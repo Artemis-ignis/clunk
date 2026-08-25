@@ -16,6 +16,8 @@ type ApiKeySummary = {
 
 type ConnectionState = "loading" | "signed-out" | "ready" | "error";
 
+const AGENT_CONNECT_LOGIN_HREF = "/login?return_to=%2Fagents%23connect";
+
 export function AgentsClient() {
   const [selectedKey, setSelectedKey] = useState<AgentGuideKey>(DEFAULT_AGENT_GUIDE.key);
   const [endpoint, setEndpoint] = useState("/api/mcp");
@@ -168,13 +170,17 @@ export function AgentsClient() {
           <small>endpoint <code>{endpoint}</code> · local file inspection은 stdio fallback · remote evidence는 HTTPS</small>
         </div>
         <div className="agent-connection-actions">
-          <button className="button button-primary button-sm" type="button" onClick={() => void createKey()} disabled={busy !== null || connectionState === "signed-out"}>
-            {busy === "create" ? "발급 중…" : "Clunk 연결 키 만들기"}
-          </button>
+          {connectionState === "signed-out" ? (
+            <a className="button button-primary button-sm" href={AGENT_CONNECT_LOGIN_HREF}>로그인하고 키 발급하기</a>
+          ) : (
+            <button className="button button-primary button-sm" type="button" onClick={() => void createKey()} disabled={busy !== null || connectionState === "loading"}>
+              {busy === "create" ? "발급 중…" : "Clunk 연결 키 만들기"}
+            </button>
+          )}
           <button className="button button-quiet button-sm" type="button" onClick={() => void verifyConnection()} disabled={busy !== null || !issuedSecret}>
             {busy === "check" ? "확인 중…" : "연결 확인"}
           </button>
-          {connectionState === "signed-out" ? <a className="button button-quiet button-sm" href="/login?return_to=%2Fagents">로그인</a> : null}
+          {connectionState === "signed-out" ? <a className="button button-quiet button-sm" href={AGENT_CONNECT_LOGIN_HREF}>로그인</a> : null}
         </div>
       </div>
 
@@ -242,9 +248,13 @@ export function AgentsClient() {
             </span>
             <div className="agent-code-actions">
               {needsRemoteKey ? (
-                <button className="agent-code-copy" type="button" onClick={() => void createKey()} disabled={busy !== null || connectionState === "signed-out"}>
-                  {busy === "create" ? "발급 중…" : "키 발급하고 설정 채우기"}
-                </button>
+                connectionState === "signed-out" ? (
+                  <a className="agent-code-copy" href={AGENT_CONNECT_LOGIN_HREF}>로그인하고 설정 채우기</a>
+                ) : (
+                  <button className="agent-code-copy" type="button" onClick={() => void createKey()} disabled={busy !== null || connectionState === "loading"}>
+                    {busy === "create" ? "발급 중…" : "키 발급하고 설정 채우기"}
+                  </button>
+                )
               ) : (
                 <>
                   <button className="agent-code-copy" type="button" onClick={downloadSelectedGuide}>다운로드</button>

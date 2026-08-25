@@ -1,5 +1,6 @@
 import { READY_SCORE_THRESHOLD, RULE_SET_ID, RULE_SET_VERSION } from "../../packages/core/src/index";
 import { getBuiltInTargetProfiles } from "../../packages/core/src/assetops-profiles";
+import { MCP_HTTP_TOOLS } from "../api/_lib/mcp-http";
 
 /**
  * Product facts shown on marketing surfaces.
@@ -78,8 +79,8 @@ export const SURFACES = [
 ] as const;
 
 /**
- * MCP tools exposed by `integrations/mcp/server.ts`. `description` is the English string the
- * server actually advertises in `tools/list`; `summary` is the Korean gloss shown on the site.
+ * Local stdio tools exposed by `integrations/mcp/server.ts`. This list intentionally includes
+ * local-only operations such as optimize and passport; it is not the HTTP tools/list surface.
  */
 export const MCP_TOOLS = [
   {
@@ -126,6 +127,42 @@ export const MCP_TOOLS = [
     output: "identity, structured findings, qualityPolicy, visualRuntime/playerFacing/humanDecision",
   },
 ] as const;
+
+/** The canonical remote tools/list surface exposed by the Clunk-owned HTTP endpoint. */
+const HTTP_TOOL_COPY: Record<string, { summary: string; input: string; output: string }> = {
+  clunk_connection_check: {
+    summary: "인증·endpoint·원격 기능이 실제 응답하는지 확인합니다.",
+    input: "Bearer key",
+    output: "connection, endpoint, capabilities",
+  },
+  clunk_asset_inspect: {
+    summary: "base64 파일 또는 안전한 multi-file bundle을 구조적으로 검사합니다.",
+    input: "bytesBase64 또는 files[], targetProfileId",
+    output: "AssetEvidence, findings, hashes",
+  },
+  clunk_asset_validate: {
+    summary: "업로드한 바이트를 선언된 프로파일 정책과 대조합니다.",
+    input: "bytesBase64 또는 files[], targetProfileId",
+    output: "valid, score, hardBlockers, observations",
+  },
+  clunk_asset_inspection_evidence: {
+    summary: "검증된 v2 evidence를 받아 구조·런타임·사람 판정을 분리합니다.",
+    input: "clunk.asset-inspection-evidence.v2",
+    output: "identity, qualityPolicy, findings, review states",
+  },
+  clunk_collaboration_append: {
+    summary: "frame manifest를 append/replace로 협업 스레드에 기록합니다.",
+    input: "threadId, evidenceMode, frame manifest",
+    output: "normalized evidence, freshness, review states",
+  },
+};
+
+export const MCP_HTTP_TOOL_CATALOG = MCP_HTTP_TOOLS.map((tool) => ({
+  ...tool,
+  ...HTTP_TOOL_COPY[tool.name],
+}));
+export const MCP_HTTP_TOOL_NAMES = MCP_HTTP_TOOLS.map((tool) => tool.name);
+export const MCP_HTTP_TOOL_COUNT = MCP_HTTP_TOOLS.length;
 
 /**
  * Commands contributed by `integrations/vscode/package.json`. `title` is the exact command
@@ -370,6 +407,7 @@ export const FRAME_REVIEW_CONTRACT = {
   closeoutStates: "OPEN active gap · CLOSED only after PASS pair + after evidence · REOPENED when a prior closeout is contradicted by a fresh pair · NOT_EVALUATED when no human decision/pair is supplied",
   defaultBoundary: "reviewStatus: NOT_EVALUATED · visualRuntime: GAP · playerFacing: NOT_EVALUATED",
   presentation: "static PASS + visual pending/GAP = CONDITIONAL · human-cleared runtime PASS = READY · hard blocker = BLOCKED",
+  acceptanceFixture: "examples/frame-manifest/harvest-frontier-m123-camera-review.example.json · npm.cmd exec -- tsx tests/harvest-frontier-m123-acceptance.test.ts · WebGPU/WebGL2 candidates remain separate and non-shipped",
 } as const;
 
 export const COLLABORATION_CONTRACT = {

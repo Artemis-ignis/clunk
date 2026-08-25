@@ -57,7 +57,7 @@ Content-Type: application/json
 {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18"}}
 ```
 
-The remote `tools/list` surface contains `clunk_connection_check`, `clunk_asset_inspect`,
+The remote HTTP `tools/list` surface contains exactly 5 tools: `clunk_connection_check`, `clunk_asset_inspect`,
 `clunk_asset_validate`, `clunk_asset_inspection_evidence`, and `clunk_collaboration_append`.
 `clunk_asset_inspect` and `clunk_asset_validate` accept the existing
 `clunk.asset-inspection-request.v1|v2` shape with `bytesBase64` or `files[]`; raw bytes are not
@@ -66,6 +66,10 @@ persisted. `clunk_asset_inspection_evidence` accepts a normalized
 locally verified capture bytes through the CLI or local MCP. `clunk_collaboration_append` accepts
 `threadId`, `evidenceMode: append|replace`, and a normalized frame manifest. It never promotes
 `reviewStatus`, `visualRuntime`, `playerFacing`, or `humanDecision`.
+
+The local stdio surface contains 6 tools, including `clunk_inspect`, `clunk_validate`,
+`clunk_optimize`, and `clunk_passport`. These catalogs are intentionally different: HTTP agents
+upload bytes/evidence, while local stdio is the only path that can read a local absolute path.
 
 ### Local stdio fallback
 
@@ -110,6 +114,13 @@ Tools returned by `tools/list`:
 - `clunk_asset_inspection_evidence` - Build `clunk.asset-inspection-evidence.v2` from a real
   asset. `evidenceKind` is `CONTRACT_FIXTURE` or `PLAYER_FACING_CAPTURE`; the latter requires
   local capture-byte verification and an explicit human decision.
+
+Harvest Frontier acceptance fixture:
+`examples/frame-manifest/harvest-frontier-m123-camera-review.example.json`.
+Validate it with `npm.cmd exec -- tsx tests/harvest-frontier-m123-acceptance.test.ts`.
+The fixture records real M123 WebGPU/WebGL2 candidate hashes, numeric camera checks, and the
+canonical tractor structural evidence; it intentionally reports `reviewStatus=NOT_EVALUATED`,
+`visualRuntime=GAP`, `playerFacing=NOT_EVALUATED`, and pending human review.
 
 Typical agent loop: `initialize` -> `tools/list` -> `clunk_inspect` -> (if fixable)
 `clunk_optimize` -> `clunk_passport`.
