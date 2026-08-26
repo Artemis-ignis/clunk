@@ -5,6 +5,7 @@ import { CodeBlock } from "../components/CodeBlock";
 import { Icon } from "../components/Icon";
 import { SiteShell } from "../components/SiteShell";
 import { DocsSearch } from "./DocsSearch";
+import { ProductEvidenceCanvas } from "../components/ProductEvidenceCanvas";
 import {
   ASSET_INSPECTION_EVIDENCE_V2_CONTRACT,
   ASSET_KIND_COVERAGE,
@@ -216,6 +217,8 @@ export default function DocsPage() {
             </div>
           </div>
         </section>
+
+        <ProductEvidenceCanvas variant="landing" compact />
 
         <div className="docs-layout">
           <aside className="docs-sidebar" aria-label="문서 목차">

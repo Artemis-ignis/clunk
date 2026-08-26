@@ -9429,6 +9429,7 @@ html.snap-y .docs-page-redesign .docs-final-card {
 .landing-flow-section .product-evidence-canvas { margin-top: 22px; }
 .agents-tools-v2 > .product-evidence-canvas { max-width: 920px; margin: 0 0 24px; }
 .studio-page > .product-evidence-canvas { margin: 0 0 24px; }
+.docs-page-redesign > .product-evidence-canvas { margin-top: 24px; }
 .ws-welcome-copy { min-width: 250px; flex: 0.8 1 310px; }
 .ws-welcome-evidence > .product-evidence-canvas { flex: 1 1 610px; max-width: 640px; }
 .ws-welcome-copy .ws-welcome-actions { justify-content: flex-start; margin-top: 20px; }
