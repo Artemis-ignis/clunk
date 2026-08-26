@@ -448,12 +448,22 @@ function DashboardAssetBoard({ latestRun, statuses }: { latestRun: Run | null; s
       <div className="dashboard-asset-board-copy">
         <span className="mono-label">FROM FILE TO DECISION</span>
         <h3 id="dashboard-asset-board-heading">대시보드에서<br /><em>다음 행동이 보여야 합니다.</em></h3>
-        <p>{hasRun ? `${latestRun?.fileName ?? "최근 에셋"}의 현재 경계를 확인하고, 비어 있는 증거를 이어 붙이세요.` : "이 보드는 샘플 점수를 섞지 않습니다. 실제 GLB·GLTF·2D bundle을 올리면 이 자리가 저장된 결과로 바뀝니다."}</p>
+        <p>{hasRun ? `${latestRun?.fileName ?? "최근 에셋"}의 다음 증거를 이어 붙이세요.` : "실제 파일을 올리면 이 보드가 저장된 결과와 다음 행동으로 바뀝니다."}</p>
         <div className="dashboard-asset-board-steps"><span className="is-done"><b>01</b> bytes</span><span className={hasRun ? "is-done" : ""}><b>02</b> inspect</span><span className={statuses.visualRuntime === "PASS" ? "is-done" : ""}><b>03</b> capture</span><span className={statuses.humanDecision === "PASS" ? "is-done" : ""}><b>04</b> review</span></div>
+        <div className="dashboard-status-stack" aria-label="현재 증거 상태">
+          <DashboardStatusRow label="STATIC / POLICY" value={statuses.structural} detail="bytes · hash · blocker" tone={statuses.structural === "PASS" ? "pass" : "pending"} />
+          <DashboardStatusRow label="VISUAL RUNTIME" value={statuses.visualRuntime} detail="shipped frame" tone={statuses.visualRuntime === "PASS" ? "pass" : "pending"} />
+          <DashboardStatusRow label="PLAYER FACING" value={statuses.playerFacing} detail="in-game readability" tone={statuses.playerFacing === "PASS" ? "pass" : "pending"} />
+          <DashboardStatusRow label="HUMAN REVIEW" value={statuses.humanDecision} detail="reviewer decision" tone={statuses.humanDecision === "PASS" ? "pass" : "pending"} />
+        </div>
         <Link className="button button-primary button-sm" href={hasRun ? "#collaboration" : "/app"}>{hasRun ? "다음 증거 연결" : "첫 실제 검사 실행"}<Icon name="arrowRight" size={14} /></Link>
       </div>
     </section>
   );
+}
+
+function DashboardStatusRow({ label, value, detail, tone }: { label: string; value: string; detail: string; tone: "pass" | "pending" }) {
+  return <div className={`dashboard-status-row dashboard-status-row-${tone}`}><span><i />{label}</span><small>{detail}</small><strong>{value}</strong></div>;
 }
 
 function EvidenceLanes({ statuses, hasRun }: { statuses: EvidenceStatuses; hasRun: boolean }) {

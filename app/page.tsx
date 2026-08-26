@@ -7,7 +7,7 @@ import { SiteNav } from "./components/SiteNav";
 import { SnapRoot } from "./components/SnapRoot";
 import { McpEndpointStatus } from "./components/McpEndpointStatus";
 import { LandingMcpDemo } from "./components/LandingMcpDemo";
-import { ProductFlowPreview } from "./components/ProductFlowPreview";
+import { SampleRunWorkbench } from "./components/SampleRunWorkbench";
 import { AssetFamilyVisual, type AssetFamilyVisualKind } from "./components/AssetFamilyVisual";
 import { ASSET_KIND_COVERAGE, CLI_SAMPLE, MCP_TOOLS, MCP_TOOL_COUNT, RULE_COUNT, RULE_SET, SURFACE_COUNT, TARGET_PROFILES } from "./components/product-facts";
 
@@ -47,13 +47,13 @@ export default function Home() {
             <div className="landing-v5-actions"><Link className="button button-primary" href="/app" prefetch={false}>검사기 열기 <Icon name="arrowUpRight" size={15} /></Link><Link className="button button-quiet" href="/studio" prefetch={false}>에셋 흐름 보기 <Icon name="arrowRight" size={15} /></Link></div>
             <div className="landing-v5-proof"><span><i /> 실제 파일 hash</span><span><i /> fresh reinspection</span><span><i /> 사람 판정 별도</span></div>
           </div>
-          <ProductFlowPreview />
+          <SampleRunWorkbench />
         </section>
 
         <section className="landing-v5-strip" aria-label="Clunk가 연결하는 결과">
           <div><span className="strip-value">2D + 3D</span><span>Sprite · Atlas · Spine · motion · GLB</span></div>
           <div><span className="strip-value">{MCP_TOOL_COUNT} tools</span><span>HTTP + local stdio MCP</span></div>
-          <div><span className="strip-value">3 verdicts</span><span>static · runtime · human</span></div>
+          <div><span className="strip-value">4 verdicts</span><span>static · runtime · player · human</span></div>
           <div><span className="strip-value">1 source</span><span>bytes → evidence → decision</span></div>
         </section>
 
@@ -79,9 +79,9 @@ export default function Home() {
 
         <section className="landing-v5-section landing-v5-agent" id="agents"><div className="landing-v5-agent-copy"><span className="eyebrow">FOR THE GENERATING AGENT</span><h2>만든 즉시 부르고,<br /><em>결과를 다시 받습니다.</em></h2><p>Clunk HTTP MCP는 실제 endpoint와 도구 목록을 제공합니다. 로컬 파일은 stdio/CLI에서 바이트를 다시 읽고, 원격 요청은 업로드된 bundle만 검사합니다.</p><div className="landing-v5-tool-line"><span><b>{MCP_TOOL_COUNT}</b> tools</span><span><b>{RULE_COUNT}</b> rules</span><span><b>{SURFACE_COUNT}</b> surfaces</span></div><Link className="button button-primary" href="/agents" prefetch={false}>연결 화면 열기 <Icon name="arrowRight" size={15} /></Link></div><div className="landing-v5-agent-panel"><div className="agent-panel-head"><span><i /> LIVE MCP CATALOG</span><code>/api/mcp</code><b>AUTH KEY</b></div><div className="agent-tool-list">{MCP_TOOLS.slice(0, 5).map((tool, index) => <div key={tool.name}><span>{String(index + 1).padStart(2, "0")}</span><strong>{tool.name}</strong><small>{tool.summary}</small></div>)}</div><div className="agent-panel-foot"><span>{MCP_TOOL_COUNT} tools · {RULE_SET.id}</span><span>HTTPS MCP · workspace key</span></div><LandingMcpDemo /><McpEndpointStatus /></div></section>
 
-        <section className="landing-v5-boundary" aria-label="Clunk의 판정 경계"><div><span className="eyebrow">THE IMPORTANT BOUNDARY</span><h2>점수와 승인은<br /><em>같은 말이 아닙니다.</em></h2></div><div className="boundary-v5-table"><div className="boundary-v5-row boundary-v5-pass"><span><i /> STATIC / POLICY</span><strong>PASS</strong><small>실제 바이트, hash, fresh reinspection</small></div><div className="boundary-v5-row boundary-v5-gap"><span><i /> VISUAL RUNTIME</span><strong>GAP</strong><small>shipped frame이 연결되기 전</small></div><div className="boundary-v5-row boundary-v5-pending"><span><i /> HUMAN REVIEW</span><strong>PENDING</strong><small>사람이 확인하기 전 자동 승격하지 않음</small></div></div></section>
+        <section className="landing-v5-boundary" aria-label="Clunk의 판정 경계"><div><span className="eyebrow">THE IMPORTANT BOUNDARY</span><h2>점수와 승인은<br /><em>같은 말이 아닙니다.</em></h2></div><div className="boundary-v5-table"><div className="boundary-v5-row boundary-v5-pass"><span><i /> STATIC / POLICY</span><strong>PASS</strong><small>실제 바이트, hash, fresh reinspection</small></div><div className="boundary-v5-row boundary-v5-gap"><span><i /> VISUAL RUNTIME</span><strong>GAP</strong><small>shipped frame이 연결되기 전</small></div><div className="boundary-v5-row boundary-v5-pending"><span><i /> PLAYER FACING</span><strong>NOT_EVALUATED</strong><small>실제 게임 화면을 아직 판정하지 않음</small></div><div className="boundary-v5-row boundary-v5-pending"><span><i /> HUMAN REVIEW</span><strong>PENDING</strong><small>사람이 확인하기 전 자동 승격하지 않음</small></div></div></section>
 
-        <div className="landing-v5-machine-marker"><code>clunk_inspect · clunk_passport · STATIC POLICY SCORE · {RULE_SET.id} · visualRuntime=GAP · humanDecision=NOT_EVALUATED</code></div>
+        <div className="landing-v5-machine-marker"><code>clunk_inspect · clunk_passport · STATIC POLICY SCORE · {RULE_SET.id} · visualRuntime=GAP · playerFacing=NOT_EVALUATED · humanDecision=NOT_EVALUATED</code></div>
         <section className="landing-v5-final" id="start"><div><span className="eyebrow">START WITH ONE REAL ASSET</span><h2>다음 에셋부터<br /><em>근거를 남기세요.</em></h2><p>샘플 GLB 또는 직접 만든 2D/3D 파일로 실제 검사 흐름을 확인합니다.</p></div><div className="landing-v5-actions"><Link className="button button-primary" href="/app" prefetch={false}>검사기 열기 <Icon name="arrowUpRight" size={15} /></Link><Link className="button button-quiet" href="/docs" prefetch={false}>문서 보기 <Icon name="arrowRight" size={15} /></Link></div></section>
         <footer className="landing-v5-footer"><div className="site-footer-brand"><span className="brand-mark"><BrandMark size={30} gradientId="clunk-v5-footer" /></span><div><strong>Clunk</strong><span>2D + 3D 에셋 품질·근거 게이트</span></div></div><nav className="site-footer-nav" aria-label="사이트 링크"><Link href="/app" prefetch={false}>검사기</Link><Link href="/agents" prefetch={false}>에이전트</Link><Link href="/dashboard" prefetch={false}>대시보드</Link><Link href="/docs" prefetch={false}>문서</Link><a href="/llms.txt">llms.txt</a></nav><span className="demo-marker">DEMO MODE · 실제 결제 아님</span></footer>
       </main>

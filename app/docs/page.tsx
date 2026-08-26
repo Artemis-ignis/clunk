@@ -6,6 +6,7 @@ import { Icon } from "../components/Icon";
 import { SiteShell } from "../components/SiteShell";
 import { DocsSearch } from "./DocsSearch";
 import { AssetFamilyVisual } from "../components/AssetFamilyVisual";
+import { SampleRunWorkbench } from "../components/SampleRunWorkbench";
 import {
   ASSET_INSPECTION_EVIDENCE_V2_CONTRACT,
   ASSET_KIND_COVERAGE,
@@ -26,7 +27,7 @@ import {
 } from "../components/product-facts";
 
 export const metadata: Metadata = {
-  title: "문서와 연동 가이드 | Clunk",
+  title: "문서와 연동 가이드",
   description: "Clunk MCP, CLI, AssetOps, frame evidence 계약을 빠르게 찾고 실제로 연결하는 문서입니다.",
 };
 
@@ -213,12 +214,15 @@ export default function DocsPage() {
             <div className="docs-evidence-state-row">
               <div><span>STRUCTURAL</span><strong>PASS</strong><small>hash · policy · blocker</small></div>
               <div><span>RUNTIME</span><strong>GAP</strong><small>shipped frame 필요</small></div>
+              <div><span>PLAYER FACING</span><strong>대기</strong><small>실제 화면 판정 전</small></div>
               <div><span>HUMAN</span><strong>대기</strong><small>자동 승격하지 않음</small></div>
             </div>
           </div>
         </section>
 
         <section className="docs-visual-quickstart" aria-label="포맷별 문서 시작점"><div><span className="eyebrow">CHOOSE YOUR STARTING POINT</span><h2>문서를 읽기 전에<br /><em>내 파일부터 고르세요.</em></h2><p>각 포맷은 같은 판정 흐름을 공유하지만, 확인하는 근거가 다릅니다.</p></div><div className="docs-visual-quickstart-grid"><div><AssetFamilyVisual kind="sprite" compact /><strong>2D Sprite / Atlas / Spine</strong><small>pixel contract · bundle</small></div><div><AssetFamilyVisual kind="motion" compact /><strong>Motion / Animation</strong><small>clip · loop · playback</small></div><div><AssetFamilyVisual kind="model" compact /><strong>GLB / GLTF</strong><small>mesh · scene · hash</small></div></div></section>
+
+        <section className="docs-product-loop" aria-labelledby="docs-product-loop-heading"><div className="docs-product-loop-heading"><span className="eyebrow">A QUICK VISUAL START</span><h2 id="docs-product-loop-heading">문서를 읽기 전에<br /><em>결과부터 한 번 보세요.</em></h2><p>샘플은 계약 fixture로 표시됩니다. 실제 플레이어 화면과 사람 승인은 별도 capture에서만 생깁니다.</p></div><SampleRunWorkbench compact /></section>
 
         <div className="docs-layout">
           <aside className="docs-sidebar" aria-label="문서 목차">
