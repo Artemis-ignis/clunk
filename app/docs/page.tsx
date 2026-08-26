@@ -5,6 +5,7 @@ import { CodeBlock } from "../components/CodeBlock";
 import { Icon } from "../components/Icon";
 import { SiteShell } from "../components/SiteShell";
 import { DocsSearch } from "./DocsSearch";
+import { AssetFamilyVisual } from "../components/AssetFamilyVisual";
 import {
   ASSET_INSPECTION_EVIDENCE_V2_CONTRACT,
   ASSET_KIND_COVERAGE,
@@ -216,6 +217,8 @@ export default function DocsPage() {
             </div>
           </div>
         </section>
+
+        <section className="docs-visual-quickstart" aria-label="포맷별 문서 시작점"><div><span className="eyebrow">CHOOSE YOUR STARTING POINT</span><h2>문서를 읽기 전에<br /><em>내 파일부터 고르세요.</em></h2><p>각 포맷은 같은 판정 흐름을 공유하지만, 확인하는 근거가 다릅니다.</p></div><div className="docs-visual-quickstart-grid"><div><AssetFamilyVisual kind="sprite" compact /><strong>2D Sprite / Atlas / Spine</strong><small>pixel contract · bundle</small></div><div><AssetFamilyVisual kind="motion" compact /><strong>Motion / Animation</strong><small>clip · loop · playback</small></div><div><AssetFamilyVisual kind="model" compact /><strong>GLB / GLTF</strong><small>mesh · scene · hash</small></div></div></section>
 
         <div className="docs-layout">
           <aside className="docs-sidebar" aria-label="문서 목차">

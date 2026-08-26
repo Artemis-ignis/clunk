@@ -5,6 +5,7 @@ import Link from "../components/NativeLink";
 import { CopyCodeButton } from "../components/CopyCodeButton";
 import { Icon, type IconName } from "../components/Icon";
 import { WorkspaceShell } from "../components/WorkspaceShell";
+import { AssetFamilyVisual, type AssetFamilyVisualKind } from "../components/AssetFamilyVisual";
 import {
   buildStudioCommand,
   STUDIO_ASSET_CARDS,
@@ -29,6 +30,14 @@ const STATUS_LABELS: Record<StudioCapabilityStatus, string> = {
   ADAPTER_REQUIRED: "어댑터 필요",
   ENVIRONMENT_UNAVAILABLE: "환경 미제공",
 };
+
+function visualKindForAsset(id: AssetKind): AssetFamilyVisualKind {
+  if (id === "2d-image") return "sprite";
+  if (id === "sprite-atlas") return "atlas";
+  if (id === "spine-project") return "spine";
+  if (id === "animation-clip") return "motion";
+  return "model";
+}
 
 const SPRITE_REVIEW_MANIFEST = {
   schema: "clunk.sprite-sheet-review.v1",
@@ -146,12 +155,17 @@ export function StudioClient({ userLabel }: { userLabel: string }) {
                 <span className={`studio-family studio-family-${selectedAsset.family.toLowerCase()}`}>{selectedAsset.family} · {selectedAsset.formats}</span>
                 <span className="studio-status studio-status-available"><span />{STATUS_LABELS[selectedAsset.createStatus]}</span>
               </div>
-              <h4>{selectedAsset.label}</h4>
-              <p>{selectedAsset.description}</p>
-              <div className="studio-capability-grid">
-                <Capability label="CREATE" value={STATUS_LABELS[selectedAsset.createStatus]} tone={selectedAsset.createStatus} detail="실제 별도 output을 작성" />
-                <Capability label="INSPECT" value={STATUS_LABELS[selectedAsset.inspectStatus]} tone={selectedAsset.inspectStatus} detail="bytes·구조·정책 검사" />
-                <Capability label="ATTACH" value={STATUS_LABELS[selectedAsset.attachStatus]} tone={selectedAsset.attachStatus} detail="target profile 연결" />
+              <div className="studio-detail-visual-row">
+                <AssetFamilyVisual kind={visualKindForAsset(selectedAsset.id)} />
+                <div className="studio-detail-content">
+                  <h4>{selectedAsset.label}</h4>
+                  <p>{selectedAsset.description}</p>
+                  <div className="studio-capability-grid">
+                    <Capability label="CREATE" value={STATUS_LABELS[selectedAsset.createStatus]} tone={selectedAsset.createStatus} detail="실제 별도 output을 작성" />
+                    <Capability label="INSPECT" value={STATUS_LABELS[selectedAsset.inspectStatus]} tone={selectedAsset.inspectStatus} detail="bytes·구조·정책 검사" />
+                    <Capability label="ATTACH" value={STATUS_LABELS[selectedAsset.attachStatus]} tone={selectedAsset.attachStatus} detail="target profile 연결" />
+                  </div>
+                </div>
               </div>
               <div className="studio-detail-note"><Icon name="info" size={15} /> {selectedAsset.limitation}</div>
             </article>
