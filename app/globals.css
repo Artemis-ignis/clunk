@@ -5921,6 +5921,9 @@ html.snap-y .landing-snap-section {
 :root[data-theme="dark"] .landing-v5-final { background: #071621; }
 :root[data-theme="dark"] .landing-v5-profile-row,
 :root[data-theme="dark"] .landing-v5-machine-marker { color: #8da6b6; }
+:root[data-theme="dark"] .landing-v5-sample .mono-label { color: #88aabd; }
+:root[data-theme="dark"] .agent-tool-list > div > span { color: #86b0bc; }
+:root[data-theme="dark"] .landing-v5-machine-marker code { color: #8aa9b8; }
 
 @media (max-width: 1040px) {
   .landing-v5-hero { grid-template-columns: minmax(0, .78fr) minmax(0, 1.22fr); gap: 28px; }
