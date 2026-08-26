@@ -1,38 +1,38 @@
 import {
   inspectAssetForTarget,
   type AssetKind,
-} from "../../packages/core/src/index";
+} from "../../../packages/core/src/index";
 import {
   evaluatePlayerFacingSceneReview,
   normalizeFrameManifest,
-} from "../../packages/core/src/collaboration-contract";
-import { normalizeSpriteSheetReview } from "../../packages/core/src/sprite-sheet-review";
+} from "../../../packages/core/src/collaboration-contract";
+import { normalizeSpriteSheetReview } from "../../../packages/core/src/sprite-sheet-review";
 import {
   getRuntimeDb,
   jsonError,
   parseJson,
   scopedStorageId,
-} from "../api/_lib/clunk";
-import { parseAssetInspectionEvidencePayload } from "../api/_lib/asset-inspection-evidence";
+} from "../_lib/clunk";
+import { parseAssetInspectionEvidencePayload } from "../_lib/asset-inspection-evidence";
 import {
   evidenceJson,
   mergeStoredEvidence,
   parseEvidenceOnlyPayload,
   parseStoredEvidence,
-} from "../api/_lib/collaboration";
-import { ClunkHttpError } from "../api/_lib/http-error";
-import { requireMcpApiKey } from "../api/_lib/mcp-auth";
+} from "../_lib/collaboration";
+import { ClunkHttpError } from "../_lib/http-error";
+import { requireMcpApiKey } from "../_lib/mcp-auth";
 import {
   MCP_HTTP_ENDPOINT_PATH,
   dispatchMcpRequest,
   type McpJsonRpcResponse,
-} from "../api/_lib/mcp-http";
+} from "../_lib/mcp-http";
 import {
   ASSET_INSPECTION_REQUEST_V1,
   ASSET_INSPECTION_REQUEST_V2,
   parseAssetInspectionRequest,
   summarizeAssetBundle,
-} from "../api/assetops/inspect/bundle-contract";
+} from "../assetops/inspect/bundle-contract";
 
 export const dynamic = "force-dynamic";
 
@@ -248,3 +248,4 @@ function withCors(response: Response): Response {
   for (const [key, value] of Object.entries(CORS_HEADERS)) headers.set(key, value);
   return new Response(response.body, { status: response.status, headers });
 }
+

@@ -1,1 +1,1 @@
-export { GET, OPTIONS, POST } from "../../mcp/route";
+export { GET, OPTIONS, POST } from "./handler";

@@ -9885,3 +9885,106 @@ html.snap-y .docs-page-redesign .docs-final-card {
 @media (prefers-reduced-motion: reduce) { .inspection-board *, .agent-inspection-board * { animation: none !important; transition: none !important; } }
 .agents-v4-machine-note { margin-top: 24px; color: #7f92a0; font: .62rem/1.6 var(--font-mono); }
 .landing-v4-machine-marker { margin: 0 0 -62px; color: #89a0ad; font: .58rem var(--font-mono); text-align: right; }
+/* --------------------------------------------------------------------------
+   MCP endpoint surface
+   -------------------------------------------------------------------------- */
+.mcp-page { width: min(100% - 48px, 1240px); margin: 0 auto; padding: 132px 0 88px; }
+.mcp-page-hero { display: grid; grid-template-columns: minmax(300px, .78fr) minmax(0, 1.22fr); gap: clamp(32px, 6vw, 84px); align-items: center; min-height: 580px; }
+.mcp-page-copy { max-width: 550px; }
+.mcp-page-copy h1 { margin-top: 18px; color: var(--text-strong); font-size: clamp(3rem, 5.3vw, 5.6rem); font-weight: 600; letter-spacing: -.075em; line-height: .98; }
+.mcp-page-copy h1 em, .mcp-page-boundary h2 em { color: var(--accent); font-style: normal; }
+.mcp-page-copy p { max-width: 52em; margin-top: 23px; color: var(--text-muted); font-size: 1rem; line-height: 1.75; }
+.mcp-page-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+.mcp-page-console { overflow: hidden; border: 1px solid rgba(126, 201, 221, .3); border-radius: 20px; background: #081522; box-shadow: var(--shadow-lift); }
+.mcp-page-console-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 54px; padding: 0 18px; border-bottom: 1px solid rgba(177, 222, 236, .14); color: #9db7c3; font: .67rem var(--font-mono); letter-spacing: .06em; }
+.mcp-page-console-head span { white-space: nowrap; }
+.mcp-page-console-head i { display: inline-block; width: 7px; height: 7px; margin-right: 7px; border-radius: 50%; background: #5ce0b1; box-shadow: 0 0 0 4px rgba(92, 224, 177, .12); }
+.mcp-page-console-head code { color: #c9eef4; }
+.mcp-page-console .mcp-live-status { margin: 0; border: 0; border-radius: 0; background: transparent; }
+.mcp-page-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.mcp-page-steps article { min-height: 176px; padding: 22px; border-right: 1px solid var(--line); }
+.mcp-page-steps article:last-child { border-right: 0; }
+.mcp-page-steps span, .mcp-page-status-grid span { color: var(--accent); font: .66rem var(--font-mono); letter-spacing: .08em; }
+.mcp-page-steps strong { display: block; margin-top: 28px; color: var(--text-strong); font-size: 1rem; }
+.mcp-page-steps p { margin-top: 8px; color: var(--text-muted); font-size: .78rem; line-height: 1.55; }
+.mcp-page-boundary { display: grid; grid-template-columns: minmax(280px, .8fr) minmax(0, 1.2fr); gap: 60px; align-items: center; padding: 96px 0 0; }
+.mcp-page-boundary h2 { margin-top: 14px; color: var(--text-strong); font-size: clamp(2.25rem, 4vw, 4.3rem); letter-spacing: -.07em; line-height: 1; }
+.mcp-page-boundary p { max-width: 520px; margin-top: 20px; color: var(--text-muted); line-height: 1.7; }
+.mcp-page-status-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+.mcp-page-status-grid > div { min-height: 142px; padding: 17px; border: 1px solid var(--line); border-radius: 14px; background: var(--ink-1); }
+.mcp-page-status-grid strong { display: block; margin-top: 28px; color: var(--text-strong); font: 1rem var(--font-mono); }
+.mcp-page-status-grid small { display: block; margin-top: 8px; color: var(--text-muted); font-size: .68rem; line-height: 1.45; }
+@media (max-width: 980px) {
+  .mcp-page-hero, .mcp-page-boundary { grid-template-columns: 1fr; }
+  .mcp-page-copy { max-width: 720px; }
+  .mcp-page-console { max-width: 760px; }
+}
+@media (max-width: 720px) {
+  .mcp-page { width: min(100% - 28px, 680px); padding-top: 104px; }
+  .mcp-page-hero { gap: 34px; min-height: 0; }
+  .mcp-page-copy h1 { font-size: clamp(2.65rem, 13vw, 4.3rem); }
+  .mcp-page-actions .button { flex: 1 1 180px; justify-content: center; }
+  .mcp-page-steps { grid-template-columns: 1fr; }
+  .mcp-page-steps article { min-height: 0; border-right: 0; border-bottom: 1px solid var(--line); }
+  .mcp-page-steps article:last-child { border-bottom: 0; }
+  .mcp-page-boundary { gap: 34px; padding-top: 66px; }
+  .mcp-page-status-grid { grid-template-columns: 1fr; }
+}
+
+/* The v4 public surfaces intentionally keep a paper-card treatment in light mode.
+   Re-map those cards in dark mode so the inherited light text never lands on white. */
+:root[data-theme="dark"] .agents-v4-tool-grid article,
+:root[data-theme="dark"] .agents-v4-statuses article,
+:root[data-theme="dark"] .agents-v4-profile-strip span,
+:root[data-theme="dark"] .docs-hero-meta,
+:root[data-theme="dark"] .docs-evidence-visual,
+:root[data-theme="dark"] .docs-sidebar-callout,
+:root[data-theme="dark"] .docs-status-card,
+:root[data-theme="dark"] .docs-studio-facts article,
+:root[data-theme="dark"] .client-route-grid article,
+:root[data-theme="dark"] .docs-scope-grid article {
+  border-color: var(--line-strong);
+  background: var(--ink-1);
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .agents-v4-tool-grid article code,
+:root[data-theme="dark"] .agents-v4-tool-grid article strong,
+:root[data-theme="dark"] .agents-v4-statuses article strong,
+:root[data-theme="dark"] .docs-hero-meta strong,
+:root[data-theme="dark"] .docs-evidence-visual-copy h2,
+:root[data-theme="dark"] .docs-status-card strong,
+:root[data-theme="dark"] .docs-studio-facts article strong,
+:root[data-theme="dark"] .client-route-grid article strong,
+:root[data-theme="dark"] .docs-scope-grid article strong {
+  color: var(--text-strong);
+}
+
+:root[data-theme="dark"] .agents-v4-tool-grid article small,
+:root[data-theme="dark"] .agents-v4-statuses article small,
+:root[data-theme="dark"] .agents-v4-profile-strip span,
+:root[data-theme="dark"] .docs-hero-meta small,
+:root[data-theme="dark"] .docs-status-card p,
+:root[data-theme="dark"] .docs-studio-facts article p,
+:root[data-theme="dark"] .client-route-grid article p,
+:root[data-theme="dark"] .docs-scope-grid article p {
+  color: var(--text-muted);
+}
+
+@media (max-width: 720px) {
+  .agents-v4-tool-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .agents-v4-tool-grid article {
+    min-width: 0;
+  }
+
+  .agents-v4-tool-grid article code,
+  .agents-v4-tool-grid article strong,
+  .agents-v4-tool-grid article small {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+}
