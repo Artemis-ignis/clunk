@@ -5687,9 +5687,11 @@ html.snap-y .landing-snap-section {
 .landing-v5-hero { display: grid; grid-template-columns: minmax(360px, .78fr) minmax(0, 1.22fr); gap: clamp(32px, 5vw, 84px); align-items: center; min-height: min(760px, calc(100dvh - 100px)); }
 .landing-v5-hero-copy { max-width: 620px; padding-bottom: 20px; }
 .landing-v5 .eyebrow { color: var(--v5-cyan); font: 600 .67rem/1.3 var(--font-mono); letter-spacing: .13em; }
-.landing-v5-hero h1 { max-width: 15ch; margin-top: 22px; font-size: clamp(2.6rem, 3.8vw, 4.1rem); font-weight: 660; letter-spacing: -.085em; line-height: .99; text-wrap: balance; }
+.landing-v5-hero h1 { max-width: none; margin-top: 22px; font-size: clamp(2.35rem, 3.15vw, 3.4rem); font-weight: 660; letter-spacing: -.085em; line-height: .99; text-wrap: balance; }
 .landing-v5-hero h1 span,
 .landing-v5-hero h1 em { display: block; }
+.landing-v5-hero h1 span,
+.landing-v5-hero h1 em { white-space: nowrap; }
 .landing-v5-hero h1 em,
 .landing-v5 h2 em,
 .landing-v5 h3 em { color: var(--v5-cyan); font-style: normal; }
@@ -5932,6 +5934,8 @@ html.snap-y .landing-snap-section {
   .landing-v5-hero { display: flex; flex-direction: column; align-items: stretch; min-height: 0; }
   .landing-v5-hero-copy { max-width: 700px; }
   .landing-v5-hero h1 { max-width: 12ch; }
+  .landing-v5-hero h1 span,
+  .landing-v5-hero h1 em { white-space: normal; }
   .flow-preview { width: 100%; }
   .landing-v5-strip { grid-template-columns: repeat(2, 1fr); }
   .landing-v5-strip > div:nth-child(2) { border-right: 0; }
