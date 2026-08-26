@@ -9569,3 +9569,4 @@ html.snap-y .docs-page-redesign .docs-final-card {
 
 @media (prefers-reduced-motion: reduce) { .inspection-board *, .agent-inspection-board * { animation: none !important; transition: none !important; } }
 .agents-v4-machine-note { margin-top: 24px; color: #7f92a0; font: .62rem/1.6 var(--font-mono); }
+.landing-v4-machine-marker { margin: 0 0 -62px; color: #89a0ad; font: .58rem var(--font-mono); text-align: right; }

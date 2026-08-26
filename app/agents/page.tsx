@@ -9,10 +9,10 @@ import { MCP_HTTP_TOOL_CATALOG, MCP_HTTP_TOOL_COUNT, MCP_SERVER, MCP_TOOLS, RULE
 export const metadata: Metadata = { title: "에이전트 연결 | Clunk", description: "Claude Code, Codex, Cursor, GitHub Copilot, Claude Desktop, VS Code에서 Clunk를 연결하는 작업 가이드입니다." };
 
 const setupSteps = [
-  ["01", "키 발급", "workspace 전용 Bearer 키"],
-  ["02", "클라이언트 선택", "쓰는 도구의 설정 형식"],
-  ["03", "설정 복사", "endpoint + 인증 헤더"],
-  ["04", "실제 연결 확인", "initialize → tools/list"],
+  ["01", "1. 키 발급", "workspace 전용 Bearer 키"],
+  ["02", "2. 클라이언트 선택", "쓰는 도구의 설정 형식"],
+  ["03", "3. 설정 복사", "endpoint + 인증 헤더"],
+  ["04", "4. 연결 확인", "initialize → tools/list"],
 ] as const;
 
 export default function AgentsPage() {
@@ -21,11 +21,11 @@ export default function AgentsPage() {
       <main className="agents-page agents-v4-page">
         <section className="agents-v4-hero"><div className="agents-v4-copy"><div className="hero-status-line"><span className="status-dot status-dot-on" /><span>CLUNK HTTP MCP</span><code>v{MCP_SERVER.version}</code></div><span className="eyebrow">CONNECT THE AGENT</span><h1>생성 직후,<br /><em>에이전트가 검사합니다.</em></h1><p>Clunk가 직접 운영하는 HTTP MCP를 연결하면 Claude Code, Codex, Cursor, GitHub Copilot, Claude Desktop, VS Code에서 같은 Core와 같은 근거를 사용합니다.</p><div className="agents-v4-actions"><a className="button button-primary" href="#connect">연결 시작 <Icon name="chevronDown" size={15} /></a><Link className="button button-quiet" href="/docs#quickstart">설정 가이드 <Icon name="arrowRight" size={15} /></Link></div><div className="agents-v4-proof"><span><b>{MCP_HTTP_TOOL_COUNT}</b> HTTP tools</span><span><b>{MCP_TOOLS.length}</b> local tools</span><span><b>0</b> overwrite</span></div></div><div className="agent-inspection-board" aria-label="에이전트가 받는 Clunk 결과"><div className="agent-board-head"><span><i /> AGENT RESULT</span><code>clunk_inspect</code><b>LIVE</b></div><div className="agent-board-visual"><div className="agent-board-grid" aria-hidden="true" /><img src="/landing/tractor-hero.png" alt="Clunk 검사 결과의 3D 에셋" width={760} height={560} /><div className="agent-board-score"><span>STRUCTURAL</span><strong>PASS <small>100</small></strong><em>hash verified · blocker 0</em></div><div className="agent-board-route"><span>02 inspect</span><i>→</i><span>03 capture</span><i>→</i><span>04 review</span></div></div><div className="agent-board-foot"><span>same contract</span><span>same evidence</span><strong>different client</strong></div></div></section>
 
-        <section className="agents-v4-rail" aria-label="MCP 연결 상태"><div><span>ENDPOINT</span><strong>/api/mcp</strong><small>streamable HTTP</small></div><div><span>AUTH</span><strong>Bearer workspace key</strong><small>로그인 후 발급</small></div><div><span>TOOLS</span><strong>{MCP_HTTP_TOOL_COUNT}개 원격</strong><small>initialize와 tools/list에 동일하게 표시</small></div><McpEndpointStatus /></section>
+        <section className="agents-v4-rail" aria-label="MCP 연결 상태"><div><span>ENDPOINT</span><strong>/api/mcp</strong><small>streamable HTTP</small></div><div><span>AUTH</span><strong>Bearer workspace key</strong><small>로그인 후 키 발급</small></div><div><span>TOOLS</span><strong>HTTP 원격 도구 {MCP_HTTP_TOOL_COUNT}개</strong><small>로컬 stdio 도구 {MCP_TOOLS.length}개 · initialize와 tools/list에 동일하게 표시</small></div><McpEndpointStatus /></section>
 
-        <section className="agents-v4-section agents-v4-setup"><div className="agents-v4-heading"><span className="eyebrow">FOUR SMALL STEPS</span><h2>연결은 짧고,<br /><em>결과는 실제여야 합니다.</em></h2><p>페이지를 읽고 추측하지 마세요. 키를 발급하고, 설정을 복사하고, 서버 handshake를 확인합니다.</p></div><ol className="agents-v4-steps">{setupSteps.map(([number, title, detail]) => <li key={number}><span>{number}</span><strong>{title}</strong><small>{detail}</small></li>)}</ol></section>
+        <section className="agents-v4-section agents-v4-setup"><div className="agents-v4-heading"><span className="eyebrow">FOUR SMALL STEPS</span><h2>연결은 짧고,<br /><em>결과는 실제여야 합니다.</em></h2><p>페이지를 읽고 추측하지 마세요. 키를 발급하고, 설정을 복사하고, 서버 handshake를 확인합니다.</p></div><ol className="agents-v4-steps agent-journey">{setupSteps.map(([number, title, detail]) => <li key={number}><span>{number}</span><strong>{title}</strong><small>{detail}</small></li>)}</ol></section>
 
-        <section className="agents-v4-section agents-v4-connect" id="connect"><div className="agents-v4-heading agents-v4-heading-wide"><div><span className="eyebrow">CLIENT SETUP</span><h2>쓰는 도구를 고르면<br /><em>설정이 완성됩니다.</em></h2></div><p>탭을 누르면 해당 클라이언트가 실제로 읽는 명령 또는 JSON으로 바뀝니다. 인증 실패도 화면에 남깁니다.</p></div><AgentsClient /></section>
+        <section className="agents-v4-section agents-v4-connect" id="connect"><div className="agents-v4-heading agents-v4-heading-wide"><div><span className="eyebrow">CLIENT SETUP</span><h2>쓰는 도구를 고르면<br /><em>설정이 완성됩니다.</em></h2></div><p className="agent-tab-purpose">선택한 클라이언트의 실제 설정을 복사합니다. 인증 실패도 화면에 남깁니다.</p></div><AgentsClient /></section>
 
         <section className="agents-v4-section agents-v4-tools" aria-labelledby="tools-heading"><div className="agents-v4-heading agents-v4-heading-wide"><div><span className="eyebrow">TOOLS THE AGENT CAN CALL</span><h2 id="tools-heading">연결 후 바로 부르는<br /><em>{MCP_HTTP_TOOL_COUNT}개 도구</em></h2></div><p>검사·생성·증거 연결의 도구가 같은 계약을 공유합니다. 원격 HTTP는 로컬 경로를 읽지 않습니다.</p></div><div className="agents-v4-tool-grid">{MCP_HTTP_TOOL_CATALOG.map((tool, index) => <article key={tool.name}><span>0{index + 1}</span><code>{tool.name}</code><strong>{tool.summary}</strong><small>입력 {tool.input} · 출력 {tool.output}</small></article>)}</div></section>
 
