@@ -5957,9 +5957,15 @@ html.snap-y .landing-snap-section {
 }
 
 @media (max-width: 560px) {
+  .landing-v5,
+  .landing-v5-hero,
+  .flow-preview,
+  .flow-preview-body,
+  .flow-preview-toolbar,
+  .flow-stage { width: 100%; min-width: 0; max-width: 100%; }
   .landing-v5 { padding-right: 14px; padding-left: 14px; }
   .flow-preview-toolbar { display: block; }
-  .flow-preview-stage-tabs { margin-top: 15px; overflow-x: auto; }
+  .flow-preview-stage-tabs { width: 100%; min-width: 0; max-width: 100%; margin-top: 15px; overflow-x: auto; }
   .flow-preview-body, .flow-stage { min-height: 490px; }
   .flow-stage-drop, .flow-stage-decide, .flow-stage-inspect { display: block; min-height: 490px; }
   .flow-file-stack { min-height: 220px; margin-top: 15px; }
