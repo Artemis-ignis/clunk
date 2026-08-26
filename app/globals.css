@@ -9295,3 +9295,159 @@ html.snap-y .docs-page-redesign .docs-final-card {
 @media (prefers-reduced-motion: reduce) {
   html.snap-y { scroll-behavior: auto; }
 }
+
+/* ============================================================================
+   Product canvas: one visual language for the actual Clunk loop
+   ============================================================================ */
+
+.product-evidence-canvas {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  width: 100%;
+  border: 1px solid rgba(145, 190, 216, 0.25);
+  border-radius: 20px;
+  background: #0b1622;
+  box-shadow: 0 24px 70px rgba(10, 42, 62, 0.2);
+  color: #e8f7fc;
+}
+
+.product-canvas-topbar,
+.product-canvas-footer,
+.product-canvas-file,
+.product-canvas-timeline,
+.product-canvas-metric {
+  display: flex;
+  align-items: center;
+}
+
+.product-canvas-topbar {
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 43px;
+  padding: 0 15px;
+  border-bottom: 1px solid rgba(145, 190, 216, 0.16);
+  color: #91b0bf;
+  font: 0.62rem var(--font-mono);
+  letter-spacing: 0.08em;
+}
+
+.product-canvas-topbar > span,
+.product-canvas-topbar code {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.product-canvas-topbar code { color: #d1eaf3; letter-spacing: 0; }
+.product-canvas-live-dot { display: inline-block; width: 7px; height: 7px; margin-right: 7px; border-radius: 50%; background: #54dbaf; box-shadow: 0 0 0 4px rgba(84, 219, 175, 0.12); }
+
+.product-canvas-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(210px, 0.65fr);
+  min-height: 300px;
+}
+
+.product-canvas-stage {
+  position: relative;
+  min-height: 300px;
+  overflow: hidden;
+  background: radial-gradient(circle at 52% 42%, rgba(54, 197, 235, 0.21), transparent 37%), linear-gradient(145deg, #122b3b, #0a1420 75%);
+}
+
+.product-canvas-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.52;
+  background-image: linear-gradient(rgba(132, 197, 222, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(132, 197, 222, 0.1) 1px, transparent 1px);
+  background-size: 34px 34px;
+  transform: perspective(380px) rotateX(58deg) scale(1.45) translateY(18%);
+  transform-origin: center bottom;
+}
+
+.product-canvas-stage > img {
+  position: absolute;
+  inset: 4% 12% 3%;
+  width: 76%;
+  height: 93%;
+  object-fit: contain;
+  opacity: 0.86;
+  filter: saturate(0.82) contrast(1.06);
+  mix-blend-mode: screen;
+}
+
+.product-canvas-sprite {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 128px;
+  padding: 9px;
+  border: 1px solid rgba(156, 224, 241, 0.25);
+  border-radius: 11px;
+  background: rgba(6, 17, 27, 0.84);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.2);
+}
+
+.product-canvas-sprite-head { color: #9deaff; font: 0.54rem var(--font-mono); letter-spacing: 0.06em; }
+.product-canvas-sprite-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; margin-top: 7px; padding: 5px; border: 1px solid rgba(156, 224, 241, 0.16); background: rgba(255, 255, 255, 0.04); }
+.sprite-cell { display: block; aspect-ratio: 1; background: #1f677d; opacity: 0.74; }
+.sprite-cell:nth-child(3n) { background: #5bc8dc; }
+.sprite-cell:nth-child(4n) { background: #d7f6f4; opacity: 0.86; }
+.sprite-cell-1 { transform: translateY(2px); }
+.sprite-cell-2 { transform: translateX(2px); }
+.sprite-cell-3 { opacity: 0.35; }
+.product-canvas-sprite small { display: block; margin-top: 6px; color: #7fa1b1; font: 0.55rem var(--font-mono); }
+
+.product-canvas-bracket { position: absolute; width: 28px; height: 28px; border-color: #75d8ed; opacity: 0.8; }
+.product-canvas-bracket-a { top: 22px; left: 22px; border-top: 1px solid; border-left: 1px solid; }
+.product-canvas-bracket-b { right: 160px; bottom: 22px; border-right: 1px solid; border-bottom: 1px solid; }
+
+.product-canvas-inspect { display: grid; align-content: start; gap: 8px; padding: 16px; border-left: 1px solid rgba(145, 190, 216, 0.16); background: rgba(4, 13, 22, 0.66); }
+.product-canvas-file { min-width: 0; gap: 9px; padding-bottom: 11px; border-bottom: 1px solid rgba(145, 190, 216, 0.15); }
+.product-canvas-file-icon { display: grid; place-items: center; flex: 0 0 auto; width: 29px; height: 29px; border-radius: 8px; background: rgba(74, 211, 244, 0.14); color: #7ee5fa; }
+.product-canvas-file div { min-width: 0; flex: 1; }
+.product-canvas-file strong, .product-canvas-file small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.product-canvas-file strong { color: #effaff; font: 0.67rem var(--font-mono); }
+.product-canvas-file small { margin-top: 3px; color: #7897a7; font: 0.58rem var(--font-mono); }
+.product-canvas-pass { align-self: start; color: #64dfad; font: 0.58rem var(--font-mono); }
+.product-canvas-metric { justify-content: space-between; gap: 8px; min-height: 44px; padding: 8px 9px; border: 1px solid rgba(145, 190, 216, 0.13); border-radius: 9px; background: rgba(255, 255, 255, 0.035); }
+.product-canvas-metric span, .product-canvas-metric small { color: #7592a3; font: 0.55rem var(--font-mono); letter-spacing: 0.05em; }
+.product-canvas-metric strong { color: #e9faff; font: 0.78rem var(--font-mono); }
+.product-canvas-metric:nth-child(3) strong { color: #ffd587; }
+.product-canvas-metric:nth-child(4) strong { color: #9deaff; }
+.product-canvas-metric small { margin-left: auto; letter-spacing: 0; }
+.product-canvas-timeline { flex-wrap: wrap; gap: 5px; margin-top: 3px; }
+.product-canvas-timeline span { padding: 4px 6px; border-radius: 5px; color: #718b9a; font: 0.52rem var(--font-mono); background: rgba(255, 255, 255, 0.04); }
+.product-canvas-timeline .is-done { color: #69dfb0; background: rgba(74, 211, 165, 0.11); }
+.product-canvas-footer { gap: 8px; min-height: 38px; padding: 0 15px; border-top: 1px solid rgba(145, 190, 216, 0.14); color: #8aa7b6; font: 0.58rem var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; }
+.product-canvas-footer b { color: #49cce9; font-size: 0.8rem; font-weight: 400; }
+
+.product-evidence-canvas-compact .product-canvas-body { min-height: 240px; }
+.product-evidence-canvas-compact .product-canvas-stage { min-height: 240px; }
+.product-evidence-canvas-compact .product-canvas-sprite { width: 108px; }
+.product-evidence-canvas-compact .product-canvas-footer { display: none; }
+.landing-flow-section .product-evidence-canvas { margin-top: 22px; }
+.agents-tools-v2 > .product-evidence-canvas { max-width: 920px; margin: 0 0 24px; }
+.studio-page > .product-evidence-canvas { margin: 0 0 24px; }
+.ws-welcome-copy { min-width: 250px; flex: 0.8 1 310px; }
+.ws-welcome-evidence > .product-evidence-canvas { flex: 1 1 610px; max-width: 640px; }
+.ws-welcome-copy .ws-welcome-actions { justify-content: flex-start; margin-top: 20px; }
+
+@media (max-width: 900px) {
+  .product-canvas-body { grid-template-columns: 1fr; }
+  .product-canvas-inspect { grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid rgba(145, 190, 216, 0.16); border-left: 0; }
+  .product-canvas-file, .product-canvas-timeline { grid-column: 1 / -1; }
+  .product-canvas-timeline { margin-top: 0; }
+  .ws-welcome-evidence > .product-evidence-canvas { max-width: none; }
+}
+
+@media (max-width: 560px) {
+  .product-canvas-topbar { align-items: flex-start; flex-direction: column; justify-content: center; gap: 3px; min-height: 54px; }
+  .product-canvas-stage, .product-evidence-canvas-compact .product-canvas-stage { min-height: 220px; }
+  .product-canvas-stage > img { inset: 5% 3% 4%; width: 94%; }
+  .product-canvas-sprite { right: 8px; bottom: 8px; transform: scale(0.84); transform-origin: right bottom; }
+  .product-canvas-bracket-b { right: 124px; }
+  .product-canvas-inspect { grid-template-columns: 1fr; }
+  .product-canvas-metric, .product-canvas-file, .product-canvas-timeline { grid-column: auto; }
+  .product-canvas-footer { flex-wrap: wrap; gap: 5px; padding: 8px 12px; }
+}

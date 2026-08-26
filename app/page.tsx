@@ -6,6 +6,7 @@ import { SiteNav } from "./components/SiteNav";
 import { SnapRoot } from "./components/SnapRoot";
 import { McpEndpointStatus } from "./components/McpEndpointStatus";
 import { LandingMcpDemo } from "./components/LandingMcpDemo";
+import { ProductEvidenceCanvas } from "./components/ProductEvidenceCanvas";
 import {
   ASSET_KIND_COVERAGE,
   CLI_SAMPLE,
@@ -176,6 +177,7 @@ export default function Home() {
                 <pre><code>{sampleTerminal}</code></pre>
               </div>
             </div>
+            <ProductEvidenceCanvas variant="landing" />
           </div>
         </section>
 

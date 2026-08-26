@@ -7,6 +7,7 @@ import { Icon } from "./Icon";
 import { resolveReadiness } from "./readiness";
 import { StatusPill } from "./StatusPill";
 import { WorkspaceShell } from "./WorkspaceShell";
+import { ProductEvidenceCanvas } from "./ProductEvidenceCanvas";
 
 /**
  * Passport is its own route now. The dashboard used to hide this list behind a
@@ -95,6 +96,15 @@ export function PassportClient({ userLabel }: { userLabel: string }) {
           Passport 규격
           <Icon name="arrowUpRight" size={15} />
         </Link>
+      </section>
+
+      <section className="passport-visual-intro" aria-label="Passport 생성 흐름">
+        <ProductEvidenceCanvas variant="dashboard" compact />
+        <div className="passport-visual-copy">
+          <span className="mono-label">TRACEABLE OUTPUT</span>
+          <h3>최적화 결과도<br /><em>검사 전으로 돌아갑니다.</em></h3>
+          <p>원본과 출력의 해시, 전후 digest, 적용 작업을 한 화면에서 비교하고 다음 검토로 보냅니다.</p>
+        </div>
       </section>
 
       {message ? (

@@ -8,6 +8,7 @@ import { Icon } from "./Icon";
 import { readinessHint, resolveStoredReadiness } from "./readiness";
 import { StatusPill } from "./StatusPill";
 import { WorkspaceShell } from "./WorkspaceShell";
+import { ProductEvidenceCanvas } from "./ProductEvidenceCanvas";
 
 type Run = {
   id: string;
@@ -246,21 +247,16 @@ export function DashboardClient() {
   return (
     <WorkspaceShell active="overview" title="워크스페이스 개요" userLabel={userLabel} status={connectionChip}>
       <section className="ws-welcome ws-welcome-evidence">
-        <div>
+        <div className="ws-welcome-copy">
           <span className="mono-label">CONTROL ROOM · EVIDENCE FIRST</span>
           <h2>검사에서 승인까지,<br />증거의 빈칸을 보여줍니다.</h2>
-          <p>정적 에셋 계약, 실제 런타임 프레임, 플레이어 화면, 사람의 판정을 한 덩어리로 뭉개지 않습니다.</p>
+          <p>Clunk는 파일 하나를 구조·런타임·사람 검토의 연결된 작업으로 바꿉니다.</p>
+          <div className="ws-welcome-actions">
+            <Link className="button button-primary" href="/app">새 검사 시작 <Icon name="arrowUpRight" size={15} /></Link>
+            <Link className="button button-quiet" href="#collaboration">프레임 증거 연결 <Icon name="chevronDown" size={15} /></Link>
+          </div>
         </div>
-        <div className="ws-welcome-actions">
-          <Link className="button button-primary" href="/app">
-            새 검사 시작
-            <Icon name="arrowUpRight" size={15} />
-          </Link>
-          <Link className="button button-quiet" href="#collaboration">
-            프레임 증거 연결
-            <Icon name="chevronDown" size={15} />
-          </Link>
-        </div>
+        <ProductEvidenceCanvas variant="dashboard" compact />
       </section>
 
       {connection === "checking" ? (

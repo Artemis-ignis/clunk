@@ -5,6 +5,7 @@ import { AgentsClient } from "./AgentsClient";
 import { Icon } from "../components/Icon";
 import { SiteShell } from "../components/SiteShell";
 import { McpEndpointStatus } from "../components/McpEndpointStatus";
+import { ProductEvidenceCanvas } from "../components/ProductEvidenceCanvas";
 import {
   ASSET_KIND_COVERAGE,
   MCP_HTTP_TOOL_CATALOG,
@@ -132,6 +133,7 @@ export default function AgentsPage() {
             </div>
             <p>{MCP_HTTP_TOOL_COUNT}개 HTTP 도구는 증거를 읽고 기록합니다. 최적화는 별도 요청이 없으면 원본을 건드리지 않습니다.</p>
           </div>
+          <ProductEvidenceCanvas variant="agents" compact />
           <div className="agents-tools-grid agents-tools-grid-v2">
             {MCP_HTTP_TOOL_CATALOG.map((tool, index) => (
               <article className="agents-tool-card" key={tool.name}>

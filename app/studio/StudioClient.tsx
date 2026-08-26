@@ -5,6 +5,7 @@ import Link from "../components/NativeLink";
 import { CopyCodeButton } from "../components/CopyCodeButton";
 import { Icon, type IconName } from "../components/Icon";
 import { WorkspaceShell } from "../components/WorkspaceShell";
+import { ProductEvidenceCanvas } from "../components/ProductEvidenceCanvas";
 import {
   buildStudioCommand,
   STUDIO_ASSET_CARDS,
@@ -104,6 +105,8 @@ export function StudioClient({ userLabel }: { userLabel: string }) {
             <div className="studio-art-core"><Icon name="boxes" size={34} /></div>
           </div>
         </header>
+
+        <ProductEvidenceCanvas variant="studio" compact />
 
         <section className="studio-workflow" aria-label="Asset Studio workflow">
           {STUDIO_WORKFLOW_STEPS.map((step, index) => (

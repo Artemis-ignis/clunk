@@ -939,6 +939,47 @@
    Asset Studio: authoring, inspection, engine attachment, and review boundary
    ------------------------------------------------------------------------ */
 
+.workspace-quick-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  padding: 8px 11px;
+  border: 1px solid var(--accent-line);
+  border-radius: var(--r-pill);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-size: var(--fs-1);
+  font-weight: 650;
+  transition: transform var(--dur-1) var(--ease), background var(--dur-1) var(--ease);
+}
+
+.workspace-quick-action:hover { background: color-mix(in srgb, var(--accent) 15%, var(--ink-1)); transform: translateY(-1px); }
+.workspace-quick-action:active { transform: translateY(0); }
+
+.passport-visual-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(220px, 0.8fr);
+  gap: var(--sp-20);
+  align-items: stretch;
+  margin-bottom: var(--sp-20);
+}
+
+.passport-visual-intro .product-evidence-canvas { min-width: 0; }
+.passport-visual-copy { display: grid; align-content: center; padding: clamp(18px, 3vw, 34px); border: 1px solid var(--accent-line); border-radius: var(--r-panel); background: linear-gradient(145deg, var(--accent-soft), var(--ink-1)); }
+.passport-visual-copy h3 { margin-top: var(--sp-8); color: var(--text-strong); font-size: clamp(1.55rem, 3vw, 2.4rem); font-weight: 590; letter-spacing: -0.06em; line-height: 1.05; }
+.passport-visual-copy h3 em { color: var(--accent); font-style: normal; }
+.passport-visual-copy p { margin-top: var(--sp-12); color: var(--text-muted); font-size: var(--fs-1); line-height: var(--lh-body); }
+
+@media (max-width: 900px) {
+  .passport-visual-intro { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .workspace-quick-action { margin-left: 0; padding: 7px 9px; }
+  .workspace-quick-action span { display: none; }
+}
+
 .studio-page {
   max-width: 1240px;
   margin: 0 auto;

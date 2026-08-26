@@ -160,6 +160,10 @@ export function WorkspaceShell({
             <Icon name="layout" size={18} />
           </button>
           <h1 className="workspace-title">{title}</h1>
+          <Link className="workspace-quick-action" href="/app" prefetch={false}>
+            <Icon name="scan" size={14} />
+            <span>새 검사</span>
+          </Link>
           <div className="workspace-toolbar-end">
             {status}
             <ThemeToggle />
