@@ -75,23 +75,29 @@ Content-Type: application/json
 {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18"}}
 ```
 
-The remote HTTP `tools/list` surface contains exactly 5 tools: `clunk_connection_check`, `clunk_asset_inspect`,
-`clunk_asset_validate`, `clunk_asset_inspection_evidence`, and `clunk_collaboration_append`.
+The remote HTTP `tools/list` surface contains exactly 7 tools: `clunk_connection_check`, `clunk_asset_inspect`,
+`clunk_asset_validate`, `clunk_asset_inspection_evidence`, `clunk_collaboration_append`,
+`clunk_scene_review`, and `clunk_sprite_sheet_review`.
 `clunk_asset_inspect` and `clunk_asset_validate` accept the existing
 `clunk.asset-inspection-request.v1|v2` shape with `bytesBase64` or `files[]`; raw bytes are not
 persisted. `clunk_asset_inspection_evidence` accepts a normalized
 `clunk.asset-inspection-evidence.v2` `CONTRACT_FIXTURE`; `PLAYER_FACING_CAPTURE` still requires
 locally verified capture bytes through the CLI or local MCP. `clunk_collaboration_append` accepts
-`threadId`, `evidenceMode: append|replace`, and a normalized frame manifest. It never promotes
+`threadId`, `evidenceMode: append|replace`, and a normalized frame manifest. `clunk_scene_review`
+normalizes shipped frame metadata and `clunk_sprite_sheet_review` normalizes the declared Pixi
+manifest; HTTP remains `DECLARED_METADATA_ONLY` and never rehashes local paths. It never promotes
 `reviewStatus`, `visualRuntime`, `playerFacing`, or `humanDecision`.
 
-The local stdio surface contains 7 tools, including `clunk_inspect`, `clunk_validate`,
-`clunk_optimize`, `clunk_passport`, and the local-only `clunk_asset_author`. These catalogs are
+The local stdio surface contains 7 advertised tools, including `clunk_inspect`, `clunk_optimize`,
+`clunk_asset_author`, `clunk_scene_review`, and `clunk_sprite_sheet_review`. Legacy
+`clunk_validate` and `clunk_passport` calls remain backward-compatible handlers. These catalogs are
 intentionally different: HTTP agents upload bytes/evidence, while local stdio is the only path
 that can read a local absolute path or write an authoring output in the caller's workspace.
 For HTTP `clunk_asset_inspect` and `clunk_asset_validate`, use an engine-aware
 `targetProfileId` such as `harvest-frontier-web-three`; local stdio names `pc`, `web`, and
-`mobile` are not valid HTTP target profile IDs.
+`mobile` are not valid HTTP target profile IDs. Local sprite review runs the exact RGBA audit and
+returns `LOCAL_CLI_BYTE_REHASH`; local scene review preserves `visualRuntime=GAP`,
+`playerFacing=NOT_EVALUATED`, and `humanDecision=NOT_EVALUATED` until separate capture and human evidence exists.
 
 ### Local stdio fallback
 
@@ -112,14 +118,11 @@ Client config:
 }
 ```
 
-Tools returned by `tools/list`:
+Tools returned by local stdio `tools/list`:
 
 - `clunk_inspect` - Inspect a real GLB/GLTF using Clunk Core.
   input: `path` (required), `profile` (`web` | `mobile` | `pc`).
   output: inspection report, `inputHash`, `resultDigest`.
-- `clunk_validate` - Validate a real GLB/GLTF against a declared policy.
-  input: `path` (required), `profile`.
-  output: `valid` boolean plus the same report.
 - `clunk_optimize` - Apply only Clunk's allowlisted render-safe and metadata-only operations
   and write a new artifact.
   input: `path` (required), `outputPath`, `profile`.
@@ -136,6 +139,15 @@ Tools returned by `tools/list`:
 - `clunk_asset_inspection_evidence` - Build `clunk.asset-inspection-evidence.v2` from a real
   asset. `evidenceKind` is `CONTRACT_FIXTURE` or `PLAYER_FACING_CAPTURE`; the latter requires
   local capture-byte verification and an explicit human decision.
+- `clunk_asset_author` - Author real 2D, Sprite, Spine, animation, or 3D bytes through a
+  registered adapter and reopen the result through AssetOps.
+- `clunk_scene_review` - Review a normalized player-facing scene manifest while keeping runtime
+  evidence and human review separate from static asset results.
+- `clunk_sprite_sheet_review` - Rehash a local RGBA sprite sheet and validate the Pixi sprite
+  contract, motion, clipping, alpha spill, border, silhouette, runtime-size, and provenance gates.
+
+`clunk_validate` and `clunk_passport` remain backward-compatible calls in the local server but
+are not advertised by the current seven-tool catalog.
 
 Harvest Frontier acceptance fixture:
 `examples/frame-manifest/harvest-frontier-m123-camera-review.example.json`.
@@ -144,8 +156,8 @@ The fixture records real M123 WebGPU/WebGL2 candidate hashes, numeric camera che
 canonical tractor structural evidence; it intentionally reports `reviewStatus=NOT_EVALUATED`,
 `visualRuntime=GAP`, `playerFacing=NOT_EVALUATED`, and pending human review.
 
-Typical agent loop: `initialize` -> `tools/list` -> `clunk_inspect` -> (if fixable)
-`clunk_optimize` -> `clunk_passport`.
+Typical agent loop: `initialize` -> `tools/list` -> `clunk_asset_inspect` or
+`clunk_sprite_sheet_review` -> (if fixable) `clunk_optimize` -> fresh evidence review.
 
 ## CLI
 
@@ -207,12 +219,12 @@ successful static analyzer does not make `productionReady` true when import/runt
 
 ## Profile-aware generation
 
-The current authoring adapter is intentionally narrow and real:
+The current authoring adapters are deterministic and real, with engine runtime kept as a separate gate:
 
 - Request schema: `clunk.asset-generation-request.v1`.
 - Result schema: `clunk.asset-generation-result.v1`.
 - Command: `npm.cmd run asset:generate -- --factory <factory.mjs> --target-profile <profile> --recipe-id threejs-factory-v1 --output-directory <separate-dir>`.
-- The adapter exports a texture-free three.js factory to a separate GLB, records source/request/recipe hashes, and reopens the output with the same target profile.
+- The adapters export a texture-free three.js factory, PNG sprite sheet, atlas page, Spine JSON bundle, or animation GLB to a separate output directory, record source/request/recipe hashes, and reopen the output with the same target profile.
 - `outputReopen: pass` proves fresh parsing of the generated bytes only. Missing engine import/runtime remains `ENVIRONMENT_UNAVAILABLE` and exit `4`.
 - 2D image, Sprite atlas, Spine JSON, and animation authoring adapters are shipped for the
   local verified rail. They write real PNG/atlas/JSON/GLB bytes into a separate output directory,
@@ -788,6 +800,26 @@ remote HTTPS MCP intentionally does not expose this write-capable tool: upload t
 bundle through `clunk_asset_inspect` or `clunk_asset_inspection_evidence` instead. A generated
 bundle can be structurally PASS while runtime status is `ENVIRONMENT_UNAVAILABLE` and
 playerFacing remains `NOT_EVALUATED`.
+
+## Pixi sprite-sheet review
+
+Clunk exposes `clunk.sprite-sheet-review.v1` for the `yeongheo-pixi-2d` target profile. The contract
+keeps `CONTRACT_FIXTURE` and `PLAYER_FACING_CAPTURE` separate and covers grid/cell,
+direction/state/fps/loop/holdLast, pivot/hitbox, opaque-bottom, duplicate and motion delta,
+clipping, alpha spill, border, silhouette, and runtime-size checks. A structural or pixel PASS is
+not a player-facing or human PASS.
+
+For exact RGBA evidence, run the local CLI against the declared sheet bytes:
+
+```text
+npm.cmd run asset:sprite-audit -- validate --input manifest.json --format json --required
+```
+
+Exit semantics: exit 0 PASS, exit 2 policy or quality FAIL, and exit 4 UNAVAILABLE (including
+missing local bytes or a required review that cannot be completed). The authenticated HTTP API and
+remote MCP use `DECLARED_METADATA_ONLY`: they never dereference a local path or pretend to rehash
+it. Use local CLI/MCP stdio for `LOCAL_CLI_BYTE_REHASH`; keep `visualRuntime`, `playerFacing`, and
+`humanDecision` independent.
 
 ## Links
 

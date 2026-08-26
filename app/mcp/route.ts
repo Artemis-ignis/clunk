@@ -3,6 +3,11 @@ import {
   type AssetKind,
 } from "../../packages/core/src/index";
 import {
+  evaluatePlayerFacingSceneReview,
+  normalizeFrameManifest,
+} from "../../packages/core/src/collaboration-contract";
+import { normalizeSpriteSheetReview } from "../../packages/core/src/sprite-sheet-review";
+import {
   getRuntimeDb,
   jsonError,
   parseJson,
@@ -97,6 +102,8 @@ async function runTool(
         "clunk_asset_validate",
         "clunk_asset_inspection_evidence",
         "clunk_collaboration_append",
+        "clunk_scene_review",
+        "clunk_sprite_sheet_review",
       ],
       localAssetPaths: "UNAVAILABLE_OVER_HTTP",
       localFileTransport: "stdio",
@@ -141,6 +148,30 @@ async function runTool(
     const evidence = parseAssetInspectionEvidencePayload(args.evidence);
     const stored = await persistInspectionEvidence(workspaceId, evidence);
     return textResult({ schema: evidence.schema, evidence, persistence: stored });
+  }
+
+  if (name === "clunk_scene_review") {
+    const manifest = normalizeFrameManifest(args.manifest);
+    const review = evaluatePlayerFacingSceneReview(manifest);
+    return textResult({
+      schema: "clunk.player-facing-scene-review.v1",
+      verificationMode: "DECLARED_METADATA_ONLY",
+      review,
+      localCaptureRehash: "UNAVAILABLE_OVER_HTTP",
+      humanReviewInferred: false,
+    });
+  }
+
+  if (name === "clunk_sprite_sheet_review") {
+    const report = normalizeSpriteSheetReview(args.manifest);
+    return textResult({
+      schema: "clunk.sprite-sheet-review.v1",
+      verificationMode: "DECLARED_METADATA_ONLY",
+      report,
+      localSheetRehash: "UNAVAILABLE_OVER_HTTP",
+      localCliCommand: "npm.cmd run asset:sprite-audit -- validate --input <manifest.json> --format json --required",
+      humanReviewInferred: false,
+    });
   }
 
   if (name === "clunk_collaboration_append") {

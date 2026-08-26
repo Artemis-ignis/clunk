@@ -1,7 +1,8 @@
 import { execFile as execFileCallback } from "node:child_process";
 import { createInterface } from "node:readline";
-import { readFile, writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { dirname, join, resolve } from "node:path";
+import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import {
@@ -15,6 +16,11 @@ import {
   type AssetKind,
   type AssetPolicy,
 } from "../../packages/core/src/index";
+import {
+  evaluatePlayerFacingSceneReview,
+  normalizeFrameManifest,
+} from "../../packages/core/src/collaboration-contract";
+import { normalizeSpriteSheetReview } from "../../packages/core/src/sprite-sheet-review";
 import type { AssetInspectionEvidenceKind, AssetCaptureEvidenceV2, HumanDecision } from "../../packages/core/src/asset-inspection-evidence";
 import { inspectEnvelope, optimizeEnvelope, passportEnvelope, validateEnvelope } from "../../packages/core/src/contract";
 import { loadAssetOpsInput, loadBundle, writeOutputBundle } from "../shared/node-asset";
@@ -36,12 +42,12 @@ const evidenceProperties = {
 };
 const tools = [
   { name: "clunk_inspect", description: "Inspect a real GLB/GLTF using Clunk Core. Use evidenceFormat=v2 for provenance and separated visual status.", inputSchema: { type: "object", required: ["path"], properties: { path: { type: "string" }, profile: { type: "string", enum: ["web", "mobile", "pc"] }, profileFile, ...evidenceProperties } } },
-  { name: "clunk_validate", description: "Validate a real GLB/GLTF against a declared policy. Use evidenceFormat=v2 to keep quality enforcement separate from player-facing review.", inputSchema: { type: "object", required: ["path"], properties: { path: { type: "string" }, profile: { type: "string", enum: ["web", "mobile", "pc"] }, profileFile, ...evidenceProperties } } },
   { name: "clunk_optimize", description: "Apply only Clunk's allowlisted render-safe and metadata-only operations and write a new artifact.", inputSchema: { type: "object", required: ["path"], properties: { path: { type: "string" }, outputPath: { type: "string" }, profile: { type: "string", enum: ["web", "mobile", "pc"] }, profileFile } } },
-  { name: "clunk_passport", description: "Create a Passport by freshly inspecting source and output artifacts.", inputSchema: { type: "object", required: ["sourcePath", "outputPath"], properties: { sourcePath: { type: "string" }, outputPath: { type: "string" }, profile: { type: "string", enum: ["web", "mobile", "pc"] }, profileFile } } },
   { name: "clunk_asset_inspect", description: "Inspect a real asset against an engine-aware target profile and return canonical evidence JSON.", inputSchema: { type: "object", required: ["path", "targetProfileId"], properties: { path: { type: "string" }, targetProfileId: { type: "string" }, assetKind: { type: "string", enum: ["3d-model", "2d-image", "sprite-atlas", "spine-project", "animation-clip"] }, runId: { type: "string" }, profileFile: { type: "string", description: "Reserved for legacy tool parity; use targetProfileId for engine-aware inspection." } } } },
   { name: "clunk_asset_inspection_evidence", description: "Create clunk.asset-inspection-evidence.v2 for a real asset. CONTRACT_FIXTURE is structural-only; PLAYER_FACING_CAPTURE requires hashed capture evidence and keeps human decision explicit.", inputSchema: { type: "object", required: ["path"], properties: { path: { type: "string" }, profile: { type: "string", enum: ["web", "mobile", "pc"] }, profileFile, ...evidenceProperties } } },
   { name: "clunk_asset_author", description: "Author a real 2D Sprite, Sprite Atlas, Spine JSON bundle, animation GLB, or 3D factory output into a separate local directory, then reopen it through AssetOps. Runtime and human visual approval stay separate.", inputSchema: { type: "object", required: ["assetKind", "targetProfileId", "outputDirectory"], properties: { assetKind: { type: "string", enum: ["2d-image", "sprite-atlas", "spine-project", "animation-clip", "3d-model"] }, targetProfileId: { type: "string" }, recipeId: { type: "string" }, recipeVersion: { type: "string" }, outputDirectory: { type: "string" }, label: { type: "string" }, prompt: { type: "string" }, factoryPath: { type: "string", description: "Required for 3d-model; a local Three.js factory module." } } } },
+  { name: "clunk_scene_review", description: "Review a player-facing scene manifest and keep visualRuntime, playerFacing, and human review separate. Local capture paths are re-read only by this local stdio process.", inputSchema: { type: "object", properties: { manifestPath: { type: "string" }, manifest: { type: "object" }, profileFile: { type: "string", description: "Reserved for catalog parity; scene review uses the manifest's declared evidence." } } } },
+  { name: "clunk_sprite_sheet_review", description: "Run the local RGBA sprite-sheet CLI against exact bytes. Returns LOCAL_CLI_BYTE_REHASH evidence; it never infers human review.", inputSchema: { type: "object", properties: { manifestPath: { type: "string" }, manifest: { type: "object" }, profileFile: { type: "string", description: "Reserved for catalog parity; sprite review uses the manifest's declared target profile." } } } },
 ];
 
 const input = createInterface({ input: process.stdin, crlfDelay: Infinity });
@@ -80,6 +86,22 @@ async function handle(method: string, params?: { name?: string; arguments?: Reco
   }
   if (params.name === "clunk_asset_author") {
     const value = await runAuthoringCommand(args);
+    return { content: [{ type: "text", text: JSON.stringify(value) }] };
+  }
+  if (params.name === "clunk_scene_review") {
+    const manifest = await readJsonManifest(args);
+    const normalized = normalizeFrameManifest(manifest);
+    return { content: [{ type: "text", text: JSON.stringify({
+      ...evaluatePlayerFacingSceneReview(normalized),
+      verificationMode: "LOCAL_CLI_METADATA_REVIEW",
+      visualRuntime: "GAP",
+      playerFacing: "NOT_EVALUATED",
+      humanDecision: "NOT_EVALUATED",
+      humanReviewInferred: false,
+    }) }] };
+  }
+  if (params.name === "clunk_sprite_sheet_review") {
+    const value = await runLocalSpriteReview(args);
     return { content: [{ type: "text", text: JSON.stringify(value) }] };
   }
   const policy: AssetPolicy = await resolveProfilePolicy({
@@ -188,6 +210,39 @@ async function runAuthoringCommand(args: Record<string, unknown>): Promise<unkno
     return JSON.parse(stdout);
   } catch {
     throw new Error("Asset authoring command did not return JSON evidence.");
+  }
+}
+
+async function readJsonManifest(args: Record<string, unknown>): Promise<unknown> {
+  const manifestPath = optionalString(args.manifestPath);
+  if (manifestPath) return JSON.parse(await readFile(resolve(manifestPath), "utf8"));
+  if (args.manifest && typeof args.manifest === "object" && !Array.isArray(args.manifest)) return args.manifest;
+  throw new Error("Provide manifestPath or manifest.");
+}
+
+async function runLocalSpriteReview(args: Record<string, unknown>): Promise<unknown> {
+  const manifestPath = optionalString(args.manifestPath);
+  let temporaryDirectory: string | undefined;
+  let inputPath = manifestPath ? resolve(manifestPath) : undefined;
+  try {
+    if (!inputPath) {
+      const manifest = args.manifest;
+      normalizeSpriteSheetReview(manifest);
+      temporaryDirectory = await mkdtemp(join(tmpdir(), "clunk-sprite-mcp-"));
+      inputPath = join(temporaryDirectory, "manifest.json");
+      await writeFile(inputPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+    }
+    const tsx = resolve(CLUNK_ROOT, "node_modules/tsx/dist/cli.mjs");
+    try {
+      const result = await execFile(process.execPath, [tsx, resolve(CLUNK_ROOT, "scripts/sprite-sheet-audit-cli.ts"), "validate", "--input", inputPath, "--format", "json", "--required"], { cwd: CLUNK_ROOT, maxBuffer: 8 * 1024 * 1024 });
+      return { ...JSON.parse(result.stdout), verificationMode: "LOCAL_CLI_BYTE_REHASH", humanReviewInferred: false };
+    } catch (error) {
+      const candidate = error as { stdout?: string; stderr?: string };
+      if (!candidate.stdout) throw new Error(candidate.stderr || "Local sprite-sheet audit failed.");
+      return { ...JSON.parse(candidate.stdout), verificationMode: "LOCAL_CLI_BYTE_REHASH", humanReviewInferred: false };
+    }
+  } finally {
+    if (temporaryDirectory) await rm(temporaryDirectory, { recursive: true, force: true });
   }
 }
 

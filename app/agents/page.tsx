@@ -152,7 +152,7 @@ export default function AgentsPage() {
               {RULE_SET.id}의 구조·정책 결과는 실제 바이트에서 시작합니다. Godot, Unity, Unreal, Web/Three.js,
               모바일처럼 환경이 다른 경우도 실행되지 않은 런타임을 PASS로 만들지 않습니다.
             </p>
-            <code className="agents-local-tools">clunk_inspect · clunk_validate · clunk_passport</code>
+            <code className="agents-local-tools">clunk_inspect · clunk_asset_author · clunk_sprite_sheet_review</code>
             <Link className="text-link" href="/docs#contracts">계약과 상태 보기 <Icon name="arrowRight" size={14} /></Link>
           </div>
           <div className="agents-contract-grid">

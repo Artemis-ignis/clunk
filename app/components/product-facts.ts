@@ -80,8 +80,9 @@ export const SURFACES = [
 ] as const;
 
 /**
- * Local stdio tools exposed by `integrations/mcp/server.ts`. This list intentionally includes
- * local-only operations such as optimize and passport; it is not the HTTP tools/list surface.
+ * Local stdio tools exposed by `integrations/mcp/server.ts`. Legacy clunk_validate and
+ * clunk_passport calls remain backward-compatible handlers, while tools/list exposes this
+ * seven-tool product surface including local scene and sprite review.
  */
 export const MCP_TOOLS = [
   {
@@ -92,26 +93,12 @@ export const MCP_TOOLS = [
     output: "report, inputHash, resultDigest",
   },
   {
-    name: "clunk_validate",
-    description: "Validate a real GLB/GLTF against a declared policy.",
-    summary: "선언된 정책과 대조해 통과 여부를 판정합니다.",
-    input: "path, profile",
-    output: "valid, report",
-  },
-  {
     name: "clunk_optimize",
     description:
       "Apply only Clunk's allowlisted render-safe and metadata-only operations and write a new artifact.",
     summary: "허용 목록 작업만 적용하고 원본과 별개인 새 파일을 씁니다.",
     input: "path, outputPath, profile",
     output: "operations, outputHash",
-  },
-  {
-    name: "clunk_passport",
-    description: "Create a Passport by freshly inspecting source and output artifacts.",
-    summary: "원본과 결과물을 각각 새로 검사해 Passport를 만듭니다.",
-    input: "sourcePath, outputPath, profile",
-    output: "passport, resultDigest",
   },
   {
     name: "clunk_asset_inspect",
@@ -133,6 +120,20 @@ export const MCP_TOOLS = [
     summary: "2D Sprite·Atlas·Spine·Motion·3D 결과를 원본과 분리된 폴더에 만들고 즉시 재검사합니다.",
     input: "assetKind, targetProfileId, outputDirectory, recipeId?, factoryPath?",
     output: "generation sidecar, artifact hashes, structure, outputReopen, runtime status",
+  },
+  {
+    name: "clunk_scene_review",
+    description: "Review a player-facing scene manifest while keeping runtime and human decisions separate.",
+    summary: "실제 shipped frame 메타데이터와 scene gap을 검토하되 사람 승인으로 자동 승격하지 않습니다.",
+    input: "manifestPath 또는 manifest",
+    output: "scene review, linked assets, visualRuntime/playerFacing/humanDecision",
+  },
+  {
+    name: "clunk_sprite_sheet_review",
+    description: "Rehash a local RGBA sprite sheet with the sprite-sheet CLI and preserve review boundaries.",
+    summary: "Pixi sprite sheet를 실제 로컬 바이트에서 재해시하고 pixel contract와 runtime/human 상태를 분리합니다.",
+    input: "manifestPath 또는 manifest",
+    output: "pixel metrics, quality, readiness, visualRuntime/playerFacing/humanDecision",
   },
 ] as const;
 
@@ -162,6 +163,16 @@ const HTTP_TOOL_COPY: Record<string, { summary: string; input: string; output: s
     summary: "frame manifest를 append/replace로 협업 스레드에 기록합니다.",
     input: "threadId, evidenceMode, frame manifest",
     output: "normalized evidence, freshness, review states",
+  },
+  clunk_scene_review: {
+    summary: "frame manifest의 scene gap과 shipped evidence를 정규화합니다.",
+    input: "manifest (HTTP는 local path를 dereference하지 않음)",
+    output: "scene review, linked assets, visualRuntime/playerFacing/humanDecision",
+  },
+  clunk_sprite_sheet_review: {
+    summary: "선언된 Pixi sprite-sheet manifest를 정규화합니다. 실제 파일 재해시는 local CLI에서 수행합니다.",
+    input: "manifest (HTTP는 local path를 dereference하지 않음)",
+    output: "pixel contract, quality, readiness, review states",
   },
 };
 
@@ -294,6 +305,16 @@ export const TEXTURE_AUDIT_CONTRACT = {
   strictClasses: "seam · memory · readability · optional banding · optional resolution",
 } as const;
 
+export const SPRITE_SHEET_REVIEW_CONTRACT = {
+  schema: "clunk.sprite-sheet-review.v1",
+  targetProfileId: "yeongheo-pixi-2d",
+  evidenceKinds: ["CONTRACT_FIXTURE", "PLAYER_FACING_CAPTURE"],
+  checks: "grid/cell/direction/state/fps/loop/holdLast/pivot/hitbox/opaque-bottom/duplicate/motion delta/clipping/alpha spill/border/silhouette/runtime-size",
+  command: "npm.cmd run asset:sprite-audit -- validate --input <manifest.json> --format json --required",
+  exitCodes: "exit 0 PASS · exit 2 policy/quality FAIL · exit 4 UNAVAILABLE or required review missing",
+  httpBoundary: "DECLARED_METADATA_ONLY; local CLI rehash required for exact RGBA sheet bytes",
+} as const;
+
 export const UI_READABILITY_CONTRACT = {
   command: "npm.cmd run asset:ui-readability -- --config <config.json> --format json --strict",
   schema: "clunk.ui-readability.v1",
@@ -338,8 +359,8 @@ export const GENERATION_CONTRACT = {
   request: "clunk.asset-generation-request.v1",
   result: "clunk.asset-generation-result.v1",
   command: "npm.cmd run asset:generate -- --factory <factory.mjs> --target-profile <profile> --recipe-id threejs-factory-v1 --output-directory <separate-dir>",
-  supported: "threejs-factory-v1 · texture-free 3D model",
-  unavailable: "2D image · Sprite atlas · Spine · animation authoring is AUTHORING_UNAVAILABLE until a verified adapter ships",
+  supported: "threejs-factory-v1 · sprite-sheet-factory-v1 · sprite-atlas-factory-v1 · spine-json-factory-v1 · threejs-animation-factory-v1",
+  unavailable: "Spine .skel binary parsing, licensed Spine export parity, and engine playback remain ENVIRONMENT_UNAVAILABLE until a verified adapter/runner ships",
   verification: "same target profile output reopen; environmentUnavailable remains exit 4",
   passport: "procedural source does not receive a fabricated Passport; real source/output files use clunk_passport",
 } as const;

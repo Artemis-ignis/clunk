@@ -102,6 +102,28 @@ export const MCP_HTTP_TOOLS = [
       additionalProperties: false,
     },
   },
+  {
+    name: "clunk_scene_review",
+    description:
+      "Run a scene review over a frame manifest and evaluate whether its shipped evidence is reviewable; this never turns numeric PASS into human visual approval.",
+    inputSchema: {
+      type: "object",
+      required: ["manifest"],
+      properties: { manifest: { type: "object", description: "clunk.frame-manifest.v1 JSON; local absolute paths are references only over HTTP." } },
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "clunk_sprite_sheet_review",
+    description:
+      "Review a PixiJS sprite sheet manifest with measured pixel metrics; CONTRACT_FIXTURE and PLAYER_FACING_CAPTURE remain separate and human review is never inferred.",
+    inputSchema: {
+      type: "object",
+      required: ["manifest"],
+      properties: { manifest: { type: "object", description: "clunk.sprite-sheet-review.v1 with declared sheet hashes and measured metrics." } },
+      additionalProperties: false,
+    },
+  },
 ] as const;
 
 export function parseBearerToken(header: string | null): string | null {

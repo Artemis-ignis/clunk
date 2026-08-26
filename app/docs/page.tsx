@@ -17,6 +17,7 @@ import {
   MCP_SERVER,
   MCP_TOOLS,
   RULE_SET,
+  SPRITE_SHEET_REVIEW_CONTRACT,
   SURFACES,
   TARGET_PROFILES,
   TEXTURE_AUDIT_CONTRACT,
@@ -127,6 +128,20 @@ $ npm.cmd run asset:author -- --asset-kind animation-clip --target-profile harve
 # local stdio MCP: clunk_asset_author uses the same fields and writes only locally.
 # remote HTTPS MCP: upload the generated bundle; it never writes local paths.
 # structural PASS != visualRuntime PASS != human player-facing PASS`;
+
+const SPRITE_SHEET_COMMANDS = `schema: clunk.sprite-sheet-review.v1
+targetProfileId: yeongheo-pixi-2d
+evidenceKind: CONTRACT_FIXTURE | PLAYER_FACING_CAPTURE
+checks: grid/cell/direction/state/fps/loop/holdLast/pivot/hitbox/opaque-bottom
+checks: duplicate/motion delta/clipping/alpha spill/border/silhouette/runtime-size
+
+# local exact RGBA bytes rehash
+$ npm.cmd run asset:sprite-audit -- validate --input manifest.json --format json --required
+# exit 0 PASS · exit 2 policy/quality FAIL · exit 4 UNAVAILABLE or required review missing
+
+# HTTP API is metadata-only and never dereferences a local path
+verificationMode: DECLARED_METADATA_ONLY
+visualRuntime: GAP · playerFacing: NOT_EVALUATED · humanDecision: NOT_EVALUATED`;
 
 const HF_EVIDENCE_RULES = `# player-facing scene review output
 comparisonSchema: clunk.frame-comparison.v1
@@ -263,6 +278,7 @@ export default function DocsPage() {
               <p className="docs-lead-v2">CLI stdout의 JSON이 CI의 기준입니다. 실패와 미지원은 서로 다른 exit code로 남기고, optimize는 요청된 별도 output에만 씁니다.</p>
               <CodeBlock title="clunk-cli" language="bash" code={CLI_COMMANDS} caption="parse · policy · output reopen · Passport 순서를 유지합니다." />
               <CodeBlock title="texture + portrait + evidence" language="bash" code={AUDIT_COMMANDS} caption={`${TEXTURE_AUDIT_CONTRACT.schema}: exit 0 PASS · 2 FAIL · 4 UNAVAILABLE. ${UI_READABILITY_CONTRACT.schema}도 같은 경계를 사용합니다.`} />
+              <CodeBlock title="Pixi sprite sheet review" language="bash" code={SPRITE_SHEET_COMMANDS} caption={`${SPRITE_SHEET_REVIEW_CONTRACT.schema}: local CLI byte rehash와 HTTP DECLARED_METADATA_ONLY를 분리합니다.`} />
               <CodeBlock title="multi-file AssetOps bundle" language="json" code={BUNDLE_EXAMPLE} caption="atlas·PNG·Spine처럼 함께 움직이는 파일은 entryFileName, fileCount, 역할, relatesTo를 한 요청으로 보존합니다." />
             </section>
 

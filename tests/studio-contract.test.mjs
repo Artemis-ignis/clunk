@@ -26,6 +26,8 @@ test("Asset Studio exposes the complete 2D/3D authoring-to-runtime boundary", as
   assert.match(model, /3D Model/);
   assert.match(client, /검사기로 보내기/);
   assert.match(client, /실제 별도 output/);
+  assert.match(client, /\/api\/sprite-review/);
+  for (const marker of ["PIXEL CONTRACT", "RUNTIME", "HUMAN REVIEW", "READINESS", "DECLARED_METADATA_ONLY"]) assert.match(client, new RegExp(marker));
   assert.match(shell, /\/studio/);
   assert.match(docs, /Asset Studio/);
   assert.match(llms, /\/studio/);
