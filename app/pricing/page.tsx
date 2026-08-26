@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "../components/NativeLink";
 import { Icon } from "../components/Icon";
 import { SiteShell } from "../components/SiteShell";
+import { AssetFamilyVisual } from "../components/AssetFamilyVisual";
 
 export const metadata: Metadata = {
   title: "요금 안내",
@@ -75,18 +76,29 @@ export default function PricingPage() {
   return (
     <SiteShell active="pricing">
       <main className="page">
-        <header className="page-head">
-          <span className="eyebrow">요금 구조</span>
-          <h1>
-            자리는 월정액,
-            <br />
-            <em>실행은 크레딧.</em>
-          </h1>
-          <p className="lead">
-            구독은 팀 자리와 정책, 이력을 담당하고, 검사와 최적화 실행은 크레딧으로 셉니다. 검사
-            1회 = 크레딧 1개, 성공한 실행에만 차감되고 실패하면 자동 복구됩니다.
-          </p>
-        </header>
+        <div className="pricing-hero-grid">
+          <header className="page-head">
+            <span className="eyebrow">요금 구조</span>
+            <h1>
+              자리는 월정액,
+              <br />
+              <em>실행은 크레딧.</em>
+            </h1>
+            <p className="lead">
+              구독은 팀 자리와 정책, 이력을 담당하고, 검사와 최적화 실행은 크레딧으로 셉니다. 검사
+              1회 = 크레딧 1개, 성공한 실행에만 차감되고 실패하면 자동 복구됩니다.
+            </p>
+          </header>
+          <section className="pricing-execution-board" aria-label="크레딧 실행 흐름 미리보기">
+            <div className="pricing-board-topline"><span><i /> RUN LEDGER</span><strong>DEMO / NO CHARGE</strong></div>
+            <div className="pricing-board-visual"><AssetFamilyVisual kind="model" compact /><span className="pricing-board-stamp">UI PREVIEW · 실제 원장은 로그인 후</span></div>
+            <div className="pricing-board-steps">
+              <div className="is-complete"><span>01</span><strong>검사 시작</strong><small>차감 전 고지</small></div>
+              <div className="is-complete"><span>02</span><strong>성공한 실행</strong><small>1 run = 1 credit</small></div>
+              <div><span>03</span><strong>실패 복구</strong><small>0 credit · ledger 기록</small></div>
+            </div>
+          </section>
+        </div>
 
         <div className="price-demo-strip">
           <span className="demo-marker">DEMO MODE · 실제 결제 아님</span>

@@ -69,6 +69,14 @@ const DEFAULT_EVIDENCE_STATUSES: EvidenceStatuses = {
   humanDecision: "NOT_EVALUATED",
 };
 
+const DASHBOARD_ASSET_FAMILIES: Array<{ kind: "sprite" | "atlas" | "spine" | "motion" | "model"; label: string; detail: string }> = [
+  { kind: "sprite", label: "Sprite", detail: "pixel contract" },
+  { kind: "atlas", label: "Atlas", detail: "regions + trim" },
+  { kind: "spine", label: "Spine", detail: "bones + slots" },
+  { kind: "motion", label: "Motion", detail: "clip + loop" },
+  { kind: "model", label: "GLB / GLTF", detail: "scene + hash" },
+];
+
 /**
  * Read the stored evidence boundary without inferring visual approval from a score.
  * Old v1 rows intentionally fall back to the conservative boundary.
@@ -425,7 +433,18 @@ function DashboardAssetBoard({ latestRun, statuses }: { latestRun: Run | null; s
   const hasRun = Boolean(latestRun);
   return (
     <section className="dashboard-asset-board" aria-labelledby="dashboard-asset-board-heading">
-      <div className="dashboard-asset-board-visual"><AssetFamilyVisual kind="model" /><div className="dashboard-asset-board-stamp"><span>{hasRun ? "LATEST RUN" : "WORKSPACE PREVIEW"}</span><strong>{latestRun ? resolveStoredReadiness(latestRun) : "READY TO START"}</strong><small>{hasRun ? "실제 저장된 검사" : "첫 실제 파일을 올리면 교체됩니다"}</small></div></div>
+      <div className="dashboard-asset-board-visual">
+        <AssetFamilyVisual kind="model" />
+        <div className="dashboard-asset-board-stamp"><span>{hasRun ? "LATEST RUN" : "WORKSPACE PREVIEW"}</span><strong>{latestRun ? resolveStoredReadiness(latestRun) : "READY TO START"}</strong><small>{hasRun ? "실제 저장된 검사" : "첫 실제 파일을 올리면 교체됩니다"}</small></div>
+        <div className="dashboard-asset-family-rail" aria-label="지원 에셋 패밀리">
+          {DASHBOARD_ASSET_FAMILIES.map((item) => (
+            <Link href={item.kind === "model" ? "/app" : "/studio"} className="dashboard-asset-family" key={item.kind}>
+              <AssetFamilyVisual kind={item.kind} compact />
+              <span><strong>{item.label}</strong><small>{item.detail}</small></span>
+            </Link>
+          ))}
+        </div>
+      </div>
       <div className="dashboard-asset-board-copy">
         <span className="mono-label">FROM FILE TO DECISION</span>
         <h3 id="dashboard-asset-board-heading">대시보드에서<br /><em>다음 행동이 보여야 합니다.</em></h3>

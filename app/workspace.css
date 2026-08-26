@@ -754,6 +754,71 @@
   flex: 0 0 auto;
 }
 
+.settings-welcome {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.85fr);
+  align-items: center;
+  gap: var(--sp-24);
+}
+
+.settings-boundary-visual {
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-panel);
+  background: var(--ink-inverse);
+  color: #e7f7f5;
+}
+
+.settings-boundary-topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(177, 222, 236, 0.14);
+  color: #96b9c0;
+  font: 0.58rem var(--font-mono);
+  letter-spacing: 0.06em;
+}
+
+.settings-boundary-topline i {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: #5ce0b1;
+}
+
+.settings-boundary-topline strong { color: #7be3bd; font-weight: 500; }
+
+.settings-boundary-stage {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  gap: 7px;
+  align-items: center;
+  padding: 18px 14px 12px;
+}
+
+.settings-boundary-stage > b { color: #50cee5; font: 1rem var(--font-mono); }
+
+.settings-boundary-file {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(145, 224, 239, 0.22);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.settings-boundary-file span,
+.settings-boundary-file small { color: #87aab5; font: 0.52rem var(--font-mono); }
+.settings-boundary-file strong { overflow: hidden; color: #f0fbfb; font: 0.65rem var(--font-mono); text-overflow: ellipsis; white-space: nowrap; }
+.settings-boundary-file.is-safe { border-color: rgba(92, 224, 177, 0.3); }
+.settings-boundary-file.is-safe strong { color: #8fe5c6; }
+.settings-boundary-file.is-muted { opacity: 0.72; }
+.settings-boundary-visual > p { margin: 0; padding: 0 14px 14px; color: #8eabb5; font-size: var(--fs-1); }
+
 .evidence-lanes {
   margin-bottom: var(--sp-20);
   padding: var(--sp-20);
@@ -917,6 +982,116 @@
   flex: 0 0 auto;
 }
 
+/* The overview is a visual control room first. The family rail keeps the
+   supported asset surface visible even before a workspace has a saved run. */
+.dashboard-asset-board-visual {
+  position: relative;
+  min-width: 0;
+  padding: 0 0 104px;
+}
+
+.dashboard-asset-board-visual > .asset-family-visual {
+  min-height: 320px;
+}
+
+.dashboard-asset-board-stamp {
+  position: absolute;
+  z-index: 5;
+  top: 18px;
+  right: 18px;
+  display: grid;
+  gap: 4px;
+  min-width: 144px;
+  padding: 10px 12px;
+  border: 1px solid rgba(116, 220, 239, 0.28);
+  border-radius: 10px;
+  background: rgba(5, 17, 27, 0.78);
+  backdrop-filter: blur(10px);
+}
+
+.dashboard-asset-board-stamp span,
+.dashboard-asset-board-stamp small {
+  color: #8cadba;
+  font: 0.54rem var(--font-mono);
+}
+
+.dashboard-asset-board-stamp strong {
+  color: #7be3bd;
+  font: 0.95rem var(--font-mono);
+}
+
+.dashboard-asset-board-stamp small {
+  color: #a6c8d2;
+  line-height: 1.35;
+}
+
+.dashboard-asset-family-rail {
+  position: absolute;
+  z-index: 6;
+  right: 14px;
+  bottom: 0;
+  left: 14px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.dashboard-asset-family {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.dashboard-asset-family .asset-family-visual {
+  min-height: 74px;
+  border-radius: 8px;
+  transition: transform var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
+}
+
+.dashboard-asset-family:hover .asset-family-visual,
+.dashboard-asset-family:focus-visible .asset-family-visual {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.dashboard-asset-family .asset-family-visual-topline {
+  inset: 7px 8px auto;
+  font-size: 0.42rem;
+}
+
+.dashboard-asset-family .asset-family-visual-topline i,
+.dashboard-asset-family .asset-family-visual-bottom,
+.dashboard-asset-family .asset-family-visual-bottom svg {
+  display: none;
+}
+
+.dashboard-asset-family > span {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 5px;
+  min-width: 0;
+}
+
+.dashboard-asset-family strong,
+.dashboard-asset-family small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-asset-family strong {
+  color: var(--text-strong);
+  font-size: 0.68rem;
+}
+
+.dashboard-asset-family small {
+  color: var(--text-dim);
+  font: 0.54rem var(--font-mono);
+}
+
 @media (max-width: 1080px) {
   .evidence-lane-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -933,6 +1108,16 @@
   .next-verification-actions { justify-content: flex-start; }
   .evidence-lane-grid { grid-template-columns: minmax(0, 1fr); }
   .evidence-lane { min-height: 0; }
+
+  .settings-welcome { grid-template-columns: 1fr; }
+  .settings-boundary-stage { grid-template-columns: 1fr; }
+  .settings-boundary-stage > b { justify-self: center; transform: rotate(90deg); }
+
+  .dashboard-asset-board-visual { padding-bottom: 88px; }
+  .dashboard-asset-board-visual > .asset-family-visual { min-height: 270px; }
+  .dashboard-asset-family-rail { right: 0; left: 0; gap: 4px; }
+  .dashboard-asset-family strong { font-size: 0.61rem; }
+  .dashboard-asset-family small { display: none; }
 }
 
 /* ---------------------------------------------------------------------------

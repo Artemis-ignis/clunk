@@ -29,7 +29,7 @@ export default async function SettingsPage() {
 
   return (
     <WorkspaceShell active="settings" title="설정" userLabel={user.displayName}>
-      <section className="ws-welcome">
+      <section className="ws-welcome settings-welcome">
         <div>
           <h2>
             경계를
@@ -37,6 +37,17 @@ export default async function SettingsPage() {
             <em>명확하게 유지합니다.</em>
           </h2>
           <p>파일럿은 ChatGPT 로그인으로 인증합니다. 별도 저장을 켜지 않는 한 원본 에셋은 브라우저 밖으로 나가지 않습니다.</p>
+        </div>
+        <div className="settings-boundary-visual" aria-label="Clunk 저장 경계 시각 안내">
+          <div className="settings-boundary-topline"><span><i /> STORAGE MAP</span><strong>NO RAW UPLOAD</strong></div>
+          <div className="settings-boundary-stage">
+            <div className="settings-boundary-file"><span>01</span><strong>asset.glb</strong><small>browser bytes</small></div>
+            <b>→</b>
+            <div className="settings-boundary-file is-safe"><span>02</span><strong>evidence.json</strong><small>hash · policy · finding</small></div>
+            <b>→</b>
+            <div className="settings-boundary-file is-muted"><span>03</span><strong>R2</strong><small>off in pilot</small></div>
+          </div>
+          <p>원본 바이트와 저장되는 근거를 분리해 보여줍니다.</p>
         </div>
       </section>
 
