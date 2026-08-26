@@ -261,7 +261,7 @@ export function AgentsClient() {
             role="tab"
             aria-selected={selected.key === guide.key}
             aria-controls="agent-guide-panel"
-            aria-label={`${guide.label} 설정 선택`}
+            aria-label={`${guide.label}${guide.recommended ? " 권장" : ""} 설정 선택`}
             data-client-key={guide.key}
             className={"agent-tab" + (selected.key === guide.key ? " agent-tab-active" : "")}
             onClick={() => setSelectedKey(guide.key)}
