@@ -5692,6 +5692,7 @@ html.snap-y .landing-snap-section {
 .landing-v5-hero h1 em { display: block; }
 .landing-v5-hero h1 span,
 .landing-v5-hero h1 em { white-space: nowrap; }
+.landing-v5-hero h1 em { white-space: normal; }
 .landing-v5-hero h1 em,
 .landing-v5 h2 em,
 .landing-v5 h3 em { color: var(--v5-cyan); font-style: normal; }
