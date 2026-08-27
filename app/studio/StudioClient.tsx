@@ -7,6 +7,7 @@ import { Icon, type IconName } from "../components/Icon";
 import { WorkspaceShell } from "../components/WorkspaceShell";
 import { AssetFamilyVisual, type AssetFamilyVisualKind } from "../components/AssetFamilyVisual";
 import { AssetCreationWorkbench } from "../components/AssetCreationWorkbench";
+import { LiveEvidenceShowcase } from "../components/LiveEvidenceShowcase";
 import {
   buildStudioCommand,
   STUDIO_ASSET_CARDS,
@@ -94,13 +95,16 @@ export function StudioClient({ userLabel }: { userLabel: string }) {
       <div className="studio-page">
         <header className="studio-command-hero">
           <div className="studio-command-hero-copy">
-            <span className="mono-label">CREATE SPACE · 2D + 3D</span>
+            <span className="mono-label">CREATE SPACE · 2D + 3D · PROMPT → ARTIFACT</span>
             <h2>무엇을 만들까요?</h2>
             <p>포맷을 고르고 프롬프트를 입력하면 실제 artifact가 만들어집니다. 바로 옆에서 hash·구조·런타임·사람 검토의 빈칸까지 확인하세요.</p>
             <div className="studio-command-hero-proof" aria-label="Studio가 기록하는 결과">
               <span><i /> 실제 bytes</span>
               <span><i /> fresh reopen</span>
               <span><i /> 판매는 승인 후</span>
+            </div>
+            <div className="studio-command-hero-actions">
+              <Link className="button button-primary button-sm" href="/app">검사기로 보내기 <Icon name="arrowUpRight" size={14} /></Link>
             </div>
           </div>
           <div className="studio-command-hero-preview">
@@ -112,7 +116,7 @@ export function StudioClient({ userLabel }: { userLabel: string }) {
         <section className="studio-live-authoring" aria-labelledby="studio-live-authoring-heading">
           <div className="studio-live-authoring-head">
             <div>
-              <span className="mono-label">LIVE PRODUCT FLOW · CREATE → INSPECT → REVIEW → SELL</span>
+              <span className="mono-label">LIVE PRODUCT FLOW · CREATE → INSPECT → REVIEW → SELL · prompt</span>
               <h3 id="studio-live-authoring-heading">프롬프트에서 실제 artifact까지</h3>
             </div>
             <span className="studio-live-authoring-api">/api/generation · /api/reviews · /api/marketplace</span>
@@ -181,8 +185,8 @@ export function StudioClient({ userLabel }: { userLabel: string }) {
         <section className="studio-section studio-engine-section" aria-labelledby="studio-engine-heading">
           <div className="studio-section-head">
             <div>
-              <span className="mono-label">02 · TARGET THE GAME</span>
-              <h3 id="studio-engine-heading">엔진 연결은 선언이 아니라 실행 증거로</h3>
+              <span className="mono-label">02 · GAME READY TARGET</span>
+              <h3 id="studio-engine-heading">Game Ready는 실행 증거로</h3>
             </div>
             <span className={`studio-status ${selectedEngine.runtimeStatus === "AVAILABLE" ? "studio-status-available" : "studio-status-unavailable"}`}><span />{STATUS_LABELS[selectedEngine.runtimeStatus]}</span>
           </div>
@@ -203,6 +207,17 @@ export function StudioClient({ userLabel }: { userLabel: string }) {
             ))}
           </div>
           <p className="studio-engine-note"><Icon name="shield" size={15} /> {selectedEngine.detail} 구조 inspection PASS는 이 상태를 자동으로 바꾸지 않습니다.</p>
+          <div className="studio-game-ready-summary" aria-label="현재 Game Ready 속성">
+            <div className="studio-game-ready-summary-head"><span>GAME READY / PROPERTIES</span><strong>{selectedEngine.runtimeStatus === "AVAILABLE" ? "TARGETED" : "ENVIRONMENT GAP"}</strong></div>
+            <dl>
+              <div><dt>Asset</dt><dd>{selectedAsset.label}</dd></div>
+              <div><dt>Target profile</dt><dd>{selectedEngine.profileId}</dd></div>
+              <div><dt>Runtime</dt><dd>{STATUS_LABELS[selectedEngine.runtimeStatus]}</dd></div>
+              <div><dt>Metadata</dt><dd>provenance · license · hash</dd></div>
+            </dl>
+            <p>Static policy score, shipped runtime, player-facing 화면과 human review는 각각 별도 evidence lane입니다.</p>
+            <Link className="button button-quiet button-sm" href="/app">Game Ready details <Icon name="arrowUpRight" size={14} /></Link>
+          </div>
         </section>
 
         <section className="studio-review-section" aria-labelledby="studio-review-heading">
@@ -216,6 +231,7 @@ export function StudioClient({ userLabel }: { userLabel: string }) {
             </button>
           </div>
           <p className="studio-review-intro">이 버튼은 인증된 `/api/sprite-review`를 실제 호출합니다. HTTP 응답은 <code>DECLARED_METADATA_ONLY</code>이며, local CLI의 RGBA byte rehash 없이는 파일 자체의 PASS를 주장하지 않습니다.</p>
+          <LiveEvidenceShowcase variant="studio" compact />
           <div className={`studio-review-message studio-review-message-${spriteReview.phase}`} role="status" aria-live="polite">{spriteReview.message}</div>
           <div className="studio-review-lanes" data-testid="sprite-review-lanes">
             <ReviewLane label="PIXEL CONTRACT" value={spriteReview.report?.quality ?? "NOT_RUN"} detail="grid · motion delta · alpha · silhouette" />

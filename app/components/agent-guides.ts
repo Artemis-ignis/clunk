@@ -62,6 +62,7 @@ function copilotCommand(endpoint: string, key: string): string {
 export function buildAgentGuides(connection?: AgentConnection): AgentGuide[] {
   const endpoint = connection?.endpoint ?? DEFAULT_ENDPOINT;
   const key = connection?.apiKey ?? DEFAULT_KEY;
+  const hasIssuedKey = key !== DEFAULT_KEY;
   const authCommand = `claude mcp add clunk --scope user --transport http ${endpoint} --header "Authorization: Bearer ${key}"`;
   const remoteMcpJson = remoteJson(endpoint, key);
   const vscodeJson = remoteJson(endpoint, key, "servers");
@@ -75,9 +76,9 @@ export function buildAgentGuides(connection?: AgentConnection): AgentGuide[] {
       description: "Clunk가 발급한 연결 키와 HTTPS endpoint를 그대로 등록합니다. 로컬 경로 치환이 없습니다.",
       fileLabel: "terminal",
       code: authCommand,
-      note: connection
+      note: hasIssuedKey
         ? "Clunk에서 발급한 이 키가 이미 명령에 삽입되어 있습니다. 실행 후 claude mcp list에서 clunk가 connected인지 확인하세요."
-        : "먼저 ‘Clunk 연결 키 만들기’를 누르면 이 블록에 일회성 키가 자동으로 삽입됩니다.",
+        : "이 공개 예시의 ${CLUNK_API_KEY}를 Clunk에서 발급한 연결 키로 바꾼 뒤 실행하세요.",
       status: "available",
       recommended: true,
     },
@@ -89,9 +90,9 @@ export function buildAgentGuides(connection?: AgentConnection): AgentGuide[] {
       description: "Codex의 공식 streamable HTTP 등록 명령과 bearer-token 환경변수를 함께 생성합니다.",
       fileLabel: "PowerShell + Codex",
       code: codexCommand(endpoint, key),
-      note: connection
+      note: hasIssuedKey
         ? "PowerShell에 그대로 붙여 넣으면 ~/.codex/config.toml에 등록됩니다. `codex mcp get clunk --json`으로 URL과 bearer 환경변수를 확인하세요."
-        : "키를 만들면 실제 endpoint와 키가 삽입된 PowerShell 명령이 생성됩니다.",
+        : "${CLUNK_API_KEY}를 Clunk에서 발급한 키로 바꾼 뒤 PowerShell에서 실행하세요.",
       status: "available",
       recommended: true,
     },
@@ -103,9 +104,9 @@ export function buildAgentGuides(connection?: AgentConnection): AgentGuide[] {
       description: "Cursor IDE와 cursor-agent가 읽는 원격 HTTP 설정을 발급합니다.",
       fileLabel: ".cursor/mcp.json",
       code: remoteMcpJson,
-      note: connection
+      note: hasIssuedKey
         ? "프로젝트의 .cursor/mcp.json에 그대로 저장한 뒤 cursor-agent mcp list로 확인하세요."
-        : "키 발급 후 .cursor/mcp.json 완성본을 바로 복사할 수 있습니다.",
+        : "${CLUNK_API_KEY}를 발급된 키로 바꾼 뒤 .cursor/mcp.json에 저장하세요.",
       status: "available",
       recommended: true,
     },
@@ -117,9 +118,9 @@ export function buildAgentGuides(connection?: AgentConnection): AgentGuide[] {
       description: "GitHub Copilot CLI가 지원하는 HTTP 등록 명령에 Clunk endpoint와 Bearer 키를 넣습니다.",
       fileLabel: "copilot mcp add",
       code: copilotCommand(endpoint, key),
-      note: connection
+      note: hasIssuedKey
         ? "실행 후 `copilot mcp list`에서 Clunk를 확인하세요. 저장 위치는 Copilot 사용자 MCP 설정입니다."
-        : "키를 만들면 실제 endpoint와 키가 삽입된 Copilot 명령이 생성됩니다.",
+        : "${CLUNK_API_KEY}를 Clunk에서 발급한 키로 바꾼 뒤 실행하세요.",
       status: "available",
       recommended: true,
     },
@@ -131,9 +132,9 @@ export function buildAgentGuides(connection?: AgentConnection): AgentGuide[] {
       description: "Claude Desktop에서 사용하는 원격 서버 블록에 Clunk endpoint와 키를 함께 넣습니다.",
       fileLabel: "claude_desktop_config.json",
       code: remoteMcpJson,
-      note: connection
+      note: hasIssuedKey
         ? "완성된 JSON을 설정에 저장한 뒤 Claude Desktop의 연결 목록에서 Clunk를 확인하세요."
-        : "키를 만들면 실제 endpoint와 일회성 키가 들어간 JSON이 생성됩니다.",
+        : "${CLUNK_API_KEY}를 발급된 키로 바꾼 뒤 Claude Desktop 설정에 저장하세요.",
       status: "available",
       recommended: true,
     },
@@ -145,9 +146,9 @@ export function buildAgentGuides(connection?: AgentConnection): AgentGuide[] {
       description: "VS Code .vscode/mcp.json에서 사용하는 servers 형식으로 완성된 설정을 제공합니다.",
       fileLabel: ".vscode/mcp.json",
       code: vscodeJson,
-      note: connection
+      note: hasIssuedKey
         ? "이 JSON을 .vscode/mcp.json에 저장하고 MCP: List Servers에서 Clunk를 확인하세요."
-        : "키 발급 뒤 workspace용 VS Code 설정을 그대로 복사할 수 있습니다.",
+        : "${CLUNK_API_KEY}를 발급된 키로 바꾼 뒤 .vscode/mcp.json에 저장하세요.",
       status: "available",
       recommended: true,
     },
@@ -175,7 +176,7 @@ export function buildAgentGuides(connection?: AgentConnection): AgentGuide[] {
         "auth: Authorization: Bearer <issued Clunk key>",
         `remote-safe tools: ${MCP_HTTP_TOOL_COUNT} remote-safe tools · local stdio tools: ${MCP_TOOLS.length}`,
       ].join("\n"),
-      note: connection
+      note: hasIssuedKey
         ? "연결 확인 버튼이 initialize → tools/list를 실제로 호출합니다. 이 endpoint는 Clunk 소유 계약입니다."
         : "Clunk 연결 키를 발급한 뒤 연결 확인을 눌러 실제 endpoint 응답을 확인하세요.",
       status: "available",

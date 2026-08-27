@@ -7,21 +7,24 @@ import { Icon } from "./Icon";
 import { ThemeToggle } from "./ThemeToggle";
 
 /**
- * Ported from agentic-build-and-orchestrate-ai-agents-while-you-sleep/components/mobile-nav.tsx.
- * Same floating glass bar, same burger to dropdown transform, same single row desktop layout.
- * Tinted for the dark palette and given a scrolled state so the bar reads against the hero image.
+ * Public navigation for the Foundry product shell. The primary row follows the
+ * Asset → Create → Game Ready → Discover path; workspace and documentation
+ * remain utility destinations rather than competing with the creation CTA.
  */
 
 export type ShellSection = "home" | "studio" | "app" | "dashboard" | "pricing" | "docs" | "agents" | "marketplace";
 
 const NAV_LINKS: { label: string; href: string; section: ShellSection }[] = [
-  { label: "에셋 스튜디오", href: "/studio", section: "studio" },
-  { label: "에셋 마켓", href: "/marketplace", section: "marketplace" },
-  { label: "검사기", href: "/app", section: "app" },
-  { label: "대시보드", href: "/dashboard", section: "dashboard" },
-  { label: "요금", href: "/pricing", section: "pricing" },
-  { label: "문서", href: "/docs", section: "docs" },
-  { label: "에이전트 연결", href: "/connect", section: "agents" },
+  { label: "Discover", href: "/marketplace", section: "marketplace" },
+  { label: "Create", href: "/studio", section: "studio" },
+  { label: "Game Ready", href: "/app", section: "app" },
+  { label: "Developers", href: "/connect", section: "agents" },
+  { label: "Pricing", href: "/pricing", section: "pricing" },
+];
+
+const UTILITY_NAV_LINKS: { label: string; href: string; section: ShellSection }[] = [
+  { label: "Docs", href: "/docs", section: "docs" },
+  { label: "Workspace", href: "/dashboard", section: "dashboard" },
 ];
 
 export function SiteNav({ active }: { active?: ShellSection }) {
@@ -78,6 +81,20 @@ export function SiteNav({ active }: { active?: ShellSection }) {
             ))}
           </ul>
 
+          <div className="sitenav-utility" aria-label="보조 메뉴">
+            {UTILITY_NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                className={`sitenav-utility-link${active === link.section ? " sitenav-utility-link-active" : ""}`}
+                href={link.href}
+                prefetch={false}
+                aria-current={active === link.section ? "page" : undefined}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+
           <div className="sitenav-actions">
             <ThemeToggle />
             <Link className="button button-quiet button-sm sitenav-login" href="/login" prefetch={false}>
@@ -86,8 +103,8 @@ export function SiteNav({ active }: { active?: ShellSection }) {
             <Link className="button button-quiet button-sm sitenav-signup" href="/signup" prefetch={false}>
               회원가입
             </Link>
-            <Link className="button button-primary button-sm sitenav-cta" href="/app" prefetch={false}>
-              내 파일 검사 · 로그인
+            <Link className="button button-primary button-sm sitenav-cta" href="/studio" prefetch={false}>
+              Create asset
               <Icon name="arrowUpRight" size={14} />
             </Link>
             <button
@@ -122,6 +139,13 @@ export function SiteNav({ active }: { active?: ShellSection }) {
                 <Icon name="arrowRight" size={15} />
               </Link>
             ))}
+            <div className="sitenav-drawer-utility" aria-label="보조 메뉴">
+              {UTILITY_NAV_LINKS.map((link) => (
+                <Link key={link.href} href={link.href} prefetch={false} onClick={() => setOpen(false)}>
+                  {link.label}
+                </Link>
+              ))}
+            </div>
             <div className="sitenav-drawer-actions">
               <Link className="button button-quiet button-sm" href="/login" prefetch={false} onClick={() => setOpen(false)}>
                 로그인
@@ -129,8 +153,8 @@ export function SiteNav({ active }: { active?: ShellSection }) {
               <Link className="button button-quiet button-sm" href="/signup" prefetch={false} onClick={() => setOpen(false)}>
                 회원가입
               </Link>
-              <Link className="button button-primary button-sm" href="/app" prefetch={false} onClick={() => setOpen(false)}>
-                내 파일 검사 · 로그인
+              <Link className="button button-primary button-sm" href="/studio" prefetch={false} onClick={() => setOpen(false)}>
+                Create asset
                 <Icon name="arrowUpRight" size={14} />
               </Link>
             </div>

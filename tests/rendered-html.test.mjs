@@ -17,9 +17,9 @@ test("server-renders the Clunk landing page", async () => {
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
-  assert.match(html, /<title>모든 에셋을 근거 있게 \| Clunk<\/title>/i);
-  assert.match(html, /모든 에셋을/);
-  assert.match(html, /검사기 열기/);
+  assert.match(html, /<title>아이디어에서 Game Ready까지 \| Clunk<\/title>/i);
+  assert.match(html, /AI GAME ASSET FOUNDRY/);
+  assert.match(html, /Create workspace/);
   // The agent integration section must render the real MCP tool names and the real rule set id
   // that packages/core declares, so the landing page cannot drift into invented marketing facts.
   assert.match(html, /clunk_inspect/);
@@ -56,10 +56,10 @@ test("server-renders public product routes", async () => {
 test("landing language covers the full 2D and 3D asset path", async () => {
   const response = await render("/");
   const html = await response.text();
-  assert.match(html, /에이전트가 만든 에셋을/);
-  assert.match(html, /게임에 넣기 전에 판정합니다/);
-  assert.match(html, /파일 하나가 근거 있는/);
-  assert.match(html, /결과가 되는 과정/);
+  assert.match(html, /아이디어를/);
+  assert.match(html, /Game Ready/);
+  assert.match(html, /IDEA/);
+  assert.match(html, /DISCOVER/);
   assert.match(html, /Sprite.*Atlas|Atlas.*Sprite/);
   assert.match(html, /Spine/);
 });

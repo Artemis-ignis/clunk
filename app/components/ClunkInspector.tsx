@@ -325,7 +325,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
   return (
     <WorkspaceShell
       active="inspector"
-      title="에셋 검사기"
+      title="Game Ready"
       userLabel={userLabel}
       status={<StatusPill status={status} />}
     >

@@ -19,10 +19,10 @@ import "../workspace.css";
 export type WorkspaceSection = "overview" | "studio" | "inspector" | "passports" | "pricing" | "docs" | "settings";
 
 const PRIMARY_NAV: { section: WorkspaceSection; label: string; href: string; icon: IconName }[] = [
-  { section: "overview", label: "개요", href: "/dashboard", icon: "layout" },
-  { section: "studio", label: "Asset Studio", href: "/studio", icon: "boxes" },
-  { section: "inspector", label: "검사기", href: "/app", icon: "scan" },
-  { section: "passports", label: "Passport", href: "/passport", icon: "badge" },
+  { section: "overview", label: "Assets", href: "/dashboard", icon: "layout" },
+  { section: "studio", label: "Create", href: "/studio", icon: "boxes" },
+  { section: "inspector", label: "Game Ready", href: "/app", icon: "scan" },
+  { section: "passports", label: "Passports", href: "/passport", icon: "badge" },
 ];
 
 const SECONDARY_NAV: { section: WorkspaceSection; label: string; href: string; icon: IconName }[] = [
@@ -112,7 +112,7 @@ export function WorkspaceShell({
   );
 
   return (
-    <div className={`workspace${railOpen ? " workspace-rail-open" : ""}`}>
+    <div className={`workspace foundry-workspace-page${railOpen ? " workspace-rail-open" : ""}`}>
       <SnapRoot mode="workspace" />
       <div className="workspace-aurora" aria-hidden="true" />
 

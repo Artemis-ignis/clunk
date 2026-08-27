@@ -9,10 +9,12 @@ import { useEffect } from "react";
  */
 export function SnapRoot({ mode = "site" }: { mode?: "site" | "workspace" }) {
   useEffect(() => {
-    document.documentElement.classList.add("snap-y");
+    const shouldSnap = mode === "site";
+    if (shouldSnap) document.documentElement.classList.add("snap-y");
     document.documentElement.classList.add(`snap-${mode}`);
     return () => {
-      document.documentElement.classList.remove("snap-y", `snap-${mode}`);
+      if (shouldSnap) document.documentElement.classList.remove("snap-y");
+      document.documentElement.classList.remove(`snap-${mode}`);
     };
   }, [mode]);
   return null;

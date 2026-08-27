@@ -1,0 +1,1251 @@
+/*
+ * Clunk Foundry visual layer.
+ *
+ * The existing product styles remain the compatibility layer for older
+ * evidence views. New product surfaces use these scoped tokens so a visual
+ * refresh cannot silently change score, status, or storage semantics.
+ */
+
+:root {
+  --foundry-paper: #f3eee4;
+  --foundry-paper-strong: #fbf8f1;
+  --foundry-paper-deep: #e9e0d2;
+  --foundry-ink: #18201f;
+  --foundry-ink-soft: #4b514d;
+  --foundry-ink-faint: #73766f;
+  --foundry-graphite: #202725;
+  --foundry-graphite-soft: #2b3330;
+  --foundry-line: #cfc5b5;
+  --foundry-line-strong: #a99d8a;
+  --foundry-amber: #d66c29;
+  --foundry-amber-deep: #9b451d;
+  --foundry-amber-soft: #f1d5bd;
+  --foundry-cyan: #087d89;
+  --foundry-cyan-soft: #c5e0dc;
+  --foundry-green: #477257;
+  --foundry-red: #9e443b;
+  --foundry-shadow: 0 22px 60px rgba(47, 38, 28, 0.11);
+}
+
+:root[data-theme="dark"] {
+  --foundry-paper: #171b1a;
+  --foundry-paper-strong: #202624;
+  --foundry-paper-deep: #101312;
+  --foundry-ink: #f1eee6;
+  --foundry-ink-soft: #c3c4bb;
+  --foundry-ink-faint: #969b91;
+  --foundry-graphite: #0e1110;
+  --foundry-graphite-soft: #252b28;
+  --foundry-line: #3f4741;
+  --foundry-line-strong: #697166;
+  --foundry-amber: #ee8b3e;
+  --foundry-amber-deep: #ffb06e;
+  --foundry-amber-soft: #573728;
+  --foundry-cyan: #63c8c6;
+  --foundry-cyan-soft: #203d3b;
+  --foundry-green: #87b28f;
+  --foundry-red: #e4867e;
+  --foundry-shadow: 0 24px 68px rgba(0, 0, 0, 0.28);
+}
+
+body:has(.foundry-page) {
+  background: var(--foundry-paper);
+}
+
+body:has(.foundry-page) .sitenav {
+  border-color: var(--foundry-line-strong);
+  border-radius: 8px;
+  background: var(--foundry-paper-strong);
+  box-shadow: 0 10px 30px rgba(47, 38, 28, 0.1);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+body:has(.foundry-page) .sitenav-scrolled {
+  background: var(--foundry-paper-strong);
+}
+
+.sitenav-utility {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.sitenav-utility-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 9px;
+  border-left: 1px solid var(--line);
+  color: var(--text-muted);
+  font: 600 0.68rem var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sitenav-utility-link:hover,
+.sitenav-utility-link-active {
+  color: var(--text-strong);
+}
+
+.sitenav-drawer-utility {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin: 8px 8px 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.sitenav-drawer-utility a {
+  padding: 8px 10px;
+  color: var(--text-muted);
+  font: 0.7rem var(--font-mono);
+}
+
+.foundry-page {
+  min-height: 100dvh;
+  overflow: clip;
+  background: var(--foundry-paper);
+  color: var(--foundry-ink);
+  font-family: var(--font-geist-sans), sans-serif;
+}
+
+.foundry-page *,
+.foundry-page *::before,
+.foundry-page *::after {
+  box-sizing: border-box;
+}
+
+.foundry-frame {
+  width: min(1280px, calc(100% - 48px));
+  margin: 0 auto;
+}
+
+.foundry-eyebrow,
+.foundry-kicker,
+.foundry-mono {
+  color: var(--foundry-cyan);
+  font: 700 0.64rem var(--font-geist-mono), monospace;
+  letter-spacing: 0.14em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.foundry-kicker {
+  color: var(--foundry-amber-deep);
+}
+
+.foundry-muted {
+  color: var(--foundry-ink-faint);
+}
+
+.foundry-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(460px, 1.1fr);
+  gap: clamp(36px, 7vw, 112px);
+  align-items: center;
+  min-height: min(760px, calc(100svh - 84px));
+  padding: 132px 0 72px;
+}
+
+.foundry-hero-copy {
+  max-width: 570px;
+}
+
+.foundry-hero h1 {
+  max-width: 700px;
+  margin: 18px 0 24px;
+  color: var(--foundry-ink);
+  font-size: clamp(3.1rem, 6.8vw, 7.2rem);
+  font-weight: 720;
+  letter-spacing: -0.095em;
+  line-height: 0.91;
+  text-wrap: balance;
+}
+
+.foundry-hero h1 em,
+.foundry-heading em {
+  color: var(--foundry-amber);
+  font-style: normal;
+}
+
+.foundry-hero-lede {
+  max-width: 500px;
+  color: var(--foundry-ink-soft);
+  font-size: clamp(1rem, 1.4vw, 1.2rem);
+  line-height: 1.7;
+}
+
+.foundry-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 28px;
+}
+
+.foundry-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 16px;
+  border: 1px solid var(--foundry-line-strong);
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+
+.foundry-button:hover {
+  transform: translateY(-2px);
+}
+
+.foundry-button-primary {
+  border-color: var(--foundry-amber);
+  background: var(--foundry-amber);
+  color: #fffaf1;
+}
+
+.foundry-button-primary:hover {
+  background: var(--foundry-amber-deep);
+  border-color: var(--foundry-amber-deep);
+}
+
+.foundry-button-quiet {
+  background: transparent;
+  color: var(--foundry-ink);
+}
+
+.foundry-button-quiet:hover {
+  border-color: var(--foundry-cyan);
+  background: var(--foundry-cyan-soft);
+}
+
+.foundry-proof-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 22px;
+  margin-top: 32px;
+  padding-top: 15px;
+  border-top: 1px solid var(--foundry-line);
+  color: var(--foundry-ink-faint);
+  font: 0.63rem var(--font-geist-mono), monospace;
+  text-transform: uppercase;
+}
+
+.foundry-proof-row span::before {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin: 0 7px 1px 0;
+  border-radius: 50%;
+  background: var(--foundry-green);
+  content: "";
+}
+
+.foundry-asset-stage {
+  position: relative;
+  min-width: 0;
+  border: 1px solid var(--foundry-line-strong);
+  background: var(--foundry-graphite);
+  box-shadow: var(--foundry-shadow);
+}
+
+.foundry-asset-stage::after {
+  position: absolute;
+  z-index: 2;
+  color: var(--foundry-cyan);
+  font: 0.58rem var(--font-geist-mono), monospace;
+  letter-spacing: 0.1em;
+  pointer-events: none;
+}
+
+.foundry-asset-stage::after {
+  right: 15px;
+  bottom: 13px;
+  content: "01 — 05";
+}
+
+.foundry-stage-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 15px 12px;
+  border-bottom: 1px solid #46504a;
+  color: #c4d0c4;
+  font: 0.62rem var(--font-geist-mono), monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.foundry-stage-toolbar strong {
+  color: var(--foundry-amber);
+  font-weight: 600;
+}
+
+.foundry-stage-image {
+  position: relative;
+  display: grid;
+  min-height: 430px;
+  place-items: center;
+  overflow: hidden;
+  padding: 48px 24px 40px;
+  background: #29312f;
+}
+
+.foundry-stage-image::before {
+  position: absolute;
+  inset: 20px;
+  border: 1px solid rgba(194, 219, 202, 0.17);
+  content: "";
+  pointer-events: none;
+}
+
+.foundry-stage-image img {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 620px);
+  height: auto;
+  border: 1px solid rgba(241, 238, 230, 0.2);
+  object-fit: cover;
+  filter: saturate(0.88) contrast(1.04);
+}
+
+.foundry-stage-footer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  padding: 14px 15px 15px;
+  border-top: 1px solid #46504a;
+}
+
+.foundry-stage-footer strong,
+.foundry-stage-footer small {
+  display: block;
+}
+
+.foundry-stage-footer strong {
+  color: #f2ede2;
+  font: 0.8rem var(--font-geist-mono), monospace;
+}
+
+.foundry-stage-footer small {
+  margin-top: 5px;
+  color: #9ba89d;
+  font-size: 0.65rem;
+}
+
+.foundry-stage-verdict {
+  text-align: right;
+}
+
+.foundry-stage-verdict span,
+.foundry-stage-verdict b {
+  display: block;
+  color: #9ba89d;
+  font: 0.58rem var(--font-geist-mono), monospace;
+  letter-spacing: 0.1em;
+}
+
+.foundry-stage-verdict b {
+  margin-top: 4px;
+  color: var(--foundry-amber);
+  font-size: 0.78rem;
+}
+
+.foundry-stage-open {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 15px;
+  border-top: 1px solid #46504a;
+  color: #f1eee6;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.foundry-stage-open:hover {
+  color: var(--foundry-amber);
+}
+
+.foundry-section {
+  padding: clamp(72px, 10vw, 140px) 0;
+  border-top: 1px solid var(--foundry-line);
+}
+
+.foundry-section-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 32px;
+  align-items: end;
+  margin-bottom: 38px;
+}
+
+.foundry-heading {
+  max-width: 720px;
+  margin: 12px 0 0;
+  font-size: clamp(2.2rem, 5vw, 5.2rem);
+  letter-spacing: -0.085em;
+  line-height: 0.94;
+  text-wrap: balance;
+}
+
+.foundry-section-heading > p {
+  max-width: 365px;
+  margin: 0;
+  color: var(--foundry-ink-soft);
+  font-size: 0.88rem;
+  line-height: 1.75;
+}
+
+.foundry-flow-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  border-top: 1px solid var(--foundry-line-strong);
+  border-left: 1px solid var(--foundry-line-strong);
+}
+
+.foundry-flow-step {
+  min-height: 210px;
+  padding: 18px;
+  border-right: 1px solid var(--foundry-line-strong);
+  border-bottom: 1px solid var(--foundry-line-strong);
+}
+
+.foundry-flow-step:nth-child(n + 6) {
+  grid-column: span 1;
+}
+
+.foundry-flow-step-number {
+  display: flex;
+  justify-content: space-between;
+  color: var(--foundry-amber);
+  font: 0.62rem var(--font-geist-mono), monospace;
+}
+
+.foundry-flow-step strong {
+  display: block;
+  margin-top: 52px;
+  font-size: 1rem;
+}
+
+.foundry-flow-step small {
+  display: block;
+  margin-top: 8px;
+  color: var(--foundry-ink-faint);
+  font-size: 0.71rem;
+  line-height: 1.5;
+}
+
+.foundry-flow-step.is-live {
+  background: var(--foundry-paper-strong);
+}
+
+.foundry-flow-step.is-live strong::after {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin: 0 0 3px 7px;
+  border-radius: 50%;
+  background: var(--foundry-green);
+  content: "";
+}
+
+.foundry-evidence-strip {
+  display: grid;
+  grid-template-columns: 1.2fr repeat(3, 1fr);
+  margin-top: 20px;
+  border: 1px solid var(--foundry-line-strong);
+  background: var(--foundry-paper-strong);
+}
+
+.foundry-evidence-strip > div {
+  min-height: 104px;
+  padding: 16px;
+  border-left: 1px solid var(--foundry-line);
+}
+
+.foundry-evidence-strip > div:first-child {
+  border-left: 0;
+  background: var(--foundry-graphite);
+  color: #f1eee6;
+}
+
+.foundry-evidence-strip span,
+.foundry-evidence-strip strong,
+.foundry-evidence-strip small {
+  display: block;
+}
+
+.foundry-evidence-strip span {
+  color: var(--foundry-cyan);
+  font: 0.58rem var(--font-geist-mono), monospace;
+  letter-spacing: 0.09em;
+}
+
+.foundry-evidence-strip strong {
+  margin-top: 12px;
+  font: 700 1.1rem var(--font-geist-mono), monospace;
+}
+
+.foundry-evidence-strip small {
+  margin-top: 5px;
+  color: var(--foundry-ink-faint);
+  font-size: 0.66rem;
+}
+
+.foundry-evidence-strip > div:first-child small {
+  color: #aeb8ad;
+}
+
+.foundry-showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.foundry-showcase-card {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.85fr) minmax(0, 1fr);
+  min-height: 276px;
+  border: 1px solid var(--foundry-line-strong);
+  background: var(--foundry-paper-strong);
+}
+
+.foundry-showcase-visual {
+  position: relative;
+  display: grid;
+  min-height: 276px;
+  place-items: center;
+  overflow: hidden;
+  background: var(--foundry-graphite);
+}
+
+.foundry-showcase-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.foundry-showcase-visual::after {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  padding: 5px 7px;
+  border: 1px solid rgba(241, 238, 230, 0.45);
+  color: #f1eee6;
+  content: "SHIPPED SAMPLE";
+  font: 0.55rem var(--font-geist-mono), monospace;
+}
+
+.foundry-showcase-console {
+  display: grid;
+  width: min(82%, 300px);
+  gap: 10px;
+  padding: 18px;
+  border: 1px solid #536057;
+  color: #dfe8dc;
+  font-family: var(--font-geist-mono), monospace;
+}
+
+.foundry-showcase-console span,
+.foundry-showcase-console small {
+  color: #9ba89d;
+  font-size: 0.58rem;
+}
+
+.foundry-showcase-console strong {
+  color: var(--foundry-amber);
+  font-size: 1.9rem;
+  letter-spacing: -0.08em;
+}
+
+.foundry-showcase-console i {
+  padding-top: 7px;
+  border-top: 1px solid #46504a;
+  color: #b5d5c0;
+  font-size: 0.65rem;
+  font-style: normal;
+}
+
+.foundry-mcp-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(240px, 0.65fr);
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--foundry-line-strong);
+  background: var(--foundry-graphite);
+}
+
+.foundry-mcp-panel > * {
+  min-width: 0;
+}
+
+.foundry-showcase-copy {
+  padding: 24px;
+}
+
+.foundry-showcase-copy h3 {
+  margin: 11px 0 9px;
+  font-size: 1.35rem;
+  letter-spacing: -0.05em;
+}
+
+.foundry-showcase-copy p {
+  margin: 0;
+  color: var(--foundry-ink-soft);
+  font-size: 0.78rem;
+  line-height: 1.7;
+}
+
+.foundry-disclosure {
+  margin-top: 18px;
+  border-top: 1px solid var(--foundry-line);
+}
+
+.foundry-disclosure summary {
+  cursor: pointer;
+  padding: 13px 0;
+  color: var(--foundry-cyan);
+  font: 0.67rem var(--font-geist-mono), monospace;
+  letter-spacing: 0.04em;
+}
+
+.foundry-disclosure-content {
+  padding: 0 0 14px;
+  color: var(--foundry-ink-faint);
+  font-size: 0.72rem;
+  line-height: 1.65;
+}
+
+.foundry-final {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+  align-items: center;
+  padding: 70px 0 92px;
+  border-top: 1px solid var(--foundry-line);
+}
+
+.foundry-final h2 {
+  max-width: 620px;
+  margin: 10px 0 0;
+  font-size: clamp(2.3rem, 5vw, 5.6rem);
+  letter-spacing: -0.09em;
+  line-height: 0.93;
+}
+
+.foundry-final p {
+  max-width: 330px;
+  color: var(--foundry-ink-soft);
+  font-size: 0.82rem;
+  line-height: 1.7;
+}
+
+.foundry-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: center;
+  padding-top: 22px;
+  padding-bottom: 28px;
+  border-top: 1px solid var(--foundry-line);
+}
+
+.foundry-footer > div {
+  display: grid;
+  gap: 5px;
+}
+
+.foundry-footer strong {
+  font-size: 1.05rem;
+}
+
+.foundry-footer span {
+  color: var(--foundry-ink-faint);
+  font-size: 0.68rem;
+}
+
+.foundry-footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.foundry-footer nav a {
+  color: var(--foundry-ink-soft);
+  font: 0.62rem var(--font-geist-mono), monospace;
+}
+
+.foundry-footer nav a:hover {
+  color: var(--foundry-amber);
+}
+
+/* Authenticated workspaces: one quiet grid, with the evidence rail kept visible. */
+.foundry-workspace-page {
+  min-height: 100%;
+  padding-bottom: 80px;
+  background: var(--foundry-paper);
+}
+
+.foundry-workspace-page .workspace-aurora {
+  display: none;
+}
+
+.foundry-workspace-page .workspace-rail {
+  border-right-color: var(--foundry-line-strong);
+  background: var(--foundry-paper-strong);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.foundry-workspace-page .workspace-toolbar {
+  border-bottom-color: var(--foundry-line);
+  background: var(--foundry-paper-strong);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.foundry-workspace-page .workspace-main {
+  color: var(--foundry-ink);
+}
+
+.foundry-workstation {
+  display: grid;
+  grid-template-columns: minmax(185px, 0.72fr) minmax(0, 1.75fr) minmax(220px, 0.8fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.foundry-workstation > * {
+  min-width: 0;
+}
+
+.foundry-workstation-panel {
+  border: 1px solid var(--foundry-line-strong);
+  background: var(--foundry-paper-strong);
+}
+
+.foundry-workstation-panel-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--foundry-line);
+}
+
+.foundry-workstation-panel-head strong {
+  font-size: 0.73rem;
+}
+
+.foundry-workstation-panel-head span {
+  color: var(--foundry-ink-faint);
+  font: 0.57rem var(--font-geist-mono), monospace;
+}
+
+.foundry-workstation-panel-body {
+  padding: 14px;
+}
+
+.foundry-property-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.foundry-property-list div {
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--foundry-line);
+}
+
+.foundry-property-list dt {
+  color: var(--foundry-ink-faint);
+  font: 0.57rem var(--font-geist-mono), monospace;
+  text-transform: uppercase;
+}
+
+.foundry-property-list dd {
+  margin: 4px 0 0;
+  font-size: 0.74rem;
+  line-height: 1.45;
+}
+
+.foundry-game-ready-card {
+  border: 1px solid var(--foundry-line-strong);
+  background: var(--foundry-graphite);
+  color: #f1eee6;
+}
+
+.foundry-game-ready-card .foundry-workstation-panel-head {
+  border-bottom-color: #46504a;
+}
+
+.foundry-game-ready-score {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 22px 14px 5px;
+  color: var(--foundry-amber);
+  font: 700 3.4rem var(--font-geist-mono), monospace;
+  letter-spacing: -0.1em;
+}
+
+.foundry-game-ready-score small {
+  color: #aeb8ad;
+  font-size: 0.75rem;
+  letter-spacing: 0;
+}
+
+.foundry-game-ready-card p {
+  margin: 0;
+  padding: 0 14px 15px;
+  color: #aeb8ad;
+  font-size: 0.67rem;
+  line-height: 1.55;
+}
+
+.foundry-evidence-rail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--foundry-line);
+}
+
+.foundry-evidence-chip {
+  padding: 6px 8px;
+  border: 1px solid var(--foundry-line);
+  color: var(--foundry-ink-faint);
+  font: 0.58rem var(--font-geist-mono), monospace;
+}
+
+.foundry-evidence-chip.is-pass {
+  border-color: var(--foundry-green);
+  color: var(--foundry-green);
+}
+
+.foundry-evidence-chip.is-gap {
+  border-color: var(--foundry-amber);
+  color: var(--foundry-amber-deep);
+}
+
+.foundry-evidence-chip.is-pending {
+  border-color: var(--foundry-line-strong);
+}
+
+.foundry-dashboard-order {
+  display: grid;
+  gap: 14px;
+}
+
+.foundry-dashboard-order > :first-child {
+  order: -2;
+}
+
+.foundry-dashboard-order > :nth-child(2) {
+  order: -1;
+}
+
+.foundry-dashboard-order > * {
+  min-width: 0;
+}
+
+.foundry-route-intro {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: end;
+  margin-bottom: 24px;
+}
+
+.foundry-route-intro h1 {
+  margin: 9px 0 0;
+  font-size: clamp(2rem, 4vw, 4rem);
+  letter-spacing: -0.08em;
+  line-height: 0.94;
+}
+
+.foundry-route-intro p {
+  max-width: 340px;
+  margin: 0;
+  color: var(--foundry-ink-soft);
+  font-size: 0.8rem;
+  line-height: 1.65;
+}
+
+/* Studio keeps creation, preview, and target/evidence controls in one frame. */
+.foundry-workspace-page .studio-page {
+  display: grid;
+  grid-template-areas:
+    "hero hero hero"
+    "assets live engine"
+    "workflow workflow workflow"
+    "review review review"
+    "command command command";
+  grid-template-columns: minmax(200px, 0.7fr) minmax(0, 1.6fr) minmax(220px, 0.8fr);
+  gap: 18px 12px;
+}
+
+.foundry-workspace-page .studio-page > .studio-command-hero { grid-area: hero; }
+.foundry-workspace-page .studio-page > .studio-live-authoring { grid-area: live; min-width: 0; }
+.foundry-workspace-page .studio-page > .studio-workflow { grid-area: workflow; }
+.foundry-workspace-page .studio-page > .studio-section[aria-labelledby="studio-assets-heading"] { grid-area: assets; min-width: 0; }
+.foundry-workspace-page .studio-page > .studio-engine-section { grid-area: engine; min-width: 0; }
+.foundry-workspace-page .studio-page > .studio-review-section { grid-area: review; min-width: 0; }
+.foundry-workspace-page .studio-page > .studio-command-grid { grid-area: command; min-width: 0; }
+
+.foundry-workspace-page .studio-page > .studio-section,
+.foundry-workspace-page .studio-page > .studio-live-authoring,
+.foundry-workspace-page .studio-page > .studio-review-section,
+.foundry-workspace-page .studio-page > .studio-command-grid {
+  margin-bottom: 0;
+}
+
+.foundry-workspace-page .studio-command-hero,
+.foundry-workspace-page .creation-workbench {
+  border-color: var(--foundry-line-strong);
+  border-radius: 4px;
+  background: var(--foundry-paper-strong);
+  box-shadow: none;
+}
+
+.foundry-workspace-page .studio-command-hero {
+  min-height: 236px;
+}
+
+.foundry-workspace-page .creation-form {
+  border-right-color: var(--foundry-line);
+  background: var(--foundry-paper);
+}
+
+.foundry-workspace-page .creation-result-panel {
+  background: var(--foundry-graphite);
+}
+
+.foundry-workspace-page .creation-image-preview::before {
+  display: none;
+}
+
+.foundry-workspace-page .studio-asset-detail,
+.foundry-workspace-page .studio-engine-section,
+.foundry-workspace-page .studio-review-section,
+.foundry-workspace-page .studio-command-card,
+.foundry-workspace-page .studio-boundary-card {
+  border-radius: 4px;
+}
+
+.foundry-workspace-page .studio-asset-layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.foundry-workspace-page .studio-detail-visual-row {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.foundry-workspace-page .studio-detail-visual-row .asset-family-visual {
+  min-height: 180px;
+}
+
+.foundry-workspace-page .studio-capability-grid {
+  flex-direction: column;
+}
+
+.foundry-workspace-page .studio-engine-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.foundry-workspace-page .studio-engine-note {
+  font-size: 0.68rem;
+}
+
+.foundry-workspace-page .studio-game-ready-summary {
+  margin-top: 14px;
+  padding: 13px;
+  border: 1px solid var(--foundry-line-strong);
+  background: var(--foundry-graphite);
+  color: #f1eee6;
+}
+
+.studio-game-ready-summary-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: #b5c2b5;
+  font: 0.58rem var(--font-geist-mono), monospace;
+  letter-spacing: 0.06em;
+}
+
+.studio-game-ready-summary-head strong {
+  color: var(--foundry-amber);
+  font-weight: 600;
+}
+
+.studio-game-ready-summary dl {
+  display: grid;
+  gap: 8px;
+  margin: 17px 0 0;
+}
+
+.studio-game-ready-summary dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid #46504a;
+}
+
+.studio-game-ready-summary dt {
+  color: #9ba89d;
+  font: 0.56rem var(--font-geist-mono), monospace;
+}
+
+.studio-game-ready-summary dd {
+  margin: 0;
+  color: #f1eee6;
+  font-size: 0.64rem;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.studio-game-ready-summary > p {
+  margin: 12px 0 0;
+  color: #aeb8ad;
+  font-size: 0.65rem;
+  line-height: 1.55;
+}
+
+.studio-game-ready-summary > .button {
+  width: 100%;
+  margin-top: 14px;
+  border-color: #536057;
+  color: #f1eee6;
+}
+
+.studio-game-ready-summary > .button:hover {
+  border-color: var(--foundry-amber);
+  background: transparent;
+}
+
+.foundry-discover-page .marketplace-page,
+.foundry-discover-page .marketplace-detail-page {
+  background: transparent;
+}
+
+@media (max-width: 1100px) {
+  .foundry-hero {
+    grid-template-columns: minmax(0, 0.85fr) minmax(380px, 1.15fr);
+    gap: 34px;
+  }
+
+  .foundry-flow-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .foundry-workstation {
+    grid-template-columns: minmax(180px, 0.68fr) minmax(0, 1.32fr);
+  }
+
+  .foundry-workstation > :last-child {
+    grid-column: 1 / -1;
+  }
+
+  .foundry-workspace-page .studio-page {
+    grid-template-areas:
+      "hero hero"
+      "assets live"
+      "engine live"
+      "workflow workflow"
+      "review review"
+      "command command";
+    grid-template-columns: minmax(190px, 0.72fr) minmax(0, 1.28fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .foundry-frame {
+    width: min(100% - 36px, 920px);
+  }
+
+  .foundry-hero {
+    min-height: auto;
+    padding-top: 116px;
+  }
+
+  .foundry-stage-image {
+    min-height: 360px;
+  }
+}
+
+@media (max-width: 900px) {
+  .sitenav-utility {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .foundry-frame {
+    width: min(100% - 28px, 680px);
+  }
+
+  .foundry-hero,
+  .foundry-section-heading,
+  .foundry-final,
+  .foundry-route-intro {
+    display: block;
+  }
+
+  .foundry-hero {
+    padding: 108px 0 52px;
+  }
+
+  .foundry-hero h1 {
+    font-size: clamp(3rem, 13vw, 5.4rem);
+  }
+
+  .foundry-asset-stage {
+    margin-top: 36px;
+  }
+
+  .foundry-section-heading > p,
+  .foundry-route-intro p {
+    margin-top: 18px;
+  }
+
+  .foundry-flow-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .foundry-flow-step {
+    min-height: 180px;
+  }
+
+  .foundry-flow-step strong {
+    margin-top: 35px;
+  }
+
+  .foundry-evidence-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .foundry-evidence-strip > div:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .foundry-evidence-strip > div:nth-child(3) {
+    border-left: 0;
+  }
+
+  .foundry-showcase-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .foundry-mcp-panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .foundry-workstation {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .foundry-workspace-page .studio-page {
+    display: block;
+  }
+
+  .foundry-workspace-page .studio-page > * {
+    margin-bottom: 18px;
+  }
+
+  .foundry-workstation > :last-child {
+    grid-column: auto;
+  }
+
+  .foundry-workstation-panel {
+    order: initial;
+  }
+
+  .foundry-final .foundry-actions {
+    margin-top: 24px;
+  }
+
+  .foundry-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 390px) {
+  .foundry-frame {
+    width: min(100% - 22px, 360px);
+  }
+
+  .foundry-hero {
+    padding-top: 98px;
+  }
+
+  .foundry-hero h1 {
+    font-size: 2.85rem;
+  }
+
+  .foundry-actions .foundry-button {
+    width: 100%;
+  }
+
+  .foundry-stage-image {
+    min-height: 245px;
+    padding: 38px 12px 28px;
+  }
+
+  .foundry-stage-image::before {
+    inset: 12px;
+  }
+
+  .foundry-stage-footer {
+    grid-template-columns: 1fr;
+  }
+
+  .foundry-stage-verdict {
+    text-align: left;
+  }
+
+  .foundry-flow-grid,
+  .foundry-evidence-strip {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .foundry-evidence-strip > div:first-child {
+    grid-column: auto;
+  }
+
+  .foundry-evidence-strip > div,
+  .foundry-evidence-strip > div:nth-child(3) {
+    border-left: 0;
+    border-top: 1px solid var(--foundry-line);
+  }
+
+  .foundry-evidence-strip > div:first-child {
+    border-top: 0;
+  }
+
+  .foundry-showcase-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .foundry-showcase-visual {
+    min-height: 210px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .foundry-page *,
+  .foundry-page *::before,
+  .foundry-page *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

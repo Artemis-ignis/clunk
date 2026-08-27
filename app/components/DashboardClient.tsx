@@ -9,6 +9,7 @@ import { readinessHint, resolveStoredReadiness } from "./readiness";
 import { StatusPill } from "./StatusPill";
 import { WorkspaceShell } from "./WorkspaceShell";
 import { AssetFamilyVisual } from "./AssetFamilyVisual";
+import { LiveEvidenceShowcase } from "./LiveEvidenceShowcase";
 
 type Run = {
   id: string;
@@ -271,14 +272,15 @@ export function DashboardClient() {
   );
 
   return (
-    <WorkspaceShell active="overview" title="워크스페이스 개요" userLabel={userLabel} status={connectionChip}>
+    <WorkspaceShell active="overview" title="Asset Workspace" userLabel={userLabel} status={connectionChip}>
       <section className="ws-welcome ws-welcome-evidence">
         <div className="ws-welcome-copy">
-          <span className="mono-label">CONTROL ROOM · EVIDENCE FIRST</span>
-          <h2>최신 검사와<br /><em>다음 증거를 한눈에.</em></h2>
-          <p>파일 하나를 구조·런타임·플레이어 화면·사람 검토의 연결된 작업으로 이어갑니다.</p>
+          <span className="mono-label">ASSETS · GENERATIONS · GAME READY</span>
+          <h2>만든 에셋과<br /><em>다음 증거를 한눈에.</em></h2>
+          <p>생성 결과와 저장된 에셋을 먼저 확인하고, 구조·런타임·플레이어 화면·사람 검토를 순서대로 이어갑니다.</p>
           <div className="ws-welcome-actions">
-            <Link className="button button-primary" href="/app">새 검사 시작 <Icon name="arrowUpRight" size={15} /></Link>
+            <Link className="button button-primary" href="/studio">Create asset <Icon name="arrowUpRight" size={15} /></Link>
+            <Link className="button button-quiet" href="/app">Game Ready 열기 <Icon name="arrowRight" size={15} /></Link>
             <Link className="button button-quiet" href="#collaboration">프레임 증거 연결 <Icon name="chevronDown" size={15} /></Link>
           </div>
         </div>
@@ -326,13 +328,13 @@ export function DashboardClient() {
         </div>
       ) : null}
 
-      <DashboardAssetBoard latestRun={latestRun} statuses={evidenceStatuses} />
-
-      <EvidenceLanes statuses={evidenceStatuses} hasRun={Boolean(latestRun)} />
-
-      <GenerationOverview jobs={generationJobs} />
-
-      <NextVerificationRail next={nextVerification} />
+      <div className="foundry-dashboard-order">
+        <DashboardAssetBoard latestRun={latestRun} statuses={evidenceStatuses} />
+        <GenerationOverview jobs={generationJobs} />
+        <LiveEvidenceShowcase variant="dashboard" compact />
+        <EvidenceLanes statuses={evidenceStatuses} hasRun={Boolean(latestRun)} />
+        <NextVerificationRail next={nextVerification} />
+      </div>
 
       <section className="ws-summary ws-summary-4" aria-label="워크스페이스 요약">
         <Summary label="사용 가능 크레딧" value={credits === null ? "대기" : `${credits}`} detail="D1 데모 원장 · 성공 시에만 차감" tone="accent" />

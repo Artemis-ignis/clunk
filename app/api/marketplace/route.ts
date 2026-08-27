@@ -2,6 +2,7 @@ import {
   assertSameOrigin,
   ClunkHttpError,
   getRuntimeDb,
+  ensureSchema,
   jsonError,
   isSafeRecordId,
   parseJson,
@@ -24,6 +25,7 @@ const LISTING_STATUSES = new Set(["DRAFT", "PENDING_REVIEW", "PUBLISHED"]);
 export async function GET(request: Request) {
   try {
     const db = getRuntimeDb();
+    await ensureSchema(db);
     const url = new URL(request.url);
     const slug = url.searchParams.get("slug");
     if (slug) {

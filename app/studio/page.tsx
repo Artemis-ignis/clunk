@@ -4,8 +4,8 @@ import { createPageMetadata } from "../components/site-metadata";
 
 export const dynamic = "force-dynamic";
 export const metadata = createPageMetadata({
-  title: "Asset Studio",
-  description: "2D Sprite, Spine, 3D Model, Animation을 만들고 검사하고 엔진 증거로 연결합니다.",
+  title: "Create · Asset Studio",
+  description: "2D Sprite, Spine, 3D Model, Animation을 실제 artifact로 만들고 검사·검토 근거로 연결합니다.",
   path: "/studio",
 });
 

@@ -1,6 +1,6 @@
 # Clunk
 
-Clunk는 생성형·마켓·외주·수작업으로 만들어진 게임 에셋을 실제 바이트 기준으로 검사하고, 안전하게 정리하고, 다시 증명하는 Game AssetOps 제품입니다.
+Clunk는 게임 에셋을 아이디어와 생성 결과에서 Game Ready 근거까지 연결하는 AI Game Asset Foundry이자 AssetOps 제품입니다. Sprite, Atlas, Spine, motion, GLB/GLTF를 실제 바이트 기준으로 검사하고, 안전하게 정리하고, 다시 증명합니다.
 
 > 어디서 생성하든, Clunk를 거쳐 출시합니다.
 
@@ -9,16 +9,12 @@ Clunk는 생성형·마켓·외주·수작업으로 만들어진 게임 에셋�
 ## 제품 흐름
 
 ```text
-ChatGPT 로그인
-  → Workspace
-  → 실제 GLB/GLTF 선택
-  → Core 검사·정책·Game-Ready Score
-  → 허용 목록 안전 최적화
-  → 새 출력 바이트 재검사
-  → Passport·다운로드·이력·크레딧 원장
+IDEA → PLAN → CREATE → REFINE → ANIMATE
+  → VALIDATE → GAME READY → PACKAGE
+  → DISCOVER → DISTRIBUTE → INTEGRATE
 ```
 
-Web, CLI, MCP와 VS Code 어댑터는 모두 `packages/core`의 검사·최적화 계약을 사용합니다. VS Code는 Windows에서 CLI 어댑터를 호출하며, workspace 이력·크레딧 저장은 Web/Sites API 경계가 담당합니다. 샘플의 메트릭은 고정 문구가 아니라 실제 GLB 바이트에서 매번 계산됩니다.
+현재 실제로 연결된 단계와 향후 provider/런타임 단계는 UI와 문서에서 구분합니다. Web, CLI, MCP와 VS Code 어댑터는 모두 `packages/core`의 검사·최적화 계약을 사용하며, 샘플의 메트릭은 고정 문구가 아니라 실제 GLB 바이트에서 매번 계산됩니다.
 
 ## 현재 구현 범위
 
@@ -29,7 +25,9 @@ Web, CLI, MCP와 VS Code 어댑터는 모두 `packages/core`의 검사·최적�
 - 빈 identity 노드 제거, 동일 머티리얼 dedupe, allowlisted `extras`·`asset.generator`·`asset.copyright` metadata 정리, 별도 출력 repack
 - 출력 파일 fresh reinspection, source/output hash가 포함된 Asset Passport JSON
 - 브라우저 3D 미리보기 및 실제 다운로드
-- ChatGPT SIWC 인증 경계, D1 메타데이터·이력·Passport·데모 크레딧 원장
+- Studio의 실제 generation artifact·review·marketplace Draft 흐름
+- provider-neutral 인증 경계와 현재 ChatGPT Sites 헤더 어댑터
+- D1 메타데이터·이력·Passport·데모 크레딧 원장 및 R2 artifact 저장 경계
 - 크레딧 idempotency, 실패 복구, 데모 업그레이드의 중복 지급 방지
 - 동일 Core를 호출하는 CLI, stdio MCP 서버, VS Code 명령 어댑터
 
@@ -93,10 +91,9 @@ npx.cmd tsx scripts/texture-audit.mjs examples/texture-audit/harvest-frontier.te
 
 ## 생성 파이프라인
 
-에이전트가 절차적 three.js 팩토리 코드로 에셋을 생성하고(img2threejs 규율, Apache-2.0),
-`scripts/threejs-to-glb.mjs`로 GLB를 추출한 뒤 기존 게이트(inspect→optimize→Passport)로
-판정하는 경로입니다. 생성 지능은 에이전트, 레일과 게이트는 Clunk — 웹 UI에 가짜 생성
-버튼을 두지 않습니다. 1차 실증(풍차 데모 100/100 READY→Passport)과 경계 고지는
+에이전트나 Studio가 실제 artifact를 생성하면 `packages/core`의 게이트(inspect→optimize→Passport)와
+분리된 review/marketplace Draft 흐름으로 이어집니다. 생성 provider가 연결되지 않은 단계는
+UI에서 미래 경로로 표시하며, fixture·preview를 실제 사용자 생성이나 생산 승인으로 부르지 않습니다. 1차 실증과 경계 고지는
 [docs/generate-pipeline.ko.md](docs/generate-pipeline.ko.md), 생성 시장 분석은
 [docs/benchmark-meshy.ko.md](docs/benchmark-meshy.ko.md) 참조.
 
@@ -114,9 +111,9 @@ stdio JSON-RPC 서버가 `clunk_inspect`, `clunk_validate`, `clunk_optimize`, `c
 
 ## 저장·인증·결제 경계
 
-- `.openai/hosting.json`은 1차에 D1만 선언하며 R2는 `null`입니다.
+- 현재 `.openai/hosting.json`은 D1 `DB`와 R2 `ASSETS`를 선언합니다. 현재 Sites 런타임과 향후 Workers 경계는 [Cloudflare 배포 경계](docs/deployment-cloudflare.md)에 기록합니다.
 - 원본 에셋은 브라우저 로컬 처리입니다. D1에는 사용자·workspace·구독 상태와 파일 메타데이터·hash·report·작업·Passport·크레딧 원장을 저장하며, 원본 바이트는 저장하지 않습니다.
-- `/app`, `/dashboard`, `/settings`, 저장 API는 모든 환경에서 Sites 호스트가 주입한 ChatGPT SIWC 사용자 헤더가 없으면 거부합니다. 애플리케이션은 클라이언트 body의 userId를 신뢰하지 않습니다. 로컬 브라우저 검증도 테스트용 SIWC 헤더를 주입한 인증 세션으로 수행하며, 인증 우회 미리보기는 제품 경로에 남겨두지 않습니다.
+- `/app`, `/dashboard`, `/settings`, 저장 API는 현재 Sites 호스트가 주입한 ChatGPT 사용자 헤더가 없으면 거부합니다. 애플리케이션은 클라이언트 body의 userId를 신뢰하지 않습니다. 인증 provider는 `app/auth.ts` 경계 뒤에 있으며 Google/GitHub OAuth는 향후 설정·검증할 adapter입니다.
 - Stripe나 실제 결제는 연결하지 않습니다. 모든 크레딧·플랜 화면에 `DEMO MODE · 실제 결제 아님`을 표시합니다.
 - 향후 결제는 `BillingProvider` 인터페이스 뒤에 국내 제공자를 연결할 수 있게 분리했습니다.
 

@@ -43,14 +43,17 @@ test("public landing is asset-first without pretending to generate", async () =>
 test("workspace surfaces name their real jobs without removing evidence", async () => {
   const studio = await source("app/studio/StudioClient.tsx");
   const gameReady = await source("app/app/page.tsx");
+  const inspector = await source("app/components/ClunkInspector.tsx");
   const dashboard = await source("app/components/DashboardClient.tsx");
   const marketplace = await source("app/marketplace/page.tsx");
+  const marketplaceApi = await source("app/api/marketplace/route.ts");
   assert.match(studio, /prompt/i);
   assert.match(studio, /Game Ready|Asset Studio/);
   assert.match(gameReady, /Game Ready/);
-  assert.match(gameReady, /NOT_EVALUATED|정적 정책 점수/);
+  assert.match(inspector, /NOT_EVALUATED|정적 정책 점수/);
   assert.match(dashboard, /assets|generations/i);
   assert.match(marketplace, /Discover|에셋/);
+  assert.match(marketplaceApi, /ensureSchema/);
 });
 
 test("Cloudflare deployment documentation is future-facing and truthful", async () => {
