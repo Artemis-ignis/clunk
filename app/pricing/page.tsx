@@ -134,6 +134,25 @@ export default function PricingPage() {
           />
         </section>
 
+        <section className="pricing-creation-section" aria-labelledby="pricing-creation-heading">
+          <div className="pricing-creation-heading">
+            <span className="eyebrow">FROM CREDIT TO CATALOG</span>
+            <h2 id="pricing-creation-heading">크레딧 하나로<br /><em>끝나는 일은 여기까지입니다.</em></h2>
+            <p>Clunk의 실행 비용은 검사에 붙지만, 상품이 되려면 생성·검수·라이선스·판매 준비가 따로 필요합니다. 한 화면에서 그 차이를 확인하세요.</p>
+            <div className="pricing-creation-actions">
+              <Link className="button button-primary button-sm" href="/studio">실제 에셋 만들기 <Icon name="arrowUpRight" size={14} /></Link>
+              <Link className="button button-quiet button-sm" href="/marketplace">마켓 둘러보기 <Icon name="arrowRight" size={14} /></Link>
+            </div>
+          </div>
+          <div className="pricing-creation-grid">
+            <article><AssetFamilyVisual kind="sprite" compact /><span>01 · CREATE</span><strong>PNG / Atlas / GLB</strong><small>새 artifact와 prompt provenance</small></article>
+            <article><AssetFamilyVisual kind="atlas" compact /><span>02 · INSPECT</span><strong>hash · policy · findings</strong><small>같은 target profile로 fresh reopen</small></article>
+            <article><AssetFamilyVisual kind="motion" compact /><span>03 · PROVE</span><strong>runtime · player</strong><small>실제 캡처가 없으면 승격하지 않음</small></article>
+            <article><AssetFamilyVisual kind="spine" compact /><span>04 · REVIEW</span><strong>human decision</strong><small>사람의 메모와 근거를 별도 저장</small></article>
+            <article><AssetFamilyVisual kind="model" compact /><span>05 · SELL</span><strong>license · listing</strong><small>모든 gate 뒤에만 공개 상품</small></article>
+          </div>
+        </section>
+
         <section className="pricing-block" aria-label="월정액 플랜">
           <div className="pricing-block-head">
             <h2>월정액 플랜</h2>

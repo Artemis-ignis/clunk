@@ -169,3 +169,94 @@ export const collaborationMessages = sqliteTable(
   },
   (table) => ({ threadCreated: index("idx_clunk_collaboration_messages_thread_created").on(table.workspaceId, table.threadId, table.createdAt) }),
 );
+
+export const generationJobs = sqliteTable(
+  "clunk_generation_jobs",
+  {
+    id: text("id").primaryKey(),
+    workspaceId: text("workspace_id").notNull(),
+    assetId: text("asset_id"),
+    assetKind: text("asset_kind").notNull(),
+    targetProfileId: text("target_profile_id").notNull(),
+    provider: text("provider").notNull(),
+    prompt: text("prompt").notNull(),
+    status: text("status").notNull(),
+    recipeJson: text("recipe_json").notNull(),
+    provenanceJson: text("provenance_json").notNull(),
+    evidenceJson: text("evidence_json"),
+    storageStatus: text("storage_status").notNull().default("UNAVAILABLE"),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => ({ workspaceCreated: index("idx_clunk_generation_workspace_created").on(table.workspaceId, table.createdAt) }),
+);
+
+export const assetArtifacts = sqliteTable(
+  "clunk_asset_artifacts",
+  {
+    id: text("id").primaryKey(),
+    workspaceId: text("workspace_id").notNull(),
+    assetId: text("asset_id").notNull(),
+    fileName: text("file_name").notNull(),
+    role: text("role").notNull(),
+    contentType: text("content_type").notNull(),
+    byteLength: integer("byte_length").notNull(),
+    sha256: text("sha256").notNull(),
+    objectKey: text("object_key"),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => ({ assetFile: uniqueIndex("clunk_asset_artifact_asset_file").on(table.assetId, table.fileName), assetCreated: index("idx_clunk_artifacts_asset_created").on(table.assetId, table.createdAt) }),
+);
+
+export const assetReviews = sqliteTable(
+  "clunk_asset_reviews",
+  {
+    id: text("id").primaryKey(),
+    workspaceId: text("workspace_id").notNull(),
+    assetId: text("asset_id").notNull(),
+    visualRuntime: text("visual_runtime").notNull(),
+    playerFacing: text("player_facing").notNull(),
+    humanDecision: text("human_decision").notNull(),
+    note: text("note"),
+    evidenceJson: text("evidence_json").notNull(),
+    reviewerUserId: text("reviewer_user_id").notNull(),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => ({ assetCreated: index("idx_clunk_reviews_asset_created").on(table.assetId, table.createdAt) }),
+);
+
+export const marketplaceListings = sqliteTable(
+  "clunk_marketplace_listings",
+  {
+    id: text("id").primaryKey(),
+    workspaceId: text("workspace_id").notNull(),
+    assetId: text("asset_id").notNull(),
+    slug: text("slug").notNull(),
+    title: text("title").notNull(),
+    description: text("description").notNull(),
+    priceCents: integer("price_cents").notNull(),
+    currency: text("currency").notNull().default("KRW"),
+    licenseStatus: text("license_status").notNull(),
+    status: text("status").notNull().default("DRAFT"),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    publishedAt: text("published_at"),
+  },
+  (table) => ({ slugUnique: uniqueIndex("clunk_marketplace_listing_slug_unique").on(table.slug), statusCreated: index("idx_clunk_listings_status_created").on(table.status, table.createdAt), workspaceCreated: index("idx_clunk_listings_workspace_created").on(table.workspaceId, table.createdAt) }),
+);
+
+export const marketplaceOrders = sqliteTable(
+  "clunk_marketplace_orders",
+  {
+    id: text("id").primaryKey(),
+    listingId: text("listing_id").notNull(),
+    buyerUserId: text("buyer_user_id").notNull(),
+    status: text("status").notNull(),
+    paymentProvider: text("payment_provider").notNull(),
+    paymentReference: text("payment_reference"),
+    amountCents: integer("amount_cents").notNull(),
+    currency: text("currency").notNull(),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => ({ buyerCreated: index("idx_clunk_orders_buyer_created").on(table.buyerUserId, table.createdAt) }),
+);

@@ -13,6 +13,9 @@ export * from "./assetops-pipeline";
 export * from "./generation-contract";
 export * from "./collaboration-contract";
 export * from "./asset-inspection-evidence";
+export * from "./sprite-sheet-review";
+export * from "./product-contract";
+export * from "./product-authoring";
 export * from "./analyzers/asset-analyzers";
 export * from "./semantic-contracts/harvest-frontier";
 

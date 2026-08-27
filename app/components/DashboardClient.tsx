@@ -41,6 +41,20 @@ type CreditEntry = {
   createdAt: string;
 };
 
+type GenerationJob = {
+  id: string;
+  assetId?: string | null;
+  assetKind: string;
+  targetProfileId: string;
+  provider: string;
+  prompt: string;
+  status: string;
+  storageStatus: string;
+  provenanceJson?: string;
+  evidenceJson?: string | null;
+  createdAt: string;
+};
+
 type MeResponse = {
   user?: {
     displayName?: string;
@@ -170,6 +184,7 @@ export function DashboardClient() {
   const [runs, setRuns] = useState<Run[]>([]);
   const [passports, setPassports] = useState<Passport[]>([]);
   const [ledger, setLedger] = useState<CreditEntry[]>([]);
+  const [generationJobs, setGenerationJobs] = useState<GenerationJob[]>([]);
   const [credits, setCredits] = useState<number | null>(null);
   const [message, setMessage] = useState("");
   const [userLabel, setUserLabel] = useState("사용자");
@@ -183,11 +198,12 @@ export function DashboardClient() {
       setConnection("checking");
       setMessage("");
       try {
-        const [me, runResponse, passportResponse, creditResponse] = await Promise.all([
+        const [me, runResponse, passportResponse, creditResponse, generationResponse] = await Promise.all([
           fetch("/api/me", { cache: "no-store" }),
           fetch("/api/runs", { cache: "no-store" }),
           fetch("/api/passports", { cache: "no-store" }),
           fetch("/api/credits", { cache: "no-store" }),
+          fetch("/api/generation", { cache: "no-store" }),
         ]);
         if (cancelled) return;
         if (!me.ok) {
@@ -212,6 +228,7 @@ export function DashboardClient() {
         const runBody = await runResponse.json() as { runs?: Run[] };
         const passportBody = await passportResponse.json() as { passports?: Passport[] };
         const creditBody = await creditResponse.json() as { credits?: number; ledger?: CreditEntry[] };
+        const generationBody = generationResponse.ok ? await generationResponse.json() as { jobs?: GenerationJob[] } : { jobs: [] };
         if (typeof creditBody.credits !== "number" || !Number.isFinite(creditBody.credits)) {
           throw new Error("Invalid credit balance response.");
         }
@@ -221,6 +238,7 @@ export function DashboardClient() {
         setRuns(runBody.runs ?? []);
         setPassports(passportBody.passports ?? []);
         setLedger(creditBody.ledger ?? []);
+        setGenerationJobs(generationBody.jobs ?? []);
         setCredits(creditBody.credits);
       } catch {
         if (cancelled) return;
@@ -298,6 +316,8 @@ export function DashboardClient() {
       <EvidenceLanes statuses={evidenceStatuses} hasRun={Boolean(latestRun)} />
 
       <DashboardAssetBoard latestRun={latestRun} statuses={evidenceStatuses} />
+
+      <GenerationOverview jobs={generationJobs} />
 
       <NextVerificationRail next={nextVerification} />
 
@@ -460,6 +480,42 @@ function DashboardAssetBoard({ latestRun, statuses }: { latestRun: Run | null; s
       </div>
     </section>
   );
+}
+
+function GenerationOverview({ jobs }: { jobs: GenerationJob[] }) {
+  const latest = jobs[0] ?? null;
+  const kind = latest ? generationVisualKind(latest.assetKind) : "sprite";
+  const provenance = latest ? parseGenerationProvenance(latest.provenanceJson) : null;
+  const evidence = latest ? parseGenerationEvidence(latest.evidenceJson) : null;
+  const staticStatus = evidence?.stages?.structure?.status === "pass" && evidence?.stages?.policy?.status === "pass" ? "PASS" : latest ? "GAP" : "NOT_RUN";
+  return (
+    <section className="dashboard-generation-overview" aria-labelledby="dashboard-generation-heading">
+      <div className="dashboard-generation-visual"><AssetFamilyVisual kind={kind} compact /><div className="dashboard-generation-visual-label"><span>AUTHORING PREVIEW</span><strong>{latest ? latest.assetKind : "2D + 3D"}</strong></div></div>
+      <div className="dashboard-generation-copy">
+        <div className="dashboard-generation-head"><div><span className="mono-label">RECENT CREATION · REAL BYTES</span><h3 id="dashboard-generation-heading">만든 결과도 이곳에서 이어집니다.</h3></div><span className={`dashboard-generation-status dashboard-generation-status-${latest ? "ready" : "empty"}`}>{latest ? latest.status : "EMPTY"}</span></div>
+        {latest ? <><strong className="dashboard-generation-name">{latest.assetId ?? latest.id}</strong><p>{latest.prompt}</p><div className="dashboard-generation-meta"><span><b>STATIC</b>{staticStatus}</span><span><b>STORAGE</b>{latest.storageStatus}</span><span><b>PROVIDER</b>{provenance?.provider ?? latest.provider}</span><span><b>READY</b>false</span></div><small className="dashboard-generation-note">생성·fresh reopen은 기록됐지만 runtime, player-facing, human review는 자동으로 채워지지 않습니다.</small></> : <p>아직 만든 에셋이 없습니다. Studio에서 Sprite·Atlas·Spine·Motion·GLB 중 하나를 선택하면 실제 artifact와 hash가 이 카드에 남습니다.</p>}
+        <div className="dashboard-generation-actions"><Link className="button button-primary button-sm" href="/studio">{latest ? "다음 에셋 만들기" : "첫 에셋 만들기"}<Icon name="arrowRight" size={14} /></Link><Link className="button button-quiet button-sm" href="/marketplace">마켓 보기</Link></div>
+      </div>
+    </section>
+  );
+}
+
+function generationVisualKind(assetKind: string): "sprite" | "atlas" | "spine" | "motion" | "model" {
+  if (assetKind === "2d-image") return "sprite";
+  if (assetKind === "sprite-atlas") return "atlas";
+  if (assetKind === "spine-project") return "spine";
+  if (assetKind === "animation-clip") return "motion";
+  return "model";
+}
+
+function parseGenerationProvenance(value: string | undefined): { provider?: string } | null {
+  if (!value) return null;
+  try { const parsed = JSON.parse(value) as { provider?: unknown }; return typeof parsed.provider === "string" ? { provider: parsed.provider } : null; } catch { return null; }
+}
+
+function parseGenerationEvidence(value: string | null | undefined): { stages?: Record<string, { status?: string }> } | null {
+  if (!value) return null;
+  try { return JSON.parse(value) as { stages?: Record<string, { status?: string }> }; } catch { return null; }
 }
 
 function DashboardStatusRow({ label, value, detail, tone }: { label: string; value: string; detail: string; tone: "pass" | "pending" }) {

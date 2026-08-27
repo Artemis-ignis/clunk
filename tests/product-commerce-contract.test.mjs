@@ -1,0 +1,74 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import { access } from "node:fs/promises";
+import test from "node:test";
+
+const root = new URL("../", import.meta.url);
+const source = async (path) => readFile(new URL(path, root), "utf8");
+
+test("product contract keeps creation, evidence, license, and publication as separate gates", async () => {
+  const contract = await import("../packages/core/src/product-contract.ts");
+  assert.equal(contract.canPublishListing({
+    artifactStored: true,
+    provenanceComplete: true,
+    licenseStatus: "cleared",
+    staticStatus: "PASS",
+    visualRuntime: "PASS",
+    playerFacing: "PASS",
+    humanDecision: "PASS",
+  }), true);
+  assert.equal(contract.canPublishListing({
+    artifactStored: true,
+    provenanceComplete: true,
+    licenseStatus: "cleared",
+    staticStatus: "PASS",
+    visualRuntime: "GAP",
+    playerFacing: "NOT_EVALUATED",
+    humanDecision: "NOT_EVALUATED",
+  }), false);
+  assert.equal(contract.readinessLabel({
+    staticStatus: "PASS",
+    visualRuntime: "GAP",
+    playerFacing: "NOT_EVALUATED",
+    humanDecision: "NOT_EVALUATED",
+  }), "EVIDENCE_INCOMPLETE");
+});
+
+test("creation and marketplace API surfaces exist and never imply a local path upload", async () => {
+  await access(new URL("app/api/generation/route.ts", root));
+  await access(new URL("app/api/reviews/route.ts", root));
+  await access(new URL("app/api/marketplace/route.ts", root));
+  await access(new URL("app/api/marketplace/checkout/route.ts", root));
+  const generation = await source("app/api/generation/route.ts");
+  const reviews = await source("app/api/reviews/route.ts");
+  const marketplace = await source("app/api/marketplace/route.ts");
+  const checkout = await source("app/api/marketplace/checkout/route.ts");
+  assert.match(generation, /clunk\.asset-generation-result\.v1/);
+  assert.match(generation, /sha256/);
+  assert.match(generation, /provenance/);
+  assert.doesNotMatch(generation, /localPath|readFile|node:fs/);
+  assert.match(reviews, /captureSha256/);
+  assert.match(reviews, /humanDecision/);
+  assert.doesNotMatch(reviews, /readFile|node:fs/);
+  assert.match(marketplace, /PUBLISHED/);
+  assert.match(marketplace, /license/);
+  assert.match(marketplace, /artifact/);
+  assert.match(checkout, /PAYMENT_PROVIDER_NOT_CONFIGURED/);
+  assert.doesNotMatch(checkout, /INSERT.*order|clunk_marketplace_orders/i);
+});
+
+test("the public product surfaces expose creation, library, review, and marketplace actions", async () => {
+  const nav = await source("app/components/SiteNav.tsx");
+  const studio = await source("app/studio/StudioClient.tsx");
+  const landing = await source("app/page.tsx");
+  const marketplace = await source("app/marketplace/page.tsx");
+  const hosting = JSON.parse(await source(".openai/hosting.json"));
+  await access(new URL("public/samples/product-sprite/clunk-sprite-sample.png", root));
+  assert.equal(hosting.r2, "ASSETS");
+  assert.match(nav, /marketplace/);
+  assert.match(studio, new RegExp("api/generation"));
+  assert.match(studio, new RegExp("api/reviews"));
+  assert.match(studio, /생성|prompt/i);
+  assert.match(landing, /실제 제작|마켓|판매/);
+  assert.match(marketplace, /검수|라이선스|다운로드/);
+});

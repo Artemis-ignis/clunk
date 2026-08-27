@@ -5,7 +5,7 @@ export type AssetKind =
   | "spine-project"
   | "animation-clip";
 
-export type TargetEngine = "web-three" | "godot" | "unity" | "unreal";
+export type TargetEngine = "web-three" | "pixi-js" | "godot" | "unity" | "unreal";
 
 export type TargetPlatform = "desktop" | "android" | "ios" | "web";
 

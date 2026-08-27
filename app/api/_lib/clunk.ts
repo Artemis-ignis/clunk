@@ -10,7 +10,7 @@ export type ClunkUserContext = {
   workspaceId: string;
 };
 
-type RuntimeEnv = { DB?: D1Database };
+type RuntimeEnv = { DB?: D1Database; ASSETS?: R2Bucket };
 
 const runtime = env as unknown as RuntimeEnv;
 
@@ -37,6 +37,17 @@ const SCHEMA_STATEMENTS = [
   `CREATE INDEX IF NOT EXISTS idx_clunk_api_keys_workspace_created ON clunk_api_keys(workspace_id, created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_clunk_collaboration_threads_workspace_updated ON clunk_collaboration_threads(workspace_id, updated_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_clunk_collaboration_messages_thread_created ON clunk_collaboration_messages(workspace_id, thread_id, created_at ASC)`,
+  `CREATE TABLE IF NOT EXISTS clunk_generation_jobs (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL, asset_id TEXT, asset_kind TEXT NOT NULL, target_profile_id TEXT NOT NULL, provider TEXT NOT NULL, prompt TEXT NOT NULL, status TEXT NOT NULL, recipe_json TEXT NOT NULL, provenance_json TEXT NOT NULL, evidence_json TEXT, storage_status TEXT NOT NULL DEFAULT 'UNAVAILABLE', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
+  `CREATE TABLE IF NOT EXISTS clunk_asset_artifacts (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL, asset_id TEXT NOT NULL, file_name TEXT NOT NULL, role TEXT NOT NULL, content_type TEXT NOT NULL, byte_length INTEGER NOT NULL, sha256 TEXT NOT NULL, object_key TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, UNIQUE (asset_id, file_name))`,
+  `CREATE TABLE IF NOT EXISTS clunk_asset_reviews (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL, asset_id TEXT NOT NULL, visual_runtime TEXT NOT NULL, player_facing TEXT NOT NULL, human_decision TEXT NOT NULL, note TEXT, evidence_json TEXT NOT NULL, reviewer_user_id TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
+  `CREATE TABLE IF NOT EXISTS clunk_marketplace_listings (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL, asset_id TEXT NOT NULL, slug TEXT NOT NULL UNIQUE, title TEXT NOT NULL, description TEXT NOT NULL, price_cents INTEGER NOT NULL, currency TEXT NOT NULL DEFAULT 'KRW', license_status TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'DRAFT', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, published_at TEXT)`,
+  `CREATE TABLE IF NOT EXISTS clunk_marketplace_orders (id TEXT PRIMARY KEY, listing_id TEXT NOT NULL, buyer_user_id TEXT NOT NULL, status TEXT NOT NULL, payment_provider TEXT NOT NULL, payment_reference TEXT, amount_cents INTEGER NOT NULL, currency TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
+  `CREATE INDEX IF NOT EXISTS idx_clunk_generation_workspace_created ON clunk_generation_jobs(workspace_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_clunk_artifacts_asset_created ON clunk_asset_artifacts(asset_id, created_at ASC)`,
+  `CREATE INDEX IF NOT EXISTS idx_clunk_reviews_asset_created ON clunk_asset_reviews(asset_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_clunk_listings_status_created ON clunk_marketplace_listings(status, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_clunk_listings_workspace_created ON clunk_marketplace_listings(workspace_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_clunk_orders_buyer_created ON clunk_marketplace_orders(buyer_user_id, created_at DESC)`,
 ];
 
 export async function requireClunkContext(): Promise<ClunkUserContext> {
@@ -56,6 +67,20 @@ export function getRuntimeDb(): D1Database {
     );
   }
   return runtime.DB;
+}
+
+export function getRuntimeAssets(): R2Bucket {
+  if (!runtime.ASSETS) {
+    throw new ClunkHttpError(
+      "Clunk asset storage is not configured. Set .openai/hosting.json r2 to ASSETS before saving generated files.",
+      503,
+    );
+  }
+  return runtime.ASSETS;
+}
+
+export function hasRuntimeAssets(): boolean {
+  return Boolean(runtime.ASSETS);
 }
 
 export async function ensureSchema(db: D1Database): Promise<void> {

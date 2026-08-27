@@ -333,7 +333,7 @@ export const ASSET_INSPECTION_CONTRACT = {
   bundle: "v2: Spine JSON + atlas + PNG or Sprite atlas + page files · per-file role/relatesTo/SHA-256/bytes · max 256 files · max 64 MiB decoded",
   response: "clunk.asset-inspection-response.v1/v2 · evidence: AssetEvidence · v2 bundle summary includes per-file role, relations, SHA-256, and byte count",
   unavailable: "ENVIRONMENT_UNAVAILABLE · productionReady false",
-  persistence: "raw bytes are not persisted; submit returned evidence in collaboration evidence",
+  persistence: "inspect API raw bytes are not persisted; authenticated Studio generation may persist its generated artifact bundle in private R2 ASSETS, while returned inspection evidence remains the source of truth",
   cli: "npm.cmd run asset:inspect -- --path <asset> --target-profile <profile> --format json",
   visualLink: "POST /api/collaboration/threads/:threadId/evidence · evidenceMode append|replace",
 } as const;
@@ -358,11 +358,23 @@ export const ASSET_INSPECTION_EVIDENCE_V2_CONTRACT = {
 export const GENERATION_CONTRACT = {
   request: "clunk.asset-generation-request.v1",
   result: "clunk.asset-generation-result.v1",
+  studioApi: "POST /api/generation · authenticated workspace · 2D Sprite/Atlas/Spine, Motion, and GLB/GLTF result bundle",
   command: "npm.cmd run asset:generate -- --factory <factory.mjs> --target-profile <profile> --recipe-id threejs-factory-v1 --output-directory <separate-dir>",
   supported: "threejs-factory-v1 · sprite-sheet-factory-v1 · sprite-atlas-factory-v1 · spine-json-factory-v1 · threejs-animation-factory-v1",
+  storage: "generated bundle bytes are stored only when the private R2 ASSETS binding is available; otherwise the response is LOCAL_PREVIEW_ONLY and productionReady remains false",
+  publication: "a marketplace listing starts as DRAFT and can become PUBLISHED only after artifact storage, provenance, cleared license, static PASS, visual runtime PASS, player-facing PASS, and human PASS",
   unavailable: "Spine .skel binary parsing, licensed Spine export parity, and engine playback remain ENVIRONMENT_UNAVAILABLE until a verified adapter/runner ships",
   verification: "same target profile output reopen; environmentUnavailable remains exit 4",
   passport: "procedural source does not receive a fabricated Passport; real source/output files use clunk_passport",
+} as const;
+
+export const MARKETPLACE_CONTRACT = {
+  catalog: "GET /api/marketplace · published listings only · public metadata and selected preview object",
+  listing: "POST /api/marketplace · authenticated workspace · DRAFT first",
+  assetDelivery: "GET /api/marketplace/assets/:assetId · published listing and R2 object key required",
+  checkout: "POST /api/marketplace/checkout · explicit PAYMENT_PROVIDER_NOT_CONFIGURED boundary; no fake order is created",
+  gate: "PUBLISHED requires stored artifact, complete provenance, cleared license, static PASS, visualRuntime PASS, playerFacing PASS, and humanDecision PASS",
+  truth: "a catalog card or structural PASS is not a player-facing or human approval",
 } as const;
 
 export const QUALITY_WARNING_CONTRACT = {

@@ -1,0 +1,26 @@
+clunk-sprite-sample.png
+size: 384, 96
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+
+frame_01
+  rotate: false
+  xy: 0, 0
+  size: 96, 96
+  orig: 96, 96
+frame_02
+  rotate: false
+  xy: 96, 0
+  size: 96, 96
+  orig: 96, 96
+frame_03
+  rotate: false
+  xy: 192, 0
+  size: 96, 96
+  orig: 96, 96
+frame_04
+  rotate: false
+  xy: 288, 0
+  size: 96, 96
+  orig: 96, 96

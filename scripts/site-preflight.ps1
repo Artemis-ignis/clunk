@@ -21,8 +21,8 @@ $checks = @(
   [ordered]@{
     name = 'source-hosting-json'
     path = $hostingPath
-    pass = ($hosting.d1 -eq 'DB' -and $null -eq $hosting.r2)
-    detail = 'D1 binding DB is declared and R2 remains null for v1.'
+    pass = ($hosting.d1 -eq 'DB' -and $hosting.r2 -eq 'ASSETS')
+    detail = 'D1 binding DB and R2 binding ASSETS are declared for product metadata and artifact bytes.'
   },
   [ordered]@{
     name = 'worker-entry'

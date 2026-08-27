@@ -1,0 +1,288 @@
+{
+  "schema": "clunk.asset-generation-result.v1",
+  "generationStatus": "GENERATED",
+  "status": "ENVIRONMENT_UNAVAILABLE",
+  "plan": {
+    "schema": "clunk.asset-generation.v1",
+    "requestHash": "c3e8af9c5a82445b007527644c40ecd781fa518dc24237df3a0b522b91366687",
+    "source": {
+      "kind": "prompt",
+      "sha256": "61feacc4eca08b0481aa2690a73ac97401c38b201079bedcf0568eaa8cdb0f91",
+      "license": "creator-owned"
+    },
+    "assetKind": "sprite-atlas",
+    "targetProfileId": "yeongheo-pixi-2d",
+    "target": {
+      "id": "yeongheo-pixi-2d",
+      "label": "영허검가 PixiJS 2D",
+      "engine": "pixi-js",
+      "engineVersion": "8.x",
+      "platform": "web",
+      "renderer": "WebGL2",
+      "importer": {
+        "id": "pixi.Texture.from"
+      },
+      "plugins": [],
+      "acceptedFormats": [
+        "png",
+        "jpg",
+        "jpeg",
+        "webp",
+        "json",
+        "atlas"
+      ],
+      "assetKinds": [
+        "2d-image",
+        "sprite-atlas",
+        "spine-project"
+      ],
+      "coordinateSystem": {
+        "up": "y",
+        "forward": "z",
+        "unitMeters": 1
+      },
+      "texturePolicy": {
+        "maxDimension": 4096,
+        "formats": [
+          "png",
+          "jpeg",
+          "webp"
+        ],
+        "memoryBudgetBytes": 134217728,
+        "compression": [
+          "webgl-compatible"
+        ]
+      },
+      "animationPolicy": {
+        "rootMotion": "forbidden"
+      },
+      "semanticRules": [
+        "pixi-sprite-atlas-v1"
+      ]
+    },
+    "recipe": {
+      "id": "sprite-atlas-factory-v1",
+      "version": "1.0.0",
+      "hash": "7f1484b5f0bf0bd5bf632b44439297f57bcc98f5dd604e0127a418948031e43b",
+      "parameters": {
+        "width": 384,
+        "height": 96,
+        "frames": 4,
+        "label": "clunk-sprite-sample"
+      }
+    },
+    "recipeHash": "7f1484b5f0bf0bd5bf632b44439297f57bcc98f5dd604e0127a418948031e43b",
+    "outputDirectory": "C:\\Users\\50106\\Desktop\\Clunk\\public\\samples\\product-sprite",
+    "verificationPolicy": "REOPEN_WITH_SAME_TARGET_PROFILE",
+    "passportPolicy": "REQUIRED_AFTER_ARTIFACT_REOPEN",
+    "status": "READY_TO_RUN",
+    "message": "A verified authoring adapter can produce a separate artifact for this target profile.",
+    "output": {
+      "authoringAdapter": "sprite-atlas-factory-v1"
+    }
+  },
+  "artifacts": [
+    {
+      "path": "C:\\Users\\50106\\Desktop\\Clunk\\public\\samples\\product-sprite\\clunk-sprite-sample.atlas",
+      "role": "entry",
+      "bytes": 360,
+      "sha256": "21048308db01d65690d20b1a45a46ab7564f3d7408ef742b4cc757fef8000002"
+    },
+    {
+      "path": "C:\\Users\\50106\\Desktop\\Clunk\\public\\samples\\product-sprite\\clunk-sprite-sample.png",
+      "role": "page",
+      "bytes": 13227,
+      "sha256": "84a1aef2a22ab233978a97616c9539c0821b078960db6a50065567a1cb602cb3"
+    }
+  ],
+  "entryFileName": "clunk-sprite-sample.atlas",
+  "evidence": {
+    "runId": "author-c3e8af9c5a82",
+    "assetKind": "sprite-atlas",
+    "source": {
+      "path": "C:\\Users\\50106\\Desktop\\Clunk\\public\\samples\\product-sprite\\clunk-sprite-sample.atlas",
+      "bytes": 360,
+      "sha256": "21048308db01d65690d20b1a45a46ab7564f3d7408ef742b4cc757fef8000002",
+      "format": "atlas"
+    },
+    "ruleSetId": "pixi-sprite-atlas-v1",
+    "ruleSetVersion": "1.0.0",
+    "recipe": {
+      "id": "sprite-atlas-factory-v1",
+      "version": "1.0.0",
+      "recipeHash": "7f1484b5f0bf0bd5bf632b44439297f57bcc98f5dd604e0127a418948031e43b",
+      "inputHash": "61feacc4eca08b0481aa2690a73ac97401c38b201079bedcf0568eaa8cdb0f91"
+    },
+    "target": {
+      "id": "yeongheo-pixi-2d",
+      "label": "영허검가 PixiJS 2D",
+      "engine": "pixi-js",
+      "engineVersion": "8.x",
+      "platform": "web",
+      "renderer": "WebGL2",
+      "importer": {
+        "id": "pixi.Texture.from"
+      },
+      "plugins": [],
+      "acceptedFormats": [
+        "png",
+        "jpg",
+        "jpeg",
+        "webp",
+        "json",
+        "atlas"
+      ],
+      "assetKinds": [
+        "2d-image",
+        "sprite-atlas",
+        "spine-project"
+      ],
+      "coordinateSystem": {
+        "up": "y",
+        "forward": "z",
+        "unitMeters": 1
+      },
+      "texturePolicy": {
+        "maxDimension": 4096,
+        "formats": [
+          "png",
+          "jpeg",
+          "webp"
+        ],
+        "memoryBudgetBytes": 134217728,
+        "compression": [
+          "webgl-compatible"
+        ]
+      },
+      "animationPolicy": {
+        "rootMotion": "forbidden"
+      },
+      "semanticRules": [
+        "pixi-sprite-atlas-v1"
+      ]
+    },
+    "stages": {
+      "bytes": {
+        "status": "pass",
+        "message": "Input bytes and target format were received.",
+        "evidence": [
+          {
+            "key": "bytes",
+            "value": 360
+          },
+          {
+            "key": "format",
+            "value": "atlas"
+          },
+          {
+            "key": "sha256",
+            "value": "21048308db01d65690d20b1a45a46ab7564f3d7408ef742b4cc757fef8000002"
+          }
+        ],
+        "durationMs": 0
+      },
+      "structure": {
+        "status": "pass",
+        "message": "Atlas pages and region references passed.",
+        "evidence": [
+          {
+            "key": "entry",
+            "value": "clunk-sprite-sample.atlas"
+          },
+          {
+            "key": "pageCount",
+            "value": 1
+          },
+          {
+            "key": "regionCount",
+            "value": 4
+          }
+        ],
+        "durationMs": 0
+      },
+      "policy": {
+        "status": "pass",
+        "message": "Atlas pages and region references passed.",
+        "evidence": [
+          {
+            "key": "entry",
+            "value": "clunk-sprite-sample.atlas"
+          },
+          {
+            "key": "pageCount",
+            "value": 1
+          },
+          {
+            "key": "regionCount",
+            "value": 4
+          }
+        ],
+        "durationMs": 0
+      },
+      "import": {
+        "status": "environmentUnavailable",
+        "message": "No pixi-js import runner was supplied; structural evidence only.",
+        "evidence": [
+          {
+            "key": "engine",
+            "value": "pixi-js"
+          },
+          {
+            "key": "engineVersion",
+            "value": "8.x"
+          },
+          {
+            "key": "profileId",
+            "value": "yeongheo-pixi-2d"
+          }
+        ],
+        "durationMs": 0
+      },
+      "runtime": {
+        "status": "environmentUnavailable",
+        "message": "No pixi-js runtime runner was supplied; structural evidence only.",
+        "evidence": [
+          {
+            "key": "engine",
+            "value": "pixi-js"
+          },
+          {
+            "key": "engineVersion",
+            "value": "8.x"
+          },
+          {
+            "key": "profileId",
+            "value": "yeongheo-pixi-2d"
+          }
+        ],
+        "durationMs": 0
+      },
+      "outputReopen": {
+        "status": "pass",
+        "message": "Generated output bundle was reopened from fresh bytes.",
+        "evidence": [
+          {
+            "key": "entry",
+            "value": "21048308db01d65690d20b1a45a46ab7564f3d7408ef742b4cc757fef8000002:360"
+          },
+          {
+            "key": "page",
+            "value": "84a1aef2a22ab233978a97616c9539c0821b078960db6a50065567a1cb602cb3:13227"
+          }
+        ],
+        "durationMs": 0,
+        "environmentId": "clunk-author-reopen-v1"
+      }
+    },
+    "findings": [],
+    "qualityWarnings": [],
+    "status": "ENVIRONMENT_UNAVAILABLE",
+    "productionReady": false
+  },
+  "passport": null,
+  "limitations": [
+    "Authoring output is procedural/authored source evidence, not a human player-facing approval.",
+    "Engine import/runtime remains ENVIRONMENT_UNAVAILABLE until a real target runner is supplied.",
+    "Run clunk_passport when a source artifact and a separately reviewed output artifact must be compared."
+  ]
+}

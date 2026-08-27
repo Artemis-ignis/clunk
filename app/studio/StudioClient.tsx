@@ -7,6 +7,7 @@ import { Icon, type IconName } from "../components/Icon";
 import { WorkspaceShell } from "../components/WorkspaceShell";
 import { AssetFamilyVisual, type AssetFamilyVisualKind } from "../components/AssetFamilyVisual";
 import { LiveEvidenceShowcase } from "../components/LiveEvidenceShowcase";
+import { AssetCreationWorkbench } from "../components/AssetCreationWorkbench";
 import {
   buildStudioCommand,
   STUDIO_ASSET_CARDS,
@@ -108,6 +109,17 @@ export function StudioClient({ userLabel }: { userLabel: string }) {
           </div>
           <LiveEvidenceShowcase variant="studio" compact />
         </header>
+
+        <section className="studio-live-authoring" aria-labelledby="studio-live-authoring-heading">
+          <div className="studio-live-authoring-head">
+            <div>
+              <span className="mono-label">LIVE PRODUCT FLOW · CREATE → INSPECT → REVIEW → SELL</span>
+              <h3 id="studio-live-authoring-heading">설명 화면을 지나 실제 생성 결과까지</h3>
+            </div>
+            <span className="studio-live-authoring-api">/api/generation · /api/reviews · /api/marketplace</span>
+          </div>
+          <AssetCreationWorkbench />
+        </section>
 
         <section className="studio-workflow" aria-label="Asset Studio workflow">
           {STUDIO_WORKFLOW_STEPS.map((step, index) => (

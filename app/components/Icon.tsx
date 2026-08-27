@@ -2,6 +2,7 @@
 
 import {
   Activity,
+  ArrowLeft,
   ArrowRight,
   ArrowUpRight,
   BadgeCheck,
@@ -11,6 +12,7 @@ import {
   Boxes,
   Check,
   ChevronDown,
+  ChevronRight,
   CircleAlert,
   CircleCheck,
   Clock,
@@ -23,6 +25,7 @@ import {
   Gauge,
   Hash,
   Info,
+  Image as ImageIcon,
   LayoutDashboard,
   ListChecks,
   Menu,
@@ -41,6 +44,7 @@ import {
 
 const REGISTRY = {
   activity: Activity,
+  arrowLeft: ArrowLeft,
   arrowRight: ArrowRight,
   arrowUpRight: ArrowUpRight,
   badge: BadgeCheck,
@@ -50,6 +54,7 @@ const REGISTRY = {
   boxes: Boxes,
   check: Check,
   chevronDown: ChevronDown,
+  chevronRight: ChevronRight,
   circleAlert: CircleAlert,
   circleCheck: CircleCheck,
   clock: Clock,
@@ -61,6 +66,7 @@ const REGISTRY = {
   gauge: Gauge,
   hash: Hash,
   info: Info,
+  image: ImageIcon,
   inspect: FileSearch,
   layout: LayoutDashboard,
   listChecks: ListChecks,

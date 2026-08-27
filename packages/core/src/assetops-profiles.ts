@@ -9,6 +9,27 @@ const ALL_KINDS: readonly AssetKind[] = [...MODEL_KINDS, ...TWO_D_KINDS];
 
 const PROFILES: readonly TargetProfile[] = [
   {
+    id: "yeongheo-pixi-2d",
+    label: "영허검가 PixiJS 2D",
+    engine: "pixi-js",
+    engineVersion: "8.x",
+    platform: "web",
+    renderer: "WebGL2",
+    importer: { id: "pixi.Texture.from" },
+    plugins: [],
+    acceptedFormats: ["png", "jpg", "jpeg", "webp", "json", "atlas"],
+    assetKinds: ["2d-image", "sprite-atlas", "spine-project"],
+    coordinateSystem: { up: "y", forward: "z", unitMeters: 1 },
+    texturePolicy: {
+      maxDimension: 4096,
+      formats: ["png", "jpeg", "webp"],
+      memoryBudgetBytes: 128 * 1024 * 1024,
+      compression: ["webgl-compatible"],
+    },
+    animationPolicy: { rootMotion: "forbidden" },
+    semanticRules: ["pixi-sprite-atlas-v1"],
+  },
+  {
     id: "harvest-frontier-web-three",
     label: "Harvest Frontier Web / Three.js",
     engine: "web-three",

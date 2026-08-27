@@ -45,6 +45,15 @@ test("Harvest Frontier target profile exposes all declared 2D and 3D asset kinds
   });
 });
 
+test("Yeongheoge Pixi profile scopes 2D authoring and keeps runtime approval separate", () => {
+  const profile = getBuiltInTargetProfiles().find((item) => item.id === "yeongheo-pixi-2d");
+  assert.ok(profile);
+  assert.equal(profile.engine, "pixi-js");
+  assert.equal(profile.renderer, "WebGL2");
+  assert.deepEqual(profile.assetKinds, ["2d-image", "sprite-atlas", "spine-project"]);
+  assert.deepEqual(profile.semanticRules, ["pixi-sprite-atlas-v1"]);
+});
+
 test("a skipped runtime gate cannot become READY", () => {
   const target = getBuiltInTargetProfiles().find((profile) => profile.id === "godot-4");
   assert.ok(target);
