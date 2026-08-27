@@ -19,12 +19,12 @@ type HandshakeStep = "idle" | "checking" | "PASS" | "FAIL";
 
 const AGENT_CONNECT_LOGIN_HREF = "/login?return_to=%2Fagents%23connect";
 
-export function AgentsClient() {
+export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuthenticated?: boolean }) {
   const [selectedKey, setSelectedKey] = useState<AgentGuideKey>(DEFAULT_AGENT_GUIDE.key);
   const [endpoint, setEndpoint] = useState("/api/mcp");
   const [issuedSecret, setIssuedSecret] = useState<string | null>(null);
   const [keys, setKeys] = useState<ApiKeySummary[]>([]);
-  const [connectionState, setConnectionState] = useState<ConnectionState>("loading");
+  const [connectionState, setConnectionState] = useState<ConnectionState>(initiallyAuthenticated ? "loading" : "signed-out");
   const [busy, setBusy] = useState<"create" | "check" | string | null>(null);
   const [message, setMessage] = useState<string>("");
   const [checkResult, setCheckResult] = useState<"PASS" | "FAIL" | null>(null);
@@ -66,9 +66,10 @@ export function AgentsClient() {
   }, []);
 
   useEffect(() => {
+    if (!initiallyAuthenticated) return;
     const timer = window.setTimeout(() => void loadKeys(), 0);
     return () => window.clearTimeout(timer);
-  }, [loadKeys]);
+  }, [initiallyAuthenticated, loadKeys]);
 
   async function createKey() {
     setBusy("create");

@@ -1,4 +1,5 @@
 import Link from "../components/NativeLink";
+import { getChatGPTUser } from "../chatgpt-auth";
 import { Icon } from "../components/Icon";
 import { McpEndpointStatus } from "../components/McpEndpointStatus";
 import { SampleRunWorkbench } from "../components/SampleRunWorkbench";
@@ -13,7 +14,8 @@ export const metadata = createPageMetadata({
   path: "/connect",
 });
 
-export default function ConnectPage() {
+export default async function ConnectPage() {
+  const user = await getChatGPTUser();
   return (
     <SiteShell active="agents">
       <main className="connect-page">
@@ -48,7 +50,7 @@ export default function ConnectPage() {
             <div><span className="eyebrow">02 · CONNECT THE CLIENT</span><h2 id="connect-setup-heading">선택하고, 발급하고,<br /><em>실제 응답을 확인합니다.</em></h2></div>
             <p>클라이언트를 고른 뒤 키를 발급하고 설정을 복사합니다. 마지막 단계에서 <code>initialize</code>와 <code>tools/list</code>를 실제 호출해 성공·실패를 화면에 남깁니다.</p>
           </div>
-          <AgentsClient />
+          <AgentsClient initiallyAuthenticated={Boolean(user)} />
         </section>
 
         <section className="connect-boundary" aria-label="연결과 검토의 경계">

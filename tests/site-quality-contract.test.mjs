@@ -112,3 +112,13 @@ test("showroom and machine docs expose valid semantic progress and links", async
   assert.match(showcase, /<h2>\{currentStage\.title\}<\/h2>/);
   assert.match(llms, /\[[^\]]+\]\(https:\/\/clunk\.honna1\.chatgpt\.site/);
 });
+
+test("signed-out agent surfaces do not probe the private key API on mount", async () => {
+  const agentsPage = await source("app/agents/page.tsx");
+  const connectPage = await source("app/connect/page.tsx");
+  const client = await source("app/agents/AgentsClient.tsx");
+  assert.match(agentsPage, /getChatGPTUser/);
+  assert.match(connectPage, /getChatGPTUser/);
+  assert.match(client, /initiallyAuthenticated/);
+  assert.match(client, /if \(!initiallyAuthenticated\) return/);
+});

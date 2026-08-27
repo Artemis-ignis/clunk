@@ -1,4 +1,5 @@
 import Link from "../components/NativeLink";
+import { getChatGPTUser } from "../chatgpt-auth";
 import { AgentsClient } from "./AgentsClient";
 import { Icon } from "../components/Icon";
 import { SiteShell } from "../components/SiteShell";
@@ -26,7 +27,8 @@ const AGENT_ASSETS: Array<{ kind: AssetFamilyVisualKind; label: string }> = [
   { kind: "model", label: "GLB / GLTF" },
 ];
 
-export default function AgentsPage() {
+export default async function AgentsPage() {
+  const user = await getChatGPTUser();
   return (
     <SiteShell active="agents">
       <main className="agents-page agents-v4-page">
@@ -40,7 +42,7 @@ export default function AgentsPage() {
 
         <section className="agents-v4-section agents-v4-setup"><div className="agents-v4-heading"><span className="eyebrow">FOUR SMALL STEPS</span><h2>연결은 짧고,<br /><em>결과는 실제여야 합니다.</em></h2><p>페이지를 읽고 추측하지 마세요. 키를 발급하고, 설정을 복사하고, 서버 handshake를 확인합니다.</p></div><ol className="agents-v4-steps agent-journey">{setupSteps.map(([number, title, detail]) => <li key={number}><span>{number}</span><strong>{title}</strong><small>{detail}</small></li>)}</ol></section>
 
-        <section className="agents-v4-section agents-v4-connect" id="connect"><div className="agents-v4-heading agents-v4-heading-wide"><div><span className="eyebrow">CLIENT SETUP</span><h2>쓰는 도구를 고르면<br /><em>설정이 완성됩니다.</em></h2></div><p className="agent-tab-purpose">선택한 클라이언트의 실제 설정을 복사합니다. 인증 실패도 화면에 남깁니다.</p></div><AgentsClient /></section>
+        <section className="agents-v4-section agents-v4-connect" id="connect"><div className="agents-v4-heading agents-v4-heading-wide"><div><span className="eyebrow">CLIENT SETUP</span><h2>쓰는 도구를 고르면<br /><em>설정이 완성됩니다.</em></h2></div><p className="agent-tab-purpose">선택한 클라이언트의 실제 설정을 복사합니다. 인증 실패도 화면에 남깁니다.</p></div><AgentsClient initiallyAuthenticated={Boolean(user)} /></section>
 
         <section className="agents-v4-section agents-v4-tools" aria-labelledby="tools-heading"><div className="agents-v4-heading agents-v4-heading-wide"><div><span className="eyebrow">TOOLS THE AGENT CAN CALL</span><h2 id="tools-heading">연결 후 바로 부르는<br /><em>{MCP_HTTP_TOOL_COUNT}개 도구</em></h2></div><p>검사·생성·증거 연결의 도구가 같은 계약을 공유합니다. 원격 HTTP는 로컬 경로를 읽지 않습니다.</p></div><div className="agents-v4-tool-grid">{MCP_HTTP_TOOL_CATALOG.map((tool, index) => <article key={tool.name}><span>0{index + 1}</span><code>{tool.name}</code><strong>{tool.summary}</strong><small>입력 {tool.input} · 출력 {tool.output}</small></article>)}</div></section>
 
