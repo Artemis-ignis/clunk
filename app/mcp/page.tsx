@@ -15,7 +15,7 @@ export default function McpPage() {
   return (
     <SiteShell active="agents">
       <main className="mcp-page">
-        <section className="mcp-page-hero">
+        <section className="mcp-page-hero public-hero-frame public-hero-mcp">
           <div className="mcp-page-copy">
             <span className="eyebrow">CLUNK HTTP MCP · v{MCP_SERVER.version}</span>
             <h1>에이전트가<br /><em>같은 근거를 호출합니다.</em></h1>

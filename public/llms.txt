@@ -6,6 +6,12 @@
 
 Status: private pilot (Korea first). Billing is a working demo ledger, not a payment provider.
 
+## Public surfaces
+
+- [Clunk home](https://clunk.honna1.chatgpt.site/): sample-first product walkthrough and evidence states.
+- [Connect](https://clunk.honna1.chatgpt.site/connect): official HTTP MCP setup and handshake entry point.
+- [Documentation](https://clunk.honna1.chatgpt.site/docs): contracts, asset families, and runtime boundaries.
+
 Clunk HTTP MCP: shipped at `/api/mcp`. The official setup surfaces are `/connect` and
 `/agents#connect`; `/mcp` is not a public website connection route. It is Clunk's own streamable
 HTTP route, authenticated with a workspace-scoped `Authorization: Bearer clunk_live_...` key issued

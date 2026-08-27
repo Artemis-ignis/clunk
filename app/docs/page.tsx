@@ -190,7 +190,7 @@ export default function DocsPage() {
   return (
     <SiteShell active="docs">
       <main className="docs-page-redesign">
-        <header className="docs-hero-v2">
+        <header className="docs-hero-v2 public-hero-frame public-hero-docs">
           <div>
             <span className="eyebrow">CLUNK DOCUMENTATION</span>
             <h1>연결하고, 검사하고,<br /><em>근거로 판단하세요.</em></h1>

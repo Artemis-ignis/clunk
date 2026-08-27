@@ -17,7 +17,7 @@ export default function ConnectPage() {
   return (
     <SiteShell active="agents">
       <main className="connect-page">
-        <header className="connect-hero">
+        <header className="connect-hero public-hero-frame public-hero-connect">
           <div className="connect-hero-copy">
             <div className="hero-status-line"><span className="status-dot status-dot-on" /><span>OFFICIAL CONNECTION SURFACE</span><code>v{MCP_SERVER.version}</code></div>
             <span className="eyebrow">SAMPLE FIRST · CONNECT SECOND</span>

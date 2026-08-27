@@ -80,7 +80,7 @@ export default function PricingPage() {
   return (
     <SiteShell active="pricing">
       <main className="page">
-        <div className="pricing-hero-grid">
+        <div className="pricing-hero-grid public-hero-frame public-hero-pricing">
           <header className="page-head">
             <span className="eyebrow">요금 구조</span>
             <h1>

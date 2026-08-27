@@ -6,7 +6,7 @@ import { SiteNav } from "./components/SiteNav";
 import { SnapRoot } from "./components/SnapRoot";
 import { McpEndpointStatus } from "./components/McpEndpointStatus";
 import { LandingMcpDemo } from "./components/LandingMcpDemo";
-import { SampleRunWorkbench } from "./components/SampleRunWorkbench";
+import { LiveEvidenceShowcase } from "./components/LiveEvidenceShowcase";
 import { AssetFamilyVisual, type AssetFamilyVisualKind } from "./components/AssetFamilyVisual";
 import { createPageMetadata } from "./components/site-metadata";
 import { ASSET_KIND_COVERAGE, CLI_SAMPLE, MCP_TOOLS, MCP_TOOL_COUNT, RULE_COUNT, RULE_SET, SURFACE_COUNT, TARGET_PROFILES } from "./components/product-facts";
@@ -40,7 +40,7 @@ export default function Home() {
       <SnapRoot />
       <SiteNav active="home" />
       <main className="landing-v5">
-        <section className="landing-v5-hero" id="home">
+                <section className="landing-v5-hero public-hero-frame public-hero-landing" id="home">
           <div className="landing-v5-hero-copy">
             <span className="eyebrow">CLUNK / ASSET EVIDENCE WORKSPACE</span>
             <h1><span>에이전트가 만든 에셋을</span><em>게임에 넣기 전에 판정합니다.</em></h1>
@@ -48,7 +48,7 @@ export default function Home() {
             <div className="landing-v5-actions"><Link className="button button-primary" href="#flow" prefetch={false}>샘플 검사 보기 <Icon name="chevronDown" size={15} /></Link><Link className="button button-quiet" href="/connect" prefetch={false}>에이전트 연결 <Icon name="arrowRight" size={15} /></Link></div>
             <div className="landing-v5-proof"><span><i /> 실제 파일 hash</span><span><i /> fresh reinspection</span><span><i /> 사람 판정 별도</span></div>
           </div>
-          <SampleRunWorkbench />
+          <LiveEvidenceShowcase variant="landing" />
         </section>
 
         <section className="landing-v5-strip" aria-label="Clunk가 연결하는 결과">

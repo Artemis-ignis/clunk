@@ -6,6 +6,7 @@ import { CopyCodeButton } from "../components/CopyCodeButton";
 import { Icon, type IconName } from "../components/Icon";
 import { WorkspaceShell } from "../components/WorkspaceShell";
 import { AssetFamilyVisual, type AssetFamilyVisualKind } from "../components/AssetFamilyVisual";
+import { LiveEvidenceShowcase } from "../components/LiveEvidenceShowcase";
 import {
   buildStudioCommand,
   STUDIO_ASSET_CARDS,
@@ -105,13 +106,7 @@ export function StudioClient({ userLabel }: { userLabel: string }) {
               </Link>
             </div>
           </div>
-          <div className="studio-hero-art" aria-hidden="true">
-            <div className="studio-orbit studio-orbit-a" />
-            <div className="studio-orbit studio-orbit-b" />
-            <div className="studio-art-block studio-art-block-a"><span>2D</span><strong>SPRITE</strong></div>
-            <div className="studio-art-block studio-art-block-b"><span>3D</span><strong>MODEL</strong></div>
-            <div className="studio-art-core"><Icon name="boxes" size={34} /></div>
-          </div>
+          <LiveEvidenceShowcase variant="studio" compact />
         </header>
 
         <section className="studio-workflow" aria-label="Asset Studio workflow">

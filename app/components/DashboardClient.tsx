@@ -8,7 +8,7 @@ import { Icon } from "./Icon";
 import { readinessHint, resolveStoredReadiness } from "./readiness";
 import { StatusPill } from "./StatusPill";
 import { WorkspaceShell } from "./WorkspaceShell";
-import { ProductEvidenceCanvas } from "./ProductEvidenceCanvas";
+import { LiveEvidenceShowcase } from "./LiveEvidenceShowcase";
 import { AssetFamilyVisual } from "./AssetFamilyVisual";
 
 type Run = {
@@ -265,7 +265,7 @@ export function DashboardClient() {
             <Link className="button button-quiet" href="#collaboration">프레임 증거 연결 <Icon name="chevronDown" size={15} /></Link>
           </div>
         </div>
-        <ProductEvidenceCanvas variant="dashboard" compact />
+        <LiveEvidenceShowcase variant="dashboard" compact />
       </section>
 
       {connection === "checking" ? (
