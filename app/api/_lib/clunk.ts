@@ -1,12 +1,12 @@
 import { env } from "cloudflare:workers";
-import { getChatGPTUser, type ChatGPTUser } from "../../chatgpt-auth";
+import { getCurrentUser, type AuthUser } from "../../auth";
 import { sha256Hex, stableStringify } from "../../../packages/core/src/index";
 import { ClunkHttpError } from "./http-error";
 
 export { ClunkHttpError } from "./http-error";
 
 export type ClunkUserContext = {
-  user: ChatGPTUser;
+  user: AuthUser & { userId: string };
   workspaceId: string;
 };
 
@@ -51,8 +51,9 @@ const SCHEMA_STATEMENTS = [
 ];
 
 export async function requireClunkContext(): Promise<ClunkUserContext> {
-  const user = await getChatGPTUser();
-  if (!user) throw new ClunkHttpError("Authentication required.", 401);
+  const currentUser = await getCurrentUser();
+  if (!currentUser) throw new ClunkHttpError("Authentication required.", 401);
+  const user = { ...currentUser, userId: currentUser.id };
   const db = getRuntimeDb();
   await ensureSchema(db);
   const workspaceId = await ensureWorkspace(db, user);
@@ -111,7 +112,7 @@ async function ensureColumn(db: D1Database, table: "clunk_collaboration_threads"
 
 export async function ensureWorkspace(
   db: D1Database,
-  user: ChatGPTUser,
+  user: AuthUser & { userId: string },
 ): Promise<string> {
   const workspaceId = `ws-${sha256Hex(new TextEncoder().encode(user.userId)).slice(0, 24)}`;
   const subscriptionId = `sub-${workspaceId}`;
