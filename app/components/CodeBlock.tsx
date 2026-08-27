@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { CopyCodeButton } from "./CopyCodeButton";
 
 /**
  * Server rendered code panel. The colour vocabulary follows
@@ -24,7 +25,7 @@ export function CodeBlock({
     <figure className="codeblock">
       <figcaption className="codeblock-head">
         <span className="mono-label">{title}</span>
-        <span className="mono-label codeblock-lang">{language}</span>
+        <span className="codeblock-head-actions"><span className="mono-label codeblock-lang">{language}</span><CopyCodeButton value={code} /></span>
       </figcaption>
       <pre className="codeblock-body">
         <code>

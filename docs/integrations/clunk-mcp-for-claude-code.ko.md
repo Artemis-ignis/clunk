@@ -10,7 +10,7 @@ Harvest Frontier 폴더의 Claude Code에서 아래 명령 하나면 됩니다. 
 claude mcp add clunk --scope local -- cmd.exe /d /s /c "cd /d C:\Users\50106\Desktop\Clunk && npm.cmd run --silent mcp"
 ```
 
-등록 확인: 그 세션에서 `/mcp` 실행 → `clunk` 서버와 tool 4개(`clunk_inspect`, `clunk_validate`, `clunk_optimize`, `clunk_passport`)가 보이면 성공.
+등록 확인: 그 세션에서 `/mcp` 실행 → `clunk` 서버와 local stdio 7개 도구(`clunk_inspect`, `clunk_optimize`, `clunk_asset_author`, `clunk_asset_inspect`, `clunk_asset_inspection_evidence`, `clunk_scene_review`, `clunk_sprite_sheet_review`)가 보이면 성공. 공개 HTTPS 연결은 [Clunk 연결 화면](/connect)에서 키를 발급하고 `/api/mcp`의 `initialize` → `tools/list`를 확인합니다.
 
 ## HF 세션 에이전트에게 줄 사용 규칙 (복사해서 지시에 포함)
 

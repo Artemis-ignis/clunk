@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
 import Link from "../components/NativeLink";
 import { requireChatGPTUser } from "../chatgpt-auth";
 import { Icon } from "../components/Icon";
 import { WorkspaceShell } from "../components/WorkspaceShell";
+import { createPageMetadata } from "../components/site-metadata";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = {
+export const metadata = createPageMetadata({
   title: "설정",
   description: "계정과 워크스페이스 저장 경계를 확인합니다.",
-};
+  path: "/settings",
+});
 
 export default async function SettingsPage() {
   const user = await requireChatGPTUser("/settings");

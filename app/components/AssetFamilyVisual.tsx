@@ -1,4 +1,5 @@
 import { Icon } from "./Icon";
+import Image from "next/image";
 
 export type AssetFamilyVisualKind = "sprite" | "atlas" | "spine" | "motion" | "model";
 
@@ -19,7 +20,7 @@ export function AssetFamilyVisual({ kind, compact = false }: { kind: AssetFamily
       {kind === "model" ? (
         <>
           <div className="asset-family-model-grid" aria-hidden="true" />
-          <img src="/landing/tractor-hero.png" alt="Clunk 제품 화면에서 보여주는 GLB 샘플" width={620} height={420} />
+          <Image src="/landing/tractor-hero.png" alt="Clunk 제품 화면에서 보여주는 GLB 샘플" width={620} height={420} />
           <span className="asset-family-axis" aria-hidden="true"><b /><b /><b /></span>
         </>
       ) : null}

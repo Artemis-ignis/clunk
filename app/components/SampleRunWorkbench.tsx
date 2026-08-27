@@ -6,6 +6,7 @@ import Link from "./NativeLink";
 import { Icon } from "./Icon";
 import { CLI_SAMPLE } from "./product-facts";
 import { getSampleRunView, SAMPLE_RUN_STAGES, type SampleRunStageId } from "./sample-run-model";
+import { EvidenceStatusGrid } from "./EvidenceStatusGrid";
 
 export function SampleRunWorkbench({ compact = false }: { compact?: boolean }) {
   const [stage, setStage] = useState<SampleRunStageId>("asset");
@@ -49,12 +50,16 @@ export function SampleRunWorkbench({ compact = false }: { compact?: boolean }) {
             {stage !== "decision" ? <button type="button" className="button button-primary button-sm" onClick={() => setStage(nextStage)}>다음 단계 보기 <Icon name="arrowRight" size={14} /></button> : <Link className="button button-primary button-sm" href="/app" prefetch={false}>내 파일로 검사하기 <Icon name="arrowUpRight" size={14} /></Link>}
             <Link className="button button-quiet button-sm" href="/docs#contracts" prefetch={false}>판정 경계 <Icon name="arrowRight" size={14} /></Link>
           </div>
-          <div className="sample-workbench-boundary" role="status" aria-live="polite">
-            <span className="sample-boundary-pass">STATIC {view.staticStatus}</span>
-            <span className="sample-boundary-gap">RUNTIME {view.visualRuntime}</span>
-            <span className="sample-boundary-pending">PLAYER {view.playerFacing}</span>
-            <span className="sample-boundary-pending">HUMAN {view.humanDecision}</span>
-          </div>
+          <EvidenceStatusGrid
+            className="sample-evidence-status-grid"
+            ariaLabel="샘플의 분리된 증거 상태"
+            items={[
+              { label: "STATIC", value: view.staticStatus, detail: "bytes · hash · policy", tone: "pass" },
+              { label: "RUNTIME", value: view.visualRuntime, detail: "shipped frame 필요", tone: "gap" },
+              { label: "PLAYER", value: view.playerFacing, detail: "실제 게임 화면 전", tone: "pending" },
+              { label: "HUMAN", value: view.humanDecision, detail: "사람 검토 대기", tone: "pending" },
+            ]}
+          />
         </div>
       </div>
     </section>

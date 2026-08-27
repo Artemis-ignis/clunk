@@ -1,5 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
-import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "../components/NativeLink";
 import { CodeBlock } from "../components/CodeBlock";
 import { Icon } from "../components/Icon";
@@ -7,6 +6,8 @@ import { SiteShell } from "../components/SiteShell";
 import { DocsSearch } from "./DocsSearch";
 import { AssetFamilyVisual } from "../components/AssetFamilyVisual";
 import { SampleRunWorkbench } from "../components/SampleRunWorkbench";
+import { createPageMetadata } from "../components/site-metadata";
+import { EvidenceStatusGrid } from "../components/EvidenceStatusGrid";
 import {
   ASSET_INSPECTION_EVIDENCE_V2_CONTRACT,
   ASSET_KIND_COVERAGE,
@@ -23,13 +24,13 @@ import {
   SURFACES,
   TARGET_PROFILES,
   TEXTURE_AUDIT_CONTRACT,
-  UI_READABILITY_CONTRACT,
 } from "../components/product-facts";
 
-export const metadata: Metadata = {
+export const metadata = createPageMetadata({
   title: "문서와 연동 가이드",
   description: "Clunk MCP, CLI, AssetOps, frame evidence 계약을 빠르게 찾고 실제로 연결하는 문서입니다.",
-};
+  path: "/docs",
+});
 
 const CLI_COMMANDS = `# 검사: 실제 바이트에서 JSON evidence 생성
 $ npm.cmd run clunk -- inspect public/samples/clunk-messy-sample.glb --profile pc
@@ -204,7 +205,7 @@ export default function DocsPage() {
 
         <section className="docs-evidence-visual" aria-label="Clunk 증거 판정 시각 안내">
           <div className="docs-evidence-visual-art">
-            <img src="/landing/tractor-hero.png" alt="실제 GLB 검사 결과를 보여주는 Clunk 트랙터 렌더" width="900" height="560" />
+            <Image src="/landing/tractor-hero.png" alt="실제 GLB 검사 결과를 보여주는 Clunk 트랙터 렌더" width={900} height={560} priority />
             <span className="docs-evidence-visual-tag">REAL BYTES · TRACTOR.GLB</span>
           </div>
           <div className="docs-evidence-visual-copy">
@@ -256,8 +257,11 @@ export default function DocsPage() {
               </div>
               <p className="docs-lead-v2">원격 에이전트는 HTTPS MCP, 로컬 파일은 stdio를 사용합니다. <Link href="/agents#connect">에이전트 연결 화면</Link>에서 키를 발급하면 클라이언트별 설정이 완성됩니다.</p>
               <div className="docs-two-column">
-                <CodeBlock title="mcpServers" language="json" code={MCP_CONFIG_SNIPPET} caption="endpoint와 Bearer 키는 /agents에서 발급한 실제 값으로 채워집니다." />
-                <CodeBlock title="실제 연결 확인" language="bash" code={HTTP_SESSION} caption="설정 파일만 복사하지 않고 initialize와 tools/list를 실제로 확인합니다." />
+                <CodeBlock title="mcpServers" language="json" code={MCP_CONFIG_SNIPPET} caption="/connect에서 발급한 endpoint와 Bearer 키를 넣습니다." />
+                <details className="docs-details">
+                  <summary>실제 handshake 예시 <span>initialize → tools/list 열기</span></summary>
+                  <CodeBlock title="실제 연결 확인" language="bash" code={HTTP_SESSION} caption="설정 복사 뒤 실제 서버 응답을 확인합니다." />
+                </details>
               </div>
               <div className="docs-next-card"><span>다음</span><Link href="#clients">클라이언트별 설정으로 이동 <Icon name="arrowRight" size={14} /></Link></div>
             </section>
@@ -267,7 +271,7 @@ export default function DocsPage() {
                 <span className="section-number">02</span>
                 <div><span className="eyebrow">COPY THE RIGHT SHAPE</span><h2>클라이언트별 설정</h2></div>
               </div>
-              <p className="docs-lead-v2">모든 클라이언트에 같은 문장을 넣는 것이 아니라, 각 도구가 실제로 읽는 명령·JSON·servers 키를 사용합니다.</p>
+              <p className="docs-lead-v2">클라이언트가 읽는 설정 모양만 고르면 됩니다. 키는 workspace에서 발급하고 화면에서 복사합니다.</p>
               <div className="client-route-grid">
                 <article><span>CLAUDE CODE</span><strong>CLI 등록</strong><code>claude mcp add --transport http</code><p>HTTPS endpoint와 Bearer 헤더를 한 명령으로 등록합니다.</p></article>
                 <article><span>CODEX</span><strong>환경변수 분리</strong><code>codex mcp add --bearer-token-env-var</code><p>키를 환경변수로 보관하고 설정은 JSON으로 확인합니다.</p></article>
@@ -282,11 +286,13 @@ export default function DocsPage() {
                 <span className="section-number">03</span>
                 <div><span className="eyebrow">AUTOMATE THE GATE</span><h2>CLI와 CI</h2></div>
               </div>
-              <p className="docs-lead-v2">CLI stdout의 JSON이 CI의 기준입니다. 실패와 미지원은 서로 다른 exit code로 남기고, optimize는 요청된 별도 output에만 씁니다.</p>
-              <CodeBlock title="clunk-cli" language="bash" code={CLI_COMMANDS} caption="parse · policy · output reopen · Passport 순서를 유지합니다." />
-              <CodeBlock title="texture + portrait + evidence" language="bash" code={AUDIT_COMMANDS} caption={`${TEXTURE_AUDIT_CONTRACT.schema}: exit 0 PASS · 2 FAIL · 4 UNAVAILABLE. ${UI_READABILITY_CONTRACT.schema}도 같은 경계를 사용합니다.`} />
-              <CodeBlock title="Pixi sprite sheet review" language="bash" code={SPRITE_SHEET_COMMANDS} caption={`${SPRITE_SHEET_REVIEW_CONTRACT.schema}: local CLI byte rehash와 HTTP DECLARED_METADATA_ONLY를 분리합니다.`} />
-              <CodeBlock title="multi-file AssetOps bundle" language="json" code={BUNDLE_EXAMPLE} caption="atlas·PNG·Spine처럼 함께 움직이는 파일은 entryFileName, fileCount, 역할, relatesTo를 한 요청으로 보존합니다." />
+              <p className="docs-lead-v2">CLI는 실제 바이트를 읽고 JSON evidence와 0/2/4 exit code를 남깁니다. 긴 예시는 필요할 때만 펼칩니다.</p>
+              <div className="docs-detail-list">
+                <details className="docs-details" open><summary>GLB/GLTF inspect · validate · optimize <span>실행 명령 보기</span></summary><CodeBlock title="clunk-cli" language="bash" code={CLI_COMMANDS} caption="원본은 유지하고 output을 fresh reopen합니다." /></details>
+                <details className="docs-details"><summary>texture · portrait · evidence <span>읽기 쉬움·증거 CLI 보기</span></summary><CodeBlock title="texture + portrait + evidence" language="bash" code={AUDIT_COMMANDS} caption={`${TEXTURE_AUDIT_CONTRACT.schema}: 0 PASS · 2 FAIL · 4 UNAVAILABLE.`} /></details>
+                <details className="docs-details"><summary>Pixi sprite sheet review <span>RGBA rehash와 HTTP 경계 보기</span></summary><CodeBlock title="Pixi sprite sheet review" language="bash" code={SPRITE_SHEET_COMMANDS} caption={`${SPRITE_SHEET_REVIEW_CONTRACT.schema}: local byte rehash와 HTTP DECLARED_METADATA_ONLY를 분리합니다.`} /></details>
+                <details className="docs-details"><summary>Atlas · PNG · Spine bundle <span>멀티파일 manifest 보기</span></summary><CodeBlock title="multi-file AssetOps bundle" language="json" code={BUNDLE_EXAMPLE} caption="entryFileName·fileCount·역할·relatesTo를 보존합니다." /></details>
+              </div>
             </section>
 
             <section className="docs-section-v2 docs-studio-section" id="asset-studio">
@@ -294,14 +300,14 @@ export default function DocsPage() {
                 <span className="section-number">04</span>
                 <div><span className="eyebrow">AUTHOR · INSPECT · ATTACH</span><h2>Asset Studio</h2></div>
               </div>
-              <p className="docs-lead-v2">2D Sprite·Atlas·Spine과 3D Model·Animation을 같은 provenance로 만들고 검사합니다. 만들었다는 사실과 게임 화면에서 잘 보인다는 판정은 서로 다른 증거입니다.</p>
+              <p className="docs-lead-v2">2D와 3D 모두 provenance를 남기고 검사합니다. 생성 완료와 게임 화면 승인은 다른 증거입니다.</p>
               <div className="docs-two-column">
                 <div className="docs-studio-facts">
                   <article><span>2D</span><strong>Sprite · Atlas · Spine JSON</strong><p>PNG page, region bounds, bones, slots, attachments, animation 이름과 atlas 관계를 검사합니다.</p></article>
                   <article><span>3D</span><strong>Model · Mesh · Motion</strong><p>GLB/GLTF 구조, 재질, bounds, animation sampler와 target node를 검사합니다.</p></article>
                   <article><span>ENGINE</span><strong>Web · Godot · Unity · Unreal · Mobile</strong><p>실제 runner가 없으면 import/runtime은 ENVIRONMENT_UNAVAILABLE로 남깁니다.</p></article>
                 </div>
-                <CodeBlock title="Asset Studio CLI" language="bash" code={STUDIO_COMMANDS} caption="생성 결과는 별도 output으로 작성하고, fresh reopen 후 AssetEvidence를 반환합니다." />
+                <details className="docs-details"><summary>Asset Studio 실행 명령 <span>Sprite · Spine · GLB · motion</span></summary><CodeBlock title="Asset Studio CLI" language="bash" code={STUDIO_COMMANDS} caption="별도 output을 작성하고 fresh reopen 후 AssetEvidence를 반환합니다." /></details>
               </div>
               <div className="docs-contract-note"><strong>사용 제한</strong><span>로컬 stdio의 clunk_asset_author와 CLI만 출력 파일을 작성합니다. 원격 HTTPS MCP는 로컬 경로를 읽거나 쓰지 않고 업로드된 bundle만 검사합니다. .skel binary parser와 실제 엔진 playback은 아직 adapter/runner가 필요하며, CONTRACT_FIXTURE나 structural PASS만으로 player-facing 승인을 만들지 않습니다.</span></div>
             </section>
@@ -312,13 +318,20 @@ export default function DocsPage() {
                 <div><span className="eyebrow">READ THE RESULT CORRECTLY</span><h2>계약과 상태</h2></div>
               </div>
               <p className="docs-lead-v2">점수는 구조 계약의 한 축입니다. 실제 게임 화면과 사람의 판단은 각각 별도 필드이며 자동 승격하지 않습니다.</p>
-              <div className="docs-status-grid">
-                <article className="docs-status-card docs-status-static"><span>STRUCTURAL</span><strong>PASS</strong><p>bytes, hash, parser, policy, hard blocker</p></article>
-                <article className="docs-status-card docs-status-runtime"><span>VISUAL RUNTIME</span><strong>GAP</strong><p>shipped renderer와 frame evidence가 없으면 GAP</p></article>
-                <article className="docs-status-card docs-status-human"><span>HUMAN DECISION</span><strong>NO_GO / PENDING</strong><p>사람의 화면 리뷰 없이는 PASS가 아님</p></article>
+              <EvidenceStatusGrid
+                className="docs-shared-status-grid"
+                ariaLabel="계약과 상태"
+                items={[
+                  { label: "STATIC", value: "PASS", detail: "bytes · hash · policy", tone: "pass" },
+                  { label: "RUNTIME", value: "GAP", detail: "shipped frame 필요", tone: "gap" },
+                  { label: "PLAYER", value: "NOT_EVALUATED", detail: "실제 화면 전", tone: "pending" },
+                  { label: "HUMAN", value: "PENDING", detail: "사람 판정 대기", tone: "pending" },
+                ]}
+              />
+              <div className="docs-detail-list">
+                <details className="docs-details"><summary>asset inspection evidence JSON <span>계약 예시 보기</span></summary><CodeBlock title="clunk.asset-inspection-evidence.v2" language="json" code={EVIDENCE_EXAMPLE} caption={`${ASSET_INSPECTION_EVIDENCE_V2_CONTRACT.evidenceKind}; finding ownership을 보존합니다.`} /></details>
+                <details className="docs-details"><summary>shipped frame manifest JSON <span>runtime 입력 보기</span></summary><CodeBlock title="frame-manifest.v1" language="json" code={FRAME_EXAMPLE} caption={`${FRAME_REVIEW_CONTRACT.defaultBoundary}; renderer pair는 별도 제출합니다.`} /></details>
               </div>
-              <CodeBlock title="clunk.asset-inspection-evidence.v2" language="json" code={EVIDENCE_EXAMPLE} caption={`${ASSET_INSPECTION_EVIDENCE_V2_CONTRACT.evidenceKind}; qualityPolicy와 finding ownership을 보존합니다.`} />
-              <CodeBlock title="frame-manifest.v1" language="json" code={FRAME_EXAMPLE} caption={`${FRAME_REVIEW_CONTRACT.defaultBoundary}; WebGPU와 WebGL2는 별도 pair로 제출합니다.`} />
               <div className="docs-contract-note"><strong>기본 경계</strong><span>reviewStatus=NOT_EVALUATED · visualRuntime=GAP · playerFacing=NOT_EVALUATED</span></div>
             </section>
 
@@ -333,9 +346,11 @@ export default function DocsPage() {
                 <div><span className="mono-label">OBSERVATIONS</span><strong>88 draws · texture 0</strong><small>missing normals 7 · UV 88 · non-unit scale 181</small></div>
                 <div><span className="mono-label">PLAYER REVIEW</span><strong>NO_GO · GAP</strong><small>정적 PASS는 화면 승인이 아님</small></div>
               </div>
-              <CodeBlock title="canonical reinspection · received evidence" language="json" code={HF_M105_TRACTOR_INSPECTION} caption="실제 HF 값은 fixture template와 분리하고, optimize 없이 read-only로 보존합니다." />
-              <CodeBlock title="freshness · stale vs error" language="json" code={HF_HANDOFF_VERIFIER_STATUS} caption="27 never-notarised는 coverage incomplete이며 current-artifact approval이 아닙니다." />
-              <CodeBlock title="player-facing scene review output" language="bash" code={HF_EVIDENCE_RULES} caption="comparison pair·asset provenance·human review를 한 상태로 합치지 않습니다." />
+              <div className="docs-detail-list">
+                <details className="docs-details"><summary>HF tractor reinspection <span>외부 handoff 예시 보기</span></summary><CodeBlock title="canonical reinspection · received evidence" language="json" code={HF_M105_TRACTOR_INSPECTION} caption="HF 값은 외부 handoff이며 Clunk checkout에서 재검증하지 않았습니다." /></details>
+                <details className="docs-details"><summary>stale evidence와 fresh run <span>현재 승인과 구분하기</span></summary><CodeBlock title="freshness · stale vs error" language="json" code={HF_HANDOFF_VERIFIER_STATUS} caption="stale coverage는 current-artifact approval이 아닙니다." /></details>
+                <details className="docs-details"><summary>player-facing scene review <span>comparison과 human lane 보기</span></summary><CodeBlock title="player-facing scene review output" language="bash" code={HF_EVIDENCE_RULES} caption="comparison pair·asset provenance·human review를 합치지 않습니다." /></details>
+              </div>
               <p className="docs-lead-v2 docs-footnote">협업 API는 {COLLABORATION_CONTRACT.evidenceWriteMode}, {COLLABORATION_CONTRACT.evidenceDefaults}, {COLLABORATION_CONTRACT.evidenceOnlyApi}를 사용합니다.</p>
             </section>
 
@@ -344,13 +359,13 @@ export default function DocsPage() {
                 <span className="section-number">07</span>
                 <div><span className="eyebrow">BROWSER-NATIVE AGENT FLOW</span><h2>브라우저에서 직접 확인</h2></div>
               </div>
-              <p className="docs-lead-v2">Clunk 사이트는 페이지를 설명하는 데서 끝나지 않고, WebMCP를 노출하는 브라우저에서 읽기 전용 도구를 등록합니다. 등록된 도구는 HTTP endpoint와 제품 경계를 조회하지만, 원본 파일을 바꾸거나 시각 승인을 만들지 않습니다.</p>
+              <p className="docs-lead-v2">WebMCP가 노출된 브라우저에서는 읽기 전용 상태 도구를 확인할 수 있습니다. 원본 파일을 바꾸거나 시각 승인을 만들지 않습니다.</p>
               <div className="docs-status-grid docs-webmcp-status-grid">
                 <article className="docs-status-card docs-status-static"><span>HTTP MCP</span><strong>/api/mcp</strong><p>키 발급 후 initialize → tools/list를 실제 호출</p></article>
                 <article className="docs-status-card docs-status-runtime"><span>WEBMCP</span><strong>REGISTERED / UNAVAILABLE</strong><p>브라우저 API 노출 여부를 라이브 상태로 표시</p></article>
                 <article className="docs-status-card docs-status-human"><span>SAFETY BOUNDARY</span><strong>READ-ONLY</strong><p>structural PASS와 visualRuntime/GAP은 독립</p></article>
               </div>
-              <CodeBlock title="document.modelContext" language="bash" code={WEBMCP_EXAMPLE} caption="현재 Chrome API는 document.modelContext를 우선 사용하고, 구형 호환 브라우저에서는 navigator.modelContext를 확인합니다." />
+              <details className="docs-details"><summary>document.modelContext 예시 <span>브라우저 도구 보기</span></summary><CodeBlock title="document.modelContext" language="bash" code={WEBMCP_EXAMPLE} caption="document.modelContext를 우선 확인하고 구형 호환 브라우저에서는 navigator.modelContext를 확인합니다." /></details>
             </section>
 
             <section className="docs-section-v2" id="scope">
@@ -370,7 +385,7 @@ export default function DocsPage() {
 
             <section className="docs-final-card">
               <div><span className="eyebrow">NEED THE UI?</span><h2>문서에서 바로 실행 화면으로 이동하세요.</h2><p>설명만 읽고 끝나지 않도록 연결 키 발급과 샘플 검사를 바로 열어 둡니다.</p></div>
-              <div><Link className="button button-primary" href="/agents#connect">에이전트 연결 <Icon name="arrowUpRight" size={15} /></Link><Link className="button button-quiet" href="/app">검사기 열기 <Icon name="arrowRight" size={15} /></Link></div>
+              <div><Link className="button button-primary" href="/agents#connect">에이전트 연결 <Icon name="arrowUpRight" size={15} /></Link><Link className="button button-quiet" href="/app">내 파일 검사 · 로그인 <Icon name="arrowRight" size={15} /></Link></div>
             </section>
           </article>
         </div>

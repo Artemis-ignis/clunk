@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { WebMcpBridge } from "./components/WebMcpBridge";
+import { SITE_ORIGIN } from "./components/site-metadata";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,18 +20,19 @@ export const metadata: Metadata = {
     template: "%s | Clunk",
   },
   description: "실제 GLB와 GLTF를 검사하고 안전하게 최적화하는 Game AssetOps 제품입니다.",
-  metadataBase: new URL(process.env.CLUNK_SITE_ORIGIN ?? "http://localhost:3000"),
+  metadataBase: new URL(SITE_ORIGIN),
   openGraph: {
     title: "Clunk - Make every asset defensible",
     description: "GLB와 GLTF 팀을 위한 로컬 우선 Game AssetOps 워크스페이스입니다.",
     type: "website",
-    images: [{ url: "/og.png", width: 1664, height: 936, alt: "Clunk - Make every asset defensible" }],
+    url: SITE_ORIGIN,
+    images: [{ url: `${SITE_ORIGIN}/og.png`, width: 1664, height: 936, alt: "Clunk - Make every asset defensible" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Clunk - Make every asset defensible",
     description: "GLB와 GLTF 팀을 위한 로컬 우선 Game AssetOps 워크스페이스입니다.",
-    images: ["/og.png"],
+    images: [`${SITE_ORIGIN}/og.png`],
   },
   icons: {
     // ?v=3: browsers cache favicons hard; the query busts it whenever the mark changes.
@@ -51,10 +53,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    <html lang="ko" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
+      <body className="antialiased">
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
         <WebMcpBridge />
         {children}

@@ -20,7 +20,7 @@ const NAV_LINKS: { label: string; href: string; section: ShellSection }[] = [
   { label: "대시보드", href: "/dashboard", section: "dashboard" },
   { label: "요금", href: "/pricing", section: "pricing" },
   { label: "문서", href: "/docs", section: "docs" },
-  { label: "에이전트 연결", href: "/agents", section: "agents" },
+  { label: "에이전트 연결", href: "/connect", section: "agents" },
 ];
 
 export function SiteNav({ active }: { active?: ShellSection }) {
@@ -86,7 +86,7 @@ export function SiteNav({ active }: { active?: ShellSection }) {
               회원가입
             </Link>
             <Link className="button button-primary button-sm sitenav-cta" href="/app" prefetch={false}>
-              검사기 열기
+              내 파일 검사 · 로그인
               <Icon name="arrowUpRight" size={14} />
             </Link>
             <button
@@ -129,7 +129,7 @@ export function SiteNav({ active }: { active?: ShellSection }) {
                 회원가입
               </Link>
               <Link className="button button-primary button-sm" href="/app" prefetch={false} onClick={() => setOpen(false)}>
-                검사기 열기
+                내 파일 검사 · 로그인
                 <Icon name="arrowUpRight" size={14} />
               </Link>
             </div>

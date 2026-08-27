@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
 import Link from "../components/NativeLink";
 import { Icon } from "../components/Icon";
 import { McpEndpointStatus } from "../components/McpEndpointStatus";
 import { SiteShell } from "../components/SiteShell";
 import { MCP_HTTP_TOOL_COUNT, MCP_SERVER } from "../components/product-facts";
+import { createPageMetadata } from "../components/site-metadata";
 
-export const metadata: Metadata = {
+export const metadata = createPageMetadata({
   title: "MCP 연결",
   description: "Clunk HTTP MCP endpoint의 실제 상태와 연결 경계를 확인합니다.",
-};
+  path: "/connect",
+});
 
 export default function McpPage() {
   return (
@@ -52,4 +53,3 @@ export default function McpPage() {
     </SiteShell>
   );
 }
-

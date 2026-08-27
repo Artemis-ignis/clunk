@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Icon } from "./Icon";
 import { CLI_SAMPLE, MCP_TOOLS } from "./product-facts";
 
@@ -80,7 +81,7 @@ function InspectStage() {
     <div className="flow-stage flow-stage-inspect">
       <div className="flow-render-pane">
         <div className="flow-render-grid" aria-hidden="true" />
-        <img src="/landing/tractor-hero.png" alt="Clunk가 검사 중인 3D 트랙터 샘플" width={720} height={540} />
+        <Image src="/landing/tractor-hero.png" alt="Clunk가 검사 중인 3D 트랙터 샘플" width={720} height={540} />
         <div className="flow-sprite-mini" aria-label="2D motion 샘플">
           <span>2D MOTION</span>
           <div>{Array.from({ length: 12 }, (_, index) => <i key={index} className={`inspection-pixel pixel-${index % 4}`} />)}</div>

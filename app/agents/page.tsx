@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
 import Link from "../components/NativeLink";
+import Image from "next/image";
 import { AgentsClient } from "./AgentsClient";
 import { Icon } from "../components/Icon";
 import { SiteShell } from "../components/SiteShell";
 import { McpEndpointStatus } from "../components/McpEndpointStatus";
 import { AssetFamilyVisual, type AssetFamilyVisualKind } from "../components/AssetFamilyVisual";
 import { SampleRunWorkbench } from "../components/SampleRunWorkbench";
+import { createPageMetadata } from "../components/site-metadata";
 import { MCP_HTTP_TOOL_CATALOG, MCP_HTTP_TOOL_COUNT, MCP_SERVER, MCP_TOOLS, RULE_SET, TARGET_PROFILES } from "../components/product-facts";
 
-export const metadata: Metadata = { title: "에이전트 연결", description: "Claude Code, Codex, Cursor, GitHub Copilot, Claude Desktop, VS Code에서 Clunk를 연결하는 작업 가이드입니다." };
+export const metadata = createPageMetadata({ title: "에이전트 연결", description: "Claude Code, Codex, Cursor, GitHub Copilot, Claude Desktop, VS Code에서 Clunk를 연결하는 작업 가이드입니다.", path: "/agents" });
 
 const setupSteps = [
   ["01", "1. 키 발급", "workspace 전용 Bearer 키"],
@@ -29,7 +30,7 @@ export default function AgentsPage() {
   return (
     <SiteShell active="agents">
       <main className="agents-page agents-v4-page">
-        <section className="agents-v4-hero"><div className="agents-v4-copy"><div className="hero-status-line"><span className="status-dot status-dot-on" /><span>CLUNK HTTP MCP</span><code>v{MCP_SERVER.version}</code></div><span className="eyebrow">CONNECT THE AGENT</span><h1>생성 직후,<br /><em>에이전트가 검사합니다.</em></h1><p>Clunk가 직접 운영하는 HTTP MCP를 연결하면 Claude Code, Codex, Cursor, GitHub Copilot, Claude Desktop, VS Code에서 같은 Core와 같은 근거를 사용합니다.</p><div className="agents-v4-actions"><a className="button button-primary" href="#connect">연결 시작 <Icon name="chevronDown" size={15} /></a><Link className="button button-quiet" href="/docs#quickstart">설정 가이드 <Icon name="arrowRight" size={15} /></Link></div><div className="agents-v4-proof"><span><b>{MCP_HTTP_TOOL_COUNT}</b> HTTP tools</span><span><b>{MCP_TOOLS.length}</b> local tools</span><span><b>0</b> overwrite</span></div></div><div className="agent-inspection-board" aria-label="에이전트가 받는 Clunk 결과"><div className="agent-board-head"><span><i /> AGENT RESULT</span><code>clunk_inspect</code><b>LIVE</b></div><div className="agent-board-visual"><div className="agent-board-grid" aria-hidden="true" /><img src="/landing/tractor-hero.png" alt="Clunk 검사 결과의 3D 에셋" width={760} height={560} /><div className="agent-board-score"><span>STRUCTURAL</span><strong>PASS <small>100</small></strong><em>hash verified · blocker 0</em></div><div className="agent-board-route"><span>02 inspect</span><i>→</i><span>03 capture</span><i>→</i><span>04 review</span></div></div><div className="agent-board-foot"><span>same contract</span><span>same evidence</span><strong>different client</strong></div></div></section>
+        <section className="agents-v4-hero"><div className="agents-v4-copy"><div className="hero-status-line"><span className="status-dot status-dot-on" /><span>CLUNK HTTP MCP</span><code>v{MCP_SERVER.version}</code></div><span className="eyebrow">CONNECT THE AGENT</span><h1>생성 직후,<br /><em>에이전트가 검사합니다.</em></h1><p>Clunk가 직접 운영하는 HTTP MCP를 연결하면 Claude Code, Codex, Cursor, GitHub Copilot, Claude Desktop, VS Code에서 같은 Core와 같은 근거를 사용합니다.</p><div className="agents-v4-actions"><a className="button button-primary" href="#connect">연결 시작 <Icon name="chevronDown" size={15} /></a><Link className="button button-quiet" href="/docs#quickstart">설정 가이드 <Icon name="arrowRight" size={15} /></Link></div><div className="agents-v4-proof"><span><b>{MCP_HTTP_TOOL_COUNT}</b> HTTP tools</span><span><b>{MCP_TOOLS.length}</b> local tools</span><span><b>0</b> overwrite</span></div></div><div className="agent-inspection-board" aria-label="에이전트가 받는 Clunk 결과"><div className="agent-board-head"><span><i /> AGENT RESULT</span><code>clunk_inspect</code><b>LIVE</b></div><div className="agent-board-visual"><div className="agent-board-grid" aria-hidden="true" /><Image src="/landing/tractor-hero.png" alt="Clunk 검사 결과의 3D 에셋" width={760} height={560} priority /><div className="agent-board-score"><span>STRUCTURAL</span><strong>PASS <small>100</small></strong><em>hash verified · blocker 0</em></div><div className="agent-board-route"><span>02 inspect</span><i>→</i><span>03 capture</span><i>→</i><span>04 review</span></div></div><div className="agent-board-foot"><span>same contract</span><span>same evidence</span><strong>different client</strong></div></div></section>
 
         <section className="agents-v4-rail" aria-label="MCP 연결 상태"><div><span>ENDPOINT</span><strong>/api/mcp</strong><small>streamable HTTP</small></div><div><span>AUTH</span><strong>Bearer workspace key</strong><small>로그인 후 키 발급</small></div><div><span>TOOLS</span><strong>HTTP 원격 도구 {MCP_HTTP_TOOL_COUNT}개</strong><small>로컬 stdio 도구 {MCP_TOOLS.length}개 · initialize와 tools/list에 동일하게 표시</small></div><McpEndpointStatus /></section>
 
@@ -47,7 +48,7 @@ export default function AgentsPage() {
 
         <section className="agents-v4-handoff" aria-labelledby="handoff-heading"><div><span className="eyebrow">EVIDENCE HANDOFF</span><h2 id="handoff-heading">자동화 결과를<br /><em>사람의 검토로 보냅니다.</em></h2><p>fixture PASS나 구조 PASS를 player-facing 승인으로 부르지 않습니다. 최신 capture와 사람의 결정을 별도 lane으로 추가합니다.</p><code className="agents-v4-unavailable">environmentUnavailable는 실행하지 않은 런타임을 PASS로 바꾸지 않습니다.</code></div><div className="agents-v4-handoff-card"><div><span>STRUCTURAL</span><b>PASS</b></div><div><span>visualRuntime</span><b>GAP</b></div><div><span>playerFacing</span><b>NOT_EVALUATED</b></div><div><span>humanDecision</span><b>NO_GO / PENDING</b></div></div></section>
         <div className="agents-v4-machine-note"><code>HF M105 · environmentUnavailable · readinessReason=PLAYER_FACING_SCENE_GAP · sceneReviewCli · assetEvidenceRef · NOT CURRENT APPROVAL</code></div>
-        <section className="agents-v4-final"><div><span className="eyebrow">NEXT</span><h2>실제 에셋을<br /><em>한 번 호출해 보세요.</em></h2></div><div className="agents-v4-actions"><a className="button button-primary" href="#connect">클라이언트 설정하기 <Icon name="arrowUpRight" size={15} /></a><Link className="button button-quiet" href="/app">샘플 GLB 검사 <Icon name="arrowRight" size={15} /></Link></div></section>
+        <section className="agents-v4-final"><div><span className="eyebrow">NEXT</span><h2>실제 에셋을<br /><em>한 번 호출해 보세요.</em></h2></div><div className="agents-v4-actions"><a className="button button-primary" href="#connect">클라이언트 설정하기 <Icon name="arrowUpRight" size={15} /></a><Link className="button button-quiet" href="/app">내 파일 검사 · 로그인 <Icon name="arrowRight" size={15} /></Link></div></section>
       </main>
     </SiteShell>
   );

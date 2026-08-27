@@ -126,8 +126,9 @@ function TranscriptPane({ tool, armed }: { tool: PlaygroundTool; armed: boolean 
         <strong className="num">{tool.headline.value}</strong>
       </div>
       <div className="codeblock-caption">
-        네 도구 모두 <code>integrations/mcp/server.ts</code>가 실제로 광고하는 이름입니다. 응답은
-        번들 샘플을 검사해 기록한 실측값이며, 재생 속도만 연출입니다.
+        선택한 도구는 <code>integrations/mcp/server.ts</code>가 실제로 광고하는 이름입니다. 응답은
+        번들 샘플을 검사해 기록한 실측값이며, 재생 속도만 연출입니다. 전체 카탈로그와 연결 절차는
+        <code>/connect</code>에서 확인합니다.
       </div>
     </div>
   );

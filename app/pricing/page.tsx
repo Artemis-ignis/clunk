@@ -1,13 +1,17 @@
-import type { Metadata } from "next";
 import Link from "../components/NativeLink";
 import { Icon } from "../components/Icon";
 import { SiteShell } from "../components/SiteShell";
 import { AssetFamilyVisual } from "../components/AssetFamilyVisual";
+import { createPageMetadata } from "../components/site-metadata";
+import { AssetPreviewCard } from "../components/AssetPreviewCard";
+import { EvidenceRunCard } from "../components/EvidenceRunCard";
+import { CLI_SAMPLE } from "../components/product-facts";
 
-export const metadata: Metadata = {
+export const metadata = createPageMetadata({
   title: "요금 안내",
   description: "월정액 플랜과 선불 크레딧 팩을 함께 쓰는 Clunk 요금 구조입니다. 지금은 데모 원장으로 동작합니다.",
-};
+  path: "/pricing",
+});
 
 /**
  * Pricing = subscription for the seat, credits for the runs.
@@ -29,7 +33,7 @@ const MONTHLY_PLANS = [
       "안전 최적화와 새 재검사, Passport 발급",
       "워크스페이스 이력과 크레딧 원장",
     ],
-    cta: { label: "파일럿 시작", href: "/app", primary: true },
+    cta: { label: "내 파일 검사 · 로그인", href: "/app", primary: true },
     active: true,
   },
   {
@@ -108,6 +112,28 @@ export default function PricingPage() {
           </p>
         </div>
 
+        <section className="pricing-evidence-section" aria-labelledby="pricing-evidence-heading">
+          <div className="pricing-evidence-heading">
+            <span className="eyebrow">ONE CREDIT · ONE TRACEABLE RUN</span>
+            <h2 id="pricing-evidence-heading">크레딧 하나가<br /><em>어떤 결과가 되는가</em></h2>
+            <p>금액표보다 먼저 실행 결과를 보여드립니다. 샘플은 비용이 없고, 실제 원장은 로그인한 workspace의 성공 실행만 기록합니다.</p>
+          </div>
+          <EvidenceRunCard
+            eyebrow="CREDIT RUN PREVIEW"
+            title="검사 → 결과 → 다음 증거"
+            artifact={`${CLI_SAMPLE.file} · ${CLI_SAMPLE.byteLength.toLocaleString()} B`}
+            detail="한 번의 검사는 원본 바이트를 읽고 hash·policy·finding을 남깁니다. 성공 실행만 1 credit을 사용하며, runtime과 사람 리뷰는 별도 lane입니다."
+            visual={<AssetPreviewCard kind="model" label="GLB / GLTF" detail="UI preview · 실제 결과는 업로드 바이트에서 생성" />}
+            statuses={[
+              { label: "STATIC", value: `${CLI_SAMPLE.score}/100`, detail: "policy · blocker 0", tone: "pass" },
+              { label: "RUNTIME", value: "GAP", detail: "shipped frame 필요", tone: "gap" },
+              { label: "PLAYER", value: "NOT_EVALUATED", detail: "게임 화면 전", tone: "pending" },
+              { label: "HUMAN", value: "PENDING", detail: "사람 검토 대기", tone: "pending" },
+            ]}
+            nextAction={{ title: "내 파일로 이 흐름 실행", detail: "workspace에 로그인하면 실제 원장과 파일 이력이 이어집니다.", href: "/app", label: "로그인 후 검사" }}
+          />
+        </section>
+
         <section className="pricing-block" aria-label="월정액 플랜">
           <div className="pricing-block-head">
             <h2>월정액 플랜</h2>
@@ -162,8 +188,8 @@ export default function PricingPage() {
                 </p>
                 <p className="pack-price">{pack.price} · 예정가(안)</p>
                 <p className="pack-note">{pack.note}</p>
-                <Link href="/app" className="button button-quiet button-sm">
-                  데모 원장에서 흐름 보기
+                <Link href="/#flow" className="button button-quiet button-sm">
+                  공개 샘플 흐름 보기
                   <Icon name="arrowRight" size={14} />
                 </Link>
               </article>

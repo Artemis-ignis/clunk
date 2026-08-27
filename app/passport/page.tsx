@@ -1,12 +1,13 @@
-import type { Metadata } from "next";
 import { requireChatGPTUser } from "../chatgpt-auth";
 import { PassportClient } from "../components/PassportClient";
+import { createPageMetadata } from "../components/site-metadata";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = {
+export const metadata = createPageMetadata({
   title: "Passport",
   description: "원본과 출력 해시를 연결한 Passport 기록을 확인하고 내려받습니다.",
-};
+  path: "/passport",
+});
 
 export default async function PassportPage() {
   const user = await requireChatGPTUser("/passport");

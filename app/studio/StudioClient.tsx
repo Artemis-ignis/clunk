@@ -98,7 +98,7 @@ export function StudioClient({ userLabel }: { userLabel: string }) {
             <p>2D Sprite·Atlas·Spine부터 3D Model·Motion까지 하나의 provenance와 검사 계약으로 묶습니다. 구조 PASS와 실제 플레이어 화면 승인은 끝까지 분리합니다.</p>
             <div className="studio-hero-actions">
               <Link className="button button-primary button-sm" href="/app">
-                검사기로 보내기 <Icon name="arrowRight" size={14} />
+                검사기로 보내기 · 로그인 <Icon name="arrowRight" size={14} />
               </Link>
               <Link className="button button-quiet button-sm" href="/docs#asset-studio">
                 제작 계약 보기 <Icon name="arrowUpRight" size={14} />

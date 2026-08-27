@@ -1,5 +1,5 @@
-/* eslint-disable @next/next/no-img-element */
 import Link from "./NativeLink";
+import Image from "next/image";
 import { BrandMark } from "./BrandMark";
 import { SiteNav, type ShellSection } from "./SiteNav";
 import { SnapRoot } from "./SnapRoot";
@@ -19,7 +19,7 @@ export function SiteShell({
       <SiteNav active={active} />
       {children}
       <footer className="site-footer">
-        <img
+        <Image
           className="site-footer-art"
           src="/template-assets/agentic-footer.png"
           alt=""
@@ -43,6 +43,7 @@ export function SiteShell({
             <Link href="/dashboard">대시보드</Link>
             <Link href="/pricing">요금</Link>
             <Link href="/docs">문서</Link>
+            <Link href="/connect">에이전트 연결</Link>
             <Link href="/settings">설정</Link>
             <a href="/llms.txt">llms.txt</a>
           </nav>

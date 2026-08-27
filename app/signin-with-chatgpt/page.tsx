@@ -1,15 +1,16 @@
-import type { Metadata } from "next";
 import Link from "../components/NativeLink";
 import { getChatGPTUser } from "../chatgpt-auth";
 import { BrandLockup } from "../components/BrandMark";
 import { Icon } from "../components/Icon";
 import { ThemeToggle } from "../components/ThemeToggle";
+import { createPageMetadata } from "../components/site-metadata";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = {
+export const metadata = createPageMetadata({
   title: "ChatGPT 로그인",
   description: "ChatGPT SIWC 인증 게이트웨이 경로입니다.",
-};
+  path: "/signin-with-chatgpt",
+});
 
 /**
  * /signin-with-chatgpt is the Sites host's sign-in interception path: in production the host
@@ -72,10 +73,10 @@ export default async function SignInGatewayPage({
           <li>
             <Icon name="fingerprint" size={15} />
             <div>
-              <strong>로컬 데모로 보시려면</strong>
+              <strong>공개 샘플부터 보려면</strong>
               <span>
-                데모 프록시 주소(포트 3005)로 접속하면 로그인 없이 인증된 워크스페이스를 그대로
-                볼 수 있습니다.
+                공개 샘플은 로그인 없이 볼 수 있습니다. 실제 파일 검사와 워크스페이스 저장은
+                ChatGPT 로그인 뒤에 이어집니다.
               </span>
             </div>
           </li>
