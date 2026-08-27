@@ -5,6 +5,7 @@ import Link from "./NativeLink";
 import { BrandMark } from "./BrandMark";
 import { Icon, type IconName } from "./Icon";
 import { ThemeToggle } from "./ThemeToggle";
+import { SnapRoot } from "./SnapRoot";
 import "../workspace.css";
 
 /**
@@ -112,6 +113,7 @@ export function WorkspaceShell({
 
   return (
     <div className={`workspace${railOpen ? " workspace-rail-open" : ""}`}>
+      <SnapRoot mode="workspace" />
       <div className="workspace-aurora" aria-hidden="true" />
 
       <aside className="workspace-rail" aria-label="워크스페이스 사이드바">

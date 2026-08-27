@@ -8,7 +8,6 @@ import { Icon } from "./Icon";
 import { readinessHint, resolveStoredReadiness } from "./readiness";
 import { StatusPill } from "./StatusPill";
 import { WorkspaceShell } from "./WorkspaceShell";
-import { LiveEvidenceShowcase } from "./LiveEvidenceShowcase";
 import { AssetFamilyVisual } from "./AssetFamilyVisual";
 
 type Run = {
@@ -276,14 +275,28 @@ export function DashboardClient() {
       <section className="ws-welcome ws-welcome-evidence">
         <div className="ws-welcome-copy">
           <span className="mono-label">CONTROL ROOM · EVIDENCE FIRST</span>
-          <h2>검사에서 승인까지,<br />증거의 빈칸을 보여줍니다.</h2>
-          <p>Clunk는 파일 하나를 구조·런타임·사람 검토의 연결된 작업으로 바꿉니다.</p>
+          <h2>최신 검사와<br /><em>다음 증거를 한눈에.</em></h2>
+          <p>파일 하나를 구조·런타임·플레이어 화면·사람 검토의 연결된 작업으로 이어갑니다.</p>
           <div className="ws-welcome-actions">
             <Link className="button button-primary" href="/app">새 검사 시작 <Icon name="arrowUpRight" size={15} /></Link>
             <Link className="button button-quiet" href="#collaboration">프레임 증거 연결 <Icon name="chevronDown" size={15} /></Link>
           </div>
         </div>
-        <LiveEvidenceShowcase variant="dashboard" compact />
+        <div className="dashboard-welcome-visual" aria-label="대시보드 최신 결과 미리보기">
+          <div className="dashboard-welcome-preview">
+            <AssetFamilyVisual kind={latestRun ? runVisualKind(latestRun.format) : "model"} compact />
+            <div className="dashboard-welcome-stamp">
+              <span>{latestRun ? "LATEST RUN" : "WORKSPACE PREVIEW"}</span>
+              <strong>{latestRun?.fileName ?? "clunk-messy-sample.glb"}</strong>
+              <small>{latestRun ? `${latestRun.score}/100 · ${latestRun.findingCount} findings` : "실제 파일을 올리면 이 결과로 교체됩니다"}</small>
+            </div>
+          </div>
+          <div className="dashboard-welcome-next">
+            <span className="mono-label">NEXT EVIDENCE</span>
+            <strong>{latestRun ? nextVerification.action : "첫 실제 검사 실행"}</strong>
+            <small>{latestRun ? nextVerification.title : "샘플 점수는 저장된 워크스페이스 지표에 섞지 않습니다."}</small>
+          </div>
+        </div>
       </section>
 
       {connection === "checking" ? (
@@ -313,9 +326,9 @@ export function DashboardClient() {
         </div>
       ) : null}
 
-      <EvidenceLanes statuses={evidenceStatuses} hasRun={Boolean(latestRun)} />
-
       <DashboardAssetBoard latestRun={latestRun} statuses={evidenceStatuses} />
+
+      <EvidenceLanes statuses={evidenceStatuses} hasRun={Boolean(latestRun)} />
 
       <GenerationOverview jobs={generationJobs} />
 
@@ -447,6 +460,12 @@ export function DashboardClient() {
 
     </WorkspaceShell>
   );
+}
+
+function runVisualKind(format: string | null | undefined): "sprite" | "atlas" | "spine" | "motion" | "model" {
+  if (format === "png" || format === "webp") return "sprite";
+  if (format === "json") return "atlas";
+  return "model";
 }
 
 function DashboardAssetBoard({ latestRun, statuses }: { latestRun: Run | null; statuses: EvidenceStatuses }) {

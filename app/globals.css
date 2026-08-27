@@ -10267,9 +10267,11 @@ html.snap-y .docs-page-redesign .docs-final-card {
 .pricing-evidence-heading h2 em { color: var(--accent); font-style: normal; }
 .pricing-evidence-heading p { margin-top: 16px; color: var(--text-muted); font-size: .82rem; line-height: 1.65; }
 .connect-page { width: min(calc(100% - 64px), var(--container-wide)); margin: 0 auto; padding: clamp(116px, 13vw, 170px) 0 110px; }
-.connect-hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(340px, .95fr); gap: clamp(32px, 6vw, 92px); align-items: center; min-height: 610px; }
+.connect-hero { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(340px, .88fr); gap: clamp(30px, 5vw, 72px); align-items: center; min-height: min(680px, calc(100svh - 104px)); }
 .connect-hero-copy { min-width: 0; }
-.connect-hero-copy h1 { max-width: 730px; margin-top: 18px; color: var(--text-strong); font-size: clamp(3.2rem, 7.3vw, 7rem); letter-spacing: -.1em; line-height: .92; }
+.connect-hero-copy h1 { width: fit-content; max-width: 100%; margin-top: 18px; color: var(--text-strong); font-size: clamp(3rem, 5.25vw, 5.25rem); letter-spacing: -.075em; line-height: .98; text-wrap: balance; word-break: keep-all; }
+.connect-hero-copy h1 > span,
+.connect-hero-copy h1 > em { display: block; white-space: nowrap; }
 .connect-hero-copy h1 em { color: var(--accent); font-style: normal; }
 .connect-hero-copy > p { max-width: 570px; margin-top: 24px; color: var(--text-muted); font-size: clamp(.95rem, 1.3vw, 1.1rem); line-height: 1.7; }
 .connect-hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
@@ -10283,7 +10285,7 @@ html.snap-y .docs-page-redesign .docs-final-card {
 .connect-hero-console .mcp-live-status { margin: 0; }
 .connect-sample-section, .connect-section { scroll-margin-top: 96px; padding: clamp(62px, 9vw, 120px) 0; border-top: 1px solid var(--line); }
 .connect-section-heading { display: grid; grid-template-columns: minmax(0, .75fr) minmax(260px, .55fr); gap: 32px; align-items: end; margin-bottom: 34px; }
-.connect-section-heading h2 { margin-top: 12px; color: var(--text-strong); font-size: clamp(2.1rem, 4.8vw, 4.4rem); letter-spacing: -.09em; line-height: .95; }
+.connect-section-heading h2 { margin-top: 12px; color: var(--text-strong); font-size: clamp(2.1rem, 4.8vw, 4.4rem); letter-spacing: -.09em; line-height: .95; text-wrap: balance; word-break: keep-all; }
 .connect-section-heading h2 em { color: var(--accent); font-style: normal; }
 .connect-section-heading > p { max-width: 430px; justify-self: end; color: var(--text-muted); font-size: .84rem; line-height: 1.7; }
 .connect-section-heading code { color: var(--accent-strong); font: .78rem var(--font-mono); }
@@ -10341,7 +10343,9 @@ html.snap-y .docs-page-redesign .docs-final-card {
 }
 
 @media (max-width: 480px) {
-  .connect-hero-copy h1 { font-size: clamp(2.75rem, 14vw, 4rem); }
+  .connect-hero-copy h1 { width: auto; font-size: clamp(2.65rem, 13vw, 4rem); }
+  .connect-hero-copy h1 > span,
+  .connect-hero-copy h1 > em { white-space: normal; }
   .connect-hero-actions .button { flex: 1 1 100%; justify-content: center; }
   .evidence-status-grid { grid-template-columns: 1fr; }
   .connect-boundary-grid { grid-template-columns: 1fr; }
@@ -11601,3 +11605,188 @@ html.snap-y .docs-page-redesign .docs-final-card {
 @media (max-width: 980px) { .pricing-creation-section { grid-template-columns: 1fr; }.pricing-creation-heading { max-width: 650px; }.pricing-creation-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 @media (max-width: 720px) { .pricing-creation-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 9px; }.pricing-creation-grid article:last-child { grid-column: span 2; }.pricing-creation-grid .asset-family-visual { min-height: 175px; } }
 @media (max-width: 430px) { .pricing-creation-section { padding-top: 22px; }.pricing-creation-actions .button { flex: 1 1 100%; justify-content: center; }.pricing-creation-grid { grid-template-columns: 1fr 1fr; }.pricing-creation-grid article:last-child { grid-column: span 2; } }
+
+/* ============================================================================
+   Product-wide screen choreography
+   Each meaningful product moment lands on a readable viewport. The page remains
+   the window scroller so fixed navigation, anchors, keyboard focus and browser
+   history continue to behave normally.
+   ============================================================================ */
+
+html.snap-y {
+  --snap-offset: 104px;
+  scroll-behavior: smooth;
+  scroll-snap-type: y mandatory;
+  scroll-padding-top: var(--snap-offset);
+}
+
+html.snap-y.snap-workspace { --snap-offset: 68px; }
+
+html.snap-y .snap-section,
+html.snap-y .landing-v5 > .landing-v5-hero,
+html.snap-y .landing-v5 > .landing-v5-section,
+html.snap-y .landing-v5 > .landing-v5-boundary,
+html.snap-y .landing-v5 > .landing-v5-final,
+html.snap-y .connect-page > .connect-hero,
+html.snap-y .connect-page > .connect-sample-section,
+html.snap-y .connect-page > .connect-section,
+html.snap-y .connect-page > .connect-boundary,
+html.snap-y .agents-v4-page > .agents-v4-hero,
+html.snap-y .agents-v4-page > .agents-v4-section,
+html.snap-y .agents-v4-page > .agents-v4-handoff,
+html.snap-y .agents-v4-page > .agents-v4-final,
+html.snap-y .docs-page-redesign > .docs-hero-v2,
+html.snap-y .docs-page-redesign > .docs-evidence-visual,
+html.snap-y .docs-page-redesign > .docs-visual-quickstart,
+html.snap-y .docs-page-redesign > .docs-product-loop,
+html.snap-y .docs-page-redesign .docs-content > .docs-section-v2,
+html.snap-y .docs-page-redesign .docs-content > .docs-final-card,
+html.snap-y .page > .pricing-hero-grid,
+html.snap-y .page > .pricing-evidence-section,
+html.snap-y .page > .pricing-creation-section,
+html.snap-y .page > .pricing-block,
+html.snap-y .page > .callout,
+html.snap-y .marketplace-page > .marketplace-hero,
+html.snap-y .marketplace-page > .marketplace-section,
+html.snap-y .marketplace-page > .marketplace-boundary,
+html.snap-y .marketplace-detail-page > .marketplace-detail-hero,
+html.snap-y .marketplace-detail-page > .marketplace-detail-section {
+  min-height: calc(100svh - var(--snap-offset));
+  box-sizing: border-box;
+  scroll-margin-top: var(--snap-offset);
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+html.snap-y .landing-v5 > .landing-v5-section,
+html.snap-y .landing-v5 > .landing-v5-boundary,
+html.snap-y .landing-v5 > .landing-v5-final,
+html.snap-y .pricing-hero-grid,
+html.snap-y .pricing-evidence-section,
+html.snap-y .pricing-creation-section,
+html.snap-y .marketplace-hero,
+html.snap-y .marketplace-section,
+html.snap-y .marketplace-boundary {
+  align-content: center;
+}
+
+html.snap-y .workspace-main > .ws-welcome,
+html.snap-y .workspace-main > .ws-welcome-evidence,
+html.snap-y .workspace-main > .dashboard-asset-board,
+html.snap-y .workspace-main > .dashboard-generation-overview,
+html.snap-y .workspace-main > .evidence-lanes,
+html.snap-y .workspace-main > .next-verification,
+html.snap-y .workspace-main > .ws-summary,
+html.snap-y .workspace-main > .collaboration-panel,
+html.snap-y .workspace-main > .ws-split,
+html.snap-y .workspace-main > .studio-page > .studio-command-hero,
+html.snap-y .workspace-main > .studio-page > .studio-live-authoring,
+html.snap-y .workspace-main > .studio-page > .studio-workflow,
+html.snap-y .workspace-main > .studio-page > .studio-section,
+html.snap-y .workspace-main > .studio-page > .studio-review-section,
+html.snap-y .workspace-main > .studio-page > .studio-command-grid,
+html.snap-y .workspace-main > .passport-visual-intro,
+html.snap-y .workspace-main > .passport-layout,
+html.snap-y .workspace-main > .settings-grid,
+html.snap-y .workspace-main > .queue-panel,
+html.snap-y .workspace-main > .inspector-grid,
+html.snap-y .workspace-main > .passport-panel,
+html.snap-y .workspace-main > .evidence-chain {
+  min-height: calc(100svh - var(--snap-offset));
+  box-sizing: border-box;
+  scroll-margin-top: var(--snap-offset);
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+/* Sticky controls must be an opaque reading surface while the next snap moves underneath. */
+.workspace-toolbar {
+  background: color-mix(in srgb, var(--ink-1) 94%, transparent);
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--ink-0) 10%, transparent);
+}
+
+/* Korean display copy is kept together by meaning, not by arbitrary glyph widths. */
+.landing-v5 h1,
+.landing-v5 h2,
+.agents-v4-page h1,
+.agents-v4-page h2,
+.docs-page-redesign h1,
+.docs-page-redesign h2,
+.page h1,
+.page h2,
+.marketplace-page h1,
+.marketplace-page h2,
+.marketplace-detail-page h1,
+.marketplace-detail-page h2,
+.workspace-main h2,
+.workspace-main h3 {
+  word-break: keep-all;
+  overflow-wrap: normal;
+  text-wrap: balance;
+}
+
+@media (max-width: 720px) {
+  html.snap-y { --snap-offset: 88px; }
+  html.snap-y.snap-workspace { --snap-offset: 68px; }
+
+  html.snap-y .snap-section,
+  html.snap-y .landing-v5 > .landing-v5-hero,
+  html.snap-y .landing-v5 > .landing-v5-section,
+  html.snap-y .landing-v5 > .landing-v5-boundary,
+  html.snap-y .landing-v5 > .landing-v5-final,
+  html.snap-y .connect-page > .connect-hero,
+  html.snap-y .connect-page > .connect-sample-section,
+  html.snap-y .connect-page > .connect-section,
+  html.snap-y .connect-page > .connect-boundary,
+  html.snap-y .agents-v4-page > .agents-v4-hero,
+  html.snap-y .agents-v4-page > .agents-v4-section,
+  html.snap-y .agents-v4-page > .agents-v4-handoff,
+  html.snap-y .agents-v4-page > .agents-v4-final,
+  html.snap-y .docs-page-redesign > .docs-hero-v2,
+  html.snap-y .docs-page-redesign > .docs-evidence-visual,
+  html.snap-y .docs-page-redesign > .docs-visual-quickstart,
+  html.snap-y .docs-page-redesign > .docs-product-loop,
+  html.snap-y .docs-page-redesign .docs-content > .docs-section-v2,
+  html.snap-y .docs-page-redesign .docs-content > .docs-final-card,
+  html.snap-y .page > .pricing-hero-grid,
+  html.snap-y .page > .pricing-evidence-section,
+  html.snap-y .page > .pricing-creation-section,
+  html.snap-y .page > .pricing-block,
+  html.snap-y .page > .callout,
+  html.snap-y .marketplace-page > .marketplace-hero,
+  html.snap-y .marketplace-page > .marketplace-section,
+  html.snap-y .marketplace-page > .marketplace-boundary,
+  html.snap-y .marketplace-detail-page > .marketplace-detail-hero,
+  html.snap-y .marketplace-detail-page > .marketplace-detail-section,
+  html.snap-y .workspace-main > .ws-welcome,
+  html.snap-y .workspace-main > .ws-welcome-evidence,
+  html.snap-y .workspace-main > .dashboard-asset-board,
+  html.snap-y .workspace-main > .dashboard-generation-overview,
+  html.snap-y .workspace-main > .evidence-lanes,
+  html.snap-y .workspace-main > .next-verification,
+  html.snap-y .workspace-main > .ws-summary,
+  html.snap-y .workspace-main > .collaboration-panel,
+  html.snap-y .workspace-main > .ws-split,
+  html.snap-y .workspace-main > .studio-page > .studio-command-hero,
+  html.snap-y .workspace-main > .studio-page > .studio-live-authoring,
+  html.snap-y .workspace-main > .studio-page > .studio-workflow,
+  html.snap-y .workspace-main > .studio-page > .studio-section,
+  html.snap-y .workspace-main > .studio-page > .studio-review-section,
+  html.snap-y .workspace-main > .studio-page > .studio-command-grid,
+  html.snap-y .workspace-main > .passport-visual-intro,
+  html.snap-y .workspace-main > .passport-layout,
+  html.snap-y .workspace-main > .settings-grid,
+  html.snap-y .workspace-main > .queue-panel,
+  html.snap-y .workspace-main > .inspector-grid,
+  html.snap-y .workspace-main > .passport-panel,
+  html.snap-y .workspace-main > .evidence-chain {
+    min-height: calc(100svh - var(--snap-offset));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.snap-y {
+    scroll-behavior: auto;
+    scroll-snap-type: none;
+  }
+}

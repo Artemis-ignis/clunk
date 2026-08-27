@@ -7,7 +7,6 @@ import { Icon } from "./Icon";
 import { resolveReadiness } from "./readiness";
 import { StatusPill } from "./StatusPill";
 import { WorkspaceShell } from "./WorkspaceShell";
-import { LiveEvidenceShowcase } from "./LiveEvidenceShowcase";
 
 /**
  * Passport is its own route now. The dashboard used to hide this list behind a
@@ -99,7 +98,32 @@ export function PassportClient({ userLabel }: { userLabel: string }) {
       </section>
 
       <section className="passport-visual-intro" aria-label="Passport 생성 흐름">
-        <LiveEvidenceShowcase variant="dashboard" compact />
+        <div className={`passport-trace-board passport-trace-board-${rows.length ? "recorded" : "empty"}`}>
+          <div className="passport-trace-head">
+            <span className="mono-label">OUTPUT TRACE · SHA-256</span>
+            <strong>{rows.length ? `${rows.length} RECORDED` : "AWAITING FIRST OUTPUT"}</strong>
+          </div>
+          <div className="passport-trace-flow" aria-label="원본에서 Passport까지의 기록 흐름">
+            <div className="passport-trace-node">
+              <span>01</span>
+              <strong>source.glb</strong>
+              <small>input bytes · hash</small>
+            </div>
+            <i aria-hidden="true">→</i>
+            <div className="passport-trace-node is-active">
+              <span>02</span>
+              <strong>fresh reopen</strong>
+              <small>output bytes · digest</small>
+            </div>
+            <i aria-hidden="true">→</i>
+            <div className="passport-trace-node is-safe">
+              <span>03</span>
+              <strong>passport.json</strong>
+              <small>before → after</small>
+            </div>
+          </div>
+          <p>{rows.length ? "저장된 원본·출력 해시를 선택해 상세 비교를 이어가세요." : "검사기에서 실제 최적화를 실행하면 이 흐름에 고정된 기록이 생깁니다."}</p>
+        </div>
         <div className="passport-visual-copy">
           <span className="mono-label">TRACEABLE OUTPUT</span>
           <h3>최적화 결과도<br /><em>검사 전으로 돌아갑니다.</em></h3>

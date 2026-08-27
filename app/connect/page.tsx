@@ -23,7 +23,10 @@ export default async function ConnectPage() {
           <div className="connect-hero-copy">
             <div className="hero-status-line"><span className="status-dot status-dot-on" /><span>OFFICIAL CONNECTION SURFACE</span><code>v{MCP_SERVER.version}</code></div>
             <span className="eyebrow">SAMPLE FIRST · CONNECT SECOND</span>
-            <h1>결과를 먼저 보고,<br /><em>에이전트를 연결하세요.</em></h1>
+            <h1>
+              <span>결과를 먼저 보고,</span>
+              <em>에이전트를 연결하세요.</em>
+            </h1>
             <p>공개 샘플은 바로 확인하고, 내 파일·workspace 이력은 로그인 뒤 이어집니다. HTTP는 로컬 경로를 읽지 않고 업로드된 bytes와 manifest만 받습니다.</p>
             <div className="connect-hero-actions">
               <a className="button button-primary" href="#connect">연결 설정 시작 <Icon name="chevronDown" size={15} /></a>

@@ -52,8 +52,15 @@ const ASSET_OPTIONS: readonly { id: AssetKind; label: string; target: string; hi
 
 const REVIEW_OPTIONS: readonly ReviewStatus[] = ["NOT_EVALUATED", "PASS", "GAP", "NO_GO", "UNAVAILABLE"];
 
-export function AssetCreationWorkbench() {
-  const [assetKind, setAssetKind] = useState<AssetKind>("sprite-atlas");
+type AssetCreationWorkbenchProps = {
+  assetKind?: AssetKind;
+  onAssetKindChange?: (assetKind: AssetKind) => void;
+};
+
+export function AssetCreationWorkbench({ assetKind: controlledAssetKind, onAssetKindChange }: AssetCreationWorkbenchProps = {}) {
+  const [internalAssetKind, setInternalAssetKind] = useState<AssetKind>("sprite-atlas");
+  const assetKind = controlledAssetKind ?? internalAssetKind;
+  const setAssetKind = onAssetKindChange ?? setInternalAssetKind;
   const selectedOption = useMemo(() => ASSET_OPTIONS.find((option) => option.id === assetKind) ?? ASSET_OPTIONS[0], [assetKind]);
   const [label, setLabel] = useState("Clunk Sprite Starter");
   const [prompt, setPrompt] = useState("a readable teal courier character with a bright silhouette");
@@ -206,7 +213,20 @@ export function AssetCreationWorkbench() {
         <div className="creation-result-panel">
           {imageArtifact ? <div className="creation-image-preview"><Image unoptimized src={`data:${imageArtifact.contentType};base64,${imageArtifact.bytesBase64}`} alt={`${label} 실제 생성 PNG`} width={assetKind === "2d-image" ? 256 : 384} height={assetKind === "2d-image" ? 256 : 96} /><span className="creation-image-stamp">REAL RGBA BYTES</span></div> : null}
           {modelArtifact ? <AssetPreview bytes={decodeBase64(modelArtifact.bytesBase64)} fileName={modelArtifact.fileName} /> : null}
-          {!imageArtifact && !modelArtifact ? <div className="creation-result-empty"><Icon name="activity" size={24} /><strong>결과 미리보기</strong><span>왼쪽에서 만들면 실제 PNG 또는 GLB가 여기에 나타납니다.</span></div> : null}
+          {!imageArtifact && !modelArtifact ? <div className="creation-result-empty creation-result-sample">
+            <div className={`creation-sample-preview creation-sample-preview-${assetKind === "2d-image" || assetKind === "sprite-atlas" || assetKind === "spine-project" ? "2d" : "3d"}`}>
+              <Image
+                unoptimized
+                src={assetKind === "2d-image" || assetKind === "sprite-atlas" || assetKind === "spine-project" ? "/samples/product-sprite/clunk-sprite-sample.png" : "/landing/tractor-hero.png"}
+                alt="Clunk가 먼저 보여주는 실제 샘플 결과"
+                width={assetKind === "2d-image" || assetKind === "sprite-atlas" || assetKind === "spine-project" ? 384 : 640}
+                height={assetKind === "2d-image" || assetKind === "sprite-atlas" || assetKind === "spine-project" ? 96 : 420}
+              />
+              <span>CONTRACT FIXTURE · NO CREDIT</span>
+            </div>
+            <strong>샘플 결과를 기준으로 시작합니다.</strong>
+            <span>왼쪽에서 만들기를 누르면 이 자리에 새 PNG, Atlas, Spine 또는 GLB의 실제 bytes와 hash가 교체됩니다.</span>
+          </div> : null}
           {result ? <div className="creation-artifact-list"><div className="creation-artifact-heading"><span>OUTPUT BUNDLE</span><strong>{result.artifacts.length} files · {result.entryFileName}</strong></div>{result.artifacts.map((artifact) => <div className="creation-artifact-row" key={artifact.fileName}><span><Icon name={artifact.contentType === "image/png" ? "download" : artifact.contentType === "model/gltf-binary" ? "box" : "fileJson"} size={14} />{artifact.fileName}</span><small>{formatBytes(artifact.byteLength)} · {artifact.sha256.slice(0, 12)}…</small></div>)}</div> : null}
         </div>
       </div>

@@ -6,7 +6,6 @@ import { CopyCodeButton } from "../components/CopyCodeButton";
 import { Icon, type IconName } from "../components/Icon";
 import { WorkspaceShell } from "../components/WorkspaceShell";
 import { AssetFamilyVisual, type AssetFamilyVisualKind } from "../components/AssetFamilyVisual";
-import { LiveEvidenceShowcase } from "../components/LiveEvidenceShowcase";
 import { AssetCreationWorkbench } from "../components/AssetCreationWorkbench";
 import {
   buildStudioCommand,
@@ -93,32 +92,32 @@ export function StudioClient({ userLabel }: { userLabel: string }) {
   return (
     <WorkspaceShell active="studio" title="Asset Studio" userLabel={userLabel}>
       <div className="studio-page">
-        <header className="studio-hero">
-          <div className="studio-hero-copy">
-            <span className="mono-label">ASSETOPS · CREATE → INSPECT → ATTACH → REVIEW</span>
-            <h2>에셋을 만들고,<br /><em>게임에 연결하세요.</em></h2>
-            <p>2D Sprite·Atlas·Spine부터 3D Model·Motion까지 하나의 provenance와 검사 계약으로 묶습니다. 구조 PASS와 실제 플레이어 화면 승인은 끝까지 분리합니다.</p>
-            <div className="studio-hero-actions">
-              <Link className="button button-primary button-sm" href="/app">
-                검사기로 보내기 · 로그인 <Icon name="arrowRight" size={14} />
-              </Link>
-              <Link className="button button-quiet button-sm" href="/docs#asset-studio">
-                제작 계약 보기 <Icon name="arrowUpRight" size={14} />
-              </Link>
+        <header className="studio-command-hero">
+          <div className="studio-command-hero-copy">
+            <span className="mono-label">CREATE SPACE · 2D + 3D</span>
+            <h2>무엇을 만들까요?</h2>
+            <p>포맷을 고르고 프롬프트를 입력하면 실제 artifact가 만들어집니다. 바로 옆에서 hash·구조·런타임·사람 검토의 빈칸까지 확인하세요.</p>
+            <div className="studio-command-hero-proof" aria-label="Studio가 기록하는 결과">
+              <span><i /> 실제 bytes</span>
+              <span><i /> fresh reopen</span>
+              <span><i /> 판매는 승인 후</span>
             </div>
           </div>
-          <LiveEvidenceShowcase variant="studio" compact />
+          <div className="studio-command-hero-preview">
+            <AssetFamilyVisual kind={visualKindForAsset(assetKind)} compact />
+            <div className="studio-command-hero-preview-meta"><span>현재 선택</span><strong>{selectedAsset.label}</strong><small>{selectedEngine.label} · {selectedEngine.profileId}</small></div>
+          </div>
         </header>
 
         <section className="studio-live-authoring" aria-labelledby="studio-live-authoring-heading">
           <div className="studio-live-authoring-head">
             <div>
               <span className="mono-label">LIVE PRODUCT FLOW · CREATE → INSPECT → REVIEW → SELL</span>
-              <h3 id="studio-live-authoring-heading">설명 화면을 지나 실제 생성 결과까지</h3>
+              <h3 id="studio-live-authoring-heading">프롬프트에서 실제 artifact까지</h3>
             </div>
             <span className="studio-live-authoring-api">/api/generation · /api/reviews · /api/marketplace</span>
           </div>
-          <AssetCreationWorkbench />
+          <AssetCreationWorkbench assetKind={assetKind} onAssetKindChange={setAssetKind} />
         </section>
 
         <section className="studio-workflow" aria-label="Asset Studio workflow">

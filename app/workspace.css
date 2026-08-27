@@ -1616,3 +1616,356 @@
 @media (max-width: 900px) { .creation-workbench-grid { grid-template-columns: minmax(0, 1fr); }.creation-form { border-right: 0; border-bottom: 1px solid var(--line); }.creation-actions-grid { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 680px) { .studio-live-authoring-head, .creation-workbench-header { align-items: flex-start; flex-direction: column; }.studio-live-authoring-api { text-align: left; }.creation-phase { align-self: stretch; }.creation-evidence-lanes { grid-template-columns: repeat(2, minmax(0, 1fr)); }.creation-form-two-col { grid-template-columns: minmax(0, 1fr); }.creation-status-selects { grid-template-columns: minmax(0, 1fr); }.creation-status-selects select { width: 100%; }.creation-artifact-row { flex-direction: column; gap: 3px; }.creation-artifact-row small { text-align: left; } }
 @media (max-width: 420px) { .creation-evidence-lanes { grid-template-columns: minmax(0, 1fr); }.creation-workbench-header, .creation-form, .creation-result-panel, .creation-actions-grid { padding-left: 16px; padding-right: 16px; }.creation-evidence-lanes { padding-left: 16px; padding-right: 16px; } }
+
+/* Studio command surface: the first workspace frame is an action, not a brochure hero. */
+.studio-command-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, .78fr);
+  gap: clamp(20px, 4vw, 48px);
+  align-items: stretch;
+  min-height: 270px;
+  margin-bottom: var(--sp-20);
+  padding: clamp(22px, 3.5vw, 38px);
+  overflow: hidden;
+  border: 1px solid var(--accent-line);
+  border-radius: var(--r-panel);
+  background:
+    radial-gradient(circle at 78% 22%, color-mix(in srgb, var(--accent-bright) 17%, transparent), transparent 35%),
+    linear-gradient(135deg, var(--accent-soft), var(--ink-1) 72%);
+  box-shadow: var(--shadow-soft);
+}
+
+.studio-command-hero-copy {
+  display: grid;
+  align-content: center;
+  min-width: 0;
+}
+
+.studio-command-hero-copy h2 {
+  max-width: 10em;
+  margin-top: var(--sp-10);
+  color: var(--text-strong);
+  font-size: clamp(2.1rem, 4.2vw, 4rem);
+  font-weight: 620;
+  letter-spacing: -.075em;
+  line-height: .98;
+  text-wrap: balance;
+}
+
+.studio-command-hero-copy p {
+  max-width: 600px;
+  margin-top: var(--sp-14);
+  color: var(--text-muted);
+  font-size: var(--fs-1);
+  line-height: 1.62;
+}
+
+.studio-command-hero-proof {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: var(--sp-18);
+  color: var(--text-dim);
+  font: .62rem var(--font-mono);
+}
+
+.studio-command-hero-proof span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.studio-command-hero-proof i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 0 4px var(--success-soft);
+}
+
+.studio-command-hero-preview {
+  position: relative;
+  min-width: 0;
+  min-height: 210px;
+}
+
+.studio-command-hero-preview .asset-family-visual {
+  height: 100%;
+  min-height: 210px;
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--line));
+}
+
+.studio-command-hero-preview-meta {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  z-index: 2;
+  display: grid;
+  gap: 3px;
+  min-width: 150px;
+  padding: 9px 10px;
+  border: 1px solid rgba(139, 226, 220, .27);
+  border-radius: 8px;
+  background: rgba(6, 20, 29, .78);
+  color: #e7f7f6;
+  box-shadow: 0 10px 24px rgba(3, 15, 23, .18);
+}
+
+.studio-command-hero-preview-meta span,
+.studio-command-hero-preview-meta small {
+  color: #8ab4bd;
+  font: .54rem var(--font-mono);
+}
+
+.studio-command-hero-preview-meta strong {
+  color: #f2fbfa;
+  font-size: .86rem;
+  letter-spacing: -.02em;
+}
+
+/* The empty result is still useful: it shows the exact visual shape that a real output replaces. */
+.creation-result-sample {
+  display: grid;
+  gap: 0;
+  min-height: 300px;
+  align-content: center;
+}
+
+.creation-sample-preview {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 166px;
+  overflow: hidden;
+  border: 1px solid rgba(127, 227, 255, .22);
+  border-radius: var(--r-control);
+  background: radial-gradient(circle at 50% 35%, rgba(22, 184, 232, .22), transparent 52%), #071722;
+}
+
+.creation-sample-preview::before {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size: 22px 22px;
+  content: "";
+  mask-image: linear-gradient(to bottom, #000, transparent);
+}
+
+.creation-sample-preview img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 82%;
+  height: auto;
+  max-height: 180px;
+  object-fit: contain;
+}
+
+.creation-sample-preview-2d img { image-rendering: pixelated; }
+.creation-sample-preview-3d img { filter: drop-shadow(0 18px 22px rgba(0, 0, 0, .27)); }
+
+.creation-sample-preview > span {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 2;
+  padding: 5px 7px;
+  border: 1px solid rgba(127, 227, 255, .28);
+  border-radius: 5px;
+  background: rgba(4, 22, 31, .82);
+  color: var(--accent-glow);
+  font: .55rem var(--font-mono);
+  letter-spacing: .04em;
+}
+
+.creation-result-sample > strong {
+  margin-top: 13px;
+  color: var(--text-on-accent);
+  font-size: var(--fs-2);
+}
+
+.creation-result-sample > span:last-child {
+  max-width: 33em;
+  margin-top: 5px;
+  color: color-mix(in srgb, var(--text-on-accent) 67%, transparent);
+  font-size: .72rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 820px) {
+  .studio-command-hero { grid-template-columns: minmax(0, 1fr); }
+  .studio-command-hero-preview { min-height: 220px; }
+}
+
+@media (max-width: 560px) {
+  .studio-command-hero { gap: 16px; padding: 20px; }
+  .studio-command-hero-copy h2 { font-size: clamp(2rem, 10vw, 3rem); }
+  .studio-command-hero-preview,
+  .studio-command-hero-preview .asset-family-visual { min-height: 190px; }
+}
+
+/* Dashboard and Passport use real state surfaces, not a repeated marketing hero. */
+.ws-welcome-evidence > .dashboard-welcome-visual {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(150px, .8fr);
+  align-items: stretch;
+  gap: 10px;
+  min-width: 0;
+}
+
+.dashboard-welcome-preview {
+  position: relative;
+  min-width: 0;
+  min-height: 246px;
+  overflow: hidden;
+  border: 1px solid rgba(127, 227, 255, .25);
+  border-radius: var(--r-panel);
+  background: #071822;
+}
+
+.dashboard-welcome-preview .asset-family-visual {
+  min-height: 246px;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+}
+
+.dashboard-welcome-stamp {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 2;
+  display: grid;
+  gap: 3px;
+  max-width: min(220px, calc(100% - 24px));
+  padding: 10px 11px;
+  border: 1px solid rgba(139, 226, 220, .3);
+  border-radius: 9px;
+  background: rgba(5, 22, 30, .86);
+  color: #e7f7f6;
+  box-shadow: 0 12px 28px rgba(3, 15, 23, .24);
+}
+
+.dashboard-welcome-stamp span,
+.dashboard-welcome-stamp small {
+  overflow: hidden;
+  color: #8ab4bd;
+  font: .53rem var(--font-mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-welcome-stamp strong {
+  overflow: hidden;
+  color: #f2fbfa;
+  font-size: .8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-welcome-next {
+  display: grid;
+  align-content: center;
+  gap: 9px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-panel);
+  background: color-mix(in srgb, var(--ink-1) 85%, var(--accent-soft));
+}
+
+.dashboard-welcome-next strong {
+  color: var(--text-strong);
+  font-size: clamp(1.05rem, 2vw, 1.45rem);
+  letter-spacing: -.04em;
+  line-height: 1.08;
+}
+
+.dashboard-welcome-next small {
+  color: var(--text-muted);
+  font-size: .74rem;
+  line-height: 1.5;
+}
+
+.passport-trace-board {
+  display: grid;
+  align-content: center;
+  gap: 18px;
+  min-width: 0;
+  min-height: 280px;
+  padding: clamp(20px, 3vw, 34px);
+  overflow: hidden;
+  border: 1px solid rgba(127, 227, 255, .24);
+  border-radius: var(--r-panel);
+  background:
+    radial-gradient(circle at 82% 18%, rgba(32, 181, 224, .2), transparent 32%),
+    linear-gradient(145deg, #09202d, #07151f 70%);
+  color: #e8f8f7;
+}
+
+.passport-trace-head,
+.passport-trace-node,
+.passport-trace-flow {
+  min-width: 0;
+}
+
+.passport-trace-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.passport-trace-head .mono-label { color: #8ab4bd; }
+.passport-trace-head strong { color: #73e2d3; font: .62rem var(--font-mono); letter-spacing: .06em; }
+
+.passport-trace-flow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+}
+
+.passport-trace-flow > i {
+  color: #55cddd;
+  font: 1rem var(--font-mono);
+  font-style: normal;
+}
+
+.passport-trace-node {
+  display: grid;
+  gap: 5px;
+  min-height: 94px;
+  padding: 12px;
+  border: 1px solid rgba(145, 224, 239, .2);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .045);
+}
+
+.passport-trace-node > span,
+.passport-trace-node > small { color: #83aab4; font: .55rem var(--font-mono); }
+.passport-trace-node > strong { overflow: hidden; color: #f0fbfb; font-size: .78rem; text-overflow: ellipsis; white-space: nowrap; }
+.passport-trace-node.is-active { border-color: rgba(82, 211, 230, .45); background: rgba(18, 117, 141, .16); }
+.passport-trace-node.is-safe { border-color: rgba(92, 224, 177, .4); background: rgba(34, 132, 111, .14); }
+.passport-trace-node.is-safe > strong { color: #9ae9c9; }
+
+.passport-trace-board > p { margin: 0; color: #9ebbc0; font-size: .76rem; line-height: 1.5; }
+
+@media (max-width: 920px) {
+  .ws-welcome-evidence > .dashboard-welcome-visual { grid-template-columns: 1fr; }
+  .dashboard-welcome-next { grid-template-columns: auto 1fr; align-items: center; }
+  .dashboard-welcome-next .mono-label { grid-row: span 2; }
+}
+
+@media (max-width: 640px) {
+  .ws-welcome-evidence > .dashboard-welcome-visual { gap: 8px; }
+  .dashboard-welcome-preview,
+  .dashboard-welcome-preview .asset-family-visual { min-height: 210px; }
+  .dashboard-welcome-next { display: grid; grid-template-columns: 1fr; gap: 6px; padding: 13px; }
+  .dashboard-welcome-next .mono-label { grid-row: auto; }
+  .passport-trace-board { min-height: 0; padding: 18px; }
+  .passport-trace-flow { grid-template-columns: 1fr; gap: 6px; }
+  .passport-trace-flow > i { justify-self: center; transform: rotate(90deg); }
+  .passport-trace-node { min-height: 0; }
+}
