@@ -31,7 +31,10 @@ export async function GET(request: Request, context: RouteContext) {
        ORDER BY CASE WHEN aa.role IN ('page', 'texture') THEN 0 WHEN aa.role = 'entry' THEN 1 ELSE 2 END, aa.created_at ASC LIMIT 1`,
     ).bind(assetId, fileName, fileName).first<{ fileName: string; contentType: string; objectKey: string; role: string }>();
     if (!artifact?.objectKey) return new Response("Not found", { status: 404 });
-    const publicPreview = previewRequested && (artifact.role === "page" || artifact.role === "texture");
+    // A paid product's page/texture artifacts ARE the product bytes, so they
+    // never ship as a public preview. Paid listings only expose an artifact
+    // whose role is explicitly "preview"; free listings may preview anything.
+    const publicPreview = previewRequested && (paid ? artifact.role === "preview" : true);
     if (paid && !publicPreview) {
       const user = await getCurrentUser();
       if (!user) {

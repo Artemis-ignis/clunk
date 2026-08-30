@@ -83,3 +83,17 @@ test("the public product surfaces expose creation, library, review, and marketpl
   assert.match(landing, /실제 제작|마켓|판매/);
   assert.match(marketplace, /검수|라이선스|다운로드/);
 });
+
+test("paid marketplace artifacts never ship as public previews", async () => {
+  const route = await source("app/api/marketplace/assets/[assetId]/route.ts");
+  assert.match(route, /paid \? artifact\.role === "preview" : true/);
+  assert.doesNotMatch(route, /artifact\.role === "page" \|\| artifact\.role === "texture"/);
+});
+
+test("the billing boundary converts zero-decimal currencies exactly once", async () => {
+  const billing = await source("app/api/marketplace/billing.ts");
+  assert.match(billing, /ZERO_DECIMAL_CURRENCIES/);
+  assert.match(billing, /toProviderAmount\(input\.amountCents, input\.currency\)/);
+  assert.match(billing, /fromProviderAmount\(providerAmount, currency\)/);
+  assert.doesNotMatch(billing, /unit_amount\]": String\(input\.amountCents\)/);
+});

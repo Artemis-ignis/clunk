@@ -102,11 +102,52 @@ test("configured Stripe checkout binds server order, amount, currency, and retur
   assert.equal(requests.length, 1);
   assert.equal(requests[0]!.headers.get("authorization"), `Basic ${btoa(`${SECRET}:`)}`);
   const body = await requests[0]!.text();
-  assert.match(body, /line_items%5B0%5D%5Bprice_data%5D%5Bunit_amount%5D=1200/);
+  // Internal amounts are always 1/100 currency units. KRW is a Stripe
+  // zero-decimal currency, so 1200 internal units are ₩12 — the provider
+  // must receive 12, never the raw 1200 (a silent 100x overcharge).
+  assert.match(body, /line_items%5B0%5D%5Bprice_data%5D%5Bunit_amount%5D=12&/);
   assert.match(body, /line_items%5B0%5D%5Bprice_data%5D%5Bcurrency%5D=krw/);
   assert.match(body, /metadata%5BorderId%5D=order-123/);
   assert.match(body, /metadata%5BassetId%5D=asset-123/);
   assert.match(body, /payment_intent_data%5Bmetadata%5D%5BorderId%5D=order-123/);
+});
+
+test("zero-decimal currencies convert at the provider boundary and refuse fractional units", async () => {
+  const requests: Request[] = [];
+  const provider = createStripeBillingProvider(ENV, async (input, init) => {
+    requests.push(new Request(input, init));
+    return Response.json({ id: "cs_usd_1", url: "https://checkout.stripe.com/c/pay/cs_usd_1" });
+  });
+  assert.equal(provider.provider, "stripe");
+  // A KRW amount that is not a whole number of won must fail closed
+  // before any provider call is made.
+  await assert.rejects(() => provider.createCheckout({
+    orderId: "order-krw-frac",
+    listingId: "listing-krw-frac",
+    assetId: "asset-krw-frac",
+    title: "Fractional won",
+    description: "must be rejected",
+    amountCents: 1250,
+    currency: "KRW",
+    successUrl: "https://clunk.example/marketplace?checkout=success",
+    cancelUrl: "https://clunk.example/marketplace?checkout=cancel",
+  }), /whole number/);
+  assert.equal(requests.length, 0);
+  // Decimal currencies pass through unchanged.
+  await provider.createCheckout({
+    orderId: "order-usd",
+    listingId: "listing-usd",
+    assetId: "asset-usd",
+    title: "USD crate",
+    description: "decimal currency",
+    amountCents: 1250,
+    currency: "USD",
+    successUrl: "https://clunk.example/marketplace?checkout=success",
+    cancelUrl: "https://clunk.example/marketplace?checkout=cancel",
+  });
+  assert.equal(requests.length, 1);
+  const body = await requests[0]!.text();
+  assert.match(body, /line_items%5B0%5D%5Bprice_data%5D%5Bunit_amount%5D=1250&/);
 });
 
 test("Stripe webhook verification accepts a signed paid event and rejects tampering/expiry", async () => {
@@ -118,7 +159,8 @@ test("Stripe webhook verification accepts a signed paid event and rejects tamper
       id: "cs_test_123",
       client_reference_id: "order-123",
       payment_status: "paid",
-      amount_total: 1200,
+      // Stripe reports zero-decimal amounts in whole currency units: ₩12.
+      amount_total: 12,
       currency: "krw",
       metadata: { orderId: "order-123", listingId: "listing-123" },
     } },
@@ -137,6 +179,8 @@ test("Stripe webhook verification accepts a signed paid event and rejects tamper
     orderId: "order-123",
     listingId: "listing-123",
     status: "PAID",
+    // Normalised back into internal 1/100-unit amounts so the webhook
+    // route compares like with like against the stored order.
     amountCents: 1200,
     currency: "KRW",
   });
@@ -144,7 +188,7 @@ test("Stripe webhook verification accepts a signed paid event and rejects tamper
   const tampered = new Request("https://clunk.example/api/marketplace/webhook", {
     method: "POST",
     headers: { "stripe-signature": signature },
-    body: payload.replace("1200", "1201"),
+    body: payload.replace('"amount_total":12', '"amount_total":13'),
   });
   await assert.rejects(() => provider.verifyWebhook(tampered));
   const expired = await signStripeWebhookPayload(payload, WEBHOOK_SECRET, timestamp - 601);

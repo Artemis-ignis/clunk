@@ -74,6 +74,33 @@ export class BillingVerificationError extends Error {
   }
 }
 
+/**
+ * Stripe zero-decimal currencies: the provider amount is already the whole
+ * currency unit (₩1, ¥1), while every internal amount in this codebase is a
+ * 1/100 unit. Convert exactly once, at this provider boundary, in both
+ * directions — anything else silently overcharges by 100x.
+ */
+const ZERO_DECIMAL_CURRENCIES = new Set([
+  "BIF", "CLP", "DJF", "GNF", "JPY", "KMF", "KRW", "MGA",
+  "PYG", "RWF", "UGX", "VND", "VUV", "XAF", "XOF", "XPF",
+]);
+
+export function isZeroDecimalCurrency(currency: string): boolean {
+  return ZERO_DECIMAL_CURRENCIES.has(currency.toUpperCase());
+}
+
+export function toProviderAmount(amountCents: number, currency: string): number {
+  if (!isZeroDecimalCurrency(currency)) return amountCents;
+  if (amountCents % 100 !== 0) {
+    throw new Error(`A ${currency.toUpperCase()} charge must be a whole number of currency units; got ${amountCents} internal units.`);
+  }
+  return amountCents / 100;
+}
+
+export function fromProviderAmount(providerAmount: number, currency: string): number {
+  return isZeroDecimalCurrency(currency) ? providerAmount * 100 : providerAmount;
+}
+
 export function getBillingEnvironment(overrides: Record<string, unknown> = {}): BillingEnvironment {
   const environment: BillingEnvironment = {};
   if (typeof process !== "undefined" && process.env) {
@@ -116,6 +143,7 @@ export function createStripeBillingProvider(
     provider: "stripe",
     async createCheckout(input) {
       validateCheckoutInput(input);
+      const providerAmount = toProviderAmount(input.amountCents, input.currency);
       const response = await fetchImpl("https://api.stripe.com/v1/checkout/sessions", {
         method: "POST",
         headers: {
@@ -130,7 +158,7 @@ export function createStripeBillingProvider(
           cancel_url: input.cancelUrl,
           "line_items[0][quantity]": "1",
           "line_items[0][price_data][currency]": input.currency.toLowerCase(),
-          "line_items[0][price_data][unit_amount]": String(input.amountCents),
+          "line_items[0][price_data][unit_amount]": String(providerAmount),
           "line_items[0][price_data][product_data][name]": input.title,
           "line_items[0][price_data][product_data][description]": input.description,
           "metadata[orderId]": input.orderId,
@@ -207,11 +235,12 @@ function parseStripeEvent(rawBody: string): BillingEvent {
   const orderId = stringValue(metadata.orderId) ?? stringValue(object.client_reference_id);
   const reference = stringValue(object.id);
   if (!orderId || !reference) throw new BillingVerificationError("Payment webhook has no order reference.");
-  const amountCents = integerValue(object.amount_total) ?? integerValue(object.amount);
+  const providerAmount = integerValue(object.amount_total) ?? integerValue(object.amount);
   const currency = stringValue(object.currency)?.toUpperCase();
-  if (amountCents === undefined || amountCents < 1 || !currency || !/^[A-Z]{3}$/.test(currency)) {
+  if (providerAmount === undefined || providerAmount < 1 || !currency || !/^[A-Z]{3}$/.test(currency)) {
     throw new BillingVerificationError("Payment webhook amount or currency is invalid.");
   }
+  const amountCents = fromProviderAmount(providerAmount, currency);
   const eventType = stringValue(parsed.type);
   let status: BillingEvent["status"];
   if (eventType === "checkout.session.completed" || eventType === "checkout.session.async_payment_succeeded") {
