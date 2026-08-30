@@ -23,7 +23,7 @@ test("Foundry shell exposes the product hierarchy and scoped design layer", asyn
   await access(new URL("app/foundry.css", root));
   const css = await source("app/foundry.css");
   assert.match(layout, /foundry\.css/);
-  for (const label of ["마켓", "Clunk 사용", "Game Ready", "Developers", "크레딧"]) {
+  for (const label of ["에셋 제작", "마켓", "검사·수정", "게임 에이전트", "요금"]) {
     assert.match(nav, new RegExp(label.replace(" ", "\\s+"), "i"));
   }
   assert.match(css, /--foundry-/);
@@ -35,14 +35,14 @@ test("public landing is asset-first without pretending to generate", async () =>
   const landing = await source("app/page.tsx");
   const snap = await source("app/components/SnapRoot.tsx");
   const css = await source("app/foundry.css");
-  assert.match(landing, /ASSET MARKET \+ CREDIT WORKSPACE/i);
+  assert.match(landing, /GAME ASSET FOUNDRY/i);
   assert.match(landing, /마켓 둘러보기/);
   assert.match(landing, /Clunk 사용하기/);
   assert.match(landing, /PLAN.*CREATE.*INSPECT.*CONNECT/s);
   for (const label of ["2D / 3D", "SPRITE / RIG", "MOTION / UI", "ENGINE / CONNECT"]) {
     assert.match(landing, new RegExp(label));
   }
-  assert.equal((landing.match(/data-snap-section=/g) ?? []).length, 6);
+  assert.equal((landing.match(/data-snap-section=/g) ?? []).length, 7);
   assert.match(landing, /data-snap-section/);
   assert.match(snap, /data-snap-section/);
   assert.match(snap, /matchMedia/);
