@@ -164,6 +164,12 @@ function AuthJourney({
             </>
           )}
 
+          {/* SIWC/OAuth 흐름에는 별도 가입 폼이 없으므로 체크박스 대신 고지+링크로 동의를 표시합니다. */}
+          <p className={styles.switch}>
+            계속하면 이용약관과 개인정보처리방침에 동의하는 것으로 간주됩니다.{" "}
+            <Link href="/terms">이용약관</Link> · <Link href="/privacy">개인정보처리방침</Link>
+          </p>
+
           <p className={styles.switch}>
             이미 Workspace를 사용 중이신가요?{" "}
             <Link href="/login">로그인 흐름 보기</Link>

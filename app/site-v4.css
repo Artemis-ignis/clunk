@@ -782,6 +782,148 @@
 .cv4-footer nav a:hover { color: var(--cv4-ink); }
 
 /* ------------------------------------------------------------------ */
+/* legal documents (terms · privacy · refunds)                         */
+/* ------------------------------------------------------------------ */
+
+.cv4-legal { padding: clamp(132px, 18vh, 176px) 0 clamp(72px, 10vh, 104px); }
+
+.cv4-legal-head { border-bottom: 1px solid var(--cv4-line); padding-bottom: 30px; }
+
+.cv4-legal-head h1 {
+  margin: 18px 0 0;
+  font-size: clamp(2rem, 4.4vw, 3rem);
+  font-weight: 760;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+}
+
+.cv4-legal-lede {
+  margin: 18px 0 0;
+  max-width: 62ch;
+  color: var(--cv4-ink-dim);
+  font-size: 1rem;
+  line-height: 1.72;
+}
+
+/* Draft badge: this document is honestly not in force until the operator's
+   registered business details replace the placeholders below it. */
+.cv4-legal-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  margin: 24px 0 0;
+  padding: 14px 16px;
+  border: 1px solid var(--cv4-warn);
+  border-radius: var(--cv4-radius);
+  background: rgba(255, 178, 36, 0.07);
+}
+
+.cv4-legal-status strong {
+  font-family: var(--cv4-font-label);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cv4-warn);
+}
+
+.cv4-legal-status span { color: var(--cv4-ink-dim); font-size: 0.88rem; line-height: 1.6; }
+
+.cv4-legal-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 24px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--cv4-font-label);
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  color: var(--cv4-ink-faint);
+}
+
+.cv4-legal-body { margin-top: 40px; display: grid; gap: 38px; max-width: 78ch; }
+
+.cv4-legal-body section { display: grid; gap: 12px; }
+
+.cv4-legal-body h2 {
+  margin: 0;
+  font-size: 1.14rem;
+  font-weight: 700;
+  letter-spacing: -0.018em;
+  color: var(--cv4-ink);
+}
+
+.cv4-legal-body h3 {
+  margin: 10px 0 0;
+  font-size: 0.96rem;
+  font-weight: 660;
+  letter-spacing: -0.012em;
+  color: var(--cv4-ink);
+}
+
+.cv4-legal-body p { margin: 0; color: var(--cv4-ink-dim); font-size: 0.95rem; line-height: 1.78; }
+
+.cv4-legal-body ul,
+.cv4-legal-body ol { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
+
+.cv4-legal-body li { color: var(--cv4-ink-dim); font-size: 0.95rem; line-height: 1.72; }
+
+.cv4-legal-body li b,
+.cv4-legal-body p b { color: var(--cv4-ink); font-weight: 640; }
+
+.cv4-legal-body a { color: var(--cv4-scan); text-decoration: underline; text-underline-offset: 3px; }
+
+.cv4-legal-table {
+  margin: 0;
+  display: grid;
+  gap: 1px;
+  background: var(--cv4-line);
+  border: 1px solid var(--cv4-line);
+  border-radius: var(--cv4-radius);
+  overflow: hidden;
+}
+
+.cv4-legal-table > div {
+  display: grid;
+  grid-template-columns: minmax(140px, 220px) 1fr;
+  gap: 14px;
+  padding: 13px 16px;
+  background: var(--cv4-bg1);
+}
+
+.cv4-legal-table dt {
+  margin: 0;
+  font-family: var(--cv4-font-label);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--cv4-ink-faint);
+}
+
+.cv4-legal-table dd { margin: 0; color: var(--cv4-ink-dim); font-size: 0.92rem; line-height: 1.6; }
+
+/* An unfilled statutory field is marked, never invented. */
+.cv4-legal-table dd.is-placeholder { color: var(--cv4-warn); font-family: var(--cv4-font-label); font-size: 0.85rem; }
+
+.cv4-legal-note {
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px dashed var(--cv4-line-strong);
+  border-radius: var(--cv4-radius);
+  color: var(--cv4-ink-faint);
+  font-size: 0.86rem;
+  line-height: 1.7;
+}
+
+.cv4-legal-crosslinks { display: flex; flex-wrap: wrap; gap: 12px 22px; margin-top: 44px; padding-top: 26px; border-top: 1px solid var(--cv4-line); }
+
+@media (max-width: 640px) {
+  .cv4-legal-table > div { grid-template-columns: 1fr; gap: 5px; }
+}
+
+/* ------------------------------------------------------------------ */
 /* reveal-on-scroll                                                    */
 /* ------------------------------------------------------------------ */
 

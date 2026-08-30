@@ -1,5 +1,5 @@
 import Link from "../components/NativeLink";
-import { requireChatGPTUser } from "../chatgpt-auth";
+import { chatGPTSignOutPath, requireChatGPTUser } from "../chatgpt-auth";
 import { Icon } from "../components/Icon";
 import { WorkspaceShell } from "../components/WorkspaceShell";
 import { createPageMetadata } from "../components/site-metadata";
@@ -100,7 +100,16 @@ export default async function SettingsPage() {
           연동 문서
           <Icon name="arrowRight" size={15} />
         </Link>
+        <Link href={chatGPTSignOutPath("/")} className="button button-quiet">
+          이 브라우저에서 로그아웃
+          <Icon name="arrowRight" size={15} />
+        </Link>
       </div>
+
+      <p className="muted-note">
+        로그아웃은 이 브라우저의 Clunk 세션 쿠키를 즉시 만료시킵니다. ChatGPT 등 인증 제공자
+        자체의 로그인 상태는 해당 제공자가 관리하므로 Clunk가 종료하지 않습니다.
+      </p>
     </WorkspaceShell>
   );
 }

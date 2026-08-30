@@ -282,6 +282,9 @@ export default function Home() {
             <Link href="/connect" prefetch={false}>에이전트</Link>
             <Link href="/pricing" prefetch={false}>크레딧 · 요금</Link>
             <Link href="/docs" prefetch={false}>Docs</Link>
+            <Link href="/terms" prefetch={false}>이용약관</Link>
+            <Link href="/privacy" prefetch={false}>개인정보처리방침</Link>
+            <Link href="/refunds" prefetch={false}>취소·환불정책</Link>
           </nav>
         </div>
       </footer>

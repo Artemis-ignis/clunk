@@ -190,6 +190,12 @@ export default function PricingPage() {
             ))}
           </div>
           <BillingState />
+          <div className={styles.actions}>
+            <Link className={styles.secondary} href="/refunds">
+              취소·환불정책
+              <span aria-hidden="true">→</span>
+            </Link>
+          </div>
         </section>
 
         <section

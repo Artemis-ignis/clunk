@@ -3,6 +3,8 @@ import Image from "next/image";
 import { BrandMark } from "./BrandMark";
 import { SiteNav, type ShellSection } from "./SiteNav";
 import { SnapRoot } from "./SnapRoot";
+import { getBillingEnvironment, getBillingStatus } from "../api/marketplace/billing";
+import { getRuntimeEnvironment } from "../runtime-environment";
 
 export type { ShellSection };
 
@@ -13,6 +15,13 @@ export function SiteShell({
   active?: ShellSection;
   children: React.ReactNode;
 }) {
+  // The demo marker is a claim about the payment boundary, so it has to track
+  // the real boundary: it shows only while no payment provider is configured
+  // (the same getBillingStatus the checkout route refuses on). Once billing is
+  // AVAILABLE, charges are real and the banner would be a lie.
+  const billingConfigured =
+    getBillingStatus(getBillingEnvironment(getRuntimeEnvironment())).status === "AVAILABLE";
+
   return (
     <div className="site-shell">
       <SnapRoot />
@@ -46,9 +55,14 @@ export function SiteShell({
             <Link href="/dashboard">Workspace</Link>
             <Link href="/docs">Docs</Link>
             <Link href="/settings">설정</Link>
+            <Link href="/terms">이용약관</Link>
+            <Link href="/privacy">개인정보처리방침</Link>
+            <Link href="/refunds">취소·환불정책</Link>
             <a href="/llms.txt">llms.txt</a>
           </nav>
-          <span className="demo-marker">DEMO MODE · 실제 결제 아님</span>
+          {billingConfigured ? null : (
+            <span className="demo-marker">DEMO MODE · 실제 결제 아님</span>
+          )}
         </div>
       </footer>
     </div>
