@@ -21,7 +21,7 @@ import { getRuntimeEnvironment } from "../../../runtime-environment";
 
 export const dynamic = "force-dynamic";
 
-type CheckoutPayload = { packId?: unknown; idempotencyKey?: unknown };
+type CheckoutPayload = { packId?: unknown; idempotencyKey?: unknown; withdrawalConsent?: unknown };
 
 /**
  * Credit-pack checkout. Mirrors the marketplace order state machine: the
@@ -53,6 +53,18 @@ export async function POST(request: Request) {
         packId: pack.id,
         error: "이 크레딧 팩은 아직 판매 가격이 확정되지 않았습니다.",
       }, { status: 409 });
+    }
+
+    // 크레딧도 제공 개시 즉시 사용 가능한 디지털 서비스다: 청약철회 제한 동의가
+    // 없으면 주문·세션을 만들지 않는다 (전자상거래법 제17조 2항 5호 고지·동의 구조).
+    if (payload.withdrawalConsent !== true) {
+      return privateJson({
+        ok: false,
+        schema: "clunk.credit-checkout.v1",
+        status: "WITHDRAWAL_CONSENT_REQUIRED",
+        policyPath: "/refunds",
+        error: "크레딧은 결제 확인 즉시 제공이 개시되어 청약철회가 제한됩니다. 이에 동의해야 결제를 시작할 수 있습니다.",
+      }, { status: 400 });
     }
 
     const billingEnvironment = getBillingEnvironment(getRuntimeEnvironment());

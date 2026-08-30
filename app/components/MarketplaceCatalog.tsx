@@ -200,10 +200,17 @@ function ListingCard({
           <Link className="button button-quiet button-sm" href={`/marketplace/${encodeURIComponent(listing.slug)}`}>
             상세 보기 <Icon name="arrowRight" size={13} />
           </Link>
-          <button type="button" className="button button-primary button-sm" onClick={onCheckout}>
-            {checkoutUnavailable ? "결제 상태 확인" : listing.priceCents === 0 ? "다운로드 상태" : "구매하기"}
-            <Icon name="arrowUpRight" size={13} />
-          </button>
+          {listing.priceCents > 0 ? (
+            <Link className="button button-primary button-sm" href={`/marketplace/${encodeURIComponent(listing.slug)}`}>
+              구매하기
+              <Icon name="arrowUpRight" size={13} />
+            </Link>
+          ) : (
+            <button type="button" className="button button-primary button-sm" onClick={onCheckout}>
+              {checkoutUnavailable ? "결제 상태 확인" : "다운로드 상태"}
+              <Icon name="arrowUpRight" size={13} />
+            </button>
+          )}
         </div>
         {checkoutMessage ? <p className="marketplace-checkout-status" role="status">{checkoutMessage}</p> : null}
       </div>
@@ -216,6 +223,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
   const [checkout, setCheckout] = useState<CheckoutState | null>(null);
   const [state, setState] = useState<CatalogState>("loading");
   const [message, setMessage] = useState("");
+  const [withdrawalConsent, setWithdrawalConsent] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -244,6 +252,10 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
 
   async function startCheckout() {
     if (!listing) return;
+    if (listing.priceCents > 0 && !withdrawalConsent) {
+      setMessage("결제를 시작하려면 청약철회 제한 동의가 필요합니다.");
+      return;
+    }
     setMessage("구매 연결 상태를 확인하는 중입니다…");
     try {
       const response = await fetch("/api/marketplace/checkout", {
@@ -252,7 +264,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
           "content-type": "application/json",
           "idempotency-key": createIdempotencyKey(),
         },
-        body: JSON.stringify({ listingId: listing.id }),
+        body: JSON.stringify({ listingId: listing.id, withdrawalConsent }),
       });
       const payload = await response.json() as CheckoutResponse;
       if (payload.checkoutUrl) {
@@ -293,8 +305,21 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
           <p>{listing.description}</p>
           <div className="marketplace-detail-price"><strong>{formatPrice(listing.priceCents, listing.currency)}</strong><small>{listing.sellerName ?? "Clunk creator"} · {formatBytes(listing.byteLength)} · {listing.entryFileName}</small></div>
           <div className="marketplace-detail-payment-status" data-payment-state={checkout?.status ?? "UNKNOWN"} role="status"><span>CHECKOUT STATUS</span><strong>{paymentStatus}</strong><small>결제 제공자 상태를 API 응답 그대로 표시합니다.</small></div>
+          {listing.priceCents > 0 ? (
+            <label className={styles.consent}>
+              <input
+                type="checkbox"
+                checked={withdrawalConsent}
+                onChange={(event) => setWithdrawalConsent(event.target.checked)}
+              />
+              <span>
+                결제 확인 즉시 다운로드 권한이 부여되며, <b>제공 개시 시점부터 청약철회가 제한</b>됩니다.
+                이에 동의합니다. <Link href="/refunds">환불정책 보기</Link>
+              </span>
+            </label>
+          ) : null}
           <div className="marketplace-detail-actions">
-            {listing.priceCents === 0 ? <a className="button button-primary" href={downloadHref} download={listing.entryFileName}>무료 파일 받기 <Icon name="download" size={15} /></a> : <button type="button" className="button button-primary" onClick={() => void startCheckout()} disabled={paymentUnavailable}>{paymentUnavailable ? "결제 미설정" : "구매하기"} <Icon name="arrowUpRight" size={15} /></button>}
+            {listing.priceCents === 0 ? <a className="button button-primary" href={downloadHref} download={listing.entryFileName}>무료 파일 받기 <Icon name="download" size={15} /></a> : <button type="button" className="button button-primary" onClick={() => void startCheckout()} disabled={paymentUnavailable || !withdrawalConsent}>{paymentUnavailable ? "결제 미설정" : withdrawalConsent ? "구매하기" : "동의 후 구매 가능"} <Icon name="arrowUpRight" size={15} /></button>}
           </div>
           {message ? <p className="marketplace-detail-message" role="status">{message}</p> : null}
         </div>

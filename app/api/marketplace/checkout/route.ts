@@ -21,7 +21,7 @@ import { getRuntimeEnvironment } from "../../../runtime-environment";
 
 export const dynamic = "force-dynamic";
 
-type CheckoutPayload = { listingId?: unknown; idempotencyKey?: unknown };
+type CheckoutPayload = { listingId?: unknown; idempotencyKey?: unknown; withdrawalConsent?: unknown };
 
 export async function POST(request: Request) {
   try {
@@ -65,6 +65,18 @@ export async function POST(request: Request) {
     }
     if (listing.sellerUserId === user.id) {
       throw new ClunkHttpError("자신이 판매 중인 listing은 구매할 수 없습니다.", 409);
+    }
+    // 전자상거래법 제17조 2항 5호: 제공이 개시된 디지털 콘텐츠의 청약철회 제한은
+    // 결제 전 고지·동의가 있어야 성립한다. 동의 없는 요청에는 주문도 세션도 만들지
+    // 않는다 — 주문 기록 자체가 동의 시점의 기록을 겸하게 하기 위해서다.
+    if (payload.withdrawalConsent !== true) {
+      return privateJson({
+        ok: false,
+        schema: "clunk.marketplace-checkout.v1",
+        status: "WITHDRAWAL_CONSENT_REQUIRED",
+        policyPath: "/refunds",
+        error: "디지털 콘텐츠는 다운로드 권한이 부여되는 즉시 청약철회가 제한됩니다. 이에 동의해야 결제를 시작할 수 있습니다.",
+      }, { status: 400 });
     }
 
     const activeEntitlement = await db.prepare(
