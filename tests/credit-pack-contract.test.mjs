@@ -53,3 +53,14 @@ test("the demo self-grant is gated off outside explicit local smoke runs", async
   const files = await import("node:fs/promises").then(({ readdir }) => readdir(path.join(root, "app", "components")));
   assert.equal(files.includes("DemoUpgradeButton.tsx"), false, "the dead demo upgrade component must stay deleted");
 });
+
+test("the pricing surface renders pack state from the API and never invents a price", async () => {
+  const panel = await source("app/components/CreditPacksPanel.tsx");
+  assert.match(panel, /\/api\/credits\/packs/);
+  assert.match(panel, /가격 확정 전/);
+  assert.match(panel, /withdrawalConsent: consent/);
+  assert.doesNotMatch(panel, /₩\s?\d|\d+,\d+원/);
+  const pricing = await source("app/pricing/page.tsx");
+  assert.match(pricing, /CreditPacksPanel/);
+  assert.match(pricing, /pricing-packs/);
+});

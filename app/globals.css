@@ -11831,3 +11831,24 @@ html.snap-y .workspace-main > .evidence-chain {
     scroll-snap-type: none;
   }
 }
+
+/* Credit packs panel (pricing) — live API state only, no invented prices. */
+.credit-packs { display: grid; gap: 16px; }
+.credit-packs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.credit-pack-card {
+  display: grid;
+  gap: 8px;
+  padding: 20px 18px;
+  border: 1px solid color-mix(in oklab, currentColor 16%, transparent);
+  border-radius: 14px;
+  align-content: start;
+}
+.credit-pack-card[data-status="DRAFT"] { opacity: 0.78; }
+.credit-pack-name { font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.65; }
+.credit-pack-credits { font-size: 1.35rem; letter-spacing: -0.02em; }
+.credit-pack-price { font-size: 1.05rem; font-weight: 650; }
+.credit-pack-pending { font-size: 0.85rem; opacity: 0.7; line-height: 1.5; }
+.credit-packs-consent { display: flex; gap: 10px; align-items: flex-start; font-size: 0.87rem; line-height: 1.55; cursor: pointer; max-width: 640px; }
+.credit-packs-consent input { margin-top: 3px; width: 15px; height: 15px; flex: 0 0 auto; }
+.credit-packs-consent a { text-decoration: underline; text-underline-offset: 2px; }
+.credit-packs-state { font-size: 0.88rem; opacity: 0.75; }

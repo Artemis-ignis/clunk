@@ -1,4 +1,5 @@
 import Link from "../components/NativeLink";
+import { CreditPacksPanel } from "../components/CreditPacksPanel";
 import { SiteShell } from "../components/SiteShell";
 import { RULE_SET } from "../components/product-facts";
 import { createPageMetadata } from "../components/site-metadata";
@@ -66,7 +67,8 @@ function BillingState() {
         <strong>{isAvailable ? "결제 provider 설정됨" : "결제 provider 설정 필요"}</strong>
       </div>
       <p>
-        실제 코드에 확정된 유료 플랜 금액이나 credit pack 금액은 없습니다.{" "}
+        유료 월정액 플랜 금액은 아직 확정된 것이 없고, credit pack 가격은 아래 패널이
+        보여 주는 서버 상태가 전부입니다.{" "}
         {isAvailable
           ? "공개 listing의 결제 요청은 설정된 provider를 통해 처리됩니다."
           : "결제 provider가 설정되지 않아 결제 요청이나 주문을 만들지 않습니다."}
@@ -196,6 +198,22 @@ export default function PricingPage() {
               <span aria-hidden="true">→</span>
             </Link>
           </div>
+        </section>
+
+        <section
+          className={styles.section + " snap-section"}
+          data-snap-section="pricing-packs"
+          aria-labelledby="packs-title"
+        >
+          <div className={styles.sectionHeading}>
+            <span className={styles.eyebrow}>CREDIT PACKS</span>
+            <h2 id="packs-title">크레딧 팩은 실제 상태만 보여 줍니다.</h2>
+            <p>
+              팩 구성과 판매 상태는 서버 API가 반환한 값 그대로입니다. 가격이 확정되지 않은
+              팩은 숫자를 지어내는 대신 &ldquo;확정 전&rdquo;으로 표시하고 구매를 열지 않습니다.
+            </p>
+          </div>
+          <CreditPacksPanel />
         </section>
 
         <section
