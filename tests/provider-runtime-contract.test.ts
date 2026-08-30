@@ -20,6 +20,129 @@ test("provider status distinguishes native availability from missing external ru
   assert.equal(statuses.find((status) => status.id === "clunk-series-native-v1")?.status, "AVAILABLE");
   assert.equal(statuses.find((status) => status.id === "trellis2")?.status, "CONFIG_REQUIRED");
   assert.equal(statuses.find((status) => status.id === "blender-motion")?.status, "CONFIG_REQUIRED");
+  assert.equal(statuses.find((status) => status.id === "codex-luna")?.status, "CONFIG_REQUIRED");
+});
+
+test("codex-luna with a configured binary but no injected runner stays environment-unavailable", async () => {
+  const statuses = getProviderRuntimeStatus({ CODEX_BIN: "C:/tools/codex.exe" });
+  assert.equal(statuses.find((status) => status.id === "codex-luna")?.status, "ENVIRONMENT_UNAVAILABLE");
+  const result = await executeExternalProvider({
+    provider: "codex-luna",
+    assetKind: "2d-image",
+    targetProfileId: "yeongheo-pixi-2d",
+    label: "no runner",
+    prompt: "A wooden crate reference",
+  }, { environment: { CODEX_BIN: "C:/tools/codex.exe" } });
+  assert.equal(result.status, "ENVIRONMENT_UNAVAILABLE");
+  assert.equal(result.artifacts.length, 0);
+  assert.equal(result.evidence.productionReady, false);
+});
+
+test("codex-luna without CODEX_BIN is fail-closed and never invokes the runner", async () => {
+  let calls = 0;
+  const result = await executeExternalProvider({
+    provider: "codex-luna",
+    assetKind: "2d-image",
+    targetProfileId: "yeongheo-pixi-2d",
+    label: "missing bin",
+    prompt: "A wooden crate reference",
+  }, {
+    environment: EMPTY,
+    runCodexLuna: async () => {
+      calls += 1;
+      return [];
+    },
+  });
+  assert.equal(result.status, "CONFIG_REQUIRED");
+  assert.equal(calls, 0);
+  assert.equal(result.artifacts.length, 0);
+});
+
+test("codex-luna PNG output is rehashed, reinspected, and carries the luna model provenance", async () => {
+  const native = await executeProviderRun({
+    provider: "clunk-series-native-v1",
+    seriesId: "sprite-lab",
+    assetKind: "2d-image",
+    targetProfileId: "yeongheo-pixi-2d",
+    label: "luna fixture",
+    prompt: "fixture bytes for the luna adapter test",
+  }, {});
+  const fixture = native.artifacts.find((artifact) => artifact.fileName.endsWith(".png"));
+  assert.ok(fixture, "native provider must supply a real PNG fixture");
+  const result = await executeExternalProvider({
+    provider: "codex-luna",
+    assetKind: "2d-image",
+    targetProfileId: "yeongheo-pixi-2d",
+    label: "luna crate",
+    prompt: "A wooden crate reference, stylized realism",
+  }, {
+    environment: { CODEX_BIN: "C:/tools/codex.exe" },
+    runCodexLuna: async () => [{
+      fileName: "luna-crate.png",
+      role: "entry",
+      contentType: "image/png",
+      bytes: fixture.bytes,
+    }],
+  });
+  assert.equal(result.status, "COMPLETED");
+  assert.equal(result.artifacts.length, 1);
+  assert.equal(result.artifacts[0]?.fileName, "luna-crate.png");
+  assert.equal(result.artifacts[0]?.sha256, fixture.sha256);
+  assert.equal(result.evidence.freshReinspection, "PASS");
+  assert.equal(result.evidence.productionReady, false);
+  assert.equal(result.provenance.modelId, "gpt-5.6-luna");
+});
+
+test("codex-luna honours a CODEX_LUNA_MODEL override in provenance", async () => {
+  const result = await executeExternalProvider({
+    provider: "codex-luna",
+    assetKind: "2d-image",
+    targetProfileId: "yeongheo-pixi-2d",
+    label: "model override",
+    prompt: "A crate",
+  }, { environment: { CODEX_BIN: "C:/tools/codex.exe", CODEX_LUNA_MODEL: "gpt-5.6-luna-preview" } });
+  assert.equal(result.provenance.modelId, "gpt-5.6-luna-preview");
+});
+
+test("codex-luna refuses non-image asset kinds", async () => {
+  const result = await executeExternalProvider({
+    provider: "codex-luna",
+    assetKind: "3d-model",
+    targetProfileId: "web-three-mobile",
+    label: "wrong kind",
+    prompt: "A crate mesh",
+  }, {
+    environment: { CODEX_BIN: "C:/tools/codex.exe" },
+    runCodexLuna: async () => [],
+  });
+  assert.equal(result.status, "FAILED");
+  assert.equal(result.artifacts.length, 0);
+});
+
+test("codex-luna output that is not a real PNG never completes", async () => {
+  const glbNamed = await executeExternalProvider({
+    provider: "codex-luna",
+    assetKind: "2d-image",
+    targetProfileId: "yeongheo-pixi-2d",
+    label: "bad name",
+    prompt: "A crate",
+  }, {
+    environment: { CODEX_BIN: "C:/tools/codex.exe" },
+    runCodexLuna: async () => [{ fileName: "crate.glb", bytes: new Uint8Array([1, 2, 3, 4]) }],
+  });
+  assert.equal(glbNamed.status, "FAILED");
+  const fakeMagic = await executeExternalProvider({
+    provider: "codex-luna",
+    assetKind: "2d-image",
+    targetProfileId: "yeongheo-pixi-2d",
+    label: "bad magic",
+    prompt: "A crate",
+  }, {
+    environment: { CODEX_BIN: "C:/tools/codex.exe" },
+    runCodexLuna: async () => [{ fileName: "crate.png", bytes: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9]) }],
+  });
+  assert.equal(fakeMagic.status, "FAILED");
+  assert.equal(fakeMagic.artifacts.length, 0);
 });
 
 test("missing external configuration is fail-closed and produces no artifact", async () => {

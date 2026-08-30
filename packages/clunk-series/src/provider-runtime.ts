@@ -13,7 +13,7 @@ import type { ClunkSeriesId } from "./contracts";
 
 export type ProviderEnvironment = Record<string, string | undefined>;
 
-export type ProviderId = "clunk-series-native-v1" | "trellis2" | "blender-motion";
+export type ProviderId = "clunk-series-native-v1" | "trellis2" | "blender-motion" | "codex-luna";
 
 export type ProviderRuntimeStatusCode = "AVAILABLE" | "CONFIG_REQUIRED" | "ENVIRONMENT_UNAVAILABLE";
 
@@ -103,6 +103,10 @@ export interface ProviderRuntimeDependencies {
     input: ProviderRunInput,
     environment: ProviderEnvironment,
   ) => Promise<readonly ProviderArtifactInput[]>;
+  runCodexLuna?: (
+    input: ProviderRunInput,
+    environment: ProviderEnvironment,
+  ) => Promise<readonly ProviderArtifactInput[]>;
 }
 
 class ProviderOutputError extends Error {
@@ -112,7 +116,8 @@ class ProviderOutputError extends Error {
   }
 }
 
-const EXTERNAL_PROVIDER_IDS = new Set<ProviderId>(["trellis2", "blender-motion"]);
+const EXTERNAL_PROVIDER_IDS = new Set<ProviderId>(["trellis2", "blender-motion", "codex-luna"]);
+const DEFAULT_CODEX_LUNA_MODEL = "gpt-5.6-luna";
 const MAX_ARTIFACTS = 32;
 const MAX_TOTAL_BYTES = 64 * 1024 * 1024;
 
@@ -121,6 +126,7 @@ export function getProviderRuntimeStatus(
 ): ProviderRuntimeStatus[] {
   const trellisConfigured = Boolean(environment.TRELLIS_ENDPOINT?.trim() && environment.TRELLIS_MODEL_ID?.trim());
   const blenderConfigured = Boolean(environment.BLENDER_BIN?.trim());
+  const codexConfigured = Boolean(environment.CODEX_BIN?.trim());
   return [
     {
       id: "clunk-series-native-v1",
@@ -146,6 +152,15 @@ export function getProviderRuntimeStatus(
       detail: blenderConfigured
         ? "Blender 경로는 설정되었지만 Worker route에는 로컬 프로세스 실행기가 주입되지 않았습니다."
         : "실제 Blender 실행 파일 경로가 필요합니다.",
+    },
+    {
+      id: "codex-luna",
+      label: "Codex CLI luna imagegen",
+      status: codexConfigured ? "ENVIRONMENT_UNAVAILABLE" : "CONFIG_REQUIRED",
+      requiredEnvironment: ["CODEX_BIN"],
+      detail: codexConfigured
+        ? "Codex CLI 경로는 설정되었지만 Worker route에는 로컬 프로세스 실행기가 주입되지 않았습니다. 로컬 러너(npm run asset:luna)에서만 실행됩니다."
+        : "로컬 Codex CLI 실행 파일 경로(CODEX_BIN)가 필요합니다.",
     },
   ];
 }
@@ -236,7 +251,7 @@ export async function executeExternalProvider(
 ): Promise<ProviderRunResult> {
   const requestHash = requestHashFor(input);
   const environment = dependencies.environment ?? getProviderEnvironment();
-  const provenance = makeProvenance(input, input.provider === "trellis2" ? environment.TRELLIS_MODEL_ID?.trim() : undefined);
+  const provenance = makeProvenance(input, providerModelId(input.provider, environment));
   if (!EXTERNAL_PROVIDER_IDS.has(input.provider)) {
     return emptyResult(input, requestHash, provenance, "FAILED", "The requested provider is not an external provider.");
   }
@@ -252,10 +267,20 @@ export async function executeExternalProvider(
   if (input.provider === "blender-motion" && input.assetKind !== "animation-clip") {
     return emptyResult(input, requestHash, provenance, "FAILED", "Blender motion output is currently limited to animation clip requests.");
   }
+  if (input.provider === "codex-luna" && input.assetKind !== "2d-image") {
+    return emptyResult(input, requestHash, provenance, "FAILED", "Codex luna imagegen output is currently limited to 2D image requests.");
+  }
 
   if (input.provider === "trellis2") {
     if (!environment.TRELLIS_ENDPOINT?.trim() || !environment.TRELLIS_MODEL_ID?.trim()) {
       return emptyResult(input, requestHash, provenance, "CONFIG_REQUIRED", "TRELLIS_ENDPOINT and TRELLIS_MODEL_ID are required.");
+    }
+  } else if (input.provider === "codex-luna") {
+    if (!environment.CODEX_BIN?.trim()) {
+      return emptyResult(input, requestHash, provenance, "CONFIG_REQUIRED", "CODEX_BIN is required.");
+    }
+    if (!dependencies.runCodexLuna) {
+      return emptyResult(input, requestHash, provenance, "ENVIRONMENT_UNAVAILABLE", "A trusted local Codex CLI runner was not injected into this Worker route.");
     }
   } else {
     if (!environment.BLENDER_BIN?.trim()) {
@@ -269,7 +294,9 @@ export async function executeExternalProvider(
   try {
     const rawArtifacts = input.provider === "trellis2"
       ? await requestTrellisArtifacts(input, environment, dependencies.fetchImpl ?? fetch)
-      : await dependencies.runBlender!(input, environment);
+      : input.provider === "codex-luna"
+        ? await dependencies.runCodexLuna!(input, environment)
+        : await dependencies.runBlender!(input, environment);
     const artifacts = normalizeArtifacts(rawArtifacts, input.provider);
     if (!artifacts.length) throw new Error("Provider returned no artifact bytes.");
 
@@ -405,16 +432,32 @@ function normalizeArtifacts(
     const bytes = new Uint8Array(value.bytes);
     const sha256 = sha256Hex(bytes);
     if (value.sha256 && value.sha256.toLowerCase() !== sha256) throw new ProviderOutputError("Provider artifact hash does not match its bytes.");
-    if (!fileName.toLowerCase().endsWith(".glb")) throw new ProviderOutputError(`${provider} currently requires GLB artifact bytes.`);
+    if (provider === "codex-luna") {
+      if (!fileName.toLowerCase().endsWith(".png")) throw new ProviderOutputError("codex-luna currently requires PNG artifact bytes.");
+      if (!hasPngSignature(bytes)) throw new ProviderOutputError("codex-luna artifact bytes are not a valid PNG.");
+    } else if (!fileName.toLowerCase().endsWith(".glb")) {
+      throw new ProviderOutputError(`${provider} currently requires GLB artifact bytes.`);
+    }
     return {
       fileName,
       role: value.role?.trim() || (index === 0 ? "entry" : "supporting"),
-      contentType: value.contentType?.trim() || "model/gltf-binary",
+      contentType: value.contentType?.trim() || (provider === "codex-luna" ? "image/png" : "model/gltf-binary"),
       byteLength: bytes.byteLength,
       sha256,
       bytes,
     };
   });
+}
+
+function hasPngSignature(bytes: Uint8Array): boolean {
+  const signature = [137, 80, 78, 71, 13, 10, 26, 10];
+  return bytes.byteLength > signature.length && signature.every((value, index) => bytes[index] === value);
+}
+
+function providerModelId(provider: ProviderId, environment: ProviderEnvironment): string | undefined {
+  if (provider === "trellis2") return environment.TRELLIS_MODEL_ID?.trim();
+  if (provider === "codex-luna") return environment.CODEX_LUNA_MODEL?.trim() || DEFAULT_CODEX_LUNA_MODEL;
+  return undefined;
 }
 
 function parseArtifactInputs(value: unknown): ProviderArtifactInput[] {

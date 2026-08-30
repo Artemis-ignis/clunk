@@ -32,6 +32,38 @@ test("procedural authoring emits a real RGBA sprite bundle with deterministic pr
   assert.deepEqual({ format: metadata.format, width: metadata.width, height: metadata.height, channels: metadata.channels }, { format: "png", width: 384, height: 96, channels: 4 });
 });
 
+test("procedural 2d sprite silhouette is centered inside its frame, not clipped at the left edge", async () => {
+  const result = createProceduralAuthoring({
+    assetKind: "2d-image",
+    label: "Center Probe",
+    prompt: "A goblin archer with a longbow",
+    targetProfileId: "yeongheo-pixi-2d",
+    width: 128,
+    height: 128,
+  });
+  const entry = result.artifacts.find((artifact) => artifact.role === "entry");
+  assert.ok(entry);
+  const sharpFactory = sharp as unknown as (input: Buffer) => {
+    raw: () => { toBuffer: (options: { resolveWithObject: true }) => Promise<{ data: Buffer; info: { width: number; height: number; channels: number } }> };
+  };
+  const { data, info } = await sharpFactory(Buffer.from(entry.bytes)).raw().toBuffer({ resolveWithObject: true });
+  let weightedX = 0;
+  let opaque = 0;
+  for (let y = 0; y < info.height; y += 1) {
+    for (let x = 0; x < info.width; x += 1) {
+      if (data[(y * info.width + x) * info.channels + 3] > 0) {
+        weightedX += x;
+        opaque += 1;
+      }
+    }
+  }
+  assert.ok(opaque > 0, "sprite must contain opaque pixels");
+  const centerRatio = weightedX / opaque / info.width;
+  assert.ok(centerRatio > 0.4 && centerRatio < 0.6, `silhouette center of mass must sit in the middle band, got ${centerRatio.toFixed(3)}`);
+  const leftEdgeOpaque = Array.from({ length: info.height }, (_, y) => data[(y * info.width) * info.channels + 3]).filter((alpha) => alpha > 0).length;
+  assert.equal(leftEdgeOpaque, 0, "column x=0 must not carry the silhouette body");
+});
+
 test("procedural authoring emits a parseable GLB animation artifact", () => {
   const result = createProceduralAuthoring({
     assetKind: "animation-clip",

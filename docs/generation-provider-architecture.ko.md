@@ -38,9 +38,28 @@ GPU inference, TRELLIS.2, Blender 자동화, 엔진 runtime capture는 현재 �
 `ENVIRONMENT_UNAVAILABLE`입니다. `/api/providers`는 이 상태를 공개 capability로
 반환합니다. 외부 결과를 생성한 것처럼 fake response를 만들지 않습니다.
 
+### codex-luna (2DProvider 첫 어댑터, 2026-08-31)
+
+`codex-luna`는 로컬 Codex CLI(`codex exec`, 기본 모델 `gpt-5.6-luna`)로 실제
+2D 이미지를 생성하는 어댑터입니다. 경계는 다음과 같습니다.
+
+- **실행 위치**: 로컬 러너 `npm run asset:luna`(scripts/luna-imagegen.ts)에서만
+  실행됩니다. Worker route에는 프로세스 실행기가 주입되지 않으므로
+  `/api/providers`는 `CODEX_BIN` 미설정 시 `CONFIG_REQUIRED`, 설정 시
+  `ENVIRONMENT_UNAVAILABLE`을 정직하게 반환합니다.
+- **출력 검증**: PNG 서명·IHDR 치수를 검증하고, Clunk가 바이트를 다시 열어
+  fresh reinspection을 통과해야만 COMPLETED가 됩니다. `.png`가 아니거나 서명이
+  틀리면 바이트는 폐기됩니다.
+- **provenance**: provider `codex-luna`, modelId(`CODEX_LUNA_MODEL` 또는 기본
+  `gpt-5.6-luna`), prompt hash, 러너 커밋이 `*.luna-record.json`에 기록됩니다.
+- **승격 불가**: 다른 어댑터와 동일하게 `productionReady: false`로 유지되며
+  license/runtime/player-facing/human review 게이트는 별도로 남습니다.
+- **환경 변수**: `CODEX_BIN`(기본 `codex`), `CODEX_LUNA_MODEL`(기본
+  `gpt-5.6-luna`). 값은 로컬 전용이며 Worker 시크릿에 넣지 않습니다.
+
 향후 adapter가 들어올 자리는 다음과 같습니다.
 
-- `2DProvider`
+- `2DProvider` — 첫 어댑터 `codex-luna` 편입, 잔여: 서버측 큐 경유 고객 노출
 - `SpriteProvider`
 - `3DProvider`
 - `TextureProvider`

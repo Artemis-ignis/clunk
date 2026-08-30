@@ -45,6 +45,7 @@
     "asset:evidence": "tsx scripts/asset-inspection-evidence-cli.ts",
     "quality:validate": "tsx scripts/player-facing-quality-validate.ts",
     "asset:generate": "tsx scripts/assetops-generate.ts",
+    "asset:luna": "tsx scripts/luna-imagegen.ts",
     "asset:author": "tsx scripts/assetops-author.ts",
     "collaboration:frame-manifest": "tsx scripts/frame-manifest-cli.ts",
     "asset:inspect": "tsx scripts/assetops-inspect-cli.ts",
