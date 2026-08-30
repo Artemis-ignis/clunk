@@ -19,7 +19,8 @@ test("login preserves the dashboard return path and explains ChatGPT signup", as
   const response = await render("/login?return_to=%2Fdashboard");
   assert.equal(response.status, 200);
   const html = await response.text();
-  assert.match(html, /곧 회원가입/);
+  assert.match(html, /ChatGPT로 계속하기/);
+  assert.match(html, /가입 흐름 보기/);
   assert.match(html, /\/signin-with-chatgpt\?return_to=%2Fdashboard/);
 });
 
@@ -27,8 +28,9 @@ test("signup is a first-class route and links back to login", async () => {
   const response = await render("/signup");
   assert.equal(response.status, 200);
   const html = await response.text();
-  assert.match(html, /회원가입/);
-  assert.match(html, /회원가입하기/);
+  assert.match(html, /ChatGPT로 Workspace 시작/);
+  assert.match(html, /가입 폼은 없습니다/);
+  assert.match(html, /로그인 흐름 보기/);
   assert.match(html, /href="\/login/);
 });
 
@@ -42,7 +44,7 @@ test("authenticated login remains visible instead of redirecting away", async ()
   assert.equal(response.status, 200);
   assert.equal(response.headers.get("location"), null);
   const html = await response.text();
-  assert.match(html, /이미 Clunk에/);
+  assert.match(html, /요청한 Workspace 열기/);
   assert.match(html, /href="\/dashboard/);
 });
 

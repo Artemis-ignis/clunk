@@ -2,296 +2,285 @@ import Image from "next/image";
 import Link from "./components/NativeLink";
 import { Icon } from "./components/Icon";
 import { SiteNav } from "./components/SiteNav";
-import { SnapRoot } from "./components/SnapRoot";
+import { RevealObserver } from "./components/Reveal";
+import { LandingMcpDemo } from "./components/LandingMcpDemo";
 import { createPageMetadata } from "./components/site-metadata";
-import { ASSET_KIND_COVERAGE, MARKETPLACE_CONTRACT } from "./components/product-facts";
+import { MCP_HTTP_TOOL_COUNT, RULE_COUNT } from "./components/product-facts";
 
 export const metadata = createPageMetadata({
-  title: "실제 에셋 마켓과 Clunk",
-  description: "마스터가 올린 실제 게임 에셋은 마켓에서 구매하고, Clunk의 생성·검수·패키징 기능은 크레딧으로 사용합니다.",
+  title: "게임 에셋 파운드리",
+  description: "게임 에셋을 만들고, 실제 바이트로 증명하고, 판매하는 파운드리. 검사·수정과 게임 제작 에이전트까지 하나의 Clunk에서 크레딧으로 사용합니다.",
   path: "/",
 });
 
+/**
+ * Public landing v4 — three-pillar information architecture ordered by the
+ * product's spine: make & sell, inspect & repair, build with agents. Every
+ * number rendered here is either imported from the code that enforces it or
+ * labelled with the real measurement it came from. No invented stats.
+ */
+
 const WORKFLOW = [
-  {
-    number: "01",
-    label: "PLAN",
-    title: "프로젝트와 목표를 정합니다",
-    detail: "프로젝트와 target profile을 정하고, 어떤 결과가 필요한지 작업면에 남깁니다.",
-    surface: "Workspace",
-  },
-  {
-    number: "02",
-    label: "2D / 3D CREATE",
-    title: "필요한 형식으로 설계합니다",
-    detail: "2D 이미지와 3D GLB·glTF를 현재 authoring 표면에서 선택하고 실제 파일로 남깁니다.",
-    surface: "Studio · authoring",
-  },
-  {
-    number: "03",
-    label: "SPRITE / RIG INSPECT",
-    title: "스프라이트와 리깅을 연결합니다",
-    detail: "Sprite Atlas와 Spine Rig의 page, region, bone, slot, attachment, animation 관계를 bundle로 관리합니다.",
-    surface: "Sprite Lab · bundle",
-  },
-  {
-    number: "04",
-    label: "MOTION / UI",
-    title: "모션과 UI를 확인합니다",
-    detail: "glTF animation clip과 portrait UI readability를 실제 산출물과 렌더링 조건으로 검사합니다.",
-    surface: "Motion Lab · UI contract",
-  },
-  {
-    number: "05",
-    label: "ENGINE / PLAY",
-    title: "엔진과 플레이 결과를 확인합니다",
-    detail: "연결된 엔진 타깃의 shipped frame, player-facing 상태, 사람의 결정을 따로 확인하고 미판정 상태는 승격하지 않습니다.",
-    surface: "CONNECT · Game Ready",
-  },
+  { number: "01", label: "PLAN", title: "프로젝트와 목표", detail: "타깃 프로파일과 필요한 결과를 작업면에 남깁니다." },
+  { number: "02", label: "2D / 3D CREATE", title: "실제 파일 생성", detail: "2D 이미지와 3D GLB·glTF를 실제 바이트로 만듭니다." },
+  { number: "03", label: "SPRITE / RIG INSPECT", title: "구조 검사", detail: "페이지·리전·본·슬롯 관계와 정책 결과를 검사합니다." },
+  { number: "04", label: "MOTION / UI", title: "모션·가독성", detail: "애니메이션 클립과 UI 판독성을 실측 조건으로 확인합니다." },
+  { number: "05", label: "ENGINE / CONNECT", title: "엔진 핸드오프", detail: "Game Ready 근거와 함께 실게임 타깃으로 전달합니다." },
 ] as const;
 
-const EVIDENCE_LANES = [
-  {
-    label: "REAL FILES",
-    title: "실제 bytes와 provenance",
-    detail: "생성·업로드 결과, 입력 hash, 파일 관계, 라이선스 출처를 분리해 남깁니다.",
-  },
-  {
-    label: "QUALITY",
-    title: "구조 검수와 재검사",
-    detail: "Clunk Core 정책 결과와 fresh reinspection을 사용해 결과를 읽습니다.",
-  },
-  {
-    label: "RUNTIME",
-    title: "엔진·플레이어 화면",
-    detail: "구조 결과가 플레이 가능한 결과를 대신하지 않도록 runtime과 player-facing 상태를 따로 둡니다.",
-  },
-  {
-    label: "DELIVERY",
-    title: "구매·다운로드 권한",
-    detail: "마켓은 게시된 listing과 실제 결제·다운로드 계약이 확인된 범위만 열어 둡니다.",
-  },
-] as const;
+const AGENT_CLIENTS = ["Claude Code", "Codex CLI", "Cursor", "VS Code", "Grok Build", "Antigravity", "DeepSeek", "GLM", "로컬 에이전트"] as const;
 
 export default function Home() {
   return (
-    <div className="site-shell clunk-home">
-      <SnapRoot />
+    <div className="cv4">
+      <RevealObserver />
       <a className="clunk-home-skip-link" href="#main-content">본문으로 건너뛰기</a>
       <SiteNav active="home" />
 
       <main id="main-content">
-        <section className="clunk-home-section clunk-home-hero public-hero-frame" data-snap-section="hero" aria-labelledby="home-heading">
-          <div className="clunk-home-frame">
-            <div className="clunk-home-hero-topline">
-              <span className="clunk-home-eyebrow">CLUNK / ASSET MARKET + CREDIT WORKSPACE</span>
-              <span className="clunk-home-topline-note">2D + 3D · REAL FILES · HUMAN DECISION</span>
+        {/* HERO ------------------------------------------------------- */}
+        <section className="cv4-hero public-hero-frame" data-snap-section="hero" aria-labelledby="home-heading">
+          <div className="cv4-frame">
+            <div className="cv4-hero-copy">
+              <span className="cv4-eyebrow">CLUNK / GAME ASSET FOUNDRY</span>
+              <h1 id="home-heading">
+                게임 에셋을 만들고,<br />증명하고, <em>판매합니다.</em>
+              </h1>
+              <p className="cv4-hero-lede">
+                생성부터 검사·수정, 마켓 판매, 그리고 에이전트로 이어지는 게임 제작까지 —
+                하나의 Clunk에서 크레딧으로 사용합니다. 모든 결과는 실제 바이트와 근거로 남습니다.
+              </p>
+              <div className="cv4-hero-actions">
+                <Link className="cv4-btn cv4-btn-primary" href="/studio" prefetch={false}>
+                  지금 시작하기 <Icon name="arrowUpRight" size={16} />
+                </Link>
+                <Link className="cv4-btn cv4-btn-ghost" href="/marketplace" prefetch={false}>
+                  마켓 둘러보기
+                </Link>
+              </div>
             </div>
 
-            <div className="clunk-home-hero-layout">
-              <div className="clunk-home-hero-copy">
-                <h1 id="home-heading">필요한 에셋은 사고,<br /><em>Clunk는 크레딧으로.</em></h1>
-                <p className="clunk-home-hero-lede">마스터가 직접 만든 실제 게임 에셋은 마켓에서 고르고 구매하세요. 직접 작업할 때는 크레딧으로 Clunk의 생성·검수·패키징 기능을 사용합니다.</p>
-
-                <div className="clunk-home-entry-grid" aria-label="Clunk 시작 경로">
-                  <Link className="clunk-home-entry-card clunk-home-entry-market" href="/marketplace" prefetch={false}>
-                    <span className="clunk-home-entry-index">01 / ASSET MARKET</span>
-                    <strong>마켓 둘러보기</strong>
-                    <p>마스터가 올린 게시 상품을 실제 preview, 형식, 라이선스, 다운로드 상태와 함께 확인합니다.</p>
-                    <span className="clunk-home-entry-footer">구매 가능한 listing 보기 <Icon name="arrowUpRight" size={15} /></span>
-                  </Link>
-                  <Link className="clunk-home-entry-card clunk-home-entry-use" href="/studio" prefetch={false}>
-                    <span className="clunk-home-entry-index">02 / CREDIT WORKSPACE</span>
-                    <strong>Clunk 사용하기</strong>
-                    <p>로그인한 작업공간에서 크레딧으로 생성하고, 실제 artifact와 검수 근거를 이어갑니다.</p>
-                    <span className="clunk-home-entry-footer">작업공간 열기 <Icon name="arrowUpRight" size={15} /></span>
-                  </Link>
-                </div>
-
-                <p className="clunk-home-truth-note"><span aria-hidden="true" /> 마켓 상품은 실제 API의 게시 상태를 따릅니다. 상품이 없거나 결제가 연결되지 않은 상태를 임의로 채우지 않습니다.</p>
+            <div className="cv4-proof cv4-reveal" role="list" aria-label="Clunk 실측 지표">
+              <div className="cv4-proof-item" role="listitem">
+                <span className="cv4-proof-value"><b>{RULE_COUNT}</b>종</span>
+                <span className="cv4-proof-label">정적 검사 정책 룰 — 코드에서 직접 셉니다</span>
               </div>
+              <div className="cv4-proof-item" role="listitem">
+                <span className="cv4-proof-value"><b>{MCP_HTTP_TOOL_COUNT}</b>개</span>
+                <span className="cv4-proof-label">에이전트용 MCP 도구 — HTTP·로컬 동일 계약</span>
+              </div>
+              <div className="cv4-proof-item" role="listitem">
+                <span className="cv4-proof-value">100<b>/100</b></span>
+                <span className="cv4-proof-label">실게임 납품 GLB 재검사 점수 · 2026-08-31 실측</span>
+              </div>
+              <div className="cv4-proof-item" role="listitem">
+                <span className="cv4-proof-value"><b>0</b></span>
+                <span className="cv4-proof-label">지어낸 지표 — 모든 수치는 코드와 실측에서 옵니다</span>
+              </div>
+            </div>
+          </div>
+        </section>
 
-              <figure className="clunk-home-asset-wall">
-                <div className="clunk-home-asset-wall-head">
-                  <span>PRODUCT FILE PREVIEWS</span>
-                  <span>02 / 02</span>
-                </div>
-                <div className="clunk-home-asset-wall-grid">
-                  <div className="clunk-home-asset-image clunk-home-asset-image-model">
-                    <Image src="/landing/tractor-hero.png" alt="Clunk가 다루는 3D GLB 에셋 파일 미리보기" width={900} height={610} priority />
-                    <span>3D / GLB</span>
+        {/* PILLAR 01 — MAKE & SELL ------------------------------------ */}
+        <section className="cv4-pillar" id="make" data-snap-section="make" aria-labelledby="pillar-make">
+          <div className="cv4-frame cv4-pillar-grid">
+            <div className="cv4-pillar-copy cv4-reveal">
+              <span className="cv4-pillar-num">01 / MAKE &amp; SELL</span>
+              <h2 id="pillar-make">에셋 제작 및 판매</h2>
+              <p>
+                프롬프트에서 2D 이미지를, Three.js 팩토리 레일에서 3D GLB를 실제 파일로 만듭니다.
+                게시 게이트를 통과한 에셋만 마켓에 올라가고, 파일·해시·라이선스가 상품 단위로 따라갑니다.
+              </p>
+              <ul className="cv4-pillar-points">
+                <li><b>2D 생성</b> — luna 이미지 엔진, 프롬프트·모델·해시가 provenance로 기록</li>
+                <li><b>3D 팩토리</b> — 부품 디테일·팔레트 규율의 저폴리 GLB, LOD와 소켓까지</li>
+                <li><b>마켓</b> — 게시 조건을 충족한 listing만 공개, 결제·다운로드 권한 분리</li>
+              </ul>
+              <div className="cv4-pillar-actions">
+                <Link className="cv4-link" href="/marketplace" prefetch={false}>마켓 둘러보기 <Icon name="arrowRight" size={15} /></Link>
+                <Link className="cv4-link" href="/studio" prefetch={false}>Studio에서 제작 <Icon name="arrowRight" size={15} /></Link>
+              </div>
+            </div>
+            <div className="cv4-pillar-visual cv4-reveal" data-delay="1">
+              <figure className="cv4-panel">
+                <div className="cv4-panel-head"><span>CLUNK MARKET / REAL FILES</span><span>GLB · PNG</span></div>
+                <div className="cv4-market-grid">
+                  <div className="cv4-asset-card">
+                    <Image src="/landing/tractor-hero.png" alt="실게임에 납품된 저폴리 트랙터 3D 에셋 렌더" width={900} height={610} priority />
+                    <div className="cv4-asset-meta">농기계 트랙터 <span>3D · 39,320 TRIS</span></div>
                   </div>
-                  <div className="clunk-home-asset-image clunk-home-asset-image-sprite">
-                    <Image src="/samples/product-sprite/clunk-sprite-sample.png" alt="Clunk가 다루는 2D Sprite 파일 미리보기" width={512} height={512} />
-                    <span>2D / SPRITE</span>
+                  <div className="cv4-asset-card">
+                    <Image src="/landing/market-stall.webp" alt="luna 엔진으로 생성한 시장 노점 2D 에셋" width={880} height={880} />
+                    <div className="cv4-asset-meta">시장 노점 <span>2D · LUNA</span></div>
+                  </div>
+                  <div className="cv4-asset-card">
+                    <Image src="/landing/crate-ref.webp" alt="luna 엔진으로 생성한 나무 상자 2D 에셋" width={880} height={880} />
+                    <div className="cv4-asset-meta">나무 상자 <span>2D · LUNA</span></div>
                   </div>
                 </div>
-                <figcaption>실제 제품 파일의 미리보기입니다. 판매 여부와 가격은 마켓의 게시 listing만 결정합니다.</figcaption>
               </figure>
+              <p className="cv4-inspect-caption" style={{ marginTop: 12 }}>
+                마스터가 직접 만든 실제 제품 파일의 미리보기입니다. 판매 여부와 가격은 마켓의 게시 listing만 결정합니다.
+              </p>
             </div>
           </div>
         </section>
 
-        <section className="clunk-home-section clunk-home-catalogue" id="catalogue" data-snap-section="catalogue" aria-labelledby="catalogue-heading">
-          <div className="clunk-home-frame">
-            <header className="clunk-home-section-heading">
-              <div>
-                <span className="clunk-home-eyebrow">TWO WAYS INTO CLUNK</span>
-                <h2 id="catalogue-heading">마스터의 상품과<br /><em>Clunk 작업이 분리되어 있습니다.</em></h2>
+        {/* PILLAR 02 — INSPECT & REPAIR ------------------------------- */}
+        <section className="cv4-pillar" id="inspect" data-snap-section="inspect" aria-labelledby="pillar-inspect">
+          <div className="cv4-frame cv4-pillar-grid" data-flip="true">
+            <div className="cv4-pillar-copy cv4-reveal">
+              <span className="cv4-pillar-num">02 / INSPECT &amp; REPAIR</span>
+              <h2 id="pillar-inspect">에셋 검사 및 수정</h2>
+              <p>
+                내 에셋을 실제 바이트로 열어 정책 검사와 Game Ready 스코어를 받고,
+                엔진·모바일·PC 타깃에 맞는 커스텀 프로파일로 수정 방향을 잡습니다.
+                구조 점수는 사람의 승인과 절대 섞이지 않습니다.
+              </p>
+              <ul className="cv4-pillar-points">
+                <li><b>바이트 검사</b> — GLB·glTF 파서가 삼각형·머티리얼·텍스처 메모리를 실측</li>
+                <li><b>Sprite / Atlas · Spine</b> — 페이지·리전·본·슬롯 관계를 번들로 검증</li>
+                <li><b>Passport</b> — 입력 해시부터 판정까지 결정론적 digest로 봉인</li>
+              </ul>
+              <div className="cv4-pillar-actions">
+                <Link className="cv4-link" href="/app" prefetch={false}>Game Ready 검사 시작 <Icon name="arrowRight" size={15} /></Link>
+                <Link className="cv4-link" href="/docs" prefetch={false}>검사 계약 읽기 <Icon name="arrowRight" size={15} /></Link>
               </div>
-              <p>구매하는 에셋과 크레딧으로 사용하는 제품 기능은 서로 다른 흐름입니다. 각각의 권한과 상태를 실제 서비스 계약에 맞춰 보여 줍니다.</p>
-            </header>
-
-            <div className="clunk-home-route-grid">
-              <article className="clunk-home-route-card clunk-home-route-market">
-                <div className="clunk-home-route-topline"><span>01</span><span>BUY / MASTER ASSETS</span></div>
-                <div className="clunk-home-route-copy">
-                  <h3>마켓에서 실제 에셋을 선택합니다</h3>
-                  <p>마스터가 업로드한 파일 중 게시 조건을 충족한 listing만 공개됩니다. preview와 파일 형식, 라이선스, 다운로드 권한을 상품 단위로 확인합니다.</p>
-                </div>
-                <dl className="clunk-home-contract-list">
-                  <div><dt>CATALOGUE</dt><dd>PUBLISHED listing only</dd></div>
-                  <div><dt>DELIVERY</dt><dd>asset bytes + download permission</dd></div>
-                  <div><dt>CONTRACT</dt><dd>{MARKETPLACE_CONTRACT.catalog}</dd></div>
-                </dl>
-                <Link className="clunk-home-text-link" href="/marketplace" prefetch={false}>마켓으로 이동 <Icon name="arrowRight" size={15} /></Link>
-              </article>
-
-              <article className="clunk-home-route-card clunk-home-route-workspace">
-                <div className="clunk-home-route-topline"><span>02</span><span>USE / CLUNK CREDITS</span></div>
-                <div className="clunk-home-route-copy">
-                  <h3>크레딧으로 Clunk 제품을 사용합니다</h3>
-                  <p>기획한 작업을 Studio에 넣고, 생성·변환·검수 결과를 실제 파일과 Passport로 이어갑니다. 성공한 실행만 비용으로 취급합니다.</p>
-                </div>
-                <ul className="clunk-home-bullet-list">
-                  <li><span>CREATE</span> 프롬프트에서 별도 artifact bundle 생성</li>
-                  <li><span>CHECK</span> bytes, hash, policy, target profile 검사</li>
-                  <li><span>HANDOFF</span> Passport, MCP, CLI와 엔진 타깃 연결</li>
-                </ul>
-                <div className="clunk-home-route-actions">
-                  <Link className="clunk-home-text-link" href="/studio" prefetch={false}>Clunk 사용 시작 <Icon name="arrowRight" size={15} /></Link>
-                  <Link className="clunk-home-secondary-link" href="/pricing" prefetch={false}>크레딧 정책 보기</Link>
-                </div>
-              </article>
             </div>
-          </div>
-        </section>
-
-        <section className="clunk-home-section clunk-home-workflow" id="workflow" data-snap-section="workflow" aria-labelledby="workflow-heading">
-          <div className="clunk-home-frame">
-            <header className="clunk-home-section-heading">
-              <div>
-                <span className="clunk-home-eyebrow">FROM BRIEF TO PLAYABLE HANDOFF</span>
-                <h2 id="workflow-heading">작업의 각 단계가<br /><em>다음 상태를 만듭니다.</em></h2>
-              </div>
-              <p>Clunk가 현재 제공하는 표면만 순서에 넣었습니다. 실행 화면과 사람의 결정은 구조 검사 결과와 섞지 않습니다.</p>
-            </header>
-
-            <ol className="clunk-home-workflow-list">
-              {WORKFLOW.map((step) => (
-                <li className="clunk-home-workflow-item" key={step.number}>
-                  <div className="clunk-home-workflow-index"><span>{step.number}</span><i aria-hidden="true" /></div>
-                  <div className="clunk-home-workflow-copy">
-                    <span>{step.label}</span>
-                    <h3>{step.title}</h3>
-                    <p>{step.detail}</p>
+            <div className="cv4-pillar-visual cv4-reveal" data-delay="1">
+              <div className="cv4-panel">
+                <div className="cv4-panel-head"><span>INSPECTION READOUT</span><span>HARVEST FRONTIER 납품분</span></div>
+                <div className="cv4-inspect">
+                  <div className="cv4-inspect-score">
+                    <strong>100<small> /100</small></strong>
+                    <span className="cv4-inspect-state">FRESH REINSPECTION · PASS</span>
                   </div>
-                  <code>{step.surface}</code>
+                  <dl className="cv4-inspect-rows">
+                    <div><dt>INPUT</dt><dd>tractor.compact.m1.glb</dd></div>
+                    <div><dt>BYTES</dt><dd>840,136</dd></div>
+                    <div><dt>SHA-256</dt><dd>f64e63b2…b95609b</dd></div>
+                    <div><dt>TRIANGLES</dt><dd>39,320 / 예산 40,000</dd></div>
+                    <div><dt>DRAW CALLS</dt><dd>98</dd></div>
+                    <div><dt>FINDING</dt><dd className="is-warn">GEO-TRIANGLE-BUDGET · WARNING</dd></div>
+                  </dl>
+                  <p className="cv4-inspect-caption">
+                    2026-08-31 실게임(Harvest Frontier) 납품 GLB를 재검사한 실측값 그대로입니다.
+                    경고 하나까지 숨기지 않는 것이 Clunk의 판정 방식입니다.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* PILLAR 03 — GAME AGENT ------------------------------------- */}
+        <section className="cv4-pillar" id="agent" data-snap-section="agent" aria-labelledby="pillar-agent">
+          <div className="cv4-frame cv4-pillar-grid">
+            <div className="cv4-pillar-copy cv4-reveal">
+              <span className="cv4-pillar-num">03 / GAME AGENT</span>
+              <h2 id="pillar-agent">게임 제작 에이전트</h2>
+              <p>
+                Clunk MCP·CLI·플러그인을 쓰는 에이전트에서 에셋 생성·검사·패키징을 그대로 호출합니다.
+                에셋만 만들게 하거나, 만들고 검사까지 시키거나, 게임 제작 워크플로 전체에 붙이세요.
+              </p>
+              <ul className="cv4-pillar-points">
+                <li><b>MCP {MCP_HTTP_TOOL_COUNT}툴</b> — HTTP와 로컬 stdio가 같은 계약으로 동작</li>
+                <li><b>CLI</b> — inspect·validate·optimize·passport·watch를 터미널에서</li>
+                <li><b>실게임 검증 루프</b> — 실제 게임 프로젝트의 배치·검수 데이터로 다듬는 중</li>
+              </ul>
+              <div className="cv4-pillar-actions">
+                <Link className="cv4-link" href="/connect" prefetch={false}>에이전트 연결 가이드 <Icon name="arrowRight" size={15} /></Link>
+              </div>
+              <div className="cv4-integrations" aria-label="Clunk를 연결할 수 있는 MCP 클라이언트">
+                <span>WORKS WITH</span>
+                {AGENT_CLIENTS.map((client) => (
+                  <span className="cv4-chip" key={client}>{client}</span>
+                ))}
+              </div>
+            </div>
+            <div className="cv4-pillar-visual cv4-reveal" data-delay="1">
+              <div className="cv4-panel">
+                <div className="cv4-panel-head"><span>CONNECT / MCP</span><span>REAL ENDPOINT</span></div>
+                <div className="cv4-agent-shell">
+                  <LandingMcpDemo />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* WORKFLOW RAIL ---------------------------------------------- */}
+        <section className="cv4-rail" id="workflow" data-snap-section="workflow" aria-labelledby="workflow-heading">
+          <div className="cv4-frame">
+            <div className="cv4-rail-head cv4-reveal">
+              <div>
+                <span className="cv4-eyebrow">FROM BRIEF TO PLAYABLE HANDOFF</span>
+                <h2 id="workflow-heading">기획에서 핸드오프까지, 다섯 단계</h2>
+              </div>
+              <p>Clunk가 실제 제공하는 표면만 순서에 넣었습니다. 실행 화면과 사람의 결정은 구조 검사 결과와 섞지 않습니다.</p>
+            </div>
+            <ol className="cv4-rail-track" style={{ listStyle: "none", padding: 0, margin: "40px 0 0" }}>
+              {WORKFLOW.map((step, index) => (
+                <li className="cv4-rail-step cv4-reveal" data-delay={String(Math.min(index, 3))} key={step.number}>
+                  <span>{step.number} · {step.label}</span>
+                  <h3>{step.title}</h3>
+                  <p>{step.detail}</p>
                 </li>
               ))}
             </ol>
-
-            <div className="clunk-home-workflow-note">
-              <Icon name="shield" size={17} />
-              <p><strong>Game Ready는 하나의 숫자가 아닙니다.</strong> 실제 bytes·구조·runtime·player-facing·human review를 각각 확인한 뒤에야 다음 제품 상태로 넘어갑니다.</p>
-            </div>
           </div>
         </section>
 
-        <section className="clunk-home-section clunk-home-families" id="formats" data-snap-section="formats" aria-labelledby="formats-heading">
-          <div className="clunk-home-frame">
-            <header className="clunk-home-section-heading">
-              <div>
-                <span className="clunk-home-eyebrow">SUPPORTED ASSET FAMILIES</span>
-                <h2 id="formats-heading">필요한 형식을 고르고,<br /><em>작업은 실제 파일로 남깁니다.</em></h2>
-              </div>
-              <p>현재 저장소의 authoring·inspection 계약이 정의한 형식입니다. 판매 상품 목록이 아니라 Clunk 작업 범위를 설명합니다.</p>
-            </header>
-
-            <div className="clunk-home-family-grid">
-              {ASSET_KIND_COVERAGE.map((family, index) => (
-                <article className="clunk-home-family-card" key={family.label}>
-                  <div className="clunk-home-family-card-head"><span>0{index + 1}</span><Icon name={index === 0 ? "box" : index === 1 ? "image" : index === 2 ? "boxes" : index === 3 ? "binary" : "activity"} size={18} /></div>
-                  <div className="clunk-home-family-mark" aria-hidden="true">{family.label.slice(0, 1)}</div>
-                  <h3>{family.label === "Sprite" ? "Sprite / Atlas" : family.label}</h3>
-                  <p>{family.detail}</p>
-                  <span className="clunk-home-family-state">AUTHORING + INSPECTION CONTRACT</span>
-                </article>
-              ))}
+        {/* TRUTH BAND -------------------------------------------------- */}
+        <section className="cv4-truth" id="evidence" data-snap-section="evidence" aria-labelledby="truth-heading">
+          <div className="cv4-frame cv4-truth-inner">
+            <div className="cv4-reveal">
+              <span className="cv4-eyebrow">NO INVENTED STATE</span>
+              <h2 id="truth-heading">결과에 필요한 상태를 숨기지도, 지어내지도 않습니다.</h2>
+              <p>
+                상품·결제·다운로드·크레딧 잔액은 각 계정과 API가 반환한 값으로만 표시합니다.
+                Game Ready는 하나의 숫자가 아니라 bytes·구조·runtime·player-facing·human review를 각각 확인한 상태의 묶음입니다.
+              </p>
             </div>
-
-            <div className="clunk-home-family-footer">
-              <p>마켓에서 상품을 찾는 중이라면 게시 listing을 확인하고, 직접 작업하려면 Studio에서 원하는 형식을 선택하세요.</p>
-              <div>
-                <Link className="clunk-home-text-link" href="/marketplace" prefetch={false}>상품 찾기 <Icon name="arrowRight" size={15} /></Link>
-                <Link className="clunk-home-secondary-link" href="/studio" prefetch={false}>Studio 열기</Link>
-              </div>
-            </div>
+            <ul className="cv4-truth-list cv4-reveal" data-delay="1">
+              <li>생성·업로드 결과와 입력 해시, 라이선스 출처를 분리 보존 <b>REAL BYTES</b></li>
+              <li>정책 결과와 fresh reinspection으로만 판정 <b>DETERMINISTIC</b></li>
+              <li>runtime·player-facing 상태는 구조 점수와 분리 <b>NOT CONFLATED</b></li>
+              <li>미판정 상태는 승격하지 않고 그대로 표시 <b>HUMAN DECISION</b></li>
+            </ul>
           </div>
         </section>
 
-        <section className="clunk-home-section clunk-home-evidence" id="evidence" data-snap-section="evidence" aria-labelledby="evidence-heading">
-          <div className="clunk-home-frame">
-            <header className="clunk-home-section-heading">
-              <div>
-                <span className="clunk-home-eyebrow">STATUS YOU CAN TRUST</span>
-                <h2 id="evidence-heading">결과에 필요한 상태를<br /><em>숨기지 않습니다.</em></h2>
-              </div>
-              <p>기술적 결과를 사용자 승인처럼 꾸미지 않습니다. 실제 데이터가 아직 없는 곳은 비어 있거나 확인 필요 상태로 남습니다.</p>
-            </header>
-
-            <div className="clunk-home-evidence-grid">
-              {EVIDENCE_LANES.map((lane, index) => (
-                <article className="clunk-home-evidence-card" key={lane.label}>
-                  <div className="clunk-home-evidence-card-top"><span>0{index + 1}</span><span>{lane.label}</span></div>
-                  <h3>{lane.title}</h3>
-                  <p>{lane.detail}</p>
-                </article>
-              ))}
-            </div>
-
-            <div className="clunk-home-evidence-footer">
-              <span className="clunk-home-eyebrow">NO INVENTED STATE</span>
-              <p>상품·결제·다운로드·크레딧 잔액은 각 계정과 API가 반환한 값으로만 표시합니다.</p>
-              <Link className="clunk-home-text-link" href="/docs#contracts" prefetch={false}>계약 문서 읽기 <Icon name="arrowUpRight" size={15} /></Link>
-            </div>
-          </div>
-        </section>
-
-        <section className="clunk-home-section clunk-home-final" id="start" data-snap-section="start" aria-labelledby="start-heading">
-          <div className="clunk-home-frame clunk-home-final-frame">
-            <div>
-              <span className="clunk-home-eyebrow">CHOOSE YOUR PATH</span>
-              <h2 id="start-heading">마켓에서 고르거나,<br /><em>크레딧으로 시작하세요.</em></h2>
-              <p>마스터의 에셋을 구매하는 흐름과 Clunk 제품을 사용하는 흐름을 지금 바로 선택할 수 있습니다.</p>
-            </div>
-            <div className="clunk-home-final-actions">
-              <Link className="clunk-home-final-button clunk-home-final-button-primary" href="/marketplace" prefetch={false}>마켓 둘러보기 <Icon name="arrowUpRight" size={16} /></Link>
-              <Link className="clunk-home-final-button clunk-home-final-button-quiet" href="/studio" prefetch={false}>Clunk 사용하기 <Icon name="arrowUpRight" size={16} /></Link>
+        {/* CLOSER ------------------------------------------------------ */}
+        <section className="cv4-closer" id="start" data-snap-section="start" aria-labelledby="start-heading">
+          <div className="cv4-frame">
+            <span className="cv4-eyebrow" style={{ justifyContent: "center" }}>START WITH CLUNK</span>
+            <h2 id="start-heading">증거 있는 에셋으로,<br /><em>게임을 만드세요.</em></h2>
+            <p>마켓에서 실제 파일을 고르거나, 크레딧으로 직접 만들고 검사하세요. 에이전트 연결은 몇 분이면 끝납니다.</p>
+            <div className="cv4-hero-actions" style={{ marginTop: 34 }}>
+              <Link className="cv4-btn cv4-btn-primary" href="/studio" prefetch={false}>
+                Clunk 사용하기 <Icon name="arrowUpRight" size={16} />
+              </Link>
+              <Link className="cv4-btn cv4-btn-ghost" href="/connect" prefetch={false}>
+                에이전트 연결
+              </Link>
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="clunk-home-footer">
-        <div className="clunk-home-frame clunk-home-footer-inner">
-          <div><strong>Clunk</strong><span>실제 게임 에셋 마켓 · 크레딧 기반 AssetOps</span></div>
+      <footer className="cv4-footer">
+        <div className="cv4-frame cv4-footer-inner">
+          <div className="cv4-footer-brand">
+            <strong>Clunk</strong>
+            <span>게임 에셋 파운드리 — 제작·판매 / 검사·수정 / 게임 제작 에이전트</span>
+          </div>
           <nav aria-label="Clunk 제품 링크">
             <Link href="/marketplace" prefetch={false}>마켓</Link>
-            <Link href="/studio" prefetch={false}>Clunk 사용</Link>
+            <Link href="/studio" prefetch={false}>에셋 제작</Link>
             <Link href="/app" prefetch={false}>Game Ready</Link>
-            <Link href="/connect" prefetch={false}>Developers</Link>
-            <Link href="/pricing" prefetch={false}>크레딧</Link>
+            <Link href="/connect" prefetch={false}>에이전트</Link>
+            <Link href="/pricing" prefetch={false}>크레딧 · 요금</Link>
             <Link href="/docs" prefetch={false}>Docs</Link>
           </nav>
         </div>

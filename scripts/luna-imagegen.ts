@@ -69,8 +69,8 @@ function runCommand(command: string, commandArgs: string[], cwd: string, timeout
       child.stdin.write(stdinText);
       child.stdin.end();
     }
-    child.stdout.on("data", (chunk: Buffer) => { stdout += chunk.toString("utf8"); });
-    child.stderr.on("data", (chunk: Buffer) => { stderr += chunk.toString("utf8"); });
+    child.stdout?.on("data", (chunk: Buffer) => { stdout += chunk.toString("utf8"); });
+    child.stderr?.on("data", (chunk: Buffer) => { stderr += chunk.toString("utf8"); });
     child.on("error", (error) => { clearTimeout(timer); rejectPromise(error); });
     child.on("close", (code) => { clearTimeout(timer); resolvePromise({ code: code ?? 1, stdout, stderr }); });
   });

@@ -39,7 +39,7 @@ test("public landing is asset-first without pretending to generate", async () =>
   assert.match(landing, /마켓 둘러보기/);
   assert.match(landing, /Clunk 사용하기/);
   assert.match(landing, /PLAN.*CREATE.*INSPECT.*CONNECT/s);
-  for (const label of ["2D \/ 3D", "SPRITE \/ RIG", "MOTION \/ UI", "ENGINE \/ PLAY"]) {
+  for (const label of ["2D / 3D", "SPRITE / RIG", "MOTION / UI", "ENGINE / CONNECT"]) {
     assert.match(landing, new RegExp(label));
   }
   assert.equal((landing.match(/data-snap-section=/g) ?? []).length, 6);

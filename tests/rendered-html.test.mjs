@@ -17,8 +17,8 @@ test("server-renders the Clunk landing page", async () => {
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
-  assert.match(html, /<title>실제 에셋 마켓과 Clunk \| Clunk<\/title>/i);
-  assert.match(html, /ASSET MARKET \+ CREDIT WORKSPACE/);
+  assert.match(html, /<title>게임 에셋 파운드리 \| Clunk<\/title>/i);
+  assert.match(html, /GAME ASSET FOUNDRY/);
   assert.match(html, /마켓 둘러보기/);
   assert.match(html, /Clunk 사용하기/);
   assert.match(html, /data-snap-section="hero"/);

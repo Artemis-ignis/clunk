@@ -15,11 +15,11 @@ import { ThemeToggle } from "./ThemeToggle";
 export type ShellSection = "home" | "series" | "studio" | "app" | "dashboard" | "pricing" | "docs" | "agents" | "marketplace";
 
 const NAV_LINKS: { label: string; href: string; section: ShellSection }[] = [
+  { label: "에셋 제작", href: "/studio", section: "studio" },
   { label: "마켓", href: "/marketplace", section: "marketplace" },
-  { label: "Clunk 사용", href: "/studio", section: "studio" },
-  { label: "Game Ready", href: "/app", section: "app" },
-  { label: "Developers", href: "/connect", section: "agents" },
-  { label: "크레딧", href: "/pricing", section: "pricing" },
+  { label: "검사·수정", href: "/app", section: "app" },
+  { label: "게임 에이전트", href: "/connect", section: "agents" },
+  { label: "요금", href: "/pricing", section: "pricing" },
 ];
 
 const UTILITY_NAV_LINKS: { label: string; href: string; section: ShellSection }[] = [

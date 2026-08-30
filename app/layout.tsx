@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "./foundry.css";
+import "./site-v4.css";
 import { WebMcpBridge } from "./components/WebMcpBridge";
 import { SITE_ORIGIN } from "./components/site-metadata";
 
