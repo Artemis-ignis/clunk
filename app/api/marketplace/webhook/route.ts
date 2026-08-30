@@ -1,4 +1,5 @@
 import {
+  applyCreditOperation,
   ensureSchema,
   getRuntimeDb,
   jsonError,
@@ -62,9 +63,27 @@ export async function POST(request: Request) {
        WHERE o.id = ? AND o.payment_provider = 'stripe' LIMIT 1`,
     ).bind(event.orderId).first<OrderRow>();
 
-    // A valid provider event for an order that no longer exists is harmless. A
-    // 2xx prevents an endless provider retry while keeping the event observable.
+    // Credit-pack orders arrive on the same provider endpoint. When the id is
+    // not a marketplace order, try the credit order book before ignoring.
     if (!order) {
+      const creditOrder = await readCreditOrder(db, event.orderId);
+      if (creditOrder) {
+        validateEventAgainstCreditOrder(event, creditOrder);
+        const creditResult = await applyCreditEvent(db, event, creditOrder);
+        return privateJson({
+          ok: true,
+          schema: "clunk.marketplace-webhook.v1",
+          kind: "credits",
+          status: creditResult.status,
+          eventId: event.eventId,
+          orderId: creditOrder.id,
+          ...(creditResult.creditsGranted !== undefined ? { creditsGranted: creditResult.creditsGranted } : {}),
+          ...(creditResult.note ? { note: creditResult.note } : {}),
+          idempotent: creditResult.idempotent,
+        });
+      }
+      // A valid provider event for an order that no longer exists is harmless. A
+      // 2xx prevents an endless provider retry while keeping the event observable.
       return privateJson({
         ok: true,
         schema: "clunk.marketplace-webhook.v1",
@@ -165,4 +184,86 @@ async function applyEvent(
     db.prepare("UPDATE clunk_marketplace_entitlements SET status = 'REVOKED', updated_at = CURRENT_TIMESTAMP WHERE order_id = ? AND status = 'ACTIVE'").bind(order.id),
   ]);
   return { status: "REFUNDED", idempotent: false };
+}
+
+type CreditOrderRow = {
+  id: string;
+  packId: string;
+  workspaceId: string;
+  buyerUserId: string;
+  status: string;
+  paymentReference: string | null;
+  amountCents: number;
+  currency: string;
+  credits: number;
+};
+
+async function readCreditOrder(db: D1Database, orderId: string): Promise<CreditOrderRow | null> {
+  return db.prepare(
+    `SELECT id, pack_id AS packId, workspace_id AS workspaceId, buyer_user_id AS buyerUserId,
+        status, payment_reference AS paymentReference, amount_cents AS amountCents, currency, credits
+     FROM clunk_credit_orders WHERE id = ? AND payment_provider = 'stripe' LIMIT 1`,
+  ).bind(orderId).first<CreditOrderRow>();
+}
+
+function validateEventAgainstCreditOrder(event: BillingEvent, order: CreditOrderRow): void {
+  if (event.orderId !== order.id || event.amountCents !== order.amountCents || event.currency !== order.currency) {
+    throw new BillingVerificationError("Payment webhook does not match the saved credit order amount or currency.");
+  }
+  if (event.listingId && event.listingId !== `credit-pack:${order.packId}`) {
+    throw new BillingVerificationError("Payment webhook pack metadata does not match the credit order.");
+  }
+  if (event.status !== "REFUNDED" && event.reference !== order.paymentReference) {
+    throw new BillingVerificationError("Payment webhook reference does not match the credit order.");
+  }
+}
+
+async function applyCreditEvent(
+  db: D1Database,
+  event: BillingEvent,
+  order: CreditOrderRow,
+): Promise<{ status: string; idempotent: boolean; creditsGranted?: number; note?: string }> {
+  if (event.status === "PAID") {
+    if (order.status === "REFUNDED") return { status: "ORDER_ALREADY_REFUNDED", idempotent: true };
+    // The grant is the idempotent primitive; the order-status update rides on
+    // the same applied-operation guard. Re-delivered events heal a partial
+    // failure instead of double-granting.
+    const grant = await applyCreditOperation(
+      db,
+      order.workspaceId,
+      {
+        key: `credit-order:${order.id}`,
+        fingerprint: `pack:${order.packId}:${order.credits}`,
+        kind: "pack-purchase",
+        amount: order.credits,
+      },
+      (operationId) => [
+        db.prepare(
+          `UPDATE clunk_credit_orders SET status = 'PAID'
+           WHERE id = ? AND status IN ('PENDING', 'CREATING')
+             AND EXISTS (SELECT 1 FROM clunk_credit_operations WHERE id = ? AND workspace_id = ? AND status = 'applied')`,
+        ).bind(order.id, operationId, order.workspaceId),
+      ],
+    );
+    return { status: "PAID", idempotent: grant.idempotent, creditsGranted: order.credits };
+  }
+
+  if (event.status === "CANCELED") {
+    if (order.status === "PAID" || order.status === "REFUNDED" || order.status === "CANCELED") {
+      return { status: order.status === "CANCELED" ? "CANCELED" : "ORDER_FINAL", idempotent: true };
+    }
+    await db.prepare("UPDATE clunk_credit_orders SET status = 'CANCELED' WHERE id = ? AND status IN ('PENDING', 'CREATING')").bind(order.id).run();
+    return { status: "CANCELED", idempotent: false };
+  }
+
+  if (order.status === "REFUNDED") return { status: "REFUNDED", idempotent: true };
+  // Money moved back, but the credits may already be spent. Automatic clawback
+  // could push a workspace negative, so the refund is recorded and left to a
+  // human reconciliation decision instead of inventing a balance state.
+  await db.prepare("UPDATE clunk_credit_orders SET status = 'REFUNDED' WHERE id = ? AND status IN ('PAID', 'PENDING', 'CREATING')").bind(order.id).run();
+  return {
+    status: "REFUNDED",
+    idempotent: false,
+    note: "CREDIT_CLAWBACK_MANUAL_REVIEW",
+  };
 }

@@ -64,6 +64,13 @@
       "when": 1787893909586,
       "tag": "0008_foamy_centennial",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1788125489362,
+      "tag": "0009_kind_ultimatum",
+      "breakpoints": true
     }
   ]
 }

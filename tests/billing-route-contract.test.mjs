@@ -52,6 +52,9 @@ test("credits route exposes only the explicit demo grant and cannot debit arbitr
   const credits = await source("app/api/credits/route.ts");
   assert.match(credits, /applyCreditOperation/);
   assert.match(credits, /simulate-upgrade/);
+  assert.match(credits, /CLUNK_ENABLE_DEV_CREDIT_GRANT/);
+  assert.match(credits, /410/);
+  assert.match(credits, /\/api\/credits\/checkout/);
   assert.match(credits, /amount:\s*100/);
   assert.doesNotMatch(credits, /amount:\s*-/);
 });

@@ -263,6 +263,39 @@ export const marketplaceOrders = sqliteTable(
   (table) => ({ buyerCreated: index("idx_clunk_orders_buyer_created").on(table.buyerUserId, table.createdAt) }),
 );
 
+export const creditPacks = sqliteTable(
+  "clunk_credit_packs",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    credits: integer("credits").notNull(),
+    priceCents: integer("price_cents").notNull().default(0),
+    currency: text("currency").notNull().default("KRW"),
+    status: text("status").notNull().default("DRAFT"),
+    sort: integer("sort").notNull().default(0),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+);
+
+export const creditOrders = sqliteTable(
+  "clunk_credit_orders",
+  {
+    id: text("id").primaryKey(),
+    packId: text("pack_id").notNull(),
+    workspaceId: text("workspace_id").notNull(),
+    buyerUserId: text("buyer_user_id").notNull(),
+    status: text("status").notNull(),
+    paymentProvider: text("payment_provider").notNull(),
+    paymentReference: text("payment_reference"),
+    checkoutUrl: text("checkout_url"),
+    amountCents: integer("amount_cents").notNull(),
+    currency: text("currency").notNull(),
+    credits: integer("credits").notNull(),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => ({ buyerCreated: index("idx_clunk_credit_orders_buyer_created").on(table.buyerUserId, table.createdAt) }),
+);
+
 export const marketplaceEntitlements = sqliteTable(
   "clunk_marketplace_entitlements",
   {

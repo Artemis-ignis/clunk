@@ -60,6 +60,10 @@ const SCHEMA_STATEMENTS = [
   `CREATE INDEX IF NOT EXISTS idx_clunk_projects_workspace_updated ON clunk_projects(workspace_id, updated_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_clunk_kits_workspace_updated ON clunk_asset_kits(workspace_id, updated_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_clunk_kit_members_workspace_position ON clunk_asset_kit_members(workspace_id, kit_id, position ASC)`,
+  `CREATE TABLE IF NOT EXISTS clunk_credit_packs (id TEXT PRIMARY KEY, name TEXT NOT NULL, credits INTEGER NOT NULL, price_cents INTEGER NOT NULL DEFAULT 0, currency TEXT NOT NULL DEFAULT 'KRW', status TEXT NOT NULL DEFAULT 'DRAFT', sort INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
+  `CREATE TABLE IF NOT EXISTS clunk_credit_orders (id TEXT PRIMARY KEY, pack_id TEXT NOT NULL, workspace_id TEXT NOT NULL, buyer_user_id TEXT NOT NULL, status TEXT NOT NULL, payment_provider TEXT NOT NULL, payment_reference TEXT, checkout_url TEXT, amount_cents INTEGER NOT NULL, currency TEXT NOT NULL, credits INTEGER NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
+  `CREATE INDEX IF NOT EXISTS idx_clunk_credit_orders_buyer_created ON clunk_credit_orders(buyer_user_id, created_at DESC)`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS idx_clunk_credit_orders_provider_reference ON clunk_credit_orders(payment_provider, payment_reference) WHERE payment_reference IS NOT NULL`,
 ];
 
 export async function requireClunkContext(): Promise<ClunkUserContext> {
@@ -112,6 +116,18 @@ export async function ensureSchema(db: D1Database): Promise<void> {
     ),
     db.prepare(
       `INSERT OR IGNORE INTO clunk_plans (id, name, monthly_credits, is_demo) VALUES ('builder-demo', 'Builder Demo', 100, 1)`,
+    ),
+    // Credit packs ship as DRAFT with price 0: the rail is complete, but no
+    // pack is purchasable until the master sets a real price and flips the
+    // status to ACTIVE. The site never invents a display price for DRAFT rows.
+    db.prepare(
+      `INSERT OR IGNORE INTO clunk_credit_packs (id, name, credits, price_cents, currency, status, sort) VALUES ('pack-starter', 'Starter', 500, 0, 'KRW', 'DRAFT', 1)`,
+    ),
+    db.prepare(
+      `INSERT OR IGNORE INTO clunk_credit_packs (id, name, credits, price_cents, currency, status, sort) VALUES ('pack-studio', 'Studio', 2000, 0, 'KRW', 'DRAFT', 2)`,
+    ),
+    db.prepare(
+      `INSERT OR IGNORE INTO clunk_credit_packs (id, name, credits, price_cents, currency, status, sort) VALUES ('pack-foundry', 'Foundry', 6000, 0, 'KRW', 'DRAFT', 3)`,
     ),
   ]);
 }
