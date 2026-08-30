@@ -9,7 +9,11 @@ export const metadata = createPageMetadata({
   path: "/studio",
 });
 
-export default async function StudioPage() {
+export default async function StudioPage({ searchParams }: { searchParams?: Promise<{ source_asset_id?: string }> }) {
   const user = await requireChatGPTUser("/studio");
-  return <StudioClient userLabel={user.displayName} />;
+  const params = await searchParams;
+  const sourceAssetId = typeof params?.source_asset_id === "string" && /^[a-zA-Z0-9:._-]{1,256}$/.test(params.source_asset_id)
+    ? params.source_asset_id
+    : undefined;
+  return <StudioClient userLabel={user.displayName} initialSourceAssetId={sourceAssetId} />;
 }

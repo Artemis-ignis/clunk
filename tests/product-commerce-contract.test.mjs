@@ -43,9 +43,15 @@ test("creation and marketplace API surfaces exist and never imply a local path u
   const reviews = await source("app/api/reviews/route.ts");
   const marketplace = await source("app/api/marketplace/route.ts");
   const checkout = await source("app/api/marketplace/checkout/route.ts");
+  const optimizations = await source("app/api/optimizations/route.ts");
   assert.match(generation, /clunk\.asset-generation-result\.v1/);
   assert.match(generation, /sha256/);
   assert.match(generation, /provenance/);
+  assert.match(generation, /reserveCreditOperation/);
+  assert.match(generation, /confirmCreditOperation/);
+  assert.match(generation, /refundCreditOperation/);
+  assert.match(generation, /idempotency-key|idempotencyKey/);
+  assert.match(generation, /STORAGE_NOT_CONFIGURED/);
   assert.doesNotMatch(generation, /localPath|readFile|node:fs/);
   assert.match(reviews, /captureSha256/);
   assert.match(reviews, /humanDecision/);
@@ -54,7 +60,12 @@ test("creation and marketplace API surfaces exist and never imply a local path u
   assert.match(marketplace, /license/);
   assert.match(marketplace, /artifact/);
   assert.match(checkout, /PAYMENT_PROVIDER_NOT_CONFIGURED/);
-  assert.doesNotMatch(checkout, /INSERT.*order|clunk_marketplace_orders/i);
+  assert.match(checkout, /clunk_marketplace_orders/);
+  assert.match(checkout, /idempot/);
+  assert.match(checkout, /createCheckout/);
+  assert.match(optimizations, /applyCreditOperation/);
+  assert.match(optimizations, /key: `optimize:/);
+  assert.match(optimizations, /amount: -1/);
 });
 
 test("the public product surfaces expose creation, library, review, and marketplace actions", async () => {

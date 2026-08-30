@@ -17,6 +17,8 @@ import {
   type ProductEvidenceStatus,
   type ProductLicenseStatus,
 } from "../../../packages/core/src/product-contract";
+import { getBillingEnvironment, getBillingStatus } from "./billing";
+import { getRuntimeEnvironment } from "../../runtime-environment";
 
 export const dynamic = "force-dynamic";
 
@@ -72,7 +74,7 @@ export async function GET(request: Request) {
           },
           license: listing.licenseStatus,
         },
-        checkout: { status: "PAYMENT_PROVIDER_NOT_CONFIGURED", provider: null },
+        checkout: checkoutStatus(),
       }, { headers: { "cache-control": "public, max-age=30" } });
     }
     const rows = await db.prepare(
@@ -99,7 +101,7 @@ export async function GET(request: Request) {
         },
         license: row.licenseStatus,
       })),
-      checkout: { status: "PAYMENT_PROVIDER_NOT_CONFIGURED", provider: null },
+      checkout: checkoutStatus(),
     }, { headers: { "cache-control": "public, max-age=30" } });
   } catch (error) {
     return jsonError(error);
@@ -176,7 +178,7 @@ export async function POST(request: Request) {
       schema: "clunk.marketplace-listing.v1",
       listing: { id: listingId, assetId: asset.id, slug, title, description, priceCents, currency, licenseStatus, status, seller: user.displayName },
       publicationGate: { ...gate, readiness: publicationReadiness(gate), publishable: canPublishListing(gate) },
-      checkout: { status: "PAYMENT_PROVIDER_NOT_CONFIGURED", provider: null },
+      checkout: checkoutStatus(),
     });
   } catch (error) {
     return jsonError(error);
@@ -204,4 +206,13 @@ function normalizeEvidenceStatus(value: unknown): ProductEvidenceStatus {
   return value === "PASS" || value === "GAP" || value === "NOT_EVALUATED" || value === "NO_GO" || value === "PENDING" || value === "UNAVAILABLE"
     ? value
     : "NOT_EVALUATED";
+}
+
+function checkoutStatus(): { status: "AVAILABLE" | "PAYMENT_PROVIDER_NOT_CONFIGURED"; provider: "stripe" | null; configured: boolean } {
+  const billing = getBillingStatus(getBillingEnvironment(getRuntimeEnvironment()));
+  return {
+    status: billing.status === "AVAILABLE" ? "AVAILABLE" : "PAYMENT_PROVIDER_NOT_CONFIGURED",
+    provider: billing.provider,
+    configured: billing.configured,
+  };
 }

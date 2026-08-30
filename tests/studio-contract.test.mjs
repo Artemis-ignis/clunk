@@ -27,6 +27,10 @@ test("Asset Studio exposes the complete 2D/3D authoring-to-runtime boundary", as
   assert.match(client, /검사기로 보내기/);
   assert.match(client, /실제 별도 output/);
   assert.match(client, /\/api\/sprite-review/);
+  assert.match(client, /크레딧/);
+  assert.match(client, /내 Workspace|자신의 프로젝트|Workspace에 저장/);
+  assert.doesNotMatch(client, /판매 Draft 저장|마켓 상품 초안 만들기/);
+  assert.doesNotMatch(client, /CONTRACT FIXTURE|clunk-sprite-sample|tractor-hero/);
   for (const marker of ["PIXEL CONTRACT", "RUNTIME", "HUMAN REVIEW", "READINESS", "DECLARED_METADATA_ONLY"]) assert.match(client, new RegExp(marker));
   assert.match(shell, /\/studio/);
   assert.match(docs, /Asset Studio/);

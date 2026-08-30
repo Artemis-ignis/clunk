@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "./NativeLink";
-import { DemoUpgradeButton } from "./DemoUpgradeButton";
 import { CollaborationPanel } from "./CollaborationPanel";
 import { Icon } from "./Icon";
 import { readinessHint, resolveStoredReadiness } from "./readiness";
@@ -13,6 +12,7 @@ import { LiveEvidenceShowcase } from "./LiveEvidenceShowcase";
 
 type Run = {
   id: string;
+  assetId?: string | null;
   inputHash: string;
   status: string;
   score: number;
@@ -43,15 +43,35 @@ type CreditEntry = {
 
 type GenerationJob = {
   id: string;
+  projectId?: string | null;
   assetId?: string | null;
+  fileName?: string | null;
   assetKind: string;
   targetProfileId: string;
   provider: string;
   prompt: string;
   status: string;
   storageStatus: string;
+  recipeJson?: string | null;
   provenanceJson?: string;
   evidenceJson?: string | null;
+  createdAt: string;
+};
+
+type Project = {
+  id: string;
+  name: string;
+  description?: string | null;
+  updatedAt?: string;
+};
+
+type WorkspaceAsset = {
+  id: string;
+  fileName: string;
+  format: string;
+  assetKind: string;
+  status: string;
+  storageStatus: string;
   createdAt: string;
 };
 
@@ -127,7 +147,7 @@ export function nextVerificationFor(run: Run | null, statuses: EvidenceStatuses)
     return {
       eyebrow: "01 · START WITH REAL BYTES",
       title: "첫 검사를 실행해 증거의 기준점을 만드세요.",
-      detail: "샘플 점수는 워크스페이스 지표에 섞지 않습니다. 실제 GLB/GLTF를 업로드하면 해시와 정책 결과가 저장됩니다.",
+      detail: "저장된 결과가 없으므로 점수를 표시하지 않습니다. 실제 GLB/GLTF를 업로드하면 해시와 정책 결과가 저장됩니다.",
       action: "검사기 열기",
       href: "/app",
     };
@@ -185,6 +205,8 @@ export function DashboardClient() {
   const [passports, setPassports] = useState<Passport[]>([]);
   const [ledger, setLedger] = useState<CreditEntry[]>([]);
   const [generationJobs, setGenerationJobs] = useState<GenerationJob[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [projectsState, setProjectsState] = useState<"loading" | "ready" | "unavailable">("loading");
   const [credits, setCredits] = useState<number | null>(null);
   const [message, setMessage] = useState("");
   const [userLabel, setUserLabel] = useState("사용자");
@@ -198,12 +220,13 @@ export function DashboardClient() {
       setConnection("checking");
       setMessage("");
       try {
-        const [me, runResponse, passportResponse, creditResponse, generationResponse] = await Promise.all([
+        const [me, runResponse, passportResponse, creditResponse, generationResponse, projectResponse] = await Promise.all([
           fetch("/api/me", { cache: "no-store" }),
           fetch("/api/runs", { cache: "no-store" }),
           fetch("/api/passports", { cache: "no-store" }),
           fetch("/api/credits", { cache: "no-store" }),
           fetch("/api/generation", { cache: "no-store" }),
+          fetch("/api/projects", { cache: "no-store" }),
         ]);
         if (cancelled) return;
         if (!me.ok) {
@@ -229,6 +252,7 @@ export function DashboardClient() {
         const passportBody = await passportResponse.json() as { passports?: Passport[] };
         const creditBody = await creditResponse.json() as { credits?: number; ledger?: CreditEntry[] };
         const generationBody = generationResponse.ok ? await generationResponse.json() as { jobs?: GenerationJob[] } : { jobs: [] };
+        const projectBody = projectResponse.ok ? await projectResponse.json() as { projects?: Project[] } : { projects: [] };
         if (typeof creditBody.credits !== "number" || !Number.isFinite(creditBody.credits)) {
           throw new Error("Invalid credit balance response.");
         }
@@ -239,7 +263,10 @@ export function DashboardClient() {
         setPassports(passportBody.passports ?? []);
         setLedger(creditBody.ledger ?? []);
         setGenerationJobs(generationBody.jobs ?? []);
+        setProjects(projectBody.projects ?? []);
+        setProjectsState(projectResponse.ok ? "ready" : "unavailable");
         setCredits(creditBody.credits);
+        if (!projectResponse.ok) setMessage("프로젝트 API를 사용할 수 없어 에셋·검사·크레딧만 표시합니다.");
       } catch {
         if (cancelled) return;
         setConnection("error");
@@ -252,6 +279,7 @@ export function DashboardClient() {
 
   const findingCount = useMemo(() => runs.reduce((total, run) => total + run.findingCount, 0), [runs]);
   const readyCount = useMemo(() => runs.filter((run) => run.status === "ready").length, [runs]);
+  const workspaceAssets = useMemo(() => buildWorkspaceAssets(generationJobs, runs), [generationJobs, runs]);
   const latestRun = runs[0] ?? null;
   const evidenceStatuses = readStoredStatuses(latestRun);
   const nextVerification = nextVerificationFor(latestRun, evidenceStatuses);
@@ -288,15 +316,15 @@ export function DashboardClient() {
           <div className="dashboard-welcome-preview">
             <AssetFamilyVisual kind={latestRun ? runVisualKind(latestRun.format) : "model"} compact />
             <div className="dashboard-welcome-stamp">
-              <span>{latestRun ? "LATEST RUN" : "WORKSPACE PREVIEW"}</span>
-              <strong>{latestRun?.fileName ?? "clunk-messy-sample.glb"}</strong>
-              <small>{latestRun ? `${latestRun.score}/100 · ${latestRun.findingCount} findings` : "실제 파일을 올리면 이 결과로 교체됩니다"}</small>
+              <span>{latestRun ? "LATEST RUN" : "EMPTY WORKSPACE"}</span>
+              <strong>{latestRun?.fileName ?? "저장된 검사 없음"}</strong>
+              <small>{latestRun ? `${latestRun.score}/100 · ${latestRun.findingCount} findings` : "실제 파일을 검사하면 결과가 표시됩니다"}</small>
             </div>
           </div>
           <div className="dashboard-welcome-next">
             <span className="mono-label">NEXT EVIDENCE</span>
             <strong>{latestRun ? nextVerification.action : "첫 실제 검사 실행"}</strong>
-            <small>{latestRun ? nextVerification.title : "샘플 점수는 저장된 워크스페이스 지표에 섞지 않습니다."}</small>
+            <small>{latestRun ? nextVerification.title : "아직 저장된 결과가 없어 다음 증거를 계산할 수 없습니다."}</small>
           </div>
         </div>
       </section>
@@ -337,7 +365,7 @@ export function DashboardClient() {
       </div>
 
       <section className="ws-summary ws-summary-4" aria-label="워크스페이스 요약">
-        <Summary label="사용 가능 크레딧" value={credits === null ? "대기" : `${credits}`} detail="D1 데모 원장 · 성공 시에만 차감" tone="accent" />
+        <Summary label="사용 가능한 크레딧" value={credits === null ? "대기" : `${credits}`} detail="/api/credits 잔액 · 실제 작업 기록" tone="accent" />
         <Summary label="실제 검사" value={`${runs.length}`} detail={runs.length ? "이 워크스페이스에 저장됨" : "아직 실제 검사가 없음"} />
         <Summary
           label="정책 PASS"
@@ -355,6 +383,8 @@ export function DashboardClient() {
           </Link>
         </div>
       </section>
+
+      <WorkspaceDataOverview projects={projects} projectsState={projectsState} assets={workspaceAssets} />
 
       <CollaborationPanel latestRun={latestRun ? {
         inputHash: latestRun.inputHash,
@@ -404,7 +434,7 @@ export function DashboardClient() {
             <div className="empty-block empty-block-lg">
               <Icon name="inspect" size={24} />
               <strong>아직 실제 검사가 없습니다</strong>
-              <p>검사기에서 GLB를 실행하세요. 샘플 버튼은 워크스페이스 지표에서 의도적으로 제외합니다.</p>
+              <p>검사기에서 실제 GLB/GLTF를 실행하면 이 목록에 저장됩니다.</p>
               <Link href="/app" className="button button-quiet button-sm">
                 첫 검사 실행
                 <Icon name="arrowRight" size={13} />
@@ -431,7 +461,7 @@ export function DashboardClient() {
               <span className="mono-label">크레딧 원장</span>
               <h3>사용량</h3>
             </div>
-            <span className="demo-marker">DEMO MODE · 실제 결제 아님</span>
+            <span className="mono-label">API 원장</span>
           </div>
           {ledger.length ? (
             <ul className="ledger-list">
@@ -449,12 +479,8 @@ export function DashboardClient() {
               {connection === "connected" ? "아직 기록된 크레딧 변동이 없습니다." : "인증 후 실제 원장 내역이 나타납니다."}
             </p>
           )}
-          <p className="muted-note">
-            파일럿을 위한 작동하는 데모 원장입니다. 결제 제공자는 아직 연결하지 않았습니다.
-          </p>
-          {connection === "connected" ? <DemoUpgradeButton /> : null}
           <Link href="/pricing" className="text-link">
-            플랜과 데모 업그레이드
+            플랜과 크레딧 보기
             <Icon name="arrowRight" size={13} />
           </Link>
         </aside>
@@ -470,13 +496,80 @@ function runVisualKind(format: string | null | undefined): "sprite" | "atlas" | 
   return "model";
 }
 
+function buildWorkspaceAssets(jobs: GenerationJob[], runs: Run[]): WorkspaceAsset[] {
+  const assets = new Map<string, WorkspaceAsset>();
+  for (const job of jobs) {
+    if (!job.assetId) continue;
+    assets.set(job.assetId, {
+      id: job.assetId,
+      fileName: job.fileName || job.assetId,
+      format: extensionOf(job.fileName || "asset"),
+      assetKind: job.assetKind,
+      status: job.status,
+      storageStatus: job.storageStatus,
+      createdAt: job.createdAt,
+    });
+  }
+  for (const run of runs) {
+    if (!run.assetId) continue;
+    const existing = assets.get(run.assetId);
+    assets.set(run.assetId, {
+      id: run.assetId,
+      fileName: run.fileName || existing?.fileName || run.assetId,
+      format: run.format || existing?.format || "unknown",
+      assetKind: existing?.assetKind || "inspection",
+      status: run.status,
+      storageStatus: existing?.storageStatus || "INSPECTION_RECORD",
+      createdAt: run.createdAt,
+    });
+  }
+  return [...assets.values()].sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+}
+
+function extensionOf(fileName: string): string {
+  return fileName.split(".").pop()?.toLowerCase() || "unknown";
+}
+
+function WorkspaceDataOverview({
+  projects,
+  projectsState,
+  assets,
+}: {
+  projects: Project[];
+  projectsState: "loading" | "ready" | "unavailable";
+  assets: WorkspaceAsset[];
+}) {
+  return (
+    <section className="ws-split" aria-label="프로젝트와 에셋">
+      <article className="panel projects-panel">
+        <div className="panel-head">
+          <div><span className="mono-label">PROJECTS · API</span><h3>프로젝트</h3></div>
+          <Link className="text-link" href="/kits">관리 <Icon name="arrowRight" size={13} /></Link>
+        </div>
+        {projectsState === "loading" ? <p className="muted-note">프로젝트를 불러오는 중입니다.</p> : projects.length ? (
+          <div className="project-list">
+            {projects.slice(0, 5).map((project) => <div className="project-row" key={project.id}><Icon name="folder" size={15} /><span><strong>{project.name}</strong><small>{project.description || "설명 없음"}</small></span></div>)}
+          </div>
+        ) : <div className="empty-block"><Icon name="folder" size={21} /><strong>{projectsState === "unavailable" ? "프로젝트 API를 사용할 수 없습니다" : "아직 프로젝트가 없습니다"}</strong><p>{projectsState === "unavailable" ? "프로젝트 데이터 없이 다른 Workspace 기록을 표시합니다." : "Kits에서 프로젝트를 만들면 생성 결과를 연결할 수 있습니다."}</p></div>}
+      </article>
+      <article className="panel">
+        <div className="panel-head">
+          <div><span className="mono-label">ASSET LIBRARY · API</span><h3>내 에셋 라이브러리</h3></div>
+          <Link className="text-link" href="/assets">전체 보기 <Icon name="arrowRight" size={13} /></Link>
+        </div>
+        {assets.length ? <div className="project-list" data-testid="dashboard-asset-list">{assets.slice(0, 5).map((asset) => <Link className="project-row" href={`/assets/${encodeURIComponent(asset.id)}`} key={asset.id}><Icon name="box" size={15} /><span><strong>{asset.fileName}</strong><small>{asset.assetKind} · {asset.format.toUpperCase()} · {asset.storageStatus}</small></span><Icon name="arrowRight" size={13} /></Link>)}</div> : <div className="empty-block"><Icon name="box" size={21} /><strong>아직 저장된 에셋이 없습니다</strong><p>생성 또는 실제 검사를 실행하면 Workspace 에셋이 여기에 표시됩니다.</p><Link className="button button-quiet button-sm" href="/assets">라이브러리 열기 <Icon name="arrowRight" size={13} /></Link></div>}
+      </article>
+    </section>
+  );
+}
+
 function DashboardAssetBoard({ latestRun, statuses }: { latestRun: Run | null; statuses: EvidenceStatuses }) {
   const hasRun = Boolean(latestRun);
   return (
     <section className="dashboard-asset-board" aria-labelledby="dashboard-asset-board-heading">
       <div className="dashboard-asset-board-visual">
         <AssetFamilyVisual kind="model" />
-        <div className="dashboard-asset-board-stamp"><span>{hasRun ? "LATEST RUN" : "WORKSPACE PREVIEW"}</span><strong>{latestRun ? resolveStoredReadiness(latestRun) : "READY TO START"}</strong><small>{hasRun ? "실제 저장된 검사" : "첫 실제 파일을 올리면 교체됩니다"}</small></div>
+         <div className="dashboard-asset-board-stamp"><span>{hasRun ? "LATEST RUN" : "EMPTY WORKSPACE"}</span><strong>{latestRun ? resolveStoredReadiness(latestRun) : "NO RUN RECORDED"}</strong><small>{hasRun ? "실제 저장된 검사" : "실제 파일을 검사하면 결과가 표시됩니다"}</small></div>
         <div className="dashboard-asset-family-rail" aria-label="지원 에셋 패밀리">
           {DASHBOARD_ASSET_FAMILIES.map((item) => (
             <Link href={item.kind === "model" ? "/app" : "/studio"} className="dashboard-asset-family" key={item.kind}>
@@ -508,14 +601,16 @@ function GenerationOverview({ jobs }: { jobs: GenerationJob[] }) {
   const kind = latest ? generationVisualKind(latest.assetKind) : "sprite";
   const provenance = latest ? parseGenerationProvenance(latest.provenanceJson) : null;
   const evidence = latest ? parseGenerationEvidence(latest.evidenceJson) : null;
+  const recipe = latest ? parseGenerationRecipe(latest.recipeJson) : null;
   const staticStatus = evidence?.stages?.structure?.status === "pass" && evidence?.stages?.policy?.status === "pass" ? "PASS" : latest ? "GAP" : "NOT_RUN";
   return (
     <section className="dashboard-generation-overview" aria-labelledby="dashboard-generation-heading">
       <div className="dashboard-generation-visual"><AssetFamilyVisual kind={kind} compact /><div className="dashboard-generation-visual-label"><span>AUTHORING PREVIEW</span><strong>{latest ? latest.assetKind : "2D + 3D"}</strong></div></div>
       <div className="dashboard-generation-copy">
         <div className="dashboard-generation-head"><div><span className="mono-label">RECENT CREATION · REAL BYTES</span><h3 id="dashboard-generation-heading">만든 결과도 이곳에서 이어집니다.</h3></div><span className={`dashboard-generation-status dashboard-generation-status-${latest ? "ready" : "empty"}`}>{latest ? latest.status : "EMPTY"}</span></div>
-        {latest ? <><strong className="dashboard-generation-name">{latest.assetId ?? latest.id}</strong><p>{latest.prompt}</p><div className="dashboard-generation-meta"><span><b>STATIC</b>{staticStatus}</span><span><b>STORAGE</b>{latest.storageStatus}</span><span><b>PROVIDER</b>{provenance?.provider ?? latest.provider}</span><span><b>READY</b>false</span></div><small className="dashboard-generation-note">생성·fresh reopen은 기록됐지만 runtime, player-facing, human review는 자동으로 채워지지 않습니다.</small></> : <p>아직 만든 에셋이 없습니다. Studio에서 Sprite·Atlas·Spine·Motion·GLB 중 하나를 선택하면 실제 artifact와 hash가 이 카드에 남습니다.</p>}
-        <div className="dashboard-generation-actions"><Link className="button button-primary button-sm" href="/studio">{latest ? "다음 에셋 만들기" : "첫 에셋 만들기"}<Icon name="arrowRight" size={14} /></Link><Link className="button button-quiet button-sm" href="/marketplace">마켓 보기</Link></div>
+        {latest ? <><div className="dashboard-generation-name-row"><strong className="dashboard-generation-name">{latest.assetId ? latest.assetId : `생성 작업 ${latest.id}`}</strong>{latest.assetId ? <Link className="text-link" href={`/assets/${encodeURIComponent(latest.assetId)}`}>Asset detail <Icon name="arrowUpRight" size={12} /></Link> : null}</div><p>{latest.prompt}</p><div className="dashboard-generation-meta"><span><b>STATIC</b>{staticStatus}</span><span><b>STORAGE</b>{latest.storageStatus}</span><span><b>PROVIDER</b>{provenance?.provider ?? latest.provider}</span><span><b>OPERATION</b>{recipe?.operation ?? "create"}</span><span><b>PROJECT</b>{latest.projectId ? latest.projectId.slice(0, 12) + "…" : "workspace"}</span><span><b>READINESS</b>{latest.assetId ? "별도 검수 필요" : "산출물 없음"}</span></div>{recipe?.sourceAssetId ? <small className="dashboard-generation-lineage">SOURCE ASSET · {recipe.sourceAssetId} · 원본을 보존한 Remix</small> : null}<small className="dashboard-generation-note">생성·fresh reopen은 기록됐지만 runtime, player-facing, human review는 자동으로 채워지지 않습니다.</small></> : <p>아직 만든 에셋이 없습니다. Studio에서 실제 작업을 실행하면 artifact와 hash가 이 카드에 남습니다.</p>}
+        <div className="dashboard-generation-actions"><Link className="button button-primary button-sm" href="/studio">{latest ? "다음 에셋 만들기" : "첫 에셋 만들기"}<Icon name="arrowRight" size={14} /></Link><Link className="button button-quiet button-sm" href="/kits">Kit / 프로젝트</Link><Link className="button button-quiet button-sm" href="/marketplace">Discover</Link></div>
+        {jobs.length > 1 ? <div className="dashboard-generation-history" data-testid="generation-history"><div className="dashboard-generation-history-head"><span className="mono-label">GENERATION HISTORY</span><small>{jobs.length} saved jobs</small></div><div className="dashboard-generation-history-list">{jobs.slice(0, 5).map((job) => { const jobRecipe = parseGenerationRecipe(job.recipeJson); return <div className="dashboard-generation-history-row" key={job.id}><span className="dashboard-generation-history-kind">{generationVisualKind(job.assetKind).toUpperCase()}</span><span className="dashboard-generation-history-main"><strong>{job.assetId ?? job.id}</strong><small>{jobRecipe?.operation === "remix" ? "REMIX" : "CREATE"} · {job.storageStatus}</small></span>{job.assetId ? <Link className="text-link" href={`/assets/${encodeURIComponent(job.assetId)}`}>열기 <Icon name="arrowUpRight" size={11} /></Link> : null}</div>; })}</div></div> : null}
       </div>
     </section>
   );
@@ -537,6 +632,18 @@ function parseGenerationProvenance(value: string | undefined): { provider?: stri
 function parseGenerationEvidence(value: string | null | undefined): { stages?: Record<string, { status?: string }> } | null {
   if (!value) return null;
   try { return JSON.parse(value) as { stages?: Record<string, { status?: string }> }; } catch { return null; }
+}
+
+function parseGenerationRecipe(value: string | null | undefined): { operation?: string; sourceAssetId?: string; projectId?: string } | null {
+  if (!value) return null;
+  try {
+    const parsed = JSON.parse(value) as Record<string, unknown>;
+    return {
+      ...(typeof parsed.operation === "string" ? { operation: parsed.operation } : {}),
+      ...(typeof parsed.sourceAssetId === "string" ? { sourceAssetId: parsed.sourceAssetId } : {}),
+      ...(typeof parsed.projectId === "string" ? { projectId: parsed.projectId } : {}),
+    };
+  } catch { return null; }
 }
 
 function DashboardStatusRow({ label, value, detail, tone }: { label: string; value: string; detail: string; tone: "pass" | "pending" }) {
@@ -741,10 +848,9 @@ function Summary({ label, value, detail, tone }: { label: string; value: string;
 
 function shortHash(value: string) { return `${value.slice(0, 8)}...${value.slice(-6)}`; }
 function creditReasonLabel(reason: string) {
-  if (reason === "demo-grant") return "시작 지급";
+  if (reason === "demo-grant" || reason === "demo-upgrade") return "크레딧 지급";
   if (reason === "inspect") return "검사 1회";
   if (reason === "optimize") return "최적화 1회";
-  if (reason === "demo-upgrade") return "Builder 데모 전환";
   if (reason === "refund") return "실패 복구";
   return reason;
 }

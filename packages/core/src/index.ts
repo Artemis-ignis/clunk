@@ -13,9 +13,11 @@ export * from "./assetops-pipeline";
 export * from "./generation-contract";
 export * from "./collaboration-contract";
 export * from "./asset-inspection-evidence";
+export * from "./player-facing-quality";
 export * from "./sprite-sheet-review";
 export * from "./product-contract";
 export * from "./product-authoring";
+export * from "./foundry-contract";
 export * from "./analyzers/asset-analyzers";
 export * from "./semantic-contracts/harvest-frontier";
 
@@ -2028,3 +2030,35 @@ function padBytes(bytes: Uint8Array, fill: number): Uint8Array {
   output.set(bytes);
   return output;
 }
+
+export {
+  CONSUMER_VALIDATION_SCHEMA,
+  CONSUMER_VALIDATION_VERSION,
+  createConsumerValidationReport,
+  normalizeConsumerValidationReport,
+  summarizeConsumerValidation,
+} from "./consumer-collaboration";
+export type {
+  ConsumerAssetKind,
+  ConsumerAssetRecord,
+  ConsumerAttachmentObservation,
+  ConsumerAttachmentStatus,
+  ConsumerCheckStatus,
+  ConsumerClunkInspection,
+  ConsumerFileRef,
+  ConsumerHumanReview,
+  ConsumerInspectionStatus,
+  ConsumerIntegrity,
+  ConsumerIntegrityStatus,
+  ConsumerProjectId,
+  ConsumerProjectRecord,
+  ConsumerProjectStatus,
+  ConsumerProvenance,
+  ConsumerReadiness,
+  ConsumerRuntimeAttachment,
+  ConsumerRuntimeEvidence,
+  ConsumerRuntimeStatus,
+  ConsumerValidationReport,
+  ConsumerValidationReportInput,
+  ConsumerValidationSummary,
+} from "./consumer-collaboration";

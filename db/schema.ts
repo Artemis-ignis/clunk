@@ -140,6 +140,7 @@ export const collaborationThreads = sqliteTable(
     workspaceId: text("workspace_id").notNull(),
     subject: text("subject").notNull(),
     assetId: text("asset_id"),
+    consumerProject: text("consumer_project").notNull().default("harvest-frontier"),
     inputHash: text("input_hash").notNull(),
     targetProfileId: text("target_profile_id").notNull(),
     ruleSetId: text("rule_set_id").notNull(),
@@ -254,9 +255,30 @@ export const marketplaceOrders = sqliteTable(
     status: text("status").notNull(),
     paymentProvider: text("payment_provider").notNull(),
     paymentReference: text("payment_reference"),
+    checkoutUrl: text("checkout_url"),
     amountCents: integer("amount_cents").notNull(),
     currency: text("currency").notNull(),
     createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => ({ buyerCreated: index("idx_clunk_orders_buyer_created").on(table.buyerUserId, table.createdAt) }),
+);
+
+export const marketplaceEntitlements = sqliteTable(
+  "clunk_marketplace_entitlements",
+  {
+    id: text("id").primaryKey(),
+    orderId: text("order_id").notNull(),
+    listingId: text("listing_id").notNull(),
+    assetId: text("asset_id").notNull(),
+    buyerUserId: text("buyer_user_id").notNull(),
+    status: text("status").notNull().default("ACTIVE"),
+    providerReference: text("provider_reference").notNull(),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => ({
+    orderUnique: uniqueIndex("clunk_marketplace_entitlement_order_unique").on(table.orderId),
+    buyerAssetStatus: uniqueIndex("clunk_marketplace_entitlement_buyer_asset_status_unique").on(table.buyerUserId, table.assetId, table.status),
+    buyerAsset: index("idx_clunk_entitlements_buyer_asset").on(table.buyerUserId, table.assetId, table.status),
+  }),
 );

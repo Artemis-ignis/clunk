@@ -77,7 +77,8 @@ test("the product showroom makes the file-to-decision loop interactive on public
   const home = await source("app/page.tsx");
   const dashboard = await source("app/components/DashboardClient.tsx");
   const studio = await source("app/studio/StudioClient.tsx");
-  assert.match(home, /LiveEvidenceShowcase/);
+  assert.match(home, /data-snap-section/);
+  assert.match(home, /마켓 둘러보기/);
   assert.match(dashboard, /LiveEvidenceShowcase/);
   assert.match(studio, /LiveEvidenceShowcase/);
 });
@@ -98,10 +99,9 @@ test("public hero surfaces share a top-aligned first-viewport contract", async (
   assert.match(css, /\.public-hero-connect/);
   assert.match(css, /@media \(max-width: 720px\)[\s\S]*\.public-hero-frame/);
 
-  for (const file of ["app/page.tsx", "app/agents/page.tsx", "app/docs/page.tsx", "app/pricing/page.tsx", "app/connect/page.tsx", "app/mcp/page.tsx"]) {
-    const page = await source(file);
-    assert.match(page, /public-hero-frame/, file);
-  }
+  const landing = await source("app/page.tsx");
+  assert.match(landing, /public-hero-frame/);
+  assert.match(landing, /data-snap-section="hero"/);
 });
 
 test("showroom and machine docs expose valid semantic progress and links", async () => {

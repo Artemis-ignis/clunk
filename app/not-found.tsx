@@ -5,7 +5,7 @@ import { Icon } from "./components/Icon";
 /** Branded, theme-aware 404 — the default framework page is English-only and dead-ends. */
 export default function NotFound() {
   return (
-    <main className="nf-page">
+    <main className="nf-page snap-section" data-snap-section="not-found">
       <div className="nf-card">
         <Link className="brand" href="/" aria-label="Clunk 홈">
           <BrandLockup gradientId="clunk-404" />
@@ -29,6 +29,22 @@ export default function NotFound() {
           </Link>
           <Link className="button button-quiet" href="/docs">
             문서 보기
+            <Icon name="arrowRight" size={15} />
+          </Link>
+          <Link className="button button-quiet" href="/marketplace">
+            공개 에셋 보기
+            <Icon name="arrowRight" size={15} />
+          </Link>
+          <Link className="button button-quiet" href="/series">
+            제품군 보기
+            <Icon name="arrowRight" size={15} />
+          </Link>
+          <Link className="button button-quiet" href="/kits">
+            Kits 안내
+            <Icon name="arrowRight" size={15} />
+          </Link>
+          <Link className="button button-quiet" href="/mcp">
+            MCP 연결
             <Icon name="arrowRight" size={15} />
           </Link>
         </div>

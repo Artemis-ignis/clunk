@@ -21,6 +21,7 @@ type Thread = {
   id: string;
   subject: string;
   inputHash: string;
+  consumerProject?: "harvest-frontier" | "forge-front";
   targetProfileId: string;
   ruleSetId: string;
   status: CollaborationStatus;
@@ -61,7 +62,8 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
   const [selected, setSelected] = useState<ThreadDetail | null>(null);
   const [loadState, setLoadState] = useState<LoadState>("checking");
   const [error, setError] = useState("");
-  const [subject, setSubject] = useState("Harvest Frontier 에셋 협업 메모");
+  const [subject, setSubject] = useState("소비 프로젝트 에셋 협업 메모");
+  const [consumerProject, setConsumerProject] = useState<"harvest-frontier" | "forge-front">("harvest-frontier");
   const [body, setBody] = useState("");
   const [inputHash, setInputHash] = useState(DEFAULT_HASH);
   const [profileId, setProfileId] = useState(DEFAULT_PROFILE);
@@ -142,7 +144,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
       const response = await fetch("/api/collaboration/threads", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ subject: subject.trim(), inputHash: effectiveInputHash, assetId: undefined, status, evidence, evidenceMode }),
+        body: JSON.stringify({ subject: subject.trim(), consumerProject, inputHash: effectiveInputHash, assetId: undefined, status, evidence, evidenceMode }),
       });
       const payload = await response.json() as { thread?: { id: string }; error?: string };
       if (!response.ok || !payload.thread) throw new Error(payload.error || "협업 스레드를 만들지 못했습니다.");
@@ -195,7 +197,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
     <section className="panel collaboration-panel" id="collaboration" aria-labelledby="collaboration-heading">
       <div className="panel-head collaboration-head">
         <div>
-          <span className="mono-label">HARVEST FRONTIER · COLLABORATION</span>
+          <span className="mono-label">CONSUMER PROJECT · COLLABORATION</span>
           <h3 id="collaboration-heading">판정 결과에 실제 메모를 남기세요.</h3>
         </div>
         <div className="collaboration-head-actions">
@@ -239,7 +241,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
               >
                 <span className={`collab-readiness collab-readiness-${slug(thread.status.readiness)}`}>{collaborationLabel(thread.status)}</span>
                 <strong>{thread.subject}</strong>
-                <small>{thread.targetProfileId} · {shortHash(thread.inputHash)}{thread.evidence && " · " + evidenceLabel(thread.evidence)}</small>
+                <small>{consumerProjectLabel(thread.consumerProject)} · {thread.targetProfileId} · {shortHash(thread.inputHash)}{thread.evidence && " · " + evidenceLabel(thread.evidence)}</small>
               </button>
             )) : (
               <div className="collaboration-list-empty">
@@ -255,7 +257,10 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
               <span>실제 hash를 고정해 메모가 어느 결과에 붙었는지 남깁니다.</span>
             </div>
             <form onSubmit={createThread} className="collaboration-form">
-              <label>제목<input value={subject} onChange={(event) => setSubject(event.target.value)} maxLength={240} /></label>
+              <div className="collaboration-form-grid">
+                <label>소비 프로젝트<select value={consumerProject} onChange={(event) => setConsumerProject(event.target.value as typeof consumerProject)}><option value="harvest-frontier">Harvest Frontier · 3D / Three.js</option><option value="forge-front">FORGE FRONT · 2D / PixiJS</option></select></label>
+                <label>제목<input value={subject} onChange={(event) => setSubject(event.target.value)} maxLength={240} /></label>
+              </div>
               <label>메모<textarea aria-label="협업 메모 입력" value={body} onChange={(event) => setBody(event.target.value)} rows={3} placeholder="예: GLB audit PASS지만 shipped camera에서 작물 반복과 지형 경계가 보입니다." maxLength={10000} /></label>
               <label>스크린샷/frame manifest <span className="field-hint">선택 · clunk.frame-manifest.v1 JSON · 아래는 schema template</span><textarea aria-label="frame manifest JSON 입력" className="collaboration-evidence-input" value={evidenceDraft} onChange={(event) => setEvidenceDraft(event.target.value)} rows={7} placeholder={FRAME_MANIFEST_SCHEMA_TEMPLATE} maxLength={100000} /></label>
               <div className="collaboration-form-grid">
@@ -281,7 +286,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
       {selected ? (
         <div className="collaboration-detail">
           <div className="collaboration-detail-head">
-            <div><span className="mono-label">SELECTED THREAD</span><strong>{selected.subject}</strong></div>
+            <div><span className="mono-label">{consumerProjectLabel(selected.consumerProject)} · SELECTED THREAD</span><strong>{selected.subject}</strong></div>
             <span className={`collab-readiness collab-readiness-${slug(selected.status.readiness)}`}>{collaborationLabel(selected.status)}</span>
           </div>
           {selected.evidence ? <EvidenceCard evidence={selected.evidence} /> : null}
@@ -320,6 +325,10 @@ function collaborationStatus(input: {
   inputHash: string;
 }): CollaborationStatus {
   return resolveCollaborationStatus(input);
+}
+
+function consumerProjectLabel(value: Thread["consumerProject"]): string {
+  return value === "forge-front" ? "FORGE FRONT" : "HARVEST FRONTIER";
 }
 
 function parseRunContext(run: RunContext): { inputHash: string; profileId?: string; ruleSetId?: string } {

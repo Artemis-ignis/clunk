@@ -17,19 +17,13 @@ test("server-renders the Clunk landing page", async () => {
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
-  assert.match(html, /<title>아이디어에서 Game Ready까지 \| Clunk<\/title>/i);
-  assert.match(html, /AI GAME ASSET FOUNDRY/);
-  assert.match(html, /Create workspace/);
-  // The agent integration section must render the real MCP tool names and the real rule set id
-  // that packages/core declares, so the landing page cannot drift into invented marketing facts.
-  assert.match(html, /clunk_inspect/);
-  assert.match(html, /clunk_passport/);
-  assert.match(html, /clunk-game-ready-v1/);
-  assert.match(html, /llms\.txt/);
-  assert.match(html, /STATIC POLICY SCORE/);
-  assert.match(html, /2D \+ 3D 에셋 품질·근거 게이트/);
-  assert.match(html, /visualRuntime.*NOT_EVALUATED|NOT_EVALUATED.*visualRuntime/i);
-  assert.doesNotMatch(html, /GAME-READY SCORE/);
+  assert.match(html, /<title>실제 에셋 마켓과 Clunk \| Clunk<\/title>/i);
+  assert.match(html, /ASSET MARKET \+ CREDIT WORKSPACE/);
+  assert.match(html, /마켓 둘러보기/);
+  assert.match(html, /Clunk 사용하기/);
+  assert.match(html, /data-snap-section="hero"/);
+  assert.match(html, /마스터가 직접 만든/);
+  assert.doesNotMatch(html, /DEMO MODE|실제 제작부터|에셋 만들기|CONTRACT_FIXTURE|SAMPLE/);
   assert.doesNotMatch(html, /Your site is taking shape|react-loading-skeleton|codex-preview/);
 });
 
@@ -44,7 +38,7 @@ test("inspector explains that policy score is not player-facing approval", async
 });
 
 test("server-renders public product routes", async () => {
-  for (const pathname of ["/pricing", "/docs"]) {
+  for (const pathname of ["/pricing", "/docs", "/series"]) {
     const response = await render(pathname);
     assert.equal(response.status, 200, pathname);
     const html = await response.text();
@@ -53,15 +47,34 @@ test("server-renders public product routes", async () => {
   }
 });
 
+test("server-renders the Clunk Series catalog with source transparency", async () => {
+  const response = await render("/series");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  for (const name of ["Clunk Asset Forge", "Clunk Sprite Lab", "Clunk Material Lab", "Clunk Motion Lab", "Clunk Game Ready", "Clunk Market"]) {
+    assert.match(html, new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  }
+  assert.match(html, /CLUNK SERIES/);
+  assert.match(html, /clunk-series-native-v1/);
+  assert.match(html, /gltf-transform/);
+  assert.match(html, /MIT/);
+  assert.match(html, /RESEARCH ONLY/);
+  assert.match(html, /사용 제외/);
+  assert.match(html, /\/studio/);
+});
+
 test("landing language covers the full 2D and 3D asset path", async () => {
   const response = await render("/");
   const html = await response.text();
-  assert.match(html, /아이디어를/);
+  assert.match(html, /마스터가 직접 만든/);
   assert.match(html, /Game Ready/);
-  assert.match(html, /IDEA/);
-  assert.match(html, /DISCOVER/);
+  assert.match(html, /PLAN/);
+  assert.match(html, /CREATE/);
+  assert.match(html, /INSPECT/);
+  assert.match(html, /CONNECT/);
   assert.match(html, /Sprite.*Atlas|Atlas.*Sprite/);
   assert.match(html, /Spine/);
+  assert.match(html, /크레딧/);
 });
 
 test("docs expose a navigable GitBook-style information architecture", async () => {

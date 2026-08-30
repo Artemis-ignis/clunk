@@ -2170,6 +2170,47 @@ pre {
   box-shadow: 0 14px 34px rgba(62, 188, 232, 0.24);
 }
 
+.login-auth-error {
+  margin-top: var(--sp-20);
+  padding: var(--sp-12) var(--sp-16);
+  border: 1px solid rgba(255, 184, 92, 0.45);
+  border-radius: 12px;
+  background: rgba(105, 61, 21, 0.34);
+  color: #ffe1af;
+  font-size: var(--fs-1);
+  line-height: var(--lh-lead);
+}
+
+.login-provider-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-12);
+  margin-top: var(--sp-24);
+  color: rgba(236, 247, 253, 0.58);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.login-provider-divider::before,
+.login-provider-divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.login-provider-actions {
+  display: grid;
+  gap: var(--sp-8);
+  margin-top: var(--sp-12);
+}
+
+.login-provider-button {
+  min-height: 46px;
+}
+
 .login-session-actions {
   display: grid;
   gap: var(--sp-12);

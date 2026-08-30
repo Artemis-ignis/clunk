@@ -9,6 +9,10 @@ Status: private pilot (Korea first). Billing is a working demo ledger, not a pay
 ## Public surfaces
 
 - [Clunk home](https://clunk.honna1.chatgpt.site/): sample-first product walkthrough and evidence states.
+- [Clunk Series](https://clunk.honna1.chatgpt.site/series): Clunk-native Forge, Sprite, Material, Motion, Game Ready, and Market surfaces with the audited GitHub source ledger.
+- [Asset Studio](https://clunk.honna1.chatgpt.site/studio): authenticated native series authoring, real artifact bytes, and review Draft flow.
+- [Kits](https://clunk.honna1.chatgpt.site/kits): authenticated projects and hash-only Clunk Kit manifests.
+- [Asset detail](https://clunk.honna1.chatgpt.site/assets/:assetId): authenticated artifact hashes, provenance, evidence, and downloads.
 - [Connect](https://clunk.honna1.chatgpt.site/connect): official HTTP MCP setup and handshake entry point.
 - [Documentation](https://clunk.honna1.chatgpt.site/docs): contracts, asset families, and runtime boundaries.
 
@@ -40,6 +44,11 @@ the Authorization header; Cursor and Claude Desktop receive `mcpServers` JSON; V
 `servers` JSON. These are client-specific forms, not a Polyfork command. The copied key is shown once.
 
 ## What Clunk actually does
+
+Clunk Series is built from audited GitHub source material, not from runtime calls to those
+repositories. Its native job provider is `clunk-series-native-v1`; every artifact keeps its
+series ID, source record IDs, license state, prompt/reference role, request hash, and SHA-256.
+The public catalog is `/series` and the authenticated creation surface is `/studio`. The authenticated package surface is `/kits`; source-linked Remix is available after a real native result exists. FORGE FRONT is a separate collaboration target, not a game implementation inside Clunk.
 
 - Parses real GLB and glTF 2.0 bytes. No screenshot, no fixture, no mock metric.
 - Records `inputHash` (SHA-256 of the input bytes), `coreBuildId`, `ruleSetId`, `ruleSetVersion`
@@ -817,6 +826,15 @@ remote HTTPS MCP intentionally does not expose this write-capable tool: upload t
 bundle through `clunk_asset_inspect` or `clunk_asset_inspection_evidence` instead. A generated
 bundle can be structurally PASS while runtime status is `ENVIRONMENT_UNAVAILABLE` and
 playerFacing remains `NOT_EVALUATED`.
+
+## Workspace lifecycle extensions
+
+`GET /api/providers` reports the checked-in capability registry. `POST /api/series` accepts
+`operation: "remix"` with a workspace-scoped `sourceAssetId`; the source hash is recorded and a
+new asset is written. `GET /api/assets/:assetId` returns private workspace metadata, and adding
+`file` plus `download=1` retrieves an exact R2 artifact when storage is configured. `/kits` and
+`/api/kits` create `clunk.asset-kit.v1` hash-only manifests from workspace assets. A Kit manifest
+does not contain raw bytes and does not mean production approval.
 
 ## Pixi sprite-sheet review
 

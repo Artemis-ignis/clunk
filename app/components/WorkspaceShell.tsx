@@ -16,11 +16,13 @@ import "../workspace.css";
  * dead affordance, and the animated radial gradient behind the shell is reproduced in CSS.
  */
 
-export type WorkspaceSection = "overview" | "studio" | "inspector" | "passports" | "pricing" | "docs" | "settings";
+export type WorkspaceSection = "overview" | "assets" | "studio" | "inspector" | "passports" | "kits" | "pricing" | "docs" | "settings";
 
 const PRIMARY_NAV: { section: WorkspaceSection; label: string; href: string; icon: IconName }[] = [
-  { section: "overview", label: "Assets", href: "/dashboard", icon: "layout" },
+  { section: "overview", label: "Dashboard", href: "/dashboard", icon: "layout" },
+  { section: "assets", label: "에셋 라이브러리", href: "/assets", icon: "folder" },
   { section: "studio", label: "Create", href: "/studio", icon: "boxes" },
+  { section: "kits", label: "Kits", href: "/kits", icon: "folder" },
   { section: "inspector", label: "Game Ready", href: "/app", icon: "scan" },
   { section: "passports", label: "Passports", href: "/passport", icon: "badge" },
 ];
@@ -103,9 +105,9 @@ export function WorkspaceShell({
           설정
         </Link>
         <div className="rail-plan">
-          <span className="mono-label">비공개 파일럿</span>
-          <strong>데모 크레딧</strong>
-          <small>DEMO MODE · 실제 결제 아님</small>
+          <span className="mono-label">PRIVATE WORKSPACE</span>
+          <strong>크레딧 사용량</strong>
+          <small>작업 성공 시 API 원장에 기록됩니다</small>
         </div>
       </div>
     </div>

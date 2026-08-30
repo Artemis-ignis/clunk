@@ -2,6 +2,15 @@ import type { AssetKind } from "../../packages/core/src/assetops-contract";
 
 export type StudioCapabilityStatus = "AVAILABLE" | "ADAPTER_REQUIRED" | "ENVIRONMENT_UNAVAILABLE";
 
+export type StudioSeriesId = "asset-forge" | "sprite-lab" | "material-lab" | "motion-lab";
+
+export type StudioSeriesOption = {
+  id: StudioSeriesId;
+  label: string;
+  assetKind: AssetKind;
+  description: string;
+};
+
 export type StudioAssetCard = {
   id: AssetKind;
   family: "2D" | "3D";
@@ -23,6 +32,33 @@ export type StudioEngineTarget = {
   runtimeStatus: StudioCapabilityStatus;
   detail: string;
 };
+
+export const STUDIO_SERIES_OPTIONS: readonly StudioSeriesOption[] = [
+  {
+    id: "asset-forge",
+    label: "Clunk Asset Forge",
+    assetKind: "3d-model",
+    description: "3D reference·prompt authoring과 GLB handoff",
+  },
+  {
+    id: "sprite-lab",
+    label: "Clunk Sprite Lab",
+    assetKind: "sprite-atlas",
+    description: "2D sprite·Atlas·Spine bundle",
+  },
+  {
+    id: "material-lab",
+    label: "Clunk Material Lab",
+    assetKind: "2d-image",
+    description: "PBR map과 material graph",
+  },
+  {
+    id: "motion-lab",
+    label: "Clunk Motion Lab",
+    assetKind: "animation-clip",
+    description: "Animation clip과 loop evidence",
+  },
+] as const;
 
 export const STUDIO_ASSET_CARDS: readonly StudioAssetCard[] = [
   {
@@ -139,6 +175,17 @@ export const STUDIO_WORKFLOW_STEPS = [
 
 export function studioAsset(id: AssetKind): StudioAssetCard {
   return STUDIO_ASSET_CARDS.find((item) => item.id === id) ?? STUDIO_ASSET_CARDS[0];
+}
+
+export function studioSeries(id: StudioSeriesId): StudioSeriesOption {
+  return STUDIO_SERIES_OPTIONS.find((item) => item.id === id) ?? STUDIO_SERIES_OPTIONS[0];
+}
+
+export function seriesForAssetKind(id: AssetKind): StudioSeriesId {
+  if (id === "animation-clip") return "motion-lab";
+  if (id === "3d-model") return "asset-forge";
+  if (id === "2d-image") return "sprite-lab";
+  return "sprite-lab";
 }
 
 export function studioEngine(id: string): StudioEngineTarget {

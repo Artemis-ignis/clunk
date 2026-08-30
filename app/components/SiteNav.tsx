@@ -1,35 +1,36 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "./NativeLink";
 import { BrandLockup } from "./BrandMark";
 import { Icon } from "./Icon";
 import { ThemeToggle } from "./ThemeToggle";
 
 /**
- * Public navigation for the Foundry product shell. The primary row follows the
- * Asset → Create → Game Ready → Discover path; workspace and documentation
- * remain utility destinations rather than competing with the creation CTA.
+ * Public navigation for the Clunk product shell. The primary row follows the
+ * buyer/user split: browse the master's assets, use Clunk with credits, then
+ * inspect the handoff. Workspace and documentation remain utility destinations.
  */
 
-export type ShellSection = "home" | "studio" | "app" | "dashboard" | "pricing" | "docs" | "agents" | "marketplace";
+export type ShellSection = "home" | "series" | "studio" | "app" | "dashboard" | "pricing" | "docs" | "agents" | "marketplace";
 
 const NAV_LINKS: { label: string; href: string; section: ShellSection }[] = [
-  { label: "Discover", href: "/marketplace", section: "marketplace" },
-  { label: "Create", href: "/studio", section: "studio" },
+  { label: "마켓", href: "/marketplace", section: "marketplace" },
+  { label: "Clunk 사용", href: "/studio", section: "studio" },
   { label: "Game Ready", href: "/app", section: "app" },
   { label: "Developers", href: "/connect", section: "agents" },
-  { label: "Pricing", href: "/pricing", section: "pricing" },
+  { label: "크레딧", href: "/pricing", section: "pricing" },
 ];
 
 const UTILITY_NAV_LINKS: { label: string; href: string; section: ShellSection }[] = [
   { label: "Docs", href: "/docs", section: "docs" },
-  { label: "Workspace", href: "/dashboard", section: "dashboard" },
+  { label: "내 작업공간", href: "/dashboard", section: "dashboard" },
 ];
 
 export function SiteNav({ active }: { active?: ShellSection }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const scrollSentinelRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -41,25 +42,20 @@ export function SiteNav({ active }: { active?: ShellSection }) {
   }, [open]);
 
   useEffect(() => {
-    let frame = 0;
-    const measure = () => {
-      frame = 0;
-      setScrolled(window.scrollY > 24);
-    };
-    const onScroll = () => {
-      if (frame) return;
-      frame = window.requestAnimationFrame(measure);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    measure();
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (frame) window.cancelAnimationFrame(frame);
-    };
+    const sentinel = scrollSentinelRef.current;
+    if (!sentinel || typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      setScrolled(!entry.isIntersecting);
+    }, { threshold: 0 });
+    observer.observe(sentinel);
+    return () => observer.disconnect();
   }, []);
 
   return (
-    <div className="sitenav-dock" data-scrolled={scrolled ? "true" : "false"}>
+    <>
+      <span ref={scrollSentinelRef} className="sitenav-scroll-sentinel" aria-hidden="true" />
+      <div className="sitenav-dock" data-scrolled={scrolled ? "true" : "false"}>
       <div className="sitenav-inner">
         <nav className={`sitenav${scrolled ? " sitenav-scrolled" : ""}`} aria-label="주요 메뉴">
           <Link className="brand" href="/" prefetch={false} aria-label="Clunk 홈">
@@ -104,7 +100,7 @@ export function SiteNav({ active }: { active?: ShellSection }) {
               회원가입
             </Link>
             <Link className="button button-primary button-sm sitenav-cta" href="/studio" prefetch={false}>
-              Create asset
+              Clunk 사용하기
               <Icon name="arrowUpRight" size={14} />
             </Link>
             <button
@@ -154,13 +150,14 @@ export function SiteNav({ active }: { active?: ShellSection }) {
                 회원가입
               </Link>
               <Link className="button button-primary button-sm" href="/studio" prefetch={false} onClick={() => setOpen(false)}>
-                Create asset
+                Clunk 사용하기
                 <Icon name="arrowUpRight" size={14} />
               </Link>
             </div>
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

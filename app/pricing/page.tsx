@@ -1,255 +1,233 @@
 import Link from "../components/NativeLink";
-import { Icon } from "../components/Icon";
 import { SiteShell } from "../components/SiteShell";
-import { AssetFamilyVisual } from "../components/AssetFamilyVisual";
+import { RULE_SET } from "../components/product-facts";
 import { createPageMetadata } from "../components/site-metadata";
-import { AssetPreviewCard } from "../components/AssetPreviewCard";
-import { EvidenceRunCard } from "../components/EvidenceRunCard";
-import { CLI_SAMPLE } from "../components/product-facts";
+import { getBillingEnvironment, getBillingStatus } from "../api/marketplace/billing";
+import { getRuntimeEnvironment } from "../runtime-environment";
+import styles from "./pricing.module.css";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = createPageMetadata({
-  title: "요금 안내",
-  description: "월정액 플랜과 선불 크레딧 팩을 함께 쓰는 Clunk 요금 구조입니다. 지금은 데모 원장으로 동작합니다.",
+  title: "크레딧 안내",
+  description: "Clunk 기능 실행에 사용하는 크레딧 규칙과 현재 결제 설정 상태를 확인합니다.",
   path: "/pricing",
 });
 
-/**
- * Pricing = subscription for the seat, credits for the runs.
- * 한국 결제 연동 전이므로 결제는 붙어 있지 않고, 유료 금액은 전부 "예정가(안)"으로 표기한다.
- * 크레딧 규칙(1 검사 = 1 크레딧, 성공 시에만 차감, 실패 복구)은 D1 데모 원장이 실제로
- * 수행하는 동작이다 — reasons: demo-grant / inspect / optimize / refund.
- */
-const MONTHLY_PLANS = [
+const CREDIT_OPERATIONS = [
   {
-    name: "Pilot",
-    price: "무료",
-    cycle: "지금 사용 가능 · 데모",
-    included: "25",
-    includedNote: "가입 시 데모 크레딧",
-    detail: "혼자서 첫 에셋 파이프라인을 검증할 때",
-    features: [
-      "브라우저 로컬 GLB·GLTF 검사와 일괄 검사 큐",
-      "버전이 있는 정책과 Game-Ready Score",
-      "안전 최적화와 새 재검사, Passport 발급",
-      "워크스페이스 이력과 크레딧 원장",
-    ],
-    cta: { label: "내 파일 검사 · 로그인", href: "/app", primary: true },
-    active: true,
+    label: "에셋 검사",
+    endpoint: "Workspace inspect",
+    detail: "업로드한 실제 파일을 검사하고 실행 기록을 남깁니다.",
   },
   {
-    name: "Team",
-    price: "49,000원",
-    cycle: "월 · 예정가(안)",
-    included: "600",
-    includedNote: "매월 포함 크레딧",
-    detail: "반복 검사를 돌리는 소규모 팀",
-    features: [
-      "Pilot의 모든 기능",
-      "팀 공유 이력과 커스텀 정책 프로파일",
-      "CLI·MCP·VS Code 어댑터 경로",
-      "크레딧 팩 추가 구매 할인",
-    ],
-    cta: { label: "출시 알림 받기", href: "/docs", primary: false },
-    active: false,
+    label: "안전 최적화",
+    endpoint: "Workspace optimize",
+    detail: "원본을 보존한 별도 산출물을 만들고 다시 검사합니다.",
   },
   {
-    name: "Studio",
-    price: "190,000원",
-    cycle: "월 · 예정가(안)",
-    included: "3,000",
-    includedNote: "매월 포함 크레딧",
-    detail: "CI에 게이트를 거는 스튜디오",
-    features: [
-      "Team의 모든 기능",
-      "CI 파이프라인과 엔진별 정책",
-      "서버 재검사 R2 경로와 감사 통제",
-      "우선 지원과 온보딩",
-    ],
-    cta: { label: "출시 알림 받기", href: "/docs", primary: false },
-    active: false,
+    label: "Clunk 생성",
+    endpoint: "Workspace generate",
+    detail: "저장 가능한 생성 결과를 만들고 Workspace에 연결합니다.",
+  },
+  {
+    label: "Provider 실행",
+    endpoint: "Provider run",
+    detail: "외부 provider 실행 결과를 받아 Clunk 규칙으로 재검사합니다.",
   },
 ] as const;
 
-const CREDIT_PACKS = [
-  { amount: "+100", price: "15,000원", note: "스팟 검수. 구독 없이 선불로 시작" },
-  { amount: "+500", price: "65,000원", note: "마일스톤 검수 몰아치기용" },
-  { amount: "+2,000", price: "220,000원", note: "대규모 에셋 드롭 정리용" },
+const CREDIT_RULES = [
+  {
+    label: "성공한 실행",
+    value: "1 credit",
+    detail: "현재 API에서 과금 대상으로 정의된 각 성공 실행은 1 credit을 사용합니다.",
+  },
+  {
+    label: "실패 또는 거부",
+    value: "0 credit",
+    detail: "입력 검증, 인증, provider, 저장 실패는 실행이 완료되지 않으므로 차감하지 않습니다.",
+  },
+  {
+    label: "중복 요청",
+    value: "1회 처리",
+    detail: "idempotency key가 같은 요청은 한 번만 ledger에 기록됩니다.",
+  },
 ] as const;
+
+function BillingState() {
+  const billing = getBillingStatus(getBillingEnvironment(getRuntimeEnvironment()));
+  const isAvailable = billing.status === "AVAILABLE";
+
+  return (
+    <div className={styles.contractNote} role="status">
+      <div className={styles.contractNoteHeader}>
+        <span className={styles.statusDot + (isAvailable ? " " + styles.statusDotReady : "")} aria-hidden="true" />
+        <strong>{isAvailable ? "결제 provider 설정됨" : "결제 provider 설정 필요"}</strong>
+      </div>
+      <p>
+        실제 코드에 확정된 유료 플랜 금액이나 credit pack 금액은 없습니다.{" "}
+        {isAvailable
+          ? "공개 listing의 결제 요청은 설정된 provider를 통해 처리됩니다."
+          : "결제 provider가 설정되지 않아 결제 요청이나 주문을 만들지 않습니다."}
+      </p>
+    </div>
+  );
+}
 
 export default function PricingPage() {
   return (
     <SiteShell active="pricing">
-      <main className="page">
-        <div className="pricing-hero-grid public-hero-frame public-hero-pricing">
-          <header className="page-head">
-            <span className="eyebrow">요금 구조</span>
-            <h1>
-              자리는 월정액,
+      <main className={styles.page}>
+        <section
+          className={styles.hero + " snap-section"}
+          data-snap-section="pricing-intro"
+          aria-labelledby="pricing-title"
+        >
+          <div className={styles.heroCopy}>
+            <span className={styles.eyebrow}>CLUNK USAGE</span>
+            <h1 id="pricing-title">
+              Clunk 기능은
               <br />
-              <em>실행은 크레딧.</em>
+              <em>크레딧으로 실행합니다.</em>
             </h1>
-            <p className="lead">
-              구독은 팀 자리와 정책, 이력을 담당하고, 검사와 최적화 실행은 크레딧으로 셉니다. 검사
-              1회 = 크레딧 1개, 성공한 실행에만 차감되고 실패하면 자동 복구됩니다.
+            <p>
+              Clunk가 공개한 에셋을 구매하는 카탈로그와 Clunk 기능을 사용하는 Workspace는
+              다릅니다. 이 페이지는 후자의 실행 크레딧만 설명합니다.
             </p>
-          </header>
-          <section className="pricing-execution-board" aria-label="크레딧 실행 흐름 미리보기">
-            <div className="pricing-board-topline"><span><i /> RUN LEDGER</span><strong>DEMO / NO CHARGE</strong></div>
-            <div className="pricing-board-visual"><AssetFamilyVisual kind="model" compact /><span className="pricing-board-stamp">UI PREVIEW · 실제 원장은 로그인 후</span></div>
-            <div className="pricing-board-steps">
-              <div className="is-complete"><span>01</span><strong>검사 시작</strong><small>차감 전 고지</small></div>
-              <div className="is-complete"><span>02</span><strong>성공한 실행</strong><small>1 run = 1 credit</small></div>
-              <div><span>03</span><strong>실패 복구</strong><small>0 credit · ledger 기록</small></div>
-            </div>
-          </section>
-        </div>
-
-        <div className="price-demo-strip">
-          <span className="demo-marker">DEMO MODE · 실제 결제 아님</span>
-          <p>
-            한국 결제 연동 전이라 유료 금액은 전부 <strong>예정가(안)</strong>입니다. 지금 워크스페이스에서
-            움직이는 크레딧은 실제로 동작하는 데모 원장이며 카드는 청구되지 않습니다.
-          </p>
-        </div>
-
-        <section className="pricing-evidence-section" aria-labelledby="pricing-evidence-heading">
-          <div className="pricing-evidence-heading">
-            <span className="eyebrow">ONE CREDIT · ONE TRACEABLE RUN</span>
-            <h2 id="pricing-evidence-heading">크레딧 하나가<br /><em>어떤 결과가 되는가</em></h2>
-            <p>금액표보다 먼저 실행 결과를 보여드립니다. 샘플은 비용이 없고, 실제 원장은 로그인한 workspace의 성공 실행만 기록합니다.</p>
-          </div>
-          <EvidenceRunCard
-            eyebrow="CREDIT RUN PREVIEW"
-            title="검사 → 결과 → 다음 증거"
-            artifact={`${CLI_SAMPLE.file} · ${CLI_SAMPLE.byteLength.toLocaleString()} B`}
-            detail="한 번의 검사는 원본 바이트를 읽고 hash·policy·finding을 남깁니다. 성공 실행만 1 credit을 사용하며, runtime과 사람 리뷰는 별도 lane입니다."
-            visual={<AssetPreviewCard kind="model" label="GLB / GLTF" detail="UI preview · 실제 결과는 업로드 바이트에서 생성" />}
-            statuses={[
-              { label: "STATIC", value: `${CLI_SAMPLE.score}/100`, detail: "policy · blocker 0", tone: "pass" },
-              { label: "RUNTIME", value: "GAP", detail: "shipped frame 필요", tone: "gap" },
-              { label: "PLAYER", value: "NOT_EVALUATED", detail: "게임 화면 전", tone: "pending" },
-              { label: "HUMAN", value: "PENDING", detail: "사람 검토 대기", tone: "pending" },
-            ]}
-            nextAction={{ title: "내 파일로 이 흐름 실행", detail: "workspace에 로그인하면 실제 원장과 파일 이력이 이어집니다.", href: "/app", label: "로그인 후 검사" }}
-          />
-        </section>
-
-        <section className="pricing-creation-section" aria-labelledby="pricing-creation-heading">
-          <div className="pricing-creation-heading">
-            <span className="eyebrow">FROM CREDIT TO CATALOG</span>
-            <h2 id="pricing-creation-heading">크레딧 하나로<br /><em>끝나는 일은 여기까지입니다.</em></h2>
-            <p>Clunk의 실행 비용은 검사에 붙지만, 상품이 되려면 생성·검수·라이선스·판매 준비가 따로 필요합니다. 한 화면에서 그 차이를 확인하세요.</p>
-            <div className="pricing-creation-actions">
-              <Link className="button button-primary button-sm" href="/studio">실제 에셋 만들기 <Icon name="arrowUpRight" size={14} /></Link>
-              <Link className="button button-quiet button-sm" href="/marketplace">마켓 둘러보기 <Icon name="arrowRight" size={14} /></Link>
+            <div className={styles.actions}>
+              <Link className={styles.primary} href="/login?return_to=%2Fdashboard">
+                Workspace 열기
+                <span aria-hidden="true">↗</span>
+              </Link>
+              <Link className={styles.secondary} href="/marketplace">
+                공개 에셋 보기
+                <span aria-hidden="true">→</span>
+              </Link>
             </div>
           </div>
-          <div className="pricing-creation-grid">
-            <article><AssetFamilyVisual kind="sprite" compact /><span>01 · CREATE</span><strong>PNG / Atlas / GLB</strong><small>새 artifact와 prompt provenance</small></article>
-            <article><AssetFamilyVisual kind="atlas" compact /><span>02 · INSPECT</span><strong>hash · policy · findings</strong><small>같은 target profile로 fresh reopen</small></article>
-            <article><AssetFamilyVisual kind="motion" compact /><span>03 · PROVE</span><strong>runtime · player</strong><small>실제 캡처가 없으면 승격하지 않음</small></article>
-            <article><AssetFamilyVisual kind="spine" compact /><span>04 · REVIEW</span><strong>human decision</strong><small>사람의 메모와 근거를 별도 저장</small></article>
-            <article><AssetFamilyVisual kind="model" compact /><span>05 · SELL</span><strong>license · listing</strong><small>모든 gate 뒤에만 공개 상품</small></article>
+
+          <div className={styles.ledger} aria-label="Clunk credit usage ledger">
+            <div className={styles.ledgerTopline}>
+              <span>USAGE LEDGER</span>
+              <span>{RULE_SET.id}</span>
+            </div>
+            <div className={styles.ledgerAmount}>
+              <strong>1</strong>
+              <span>credit<br />per successful run</span>
+            </div>
+            <div className={styles.ledgerFacts}>
+              <div>
+                <span>RULE SET</span>
+                <strong>{RULE_SET.version}</strong>
+              </div>
+              <div>
+                <span>BLOCKED</span>
+                <strong>0 credit</strong>
+              </div>
+              <div>
+                <span>DUPLICATE</span>
+                <strong>idempotent</strong>
+              </div>
+            </div>
           </div>
         </section>
 
-        <section className="pricing-block" aria-label="월정액 플랜">
-          <div className="pricing-block-head">
-            <h2>월정액 플랜</h2>
-            <p>매월 포함 크레딧이 함께 들어 있습니다. 파일럿은 지금 바로 무료로 쓸 수 있습니다.</p>
+        <section
+          className={styles.section + " snap-section"}
+          data-snap-section="pricing-operations"
+          aria-labelledby="operations-title"
+        >
+          <div className={styles.sectionHeading}>
+            <span className={styles.eyebrow}>WHAT USES CREDIT</span>
+            <h2 id="operations-title">
+              만드는 사람과
+              <br />
+              사용하는 사람의 경계를 분명히 합니다.
+            </h2>
+            <p>
+              마스터가 만든 에셋은 공개 카탈로그에 올라가고 사용자는 그것을 구매합니다.
+              사용자가 credit을 쓰는 곳은 에셋 상품 제작이 아니라 Clunk의 검사, 처리, 생성 기능입니다.
+            </p>
           </div>
-          <div className="plan-grid">
-            {MONTHLY_PLANS.map((plan) => (
-              <article key={plan.name} className={`plan-card${plan.active ? " plan-card-active" : ""}`}>
-                {plan.active ? <span className="plan-flag">지금 사용 가능</span> : null}
-                <span className="mono-label">{plan.name}</span>
-                <p className="plan-price">
-                  {plan.price}
-                  <small className="plan-cycle">{plan.cycle}</small>
-                </p>
-                <div className="plan-included">
-                  <strong className="num">{plan.included}</strong>
-                  <span>{plan.includedNote}</span>
+          <div className={styles.operationGrid}>
+            {CREDIT_OPERATIONS.map((operation, index) => (
+              <article className={styles.operation} key={operation.endpoint}>
+                <span className={styles.operationIndex}>0{index + 1}</span>
+                <div>
+                  <span className={styles.operationEndpoint}>{operation.endpoint}</span>
+                  <h3>{operation.label}</h3>
+                  <p>{operation.detail}</p>
                 </div>
-                <p className="plan-detail">{plan.detail}</p>
-                <ul className="plan-features">
-                  {plan.features.map((feature) => (
-                    <li key={feature}>
-                      <Icon name="check" size={14} strokeWidth={2.2} />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href={plan.cta.href}
-                  className={`button button-block ${plan.cta.primary ? "button-primary" : "button-quiet"}`}
-                >
-                  {plan.cta.label}
-                  <Icon name="arrowUpRight" size={14} />
-                </Link>
-                {!plan.active ? <span className="plan-tier-note">국내 결제 연동 후 오픈 · 예정가(안)</span> : null}
+                <strong className={styles.operationCost}>1 credit</strong>
               </article>
             ))}
           </div>
         </section>
 
-        <section className="pricing-block" aria-label="크레딧 팩">
-          <div className="pricing-block-head">
-            <h2>크레딧 팩</h2>
-            <p>구독과 별개로 선불 충전합니다. 포함 크레딧을 다 쓴 달이나, 구독 없이 스팟으로 쓸 때.</p>
+        <section
+          className={styles.section + " snap-section"}
+          data-snap-section="pricing-rules"
+          aria-labelledby="rules-title"
+        >
+          <div className={styles.sectionHeading}>
+            <span className={styles.eyebrow}>TRANSACTION RULES</span>
+            <h2 id="rules-title">실행 결과가 기준입니다.</h2>
+            <p>
+              표시용 숫자나 예정 가격을 만들지 않습니다. 실제 API가 기록하는 ledger 동작과
+              현재 결제 provider 설정만 공개합니다.
+            </p>
           </div>
-          <div className="pack-grid">
-            {CREDIT_PACKS.map((pack) => (
-              <article key={pack.amount} className="pack-card">
-                <p className="pack-amount">
-                  {pack.amount}
-                  <small>크레딧</small>
-                </p>
-                <p className="pack-price">{pack.price} · 예정가(안)</p>
-                <p className="pack-note">{pack.note}</p>
-                <Link href="/#flow" className="button button-quiet button-sm">
-                  공개 샘플 흐름 보기
-                  <Icon name="arrowRight" size={14} />
-                </Link>
-              </article>
+          <div className={styles.ruleList}>
+            {CREDIT_RULES.map((rule) => (
+              <div className={styles.rule} key={rule.label}>
+                <div>
+                  <span>{rule.label}</span>
+                  <strong>{rule.value}</strong>
+                </div>
+                <p>{rule.detail}</p>
+              </div>
             ))}
           </div>
+          <BillingState />
         </section>
 
-        <section className="pricing-block" aria-label="크레딧 규칙">
-          <div className="pricing-block-head">
-            <h2>크레딧이 세는 것</h2>
-            <p>모든 규칙은 지금 D1 데모 원장이 실제로 수행하는 동작입니다.</p>
+        <section
+          className={styles.routeSection + " snap-section"}
+          data-snap-section="pricing-next"
+          aria-labelledby="next-title"
+        >
+          <div className={styles.sectionHeading}>
+            <span className={styles.eyebrow}>NEXT SURFACE</span>
+            <h2 id="next-title">지금 하려는 일로 이동합니다.</h2>
           </div>
-          <div className="pack-grid">
-            <article className="pack-card">
-              <p className="pack-amount">
-                1<small>크레딧 / 검사</small>
-              </p>
-              <p className="pack-note">일괄 검사 큐도 같은 규칙입니다. 파일당 1개, 시작 전에 미리 고지합니다.</p>
-            </article>
-            <article className="pack-card">
-              <p className="pack-amount">
-                0<small>실패 시 차감</small>
-              </p>
-              <p className="pack-note">성공한 실행에만 차감합니다. 실패하면 원장에 복구 기록이 남습니다.</p>
-            </article>
-            <article className="pack-card">
-              <p className="pack-amount">
-                0<small>샘플 비용</small>
-              </p>
-              <p className="pack-note">데모 샘플 실행은 크레딧과 워크스페이스 이력에서 제외됩니다.</p>
-            </article>
+          <div className={styles.routeGrid}>
+            <Link className={styles.route} href="/marketplace">
+              <span>
+                <small>BUY</small>
+                <strong>공개 에셋 카탈로그</strong>
+                <em>실제 공개 listing이 있을 때 구매합니다.</em>
+              </span>
+              <span className={styles.routeArrow} aria-hidden="true">↗</span>
+            </Link>
+            <Link className={styles.route} href="/login?return_to=%2Fapp">
+              <span>
+                <small>USE</small>
+                <strong>Clunk Game Ready</strong>
+                <em>인증 후 Workspace에서 credit을 사용합니다.</em>
+              </span>
+              <span className={styles.routeArrow} aria-hidden="true">↗</span>
+            </Link>
+            <Link className={styles.route} href="/docs">
+              <span>
+                <small>CONNECT</small>
+                <strong>개발자 문서</strong>
+                <em>CLI와 MCP로 실제 Clunk 기능을 연결합니다.</em>
+              </span>
+              <span className={styles.routeArrow} aria-hidden="true">↗</span>
+            </Link>
           </div>
         </section>
-
-        <aside className="callout callout-warning">
-          <span className="demo-marker">DEMO MODE · 실제 결제 아님</span>
-          <p>
-            결제 제공자는 연결하지 않았습니다. 로그인한 워크스페이스에서 업그레이드를 누르면 데모 크레딧만 늘어나고
-            카드는 청구되지 않습니다. 실제 사업 단계에서는 분리해 둔 BillingProvider에 국내 결제 제공자를 붙입니다.
-          </p>
-        </aside>
       </main>
     </SiteShell>
   );

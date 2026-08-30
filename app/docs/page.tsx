@@ -132,6 +132,14 @@ $ npm.cmd run asset:author -- --asset-kind animation-clip --target-profile harve
 # remote HTTPS MCP: upload the generated bundle; it never writes local paths.
 # structural PASS != visualRuntime PASS != human player-facing PASS`;
 
+const CLUNK_SERIES_COMMANDS = `# Clunk Series: 내부 코드로 실행하는 Game Ready mesh pass
+$ npm.cmd run series:mesh -- game-ready public/samples/clunk-messy-sample.glb --out output/game-ready/optimized.glb --target-profile web-three-mobile --run-id series-game-ready-001
+
+# output과 같은 이름의 .clunk.json sidecar에 input/output hash와 fresh evidence 기록
+# 원본은 절대 덮어쓰지 않음
+# provider: clunk-series-native-v1
+# productionReady: false until runtime capture and human review are supplied`;
+
 const SPRITE_SHEET_COMMANDS = `schema: clunk.sprite-sheet-review.v1
 targetProfileId: yeongheo-pixi-2d
 evidenceKind: CONTRACT_FIXTURE | PLAYER_FACING_CAPTURE
@@ -301,6 +309,12 @@ export default function DocsPage() {
                 <div><span className="eyebrow">AUTHOR · INSPECT · ATTACH</span><h2>Asset Studio</h2></div>
               </div>
               <p className="docs-lead-v2">2D와 3D 모두 provenance를 남기고 검사합니다. 생성 완료와 게임 화면 승인은 다른 증거입니다.</p>
+              <div className="docs-two-column">
+                <div className="docs-studio-facts">
+                  <article><span>CLUNK SERIES · NATIVE</span><strong>Forge · Sprite · Material · Motion · Game Ready</strong><p>GitHub 자료는 감사된 source material로만 기록하고, 실제 실행은 Clunk 내부 코드와 Core 계약으로 수행합니다. <Link href="/series">여섯 시리즈와 소스 장부 보기 <Icon name="arrowUpRight" size={14} /></Link></p></article>
+                </div>
+                <details className="docs-details"><summary>Game Ready mesh pass <span>별도 GLB · fresh evidence</span></summary><CodeBlock title="Clunk Series CLI" language="bash" code={CLUNK_SERIES_COMMANDS} caption="외부 생성 API를 호출하지 않으며, output과 evidence sidecar를 별도로 작성합니다." /></details>
+              </div>
               <div className="docs-two-column">
                 <div className="docs-studio-facts">
                   <article><span>2D</span><strong>Sprite · Atlas · Spine JSON</strong><p>PNG page, region bounds, bones, slots, attachments, animation 이름과 atlas 관계를 검사합니다.</p></article>

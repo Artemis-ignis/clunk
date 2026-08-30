@@ -66,3 +66,25 @@ test("dashboard client exposes loading, auth-required, error, and retry states",
   assert.match(source, /연결 확인 중/);
   assert.match(source, /로그인 · 회원가입/);
 });
+
+test("dashboard uses real workspace endpoints and does not render demo ledger or sample asset data", async () => {
+  const source = await readFile(
+    new URL("../app/components/DashboardClient.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(source, /\/api\/projects/);
+  assert.match(source, /\/api\/generation/);
+  assert.match(source, /\/assets/);
+  assert.doesNotMatch(source, /DEMO MODE|데모 원장|clunk-messy-sample|DemoUpgradeButton/);
+});
+
+test("passport surface is backed by stored API rows and keeps final readiness separate", async () => {
+  const source = await readFile(
+    new URL("../app/components/PassportClient.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(source, /\/api\/passports/);
+  assert.match(source, /정적 재검사 결과/);
+  assert.match(source, /Game Ready READY/);
+  assert.match(source, /연결된 에셋 보기/);
+});

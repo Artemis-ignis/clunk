@@ -1,5 +1,11 @@
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import {
+  AUTH_SESSION_COOKIE,
+  decodeOAuthSession,
+  getOAuthEnvironment,
+} from "./oauth";
+import { getRuntimeEnvironment } from "./runtime-environment";
 
 export type AuthProvider = "chatgpt-sites" | "google" | "github" | (string & {});
 
@@ -9,6 +15,8 @@ export type AuthUser = {
   email: string;
   fullName: string | null;
   provider: AuthProvider;
+  /** Stable provider subject; never derive account identity from a mutable email. */
+  providerAccountId?: string;
 };
 
 export type AuthIdentity = {
@@ -36,22 +44,34 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
   const requestHeaders = await headers();
   const id = requestHeaders.get(USER_ID_HEADER)?.trim() ?? "";
   const email = requestHeaders.get(USER_EMAIL_HEADER)?.trim() ?? "";
-  if (!id || !email) return null;
+  if (id && email) {
+    const encodedFullName = requestHeaders.get(USER_FULL_NAME_HEADER);
+    const fullName =
+      encodedFullName &&
+      requestHeaders.get(USER_FULL_NAME_ENCODING_HEADER) === PERCENT_ENCODED_UTF8
+        ? safeDecodeURIComponent(encodedFullName)
+        : null;
 
-  const encodedFullName = requestHeaders.get(USER_FULL_NAME_HEADER);
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get(USER_FULL_NAME_ENCODING_HEADER) === PERCENT_ENCODED_UTF8
-      ? safeDecodeURIComponent(encodedFullName)
-      : null;
+    return {
+      id,
+      providerAccountId: id,
+      displayName: fullName ?? email,
+      email,
+      fullName,
+      provider: "chatgpt-sites",
+    };
+  }
 
-  return {
-    id,
-    displayName: fullName ?? email,
-    email,
-    fullName,
-    provider: "chatgpt-sites",
-  };
+  // Sites identity is authoritative. A locally signed OAuth session is only
+  // consulted when Sites did not provide a complete server-side identity.
+  try {
+    const sessionSecret = getOAuthEnvironment(getRuntimeEnvironment()).CLUNK_AUTH_SESSION_SECRET;
+    const session = (await cookies()).get(AUTH_SESSION_COOKIE)?.value;
+    if (!session || !sessionSecret) return null;
+    return await decodeOAuthSession(session, sessionSecret);
+  } catch {
+    return null;
+  }
 }
 
 export async function requireUser(returnTo: string): Promise<AuthUser> {
@@ -68,7 +88,7 @@ export async function getCurrentIdentity(): Promise<AuthIdentity | null> {
   return {
     userId: user.id,
     provider: user.provider,
-    providerAccountId: user.id,
+    providerAccountId: user.providerAccountId ?? user.id,
     email: user.email,
   };
 }

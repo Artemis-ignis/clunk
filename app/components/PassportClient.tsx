@@ -36,7 +36,7 @@ export function PassportClient({ userLabel }: { userLabel: string }) {
 
   useEffect(() => {
     let cancelled = false;
-    void fetch("/api/passports")
+    void fetch("/api/passports", { cache: "no-store" })
       .then(async (response) => {
         if (cancelled) return;
         if (!response.ok) {
@@ -225,17 +225,17 @@ function PassportDetail({ row }: { row: ParsedPassport }) {
       <div className="passport-detail-head">
         <div>
           <span className="mono-label">Passport 상세</span>
-          <h3>{passport.passportId}</h3>
-          <p className="passport-file-flow">
+           <h3>{passport.passportId}</h3>
+           <p className="passport-file-flow">
             <strong>{passport.sourceFileName}</strong>
             <Icon name="arrowRight" size={13} />
             <strong>{passport.outputFileName}</strong>
           </p>
         </div>
         <div className="passport-readiness">
-          <span className="mono-label">재검사 결과</span>
-          <StatusPill status={afterReadiness} />
-          <small>{row.createdAt}</small>
+           <span className="mono-label">정적 재검사 결과</span>
+           <StatusPill status={afterReadiness} />
+           <small>{row.createdAt}</small>
         </div>
       </div>
 
@@ -323,7 +323,12 @@ function PassportDetail({ row }: { row: ParsedPassport }) {
           검사기에서 새 최적화
           <Icon name="arrowRight" size={14} />
         </Link>
+        <Link href={`/assets/${encodeURIComponent(row.assetId)}`} className="button button-quiet">
+          연결된 에셋 보기
+          <Icon name="arrowUpRight" size={14} />
+        </Link>
       </div>
+      <p className="muted-note">Passport의 정적 재검사 결과만으로 Game Ready READY를 주장하지 않습니다. 저장 상태와 runtime·player-facing·human review gate는 연결된 에셋에서 별도로 확인하세요.</p>
     </>
   );
 }

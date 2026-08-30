@@ -23,7 +23,7 @@ test("Foundry shell exposes the product hierarchy and scoped design layer", asyn
   await access(new URL("app/foundry.css", root));
   const css = await source("app/foundry.css");
   assert.match(layout, /foundry\.css/);
-  for (const label of ["Discover", "Create", "Game Ready", "Developers", "Pricing"]) {
+  for (const label of ["마켓", "Clunk 사용", "Game Ready", "Developers", "크레딧"]) {
     assert.match(nav, new RegExp(label.replace(" ", "\\s+"), "i"));
   }
   assert.match(css, /--foundry-/);
@@ -33,11 +33,27 @@ test("Foundry shell exposes the product hierarchy and scoped design layer", asyn
 
 test("public landing is asset-first without pretending to generate", async () => {
   const landing = await source("app/page.tsx");
-  assert.match(landing, /AI GAME ASSET FOUNDRY|Asset Foundry/i);
-  assert.match(landing, /CONTRACT FIXTURE|SAMPLE/);
-  assert.match(landing, /IDEA.*PLAN.*CREATE|CREATE.*REFINE.*GAME READY/s);
+  const snap = await source("app/components/SnapRoot.tsx");
+  const css = await source("app/foundry.css");
+  assert.match(landing, /ASSET MARKET \+ CREDIT WORKSPACE/i);
+  assert.match(landing, /마켓 둘러보기/);
+  assert.match(landing, /Clunk 사용하기/);
+  assert.match(landing, /PLAN.*CREATE.*INSPECT.*CONNECT/s);
+  for (const label of ["2D \/ 3D", "SPRITE \/ RIG", "MOTION \/ UI", "ENGINE \/ PLAY"]) {
+    assert.match(landing, new RegExp(label));
+  }
+  assert.equal((landing.match(/data-snap-section=/g) ?? []).length, 6);
+  assert.match(landing, /data-snap-section/);
+  assert.match(snap, /data-snap-section/);
+  assert.match(snap, /matchMedia/);
+  assert.match(snap, /snapMotion/);
+  assert.match(css, /html\.snap-y[\s\S]*scroll-snap-type:\s*y mandatory/);
+  assert.match(css, /@media \(max-width: 768px\)[\s\S]*html\.snap-y[\s\S]*scroll-snap-type:\s*none/);
+  assert.match(css, /html\[data-snap-motion="reduced"\][\s\S]*scroll-snap-type:\s*none/);
+  assert.doesNotMatch(landing, /SCROLL TO EXPLORE/);
   assert.match(landing, /\/studio/);
   assert.doesNotMatch(landing, /fetch\(["']\/api\/generation/);
+  assert.doesNotMatch(landing, /DEMO MODE|실제 제작부터|에셋 만들기|CONTRACT_FIXTURE|SAMPLE/);
 });
 
 test("workspace surfaces name their real jobs without removing evidence", async () => {
@@ -45,6 +61,7 @@ test("workspace surfaces name their real jobs without removing evidence", async 
   const gameReady = await source("app/app/page.tsx");
   const inspector = await source("app/components/ClunkInspector.tsx");
   const dashboard = await source("app/components/DashboardClient.tsx");
+  const shell = await source("app/components/WorkspaceShell.tsx");
   const marketplace = await source("app/marketplace/page.tsx");
   const marketplaceApi = await source("app/api/marketplace/route.ts");
   assert.match(studio, /prompt/i);
@@ -52,6 +69,8 @@ test("workspace surfaces name their real jobs without removing evidence", async 
   assert.match(gameReady, /Game Ready/);
   assert.match(inspector, /NOT_EVALUATED|정적 정책 점수/);
   assert.match(dashboard, /assets|generations/i);
+  assert.match(shell, /\/assets/);
+  assert.doesNotMatch(dashboard, /DEMO MODE|데모 원장|clunk-messy-sample/);
   assert.match(marketplace, /Discover|에셋/);
   assert.match(marketplaceApi, /ensureSchema/);
 });

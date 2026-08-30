@@ -43,3 +43,16 @@ node_modules/.nitro/
 /work/
 /.playwright-cli/
 /.clunk-evidence/
+
+# local secrets
+.dev.vars
+
+# machine-local tooling & generated previews
+/.agents/
+/.static-preview/
+/skills-lock.json
+
+# local evidence captures & personal documents
+/output/
+/*.mp4
+/*.pdf
