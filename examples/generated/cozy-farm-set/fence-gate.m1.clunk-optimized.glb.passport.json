@@ -1,0 +1,150 @@
+{
+  "schemaVersion": "1.0",
+  "passportId": "passport-9102e822f9f6-a7c3c710e2ed",
+  "coreVersion": "0.1.0",
+  "ruleSetId": "clunk-game-ready-v1",
+  "ruleSetVersion": "1.0.0",
+  "profileId": "web",
+  "sourceHash": "9102e822f9f6e292fda4773d301819e5ec8c22482479b1246dac0beb6d345505",
+  "outputHash": "a7c3c710e2edc5e158d00dbc9a32eaae270486f04e51ee7a50cd0449b0d3eb6c",
+  "sourceFileName": "fence-gate.m1.glb",
+  "outputFileName": "fence-gate.m1.clunk-optimized.glb",
+  "sourceInspectionDigest": "a07606ca32435a98bcb6ed3f6995507997073655dc9d3fedcee7d3caa48f5655",
+  "outputInspectionDigest": "f100556c2cd6effa5e0cf6c31a20b5e81435aa6568277523fff91092d03115ff",
+  "operations": [
+    {
+      "id": "clean-metadata",
+      "description": "Removed explicitly allowlisted non-runtime metadata: extras, asset.generator, and asset.copyright.",
+      "count": 3,
+      "safety": "metadata-only"
+    }
+  ],
+  "before": {
+    "metrics": {
+      "sceneCount": 1,
+      "nodeCount": 17,
+      "maxDepth": 3,
+      "emptyNodeCount": 0,
+      "meshCount": 13,
+      "primitiveCount": 13,
+      "vertexCount": 976,
+      "triangleCount": 520,
+      "drawCallCount": 13,
+      "materialCount": 6,
+      "duplicateMaterialCount": 0,
+      "textureCount": 0,
+      "imageCount": 0,
+      "textureMaxDimension": 0,
+      "textureMemoryBytes": 0,
+      "animationCount": 0,
+      "skinCount": 0,
+      "missingNormalPrimitiveCount": 0,
+      "missingUvPrimitiveCount": 0,
+      "nonUnitScaleNodeCount": 0,
+      "zeroScaleNodeCount": 0,
+      "externalResourceCount": 0,
+      "unresolvedResourceCount": 0,
+      "remoteResourceCount": 0,
+      "extensionCount": 0,
+      "bounds": {
+        "min": [
+          -1.2000000476837158,
+          -0.03999999910593033,
+          -0.25999999046325684
+        ],
+        "max": [
+          1.4726130962371826,
+          1.7100000381469727,
+          0.25999999046325684
+        ],
+        "dimensions": [
+          2.6726131439208984,
+          1.750000037252903,
+          0.5199999809265137
+        ]
+      }
+    },
+    "score": {
+      "score": 100,
+      "threshold": 90,
+      "ready": true,
+      "hardBlockerCount": 0,
+      "breakdown": {
+        "format": 100,
+        "scene": 100,
+        "geometry": 100,
+        "materials": 100,
+        "textures": 100,
+        "runtime": 100
+      },
+      "ruleSetId": "clunk-game-ready-v1",
+      "ruleSetVersion": "1.0.0"
+    }
+  },
+  "after": {
+    "metrics": {
+      "sceneCount": 1,
+      "nodeCount": 17,
+      "maxDepth": 3,
+      "emptyNodeCount": 0,
+      "meshCount": 13,
+      "primitiveCount": 13,
+      "vertexCount": 976,
+      "triangleCount": 520,
+      "drawCallCount": 13,
+      "materialCount": 6,
+      "duplicateMaterialCount": 0,
+      "textureCount": 0,
+      "imageCount": 0,
+      "textureMaxDimension": 0,
+      "textureMemoryBytes": 0,
+      "animationCount": 0,
+      "skinCount": 0,
+      "missingNormalPrimitiveCount": 0,
+      "missingUvPrimitiveCount": 0,
+      "nonUnitScaleNodeCount": 0,
+      "zeroScaleNodeCount": 0,
+      "externalResourceCount": 0,
+      "unresolvedResourceCount": 0,
+      "remoteResourceCount": 0,
+      "extensionCount": 0,
+      "bounds": {
+        "min": [
+          -1.2000000476837158,
+          -0.03999999910593033,
+          -0.25999999046325684
+        ],
+        "max": [
+          1.4726130962371826,
+          1.7100000381469727,
+          0.25999999046325684
+        ],
+        "dimensions": [
+          2.6726131439208984,
+          1.750000037252903,
+          0.5199999809265137
+        ]
+      }
+    },
+    "score": {
+      "score": 100,
+      "threshold": 90,
+      "ready": true,
+      "hardBlockerCount": 0,
+      "breakdown": {
+        "format": 100,
+        "scene": 100,
+        "geometry": 100,
+        "materials": 100,
+        "textures": 100,
+        "runtime": 100
+      },
+      "ruleSetId": "clunk-game-ready-v1",
+      "ruleSetVersion": "1.0.0"
+    }
+  },
+  "limitations": [
+    "Lossy geometry, texture, animation, skin, and unknown-extension transforms are not applied in v1.",
+    "Game-Ready Score is Clunk's declared policy score, not a universal engine certification."
+  ]
+}
