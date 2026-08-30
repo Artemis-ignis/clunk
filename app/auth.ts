@@ -6,6 +6,13 @@ import {
   getOAuthEnvironment,
 } from "./oauth";
 import { getRuntimeEnvironment } from "./runtime-environment";
+import {
+  UPSTREAM_IDENTITY_FULL_NAME_ENCODING_HEADER,
+  UPSTREAM_IDENTITY_FULL_NAME_HEADER,
+  UPSTREAM_IDENTITY_USER_EMAIL_HEADER,
+  UPSTREAM_IDENTITY_USER_ID_HEADER,
+  trustsUpstreamIdentityHeaders,
+} from "./api/_lib/identity-headers";
 
 export type AuthProvider = "chatgpt-sites" | "google" | "github" | (string & {});
 
@@ -26,10 +33,16 @@ export type AuthIdentity = {
   email: string;
 };
 
-const USER_ID_HEADER = "oai-authenticated-user-id";
-const USER_EMAIL_HEADER = "oai-authenticated-user-email";
-const USER_FULL_NAME_HEADER = "oai-authenticated-user-full-name";
-const USER_FULL_NAME_ENCODING_HEADER =
+// The literals stay spelled out here so the header contract is readable at the
+// auth boundary, while the `typeof` annotations make any drift away from the
+// shared definition in `api/_lib/identity-headers` a compile error.
+const USER_ID_HEADER: typeof UPSTREAM_IDENTITY_USER_ID_HEADER =
+  "oai-authenticated-user-id";
+const USER_EMAIL_HEADER: typeof UPSTREAM_IDENTITY_USER_EMAIL_HEADER =
+  "oai-authenticated-user-email";
+const USER_FULL_NAME_HEADER: typeof UPSTREAM_IDENTITY_FULL_NAME_HEADER =
+  "oai-authenticated-user-full-name";
+const USER_FULL_NAME_ENCODING_HEADER: typeof UPSTREAM_IDENTITY_FULL_NAME_ENCODING_HEADER =
   "oai-authenticated-user-full-name-encoding";
 const PERCENT_ENCODED_UTF8 = "percent-encoded-utf-8";
 const SIGN_IN_PATH = "/signin-with-chatgpt";
@@ -37,14 +50,54 @@ const SIGN_OUT_PATH = "/signout-with-chatgpt";
 const CALLBACK_PATH = "/callback";
 
 /**
- * Resolve the authenticated principal from the hosting provider's server-side
- * identity headers. Browser-provided identity fields are never consulted.
+ * Resolve the authenticated principal. Browser-provided identity fields are
+ * never consulted.
+ *
+ * Trust model, in priority order:
+ *
+ * 1. The HMAC-signed local OAuth session cookie. It is verified here, so it is
+ *    checked FIRST — an upstream identity header can never displace a real
+ *    signed session, even on a deployment that trusts those headers.
+ * 2. The host's `oai-authenticated-user-*` headers, and only when the runtime
+ *    sets `CLUNK_TRUST_SIWC_HEADERS="1"`. Without that flag the headers are not
+ *    read at all, because on any deployment that is not behind the ChatGPT
+ *    Sites identity proxy they are attacker-controlled request headers.
  */
 export async function getCurrentUser(): Promise<AuthUser | null> {
-  const requestHeaders = await headers();
-  const id = requestHeaders.get(USER_ID_HEADER)?.trim() ?? "";
-  const email = requestHeaders.get(USER_EMAIL_HEADER)?.trim() ?? "";
-  if (id && email) {
+  const environment = getOAuthEnvironment(getRuntimeEnvironment());
+
+  const session = await readSignedSessionUser(environment);
+  if (session) return session;
+
+  if (!trustsUpstreamIdentityHeaders(environment)) return null;
+  return await readUpstreamIdentityUser();
+}
+
+/** Verified, self-owned session. Never inferred from an unsigned value. */
+async function readSignedSessionUser(
+  environment: Record<string, string | undefined>,
+): Promise<AuthUser | null> {
+  try {
+    const sessionSecret = environment.CLUNK_AUTH_SESSION_SECRET;
+    const session = (await cookies()).get(AUTH_SESSION_COOKIE)?.value;
+    if (!session || !sessionSecret) return null;
+    return await decodeOAuthSession(session, sessionSecret);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Host-injected identity. Only reached when the trust flag is on; the parsing
+ * itself (including percent-encoded full names) is unchanged.
+ */
+async function readUpstreamIdentityUser(): Promise<AuthUser | null> {
+  try {
+    const requestHeaders = await headers();
+    const id = requestHeaders.get(USER_ID_HEADER)?.trim() ?? "";
+    const email = requestHeaders.get(USER_EMAIL_HEADER)?.trim() ?? "";
+    if (!id || !email) return null;
+
     const encodedFullName = requestHeaders.get(USER_FULL_NAME_HEADER);
     const fullName =
       encodedFullName &&
@@ -60,15 +113,6 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
       fullName,
       provider: "chatgpt-sites",
     };
-  }
-
-  // Sites identity is authoritative. A locally signed OAuth session is only
-  // consulted when Sites did not provide a complete server-side identity.
-  try {
-    const sessionSecret = getOAuthEnvironment(getRuntimeEnvironment()).CLUNK_AUTH_SESSION_SECRET;
-    const session = (await cookies()).get(AUTH_SESSION_COOKIE)?.value;
-    if (!session || !sessionSecret) return null;
-    return await decodeOAuthSession(session, sessionSecret);
   } catch {
     return null;
   }

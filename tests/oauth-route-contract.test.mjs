@@ -24,15 +24,25 @@ test("OAuth start and callback routes exist and fail closed around provider conf
   assert.match(callback, /code/);
 });
 
-test("Sites identity remains the first authentication source and local OAuth is only a fallback", async () => {
+test("the signed session outranks host identity headers, which stay behind a trust flag", async () => {
   const auth = await source("app/auth.ts");
   const sitesHeaderIndex = auth.indexOf("oai-authenticated-user-id");
-  const sitesResolutionIndex = auth.indexOf("if (id && email)");
   const sessionCookieIndex = auth.indexOf("const session =");
+  const headerReadIndex = auth.indexOf("readUpstreamIdentityUser()");
   assert.ok(sitesHeaderIndex >= 0);
-  assert.ok(sitesResolutionIndex >= 0);
   assert.ok(sessionCookieIndex >= 0);
-  assert.ok(sitesResolutionIndex < sessionCookieIndex);
+  assert.ok(headerReadIndex >= 0);
+
+  // A forged `oai-authenticated-*` header must never displace a verified
+  // session, so the cookie is resolved first inside getCurrentUser().
+  const resolver = auth.slice(
+    auth.indexOf("export async function getCurrentUser"),
+    auth.indexOf("async function readSignedSessionUser"),
+  );
+  assert.ok(resolver.length > 0);
+  assert.ok(resolver.indexOf("readSignedSessionUser") < resolver.indexOf("readUpstreamIdentityUser"));
+  assert.match(resolver, /trustsUpstreamIdentityHeaders\(environment\)/);
+
   assert.match(auth, /providerAccountId/);
   assert.match(auth, /decodeOAuthSession/);
 });

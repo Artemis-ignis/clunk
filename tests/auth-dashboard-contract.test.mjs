@@ -2,6 +2,9 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+// These contracts describe a deployment that sits behind the ChatGPT Sites
+// identity proxy, so the runtime opts into header trust exactly as production
+// Sites does. Without CLUNK_TRUST_SIWC_HEADERS the Worker strips the headers.
 async function render(pathname, requestHeaders = {}) {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", String(process.pid) + "-" + String(Date.now()) + "-" + pathname);
@@ -10,7 +13,11 @@ async function render(pathname, requestHeaders = {}) {
     new Request("http://localhost" + pathname, {
       headers: { accept: "text/html", ...requestHeaders },
     }),
-    { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
+    {
+      ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) },
+      CLUNK_TRUST_SIWC_HEADERS: "1",
+      CLUNK_RATE_LIMIT_DISABLED: "1",
+    },
     { waitUntil() {}, passThroughOnException() {} },
   );
 }

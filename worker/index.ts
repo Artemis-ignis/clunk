@@ -1,11 +1,20 @@
 /** Cloudflare Worker entry point for the vinext-starter template. */
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
-import { setRuntimeBindings } from "../app/runtime-environment";
+import { getRuntimeEnvironment, setRuntimeBindings } from "../app/runtime-environment";
+import {
+  stripUpstreamIdentityHeaders,
+  trustsUpstreamIdentityHeaders,
+} from "../app/api/_lib/identity-headers";
+import { enforceRateLimit } from "../app/api/_lib/rate-limit";
 
 interface Env {
   ASSETS: Fetcher;
   DB: D1Database;
+  /** "1" only on a deployment sitting behind the ChatGPT Sites identity proxy. */
+  CLUNK_TRUST_SIWC_HEADERS?: string;
+  /** "1" disables the in-isolate request limiter (local dev and tests). */
+  CLUNK_RATE_LIMIT_DISABLED?: string;
   IMAGES: {
     input(stream: ReadableStream): {
       transform(options: Record<string, unknown>): {
@@ -29,12 +38,21 @@ interface ExecutionContext {
 const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     setRuntimeBindings(env as unknown as Record<string, unknown>);
-    const url = new URL(request.url);
+    const runtimeEnvironment = getRuntimeEnvironment();
+
+    // Defense in depth. Unless this deployment is explicitly behind the ChatGPT
+    // Sites identity proxy, inbound `oai-authenticated-*` headers are supplied
+    // by the caller and must never reach the auth boundary. Stripping happens
+    // before anything else reads the request, rate limiting included.
+    const inbound = trustsUpstreamIdentityHeaders(runtimeEnvironment)
+      ? request
+      : stripUpstreamIdentityHeaders(request);
+    const url = new URL(inbound.url);
 
     if (url.pathname === "/_vinext/image") {
       const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
-      return withSecurityHeaders(await handleImageOptimization(request, {
-        fetchAsset: (path) => env.ASSETS.fetch(new Request(new URL(path, request.url))),
+      return withSecurityHeaders(await handleImageOptimization(inbound, {
+        fetchAsset: (path) => env.ASSETS.fetch(new Request(new URL(path, inbound.url))),
         transformImage: async (body, { width, format, quality }) => {
           const result = await env.IMAGES.input(body).transform(width > 0 ? { width } : {}).output({ format, quality });
           return result.response();
@@ -42,7 +60,10 @@ const worker = {
       }, allowedWidths));
     }
 
-    return withSecurityHeaders(await handler.fetch(request, env, ctx));
+    const limited = await enforceRateLimit(inbound, runtimeEnvironment);
+    if (limited) return withSecurityHeaders(limited);
+
+    return withSecurityHeaders(await handler.fetch(inbound, env, ctx));
   },
 };
 

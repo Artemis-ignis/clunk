@@ -66,11 +66,25 @@ derived·runtime 바이트, SHA-256, Clunk inspection, provenance, runtime 연�
 | Stripe 결제 | `CLUNK_BILLING_PROVIDER=stripe`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` |
 | TRELLIS.2 | `TRELLIS_ENDPOINT`, `TRELLIS_MODEL_ID`, 필요 시 `TRELLIS_API_KEY` |
 | Blender | `BLENDER_BIN` |
+| Sites 헤더 신뢰 | `CLUNK_TRUST_SIWC_HEADERS=1` — **ChatGPT Sites 배포에서만**. 그 외 배포는 설정하지 않음 |
+| 레이트리밋 | `CLUNK_RATE_LIMIT_DISABLED=1` — 로컬·테스트 전용. 운영에서는 설정하지 않음(기본 켜짐) |
 
 Google과 GitHub callback URI는 각각 Clunk의 실제 HTTPS origin에 정확히 등록해야
 합니다. Clunk는 state·nonce·S256 PKCE·HttpOnly transaction cookie·서명된 local
-session을 검증하며, Sites의 `oai-authenticated-user-*` 헤더가 있으면 그 identity를
-먼저 사용합니다.
+session을 검증합니다.
+
+`oai-authenticated-user-*` 헤더는 `CLUNK_TRUST_SIWC_HEADERS=1`일 때만 identity로
+읽힙니다. 플래그가 없으면 `worker/index.ts`가 인바운드 요청에서 이 헤더를 제거하고
+OAuth 서명 세션만 사용합니다. 우선순위는 **서명 세션 → (플래그가 켜진 경우) 헤더**이므로
+위조 헤더가 실제 세션을 덮어쓸 수 없습니다. 배포 전 체크리스트:
+
+- Sites 배포: `CLUNK_TRUST_SIWC_HEADERS=1` 설정 여부 확인 → SIWC 로그인 회귀 확인.
+- Sites 외 배포(Cloudflare 커스텀 도메인, Netlify): 이 값이 **설정되지 않았는지** 확인.
+  실수로 켜면 헤더 주입으로 계정 탈취가 가능해집니다.
+- `CLUNK_RATE_LIMIT_DISABLED`가 운영 secret store에 남아 있지 않은지 확인.
+
+미확인: ChatGPT Sites 호스트가 인바운드 `oai-*` 헤더를 스트립하는지는 1차 자료로 확인하지
+못했습니다. 플래그를 켜는 것은 그 가정에 대한 명시적 동의입니다.
 
 ## 4. 인증·origin·보안 헤더
 

@@ -21,10 +21,58 @@ Authentication currently uses the Sites server headers
 `oai-authenticated-user-id`, `oai-authenticated-user-email`, and the optional encoded
 full-name headers. Clunk resolves those headers through `app/auth.ts`; the legacy
 `app/chatgpt-auth.ts` exports remain as a compatibility adapter for existing routes.
-When Sites does not provide those headers, a verified Google/GitHub callback may create a
-short-lived signed local session. The callback requires state, nonce, S256 PKCE, a matching
-HttpOnly transaction cookie, and a provider subject; missing secrets remain
-`CONFIG_REQUIRED`.
+A verified Google/GitHub callback may create a short-lived signed local session. The
+callback requires state, nonce, S256 PKCE, a matching HttpOnly transaction cookie, and a
+provider subject; missing secrets remain `CONFIG_REQUIRED`.
+
+### Identity header trust (`CLUNK_TRUST_SIWC_HEADERS`)
+
+The `oai-authenticated-*` headers are only identity evidence when a trusted proxy is
+guaranteed to overwrite them on every inbound request. On any host that forwards
+client-supplied headers, `curl -H "oai-authenticated-user-id: <victim>"` would otherwise
+be enough to assume an arbitrary account. Clunk therefore reads them only when the
+runtime sets `CLUNK_TRUST_SIWC_HEADERS` to exactly `"1"`:
+
+| Deployment | `CLUNK_TRUST_SIWC_HEADERS` | Effect |
+| --- | --- | --- |
+| ChatGPT Sites (behind the identity proxy) | `1` | headers are read as identity; SIWC sign-in works |
+| Cloudflare custom domain, Netlify, local dev | unset | headers ignored **and stripped** from inbound requests by `worker/index.ts`; OAuth sessions only |
+
+Priority is session-first: `getCurrentUser()` resolves the HMAC-signed
+`clunk_auth_session` cookie before it ever looks at a header, so a forged header cannot
+displace a real session even where the flag is on.
+
+Layer coverage: the flag gate lives in `app/auth.ts` and therefore applies on **every**
+runtime (Sites, Workers, Netlify, local). The inbound header strip lives in
+`worker/index.ts`, which is only the entry point for the Cloudflare build — a Netlify
+build (`NITRO_PRESET=netlify`) uses the nitro plugin instead, so it gets the flag gate
+but not the strip. The strip is defense in depth; the gate is the control.
+
+Unverified: whether the ChatGPT Sites host itself strips or overwrites *inbound*
+`oai-authenticated-*` headers has not been confirmed from primary documentation.
+Setting the flag is an explicit acceptance of that assumption for that host only.
+See [`docs/auth-migration.ko.md`](auth-migration.ko.md).
+
+### Request rate limits (`CLUNK_RATE_LIMIT_DISABLED`)
+
+`worker/index.ts` applies a fixed-window limiter from `app/api/_lib/rate-limit.ts`
+before any route handler runs: `POST /api/generation` 20/min,
+`POST /api/assetops/inspect` 10/min, `POST /api/credits` 10/min,
+`POST /api/marketplace/checkout` 10/min, and all `/api/auth/*` 30/min. The key is the
+authenticated user id when one can be established without trusting the caller, and the
+`cf-connecting-ip` client address otherwise. Exceeding a window returns `429` with
+`retry-after`.
+
+Counters live in a single Worker isolate's memory, so the effective global ceiling is
+`limit x active isolates` rather than a global quota, and isolate recycling resets
+counters. Treat it as a v1 abuse-cost measure, not a billing control; a global limit
+needs Durable Objects or Cloudflare Rate Limiting rules. Set
+`CLUNK_RATE_LIMIT_DISABLED=1` only for local development and tests — the default is on.
+
+Like the strip layer, the limiter runs in `worker/index.ts` and therefore covers the
+Cloudflare build only. A Netlify deployment currently has no request limiter; add
+Netlify-side rate limiting or move the limiter into shared middleware before treating
+that path as production-ready.
 
 ## Clunk Series storage boundary
 
