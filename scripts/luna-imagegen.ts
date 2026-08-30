@@ -153,7 +153,13 @@ async function main() {
       assertPngBytes(bytes);
       return [{ fileName: `${label}.png`, role: "entry", contentType: "image/png", bytes }];
     } finally {
-      await rm(workDir, { recursive: true, force: true });
+      // On Windows codex can still hold a handle on the temp dir; a cleanup
+      // EBUSY must never discard an already-successful generation.
+      try {
+        await rm(workDir, { recursive: true, force: true });
+      } catch {
+        // leave the temp dir for the OS to reap
+      }
     }
   };
 
