@@ -7,6 +7,7 @@ import { existsSync } from "node:fs";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import sharp from "sharp";
 import {
   executeProviderRun,
   getProviderEnvironment,
@@ -82,6 +83,27 @@ function assertPngBytes(bytes: Uint8Array): { width: number; height: number } {
   }
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   return { width: view.getUint32(16, false), height: view.getUint32(20, false) };
+}
+
+// Consumers that replace an existing map re-derive their gain from this value
+// instead of re-measuring (integration rule R-002, Harvest Frontier 2026-08-31):
+// mean of Rec.709 luma over sRGB-linearised pixels, alpha-ignored, 0..1.
+async function meanLinearLuminance709(bytes: Uint8Array): Promise<number> {
+  const sharpFactory = sharp as unknown as (input: Buffer) => {
+    raw: () => { toBuffer: (options: { resolveWithObject: true }) => Promise<{ data: Buffer; info: { width: number; height: number; channels: number } }> };
+  };
+  const { data, info } = await sharpFactory(Buffer.from(bytes)).raw().toBuffer({ resolveWithObject: true });
+  const linear = (value: number) => {
+    const c = value / 255;
+    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  };
+  let sum = 0;
+  const pixels = info.width * info.height;
+  for (let index = 0; index < pixels; index += 1) {
+    const offset = index * info.channels;
+    sum += 0.2126 * linear(data[offset]) + 0.7152 * linear(data[offset + 1]) + 0.0722 * linear(data[offset + 2]);
+  }
+  return Number((sum / pixels).toFixed(6));
 }
 
 async function gitHeadCommit(): Promise<string> {
@@ -182,7 +204,14 @@ async function main() {
       limitations: runResult.evidence.limitations,
       productionReady: false,
     },
-    image: { fileName: entry.fileName, width: dimensions.width, height: dimensions.height, byteLength: entry.byteLength, sha256: entry.sha256 },
+    image: {
+      fileName: entry.fileName,
+      width: dimensions.width,
+      height: dimensions.height,
+      byteLength: entry.byteLength,
+      sha256: entry.sha256,
+      meanLinearLuminance709: await meanLinearLuminance709(entry.bytes),
+    },
   };
   await writeFile(join(outDir, `${label}.luna-record.json`), `${JSON.stringify(record, null, 2)}\n`);
   process.stdout.write(`${JSON.stringify({ status: "COMPLETED", outDir, image: record.image, freshReinspection: record.evidence.freshReinspection, productionReady: false }, null, 2)}\n`);
