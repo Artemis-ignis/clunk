@@ -22,13 +22,16 @@ async function render(pathname, requestHeaders = {}) {
   );
 }
 
-test("login preserves the dashboard return path and explains ChatGPT signup", async () => {
+test("login preserves the dashboard return path and lists truthful providers", async () => {
   const response = await render("/login?return_to=%2Fdashboard");
   assert.equal(response.status, 200);
   const html = await response.text();
-  assert.match(html, /ChatGPT로 계속하기/);
+  // cv5 login: OAuth inventory (live or 준비 중) instead of the Sites-host
+  // button this deployment cannot honor; the return path stays visible.
+  assert.match(html, /Google로 계속하기/);
+  assert.match(html, /GitHub로 계속하기/);
   assert.match(html, /가입 흐름 보기/);
-  assert.match(html, /\/signin-with-chatgpt\?return_to=%2Fdashboard/);
+  assert.match(html, /\/dashboard/);
 });
 
 test("signup is a first-class route and links back to login", async () => {

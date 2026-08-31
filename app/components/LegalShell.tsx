@@ -1,9 +1,12 @@
 import Link from "./NativeLink";
 import { SiteNav } from "./SiteNav";
 import { ForceDarkTheme } from "./ForceDarkTheme";
+import "./legal-v5.css";
 
 /**
- * Shared chrome for the three statutory documents (terms, privacy, refunds).
+ * Shared chrome for the three statutory documents (terms, privacy, refunds),
+ * rendered in the unified cv5 system (tokens in app/site-v5.css, legal-specific
+ * classes in ./legal-v5.css).
  *
  * Truthfulness rule for this surface: the values below come straight from the
  * operator's 사업자등록증명 (아르테미스, 등록 2026-08-21 · 개업 2026-08-24,
@@ -37,7 +40,7 @@ export const LEGAL_OPERATOR_ROWS: LegalRow[] = [
 
 export function LegalRows({ rows }: { rows: LegalRow[] }) {
   return (
-    <dl className="cv4-legal-table">
+    <dl className="cv5-legal-table">
       {rows.map((row) => (
         <div key={row.label}>
           <dt>{row.label}</dt>
@@ -64,54 +67,71 @@ export function LegalShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="cv4">
+    <div className="cv5">
       <ForceDarkTheme />
+      <div className="cv5-stars" aria-hidden="true" />
       <a className="clunk-home-skip-link" href="#legal-content">본문으로 건너뛰기</a>
       <SiteNav />
 
-      <main className="cv4-legal" id="legal-content">
-        <div className="cv4-frame">
-          <header className="cv4-legal-head">
-            <span className="cv4-eyebrow">{eyebrow}</span>
+      <main className="cv5-legal" id="legal-content">
+        <div className="cv5-frame">
+          <header className="cv5-legal-head">
+            <span className="cv5-eyebrow">{eyebrow}</span>
             <h1>{title}</h1>
-            <p className="cv4-legal-lede">{lede}</p>
-            <p className="cv4-legal-status" role="note">
+            <p className="cv5-legal-lede">{lede}</p>
+            <p className="cv5-legal-status" role="note">
               <strong>초안 · 시행 전</strong>
               <span>{LEGAL_DRAFT_NOTICE}</span>
             </p>
             {/* 한 개의 문자열로 렌더해야 날짜 앞에 RSC 텍스트 분리 주석이 끼지 않는다. */}
-            <ul className="cv4-legal-dates">
+            <ul className="cv5-legal-dates">
               <li>{`초안 작성일 ${effectiveDate}`}</li>
               <li>{`최종 수정일 ${updatedDate}`}</li>
               <li>시행일 미정 — 사업자 정보 확정 후 고지</li>
             </ul>
           </header>
 
-          <div className="cv4-legal-body">{children}</div>
+          <div className="cv5-legal-body">{children}</div>
 
-          <nav className="cv4-legal-crosslinks" aria-label="관련 문서">
-            <Link className="cv4-link" href="/terms" prefetch={false}>이용약관</Link>
-            <Link className="cv4-link" href="/privacy" prefetch={false}>개인정보처리방침</Link>
-            <Link className="cv4-link" href="/refunds" prefetch={false}>취소·환불정책</Link>
-            <Link className="cv4-link" href="/" prefetch={false}>홈으로</Link>
+          <nav className="cv5-legal-crosslinks" aria-label="관련 문서">
+            <Link href="/terms" prefetch={false}>이용약관</Link>
+            <Link href="/privacy" prefetch={false}>개인정보처리방침</Link>
+            <Link href="/refunds" prefetch={false}>취소·환불정책</Link>
+            <Link href="/" prefetch={false}>홈으로</Link>
           </nav>
         </div>
       </main>
 
-      <footer className="cv4-footer">
-        <div className="cv4-frame cv4-footer-inner">
-          <div className="cv4-footer-brand">
-            <strong>Clunk</strong>
-            <span>게임 에셋 파운드리 — 제작·판매 / 검사·수정 / 게임 제작 에이전트</span>
+      <footer className="cv5-footer">
+        <div className="cv5-frame cv5-footer-inner">
+          <div className="cv5-footer-brand">
+            <strong>CLUNK</strong>
+            <p>게임 에셋 파운드리 — 만들고, 증명하고, 판매합니다. 모든 결과는 실제 바이트와 검사 근거로 남습니다.</p>
           </div>
-          <nav aria-label="Clunk 제품 링크">
-            <Link href="/marketplace" prefetch={false}>마켓</Link>
-            <Link href="/pricing" prefetch={false}>크레딧 · 요금</Link>
+          <nav className="cv5-footer-col" aria-label="제품">
+            <header>PRODUCT</header>
+            <Link href="/marketplace" prefetch={false}>에셋 판매</Link>
+            <Link href="/studio" prefetch={false}>에셋 제작</Link>
+            <Link href="/app" prefetch={false}>에셋 검사</Link>
+            <Link href="/connect" prefetch={false}>제작 에이전트</Link>
+            <Link href="/pricing" prefetch={false}>요금 · 크레딧</Link>
+          </nav>
+          <nav className="cv5-footer-col" aria-label="리소스">
+            <header>RESOURCES</header>
             <Link href="/docs" prefetch={false}>Docs</Link>
+            <Link href="/connect" prefetch={false}>MCP 연결</Link>
+            <Link href="/dashboard" prefetch={false}>내 작업공간</Link>
+          </nav>
+          <nav className="cv5-footer-col" aria-label="법적 고지">
+            <header>LEGAL</header>
             <Link href="/terms" prefetch={false}>이용약관</Link>
             <Link href="/privacy" prefetch={false}>개인정보처리방침</Link>
             <Link href="/refunds" prefetch={false}>취소·환불정책</Link>
           </nav>
+        </div>
+        <div className="cv5-frame cv5-footer-legal">
+          <span>아르테미스(Artemis) · 대표 박준성 · 사업자등록번호 361-02-03814 · 인천광역시 제물포구 화도진로 16, 109동 1604호</span>
+          <span>통신판매업 신고 완료 전 — 유료 결제 미개시</span>
         </div>
       </footer>
     </div>

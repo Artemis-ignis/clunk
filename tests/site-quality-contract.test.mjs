@@ -22,7 +22,7 @@ test("the shareable connect surface exists and points to the real agent flow", a
 test("metadata never falls back to a localhost origin and public pages declare canonical paths", async () => {
   const layout = await source("app/layout.tsx");
   const metadata = await source("app/components/site-metadata.ts");
-  assert.match(metadata, /https:\/\/clunk\.ddakdama-app\.workers\.dev/);
+  assert.match(metadata, /https:\/\/clunk\.artemis-clunk\.workers\.dev/);
   assert.doesNotMatch(layout, /metadataBase:\s*new URL\(process\.env\.CLUNK_SITE_ORIGIN \?\? ["']http:\/\/localhost:3000/);
 
   for (const page of ["app/page.tsx", "app/agents/page.tsx", "app/docs/page.tsx", "app/pricing/page.tsx"]) {
@@ -110,7 +110,7 @@ test("showroom and machine docs expose valid semantic progress and links", async
   assert.match(showcase, /role="progressbar"/);
   assert.match(showcase, /aria-valuenow=\{stageProgress\}/);
   assert.match(showcase, /<h2>\{currentStage\.title\}<\/h2>/);
-  assert.match(llms, /\[[^\]]+\]\(https:\/\/clunk\.ddakdama-app\.workers\.dev/);
+  assert.match(llms, /\[[^\]]+\]\(https:\/\/clunk\.artemis-clunk\.workers\.dev/);
 });
 
 test("signed-out agent surfaces do not probe the private key API on mount", async () => {

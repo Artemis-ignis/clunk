@@ -97,7 +97,7 @@ export default function PrivacyPage() {
           <li>전자상거래법상 보존 의무가 적용되는 기록(계약·청약철회 5년, 대금 결제 5년, 소비자 불만·분쟁 처리 3년)은 해당 기간 동안 보관합니다.</li>
           <li>파기 시에는 데이터베이스 레코드를 삭제하고 저장소의 결과 파일을 삭제합니다.</li>
         </ul>
-        <p className="cv4-legal-note">
+        <p className="cv5-legal-note">
           현재 코드에는 <b>기간 경과 자동 파기 스케줄러가 구현되어 있지 않습니다</b>. 삭제 요청은 아래
           문의 창구를 통해 수동으로 처리하며, 자동 파기 주기는 이 방침 시행 전까지 확정해 여기에 기재합니다.
         </p>
@@ -111,7 +111,7 @@ export default function PrivacyPage() {
           <li>위 수탁자는 국외에 서버를 둘 수 있으며, 실제 운영 배포처와 이전 국가·항목·시점은 사업자 정보 확정 시점에 이 방침에 정확히 기재합니다.</li>
           <li>운영자는 위 목적 외에 개인정보를 제3자에게 제공하지 않습니다.</li>
         </ul>
-        <p className="cv4-legal-note">
+        <p className="cv5-legal-note">
           수탁자 명칭과 국외 이전 내역은 운영 배포처가 확정된 뒤 <b>확정된 사실만</b> 기재합니다.
         </p>
       </section>
@@ -158,7 +158,7 @@ export default function PrivacyPage() {
           이 방침을 변경할 때에는 변경 내용과 적용일자를 <a href="/privacy">/privacy</a>에 게시하고,
           이용자에게 불리한 변경은 최소 30일 전에 공지합니다.
         </p>
-        <p className="cv4-legal-note">
+        <p className="cv5-legal-note">
           이 방침 초안은 {LEGAL_DRAFT_DATE} 작성되었으며, 개인정보보호책임자 지정과 통신판매업
           신고가 완료되어 시행일을 고지하는 시점부터 효력이 발생합니다. 침해 신고·상담은 개인정보침해신고센터(118),
           개인정보 분쟁조정위원회, 대검찰청·경찰청 사이버수사 창구를 이용할 수 있습니다.

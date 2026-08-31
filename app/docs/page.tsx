@@ -3,6 +3,8 @@ import Link from "../components/NativeLink";
 import { CodeBlock } from "../components/CodeBlock";
 import { Icon } from "../components/Icon";
 import { SiteShell } from "../components/SiteShell";
+import { ForceDarkTheme } from "../components/ForceDarkTheme";
+import "./docs-v5.css";
 import { DocsSearch } from "./DocsSearch";
 import { AssetFamilyVisual } from "../components/AssetFamilyVisual";
 import { SampleRunWorkbench } from "../components/SampleRunWorkbench";
@@ -197,7 +199,10 @@ humanDecision: PENDING`;
 export default function DocsPage() {
   return (
     <SiteShell active="docs">
-      <main className="docs-page-redesign">
+      {/* cv5 chrome: docs is dark-committed and sits on the cv5 navy ground
+          (docs-v5.css). Content structure below is untouched. */}
+      <ForceDarkTheme />
+      <main className="docs-page-redesign docs-cv5">
         <header className="docs-hero-v2 public-hero-frame public-hero-docs">
           <div>
             <span className="eyebrow">CLUNK DOCUMENTATION</span>

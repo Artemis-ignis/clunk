@@ -60,7 +60,7 @@ function ShowcaseImg({ slug, name, eager }: { slug: string; name: string; eager?
 
 export default function Home() {
   return (
-    <div className="cv5">
+    <div className="cv5 cv5-snap">
       <ForceDarkTheme />
       <RevealObserver />
       <div className="cv5-stars" aria-hidden="true" />
@@ -69,7 +69,7 @@ export default function Home() {
 
       <main id="main-content">
         {/* HERO ------------------------------------------------------- */}
-        <section className="cv5-hero" aria-labelledby="home-heading">
+        <section className="cv5-hero public-hero-frame" data-snap-section="hero" aria-labelledby="home-heading">
           <div className="cv5-frame cv5-hero-grid">
             <div>
               <span className="cv5-badge">✦ 게임 제작을 위한 <b>단 하나의 AI 슈퍼앱</b></span>
@@ -122,7 +122,7 @@ export default function Home() {
         </section>
 
         {/* 01 — MAKE & SELL ------------------------------------------- */}
-        <section className="cv5-sec" id="make" aria-labelledby="sec-make">
+        <section className="cv5-sec" id="make" data-snap-section="make" aria-labelledby="sec-make">
           <div className="cv5-frame cv5-sec-grid">
             <div className="cv5-sec-copy cv5-reveal">
               <div className="cv5-sec-kicker"><span className="cv5-num">01</span><small>CLUNK · MAKE &amp; SELL</small></div>
@@ -168,7 +168,7 @@ export default function Home() {
         </section>
 
         {/* 02 — INSPECT & REPAIR --------------------------------------- */}
-        <section className="cv5-sec" id="inspect" data-tone="green" aria-labelledby="sec-inspect">
+        <section className="cv5-sec" id="inspect" data-tone="green" data-snap-section="inspect" aria-labelledby="sec-inspect">
           <div className="cv5-frame cv5-sec-grid" data-flip="true">
             <div className="cv5-sec-copy cv5-reveal">
               <div className="cv5-sec-kicker"><span className="cv5-num">02</span><small>CLUNK · INSPECT &amp; REPAIR</small></div>
@@ -221,7 +221,7 @@ export default function Home() {
         </section>
 
         {/* 03 — GAME AGENT --------------------------------------------- */}
-        <section className="cv5-sec" id="agent" aria-labelledby="sec-agent">
+        <section className="cv5-sec" id="agent" data-snap-section="agent" aria-labelledby="sec-agent">
           <div className="cv5-frame cv5-sec-grid">
             <div className="cv5-sec-copy cv5-reveal">
               <div className="cv5-sec-kicker"><span className="cv5-num">03</span><small>CLUNK · GAME AGENT</small></div>
@@ -281,7 +281,7 @@ export default function Home() {
         </section>
 
         {/* STATS — measured only ---------------------------------------- */}
-        <section className="cv5-stats" aria-label="Clunk 실측 지표">
+        <section className="cv5-stats" data-snap-section="proof" aria-label="Clunk 실측 지표">
           <div className="cv5-frame">
             <p className="cv5-stats-note cv5-stats-note-top">NO INVENTED METRICS — 아래 수치는 전부 코드와 감사 로그에서 직접 읽은 실측값입니다</p>
             <div className="cv5-stats-grid">
@@ -294,7 +294,7 @@ export default function Home() {
         </section>
 
         {/* SHOWCASE ------------------------------------------------------ */}
-        <section className="cv5-showcase" id="showcase" aria-labelledby="showcase-heading">
+        <section className="cv5-showcase" id="showcase" data-snap-section="showcase" aria-labelledby="showcase-heading">
           <div className="cv5-frame">
             <div className="cv5-showcase-head cv5-reveal">
               <div>
@@ -326,7 +326,7 @@ export default function Home() {
         </section>
 
         {/* CLOSER -------------------------------------------------------- */}
-        <section className="cv5-closer" id="start" aria-labelledby="start-heading">
+        <section className="cv5-closer" id="start" data-snap-section="start" aria-labelledby="start-heading">
           <div className="cv5-frame">
             <span className="cv5-eyebrow" style={{ justifyContent: "center" }}>START WITH CLUNK</span>
             <h2 id="start-heading">증거 있는 에셋으로,<br /><em>게임을 만드세요</em></h2>

@@ -6,18 +6,19 @@ import {
 } from "../chatgpt-auth";
 import { getOAuthEnvironment, getOAuthProviderStatuses, safeOAuthReturnPath } from "../oauth";
 import { getRuntimeEnvironment } from "../runtime-environment";
+import { trustsUpstreamIdentityHeaders } from "../api/_lib/identity-headers";
 import { QaKeyLogin } from "../components/QaKeyLogin";
-import { BrandLockup } from "../components/BrandMark";
+import { SiteNav } from "../components/SiteNav";
+import { ForceDarkTheme } from "../components/ForceDarkTheme";
 import Link from "../components/NativeLink";
-import { ThemeToggle } from "../components/ThemeToggle";
 import { createPageMetadata } from "../components/site-metadata";
-import styles from "./auth-entry.module.css";
+import "./auth-v5.css";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = createPageMetadata({
   title: "로그인",
-  description: "ChatGPT 계정으로 Clunk Workspace에 로그인하고 요청한 작업면으로 돌아갑니다.",
+  description: "Google·GitHub OAuth 또는 운영자 QA 키로 Clunk Workspace에 로그인하고 요청한 작업면으로 돌아갑니다.",
   path: "/login",
 });
 
@@ -41,13 +42,27 @@ function providerLabel(provider: "google" | "github" | "qa"): string {
   return provider === "google" ? "Google" : "GitHub";
 }
 
+function sessionProviderLabel(provider: string): string {
+  if (provider === "chatgpt-sites") return "ChatGPT SIWC";
+  if (provider === "google") return "Google OAuth";
+  if (provider === "github") return "GitHub OAuth";
+  if (provider === "qa") return "QA 키 (운영자 전용)";
+  return provider;
+}
+
 /** QA sign-in shows only where the deployment carries the QA key. */
 function isQaLoginEnabled(): boolean {
   const key = getRuntimeEnvironment().CLUNK_QA_LOGIN_KEY;
   return typeof key === "string" && key.length >= 24;
 }
 
-function getReadyOAuthProviders() {
+/**
+ * Truthful provider inventory: every OAuth provider is listed, but only the
+ * ones with a complete registration (client id/secret/redirect + both signing
+ * secrets) render as live links. The rest render as visible "준비 중" rows —
+ * nothing is invented, nothing configured is hidden.
+ */
+function getOAuthProviderRows() {
   const environment = getOAuthEnvironment(getRuntimeEnvironment());
   const secretsReady = Boolean(
     environment.CLUNK_OAUTH_STATE_SECRET &&
@@ -55,9 +70,15 @@ function getReadyOAuthProviders() {
       environment.CLUNK_AUTH_SESSION_SECRET &&
       environment.CLUNK_AUTH_SESSION_SECRET.length >= 16,
   );
-  return getOAuthProviderStatuses(environment).filter(
-    (status) => status.configured && secretsReady,
-  );
+  return getOAuthProviderStatuses(environment).map((status) => ({
+    ...status,
+    ready: status.configured && secretsReady,
+  }));
+}
+
+/** ChatGPT SIWC only exists on deployments behind the Sites identity proxy. */
+function isHostSiwcAvailable(): boolean {
+  return trustsUpstreamIdentityHeaders(getOAuthEnvironment(getRuntimeEnvironment()));
 }
 
 function AuthJourney({
@@ -70,124 +91,135 @@ function AuthJourney({
   authError?: string;
 }) {
   const errorMessage = getAuthErrorMessage(authError);
-  const providers = getReadyOAuthProviders();
+  const providers = getOAuthProviderRows();
+  const readyCount = providers.filter((status) => status.ready).length;
+  const hostSiwc = isHostSiwcAvailable();
+  const qaEnabled = isQaLoginEnabled();
   const signedIn = Boolean(user);
 
   return (
-    <main className={styles.page + " snap-section"} data-snap-section="login-entry">
-      <header className={styles.topbar}>
-        <Link className={styles.brand} href="/">
-          <span className={styles.brandMark}>
-            <BrandLockup size={23} gradientId="clunk-login" />
-          </span>
-          <span>Clunk</span>
-        </Link>
-        <div className={styles.topbarMeta}>
-          <span>Clunk Workspace</span>
-          <ThemeToggle />
-        </div>
-      </header>
+    <div className="cv5 cv5-auth-shell">
+      <ForceDarkTheme />
+      <div className="cv5-stars" aria-hidden="true" />
+      <a className="clunk-home-skip-link" href="#main-content">본문으로 건너뛰기</a>
+      <SiteNav />
 
-      <div className={styles.content}>
-        <div className={styles.intro}>
-          <span className={styles.eyebrow}>IDENTITY GATE</span>
-          <h1>
-            Clunk의 작업면으로
-            <br />
-            <em>돌아옵니다.</em>
-          </h1>
-          <p className={styles.introCopy}>
-            Clunk는 별도 비밀번호를 보관하지 않습니다. 호스트가 확인한 ChatGPT
-            identity로 Workspace를 열고, 요청한 경로로 돌아갑니다.
-          </p>
-          <div className={styles.factList}>
-            <div className={styles.fact}>
-              <span>IDENTITY</span>
-              <strong>ChatGPT SIWC</strong>
-            </div>
-            <div className={styles.fact}>
-              <span>RETURN</span>
-              <strong>{returnTo}</strong>
-            </div>
-            <div className={styles.fact}>
-              <span>DATA</span>
-              <strong>개인 Workspace</strong>
+      <main id="main-content" className="cv5-auth">
+        <div className="cv5-frame cv5-auth-grid">
+          <div className="cv5-auth-intro">
+            <span className="cv5-badge">✦ CLUNK <b>WORKSPACE</b></span>
+            <h1>
+              작업하던 화면으로
+              <br />
+              <em>돌아옵니다.</em>
+            </h1>
+            <p className="cv5-auth-lede">
+              Clunk는 자체 비밀번호를 만들거나 보관하지 않습니다. Google·GitHub OAuth로
+              로그인하고, 판매 개시 전에는 운영자 전용 QA 키 로그인을 함께 사용합니다.
+              인증이 끝나면 요청한 경로로 돌아갑니다.
+            </p>
+            <div className="cv5-auth-facts">
+              <div className="cv5-auth-fact">
+                <span>IDENTITY</span>
+                <strong>Google · GitHub OAuth</strong>
+              </div>
+              <div className="cv5-auth-fact">
+                <span>RETURN</span>
+                <strong>{returnTo}</strong>
+              </div>
+              <div className="cv5-auth-fact">
+                <span>DATA</span>
+                <strong>개인 Workspace</strong>
+              </div>
             </div>
           </div>
-        </div>
 
-        <section className={styles.card} aria-labelledby="login-title">
-          <span className={styles.status}>{signedIn ? "AUTHENTICATED" : "CHATGPT SIWC"}</span>
-          <h2 id="login-title">Clunk Workspace에<br />로그인합니다.</h2>
-          <p className={styles.cardCopy}>
-            {signedIn
-              ? "현재 브라우저의 인증 상태를 확인했습니다. 계속하면 요청한 작업면으로 이동합니다."
-              : "호스트의 ChatGPT 인증을 사용합니다. 인증이 끝나면 요청한 작업면으로 복귀합니다."}
-          </p>
+          <section className="cv5-auth-card" aria-labelledby="login-title">
+            <span className="cv5-auth-status" data-state={signedIn ? "on" : "off"}>
+              {signedIn ? "AUTHENTICATED" : "SIGN IN"}
+            </span>
+            <h2 id="login-title">Clunk Workspace에<br />로그인합니다.</h2>
+            <p className="cv5-auth-copy">
+              {signedIn
+                ? "현재 브라우저의 인증 상태를 확인했습니다. 계속하면 요청한 작업면으로 이동합니다."
+                : "설정이 완료된 인증 수단만 버튼으로 열립니다. OAuth 앱 등록이 끝나지 않은 provider는 준비 중으로 표시합니다."}
+            </p>
 
-          {errorMessage ? <p className={styles.alert} role="alert">{errorMessage}</p> : null}
+            {errorMessage ? <p className="cv5-auth-alert" role="alert">{errorMessage}</p> : null}
 
-          {user ? (
-            <div className={styles.signedIn}>
-              <div>
-                <strong>{user.displayName}</strong>
-                <span>{user.email}</span>
-                <span>인증 방식: {user.provider === "chatgpt-sites" ? "ChatGPT SIWC" : user.provider}</span>
-              </div>
-              <Link className={styles.primary} href={returnTo}>
-                요청한 Workspace 열기
-                <span aria-hidden="true">↗</span>
-              </Link>
-              <Link className={styles.secondary} href={chatGPTSignOutPath(returnTo)}>
-                이 브라우저에서 로그아웃
-                <span aria-hidden="true">→</span>
-              </Link>
-            </div>
-          ) : (
-            <>
-              <div className={styles.actions}>
-                <Link className={styles.primary} href={chatGPTSignInPath(returnTo)}>
-                  ChatGPT로 계속하기
+            {user ? (
+              <div className="cv5-auth-signedin">
+                <div className="cv5-auth-signedin-user">
+                  <strong>{user.displayName}</strong>
+                  <span>{user.email}</span>
+                  <span>인증 방식: {sessionProviderLabel(user.provider)}</span>
+                </div>
+                <Link className="cv5-auth-primary" href={returnTo}>
+                  요청한 Workspace 열기
                   <span aria-hidden="true">↗</span>
                 </Link>
+                <Link className="cv5-auth-secondary" href={chatGPTSignOutPath(returnTo)}>
+                  이 브라우저에서 로그아웃
+                  <span aria-hidden="true">→</span>
+                </Link>
               </div>
-              {providers.length > 0 ? (
-                <div className={styles.providerList} aria-label="설정된 외부 OAuth provider">
-                  {providers.map((status) => (
-                    <Link
-                      className={styles.provider}
-                      href={"/api/auth/" + status.provider + "?return_to=" + encodeURIComponent(returnTo)}
-                      key={status.provider}
-                    >
-                      {providerLabel(status.provider)}로 계속하기
-                      <span>OAuth / PKCE ↗</span>
+            ) : (
+              <>
+                <div className="cv5-auth-providers" aria-label="로그인 수단">
+                  {providers.map((status) =>
+                    status.ready ? (
+                      <Link
+                        className="cv5-auth-provider"
+                        data-ready="true"
+                        href={"/api/auth/" + status.provider + "?return_to=" + encodeURIComponent(returnTo)}
+                        key={status.provider}
+                      >
+                        {/* 한 개의 문자열로 렌더해야 라벨 사이에 RSC 텍스트 분리 주석이 끼지 않는다. */}
+                        {`${providerLabel(status.provider)}로 계속하기`}
+                        <small>OAUTH · PKCE ↗</small>
+                      </Link>
+                    ) : (
+                      <div className="cv5-auth-provider" data-ready="false" key={status.provider}>
+                        {`${providerLabel(status.provider)}로 계속하기`}
+                        <small>준비 중 · OAUTH 앱 등록 대기</small>
+                      </div>
+                    ),
+                  )}
+                  {hostSiwc ? (
+                    <Link className="cv5-auth-provider" data-ready="true" href={chatGPTSignInPath(returnTo)}>
+                      ChatGPT로 계속하기
+                      <small>SITES HOST ↗</small>
                     </Link>
-                  ))}
+                  ) : null}
                 </div>
-              ) : (
-                <p className={styles.providerNotice}>
-                  현재 운영 환경에서 전체 OAuth 설정이 확인된 외부 provider가 없어 ChatGPT SIWC만 표시합니다.
-                </p>
-              )}
-              {isQaLoginEnabled() ? <QaKeyLogin returnTo={returnTo} /> : null}
-            </>
-          )}
+                {readyCount === 0 && !hostSiwc ? (
+                  <p className="cv5-auth-hint">
+                    OAuth 앱 등록이 완료되면 위 버튼이 자동으로 활성화됩니다.
+                    {qaEnabled ? " 그 전까지는 운영자 전용 QA 키 로그인만 열려 있습니다." : null}
+                  </p>
+                ) : null}
+                {qaEnabled ? <QaKeyLogin returnTo={returnTo} /> : null}
+              </>
+            )}
 
-          {/* SIWC/OAuth 흐름에는 별도 가입 폼이 없으므로 체크박스 대신 고지+링크로 동의를 표시합니다. */}
-          <p className={styles.switch}>
-            계속하면 이용약관과 개인정보처리방침에 동의하는 것으로 간주됩니다.{" "}
-            <Link href="/terms">이용약관</Link> · <Link href="/privacy">개인정보처리방침</Link>
-          </p>
+            {/* OAuth/QA 흐름에는 별도 가입 폼이 없으므로 체크박스 대신 고지+링크로 동의를 표시합니다. */}
+            <p className="cv5-auth-switch">
+              계속하면 이용약관과 개인정보처리방침에 동의하는 것으로 간주됩니다.{" "}
+              <Link href="/terms">이용약관</Link> · <Link href="/privacy">개인정보처리방침</Link>
+            </p>
 
-          <p className={styles.switch}>
-            Clunk Workspace를 처음 사용하시나요?{" "}
-            <Link href="/signup">가입 흐름 보기</Link>
-          </p>
-        </section>
-      </div>
+            <p className="cv5-auth-switch">
+              Clunk Workspace를 처음 사용하시나요?{" "}
+              <Link href="/signup">가입 흐름 보기</Link>
+            </p>
+          </section>
+        </div>
+      </main>
 
-      <footer className={styles.footer}>Clunk · authenticated workspace</footer>
-    </main>
+      <footer className="cv5-auth-foot">
+        <div className="cv5-frame">CLUNK · AUTHENTICATED WORKSPACE</div>
+      </footer>
+    </div>
   );
 }
 

@@ -1,0 +1,407 @@
+/* ============================================================================
+   CLUNK cv5 — auth entry surfaces (/login, /signup)
+   Tokens come from app/site-v5.css (.cv5 scope). This file only adds the
+   auth-specific layout: intro column + dark glass card, provider rows with an
+   honest "준비 중" state for unregistered OAuth apps, and the QA key form.
+   ========================================================================= */
+
+.cv5-auth-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.cv5-auth-shell > main { flex: 1; }
+
+.cv5-auth {
+  position: relative;
+  padding: clamp(124px, 16vh, 172px) 0 clamp(56px, 8vw, 96px);
+}
+
+.cv5-auth-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.04fr) minmax(360px, 0.96fr);
+  gap: clamp(32px, 5vw, 88px);
+  align-items: center;
+}
+
+/* ---------------------------------------------------------------- intro */
+.cv5-auth-intro h1 {
+  margin: 20px 0 0;
+  font-size: clamp(2.2rem, 4.6vw, 3.4rem);
+  font-weight: 860;
+  line-height: 1.14;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+
+.cv5-auth-intro h1 em {
+  font-style: normal;
+  background: var(--v5-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.cv5-auth-lede {
+  margin: 18px 0 0;
+  max-width: 480px;
+  font-size: clamp(0.98rem, 1.3vw, 1.08rem);
+  line-height: 1.74;
+  color: var(--v5-ink-dim);
+}
+
+.cv5-auth-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  max-width: 520px;
+  margin-top: 40px;
+}
+
+.cv5-auth-fact {
+  display: grid;
+  gap: 8px;
+  padding: 14px 0 0;
+  border-top: 1px solid var(--v5-line);
+}
+
+.cv5-auth-fact span {
+  font-family: var(--v5-label);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--v5-ink-faint);
+}
+
+.cv5-auth-fact strong {
+  font-size: 0.9rem;
+  font-weight: 640;
+  line-height: 1.4;
+  color: var(--v5-ink);
+  overflow-wrap: anywhere;
+}
+
+/* ---------------------------------------------------------------- card */
+.cv5-auth-card {
+  position: relative;
+  border: 1px solid var(--v5-line-strong);
+  border-radius: var(--v5-r-lg);
+  background: linear-gradient(178deg, #131628, #0c0e1a 68%);
+  box-shadow:
+    0 40px 90px -38px rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(124, 93, 250, 0.12),
+    0 24px 80px -30px rgba(124, 93, 250, 0.35);
+  padding: clamp(26px, 3.4vw, 40px);
+}
+
+.cv5-auth-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 13px;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  border-radius: 999px;
+  background: var(--v5-grad-soft);
+  font-family: var(--v5-label);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--v5-ink);
+}
+
+.cv5-auth-status::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--v5-grad);
+}
+
+.cv5-auth-status[data-state="on"] {
+  border-color: rgba(52, 211, 153, 0.4);
+  background: rgba(52, 211, 153, 0.1);
+}
+
+.cv5-auth-status[data-state="on"]::before { background: var(--v5-green); }
+
+.cv5-auth-card h2 {
+  margin: 18px 0 0;
+  font-size: clamp(1.5rem, 2.6vw, 1.95rem);
+  font-weight: 830;
+  line-height: 1.22;
+  letter-spacing: -0.032em;
+}
+
+.cv5-auth-copy {
+  margin: 12px 0 0;
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: var(--v5-ink-dim);
+}
+
+.cv5-auth-alert {
+  margin: 18px 0 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  border-radius: 12px;
+  background: rgba(248, 113, 113, 0.08);
+  color: #fca5a5;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+/* provider rows — a real link when the OAuth app is registered, an inert
+   "준비 중" row when it is not. No provider is ever invented. */
+.cv5-auth-providers {
+  display: grid;
+  gap: 9px;
+  margin-top: 22px;
+}
+
+.cv5-auth-provider {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 50px;
+  padding: 0 16px;
+  border: 1px solid var(--v5-line-strong);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--v5-ink);
+  font-size: 0.92rem;
+  font-weight: 650;
+  transition: border-color 0.18s, background 0.18s, transform 0.18s;
+}
+
+a.cv5-auth-provider:hover {
+  border-color: rgba(139, 92, 246, 0.55);
+  background: rgba(99, 102, 241, 0.08);
+  transform: translateY(-1px);
+}
+
+.cv5-auth-provider small {
+  font-family: var(--v5-label);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--v5-ink-faint);
+  white-space: nowrap;
+}
+
+.cv5-auth-provider[data-ready="false"] {
+  border-style: dashed;
+  border-color: var(--v5-line);
+  color: var(--v5-ink-faint);
+  background: transparent;
+}
+
+.cv5-auth-provider[data-ready="false"] small { color: var(--v5-amber); }
+
+.cv5-auth-primary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 52px;
+  padding: 0 18px;
+  margin-top: 22px;
+  border-radius: 13px;
+  background: var(--v5-grad);
+  box-shadow: var(--v5-glow);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  transition: filter 0.18s, transform 0.18s;
+}
+
+.cv5-auth-primary:hover { filter: brightness(1.08); }
+.cv5-auth-primary:active { transform: translateY(1px); }
+
+.cv5-auth-primary + .cv5-auth-providers { margin-top: 10px; }
+
+.cv5-auth-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 1px solid var(--v5-line-strong);
+  border-radius: 13px;
+  color: var(--v5-ink);
+  font-size: 0.9rem;
+  font-weight: 650;
+  transition: border-color 0.18s, background 0.18s;
+}
+
+.cv5-auth-secondary:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.cv5-auth-hint {
+  margin: 14px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--v5-ink-faint);
+}
+
+/* signed-in summary */
+.cv5-auth-signedin {
+  display: grid;
+  gap: 14px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--v5-line);
+}
+
+.cv5-auth-signedin-user strong {
+  display: block;
+  font-size: 1rem;
+  color: var(--v5-ink);
+}
+
+.cv5-auth-signedin-user span {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.82rem;
+  color: var(--v5-ink-dim);
+  overflow-wrap: anywhere;
+}
+
+/* switch / consent notice lines */
+.cv5-auth-switch {
+  margin: 22px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.65;
+  color: var(--v5-ink-faint);
+}
+
+.cv5-auth-switch + .cv5-auth-switch { margin-top: 10px; }
+
+.cv5-auth-switch a {
+  color: #c4b5fd;
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cv5-auth-switch a:hover { color: #ddd0ff; }
+
+/* ------------------------------------------------------------- QA form */
+.cv5-qa-login {
+  display: grid;
+  gap: 9px;
+  margin-top: 22px;
+  padding: 16px;
+  border: 1px solid var(--v5-line);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.cv5-qa-label {
+  display: grid;
+  gap: 7px;
+  font-family: var(--v5-label);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--v5-ink-faint);
+}
+
+.cv5-qa-input {
+  height: 44px;
+  padding: 0 13px;
+  border: 1px solid var(--v5-line-strong);
+  border-radius: 11px;
+  background: rgba(6, 7, 15, 0.6);
+  color: var(--v5-ink);
+  font: inherit;
+  font-size: 0.9rem;
+  letter-spacing: normal;
+}
+
+.cv5-qa-input::placeholder { color: var(--v5-ink-faint); }
+
+.cv5-qa-input:focus-visible {
+  outline: none;
+  border-color: rgba(139, 92, 246, 0.65);
+  box-shadow: 0 0 0 3px rgba(124, 93, 250, 0.22);
+}
+
+.cv5-qa-submit {
+  height: 44px;
+  border: 0;
+  border-radius: 11px;
+  background: var(--v5-grad);
+  box-shadow: var(--v5-glow);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.18s, opacity 0.18s;
+}
+
+.cv5-qa-submit:hover:not(:disabled) { filter: brightness(1.08); }
+
+.cv5-qa-submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.cv5-qa-submit[data-pending="true"] { cursor: wait; }
+
+.cv5-qa-error {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--v5-red);
+}
+
+.cv5-qa-note {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.6;
+  color: var(--v5-ink-faint);
+}
+
+/* ---------------------------------------------------------------- foot */
+.cv5-auth-foot {
+  border-top: 1px solid var(--v5-line);
+  padding: 18px 0 26px;
+  font-family: var(--v5-label);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--v5-ink-faint);
+}
+
+/* --------------------------------------------------------------- focus */
+.cv5-auth a:focus-visible,
+.cv5-qa-submit:focus-visible {
+  outline: 3px solid rgba(139, 92, 246, 0.55);
+  outline-offset: 3px;
+}
+
+/* ---------------------------------------------------------- responsive */
+@media (max-width: 1023px) {
+  .cv5-auth-grid { grid-template-columns: 1fr; }
+  .cv5-auth-card { max-width: 620px; }
+}
+
+@media (max-width: 640px) {
+  .cv5-auth { padding-top: 108px; }
+  .cv5-auth-facts { grid-template-columns: 1fr; gap: 14px; margin-top: 30px; }
+  .cv5-auth-card { padding: 24px 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cv5-auth-provider,
+  .cv5-auth-primary,
+  .cv5-auth-secondary,
+  .cv5-qa-submit { transition: none; }
+}

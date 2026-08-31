@@ -1,0 +1,44 @@
+/* ============================================================================
+   CLUNK cv5 — /docs chrome harmony (2026-08-31 unified-site pass)
+
+   The docs surface keeps its GitBook-style structure and every legacy
+   docs-* class (tests pin docs-layout / docs-sidebar / ONE FILE · THREE
+   STATES). This file only retunes the CHROME so the page reads as the same
+   site as the cv5 landing: the legacy dark token ramp is mapped onto the
+   cv5 deep-navy ground (values mirror app/site-v5.css), and the shell gets
+   the same ambient indigo/violet glow. No structural rules live here.
+   ========================================================================= */
+
+/* Legacy tokens → cv5 navy ramp, only while the docs page is mounted.
+   Every docs card/nav/footer color is token-driven, so this single override
+   moves the whole chrome onto the cv5 ground without touching structure. */
+:root[data-theme="dark"]:has(.docs-cv5) {
+  --ink-0: #06070f;
+  --ink-1: #0a0c16;
+  --ink-2: #10121e;
+  --ink-3: #151830;
+  --ink-4: #1b1f3e;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.15);
+  --tint-1: rgba(255, 255, 255, 0.03);
+  --tint-2: rgba(255, 255, 255, 0.05);
+  --tint-3: rgba(255, 255, 255, 0.08);
+  --glass: rgba(10, 12, 22, 0.72);
+  --glass-strong: rgba(6, 7, 15, 0.92);
+  --ground-rgb: 6, 7, 15;
+  --accent-2: #8b5cf6;
+  --accent-2-bright: #a78bfa;
+  --accent-2-soft: rgba(139, 92, 246, 0.14);
+}
+
+/* Ambient glow behind the whole shell, mirroring the landing's .cv5-stars. */
+.site-shell:has(.docs-cv5) {
+  background:
+    radial-gradient(1200px 700px at 78% -8%, rgba(124, 93, 250, 0.14), transparent 62%),
+    radial-gradient(900px 560px at 12% 8%, rgba(99, 102, 241, 0.09), transparent 60%);
+}
+
+/* Docs is dark-committed like every cv5 page (ForceDarkTheme in page.tsx);
+   the toggle would only offer a broken light state here. Same rule as
+   `.cv5 .theme-toggle` in site-v5.css. */
+.site-shell:has(.docs-cv5) .theme-toggle { display: none; }

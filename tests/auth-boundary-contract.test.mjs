@@ -43,7 +43,11 @@ test("forged Sites identity headers cannot authenticate a deployment that did no
   // The authenticated affordance must be absent: no session was ever proven.
   assert.doesNotMatch(html, /요청한 Workspace 열기/);
   assert.doesNotMatch(html, /forged@example\.test/);
-  assert.match(html, /ChatGPT로 계속하기/);
+  // An untrusted deployment must not advertise the Sites host sign-in it
+  // cannot honor; the truthful provider inventory renders instead.
+  assert.doesNotMatch(html, /ChatGPT로 계속하기/);
+  assert.match(html, /Google로 계속하기/);
+  assert.match(html, /GitHub로 계속하기/);
 
   const dashboard = await render("/dashboard", { headers: FORGED_SITES_HEADERS });
   assert.ok([307, 308].includes(dashboard.status));

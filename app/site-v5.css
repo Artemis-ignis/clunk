@@ -390,3 +390,30 @@ html:has(.cv5) body { background: var(--v5-bg0, #06070f); }
   /* floats crowd the market panel on phones; the panel alone reads cleaner */
   .cv5-float { display: none; }
 }
+
+/* ============================================================================
+   2026-08-31 master live-review fixes
+   ========================================================================= */
+
+/* Tractor render must never be cropped: contain on the studio-grey ground the
+   render itself was shot on (#ececec measured from the hero pipeline). */
+.cv5-inspect-preview { background: #ececec; }
+.cv5-inspect-preview img { object-fit: contain; padding: 6px; }
+
+/* Legacy v4 tab indicator (absolute underline) drifts inside the cv5 layout —
+   the active state here is the gradient pill, nothing else. */
+.cv5 .landing-mcp-tabs button::before,
+.cv5 .landing-mcp-tabs button::after { content: none !important; display: none !important; }
+
+/* Scroll snap: proximity (never trap-scroll), offset for the fixed 68px nav. */
+html:has(.cv5-snap) { scroll-snap-type: y proximity; }
+.cv5 [data-snap-section] { scroll-snap-align: start; scroll-margin-top: 74px; }
+@media (prefers-reduced-motion: reduce) { html:has(.cv5-snap) { scroll-snap-type: none; } }
+
+/* legacy .public-hero-frame rules are inert here; keep the hero self-managed */
+.cv5 .public-hero-frame { align-items: initial; }
+
+/* Long asset names in the market mockup must ellipsize, never clip mid-glyph. */
+.cv5-market-card figcaption { min-width: 0; }
+.cv5-market-card figcaption span:first-child,
+.cv5-market-card figcaption { overflow: hidden; }

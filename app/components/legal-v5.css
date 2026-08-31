@@ -1,0 +1,217 @@
+/* ============================================================================
+   CLUNK cv5 — statutory documents (terms · privacy · refunds)
+   Tokens come from app/site-v5.css (.cv5 scope). This file restyles the shared
+   LegalShell chrome to the unified cv5 system; every legal FACT stays in the
+   TSX and is rendered verbatim. The draft/placeholder amber treatment is kept
+   deliberately loud: an unfilled statutory field is marked, never invented.
+   ========================================================================= */
+
+.cv5-legal {
+  position: relative;
+  padding: clamp(128px, 17vh, 176px) 0 clamp(64px, 9vh, 104px);
+}
+
+.cv5-legal-head {
+  border-bottom: 1px solid var(--v5-line);
+  padding-bottom: 30px;
+}
+
+.cv5-legal-head h1 {
+  margin: 18px 0 0;
+  font-size: clamp(2rem, 4.4vw, 3rem);
+  font-weight: 860;
+  line-height: 1.12;
+  letter-spacing: -0.038em;
+}
+
+.cv5-legal-lede {
+  margin: 18px 0 0;
+  max-width: 62ch;
+  color: var(--v5-ink-dim);
+  font-size: 1rem;
+  line-height: 1.72;
+}
+
+/* Draft badge: this document is honestly not in force until the operator's
+   registered business details replace the placeholders below it. */
+.cv5-legal-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  margin: 24px 0 0;
+  padding: 14px 16px;
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  border-radius: var(--v5-r);
+  background: rgba(251, 191, 36, 0.07);
+}
+
+.cv5-legal-status strong {
+  font-family: var(--v5-label);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--v5-amber);
+}
+
+.cv5-legal-status span {
+  color: var(--v5-ink-dim);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.cv5-legal-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 24px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--v5-label);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+
+.cv5 .cv5-legal-dates li { color: var(--v5-ink-faint); }
+
+/* ---------------------------------------------------------------- body */
+.cv5-legal-body {
+  margin-top: 40px;
+  display: grid;
+  gap: 38px;
+  max-width: 78ch;
+}
+
+.cv5-legal-body section { display: grid; gap: 12px; }
+
+.cv5-legal-body h2 {
+  margin: 0;
+  font-size: 1.16rem;
+  font-weight: 760;
+  letter-spacing: -0.02em;
+  color: var(--v5-ink);
+}
+
+.cv5-legal-body h3 {
+  margin: 10px 0 0;
+  font-size: 0.96rem;
+  font-weight: 680;
+  letter-spacing: -0.012em;
+  color: var(--v5-ink);
+}
+
+.cv5-legal-body p {
+  margin: 0;
+  color: var(--v5-ink-dim);
+  font-size: 0.95rem;
+  line-height: 1.78;
+}
+
+.cv5-legal-body ul,
+.cv5-legal-body ol {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 8px;
+}
+
+.cv5-legal-body li {
+  color: var(--v5-ink-dim);
+  font-size: 0.95rem;
+  line-height: 1.72;
+}
+
+.cv5-legal-body li b,
+.cv5-legal-body p b {
+  color: var(--v5-ink);
+  font-weight: 660;
+}
+
+.cv5-legal-body a {
+  color: #c4b5fd;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cv5-legal-body a:hover { color: #ddd0ff; }
+
+.cv5-legal-body code {
+  font-family: var(--v5-label);
+  font-size: 0.84em;
+  color: var(--v5-cyan);
+}
+
+/* statutory operator table */
+.cv5-legal-table {
+  margin: 0;
+  display: grid;
+  gap: 1px;
+  background: var(--v5-line);
+  border: 1px solid var(--v5-line);
+  border-radius: var(--v5-r);
+  overflow: hidden;
+}
+
+.cv5-legal-table > div {
+  display: grid;
+  grid-template-columns: minmax(140px, 220px) 1fr;
+  gap: 14px;
+  padding: 13px 16px;
+  background: var(--v5-bg1);
+}
+
+.cv5-legal-table dt {
+  margin: 0;
+  font-family: var(--v5-label);
+  font-size: 0.72rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--v5-ink-faint);
+}
+
+.cv5-legal-table dd {
+  margin: 0;
+  color: var(--v5-ink-dim);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+/* An unfilled statutory field is marked, never invented. */
+.cv5-legal-table dd.is-placeholder {
+  color: var(--v5-amber);
+  font-family: var(--v5-label);
+  font-size: 0.82rem;
+}
+
+.cv5-legal-note {
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px dashed var(--v5-line-strong);
+  border-radius: var(--v5-r);
+  font-size: 0.86rem;
+  line-height: 1.7;
+}
+
+.cv5 .cv5-legal-body .cv5-legal-note { color: var(--v5-ink-faint); }
+
+.cv5-legal-crosslinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 26px;
+  margin-top: 44px;
+  padding-top: 26px;
+  border-top: 1px solid var(--v5-line);
+}
+
+.cv5-legal-crosslinks a {
+  color: var(--v5-ink);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.cv5-legal-crosslinks a:hover { color: #cdb7ff; }
+
+@media (max-width: 640px) {
+  .cv5-legal-table > div { grid-template-columns: 1fr; gap: 5px; }
+}
