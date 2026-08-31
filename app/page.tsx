@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "./components/NativeLink";
 import { Icon } from "./components/Icon";
 import { SiteNav } from "./components/SiteNav";
@@ -10,33 +9,25 @@ import { MCP_HTTP_TOOL_COUNT, RULE_COUNT } from "./components/product-facts";
 
 export const metadata = createPageMetadata({
   title: "게임 에셋 파운드리",
-  description: "게임 에셋을 만들고, 실제 바이트로 증명하고, 판매하는 파운드리. 검사·수정과 게임 제작 에이전트까지 하나의 Clunk에서 크레딧으로 사용합니다.",
+  description: "게임 제작의 모든 과정을 CLUNK 하나로 — 에셋 제작·판매, 검사·수정, 게임 제작 에이전트를 크레딧 하나로 사용합니다. 모든 수치는 실제 바이트와 감사 로그의 실측값입니다.",
   path: "/",
 });
 
 /**
- * Public landing v4 — three-pillar information architecture ordered by the
- * product's spine: make & sell, inspect & repair, build with agents. Every
- * number rendered here is either imported from the code that enforces it or
- * labelled with the real measurement it came from. No invented stats.
+ * Public landing v5 — master-reference rebuild (2026-08-31). Structure follows
+ * the approved reference: hero with a product-panel visual, three numbered
+ * product sections each carrying a REAL-data UI mockup, a measured stats band,
+ * and the wave-1 real-inventory grid. Every number rendered here is a real
+ * measurement (renderer-measured tris, the 2026-08-31 tractor reinspection,
+ * counts derived from code) — the reference layout's invented-stat band is
+ * deliberately replaced with measured facts.
  */
 
-const WORKFLOW = [
-  { number: "01", label: "PLAN", title: "프로젝트와 목표", detail: "타깃 프로파일과 필요한 결과를 작업면에 남깁니다." },
-  { number: "02", label: "2D / 3D CREATE", title: "실제 파일 생성", detail: "2D 이미지와 3D GLB·glTF를 실제 바이트로 만듭니다." },
-  { number: "03", label: "SPRITE / RIG INSPECT", title: "구조 검사", detail: "페이지·리전·본·슬롯 관계와 정책 결과를 검사합니다." },
-  { number: "04", label: "MOTION / UI", title: "모션·가독성", detail: "애니메이션 클립과 UI 판독성을 실측 조건으로 확인합니다." },
-  { number: "05", label: "ENGINE / CONNECT", title: "엔진 핸드오프", detail: "Game Ready 근거와 함께 실게임 타깃으로 전달합니다." },
-] as const;
+const FLOW = ["생성", "검사", "수정", "게시", "에이전트"] as const;
 
 const AGENT_CLIENTS = ["Claude Code", "Codex CLI", "Cursor", "VS Code", "Grok Build", "Antigravity", "DeepSeek", "GLM", "로컬 에이전트"] as const;
 
-/**
- * Wave 1 real inventory. Every triangle count below is read from
- * outputs/market-launch/wave1/measurements/*.json (renderer-measured, not
- * hand-written); the images are renders of the actual optimized GLBs that
- * shipped to the Harvest Frontier production line.
- */
+/** Renderer-measured triangle counts — outputs/market-launch/wave1/measurements. */
 const SHOWCASE = [
   { slug: "market-stall", name: "시장 노점", tris: "2,456" },
   { slug: "greenhouse", name: "온실", tris: "5,756" },
@@ -52,64 +43,262 @@ const SHOWCASE = [
   { slug: "crate-closed", name: "뚜껑 상자", tris: "700" },
 ] as const;
 
+const HERO_CELLS = SHOWCASE.slice(0, 6);
+const MARKET_CELLS = SHOWCASE.slice(0, 6);
+
+function ShowcaseImg({ slug, name, eager }: { slug: string; name: string; eager?: boolean }) {
+  return (
+    <img
+      src={`/landing/showcase/${slug}.webp`}
+      alt={`${name} 저폴리 3D 에셋 렌더`}
+      width={560}
+      height={560}
+      loading={eager ? "eager" : "lazy"}
+    />
+  );
+}
+
 export default function Home() {
   return (
-    <div className="cv4">
+    <div className="cv5">
       <ForceDarkTheme />
       <RevealObserver />
+      <div className="cv5-stars" aria-hidden="true" />
       <a className="clunk-home-skip-link" href="#main-content">본문으로 건너뛰기</a>
       <SiteNav active="home" />
 
       <main id="main-content">
         {/* HERO ------------------------------------------------------- */}
-        <section className="cv4-hero public-hero-frame" data-snap-section="hero" aria-labelledby="home-heading">
-          <div className="cv4-frame">
-            <div className="cv4-hero-copy">
-              <span className="cv4-eyebrow">CLUNK / GAME ASSET FOUNDRY</span>
+        <section className="cv5-hero" aria-labelledby="home-heading">
+          <div className="cv5-frame cv5-hero-grid">
+            <div>
+              <span className="cv5-badge">✦ 게임 제작을 위한 <b>단 하나의 AI 슈퍼앱</b></span>
               <h1 id="home-heading">
-                게임 에셋을 만들고,<br />증명하고, <em>판매합니다.</em>
+                게임 제작의 모든 과정을<br /><em>CLUNK 하나로</em>
               </h1>
-              <p className="cv4-hero-lede">
-                생성부터 검사·수정, 마켓 판매, 그리고 에이전트로 이어지는 게임 제작까지 —
-                하나의 Clunk에서 크레딧으로 사용합니다. 모든 결과는 실제 바이트와 근거로 남습니다.
+              <p className="cv5-hero-lede">
+                에셋 생성과 판매, 품질 검사와 수정, 그리고 에이전트 제작 자동화까지 —
+                게임 제작 워크플로우를 하나의 크레딧으로 연결하세요.
+                모든 결과는 실제 바이트와 검사 근거로 남습니다.
               </p>
-              <div className="cv4-hero-actions">
-                <Link className="cv4-btn cv4-btn-primary" href="/studio" prefetch={false}>
-                  지금 시작하기 <Icon name="arrowUpRight" size={16} />
+              <div className="cv5-cta-row">
+                <Link className="cv5-btn cv5-btn-primary" href="/studio" prefetch={false}>
+                  무료로 시작하기 <Icon name="arrowUpRight" size={17} />
                 </Link>
-                <Link className="cv4-btn cv4-btn-ghost" href="/marketplace" prefetch={false}>
+                <Link className="cv5-btn cv5-btn-ghost" href="/marketplace" prefetch={false}>
                   마켓 둘러보기
                 </Link>
               </div>
+              <div className="cv5-flow" aria-label="Clunk 워크플로우">
+                {FLOW.map((step, index) => (
+                  <span key={step}>
+                    <b>{String(index + 1).padStart(2, "0")}</b> {step}
+                  </span>
+                ))}
+              </div>
             </div>
 
-            <div className="cv4-proof cv4-reveal" role="list" aria-label="Clunk 실측 지표">
-              <div className="cv4-proof-item" role="listitem">
-                <span className="cv4-proof-value"><b>{RULE_COUNT}</b>종</span>
-                <span className="cv4-proof-label">정적 검사 정책 룰 — 코드에서 직접 셉니다</span>
+            <div className="cv5-hero-visual" aria-hidden="true">
+              <div className="cv5-hv-panel">
+                <div className="cv5-hv-head"><span>CLUNK <b>MARKET</b></span><span>REAL FILES · GLB</span></div>
+                <div className="cv5-hv-grid">
+                  {HERO_CELLS.map((asset) => (
+                    <figure className="cv5-hv-cell" key={asset.slug} style={{ margin: 0 }}>
+                      <ShowcaseImg slug={asset.slug} name={asset.name} eager />
+                      <span>{asset.tris} TRIS</span>
+                    </figure>
+                  ))}
+                </div>
+                <div className="cv5-hv-foot">
+                  <span>실게임 납품 GLB 재검사</span>
+                  <b>100/100 · PASS</b>
+                </div>
               </div>
-              <div className="cv4-proof-item" role="listitem">
-                <span className="cv4-proof-value"><b>{MCP_HTTP_TOOL_COUNT}</b>개</span>
-                <span className="cv4-proof-label">에이전트용 MCP 도구 — HTTP·로컬 동일 계약</span>
+              <div className="cv5-float cv5-float-a"><img src="/landing/showcase/conifer-spire.webp" alt="" width={240} height={240} loading="eager" /><small>860 TRIS</small></div>
+              <div className="cv5-float cv5-float-b"><img src="/landing/showcase/crate-produce.webp" alt="" width={200} height={200} loading="eager" /><small>782 TRIS</small></div>
+              <div className="cv5-float cv5-float-c"><img src="/landing/showcase/haystack.webp" alt="" width={220} height={220} loading="eager" /><small>1,322 TRIS</small></div>
+            </div>
+          </div>
+        </section>
+
+        {/* 01 — MAKE & SELL ------------------------------------------- */}
+        <section className="cv5-sec" id="make" aria-labelledby="sec-make">
+          <div className="cv5-frame cv5-sec-grid">
+            <div className="cv5-sec-copy cv5-reveal">
+              <div className="cv5-sec-kicker"><span className="cv5-num">01</span><small>CLUNK · MAKE &amp; SELL</small></div>
+              <h2 id="sec-make">게임 에셋 제작 및 판매</h2>
+              <p>
+                프롬프트에서 2D를, 팩토리 레일에서 3D GLB를 실제 파일로 만들고,
+                게시 게이트를 통과한 에셋만 마켓에 올립니다. 파일·해시·라이선스가
+                상품 단위로 따라갑니다.
+              </p>
+              <ul className="cv5-points">
+                <li><b>luna 이미지 엔진</b> — 프롬프트·모델·해시가 provenance로 기록</li>
+                <li><b>Three.js 팩토리</b> — 저폴리 GLB, 베이크 변환·인스턴싱 대응</li>
+                <li><b>게시 게이트 7조건</b> — 저장·출처·라이선스·검사·검수 전부 PASS여야 공개</li>
+              </ul>
+              <div>
+                <Link className="cv5-more" href="/marketplace" prefetch={false}>마켓 보기 <Icon name="arrowRight" size={15} /></Link>
+                <Link className="cv5-more" href="/studio" prefetch={false}>Studio에서 제작 <Icon name="arrowRight" size={15} /></Link>
               </div>
-              <div className="cv4-proof-item" role="listitem">
-                <span className="cv4-proof-value">100<b>/100</b></span>
-                <span className="cv4-proof-label">실게임 납품 GLB 재검사 점수 · 2026-08-31 실측</span>
-              </div>
-              <div className="cv4-proof-item" role="listitem">
-                <span className="cv4-proof-value"><b>0</b></span>
-                <span className="cv4-proof-label">지어낸 지표 — 모든 수치는 코드와 실측에서 옵니다</span>
+            </div>
+            <div className="cv5-sec-visual cv5-reveal" data-delay="1">
+              <div className="cv5-mock">
+                <div className="cv5-mock-bar"><span>CLUNK <b>MARKET</b></span><span>WAVE 1 · 19 PRODUCTS</span></div>
+                <div className="cv5-mock-body cv5-market">
+                  <div className="cv5-market-side">
+                    <span className="on">추천</span>
+                    <span>구조물</span>
+                    <span>수목</span>
+                    <span>소품</span>
+                    <span>2D · VFX</span>
+                  </div>
+                  <div className="cv5-market-grid">
+                    {MARKET_CELLS.map((asset) => (
+                      <figure className="cv5-market-card" key={asset.slug} style={{ margin: 0 }}>
+                        <ShowcaseImg slug={asset.slug} name={asset.name} />
+                        <figcaption>{asset.name}<b>{asset.tris} TRIS</b></figcaption>
+                      </figure>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* SHOWCASE — real wave-1 inventory ---------------------------- */}
-        <section className="cv4-showcase" id="showcase" data-snap-section="showcase" aria-labelledby="showcase-heading">
-          <div className="cv4-frame">
-            <div className="cv4-showcase-head cv4-reveal">
+        {/* 02 — INSPECT & REPAIR --------------------------------------- */}
+        <section className="cv5-sec" id="inspect" data-tone="green" aria-labelledby="sec-inspect">
+          <div className="cv5-frame cv5-sec-grid" data-flip="true">
+            <div className="cv5-sec-copy cv5-reveal">
+              <div className="cv5-sec-kicker"><span className="cv5-num">02</span><small>CLUNK · INSPECT &amp; REPAIR</small></div>
+              <h2 id="sec-inspect">게임 에셋 검사 및 수정</h2>
+              <p>
+                에셋을 실제 바이트로 열어 {RULE_COUNT}개 정책 룰로 검사하고 Game-Ready
+                점수를 받습니다. 수리는 허용 목록 연산만, 원본은 불변, 전 과정은
+                Passport digest로 봉인됩니다.
+              </p>
+              <ul className="cv5-points">
+                <li><b>바이트 실측</b> — 삼각형·드로우콜·텍스처 메모리를 파서가 직접 셉니다</li>
+                <li><b>Sprite · Atlas · Spine</b> — 페이지·리전·본·슬롯 관계를 번들로 검증</li>
+                <li><b>정직한 상태 분리</b> — 구조 점수는 사람 승인과 절대 섞이지 않습니다</li>
+              </ul>
               <div>
-                <span className="cv4-eyebrow">REAL INVENTORY / WAVE 1</span>
+                <Link className="cv5-more" href="/app" prefetch={false}>검사 시작 <Icon name="arrowRight" size={15} /></Link>
+                <Link className="cv5-more" href="/docs" prefetch={false}>검사 계약 읽기 <Icon name="arrowRight" size={15} /></Link>
+              </div>
+            </div>
+            <div className="cv5-sec-visual cv5-reveal" data-delay="1">
+              <div className="cv5-mock">
+                <div className="cv5-mock-bar"><span>ASSET <b>INSPECTOR</b></span><span>tractor.compact.m1.glb · 2026-08-31 실측</span></div>
+                <div className="cv5-mock-body cv5-inspect">
+                  <div className="cv5-inspect-preview">
+                    <img src="/landing/tractor-hero.png" alt="실게임에 납품된 저폴리 트랙터 3D 에셋 렌더" width={900} height={610} loading="lazy" />
+                    <small>HARVEST FRONTIER 납품분</small>
+                  </div>
+                  <div className="cv5-inspect-panel">
+                    <div className="cv5-score">
+                      <span className="cv5-score-ring"><i>100</i></span>
+                      <div><span>GAME-READY SCORE</span><b>FRESH REINSPECTION · PASS</b></div>
+                    </div>
+                    <div className="cv5-find">
+                      <div><b>TRIANGLES</b><span>39,320 / 예산 40,000</span></div>
+                      <div><b>DRAW CALLS</b><span>98</span></div>
+                      <div><b>BYTES · SHA-256</b><span>840,136 · f64e63b2…</span></div>
+                      <div data-tone="warn"><b>GEO-TRIANGLE-BUDGET</b><span>WARNING · 숨기지 않음</span></div>
+                    </div>
+                    <div className="cv5-ops">
+                      <span><b>✓</b>빈 노드 정리</span>
+                      <span><b>✓</b>중복 머티리얼 병합</span>
+                      <span><b>✓</b>메타데이터 정리</span>
+                      <span><b>✓</b>재패킹</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 03 — GAME AGENT --------------------------------------------- */}
+        <section className="cv5-sec" id="agent" aria-labelledby="sec-agent">
+          <div className="cv5-frame cv5-sec-grid">
+            <div className="cv5-sec-copy cv5-reveal">
+              <div className="cv5-sec-kicker"><span className="cv5-num">03</span><small>CLUNK · GAME AGENT</small></div>
+              <h2 id="sec-agent">게임 제작 에이전트</h2>
+              <p>
+                Clunk MCP·CLI·플러그인을 붙이면 에이전트가 에셋 생성·검사·패키징을
+                직접 호출합니다. HTTP와 로컬이 같은 {MCP_HTTP_TOOL_COUNT}개 툴 계약이라
+                CI와 로컬이 동일하게 동작합니다.
+              </p>
+              <ul className="cv5-points">
+                <li><b>MCP {MCP_HTTP_TOOL_COUNT}툴</b> — 생성·검사·evidence·리뷰를 에이전트가 직접 실행</li>
+                <li><b>CLI · VS Code · Codex 플러그인</b> — exit code 계약으로 CI에 바로 연결</li>
+                <li><b>실게임 검증 루프</b> — 실제 게임 2종의 납품·감사 데이터로 다듬는 중</li>
+              </ul>
+              <div>
+                <Link className="cv5-more" href="/connect" prefetch={false}>에이전트 연결 가이드 <Icon name="arrowRight" size={15} /></Link>
+              </div>
+              <div className="cv5-flow" aria-label="Clunk를 연결할 수 있는 MCP 클라이언트" style={{ marginTop: 26 }}>
+                {AGENT_CLIENTS.map((client) => (
+                  <span key={client}>{client}</span>
+                ))}
+              </div>
+            </div>
+            <div className="cv5-sec-visual cv5-reveal" data-delay="1">
+              <div className="cv5-mock">
+                <div className="cv5-mock-bar"><span>AGENT <b>WORKSPACE</b></span><span>MCP · REAL ENDPOINT</span></div>
+                <div className="cv5-mock-body cv5-agent">
+                  <div className="cv5-chat">
+                    <div className="cv5-msg cv5-msg-user">온실 GLB 만들어서 web 프로파일로 검사하고, 게시 준비까지 해줘.</div>
+                    <div className="cv5-msg cv5-msg-bot">
+                      팩토리 레일로 생성 후 같은 프로파일로 재검사합니다.
+                      <div className="cv5-steps">
+                        <span><b>✓</b><code>clunk_asset_author</code> — greenhouse.glb 생성 · 5,756 tris</span>
+                        <span><b>✓</b><code>clunk_asset_inspect</code> — 정책 {RULE_COUNT}룰 · 하드 블로커 0</span>
+                        <span><b>✓</b><code>clunk_optimize</code> — 허용 연산만 · 새 파일 출력</span>
+                        <span><b>✓</b><code>clunk_passport</code> — 입력→출력 digest 봉인</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="cv5-agent-side">
+                    <div className="cv5-agent-assets">
+                      <header>연결된 에셋</header>
+                      <div>
+                        <img src="/landing/showcase/greenhouse.webp" alt="" width={112} height={112} loading="lazy" />
+                        <img src="/landing/showcase/market-stall.webp" alt="" width={112} height={112} loading="lazy" />
+                        <img src="/landing/showcase/broadleaf-full.webp" alt="" width={112} height={112} loading="lazy" />
+                      </div>
+                    </div>
+                    <div className="cv5-mcp-demo">
+                      <LandingMcpDemo />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* STATS — measured only ---------------------------------------- */}
+        <section className="cv5-stats" aria-label="Clunk 실측 지표">
+          <div className="cv5-frame">
+            <p className="cv5-stats-note cv5-stats-note-top">NO INVENTED METRICS — 아래 수치는 전부 코드와 감사 로그에서 직접 읽은 실측값입니다</p>
+            <div className="cv5-stats-grid">
+              <div className="cv5-stat"><b>{RULE_COUNT}</b><span>정적 검사 정책 룰 — 코드에서 직접 셉니다</span></div>
+              <div className="cv5-stat"><b>{MCP_HTTP_TOOL_COUNT}</b><span>에이전트용 MCP 툴 — HTTP·로컬 동일 계약</span></div>
+              <div className="cv5-stat"><b>19</b><span>실물 에셋 상품 · 94개 파일 — 게시 대기</span></div>
+              <div className="cv5-stat"><b>100/100</b><span>실게임 납품 GLB 재검사 · 2026-08-31</span></div>
+            </div>
+          </div>
+        </section>
+
+        {/* SHOWCASE ------------------------------------------------------ */}
+        <section className="cv5-showcase" id="showcase" aria-labelledby="showcase-heading">
+          <div className="cv5-frame">
+            <div className="cv5-showcase-head cv5-reveal">
+              <div>
+                <span className="cv5-eyebrow">REAL INVENTORY · WAVE 1</span>
                 <h2 id="showcase-heading">목업이 아니라, 실제 제품 파일입니다</h2>
               </div>
               <p>
@@ -117,215 +306,36 @@ export default function Home() {
                 삼각형 수는 손으로 적은 값이 아니라 렌더러가 실측한 수치 그대로입니다.
               </p>
             </div>
-            <ul className="cv4-showcase-grid" aria-label="Wave 1 실제 에셋 12종">
+            <ul className="cv5-showcase-grid" aria-label="Wave 1 실제 에셋 12종">
               {SHOWCASE.map((asset, index) => (
-                <li className="cv4-showcase-card cv4-reveal" data-delay={String(index % 4)} key={asset.slug}>
+                <li className="cv5-showcase-card cv5-reveal" data-delay={String(index % 4)} key={asset.slug}>
                   <Link href="/marketplace" prefetch={false} aria-label={`${asset.name} — 마켓에서 보기`}>
-                    <img
-                      src={`/landing/showcase/${asset.slug}.webp`}
-                      alt={`${asset.name} 저폴리 3D 에셋 렌더`}
-                      width={560}
-                      height={560}
-                      loading={index < 6 ? "eager" : "lazy"}
-                    />
-                    <span className="cv4-showcase-meta">
-                      <b>{asset.name}</b>
-                      <span>{asset.tris} TRIS</span>
-                    </span>
+                    <ShowcaseImg slug={asset.slug} name={asset.name} />
+                    <span className="cv5-showcase-meta"><b>{asset.name}</b><span>{asset.tris} TRIS</span></span>
                   </Link>
                 </li>
               ))}
             </ul>
-            <div className="cv4-showcase-foot cv4-reveal">
-              <Link className="cv4-link" href="/marketplace" prefetch={false}>
+            <div className="cv5-showcase-foot cv5-reveal">
+              <Link className="cv5-more" href="/marketplace" prefetch={false}>
                 마켓에서 전체 인벤토리 보기 <Icon name="arrowRight" size={15} />
               </Link>
-              <span>19종 준비 완료 · 판매 개시는 통신판매업 신고 완료 후</span>
+              <small>19종 준비 완료 · 판매 개시는 통신판매업 신고 완료 후</small>
             </div>
           </div>
         </section>
 
-        {/* PILLAR 01 — MAKE & SELL ------------------------------------ */}
-        <section className="cv4-pillar" id="make" data-snap-section="make" aria-labelledby="pillar-make">
-          <div className="cv4-frame cv4-pillar-grid">
-            <div className="cv4-pillar-copy cv4-reveal">
-              <span className="cv4-pillar-num">01 / MAKE &amp; SELL</span>
-              <h2 id="pillar-make">에셋 제작 및 판매</h2>
-              <p>
-                프롬프트에서 2D 이미지를, Three.js 팩토리 레일에서 3D GLB를 실제 파일로 만듭니다.
-                게시 게이트를 통과한 에셋만 마켓에 올라가고, 파일·해시·라이선스가 상품 단위로 따라갑니다.
-              </p>
-              <ul className="cv4-pillar-points">
-                <li><b>2D 생성</b> — luna 이미지 엔진, 프롬프트·모델·해시가 provenance로 기록</li>
-                <li><b>3D 팩토리</b> — 부품 디테일·팔레트 규율의 저폴리 GLB, LOD와 소켓까지</li>
-                <li><b>마켓</b> — 게시 조건을 충족한 listing만 공개, 결제·다운로드 권한 분리</li>
-              </ul>
-              <div className="cv4-pillar-actions">
-                <Link className="cv4-link" href="/marketplace" prefetch={false}>마켓 둘러보기 <Icon name="arrowRight" size={15} /></Link>
-                <Link className="cv4-link" href="/studio" prefetch={false}>Studio에서 제작 <Icon name="arrowRight" size={15} /></Link>
-              </div>
-            </div>
-            <div className="cv4-pillar-visual cv4-reveal" data-delay="1">
-              <figure className="cv4-panel">
-                <div className="cv4-panel-head"><span>CLUNK MARKET / REAL FILES</span><span>GLB · PNG</span></div>
-                <div className="cv4-market-grid">
-                  <div className="cv4-asset-card">
-                    <Image src="/landing/tractor-hero.png" alt="실게임에 납품된 저폴리 트랙터 3D 에셋 렌더" width={900} height={610} priority unoptimized />
-                    <div className="cv4-asset-meta">농기계 트랙터 <span>3D · 39,320 TRIS</span></div>
-                  </div>
-                  <div className="cv4-asset-card">
-                    <Image src="/landing/market-stall.webp" alt="luna 엔진으로 생성한 시장 노점 2D 에셋" width={880} height={880} unoptimized />
-                    <div className="cv4-asset-meta">시장 노점 <span>2D · LUNA</span></div>
-                  </div>
-                  <div className="cv4-asset-card">
-                    <Image src="/landing/crate-ref.webp" alt="luna 엔진으로 생성한 나무 상자 2D 에셋" width={880} height={880} unoptimized />
-                    <div className="cv4-asset-meta">나무 상자 <span>2D · LUNA</span></div>
-                  </div>
-                </div>
-              </figure>
-              <p className="cv4-inspect-caption" style={{ marginTop: 12 }}>
-                마스터가 직접 만든 실제 제품 파일의 미리보기입니다. 판매 여부와 가격은 마켓의 게시 listing만 결정합니다.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* PILLAR 02 — INSPECT & REPAIR ------------------------------- */}
-        <section className="cv4-pillar" id="inspect" data-snap-section="inspect" aria-labelledby="pillar-inspect">
-          <div className="cv4-frame cv4-pillar-grid" data-flip="true">
-            <div className="cv4-pillar-copy cv4-reveal">
-              <span className="cv4-pillar-num">02 / INSPECT &amp; REPAIR</span>
-              <h2 id="pillar-inspect">에셋 검사 및 수정</h2>
-              <p>
-                내 에셋을 실제 바이트로 열어 정책 검사와 Game Ready 스코어를 받고,
-                엔진·모바일·PC 타깃에 맞는 커스텀 프로파일로 수정 방향을 잡습니다.
-                구조 점수는 사람의 승인과 절대 섞이지 않습니다.
-              </p>
-              <ul className="cv4-pillar-points">
-                <li><b>바이트 검사</b> — GLB·glTF 파서가 삼각형·머티리얼·텍스처 메모리를 실측</li>
-                <li><b>Sprite / Atlas · Spine</b> — 페이지·리전·본·슬롯 관계를 번들로 검증</li>
-                <li><b>Passport</b> — 입력 해시부터 판정까지 결정론적 digest로 봉인</li>
-              </ul>
-              <div className="cv4-pillar-actions">
-                <Link className="cv4-link" href="/app" prefetch={false}>Game Ready 검사 시작 <Icon name="arrowRight" size={15} /></Link>
-                <Link className="cv4-link" href="/docs" prefetch={false}>검사 계약 읽기 <Icon name="arrowRight" size={15} /></Link>
-              </div>
-            </div>
-            <div className="cv4-pillar-visual cv4-reveal" data-delay="1">
-              <div className="cv4-panel">
-                <div className="cv4-panel-head"><span>INSPECTION READOUT</span><span>HARVEST FRONTIER 납품분</span></div>
-                <div className="cv4-inspect">
-                  <div className="cv4-inspect-score">
-                    <strong>100<small> /100</small></strong>
-                    <span className="cv4-inspect-state">FRESH REINSPECTION · PASS</span>
-                  </div>
-                  <dl className="cv4-inspect-rows">
-                    <div><dt>INPUT</dt><dd>tractor.compact.m1.glb</dd></div>
-                    <div><dt>BYTES</dt><dd>840,136</dd></div>
-                    <div><dt>SHA-256</dt><dd>f64e63b2…b95609b</dd></div>
-                    <div><dt>TRIANGLES</dt><dd>39,320 / 예산 40,000</dd></div>
-                    <div><dt>DRAW CALLS</dt><dd>98</dd></div>
-                    <div><dt>FINDING</dt><dd className="is-warn">GEO-TRIANGLE-BUDGET · WARNING</dd></div>
-                  </dl>
-                  <p className="cv4-inspect-caption">
-                    2026-08-31 실게임(Harvest Frontier) 납품 GLB를 재검사한 실측값 그대로입니다.
-                    경고 하나까지 숨기지 않는 것이 Clunk의 판정 방식입니다.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* PILLAR 03 — GAME AGENT ------------------------------------- */}
-        <section className="cv4-pillar" id="agent" data-snap-section="agent" aria-labelledby="pillar-agent">
-          <div className="cv4-frame cv4-pillar-grid">
-            <div className="cv4-pillar-copy cv4-reveal">
-              <span className="cv4-pillar-num">03 / GAME AGENT</span>
-              <h2 id="pillar-agent">게임 제작 에이전트</h2>
-              <p>
-                Clunk MCP·CLI·플러그인을 쓰는 에이전트에서 에셋 생성·검사·패키징을 그대로 호출합니다.
-                에셋만 만들게 하거나, 만들고 검사까지 시키거나, 게임 제작 워크플로 전체에 붙이세요.
-              </p>
-              <ul className="cv4-pillar-points">
-                <li><b>MCP {MCP_HTTP_TOOL_COUNT}툴</b> — HTTP와 로컬 stdio가 같은 계약으로 동작</li>
-                <li><b>CLI</b> — inspect·validate·optimize·passport·watch를 터미널에서</li>
-                <li><b>실게임 검증 루프</b> — 실제 게임 프로젝트의 배치·검수 데이터로 다듬는 중</li>
-              </ul>
-              <div className="cv4-pillar-actions">
-                <Link className="cv4-link" href="/connect" prefetch={false}>에이전트 연결 가이드 <Icon name="arrowRight" size={15} /></Link>
-              </div>
-              <div className="cv4-integrations" aria-label="Clunk를 연결할 수 있는 MCP 클라이언트">
-                <span>WORKS WITH</span>
-                {AGENT_CLIENTS.map((client) => (
-                  <span className="cv4-chip" key={client}>{client}</span>
-                ))}
-              </div>
-            </div>
-            <div className="cv4-pillar-visual cv4-reveal" data-delay="1">
-              <div className="cv4-panel">
-                <div className="cv4-panel-head"><span>CONNECT / MCP</span><span>REAL ENDPOINT</span></div>
-                <div className="cv4-agent-shell">
-                  <LandingMcpDemo />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* WORKFLOW RAIL ---------------------------------------------- */}
-        <section className="cv4-rail" id="workflow" data-snap-section="workflow" aria-labelledby="workflow-heading">
-          <div className="cv4-frame">
-            <div className="cv4-rail-head cv4-reveal">
-              <div>
-                <span className="cv4-eyebrow">FROM BRIEF TO PLAYABLE HANDOFF</span>
-                <h2 id="workflow-heading">기획에서 핸드오프까지, 다섯 단계</h2>
-              </div>
-              <p>Clunk가 실제 제공하는 표면만 순서에 넣었습니다. 실행 화면과 사람의 결정은 구조 검사 결과와 섞지 않습니다.</p>
-            </div>
-            <ol className="cv4-rail-track" style={{ listStyle: "none", padding: 0, margin: "40px 0 0" }}>
-              {WORKFLOW.map((step, index) => (
-                <li className="cv4-rail-step cv4-reveal" data-delay={String(Math.min(index, 3))} key={step.number}>
-                  <span>{step.number} · {step.label}</span>
-                  <h3>{step.title}</h3>
-                  <p>{step.detail}</p>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </section>
-
-        {/* TRUTH BAND -------------------------------------------------- */}
-        <section className="cv4-truth" id="evidence" data-snap-section="evidence" aria-labelledby="truth-heading">
-          <div className="cv4-frame cv4-truth-inner">
-            <div className="cv4-reveal">
-              <span className="cv4-eyebrow">NO INVENTED STATE</span>
-              <h2 id="truth-heading">결과에 필요한 상태를 숨기지도, 지어내지도 않습니다.</h2>
-              <p>
-                상품·결제·다운로드·크레딧 잔액은 각 계정과 API가 반환한 값으로만 표시합니다.
-                Game Ready는 하나의 숫자가 아니라 bytes·구조·runtime·player-facing·human review를 각각 확인한 상태의 묶음입니다.
-              </p>
-            </div>
-            <ul className="cv4-truth-list cv4-reveal" data-delay="1">
-              <li>생성·업로드 결과와 입력 해시, 라이선스 출처를 분리 보존 <b>REAL BYTES</b></li>
-              <li>정책 결과와 fresh reinspection으로만 판정 <b>DETERMINISTIC</b></li>
-              <li>runtime·player-facing 상태는 구조 점수와 분리 <b>NOT CONFLATED</b></li>
-              <li>미판정 상태는 승격하지 않고 그대로 표시 <b>HUMAN DECISION</b></li>
-            </ul>
-          </div>
-        </section>
-
-        {/* CLOSER ------------------------------------------------------ */}
-        <section className="cv4-closer" id="start" data-snap-section="start" aria-labelledby="start-heading">
-          <div className="cv4-frame">
-            <span className="cv4-eyebrow" style={{ justifyContent: "center" }}>START WITH CLUNK</span>
-            <h2 id="start-heading">증거 있는 에셋으로,<br /><em>게임을 만드세요.</em></h2>
+        {/* CLOSER -------------------------------------------------------- */}
+        <section className="cv5-closer" id="start" aria-labelledby="start-heading">
+          <div className="cv5-frame">
+            <span className="cv5-eyebrow" style={{ justifyContent: "center" }}>START WITH CLUNK</span>
+            <h2 id="start-heading">증거 있는 에셋으로,<br /><em>게임을 만드세요</em></h2>
             <p>마켓에서 실제 파일을 고르거나, 크레딧으로 직접 만들고 검사하세요. 에이전트 연결은 몇 분이면 끝납니다.</p>
-            <div className="cv4-hero-actions" style={{ marginTop: 34 }}>
-              <Link className="cv4-btn cv4-btn-primary" href="/studio" prefetch={false}>
-                Clunk 사용하기 <Icon name="arrowUpRight" size={16} />
+            <div className="cv5-cta-row" style={{ marginTop: 34 }}>
+              <Link className="cv5-btn cv5-btn-primary" href="/studio" prefetch={false}>
+                Clunk 시작하기 <Icon name="arrowUpRight" size={17} />
               </Link>
-              <Link className="cv4-btn cv4-btn-ghost" href="/connect" prefetch={false}>
+              <Link className="cv5-btn cv5-btn-ghost" href="/connect" prefetch={false}>
                 에이전트 연결
               </Link>
             </div>
@@ -333,23 +343,37 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="cv4-footer">
-        <div className="cv4-frame cv4-footer-inner">
-          <div className="cv4-footer-brand">
-            <strong>Clunk</strong>
-            <span>게임 에셋 파운드리 — 제작·판매 / 검사·수정 / 게임 제작 에이전트</span>
+      {/* FOOTER ---------------------------------------------------------- */}
+      <footer className="cv5-footer">
+        <div className="cv5-frame cv5-footer-inner">
+          <div className="cv5-footer-brand">
+            <strong>CLUNK</strong>
+            <p>게임 에셋 파운드리 — 만들고, 증명하고, 판매합니다. 모든 결과는 실제 바이트와 검사 근거로 남습니다.</p>
           </div>
-          <nav aria-label="Clunk 제품 링크">
-            <Link href="/marketplace" prefetch={false}>마켓</Link>
+          <nav className="cv5-footer-col" aria-label="제품">
+            <header>PRODUCT</header>
+            <Link href="/marketplace" prefetch={false}>에셋 판매</Link>
             <Link href="/studio" prefetch={false}>에셋 제작</Link>
-            <Link href="/app" prefetch={false}>Game Ready</Link>
-            <Link href="/connect" prefetch={false}>에이전트</Link>
-            <Link href="/pricing" prefetch={false}>크레딧 · 요금</Link>
+            <Link href="/app" prefetch={false}>에셋 검사</Link>
+            <Link href="/connect" prefetch={false}>제작 에이전트</Link>
+            <Link href="/pricing" prefetch={false}>요금 · 크레딧</Link>
+          </nav>
+          <nav className="cv5-footer-col" aria-label="리소스">
+            <header>RESOURCES</header>
             <Link href="/docs" prefetch={false}>Docs</Link>
+            <Link href="/connect" prefetch={false}>MCP 연결</Link>
+            <Link href="/dashboard" prefetch={false}>내 작업공간</Link>
+          </nav>
+          <nav className="cv5-footer-col" aria-label="법적 고지">
+            <header>LEGAL</header>
             <Link href="/terms" prefetch={false}>이용약관</Link>
             <Link href="/privacy" prefetch={false}>개인정보처리방침</Link>
             <Link href="/refunds" prefetch={false}>취소·환불정책</Link>
           </nav>
+        </div>
+        <div className="cv5-frame cv5-footer-legal">
+          <span>아르테미스(Artemis) · 대표 박준성 · 사업자등록번호 361-02-03814 · 인천광역시 제물포구 화도진로 16, 109동 1604호</span>
+          <span>통신판매업 신고 완료 전 — 유료 결제 미개시</span>
         </div>
       </footer>
     </div>

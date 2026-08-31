@@ -18,11 +18,11 @@ test("server-renders the Clunk landing page", async () => {
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
   assert.match(html, /<title>게임 에셋 파운드리 \| Clunk<\/title>/i);
-  assert.match(html, /GAME ASSET FOUNDRY/);
+  assert.match(html, /단 하나의 AI 슈퍼앱/);
+  assert.match(html, /게임 제작의 모든 과정을/);
   assert.match(html, /마켓 둘러보기/);
-  assert.match(html, /Clunk 사용하기/);
-  assert.match(html, /data-snap-section="hero"/);
-  assert.match(html, /마스터가 직접 만든/);
+  assert.match(html, /무료로 시작하기/);
+  assert.match(html, /목업이 아니라, 실제 제품 파일입니다/);
   assert.doesNotMatch(html, /DEMO MODE|실제 제작부터|에셋 만들기|CONTRACT_FIXTURE|SAMPLE/);
   assert.doesNotMatch(html, /Your site is taking shape|react-loading-skeleton|codex-preview/);
 });
@@ -66,12 +66,11 @@ test("server-renders the Clunk Series catalog with source transparency", async (
 test("landing language covers the full 2D and 3D asset path", async () => {
   const response = await render("/");
   const html = await response.text();
-  assert.match(html, /마스터가 직접 만든/);
-  assert.match(html, /Game Ready/);
-  assert.match(html, /PLAN/);
-  assert.match(html, /CREATE/);
-  assert.match(html, /INSPECT/);
-  assert.match(html, /CONNECT/);
+  assert.match(html, /실측한 수치 그대로/);
+  assert.match(html, /GAME-READY SCORE/i);
+  assert.match(html, /MAKE &amp; SELL|MAKE & SELL/);
+  assert.match(html, /INSPECT &amp; REPAIR|INSPECT & REPAIR/);
+  assert.match(html, /GAME AGENT/);
   assert.match(html, /Sprite.*Atlas|Atlas.*Sprite/);
   assert.match(html, /Spine/);
   assert.match(html, /크레딧/);

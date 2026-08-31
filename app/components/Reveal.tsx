@@ -13,7 +13,7 @@ export function RevealObserver() {
   useEffect(() => {
     if (typeof IntersectionObserver === "undefined") return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      document.querySelectorAll(".cv4-reveal").forEach((el) => el.classList.add("is-in"));
+      document.querySelectorAll(".cv4-reveal, .cv5-reveal").forEach((el) => el.classList.add("is-in"));
       return;
     }
     const observer = new IntersectionObserver(
@@ -27,7 +27,7 @@ export function RevealObserver() {
       },
       { threshold: 0.18, rootMargin: "0px 0px -6% 0px" },
     );
-    document.querySelectorAll(".cv4-reveal").forEach((el) => observer.observe(el));
+    document.querySelectorAll(".cv4-reveal, .cv5-reveal").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, []);
   return null;
