@@ -4,6 +4,23 @@ import test from "node:test";
 
 const source = async (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
+
+/**
+ * /docs became a multi-page GitBook manual on 2026-08-31: the sections that used
+ * to be anchors on app/docs/page.tsx are now app/docs/<topic>/page.tsx, and the
+ * long listings live in app/docs/docs-content.ts. This assertion freezes that the
+ * DOCS SURFACE publishes a fact, not which file holds it, so read them all.
+ */
+async function docsSurface() {
+  const { readdir, readFile: read } = await import("node:fs/promises");
+  const dir = new URL("../app/docs/", import.meta.url);
+  const names = (await readdir(dir, { recursive: true })).filter((name) => /\.tsx?$/.test(name));
+  const parts = await Promise.all(
+    names.map((name) => read(new URL(name.replaceAll("\\", "/"), dir), "utf8")),
+  );
+  return parts.join("\n");
+}
+
 test("Clunk Series has a truthful public catalog surface", async () => {
   const page = await source("app/series/page.tsx");
   const catalog = await source("app/components/ClunkSeriesCatalog.tsx");
@@ -49,7 +66,7 @@ test("Studio authoring uses the native Clunk Series execution rail", async () =>
 });
 
 test("Docs explain the native Clunk Series execution boundary", async () => {
-  const docs = await source("app/docs/page.tsx");
+  const docs = await docsSurface();
 
   assert.match(docs, /Clunk Series/);
   assert.match(docs, /clunk-series-native-v1/);

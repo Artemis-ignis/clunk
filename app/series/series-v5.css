@@ -1,0 +1,181 @@
+@import "../components/cv5-surface.css";
+
+/* ============================================================================
+   CLUNK cv5 — /series (2026-08-31 unified-site pass)
+
+   /series renders against the foundry warm-paper ramp: a beige blueprint sheet
+   with 3px corners and near-black ink, i.e. a visibly different product from
+   the navy landing. cv5-surface.css remaps every `--foundry-*` token onto the
+   cv5 palette, so this file only has to fix the shapes the ramp cannot carry —
+   the square blueprint corners, the oversized display scale, and the ledger
+   rows that were drawn as bare rules on paper.
+
+   tests/rendered-html.test.mjs pins the catalog names, `clunk-series-native-v1`,
+   `RESEARCH ONLY`, `사용 제외` and `/studio`; tests/public-journeys-contract
+   pins the catalog/source-manifest calls and the snap markers. Structure and
+   copy are unchanged.
+   ========================================================================= */
+
+.series-cv5 .foundry-frame { width: min(var(--v5-frame), calc(100% - clamp(28px, 5vw, 88px))); }
+.series-cv5 .foundry-page { background: transparent; font-family: var(--v5-font); }
+
+/* -------------------------------------------------------------------- hero */
+.series-cv5 .series-hero {
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+  gap: clamp(28px, 4vw, 64px);
+  min-height: 0;
+  padding-top: clamp(112px, 13vw, 156px);
+  padding-bottom: clamp(40px, 6vw, 72px);
+}
+.series-cv5 .series-hero h1 {
+  margin: 22px 0 0;
+  font-size: clamp(2.4rem, 5.2vw, 3.9rem);
+  font-weight: 860;
+  letter-spacing: -0.042em;
+  line-height: 1.12;
+}
+.series-cv5 .series-hero-copy > p {
+  margin-top: 20px;
+  max-width: 540px;
+  font-size: clamp(1rem, 1.35vw, 1.12rem);
+  line-height: 1.72;
+  color: var(--v5-ink-dim);
+}
+.series-cv5 .series-hero-actions { gap: 12px; margin-top: 32px; }
+.series-cv5 .series-hero-actions .button { min-height: 52px; padding: 0 24px; font-size: 0.98rem; }
+
+.series-cv5 .series-hero-proof { gap: 8px; margin-top: 32px; text-transform: none; }
+.series-cv5 .series-hero-proof span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 13px;
+  border: 1px solid var(--v5-line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  font-family: var(--v5-label);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--v5-ink-dim);
+}
+.series-cv5 .series-hero-proof b { margin-right: 0; color: var(--v5-cyan); font-size: inherit; }
+
+/* build-map board — the cv5 glass mockup shell, not a graphite blueprint */
+.series-cv5 .series-hero-board {
+  min-height: 420px;
+  border: 1px solid var(--v5-line-strong);
+  border-radius: var(--v5-r-lg);
+  background: linear-gradient(178deg, #131628, #0c0e1a 68%);
+  box-shadow: 0 40px 90px -38px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(124, 93, 250, 0.12),
+    0 24px 80px -30px rgba(124, 93, 250, 0.35);
+  color: var(--v5-ink);
+}
+.series-cv5 .series-hero-board::after { inset: 14px; border-color: rgba(255, 255, 255, 0.06); border-radius: 14px; }
+.series-cv5 .series-board-topline { color: var(--v5-ink-faint); font-family: var(--v5-label); letter-spacing: 0.14em; }
+.series-cv5 .series-board-topline strong { color: var(--v5-cyan); }
+.series-cv5 .series-board-flow { color: var(--v5-ink-dim); font-family: var(--v5-label); }
+.series-cv5 .series-board-flow i { color: #c4b5fd; }
+.series-cv5 .series-board-orbit { border-color: rgba(139, 92, 246, 0.45); box-shadow: 0 0 46px rgba(124, 93, 250, 0.24); }
+.series-cv5 .series-board-orbit::after { border-color: rgba(89, 217, 255, 0.4); }
+.series-cv5 .series-board-output strong {
+  font-size: clamp(3rem, 7vw, 5.2rem);
+  font-weight: 860;
+  letter-spacing: -0.05em;
+  background: var(--v5-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.series-cv5 .series-board-output small { color: var(--v5-ink-faint); font-family: var(--v5-label); }
+.series-cv5 .series-board-note { border-top: 1px solid var(--v5-line); }
+.series-cv5 .series-board-note span { color: var(--v5-ink-faint); font-family: var(--v5-label); letter-spacing: 0.12em; }
+.series-cv5 .series-board-note b { color: var(--v5-ink); }
+.series-cv5 .series-board-note small { color: var(--v5-ink-faint); }
+
+/* ---------------------------------------------------------------- sections */
+.series-cv5 .series-catalog-section,
+.series-cv5 .series-source-section { padding-top: clamp(48px, 7vw, 88px); }
+.series-cv5 .series-section-heading { gap: clamp(18px, 3vw, 48px); margin-bottom: clamp(26px, 4vw, 40px); }
+.series-cv5 .series-section-heading h2 {
+  margin-top: 14px;
+  font-size: clamp(1.7rem, 3.2vw, 2.45rem);
+  font-weight: 830;
+  letter-spacing: -0.035em;
+  line-height: 1.18;
+}
+.series-cv5 .series-section-heading > p { max-width: 430px; font-size: 0.94rem; line-height: 1.68; color: var(--v5-ink-dim); }
+
+/* ------------------------------------------------------------------- cards */
+.series-cv5 .series-grid { gap: 13px; }
+.series-cv5 .series-card {
+  min-height: 0;
+  padding: 20px;
+  border: 1px solid var(--v5-line);
+  border-radius: var(--v5-r);
+  background: rgba(255, 255, 255, 0.03);
+}
+.series-cv5 .series-card:hover {
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 20px 44px -20px rgba(0, 0, 0, 0.85), 0 0 24px -6px rgba(124, 93, 250, 0.35);
+}
+.series-cv5 .series-card-index { color: #c4b5fd; font-family: var(--v5-label); font-weight: 700; }
+.series-cv5 .series-availability { font-family: var(--v5-label); letter-spacing: 0.08em; }
+.series-cv5 .series-card-copy { margin-top: 26px; }
+.series-cv5 .series-card-copy h3 { font-size: clamp(1.15rem, 1.9vw, 1.45rem); font-weight: 780; letter-spacing: -0.035em; line-height: 1.2; }
+.series-cv5 .series-card-copy p { color: var(--v5-ink-dim); font-size: 0.82rem; line-height: 1.65; }
+.series-cv5 .series-capability-list span {
+  padding: 5px 9px;
+  border: 1px solid var(--v5-line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  font-family: var(--v5-label);
+  font-size: 0.58rem;
+  font-weight: 700;
+}
+.series-cv5 .series-card-footer { border-top: 1px solid var(--v5-line); }
+.series-cv5 .series-source-chip { padding: 4px 9px; border-radius: 999px; border-color: rgba(89, 217, 255, 0.4); font-family: var(--v5-label); }
+.series-cv5 .series-source-chip-native { border-color: var(--v5-line); }
+.series-cv5 .series-card-footer .text-link { color: #c4b5fd; }
+
+/* ------------------------------------------------------------------ ledger */
+/* The source ledger was four bare columns separated by hairlines on paper —
+   the "plain list" shape. Each record becomes a glass row instead. */
+.series-cv5 .series-source-ledger { gap: 8px; }
+.series-cv5 .series-source-row {
+  padding: 16px 18px;
+  border: 1px solid var(--v5-line);
+  border-radius: var(--v5-r);
+  background: rgba(255, 255, 255, 0.03);
+}
+.series-cv5 .series-source-row:last-child { border-bottom: 1px solid var(--v5-line); }
+.series-cv5 .series-source-id span { color: var(--v5-ink); font-family: var(--v5-label); font-weight: 700; }
+.series-cv5 .series-source-id strong { font-family: var(--v5-label); letter-spacing: 0.08em; }
+.series-cv5 .series-source-row-research-only { border-color: rgba(251, 191, 36, 0.28); }
+.series-cv5 .series-source-row-research-only .series-source-id strong { color: var(--v5-amber); }
+.series-cv5 .series-source-row-excluded-license { border-color: rgba(248, 113, 113, 0.28); }
+.series-cv5 .series-source-row-excluded-license .series-source-id strong { color: var(--v5-red); }
+.series-cv5 .series-source-repository { color: var(--v5-cyan); font-family: var(--v5-label); }
+.series-cv5 .series-source-repository span { color: var(--v5-ink-faint); }
+.series-cv5 .series-source-license span { color: var(--v5-ink-faint); font-family: var(--v5-label); letter-spacing: 0.12em; }
+.series-cv5 .series-source-license strong { color: var(--v5-ink); }
+.series-cv5 .series-source-row > p { color: var(--v5-ink-dim); font-size: 0.74rem; line-height: 1.6; }
+
+.series-cv5 .series-source-callout {
+  margin-top: 22px;
+  padding: 20px 22px;
+  border: 1px solid rgba(139, 92, 246, 0.32);
+  border-left-width: 3px;
+  border-radius: var(--v5-r);
+  background: var(--v5-grad-soft);
+}
+.series-cv5 .series-source-callout .mono-label { color: #c4b5fd; }
+.series-cv5 .series-source-callout strong { color: var(--v5-ink); font-size: 0.96rem; font-weight: 750; }
+.series-cv5 .series-source-callout > span:last-child { color: var(--v5-ink-dim); font-size: 0.78rem; line-height: 1.6; }
+
+/* ------------------------------------------------------------- responsive */
+@media (max-width: 1080px) {
+  .series-cv5 .series-hero { grid-template-columns: 1fr; }
+  .series-cv5 .series-hero-board { min-height: 340px; }
+}

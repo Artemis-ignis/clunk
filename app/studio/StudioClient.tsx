@@ -290,7 +290,7 @@ export function StudioClient({ userLabel, initialSourceAssetId }: { userLabel: s
             <div className="studio-card-heading"><div><span className="mono-label">03 · RUN THE REAL RAIL</span><h3>선택한 작업을 로컬에서 실행</h3></div><Icon name="terminal" size={20} /></div>
             <p>Clunk는 원본을 덮어쓰지 않습니다. 선택한 종류에 맞는 authoring adapter가 별도 output을 만들고, 같은 target profile로 fresh reopen evidence를 기록합니다.</p>
             <div className="studio-command"><code>{command}</code><CopyCodeButton value={command} /></div>
-            <div className="studio-command-links"><Link href="/agents#connect" className="text-link">MCP로 에이전트 연결 <Icon name="arrowUpRight" size={13} /></Link><Link href="/docs#asset-studio" className="text-link">CLI schema 보기 <Icon name="arrowRight" size={13} /></Link></div>
+            <div className="studio-command-links"><Link href="/agents#connect" className="text-link">MCP로 에이전트 연결 <Icon name="arrowUpRight" size={13} /></Link><Link href="/docs/asset-studio" className="text-link">CLI schema 보기 <Icon name="arrowRight" size={13} /></Link></div>
           </article>
           <article className="studio-boundary-card">
             <span className="mono-label">04 · DO NOT COLLAPSE THE REVIEW</span>

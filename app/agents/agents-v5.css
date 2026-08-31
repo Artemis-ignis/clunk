@@ -1,0 +1,250 @@
+@import "../components/cv5-surface.css";
+
+/* ============================================================================
+   CLUNK cv5 — /agents (2026-08-31 unified-site pass)
+
+   Same failure class the master flagged on /connect. `.agents-v4-page` styles
+   ~90 rules against `--v4-ink` / `--v4-muted` / `--v4-line` / `--v4-cyan`, but
+   globals.css declares that ramp only inside `.clunk-v4`, which this page never
+   carried: every colour resolved to a guaranteed-invalid value, the cards fell
+   back to the hardcoded `background: #fff`, and the page read as a white text
+   wall. cv5-surface.css now declares the `--v4-*` ramp on the navy palette, so
+   the existing rules paint correctly; this file supplies the cv5 type scale and
+   panel treatment on top.
+
+   Markup, copy and structure are untouched — tests/agents-contract.test.mjs
+   pins agent-journey, agent-tab-purpose, the four setup steps and the
+   handshake card, and all of them still render exactly as before.
+   ========================================================================= */
+
+.agents-cv5 .agents-v4-page {
+  width: min(var(--v5-frame), calc(100% - clamp(28px, 5vw, 88px)));
+  margin-inline: auto;
+  padding: clamp(104px, 12vw, 148px) 0 clamp(48px, 7vw, 80px);
+  color: var(--v5-ink);
+}
+
+/* -------------------------------------------------------------------- hero */
+.agents-cv5 .agents-v4-hero {
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+  gap: clamp(28px, 4vw, 64px);
+  padding: clamp(24px, 4vw, 48px) 0 clamp(40px, 6vw, 72px);
+}
+.agents-cv5 .agents-v4-copy { max-width: 560px; }
+
+/* One display scale for every heading on the page, matching `.cv5-hero h1`
+   and `.cv5-sec-copy h2` on the landing. The legacy -.075em/0.99 setting was
+   tuned for the light v4 layout and reads as broken tracking on the navy. */
+.agents-cv5 .agents-v4-copy h1 {
+  margin-top: 22px;
+  font-size: clamp(2.4rem, 5.2vw, 3.9rem);
+  font-weight: 860;
+  letter-spacing: -0.042em;
+  line-height: 1.12;
+}
+.agents-cv5 .agents-v4-heading h2,
+.agents-cv5 .agents-v4-handoff h2,
+.agents-cv5 .agents-v4-final h2 {
+  margin-top: 16px;
+  font-size: clamp(1.7rem, 3.2vw, 2.45rem);
+  font-weight: 830;
+  letter-spacing: -0.035em;
+  line-height: 1.18;
+}
+.agents-cv5 .agents-v4-copy > p,
+.agents-cv5 .agents-v4-heading > p,
+.agents-cv5 .agents-v4-handoff p {
+  margin-top: 18px;
+  font-size: 0.96rem;
+  line-height: 1.72;
+  color: var(--v5-ink-dim);
+}
+
+.agents-cv5 .agents-v4-actions { gap: 12px; margin-top: 32px; }
+.agents-cv5 .agents-v4-actions .button { min-height: 52px; padding: 0 24px; font-size: 0.98rem; }
+.agents-cv5 .agents-v4-actions .button-sm { min-height: 42px; padding: 0 18px; font-size: 0.9rem; }
+
+.agents-cv5 .agents-v4-proof {
+  gap: 8px;
+  margin-top: 32px;
+  color: var(--v5-ink-dim);
+  font: inherit;
+}
+.agents-cv5 .agents-v4-proof span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 13px;
+  border: 1px solid var(--v5-line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  font-family: var(--v5-label);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+.agents-cv5 .agents-v4-proof b { margin-right: 0; color: var(--v5-ink); font-size: inherit; }
+
+/* -------------------------------------------------------------- status rail */
+.agents-cv5 .agents-v4-rail {
+  border-block: 1px solid var(--v5-line);
+  background: rgba(255, 255, 255, 0.014);
+}
+.agents-cv5 .agents-v4-rail > div { padding: 22px 24px; border-right: 1px solid var(--v5-line); }
+.agents-cv5 .agents-v4-rail > div:last-of-type { border-right: 0; }
+.agents-cv5 .agents-v4-rail > div span {
+  font-family: var(--v5-label);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--v5-ink-faint);
+}
+.agents-cv5 .agents-v4-rail > div strong { color: var(--v5-ink); font-size: 0.95rem; font-weight: 700; }
+.agents-cv5 .agents-v4-rail > div small { color: var(--v5-ink-faint); font-size: 0.74rem; line-height: 1.55; }
+.agents-cv5 .agents-v4-rail .mcp-live-status { border-top: 1px solid var(--v5-line); }
+
+/* ---------------------------------------------------------------- sections */
+.agents-cv5 .agents-v4-section {
+  padding: clamp(56px, 8vw, 96px) 0;
+  border-bottom: 1px solid var(--v5-line);
+}
+.agents-cv5 .agents-v4-heading-wide { gap: clamp(18px, 3vw, 48px); margin-bottom: clamp(26px, 4vw, 40px); }
+
+/* four setup steps — the landing's numbered-cell rhythm */
+.agents-cv5 .agents-v4-steps { margin-top: clamp(26px, 4vw, 40px); border-top: 1px solid var(--v5-line); }
+.agents-cv5 .agents-v4-steps li { padding: 18px 20px; border-right: 1px solid var(--v5-line); }
+.agents-cv5 .agents-v4-steps span {
+  font-family: var(--v5-label);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  background: var(--v5-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.agents-cv5 .agents-v4-steps strong { color: var(--v5-ink); font-size: 0.98rem; font-weight: 700; }
+.agents-cv5 .agents-v4-steps small { color: var(--v5-ink-faint); font-size: 0.76rem; }
+
+/* tool catalog + status cards — glass, never white */
+.agents-cv5 .agents-v4-tool-grid { gap: 12px; }
+.agents-cv5 .agents-v4-tool-grid article,
+.agents-cv5 .agents-v4-statuses article {
+  padding: 18px;
+  border: 1px solid var(--v5-line);
+  border-radius: var(--v5-r);
+  background: rgba(255, 255, 255, 0.03);
+  transition: border-color 0.2s, transform 0.2s;
+}
+.agents-cv5 .agents-v4-tool-grid article:hover { transform: translateY(-2px); border-color: rgba(139, 92, 246, 0.45); }
+.agents-cv5 .agents-v4-tool-grid article > span,
+.agents-cv5 .agents-v4-statuses span {
+  font-family: var(--v5-label);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--v5-ink-faint);
+}
+.agents-cv5 .agents-v4-tool-grid code { color: var(--v5-cyan); font-size: 0.76rem; font-weight: 700; }
+.agents-cv5 .agents-v4-tool-grid strong { color: var(--v5-ink-dim); font-size: 0.8rem; line-height: 1.5; }
+.agents-cv5 .agents-v4-tool-grid small { border-top: 1px solid var(--v5-line); color: var(--v5-ink-faint); font-size: 0.62rem; }
+
+.agents-cv5 .agents-v4-statuses { gap: 10px; }
+.agents-cv5 .agents-v4-statuses strong { font-family: var(--v5-label); font-size: 1rem; font-weight: 700; }
+.agents-cv5 .agents-v4-statuses article:nth-child(1) strong { color: var(--v5-green); }
+.agents-cv5 .agents-v4-statuses article:nth-child(2) strong { color: var(--v5-amber); }
+.agents-cv5 .agents-v4-statuses article:nth-child(3) strong,
+.agents-cv5 .agents-v4-statuses article:nth-child(4) strong { color: var(--v5-ink-dim); }
+.agents-cv5 .agents-v4-statuses small { color: var(--v5-ink-faint); font-size: 0.7rem; }
+
+.agents-cv5 .agents-v4-profile-strip span {
+  padding: 7px 12px;
+  border: 1px solid var(--v5-line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--v5-ink-dim);
+  font-family: var(--v5-label);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+/* --------------------------------------------------------------- handoff */
+.agents-cv5 .agents-v4-handoff { gap: clamp(30px, 5vw, 60px); padding: clamp(56px, 8vw, 92px) 0; }
+.agents-cv5 .agents-v4-handoff-card {
+  border: 1px solid var(--v5-line-strong);
+  border-radius: var(--v5-r-lg);
+  background: linear-gradient(178deg, #131628, #0c0e1a 68%);
+  box-shadow: 0 36px 90px -40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(124, 93, 250, 0.1);
+  color: var(--v5-ink);
+}
+.agents-cv5 .agents-v4-handoff-card div { border-bottom: 1px solid var(--v5-line); font-family: var(--v5-label); font-size: 0.68rem; }
+.agents-cv5 .agents-v4-handoff-card span { color: var(--v5-ink-faint); }
+.agents-cv5 .agents-v4-handoff-card b { color: var(--v5-green); font-weight: 700; }
+.agents-cv5 .agents-v4-handoff-card div:nth-child(2) b { color: var(--v5-amber); }
+.agents-cv5 .agents-v4-handoff-card div:nth-child(3) b,
+.agents-cv5 .agents-v4-handoff-card div:nth-child(4) b { color: var(--v5-cyan); }
+
+.agents-cv5 .agents-v4-unavailable {
+  display: block;
+  margin-top: 18px;
+  padding: 11px 14px;
+  border: 1px solid rgba(251, 191, 36, 0.32);
+  border-radius: 11px;
+  background: rgba(251, 191, 36, 0.06);
+  color: var(--v5-amber);
+  font-family: var(--v5-label);
+  font-size: 0.68rem;
+  line-height: 1.6;
+}
+
+.agents-cv5 .agents-v4-machine-note {
+  margin-top: 22px;
+  padding: 12px 14px;
+  border: 1px solid var(--v5-line);
+  border-radius: 11px;
+  background: #0a0d18;
+  color: #9fb3d9;
+  font-family: var(--v5-label);
+  font-size: 0.62rem;
+  line-height: 1.7;
+  overflow-x: auto;
+}
+
+.agents-cv5 .agents-v4-final { padding: clamp(56px, 8vw, 80px) 0 20px; }
+
+/* ------------------------------------------------------------- asset strip */
+.agents-cv5 .agent-asset-strip-copy strong { color: var(--v5-ink); font-weight: 800; letter-spacing: -0.03em; }
+.agents-cv5 .agent-asset-strip-copy small { color: var(--v5-ink-faint); }
+.agents-cv5 .agent-asset-strip-items > div {
+  border: 1px solid var(--v5-line);
+  border-radius: var(--v5-r);
+  background: rgba(255, 255, 255, 0.03);
+}
+.agents-cv5 .agent-asset-strip-items span {
+  font-family: var(--v5-label);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--v5-ink-dim);
+}
+
+/* ------------------------------------------------------------- responsive */
+@media (max-width: 1080px) {
+  .agents-cv5 .agents-v4-hero { grid-template-columns: 1fr; }
+  .agents-cv5 .agents-v4-boundary { grid-template-columns: 1fr; gap: 28px; }
+  .agents-cv5 .agents-v4-handoff { grid-template-columns: 1fr; }
+  .agents-cv5 .agents-v4-heading-wide { flex-direction: column; align-items: flex-start; }
+  .agents-cv5 .agents-v4-tool-grid { grid-template-columns: repeat(2, 1fr); }
+  .agents-cv5 .agents-v4-statuses { grid-template-columns: repeat(2, 1fr); }
+  .agents-cv5 .agents-v4-rail { grid-template-columns: 1fr; }
+  .agents-cv5 .agents-v4-rail > div { border-right: 0; border-bottom: 1px solid var(--v5-line); }
+}
+@media (max-width: 640px) {
+  .agents-cv5 .agents-v4-steps { grid-template-columns: 1fr; }
+  .agents-cv5 .agents-v4-steps li { border-right: 0; border-bottom: 1px solid var(--v5-line); min-height: 0; }
+  .agents-cv5 .agents-v4-tool-grid,
+  .agents-cv5 .agents-v4-statuses { grid-template-columns: 1fr; }
+  .agents-cv5 .agents-v4-final { flex-direction: column; align-items: flex-start; }
+}

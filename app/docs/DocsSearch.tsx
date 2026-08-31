@@ -1,28 +1,27 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { DOCS_ROUTES } from "./docs-nav";
 
-const DOC_LINKS = [
-  { label: "빠른 시작", href: "#quickstart", keywords: "mcp endpoint 연결 키" },
-  { label: "클라이언트별 설정", href: "#clients", keywords: "claude code codex cursor copilot vscode" },
-  { label: "CLI와 CI", href: "#cli", keywords: "inspect validate passport texture readability" },
-  { label: "계약과 상태", href: "#contracts", keywords: "static visualRuntime playerFacing human review" },
-  { label: "Harvest Frontier", href: "#harvest-frontier", keywords: "hf scene gap frame manifest" },
-  { label: "지원 범위", href: "#scope", keywords: "godot unity unreal mobile" },
-];
-
+/**
+ * Sidebar search. It used to jump to anchors on the single docs page; now that
+ * every section is its own route it filters the route table and links to the
+ * page. Keywords live in docs-nav.ts next to the routes they describe.
+ */
 export function DocsSearch() {
   const [query, setQuery] = useState("");
   const results = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    if (!normalized) return DOC_LINKS;
-    return DOC_LINKS.filter((item) => `${item.label} ${item.keywords}`.toLowerCase().includes(normalized));
+    if (!normalized) return [];
+    return DOCS_ROUTES.filter((item) =>
+      `${item.label} ${item.title} ${item.keywords}`.toLowerCase().includes(normalized),
+    );
   }, [query]);
 
   return (
-    <div className="docs-search">
+    <div className="dv5-search">
       <label htmlFor="docs-search-input">문서 검색</label>
-      <div className="docs-search-field">
+      <div className="dv5-search-field">
         <span aria-hidden="true">⌕</span>
         <input
           id="docs-search-input"
@@ -32,11 +31,26 @@ export function DocsSearch() {
           placeholder="예: Codex, texture, frame"
           autoComplete="off"
         />
-        {query ? <button type="button" onClick={() => setQuery("")} aria-label="문서 검색 지우기">×</button> : null}
+        {query ? (
+          <button type="button" onClick={() => setQuery("")} aria-label="문서 검색 지우기">
+            ×
+          </button>
+        ) : null}
       </div>
-      <nav className="docs-search-results" aria-label="문서 검색 결과">
-        {results.length ? results.map((item) => <a key={item.href} href={item.href}>{item.label}<span>→</span></a>) : <p>일치하는 섹션이 없습니다.</p>}
-      </nav>
+      {query.trim() ? (
+        <nav className="dv5-search-results" aria-label="문서 검색 결과">
+          {results.length ? (
+            results.map((item) => (
+              <a key={item.href} href={item.href}>
+                {item.label}
+                <span aria-hidden="true">→</span>
+              </a>
+            ))
+          ) : (
+            <p>일치하는 문서가 없습니다.</p>
+          )}
+        </nav>
+      ) : null}
     </div>
   );
 }

@@ -38,11 +38,19 @@ test("Geist variables are declared on html so root font tokens resolve", async (
   assert.doesNotMatch(layout, /<body[\s\S]*geistSans\.variable/);
 });
 
-test("the sign-in boundary explains sample-first access without an imaginary proxy", async () => {
+test("the sign-in boundary sends visitors to a door that exists", async () => {
+  // 2026-08-31: the Sites-host gateway page was a dead end on this deployment
+  // (nothing behind it could ever authenticate), so it became a pure server
+  // redirect. The boundary it used to explain now lives on /login, which
+  // lists the real providers and their readiness.
   const signIn = await source("app/signin-with-chatgpt/page.tsx");
   assert.doesNotMatch(signIn, /3005/);
-  assert.match(signIn, /공개 샘플/);
-  assert.match(signIn, /실제 파일 검사/);
+  assert.match(signIn, /redirect\(/);
+  assert.match(signIn, /\/login\?return_to=/);
+
+  const login = await source("app/login/page.tsx");
+  assert.match(login, /준비 중/);
+  assert.match(login, /Google|GitHub/);
 });
 
 test("public source links use connect instead of the provider-conflicting mcp route", async () => {

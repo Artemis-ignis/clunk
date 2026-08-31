@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { access, readFile } from "node:fs/promises";
+import { access, readFile, readdir } from "node:fs/promises";
 import { constants } from "node:fs";
 import test from "node:test";
 
@@ -9,6 +9,21 @@ async function source(relativePath) {
   const url = new URL(relativePath, root);
   await access(url, constants.F_OK);
   return readFile(url, "utf8");
+}
+
+/**
+ * /docs became a multi-page GitBook manual on 2026-08-31: the sections that used
+ * to be anchors on app/docs/page.tsx are now app/docs/<topic>/page.tsx, and the
+ * long listings live in app/docs/docs-content.ts. These assertions freeze that
+ * the DOCS SURFACE publishes a fact, not which file holds it, so read them all.
+ */
+async function docsSurface() {
+  const dir = new URL("app/docs/", root);
+  const names = (await readdir(dir, { recursive: true })).filter((name) => /\.tsx?$/.test(name));
+  const parts = await Promise.all(
+    names.map((name) => readFile(new URL(name.replaceAll("\\", "/"), dir), "utf8")),
+  );
+  return parts.join("\n");
 }
 
 test("collaboration thread routes require authentication and workspace scoping", async () => {
@@ -82,7 +97,7 @@ test("frame evidence writes expose explicit append and replace semantics", async
   const helper = await source("app/api/_lib/collaboration.ts");
   const item = await source("app/api/collaboration/threads/[threadId]/route.ts");
   const messages = await source("app/api/collaboration/threads/[threadId]/messages/route.ts");
-  const docs = await source("app/docs/page.tsx");
+  const docs = await docsSurface();
   assert.match(helper, /FrameManifestWriteMode/);
   assert.match(helper, /comparison\.v1/);
   assert.match(helper, /procedural\/runtime-generated NOT_EVALUATED/);
@@ -102,7 +117,7 @@ test("collaboration UI keeps capture integrity, asset audit, and human visual re
   const panel = await source("app/components/CollaborationPanel.tsx");
   const agents = await source("app/agents/page.tsx");
   const facts = await source("app/components/product-facts.ts");
-  const docsPage = await source("app/docs/page.tsx");
+  const docsPage = await docsSurface();
   const llms = await source("public/llms.txt");
   assert.match(panel, /CAPTURE CONTRACT PASS/);
   assert.match(panel, /NUMERIC CONTRACT PASS/);
@@ -169,7 +184,7 @@ test("asset evidence UI exposes digest, byte provenance, and freshness without c
   const panel = await source("app/components/CollaborationPanel.tsx");
   const inspector = await source("app/components/ClunkInspector.tsx");
   const dashboard = await source("app/components/DashboardClient.tsx");
-  const docs = await source("app/docs/page.tsx");
+  const docs = await docsSurface();
   const llms = await source("public/llms.txt");
   assert.match(contract, /clunk\.asset-evidence-ref\.v1/);
   assert.match(contract, /evidenceRef/);

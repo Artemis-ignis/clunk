@@ -1,0 +1,180 @@
+@import "../components/cv5-surface.css";
+
+/* ============================================================================
+   CLUNK cv5 — /connect (2026-08-31 unified-site pass)
+
+   Master live review: this route rendered as a raw text dump — white ground,
+   the legacy nav pill, unstyled lists — while the landing next to it was the
+   cv5 navy product page. The page root now carries `cv5 cv5-surface`, which
+   (a) puts the nav under the `.cv5 .sitenav-*` rules in site-v5.css and
+   (b) swings the whole legacy token ramp onto the navy palette.
+
+   This file only retunes what the ramp cannot reach: type scale, panel shells
+   and grid rhythm for the connect-specific classes. No markup, copy, route or
+   data-fetch behaviour changes — the /connect contract in
+   tests/site-quality-contract.test.mjs still pins SampleRunWorkbench,
+   AgentsClient, /agents#connect and getChatGPTUser.
+   ========================================================================= */
+
+.connect-cv5 .connect-page {
+  width: min(var(--v5-frame), calc(100% - clamp(28px, 5vw, 88px)));
+  padding: clamp(112px, 13vw, 156px) 0 clamp(56px, 8vw, 96px);
+}
+
+/* -------------------------------------------------------------------- hero */
+.connect-cv5 .connect-hero {
+  grid-template-columns: minmax(0, 1.02fr) minmax(340px, 0.98fr);
+  gap: clamp(28px, 4vw, 64px);
+  min-height: 0;
+  padding-bottom: clamp(32px, 5vw, 64px);
+}
+
+.connect-cv5 .connect-hero-copy h1 {
+  margin-top: 22px;
+  font-size: clamp(2.4rem, 5.2vw, 3.9rem);
+  font-weight: 860;
+  letter-spacing: -0.042em;
+  line-height: 1.12;
+}
+
+/* The legacy rule pins both heading lines to `white-space: nowrap`, which
+   overflows the column once the type scale is cv5-sized. Korean stays unbroken
+   at the word level via keep-all instead, so the two-line shape survives
+   without a horizontal scrollbar. */
+.connect-cv5 .connect-hero-copy h1 > span,
+.connect-cv5 .connect-hero-copy h1 > em {
+  display: block;
+  white-space: normal;
+  word-break: keep-all;
+}
+
+.connect-cv5 .connect-hero-copy > p {
+  margin-top: 20px;
+  max-width: 540px;
+  font-size: clamp(1rem, 1.35vw, 1.12rem);
+  line-height: 1.72;
+  color: var(--v5-ink-dim);
+}
+
+.connect-cv5 .connect-hero-actions { gap: 12px; margin-top: 32px; }
+.connect-cv5 .connect-hero-actions .button { min-height: 52px; padding: 0 24px; font-size: 0.98rem; }
+
+.connect-cv5 .connect-proof {
+  gap: 8px;
+  margin-top: 34px;
+  font: inherit;
+}
+.connect-cv5 .connect-proof span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 13px;
+  border: 1px solid var(--v5-line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  font-family: var(--v5-label);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--v5-ink-dim);
+}
+.connect-cv5 .connect-proof b { color: var(--v5-ink); font-weight: 700; }
+
+/* live endpoint console — the cv5 glass mockup shell */
+.connect-cv5 .connect-hero-console {
+  padding: 0;
+  border: 1px solid var(--v5-line-strong);
+  border-radius: var(--v5-r-lg);
+  background: linear-gradient(178deg, #131628, #0c0e1a 68%);
+  box-shadow: 0 40px 90px -38px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(124, 93, 250, 0.12),
+    0 24px 80px -30px rgba(124, 93, 250, 0.35);
+}
+.connect-cv5 .connect-console-head {
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--v5-line);
+  font-family: var(--v5-label);
+  font-size: 0.63rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--v5-ink-faint);
+}
+.connect-cv5 .connect-console-head i { background: var(--v5-green); box-shadow: 0 0 12px var(--v5-green); }
+.connect-cv5 .connect-console-head code { color: var(--v5-cyan); }
+.connect-cv5 .connect-hero-console .mcp-live-status { padding: 14px 16px; }
+
+/* ---------------------------------------------------------------- sections */
+.connect-cv5 .connect-sample-section,
+.connect-cv5 .connect-section {
+  scroll-margin-top: 86px;
+  padding: clamp(56px, 8vw, 104px) 0 0;
+  border-top: 1px solid var(--v5-line);
+}
+
+.connect-cv5 .connect-section-heading {
+  grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.85fr);
+  gap: clamp(18px, 3vw, 48px);
+  margin-bottom: clamp(26px, 4vw, 40px);
+}
+.connect-cv5 .connect-section-heading h2 {
+  margin-top: 14px;
+  font-size: clamp(1.7rem, 3.2vw, 2.45rem);
+  font-weight: 830;
+  letter-spacing: -0.035em;
+  line-height: 1.18;
+}
+.connect-cv5 .connect-section-heading > p {
+  max-width: 430px;
+  font-size: 0.94rem;
+  line-height: 1.68;
+  color: var(--v5-ink-dim);
+}
+.connect-cv5 .connect-section-heading code { color: var(--v5-cyan); font-size: 0.84rem; }
+
+/* --------------------------------------------------------------- boundary */
+/* Four evidence lanes. Same anatomy as the landing's stats band: one glass
+   card per lane, monospace state, semantic colour carried by the state word. */
+.connect-cv5 .connect-boundary {
+  margin-top: clamp(56px, 8vw, 104px);
+  padding: clamp(34px, 5vw, 62px);
+  border: 1px solid var(--v5-line);
+  border-radius: var(--v5-r-lg);
+  background:
+    radial-gradient(52% 70% at 76% 12%, rgba(124, 93, 250, 0.14), transparent 68%),
+    var(--v5-bg1);
+}
+.connect-cv5 .connect-boundary h2 {
+  margin-top: 14px;
+  font-size: clamp(1.7rem, 3.2vw, 2.45rem);
+  font-weight: 830;
+  letter-spacing: -0.035em;
+  line-height: 1.18;
+}
+.connect-cv5 .connect-boundary p { margin-top: 16px; font-size: 0.94rem; line-height: 1.7; color: var(--v5-ink-dim); }
+
+.connect-cv5 .connect-boundary-grid { gap: 10px; }
+.connect-cv5 .connect-boundary-grid > div {
+  padding: 16px 18px;
+  border: 1px solid var(--v5-line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+.connect-cv5 .connect-boundary-grid span {
+  font-family: var(--v5-label);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--v5-ink-faint);
+}
+.connect-cv5 .connect-boundary-grid strong { margin-top: 10px; font-family: var(--v5-label); font-size: 0.86rem; }
+.connect-cv5 .connect-boundary-grid > div:nth-child(1) { border-color: rgba(52, 211, 153, 0.3); background: rgba(52, 211, 153, 0.06); }
+.connect-cv5 .connect-boundary-grid > div:nth-child(2) { border-color: rgba(251, 191, 36, 0.3); background: rgba(251, 191, 36, 0.06); }
+.connect-cv5 .connect-boundary-grid small { margin-top: 7px; font-size: 0.7rem; color: var(--v5-ink-faint); }
+
+/* ------------------------------------------------------------- responsive */
+@media (max-width: 1080px) {
+  .connect-cv5 .connect-hero { grid-template-columns: 1fr; }
+  .connect-cv5 .connect-section-heading { grid-template-columns: 1fr; }
+  .connect-cv5 .connect-section-heading > p { justify-self: start; }
+  .connect-cv5 .connect-boundary { grid-template-columns: 1fr; }
+}

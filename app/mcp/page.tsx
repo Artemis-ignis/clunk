@@ -2,8 +2,10 @@ import Link from "../components/NativeLink";
 import { Icon } from "../components/Icon";
 import { McpEndpointStatus } from "../components/McpEndpointStatus";
 import { SiteShell } from "../components/SiteShell";
+import { ForceDarkTheme } from "../components/ForceDarkTheme";
 import { MCP_HTTP_TOOL_COUNT, MCP_SERVER } from "../components/product-facts";
 import { createPageMetadata } from "../components/site-metadata";
+import "./mcp-v5.css";
 
 export const metadata = createPageMetadata({
   title: "MCP 연결",
@@ -13,7 +15,12 @@ export const metadata = createPageMetadata({
 
 export default function McpPage() {
   return (
-    <SiteShell active="agents">
+    /* cv5 chrome — wrapper sits above SiteShell so the nav picks up the
+       `.cv5 .sitenav-*` rules in site-v5.css. */
+    <div className="cv5 cv5-surface mcp-cv5">
+      <ForceDarkTheme />
+      <div className="cv5-stars" aria-hidden="true" />
+      <SiteShell active="agents">
       <main className="mcp-page">
         <section
           className="mcp-page-hero public-hero-frame public-hero-mcp snap-section"
@@ -29,7 +36,7 @@ export default function McpPage() {
             </p>
             <div className="mcp-page-actions">
               <Link className="button button-primary" href="/agents#connect">연결 키 발급 <Icon name="arrowUpRight" size={15} /></Link>
-              <Link className="button button-quiet" href="/docs#clients">설정 문서 <Icon name="arrowRight" size={15} /></Link>
+              <Link className="button button-quiet" href="/docs/clients">설정 문서 <Icon name="arrowRight" size={15} /></Link>
             </div>
           </div>
           <div className="mcp-page-console" aria-label="Clunk MCP endpoint 상태">
@@ -60,6 +67,7 @@ export default function McpPage() {
           </div>
         </section>
       </main>
-    </SiteShell>
+      </SiteShell>
+    </div>
   );
 }

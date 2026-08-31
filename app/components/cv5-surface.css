@@ -1,0 +1,395 @@
+/* ============================================================================
+   CLUNK cv5 — shared surface layer for the product / workspace pages
+   (2026-08-31 unified-site pass, partition: connect · agents · mcp · series ·
+   kits · app · studio · dashboard · settings · passport · assets)
+
+   WHY THIS FILE EXISTS
+   The public landing and the marketplace already live on the cv5 deep-navy
+   design system (app/site-v5.css). Every remaining product surface still keys
+   its colours off the LIGHT-first legacy token ramp in globals.css, plus the
+   warm-paper foundry ramp, plus a `--v4-*` ramp that is only ever declared on
+   `.clunk-v4` — a class none of these pages carry, so `var(--v4-ink)` resolved
+   to nothing and whole sections rendered as unstyled black-on-white text. That
+   is the "raw text dump" the 2026-08-31 master live review caught on /connect.
+
+   Every one of those legacy stylesheets is strictly token-driven, so the fix is
+   a token remap rather than a rewrite: a page opts in by putting
+   `cv5 cv5-surface` on its root element (plus <ForceDarkTheme/>), and the whole
+   legacy cascade resolves against the cv5 navy/indigo palette instead. Page
+   structure, class names and markup are untouched — the frozen-copy contract
+   tests keep passing.
+
+   No structural rules live in the ramp block. Chrome-level fixes that every
+   page in the partition shares (site footer, buttons, eyebrows, panels) follow
+   the ramp; anything page-specific lives in that page's own *-v5.css.
+   ========================================================================= */
+
+/* ---------------------------------------------------------------- the ramp */
+/* Two selectors, deliberately: the bare `:root:has()` keeps the page dark even
+   in the instant before the theme script runs (and with JS off), while the
+   `[data-theme]` copy raises specificity above `:root[data-theme="dark"]` in
+   globals.css so bundle order can never flip the palette back to light. */
+:root:has(.cv5-surface),
+:root[data-theme]:has(.cv5-surface) {
+  color-scheme: dark;
+
+  /* --- globals.css ramp → cv5 navy ground (values mirror app/site-v5.css) --- */
+  --ink-0: #06070f;
+  --ink-1: #0a0c16;
+  --ink-2: #10121e;
+  --ink-3: #151830;
+  --ink-4: #1b1f3e;
+  --ink-inverse: #0a0d18;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.15);
+
+  --tint-1: rgba(255, 255, 255, 0.03);
+  --tint-2: rgba(255, 255, 255, 0.05);
+  --tint-3: rgba(255, 255, 255, 0.08);
+
+  --text: rgba(233, 236, 248, 0.72);
+  --text-strong: #f4f5fa;
+  --text-muted: rgba(233, 236, 248, 0.66);
+  --text-dim: rgba(233, 236, 248, 0.46);
+  --text-on-accent: #ffffff;
+
+  /* --accent has to stay legible as body-sized text on the navy ground, so the
+     readable indigo is the text colour and the saturated brand ramp is kept for
+     fills and glows only — the same split site-v5.css makes. */
+  --accent: #a5a8ff;
+  --accent-strong: #8b8cf8;
+  --accent-bright: #8b5cf6;
+  --accent-glow: #c4b5fd;
+  --accent-soft: rgba(99, 102, 241, 0.14);
+  --accent-line: rgba(139, 92, 246, 0.38);
+  --accent-ink: #ffffff;
+
+  --accent-2: #c084fc;
+  --accent-2-bright: #a855f7;
+  --accent-2-soft: rgba(168, 85, 247, 0.14);
+
+  --success: #34d399;
+  --success-soft: rgba(52, 211, 153, 0.13);
+  --warning: #fbbf24;
+  --warning-soft: rgba(251, 191, 36, 0.13);
+  --danger: #f87171;
+  --danger-soft: rgba(248, 113, 113, 0.13);
+
+  --glass: rgba(10, 12, 22, 0.74);
+  --glass-strong: rgba(6, 7, 15, 0.92);
+  --ground-rgb: 6, 7, 15;
+
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.44), 0 4px 14px rgba(0, 0, 0, 0.36);
+  --shadow-panel: 0 2px 4px rgba(0, 0, 0, 0.4), 0 18px 44px rgba(0, 0, 0, 0.5);
+  --shadow-lift: 0 4px 12px rgba(0, 0, 0, 0.46), 0 30px 70px rgba(0, 0, 0, 0.6);
+  --shadow-accent: 0 12px 44px -12px rgba(124, 93, 250, 0.55);
+
+  /* Literal stacks only. A nested var() whose inner variable is undefined is
+     guaranteed-invalid and silently drops the whole page to the system font —
+     the font-poisoning bug the 2026-08-31 review caught. */
+  --font-sans: "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono: "Space Grotesk V", "Space Grotesk", ui-monospace, "Cascadia Mono", monospace;
+  /* A large number of legacy rules (all of foundry.css) reach past --font-mono
+     straight to the next/font variable, so the cv5 label face has to be swapped
+     in at that level too or half the page keeps the Geist look. Same literal
+     stacks — never a nested var() that could be undefined. */
+  --font-geist-sans: "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-geist-mono: "Space Grotesk V", "Space Grotesk", ui-monospace, "Cascadia Mono", monospace;
+
+  /* --- foundry.css warm-paper ramp → the same navy ground --- */
+  --foundry-paper: #06070f;
+  --foundry-paper-strong: #0a0c16;
+  --foundry-paper-deep: #04050b;
+  --foundry-ink: #f4f5fa;
+  --foundry-ink-soft: rgba(233, 236, 248, 0.7);
+  --foundry-ink-faint: rgba(233, 236, 248, 0.46);
+  --foundry-graphite: #0a0c16;
+  --foundry-graphite-soft: #151830;
+  --foundry-line: rgba(255, 255, 255, 0.08);
+  --foundry-line-strong: rgba(255, 255, 255, 0.15);
+  --foundry-amber: #c084fc;
+  --foundry-amber-deep: #a5a8ff;
+  --foundry-amber-soft: rgba(139, 92, 246, 0.16);
+  --foundry-cyan: #59d9ff;
+  --foundry-cyan-soft: rgba(89, 217, 255, 0.14);
+  --foundry-green: #34d399;
+  --foundry-red: #f87171;
+  --foundry-shadow: 0 24px 68px rgba(0, 0, 0, 0.5);
+
+  /* --- the `--v4-*` ramp globals.css only ever declares on `.clunk-v4` ---
+     /agents styles ~90 rules against these while carrying `.agents-v4-page`,
+     never `.clunk-v4`, so every one of them resolved to an invalid value and
+     the section rendered as raw text. Declaring them here is what actually
+     un-breaks that page. */
+  --v4-ink: #f4f5fa;
+  --v4-muted: rgba(233, 236, 248, 0.66);
+  --v4-line: rgba(255, 255, 255, 0.08);
+  --v4-cyan: #59d9ff;
+  --v4-blue: #8b8cf8;
+}
+
+/* ---------------------------------------------------------------- ambience */
+/* The landing paints `.cv5-stars` as a fixed layer at z-index 0 and lifts its
+   own direct children above it. These pages nest their content one level
+   deeper (inside SiteShell / the workspace grid), so the lift is re-declared. */
+.cv5-surface > .site-shell,
+.cv5-surface > .workspace-column,
+.cv5-surface > .workspace-rail,
+.cv5-surface > main { position: relative; z-index: 1; }
+
+/* ------------------------------------------------------------------ typography */
+/* Legacy headings ship a slab of hard tracking tuned for the light v4 layout;
+   cv5 headings are tighter, balanced, and never break a Korean word. */
+.cv5-surface h1,
+.cv5-surface h2,
+.cv5-surface h3 {
+  color: var(--v5-ink);
+  letter-spacing: -0.038em;
+  text-wrap: balance;
+  word-break: keep-all;
+}
+
+/* Across every legacy surface `<em>` inside a heading is the accent phrase.
+   cv5 renders that as the indigo→violet gradient, exactly like the landing. */
+.cv5-surface h1 em,
+.cv5-surface h2 em {
+  background: var(--v5-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-style: normal;
+}
+
+.cv5-surface .eyebrow {
+  font-family: var(--v5-label);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--v5-ink-faint);
+  text-transform: uppercase;
+}
+
+.cv5-surface .mono-label {
+  font-family: var(--v5-label);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--v5-ink-faint);
+}
+
+.cv5-surface code,
+.cv5-surface kbd,
+.cv5-surface samp { font-family: var(--v5-label); }
+
+.cv5-surface .text-link { color: var(--v5-ink); font-weight: 700; }
+.cv5-surface .text-link:hover { color: #cdb7ff; }
+
+.cv5-surface .hero-status-line { font-family: var(--v5-label); letter-spacing: 0.12em; }
+.cv5-surface .hero-status-line code { color: var(--v5-cyan); }
+
+/* --------------------------------------------------------------- controls */
+/* The legacy `.button-primary` is a cyan gradient; cv5's primary is the
+   indigo→violet ramp with the brand glow. Matching them is what makes a
+   workspace CTA read as the same product as the landing CTA. */
+.cv5-surface .button {
+  border-radius: 12px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.cv5-surface .button-primary {
+  background: var(--v5-grad);
+  color: #fff;
+  box-shadow: var(--v5-glow);
+}
+.cv5-surface .button-primary:hover:not(:disabled) {
+  background: var(--v5-grad);
+  filter: brightness(1.08);
+  box-shadow: var(--v5-glow);
+}
+.cv5-surface .button-quiet {
+  border-color: var(--v5-line-strong);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--v5-ink);
+  box-shadow: none;
+}
+.cv5-surface .button-quiet:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--v5-ink);
+  box-shadow: none;
+}
+
+/* ----------------------------------------------------------------- panels */
+.cv5-surface .panel {
+  border-radius: var(--v5-r-lg);
+  border-color: var(--v5-line);
+  background: linear-gradient(178deg, rgba(19, 22, 40, 0.6), rgba(11, 13, 24, 0.6)), var(--v5-bg1);
+  box-shadow: 0 30px 80px -44px rgba(0, 0, 0, 0.9);
+}
+
+/* Definition lists are the single most common "unstyled dump" shape in this
+   partition (settings, passport, asset detail): a bare dt/dd pair inherits no
+   layout at all. Give every one of them the cv5 row treatment. */
+.cv5-surface dl { margin: 0; }
+.cv5-surface dt { font-family: var(--v5-label); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; color: var(--v5-ink-faint); }
+.cv5-surface dd { margin: 0; color: var(--v5-ink-dim); }
+
+/* ----------------------------------------------------------------- footer */
+/* SiteShell's footer is shared with the landing-adjacent pages but styled off
+   the legacy ramp. The remap already darkens it; these rules bring the type
+   and the decorative art in line with `.cv5-footer`. */
+.cv5-surface .site-footer {
+  margin-top: clamp(48px, 7vw, 80px);
+  border-top: 1px solid var(--v5-line);
+  background: rgba(255, 255, 255, 0.012);
+}
+.cv5-surface .site-footer-art { opacity: 0.1; filter: saturate(0.4) brightness(0.5); }
+.cv5-surface .site-footer-brand strong { font-family: var(--v5-label); letter-spacing: 0.14em; color: var(--v5-ink); }
+.cv5-surface .site-footer-brand span { color: var(--v5-ink-faint); }
+.cv5-surface .site-footer-nav a { color: var(--v5-ink-dim); font-size: 0.86rem; }
+.cv5-surface .site-footer-nav a:hover { color: var(--v5-ink); }
+.cv5-surface .demo-marker {
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  border-radius: 999px;
+  background: rgba(251, 191, 36, 0.08);
+  color: var(--v5-amber);
+  font-family: var(--v5-label);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+}
+
+/* --------------------------------------------------------------- surfaces */
+/* Legacy cards hardcode `background: #fff` in a handful of v4 rules that the
+   token remap cannot reach. Anything still painting white on the navy ground
+   would be a light-theme leftover, so they are caught by class here. */
+.cv5-surface .agents-v4-tool-grid article,
+.cv5-surface .agents-v4-statuses article,
+.cv5-surface .agents-v4-profile-strip span {
+  border-color: var(--v5-line);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* ============================================================================
+   Shared product widgets
+
+   SampleRunWorkbench and LiveEvidenceShowcase are two-tone by design: a dark
+   render stage on the left and a LIGHT information panel on the right, with the
+   light half hardcoded (#f8fbfa / #f8fbfc / #fff) rather than tokenised. On a
+   cv5 navy page that half is a white slab — the most visible piece of the "raw
+   dump" the master reported on /connect.
+
+   Both widgets are shared with pages outside this partition (/docs, /pricing),
+   so every rule below is scoped to `.cv5-surface` and changes nothing there.
+   ========================================================================= */
+
+/* ---- SampleRunWorkbench (/connect, /agents) ---- */
+.cv5-surface .sample-workbench {
+  border: 1px solid var(--v5-line-strong);
+  border-radius: var(--v5-r-lg);
+  box-shadow: 0 36px 90px -40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(124, 93, 250, 0.08);
+}
+.cv5-surface .sample-workbench-topbar {
+  border-bottom-color: var(--v5-line);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--v5-ink-faint);
+  font-family: var(--v5-label);
+  letter-spacing: 0.14em;
+}
+.cv5-surface .sample-workbench-topbar > div { color: var(--v5-ink); }
+.cv5-surface .sample-workbench-panel {
+  background: linear-gradient(178deg, rgba(19, 22, 40, 0.85), rgba(11, 13, 24, 0.95)), var(--v5-bg1);
+  color: var(--v5-ink);
+}
+.cv5-surface .sample-workbench-tabs button { color: var(--v5-ink-faint); font-family: var(--v5-label); }
+.cv5-surface .sample-workbench-tabs button span { color: var(--v5-ink-faint); }
+.cv5-surface .sample-workbench-tabs button:hover { color: var(--v5-ink); }
+.cv5-surface .sample-workbench-tabs button.is-active { border-color: #a855f7; color: var(--v5-ink); }
+.cv5-surface .sample-workbench-tabs button.is-active span { color: #c4b5fd; }
+.cv5-surface .sample-workbench-kicker { color: #c4b5fd; font-family: var(--v5-label); letter-spacing: 0.14em; }
+.cv5-surface .sample-workbench-panel h3 { color: var(--v5-ink); letter-spacing: -0.035em; line-height: 1.2; }
+.cv5-surface .sample-workbench-panel > p { color: var(--v5-ink-dim); }
+.cv5-surface .sample-workbench-metadata > div {
+  border-color: var(--v5-line);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.03);
+}
+.cv5-surface .sample-workbench-metadata span { color: var(--v5-ink-faint); font-family: var(--v5-label); }
+.cv5-surface .sample-workbench-metadata strong { color: var(--v5-ink); font-family: var(--v5-label); }
+.cv5-surface .sample-workbench-boundary { color: var(--v5-ink-faint); font-family: var(--v5-label); }
+
+/* the four evidence-lane cards inside the workbench panel */
+.cv5-surface .sample-evidence-status-grid .evidence-status-card {
+  border-color: var(--v5-line);
+  background: rgba(255, 255, 255, 0.03);
+}
+.cv5-surface .sample-evidence-status-grid .evidence-status-card > span { color: var(--v5-ink-faint); }
+.cv5-surface .sample-evidence-status-grid .evidence-status-card > strong { color: var(--v5-ink); }
+.cv5-surface .sample-evidence-status-grid .evidence-status-card > small { color: var(--v5-ink-faint); }
+.cv5-surface .sample-evidence-status-grid .evidence-status-card-pass > strong { color: var(--v5-green); }
+.cv5-surface .sample-evidence-status-grid .evidence-status-card-gap > strong { color: var(--v5-amber); }
+
+/* ---- LiveEvidenceShowcase (/agents, /dashboard, /studio) ---- */
+.cv5-surface .live-evidence-showcase {
+  border: 1px solid var(--v5-line-strong);
+  border-radius: var(--v5-r-lg);
+  box-shadow: 0 36px 90px -40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(124, 93, 250, 0.08);
+}
+.cv5-surface .live-evidence-showcase-detail {
+  background: linear-gradient(178deg, rgba(19, 22, 40, 0.85), rgba(11, 13, 24, 0.95)), var(--v5-bg1);
+  color: var(--v5-ink);
+}
+.cv5-surface .live-evidence-showcase-file { border-bottom-color: var(--v5-line); }
+.cv5-surface .live-evidence-showcase-file-icon {
+  border-color: rgba(139, 92, 246, 0.35);
+  background: var(--v5-grad-soft);
+  color: #c4b5fd;
+}
+.cv5-surface .live-evidence-showcase-file strong { color: var(--v5-ink); font-family: var(--v5-label); }
+.cv5-surface .live-evidence-showcase-file small { color: var(--v5-ink-faint); font-family: var(--v5-label); }
+.cv5-surface .live-evidence-showcase-file-state {
+  background: rgba(52, 211, 153, 0.12);
+  color: var(--v5-green);
+  font-family: var(--v5-label);
+}
+.cv5-surface .live-evidence-showcase-kicker { color: #c4b5fd; font-family: var(--v5-label); letter-spacing: 0.14em; }
+.cv5-surface .live-evidence-showcase-detail h2 { color: var(--v5-ink); letter-spacing: -0.035em; line-height: 1.2; }
+.cv5-surface .live-evidence-showcase-detail > p { color: var(--v5-ink-dim); }
+.cv5-surface .live-evidence-showcase-proof span { color: var(--v5-ink-faint); font-family: var(--v5-label); }
+.cv5-surface .live-evidence-showcase-proof code { color: var(--v5-cyan); font-family: var(--v5-label); }
+.cv5-surface .live-evidence-showcase-status {
+  border-color: var(--v5-line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+}
+.cv5-surface .live-evidence-showcase-status.is-active {
+  border-color: rgba(139, 92, 246, 0.5);
+  background: var(--v5-grad-soft);
+}
+.cv5-surface .live-evidence-showcase-status span { color: var(--v5-ink-faint); font-family: var(--v5-label); }
+.cv5-surface .live-evidence-showcase-status strong { color: var(--v5-ink-dim); font-family: var(--v5-label); }
+.cv5-surface .live-evidence-showcase-status small { color: var(--v5-ink-faint); }
+.cv5-surface .live-evidence-showcase-status-pass strong { color: var(--v5-green); }
+.cv5-surface .live-evidence-showcase-status-gap strong { color: var(--v5-amber); }
+.cv5-surface .live-evidence-showcase-status-pending strong { color: var(--v5-ink-faint); }
+
+/* ---- AgentsClient connection UI (/connect, /agents) ---- */
+/* Already dark, but on the v4 slate-blue ground with a cyan tab indicator. */
+.cv5-surface .agent-connect-ui {
+  border: 1px solid var(--v5-line-strong);
+  border-radius: var(--v5-r-lg);
+  background: linear-gradient(178deg, #131628, #0c0e1a 68%);
+  box-shadow: 0 36px 90px -40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(124, 93, 250, 0.1);
+}
+.cv5-surface .agent-connection-toolbar {
+  border-bottom-color: var(--v5-line);
+  background: var(--v5-grad-soft);
+}
+.cv5-surface .agent-tab { color: var(--v5-ink-faint); }
+.cv5-surface .agent-tab:hover,
+.cv5-surface .agent-tab-active { color: var(--v5-ink); }
+.cv5-surface .agent-tab-active { border-bottom-color: #a855f7; }
+.cv5-surface .agent-tab-dot { background: var(--v5-amber); }
+.cv5-surface .agent-guide-copy h3 { color: var(--v5-ink); letter-spacing: -0.035em; line-height: 1.18; }
+.cv5-surface .agent-code-card,
+.cv5-surface .agent-handshake-card { border-color: var(--v5-line); border-radius: var(--v5-r); }
+.cv5-surface .agent-key-list > div code { color: var(--v5-cyan); }

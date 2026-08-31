@@ -6,7 +6,9 @@ import { BrandMark } from "./BrandMark";
 import { Icon, type IconName } from "./Icon";
 import { ThemeToggle } from "./ThemeToggle";
 import { SnapRoot } from "./SnapRoot";
+import { ForceDarkTheme } from "./ForceDarkTheme";
 import "../workspace.css";
+import "./workspace-v5.css";
 
 /**
  * Ported from custom-globe-component/components/creative.tsx.
@@ -114,8 +116,16 @@ export function WorkspaceShell({
   );
 
   return (
-    <div className={`workspace foundry-workspace-page${railOpen ? " workspace-rail-open" : ""}`}>
+    /* cv5 chrome (2026-08-31 unified-site pass): every authenticated workspace
+       route — /dashboard /assets /studio /kits?view=workspace /app /passport
+       /settings — renders through this shell, so opting the shell in is what
+       moves all of them onto the cv5 navy ground in one place. `cv5-surface`
+       swings the legacy globals/foundry token ramps; ForceDarkTheme pins
+       data-theme=dark so those ramps never resolve to the light palette. */
+    <div className={`workspace foundry-workspace-page cv5 cv5-surface workspace-cv5${railOpen ? " workspace-rail-open" : ""}`}>
+      <ForceDarkTheme />
       <SnapRoot mode="workspace" />
+      <div className="cv5-stars" aria-hidden="true" />
       <div className="workspace-aurora" aria-hidden="true" />
 
       <aside className="workspace-rail" aria-label="워크스페이스 사이드바">

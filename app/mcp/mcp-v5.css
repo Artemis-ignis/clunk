@@ -1,0 +1,121 @@
+@import "../components/cv5-surface.css";
+
+/* ============================================================================
+   CLUNK cv5 — /mcp (2026-08-31 unified-site pass)
+
+   This page was already token-driven against the globals ramp, so it rendered
+   in the LIGHT palette: a white product page one click from the navy landing.
+   The `cv5-surface` ramp fixes the palette; this file brings the display scale
+   and the panel shells in line with the landing.
+
+   tests/public-journeys-contract.test.mjs pins `path: "/mcp"`, the three
+   data-snap-section markers and McpEndpointStatus — all unchanged.
+   ========================================================================= */
+
+.mcp-cv5 .mcp-page {
+  width: min(var(--v5-frame), calc(100% - clamp(28px, 5vw, 88px)));
+  padding: clamp(112px, 13vw, 156px) 0 clamp(56px, 8vw, 96px);
+}
+
+/* -------------------------------------------------------------------- hero */
+.mcp-cv5 .mcp-page-hero {
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+  gap: clamp(28px, 4vw, 64px);
+  min-height: 0;
+  padding-bottom: clamp(40px, 6vw, 72px);
+}
+.mcp-cv5 .mcp-page-copy { max-width: 560px; }
+.mcp-cv5 .mcp-page-copy h1 {
+  margin-top: 22px;
+  font-size: clamp(2.4rem, 5.2vw, 3.9rem);
+  font-weight: 860;
+  letter-spacing: -0.042em;
+  line-height: 1.12;
+}
+.mcp-cv5 .mcp-page-copy p {
+  margin-top: 20px;
+  max-width: 540px;
+  font-size: clamp(1rem, 1.35vw, 1.12rem);
+  line-height: 1.72;
+  color: var(--v5-ink-dim);
+}
+.mcp-cv5 .mcp-page-actions { gap: 12px; margin-top: 32px; }
+.mcp-cv5 .mcp-page-actions .button { min-height: 52px; padding: 0 24px; font-size: 0.98rem; }
+
+/* live endpoint console — same glass shell as /connect */
+.mcp-cv5 .mcp-page-console {
+  border: 1px solid var(--v5-line-strong);
+  border-radius: var(--v5-r-lg);
+  background: linear-gradient(178deg, #131628, #0c0e1a 68%);
+  box-shadow: 0 40px 90px -38px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(124, 93, 250, 0.12),
+    0 24px 80px -30px rgba(124, 93, 250, 0.35);
+}
+.mcp-cv5 .mcp-page-console-head {
+  min-height: 50px;
+  border-bottom: 1px solid var(--v5-line);
+  font-family: var(--v5-label);
+  font-size: 0.63rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--v5-ink-faint);
+}
+.mcp-cv5 .mcp-page-console-head i { background: var(--v5-green); box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.12); }
+.mcp-cv5 .mcp-page-console-head code { color: var(--v5-cyan); }
+.mcp-cv5 .mcp-page-console .mcp-live-status { padding: 14px 16px; }
+
+/* ------------------------------------------------------------------- steps */
+.mcp-cv5 .mcp-page-steps {
+  border-block: 1px solid var(--v5-line);
+  background: rgba(255, 255, 255, 0.014);
+}
+.mcp-cv5 .mcp-page-steps article { min-height: 0; padding: clamp(22px, 3vw, 32px); border-right: 1px solid var(--v5-line); }
+.mcp-cv5 .mcp-page-steps span,
+.mcp-cv5 .mcp-page-status-grid span {
+  font-family: var(--v5-label);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  background: var(--v5-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.mcp-cv5 .mcp-page-steps strong { margin-top: 20px; color: var(--v5-ink); font-size: 1rem; font-weight: 700; }
+.mcp-cv5 .mcp-page-steps p { margin-top: 9px; color: var(--v5-ink-dim); font-size: 0.82rem; line-height: 1.65; }
+
+/* ---------------------------------------------------------------- boundary */
+.mcp-cv5 .mcp-page-boundary {
+  grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
+  gap: clamp(26px, 4vw, 60px);
+  padding: clamp(56px, 8vw, 104px) 0 0;
+}
+.mcp-cv5 .mcp-page-boundary h2 {
+  margin-top: 16px;
+  font-size: clamp(1.7rem, 3.2vw, 2.45rem);
+  font-weight: 830;
+  letter-spacing: -0.035em;
+  line-height: 1.18;
+}
+.mcp-cv5 .mcp-page-boundary p { margin-top: 18px; font-size: 0.96rem; line-height: 1.72; color: var(--v5-ink-dim); }
+
+.mcp-cv5 .mcp-page-status-grid { gap: 10px; }
+.mcp-cv5 .mcp-page-status-grid > div {
+  min-height: 0;
+  padding: 18px;
+  border: 1px solid var(--v5-line);
+  border-radius: var(--v5-r);
+  background: rgba(255, 255, 255, 0.03);
+}
+.mcp-cv5 .mcp-page-status-grid strong { margin-top: 20px; color: var(--v5-ink); font-family: var(--v5-label); font-size: 1rem; font-weight: 700; }
+.mcp-cv5 .mcp-page-status-grid small { margin-top: 8px; color: var(--v5-ink-faint); font-size: 0.7rem; line-height: 1.5; }
+
+/* ------------------------------------------------------------- responsive */
+@media (max-width: 1080px) {
+  .mcp-cv5 .mcp-page-hero,
+  .mcp-cv5 .mcp-page-boundary { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .mcp-cv5 .mcp-page-steps,
+  .mcp-cv5 .mcp-page-status-grid { grid-template-columns: 1fr; }
+  .mcp-cv5 .mcp-page-steps article { border-right: 0; border-bottom: 1px solid var(--v5-line); }
+}

@@ -2,9 +2,11 @@ import { requireChatGPTUser } from "../chatgpt-auth";
 import { KitsClient } from "../components/KitsClient";
 import Link from "../components/NativeLink";
 import { SiteShell } from "../components/SiteShell";
+import { ForceDarkTheme } from "../components/ForceDarkTheme";
 import { WorkspaceShell } from "../components/WorkspaceShell";
 import { createPageMetadata } from "../components/site-metadata";
 import styles from "./kits.module.css";
+import "../components/cv5-surface.css";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +18,13 @@ export const metadata = createPageMetadata({
 
 function PublicKitsPage() {
   return (
-    <SiteShell>
+    /* cv5 chrome — wrapper above SiteShell so the nav picks up the
+       `.cv5 .sitenav-*` rules in site-v5.css; kits.module.css carries the
+       page palette (its own variables never existed, so it hardcoded light). */
+    <div className="cv5 cv5-surface kits-cv5">
+      <ForceDarkTheme />
+      <div className="cv5-stars" aria-hidden="true" />
+      <SiteShell>
       <main className={styles.page}>
         <section
           className={styles.hero + " snap-section"}
@@ -121,7 +129,8 @@ function PublicKitsPage() {
           </div>
         </section>
       </main>
-    </SiteShell>
+      </SiteShell>
+    </div>
   );
 }
 

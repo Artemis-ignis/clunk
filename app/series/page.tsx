@@ -1,6 +1,8 @@
 import { ClunkSeriesCatalog } from "../components/ClunkSeriesCatalog";
 import { SiteShell } from "../components/SiteShell";
+import { ForceDarkTheme } from "../components/ForceDarkTheme";
 import { createPageMetadata } from "../components/site-metadata";
+import "./series-v5.css";
 import { getClunkSeriesCatalog } from "../../packages/clunk-series/src/catalog";
 import { getClunkSourceManifest } from "../../packages/clunk-series/src/source-manifest";
 
@@ -16,7 +18,12 @@ export default function SeriesPage() {
   const nativeCount = catalog.filter((entry) => entry.availability === "native").length;
 
   return (
-    <SiteShell active="series">
+    /* cv5 chrome — the foundry warm-paper ramp this page renders against is
+       remapped onto the navy palette by cv5-surface.css. */
+    <div className="cv5 cv5-surface series-cv5">
+      <ForceDarkTheme />
+      <div className="cv5-stars" aria-hidden="true" />
+      <SiteShell active="series">
       <main className="series-page foundry-page">
         <header
           className="series-hero foundry-frame snap-section"
@@ -91,6 +98,7 @@ export default function SeriesPage() {
           <div className="series-source-callout"><span className="mono-label">CLUNK RULE · clunk-series-native-v1</span><strong>라이선스가 확인되지 않은 자료는 제품 코드와 에셋에 포함하지 않습니다.</strong><span>공개 저장소를 가져온 사실과 Clunk가 실제로 실행하는 코드는 분리해 기록합니다.</span></div>
         </section>
       </main>
-    </SiteShell>
+      </SiteShell>
+    </div>
   );
 }

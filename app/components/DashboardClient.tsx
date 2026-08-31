@@ -184,7 +184,7 @@ export function nextVerificationFor(run: Run | null, statuses: EvidenceStatuses)
     title: "다음 변경도 같은 계약으로 비교하세요.",
     detail: "before/after frame pair와 sourceTreeHash를 고정하면 재현 가능한 회귀 기록이 됩니다.",
     action: "계약 문서 보기",
-    href: "/docs#contracts",
+    href: "/docs/contracts",
   };
 }
 
@@ -728,7 +728,7 @@ function NextVerificationRail({ next }: { next: NextVerification }) {
         </Link>
         <Link className="button button-quiet button-sm" href="/studio">Asset Studio</Link>
         <Link className="button button-quiet button-sm" href="/agents#connect">에이전트 연결</Link>
-        <Link className="button button-quiet button-sm" href="/docs#contracts">계약 보기</Link>
+        <Link className="button button-quiet button-sm" href="/docs/contracts">계약 보기</Link>
       </div>
     </section>
   );

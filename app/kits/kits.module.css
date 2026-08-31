@@ -1,34 +1,53 @@
+/* ============================================================================
+   CLUNK cv5 — /kits public surface (2026-08-31 unified-site pass)
+
+   Rewritten from the light "paper" palette onto the cv5 deep-navy system. The
+   old file keyed every colour off `var(--ink, #10222d)` / `var(--paper,
+   #f7faf9)` / `var(--muted, …)` — variables that are not declared anywhere in
+   the app, so every one of them resolved to its hardcoded LIGHT fallback and
+   the page rendered as a white sheet regardless of theme. That is why a token
+   remap alone could not save this surface and the module itself had to move.
+
+   Class names are unchanged (page.tsx keys off styles.page, styles.hero,
+   styles.manifest, styles.flowGrid, styles.stateCard, styles.nextLinks, …) and
+   so is every string of copy, so the /kits contract in
+   tests/public-journeys-contract.test.mjs still passes.
+
+   The `--v5-*` tokens are inherited from the `.cv5` wrapper the page root now
+   carries; the literal hex fallbacks keep this module readable on its own.
+   ========================================================================= */
+
 .page {
-  color: var(--ink, #10222d);
-  background:
-    radial-gradient(circle at 82% 8%, rgba(22, 156, 188, 0.1), transparent 26rem),
-    var(--paper, #f7faf9);
+  color: var(--v5-ink, #f4f5fa);
+  background: transparent;
 }
 
 .hero,
 .section,
 .emptySection,
 .nextSection {
-  width: min(1240px, calc(100% - 48px));
+  width: min(var(--v5-frame, 1200px), calc(100% - clamp(28px, 5vw, 88px)));
   margin: 0 auto;
 }
 
+/* cv5 sections breathe on a padding rhythm; the old full-viewport minimum
+   stretched four screens of near-empty page out of five short sections. */
 .hero,
 .section,
 .emptySection {
-  min-height: calc(100dvh - 92px);
-  padding: 112px 0 96px;
+  padding: clamp(56px, 8vw, 104px) 0;
   display: grid;
   align-items: center;
 }
 
 .hero {
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.78fr);
-  gap: clamp(44px, 9vw, 140px);
+  grid-template-columns: minmax(0, 1.02fr) minmax(320px, 0.98fr);
+  gap: clamp(28px, 4vw, 64px);
+  padding-top: clamp(112px, 13vw, 156px);
 }
 
 .heroCopy {
-  max-width: 720px;
+  max-width: 560px;
 }
 
 .eyebrow,
@@ -36,11 +55,11 @@
 .manifestRows span,
 .stateCard > span,
 .nextLinks span {
-  color: var(--accent, #0c8da9);
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 0.7rem;
+  color: var(--v5-ink-faint, rgba(233, 236, 248, 0.42));
+  font-family: var(--v5-label, "Space Grotesk V", "Space Grotesk", ui-monospace, monospace);
+  font-size: 0.66rem;
   font-weight: 700;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
@@ -48,36 +67,52 @@
 .sectionHeading h2,
 .emptySection h2,
 .nextSection h2 {
-  margin: 18px 0 24px;
-  font-size: clamp(3rem, 7vw, 6.8rem);
-  font-weight: 520;
-  letter-spacing: -0.08em;
-  line-height: 0.98;
+  margin: 20px 0 0;
+  color: var(--v5-ink, #f4f5fa);
+  font-size: clamp(2.4rem, 5.2vw, 3.9rem);
+  font-weight: 860;
+  letter-spacing: -0.042em;
+  line-height: 1.12;
+  text-wrap: balance;
+  word-break: keep-all;
 }
 
+.sectionHeading h2,
+.emptySection h2,
+.nextSection h2 {
+  font-size: clamp(1.7rem, 3.2vw, 2.45rem);
+  font-weight: 830;
+  letter-spacing: -0.035em;
+  line-height: 1.18;
+}
+
+/* The accent phrase is the indigo→violet gradient, same as every cv5 heading. */
 .hero h1 em,
 .sectionHeading h2 em,
 .emptySection h2 em,
 .nextSection h2 em {
-  color: var(--accent, #0c8da9);
+  background: var(--v5-grad, linear-gradient(96deg, #6366f1 4%, #8b5cf6 52%, #a855f7 96%));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
   font-style: normal;
 }
 
 .heroCopy > p,
 .sectionHeading > p,
 .emptySection > div > p {
-  max-width: 620px;
-  margin: 0;
-  color: var(--muted, #61717a);
-  font-size: clamp(1rem, 1.4vw, 1.14rem);
-  line-height: 1.8;
+  max-width: 540px;
+  margin: 20px 0 0;
+  color: var(--v5-ink-dim, rgba(233, 236, 248, 0.66));
+  font-size: clamp(0.96rem, 1.3vw, 1.08rem);
+  line-height: 1.72;
 }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-top: 36px;
+  margin-top: 32px;
 }
 
 .primary,
@@ -85,51 +120,65 @@
   display: inline-flex;
   min-height: 52px;
   align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  padding: 0 20px;
+  gap: 10px;
+  padding: 0 26px;
   border: 1px solid transparent;
-  font-size: 0.9rem;
+  border-radius: 14px;
+  font-size: 0.98rem;
   font-weight: 700;
+  letter-spacing: -0.01em;
   text-decoration: none;
-  transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
+  transition: transform 180ms ease, filter 180ms ease, background 180ms ease, border-color 180ms ease;
 }
 
 .primary {
   color: #fff;
-  background: var(--accent, #0c8da9);
+  background: var(--v5-grad, linear-gradient(96deg, #6366f1 4%, #8b5cf6 52%, #a855f7 96%));
+  box-shadow: var(--v5-glow, 0 12px 44px -12px rgba(124, 93, 250, 0.55));
+}
+
+.primary:hover {
+  filter: brightness(1.08);
 }
 
 .secondary {
-  color: var(--ink, #10222d);
-  border-color: var(--line, #cfdcdf);
+  color: var(--v5-ink, #f4f5fa);
+  border-color: var(--v5-line-strong, rgba(255, 255, 255, 0.15));
+  background: rgba(255, 255, 255, 0.03);
 }
 
-.primary:hover,
-.secondary:hover,
-.nextLinks a:hover,
-.stateCard a:hover {
-  transform: translateY(-3px);
+.secondary:hover {
+  border-color: rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.primary:active,
+.secondary:active,
+.nextLinks a:active {
+  transform: translateY(1px);
 }
 
 .primary:focus-visible,
 .secondary:focus-visible,
 .nextLinks a:focus-visible,
 .stateCard a:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--accent, #0c8da9) 38%, transparent);
-  outline-offset: 4px;
+  outline: 2px solid #a855f7;
+  outline-offset: 3px;
 }
 
+/* --------------------------------------------------- manifest contract card */
+/* The cv5 glass mockup shell, matching the landing's product panels. */
 .manifest {
   position: relative;
-  min-height: 430px;
-  padding: 30px;
+  min-height: 400px;
+  padding: 22px;
   overflow: hidden;
-  color: #dcf7f5;
-  background:
-    linear-gradient(135deg, rgba(31, 111, 120, 0.36), transparent 54%),
-    #102b33;
-  box-shadow: 20px 20px 0 rgba(12, 141, 169, 0.12);
+  color: var(--v5-ink, #f4f5fa);
+  border: 1px solid var(--v5-line-strong, rgba(255, 255, 255, 0.15));
+  border-radius: var(--v5-r-lg, 20px);
+  background: linear-gradient(178deg, #131628, #0c0e1a 68%);
+  box-shadow: 0 40px 90px -38px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(124, 93, 250, 0.12),
+    0 24px 80px -30px rgba(124, 93, 250, 0.35);
 }
 
 .manifest::after {
@@ -138,8 +187,8 @@
   bottom: 27%;
   left: -12%;
   height: 1px;
-  background: rgba(151, 234, 229, 0.25);
-  box-shadow: 0 68px rgba(151, 234, 229, 0.13), 0 136px rgba(151, 234, 229, 0.1);
+  background: rgba(139, 92, 246, 0.28);
+  box-shadow: 0 68px rgba(139, 92, 246, 0.16), 0 136px rgba(139, 92, 246, 0.1);
   content: "";
   transform: rotate(-18deg);
 }
@@ -150,185 +199,204 @@
   display: flex;
   justify-content: space-between;
   gap: 18px;
-  color: #79d9d4;
-  font-size: 0.64rem;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--v5-line, rgba(255, 255, 255, 0.08));
+  font-size: 0.63rem;
+  letter-spacing: 0.14em;
 }
 
 .manifestTopline span:last-child {
-  color: rgba(220, 247, 245, 0.7);
+  color: var(--v5-cyan, #59d9ff);
 }
 
 .manifestRows {
   position: relative;
   z-index: 1;
   display: grid;
-  gap: 18px;
-  margin-top: 88px;
+  gap: 8px;
+  margin-top: 40px;
 }
 
 .manifestRows div {
   display: grid;
-  grid-template-columns: 100px 1fr;
-  gap: 16px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(151, 234, 229, 0.26);
+  grid-template-columns: 96px 1fr;
+  gap: 14px;
+  align-items: center;
+  padding: 11px 13px;
+  border: 1px solid var(--v5-line, rgba(255, 255, 255, 0.08));
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .manifestRows span {
-  color: rgba(151, 234, 229, 0.7);
-  font-size: 0.6rem;
+  color: var(--v5-ink-faint, rgba(233, 236, 248, 0.42));
+  font-size: 0.56rem;
+  letter-spacing: 0.14em;
 }
 
 .manifestRows strong {
-  color: #f5ffff;
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 0.82rem;
-  font-weight: 500;
+  color: var(--v5-ink, #f4f5fa);
+  font-family: var(--v5-label, "Space Grotesk V", "Space Grotesk", ui-monospace, monospace);
+  font-size: 0.78rem;
+  font-weight: 700;
 }
 
 .manifest p {
   position: relative;
   z-index: 1;
-  margin: 58px 0 0;
-  color: rgba(220, 247, 245, 0.72);
-  font-size: 0.86rem;
+  margin: 26px 0 0;
+  color: var(--v5-ink-faint, rgba(233, 236, 248, 0.42));
+  font-size: 0.8rem;
   line-height: 1.65;
 }
 
+/* ------------------------------------------------------------ workflow flow */
 .section {
   display: block;
-  padding-top: 132px;
-  padding-bottom: 132px;
+  border-top: 1px solid var(--v5-line, rgba(255, 255, 255, 0.08));
 }
 
 .sectionHeading {
-  max-width: 800px;
-}
-
-.sectionHeading h2,
-.emptySection h2,
-.nextSection h2 {
-  font-size: clamp(2.6rem, 5.8vw, 5.5rem);
+  max-width: 640px;
 }
 
 .flowGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  margin-top: 70px;
-  background: var(--line, #cfdcdf);
-  border: 1px solid var(--line, #cfdcdf);
+  gap: 13px;
+  margin-top: clamp(26px, 4vw, 40px);
+  background: none;
+  border: 0;
 }
 
 .flowGrid article {
-  min-height: 210px;
-  padding: 26px;
-  background: var(--paper, #f7faf9);
+  min-height: 0;
+  padding: 22px;
+  border: 1px solid var(--v5-line, rgba(255, 255, 255, 0.08));
+  border-radius: var(--v5-r, 14px);
+  background: rgba(255, 255, 255, 0.03);
+  transition: border-color 200ms ease, transform 200ms ease;
+}
+
+.flowGrid article:hover {
+  transform: translateY(-2px);
+  border-color: rgba(139, 92, 246, 0.45);
 }
 
 .flowGrid article > span {
-  color: var(--accent, #0c8da9);
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 0.78rem;
+  background: var(--v5-grad, linear-gradient(96deg, #6366f1 4%, #8b5cf6 52%, #a855f7 96%));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-family: var(--v5-label, "Space Grotesk V", "Space Grotesk", ui-monospace, monospace);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
 }
 
 .flowGrid strong {
   display: block;
-  margin-top: 68px;
-  font-size: 1.34rem;
-  letter-spacing: -0.04em;
+  margin-top: 26px;
+  color: var(--v5-ink, #f4f5fa);
+  font-size: 1.04rem;
+  font-weight: 750;
+  letter-spacing: -0.028em;
 }
 
 .flowGrid p {
-  margin: 10px 0 0;
-  color: var(--muted, #61717a);
-  font-size: 0.88rem;
-  line-height: 1.6;
+  margin: 9px 0 0;
+  color: var(--v5-ink-dim, rgba(233, 236, 248, 0.66));
+  font-size: 0.84rem;
+  line-height: 1.65;
 }
 
+/* ------------------------------------------------------------- public state */
 .emptySection {
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.66fr);
-  gap: clamp(40px, 9vw, 130px);
-  padding-top: 120px;
-  padding-bottom: 120px;
+  grid-template-columns: minmax(0, 1.02fr) minmax(300px, 0.98fr);
+  gap: clamp(28px, 4vw, 64px);
+  border-top: 1px solid var(--v5-line, rgba(255, 255, 255, 0.08));
 }
 
 .stateCard {
-  padding: 28px;
-  border: 1px solid var(--line, #cfdcdf);
-  background: color-mix(in srgb, var(--accent, #0c8da9) 7%, var(--paper, #f7faf9));
+  padding: 24px;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: var(--v5-r-lg, 20px);
+  background: rgba(251, 191, 36, 0.06);
 }
 
 .stateCard > span {
-  font-size: 0.62rem;
+  font-size: 0.6rem;
 }
 
 .stateCard strong {
   display: block;
-  margin-top: 66px;
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: clamp(1rem, 2vw, 1.3rem);
+  margin-top: 28px;
+  color: var(--v5-amber, #fbbf24);
+  font-family: var(--v5-label, "Space Grotesk V", "Space Grotesk", ui-monospace, monospace);
+  font-size: clamp(0.98rem, 2vw, 1.22rem);
+  font-weight: 700;
   letter-spacing: 0.04em;
 }
 
 .stateCard p {
-  margin: 16px 0 24px;
-  color: var(--muted, #61717a);
-  font-size: 0.88rem;
+  margin: 14px 0 20px;
+  color: var(--v5-ink-dim, rgba(233, 236, 248, 0.66));
+  font-size: 0.84rem;
   line-height: 1.65;
 }
 
 .stateCard a {
-  color: var(--accent, #0c8da9);
+  color: var(--v5-ink, #f4f5fa);
   font-size: 0.88rem;
   font-weight: 700;
   text-decoration: none;
-  transition: transform 180ms ease;
+  transition: color 180ms ease;
 }
 
+.stateCard a:hover {
+  color: #cdb7ff;
+}
+
+/* -------------------------------------------------------------- next surface */
 .nextSection {
-  min-height: calc(100dvh - 92px);
-  padding: 112px 0 140px;
+  padding: clamp(56px, 8vw, 104px) 0 clamp(48px, 7vw, 88px);
+  border-top: 1px solid var(--v5-line, rgba(255, 255, 255, 0.08));
 }
 
 .nextLinks {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin-top: 54px;
+  gap: 13px;
+  margin-top: clamp(26px, 4vw, 40px);
 }
 
 .nextLinks a {
   display: flex;
-  min-height: 190px;
+  min-height: 150px;
   flex-direction: column;
   justify-content: space-between;
-  padding: 24px;
-  color: var(--ink, #10222d);
-  border: 1px solid var(--line, #cfdcdf);
+  padding: 22px;
+  color: var(--v5-ink, #f4f5fa);
+  border: 1px solid var(--v5-line, rgba(255, 255, 255, 0.08));
+  border-radius: var(--v5-r, 14px);
+  background: rgba(255, 255, 255, 0.03);
   text-decoration: none;
-  transition: transform 180ms ease, border-color 180ms ease;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
 
 .nextLinks a:hover {
-  border-color: var(--accent, #0c8da9);
+  transform: translateY(-3px);
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 20px 44px -20px rgba(0, 0, 0, 0.85), 0 0 24px -6px rgba(124, 93, 250, 0.35);
 }
 
 .nextLinks strong {
-  font-size: 1.1rem;
-  letter-spacing: -0.03em;
+  font-size: 1.02rem;
+  font-weight: 750;
+  letter-spacing: -0.028em;
 }
 
 @media (max-width: 900px) {
-  .hero,
-  .section,
-  .emptySection,
-  .nextSection {
-    width: min(100% - 32px, 680px);
-    min-height: auto;
-    padding: 88px 0;
-  }
-
   .hero,
   .emptySection {
     grid-template-columns: 1fr;
@@ -340,30 +408,26 @@
   }
 
   .manifest {
-    min-height: 390px;
+    min-height: 340px;
   }
 }
 
 @media (max-width: 560px) {
-  .hero h1,
-  .sectionHeading h2,
-  .emptySection h2,
-  .nextSection h2 {
-    font-size: clamp(2.7rem, 14vw, 4.6rem);
+  .hero h1 {
+    font-size: clamp(2.1rem, 10vw, 3rem);
   }
 
   .manifest {
-    padding: 22px;
-    box-shadow: 10px 10px 0 rgba(12, 141, 169, 0.12);
+    padding: 18px;
   }
 
   .manifestRows {
-    margin-top: 70px;
+    margin-top: 28px;
   }
 
   .manifestRows div {
     grid-template-columns: 1fr;
-    gap: 8px;
+    gap: 6px;
   }
 
   .actions {
@@ -374,6 +438,7 @@
   .primary,
   .secondary {
     width: 100%;
+    justify-content: center;
   }
 }
 
@@ -381,6 +446,7 @@
   .primary,
   .secondary,
   .nextLinks a,
+  .flowGrid article,
   .stateCard a {
     transition: none;
   }

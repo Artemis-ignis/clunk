@@ -4,10 +4,12 @@ import { Icon } from "../components/Icon";
 import { McpEndpointStatus } from "../components/McpEndpointStatus";
 import { SampleRunWorkbench } from "../components/SampleRunWorkbench";
 import { SiteShell } from "../components/SiteShell";
+import { ForceDarkTheme } from "../components/ForceDarkTheme";
 import { AgentsClient } from "../agents/AgentsClient";
 import { createPageMetadata } from "../components/site-metadata";
 import { MCP_HTTP_TOOL_COUNT, MCP_SERVER } from "../components/product-facts";
 import { ProviderStatusPanel } from "../components/ProviderStatusPanel";
+import "./connect-v5.css";
 
 export const metadata = createPageMetadata({
   title: "Clunk 연결",
@@ -18,7 +20,13 @@ export const metadata = createPageMetadata({
 export default async function ConnectPage() {
   const user = await getChatGPTUser();
   return (
-    <SiteShell active="agents">
+    /* cv5 chrome: the wrapper has to sit ABOVE SiteShell so the `.cv5 .sitenav-*`
+       rules in site-v5.css reach the nav — the legacy nav pill was half of what
+       made this page read as a different site in the 2026-08-31 live review. */
+    <div className="cv5 cv5-surface connect-cv5">
+      <ForceDarkTheme />
+      <div className="cv5-stars" aria-hidden="true" />
+      <SiteShell active="agents">
       <main className="connect-page">
         <header className="connect-hero public-hero-frame public-hero-connect">
           <div className="connect-hero-copy">
@@ -64,6 +72,7 @@ export default async function ConnectPage() {
           <div className="connect-boundary-grid"><div><span>STATIC</span><strong>PASS</strong><small>bytes · hash · policy</small></div><div><span>RUNTIME</span><strong>GAP</strong><small>shipped frame 필요</small></div><div><span>PLAYER</span><strong>NOT_EVALUATED</strong><small>실제 게임 화면 전</small></div><div><span>HUMAN</span><strong>PENDING</strong><small>사람 검토 대기</small></div></div>
         </section>
       </main>
-    </SiteShell>
+      </SiteShell>
+    </div>
   );
 }

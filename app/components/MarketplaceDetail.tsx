@@ -107,7 +107,7 @@ export function MarketplaceDetail({ slug }: { slug: string }) {
         <div className="marketplace-detail-heading"><span className="eyebrow">PACKAGE CONTENTS</span><h2 id="detail-package-heading">다운로드하는 파일과<br /><em>근거의 연결</em></h2></div>
         <div className="marketplace-detail-files">{listing.artifacts.map((artifact) => <article key={artifact.fileName}><div><Icon name={artifact.contentType === "image/png" ? "image" : artifact.contentType.includes("gltf") ? "box" : "fileJson"} size={17} /><strong>{artifact.fileName}</strong></div><span>{artifact.role} · {formatBytes(artifact.byteLength)}</span><code>{artifact.sha256.slice(0, 16)}…</code><a href={`/api/marketplace/assets/${listing.assetId}?file=${encodeURIComponent(artifact.fileName)}`} download={artifact.fileName}>다운로드</a></article>)}</div>
       </section>
-      <div className="marketplace-detail-footer-actions"><Link className="button button-quiet" href="/studio">내 에셋도 만들기 <Icon name="arrowUpRight" size={14} /></Link><Link className="text-link" href="/docs#asset-studio">판매 전 체크리스트 보기 <Icon name="arrowRight" size={14} /></Link></div>
+      <div className="marketplace-detail-footer-actions"><Link className="button button-quiet" href="/studio">내 에셋도 만들기 <Icon name="arrowUpRight" size={14} /></Link><Link className="text-link" href="/docs/asset-studio">판매 전 체크리스트 보기 <Icon name="arrowRight" size={14} /></Link></div>
     </>
   );
 }

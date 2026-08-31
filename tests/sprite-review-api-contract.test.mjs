@@ -11,6 +11,23 @@ async function source(relativePath) {
   return readFile(url, "utf8");
 }
 
+
+/**
+ * /docs became a multi-page GitBook manual on 2026-08-31: the sections that used
+ * to be anchors on app/docs/page.tsx are now app/docs/<topic>/page.tsx, and the
+ * long listings live in app/docs/docs-content.ts. This assertion freezes that the
+ * DOCS SURFACE publishes a fact, not which file holds it, so read them all.
+ */
+async function docsSurface() {
+  const { readdir, readFile: read } = await import("node:fs/promises");
+  const dir = new URL("../app/docs/", import.meta.url);
+  const names = (await readdir(dir, { recursive: true })).filter((name) => /\.tsx?$/.test(name));
+  const parts = await Promise.all(
+    names.map((name) => read(new URL(name.replaceAll("\\", "/"), dir), "utf8")),
+  );
+  return parts.join("\n");
+}
+
 test("sprite and scene review APIs are explicit, stateless, and preserve review boundaries", async () => {
   const spriteRoute = await source("app/api/sprite-review/route.ts");
   const sceneRoute = await source("app/api/scene-review/route.ts");
@@ -31,7 +48,7 @@ test("sprite and scene review APIs are explicit, stateless, and preserve review 
 });
 
 test("sprite review docs name the local image contract and its exit semantics", async () => {
-  const docs = await source("app/docs/page.tsx");
+  const docs = await docsSurface();
   const llms = await source("public/llms.txt");
   const facts = await source("app/components/product-facts.ts");
 

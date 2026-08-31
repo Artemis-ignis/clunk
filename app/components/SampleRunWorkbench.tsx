@@ -48,7 +48,7 @@ export function SampleRunWorkbench({ compact = false }: { compact?: boolean }) {
           </div>
           <div className="sample-workbench-actions">
             {stage !== "decision" ? <button type="button" className="button button-primary button-sm" onClick={() => setStage(nextStage)}>다음 단계 보기 <Icon name="arrowRight" size={14} /></button> : <Link className="button button-primary button-sm" href="/app" prefetch={false}>내 파일로 검사하기 <Icon name="arrowUpRight" size={14} /></Link>}
-            <Link className="button button-quiet button-sm" href="/docs#contracts" prefetch={false}>판정 경계 <Icon name="arrowRight" size={14} /></Link>
+            <Link className="button button-quiet button-sm" href="/docs/contracts" prefetch={false}>판정 경계 <Icon name="arrowRight" size={14} /></Link>
           </div>
           <EvidenceStatusGrid
             className="sample-evidence-status-grid"
