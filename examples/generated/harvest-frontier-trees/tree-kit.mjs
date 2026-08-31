@@ -1049,8 +1049,18 @@ export const TREE_TEMPLATES = {
     seed: 71.5,
     bark: CONIFER_BARK,
     leaf: CONIFER_LEAF,
+    // CONTAINMENT INVARIANT — do not raise `height` without redoing this arithmetic.
+    // The top skirt is a needle, so near the apex the canopy has almost no radius to hide
+    // anything inside it. At height 7.4 the trunk top (7.40) sat just under the apex (7.45)
+    // where the skirt radius is ~0.02, and the leaned, wobbling stem punched a brown stub
+    // out through the tip — a vertical protrusion no camera angle hides.
+    //   trunk outer extent at top = topRadius*(1+wobble) + |lean| = 0.07*1.05 + 0.05 = 0.124
+    //   top skirt radius at y     = 0.34 * (1 - (y-6.50)/0.95)^0.92, times cos(pi/9) for the
+    //                               inscribed radius of its 9-gon cross-section
+    //   at y = 6.85               = 0.223 * 0.940 = 0.209  ->  0.085 m of clearance
+    // 6.85 also keeps the model's overall height at the skirt apex (7.45), unchanged.
     trunk: {
-      height: 7.4,
+      height: 6.85,
       baseRadius: 0.34,
       topRadius: 0.07,
       radial: 8,
