@@ -91,6 +91,7 @@ interface ReleaseLedger {
   path: string;
   releaseRunId: string | null;
   assetRunId: string | null;
+  gameReadyRunId: string | null;
 }
 
 interface ForgePipelineResolution {
@@ -359,7 +360,12 @@ function collectForgeFront(
   const projectEvidenceRoot = join(runRoot, "forge-front");
   mkdirSync(projectEvidenceRoot, { recursive: true });
   const git = gitInfo(root);
-  const gameReady = latestForgeGameReadyEvidence(root);
+  // The release ledger is the shipping authority for BOTH pointers: which
+  // pipeline manifest is live and which game-ready run proved it loaded. The
+  // old newest-v8 pick silently pinned an ancient run once FF's harness moved
+  // to v12/v13 schemas.
+  const ledger = latestReleaseLedger(root);
+  const gameReady = latestForgeGameReadyEvidence(root, ledger?.gameReadyRunId ?? undefined);
   const resolution = resolveForgePipeline(root, gameReady.value);
   applyForgeFreshnessGuards(resolution, guards);
   const pipelinePath = resolution.path;
@@ -614,8 +620,21 @@ function harvestScreenshotPaths(value: Record<string, unknown>): string[] {
   return screenshotPath ? [screenshotPath] : [];
 }
 
-function latestForgeGameReadyEvidence(root: string): RuntimeCandidate {
-  const candidate = latestJson(join(root, "artifacts", "clunk", "evidence", "game-ready"), (value) => value.schema === "forge-front.game-ready-evidence.v8");
+function latestForgeGameReadyEvidence(root: string, pinnedRunId?: string): RuntimeCandidate {
+  const gameReadyRoot = join(root, "artifacts", "clunk", "evidence", "game-ready");
+  // Version-agnostic: FF's harness bumps the schema suffix (v8 -> v12 -> v13)
+  // while keeping the runtimeAssets contract; an exact-version pin silently
+  // froze the audit on the last v8 run from 08-28.
+  const isGameReadyEvidence = (value: Record<string, unknown>) =>
+    String(value.schema ?? "").startsWith("forge-front.game-ready-evidence.v");
+  if (pinnedRunId && /^[A-Za-z0-9._-]{1,120}$/.test(pinnedRunId)) {
+    const pinnedDir = join(gameReadyRoot, pinnedRunId);
+    if (existsSync(pinnedDir)) {
+      const pinned = latestJson(pinnedDir, isGameReadyEvidence);
+      if (pinned) return pinned;
+    }
+  }
+  const candidate = latestJson(gameReadyRoot, isGameReadyEvidence);
   if (!candidate) throw new Error(`FORGE FRONT game-ready evidence not found below ${root}`);
   return candidate;
 }
@@ -684,6 +703,7 @@ function latestReleaseLedger(root: string): ReleaseLedger | null {
     path: best.path,
     releaseRunId: stringValue(best.value.releaseRunId),
     assetRunId: stringValue(references?.assetRunId) ?? stringValue(best.value.assetRunId),
+    gameReadyRunId: stringValue(references?.gameReadyRunId) ?? stringValue(best.value.gameReadyRunId),
   };
 }
 
