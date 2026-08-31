@@ -19,8 +19,8 @@ export const metadata = createPageMetadata({
  * 정보는 플레이스홀더로 남겨 둡니다.
  */
 const PRIVACY_OFFICER_ROWS: LegalRow[] = [
-  { label: "개인정보보호책임자", value: "[성명·직위 — 사업자 등록 후 지정·기재]", placeholder: true },
-  { label: "책임자 연락처", value: "[전화번호 — 사업자 등록 후 기재]", placeholder: true },
+  { label: "개인정보보호책임자", value: "[성명·직위 — 운영자 지정 후 기재]", placeholder: true },
+  { label: "책임자 연락처", value: "[전화번호 — 확정 후 기재]", placeholder: true },
   { label: "책임자 전자우편", value: "[개인정보 문의 이메일 — 운영 계정 확정 후 기재]", placeholder: true },
   { label: "개인정보 열람 청구 접수", value: "[접수 창구 — 확정 후 기재]", placeholder: true },
 ];
@@ -40,8 +40,9 @@ export default function PrivacyPage() {
       <section aria-labelledby="privacy-officer">
         <h2 id="privacy-officer">개인정보보호책임자</h2>
         <p>
-          개인정보 보호법 제31조에 따른 개인정보보호책임자입니다. 사업자 등록 전이므로 아직
-          지정·공개되지 않았으며, <b>임의의 이름이나 연락처를 기재하지 않습니다</b>.
+          개인정보 보호법 제31조에 따른 개인정보보호책임자입니다. 운영자(아르테미스, 대표
+          박준성)의 사업자 등록은 완료되었으나 책임자 지정·공개 절차가 아직 남아 있으며,
+          <b>임의의 이름이나 연락처를 기재하지 않습니다</b>.
         </p>
         <LegalRows rows={PRIVACY_OFFICER_ROWS} />
       </section>
@@ -158,8 +159,8 @@ export default function PrivacyPage() {
           이용자에게 불리한 변경은 최소 30일 전에 공지합니다.
         </p>
         <p className="cv4-legal-note">
-          이 방침 초안은 {LEGAL_DRAFT_DATE} 작성되었으며, 개인정보보호책임자와 사업자 정보 확정 후
-          시행일을 고지하는 시점부터 효력이 발생합니다. 침해 신고·상담은 개인정보침해신고센터(118),
+          이 방침 초안은 {LEGAL_DRAFT_DATE} 작성되었으며, 개인정보보호책임자 지정과 통신판매업
+          신고가 완료되어 시행일을 고지하는 시점부터 효력이 발생합니다. 침해 신고·상담은 개인정보침해신고센터(118),
           개인정보 분쟁조정위원회, 대검찰청·경찰청 사이버수사 창구를 이용할 수 있습니다.
         </p>
       </section>

@@ -106,7 +106,7 @@ export default function RefundsPage() {
       <section aria-labelledby="refunds-process">
         <h2 id="refunds-process">5. 신청 방법과 처리 절차</h2>
         <ol>
-          <li>구매자가 주문 식별자와 사유를 적어 고객문의 창구(사업자 정보 확정 후 기재)로 신청합니다.</li>
+          <li>구매자가 주문 식별자와 사유를 적어 고객문의 창구(운영 연락처 확정 후 기재)로 신청합니다.</li>
           <li>운영자가 주문 기록, 이용권 상태, 다운로드 이력, 파일 해시를 확인합니다.</li>
           <li>환불 사유가 확인되면 결제대행사를 통해 환불을 요청합니다.</li>
           <li>환불이 확인되면 주문 상태는 <b>REFUNDED</b>로, 해당 이용권은 <b>REVOKED</b>로 변경되어 다운로드 권한이 회수됩니다.</li>

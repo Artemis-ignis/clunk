@@ -4,29 +4,32 @@ import { SiteNav } from "./SiteNav";
 /**
  * Shared chrome for the three statutory documents (terms, privacy, refunds).
  *
- * Truthfulness rule for this surface: Clunk is not yet a registered
- * 통신판매업자, so every field that the 전자상거래법 requires an operator to
- * publish is rendered as a visible placeholder instead of an invented value,
- * and every document carries a draft badge saying it is not yet in force.
- * Do not replace a placeholder with a plausible-looking string — only the
- * operator's real registration data may fill these in.
+ * Truthfulness rule for this surface: the values below come straight from the
+ * operator's 사업자등록증명 (아르테미스, 등록 2026-08-21 · 개업 2026-08-24,
+ * 인천세무서 발급 2026-08-31) supplied by the operator. The 통신판매업 신고 is
+ * still pending, so that row stays a visible placeholder and paid trade stays
+ * closed until the registration number exists. Never fill a remaining [ ]
+ * field with a plausible-looking string — only real registration data.
  */
 
 export const LEGAL_DRAFT_DATE = "2026-08-31";
 
 export const LEGAL_DRAFT_NOTICE =
-  "이 문서는 시행 전 초안이며 사업자 정보 확정 후 발효됩니다. 아래 표의 [ ] 항목은 사업자 등록·통신판매업 신고가 완료되면 실제 값으로 채워지고, 그때 시행일을 다시 고지합니다.";
+  "사업자 등록은 완료되었습니다(아르테미스, 개업 2026-08-24). 다만 통신판매업 신고가 완료되기 전까지 유상 판매를 개시하지 않으며, 이 문서도 시행 전 초안입니다. 남은 [ ] 항목은 확정되는 대로 채워지고, 그때 시행일을 고지합니다.";
 
 export type LegalRow = { label: string; value: string; placeholder?: boolean };
 
-/** 전자상거래법 제10조가 요구하는 사업자 표시사항. 값은 전부 미확정 플레이스홀더. */
+/**
+ * 전자상거래법 제10조가 요구하는 사업자 표시사항.
+ * 실값 4건은 사업자등록증명 원본에서 그대로 옮겼다. 나머지는 미확정 플레이스홀더.
+ */
 export const LEGAL_OPERATOR_ROWS: LegalRow[] = [
-  { label: "상호", value: "[상호 — 사업자 등록 후 기재]", placeholder: true },
-  { label: "대표자", value: "[대표자 성명 — 사업자 등록 후 기재]", placeholder: true },
-  { label: "사업자등록번호", value: "[사업자등록번호 — 사업자 등록 후 기재]", placeholder: true },
-  { label: "통신판매업 신고번호", value: "[통신판매업 신고번호 — 신고 후 기재]", placeholder: true },
-  { label: "사업장 주소", value: "[사업장 주소 — 사업자 등록 후 기재]", placeholder: true },
-  { label: "연락처", value: "[대표 전화번호 — 사업자 등록 후 기재]", placeholder: true },
+  { label: "상호", value: "아르테미스(Artemis)" },
+  { label: "대표자", value: "박준성" },
+  { label: "사업자등록번호", value: "361-02-03814" },
+  { label: "통신판매업 신고번호", value: "[통신판매업 신고번호 — 신고 준비 중 · 완료 전까지 유상 판매 미개시]", placeholder: true },
+  { label: "사업장 주소", value: "인천광역시 제물포구 화도진로 16, 109동 1604호(송림동, 동인천역 파크푸르지오)" },
+  { label: "연락처", value: "[대표 전화번호 — 확정 후 기재]", placeholder: true },
   { label: "전자우편", value: "[고객문의 이메일 — 운영 계정 확정 후 기재]", placeholder: true },
   { label: "호스팅 제공자", value: "[호스팅 사업자 — 운영 배포처 확정 후 기재]", placeholder: true },
 ];

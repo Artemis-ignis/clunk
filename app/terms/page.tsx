@@ -22,7 +22,7 @@ export default function TermsPage() {
     <LegalShell
       eyebrow="CLUNK / LEGAL"
       title="이용약관"
-      lede="Clunk(이하 “서비스”)가 제공하는 게임 에셋 생성·검사·마켓 기능의 이용 조건입니다. 아직 사업자 등록 전 초안이므로, 아래 사업자 표시사항이 확정되기 전까지는 유상 거래를 개시하지 않습니다."
+      lede="Clunk(이하 “서비스”)가 제공하는 게임 에셋 생성·검사·마켓 기능의 이용 조건입니다. 운영자(아르테미스)의 사업자 등록은 완료되었으며, 통신판매업 신고가 완료되기 전까지는 유상 거래를 개시하지 않습니다."
     >
       <section aria-labelledby="terms-operator">
         <h2 id="terms-operator">사업자 표시사항</h2>

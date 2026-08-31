@@ -45,8 +45,8 @@ test("법적 문서 3종이 200으로 렌더되고 시행 전 초안임을 배�
 
     assert.ok(html.includes("초안 · 시행 전"), `${pathname} 상태 배지가 없습니다`);
     assert.ok(
-      html.includes("이 문서는 시행 전 초안이며 사업자 정보 확정 후 발효됩니다."),
-      `${pathname} 초안 고지문이 없습니다`,
+      html.includes("통신판매업 신고가 완료되기 전까지 유상 판매를 개시하지 않으며"),
+      `${pathname} 판매 미개시 고지문이 없습니다`,
     );
     assert.ok(html.includes("초안 작성일 2026-08-31"), `${pathname} 초안 작성일이 없습니다`);
     assert.ok(html.includes("최종 수정일 2026-08-31"), `${pathname} 최종 수정일이 없습니다`);
@@ -54,20 +54,30 @@ test("법적 문서 3종이 200으로 렌더되고 시행 전 초안임을 배�
   }
 });
 
-test("사업자 표시사항은 지어내지 않고 플레이스홀더로만 표시한다", async () => {
+test("사업자 표시사항은 등록증 실값과 정확히 일치하고, 미확정 항목만 플레이스홀더다", async () => {
   for (const pathname of ["/terms", "/refunds"]) {
     const html = await (await render(pathname)).text();
-    for (const placeholder of [
-      "[상호 — 사업자 등록 후 기재]",
-      "[대표자 성명 — 사업자 등록 후 기재]",
-      "[사업자등록번호 — 사업자 등록 후 기재]",
-      "[통신판매업 신고번호 — 신고 후 기재]",
-      "[사업장 주소 — 사업자 등록 후 기재]",
+    // 사업자등록증명(인천세무서, 2026-08-31 발급) 원본 값과의 정확 일치.
+    for (const realValue of [
+      "아르테미스(Artemis)",
+      "박준성",
+      "361-02-03814",
+      "인천광역시 제물포구 화도진로 16, 109동 1604호",
     ]) {
-      assert.ok(html.includes(placeholder), `${pathname}에 ${placeholder} 플레이스홀더가 없습니다`);
+      assert.ok(html.includes(realValue), `${pathname}에 등록증 실값 ${realValue} 이 없습니다`);
     }
-    // 실제 등록번호 형태(000-00-00000)가 박혀 있으면 허위 기재다.
-    assert.doesNotMatch(html, /\b\d{3}-\d{2}-\d{5}\b/, `${pathname}에 지어낸 사업자등록번호가 있습니다`);
+    // 통신판매업 신고 전에는 신고번호를 지어내지 않고, 판매 미개시를 함께 고지한다.
+    assert.ok(
+      html.includes("[통신판매업 신고번호 — 신고 준비 중 · 완료 전까지 유상 판매 미개시]"),
+      `${pathname}에 통신판매업 미신고 플레이스홀더가 없습니다`,
+    );
+    // 등록번호 형태의 숫자는 등록증의 실번호 하나만 존재해야 한다(지어낸 번호 금지).
+    const registrationLike = html.match(/\b\d{3}-\d{2}-\d{5}\b/g) ?? [];
+    assert.ok(registrationLike.length > 0, `${pathname}에 사업자등록번호가 없습니다`);
+    assert.ok(
+      registrationLike.every((value) => value === "361-02-03814"),
+      `${pathname}에 등록증과 다른 사업자등록번호 형태가 있습니다: ${registrationLike.join(", ")}`,
+    );
   }
 });
 
@@ -87,7 +97,7 @@ test("개인정보처리방침이 실제 저장 항목과 책임자 플레이스
   const html = await (await render("/privacy")).text();
   assert.ok(html.includes("개인정보보호책임자"), "개인정보보호책임자 항목이 없습니다");
   assert.ok(
-    html.includes("[성명·직위 — 사업자 등록 후 지정·기재]"),
+    html.includes("[성명·직위 — 운영자 지정 후 기재]"),
     "책임자 정보가 플레이스홀더로 표시되지 않았습니다",
   );
   assert.ok(html.includes("clunk_auth_session"), "세션 쿠키 항목이 없습니다");
