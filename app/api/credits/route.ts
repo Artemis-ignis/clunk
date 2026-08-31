@@ -8,6 +8,7 @@ import {
   parseJson,
   requireClunkContext,
 } from "../_lib/clunk";
+import { getRuntimeEnvironment } from "../../runtime-environment";
 
 export const dynamic = "force-dynamic";
 
@@ -40,8 +41,21 @@ export async function POST(request: Request) {
     const payload = await parseJson<{ action?: string }>(request);
     if (payload.action !== "simulate-upgrade") {
       return privateJson(
-        { ok: false, error: "Only the demo upgrade action is available in v1." },
+        { ok: false, error: "크레딧 충전은 /api/credits/checkout 으로 진행합니다." },
         { status: 400 },
+      );
+    }
+    // The demo self-grant became a revenue bypass the moment real packs
+    // exist, so it only answers when the operator explicitly enables it for
+    // local smoke runs. Production never sets this flag.
+    if (getRuntimeEnvironment().CLUNK_ENABLE_DEV_CREDIT_GRANT !== "1") {
+      return privateJson(
+        {
+          ok: false,
+          error: "데모 크레딧 지급은 종료되었습니다. 크레딧 충전은 /api/credits/checkout 으로 진행합니다.",
+          checkoutEndpoint: "/api/credits/checkout",
+        },
+        { status: 410 },
       );
     }
     const db = getRuntimeDb();

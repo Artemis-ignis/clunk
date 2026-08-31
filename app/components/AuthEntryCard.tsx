@@ -3,17 +3,29 @@ import { chatGPTSignInPath, chatGPTSignOutPath, type ChatGPTUser } from "../chat
 import { BrandLockup } from "./BrandMark";
 import { Icon } from "./Icon";
 import { ThemeToggle } from "./ThemeToggle";
+import { getOAuthProviderStatuses, type OAuthProvider } from "../oauth";
 
 export function AuthEntryCard({
   mode,
   user,
   returnTo,
+  authError,
 }: {
   mode: "login" | "signup";
   user: ChatGPTUser | null;
   returnTo: string;
+  authError?: string | null;
 }) {
   const isSignup = mode === "signup";
+  const oauthProviders = getOAuthProviderStatuses().filter((status) => status.configured);
+  const providerName = user?.provider === "google" ? "Google" : user?.provider === "github" ? "GitHub" : "ChatGPT";
+  const authErrorMessage = authError === "config_required"
+    ? "외부 로그인은 운영 환경의 provider 설정이 끝난 뒤 활성화됩니다. 지금은 ChatGPT 로그인으로 계속할 수 있습니다."
+    : authError === "provider_denied"
+      ? "외부 로그인 동의가 취소되었습니다. 다른 로그인 방법을 선택해 주세요."
+      : authError
+        ? "외부 로그인 검증에 실패했습니다. 다시 시도하거나 ChatGPT 로그인으로 계속해 주세요."
+        : null;
 
   return (
     <main className="login-page">
@@ -39,6 +51,8 @@ export function AuthEntryCard({
           {user ? "SIWC 연결됨" : "ChatGPT SIWC"}
         </span>
 
+        {authErrorMessage ? <p className="login-auth-error" role="alert">{authErrorMessage}</p> : null}
+
         {user ? (
           <>
             <h1 id="auth-entry-title">
@@ -47,8 +61,8 @@ export function AuthEntryCard({
               <em>연결되어 있습니다.</em>
             </h1>
             <p className="login-lead">
-              {user.displayName}님, 현재 ChatGPT 계정으로 인증된 워크스페이스를 사용 중입니다. 로그인과 회원가입은
-              같은 SIWC 흐름이며 별도 비밀번호는 없습니다.
+              {user.displayName}님, 현재 {providerName} 계정으로 인증된 워크스페이스를 사용 중입니다. 로그인과 회원가입은
+              같은 계정 흐름이며 별도 Clunk 비밀번호는 없습니다.
             </p>
 
             <div className="login-session-actions">
@@ -87,6 +101,24 @@ export function AuthEntryCard({
               <Icon name="arrowUpRight" size={16} />
             </Link>
 
+            {oauthProviders.length ? (
+              <>
+                <div className="login-provider-divider" aria-hidden="true"><span>또는 외부 계정으로</span></div>
+                <div className="login-provider-actions" aria-label="외부 로그인">
+                  {oauthProviders.map((provider) => (
+                    <a
+                      className="button button-quiet button-block login-provider-button"
+                      href={oauthPath(provider.provider, returnTo)}
+                      key={provider.provider}
+                    >
+                      {provider.provider === "google" ? "Google로 계속하기" : "GitHub로 계속하기"}
+                      <Icon name="arrowUpRight" size={15} />
+                    </a>
+                  ))}
+                </div>
+              </>
+            ) : null}
+
             <ul className="login-facts">
               <li>
                 <Icon name="fingerprint" size={15} />
@@ -112,7 +144,9 @@ export function AuthEntryCard({
             </ul>
 
             <p className="login-boundary">
-              비공개 파일럿에서는 ChatGPT 로그인만 사용합니다. Google, Apple, 이메일 계정은 받지 않습니다.
+              {oauthProviders.length
+                ? "ChatGPT SIWC가 기본 로그인이며, 운영 설정이 완료된 외부 provider만 추가로 표시됩니다."
+                : "현재는 ChatGPT SIWC만 활성화되어 있습니다. Google·GitHub 버튼은 운영 secret과 callback 설정이 완료될 때까지 표시하지 않습니다."}
             </p>
 
             <p className="login-account-switch">
@@ -136,4 +170,8 @@ export function AuthEntryCard({
       </footer>
     </main>
   );
+}
+
+function oauthPath(provider: OAuthProvider, returnTo: string): string {
+  return `/api/auth/${provider}?return_to=${encodeURIComponent(returnTo)}`;
 }

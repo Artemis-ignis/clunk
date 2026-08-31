@@ -25,6 +25,8 @@ test("collaboration thread routes require authentication and workspace scoping",
   assert.match(collection, /assertSameOrigin/);
   assert.match(messages, /assertSameOrigin/);
   assert.match(collection, /evidence_json/);
+  assert.match(collection, /consumerProject/);
+  assert.match(collection, /consumer_project/);
   assert.match(collection, /parseStoredEvidence/);
   assert.match(item, /evidence_json/);
   assert.match(item, /evidenceJson/);
@@ -34,11 +36,14 @@ test("collaboration thread routes require authentication and workspace scoping",
 
 test("collaboration D1 schema stores append-only messages and status snapshots", async () => {
   const schema = await source("drizzle/0002_lovely_thunderbolt_ross.sql");
+  const currentSchema = await source("app/api/_lib/clunk.ts");
   assert.match(schema, /clunk_collaboration_threads/);
   assert.match(schema, /clunk_collaboration_messages/);
   assert.match(schema, /status_json/);
   assert.match(schema, /input_hash/);
   assert.match(schema, /workspace_id/);
+  assert.match(currentSchema, /consumer_project/);
+  assert.match(currentSchema, /harvest-frontier/);
 });
 
 test("frame manifest evidence has a versioned migration and API envelope", async () => {
@@ -108,6 +113,9 @@ test("collaboration UI keeps capture integrity, asset audit, and human visual re
   assert.match(panel, /COMPARISON\.V1/);
   assert.match(panel, /closeout/);
   assert.match(panel, /assetInspections/);
+  assert.match(panel, /consumerProject/);
+  assert.match(panel, /FORGE FRONT/);
+  assert.match(panel, /Harvest Frontier · 3D \/ Three\.js/);
   assert.match(panel, /numericContract/);
   assert.match(panel, /qualityWarnings/);
   assert.match(panel, /readinessReason/);

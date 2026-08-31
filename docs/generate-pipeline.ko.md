@@ -40,7 +40,9 @@ provenance, recipe hash, target profile, 별도 output directory를 함께 기�
 같은 profile로 새 프로세스에서 output reopen을 수행합니다. 입력 factory 디렉터리와 output
 directory가 겹치거나 output 파일이 이미 있으면 덮어쓰지 않고 중단합니다.
 
-현재 실제 authoring adapter는 텍스처 없는 `threejs-factory-v1` 하나입니다.
+기존 CLI의 실제 authoring adapter는 텍스처 없는 `threejs-factory-v1`입니다. Studio의
+Clunk Series native rail은 별도의 `clunk-series-native-v1` 계약으로 이 CLI 레거시 경계와
+구분됩니다.
 
 ```powershell
 npm.cmd run asset:generate -- `
@@ -58,8 +60,9 @@ npm.cmd run asset:generate -- `
 `artifact.sha256`, `plan.recipeHash`, `evidence.stages.outputReopen`, 그리고 동일 target의
 `evidence`를 확인해야 합니다. 엔진 importer/runtime이 실행되지 않은 환경에서는 exit `4`와
 `ENVIRONMENT_UNAVAILABLE`을 반환하며, 구조 PASS를 READY나 플레이어 화면 PASS로 승격하지
-않습니다. 2D 이미지·Sprite·Spine 생성 adapter는 아직 출하되지 않았으므로 요청은
-`AUTHORING_UNAVAILABLE` 및 exit `4`로 끝나고 pretend 파일을 만들지 않습니다.
+않습니다. 기존 `asset:author` CLI는 지원하는 계약만 실행하고, Studio에서는 2D 이미지·Sprite·
+Spine·Material을 Clunk Series native rail이 별도 bundle로 처리합니다. 외부 생성 provider의
+성공을 시뮬레이션하지 않습니다.
 
 `passport`는 procedural factory 자체를 원본 asset인 것처럼 꾸미지 않기 위해 자동 생성하지
 않습니다. 실제 source asset과 output asset이 모두 있을 때에만 `clunk_passport`로 두 파일을
@@ -83,3 +86,12 @@ npm.cmd run asset:generate -- `
 - 텍스처 포함 생성물은 현 레일 밖이다 — 텍스처 세트 검사(P0)와 함께 확장한다.
 
 관련: [roadmap-hf-feedback.ko.md](roadmap-hf-feedback.ko.md) · [benchmark-meshy.ko.md](benchmark-meshy.ko.md) · [custom-profiles.ko.md](custom-profiles.ko.md)
+
+## Clunk Series native rail
+
+Studio의 생성 경로는 [`docs/clunk-series.ko.md`](clunk-series.ko.md)에 정의된
+`/api/series`를 사용합니다. 3D Game Ready 작업은 원본 GLB를 복사한 뒤
+`@gltf-transform/*`와 `meshoptimizer`로 별도 output을 만들고, Clunk Core가 그 output
+bytes를 다시 검사합니다. 자세한 clone·커밋·라이선스 결정은
+[`docs/third-party/clunk-series-sources.ko.md`](third-party/clunk-series-sources.ko.md)를
+참조하세요.

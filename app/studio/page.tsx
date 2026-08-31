@@ -4,12 +4,16 @@ import { createPageMetadata } from "../components/site-metadata";
 
 export const dynamic = "force-dynamic";
 export const metadata = createPageMetadata({
-  title: "Asset Studio",
-  description: "2D Sprite, Spine, 3D Model, Animation을 만들고 검사하고 엔진 증거로 연결합니다.",
+  title: "Create · Asset Studio",
+  description: "2D Sprite, Spine, 3D Model, Animation을 실제 artifact로 만들고 검사·검토 근거로 연결합니다.",
   path: "/studio",
 });
 
-export default async function StudioPage() {
+export default async function StudioPage({ searchParams }: { searchParams?: Promise<{ source_asset_id?: string }> }) {
   const user = await requireChatGPTUser("/studio");
-  return <StudioClient userLabel={user.displayName} />;
+  const params = await searchParams;
+  const sourceAssetId = typeof params?.source_asset_id === "string" && /^[a-zA-Z0-9:._-]{1,256}$/.test(params.source_asset_id)
+    ? params.source_asset_id
+    : undefined;
+  return <StudioClient userLabel={user.displayName} initialSourceAssetId={sourceAssetId} />;
 }

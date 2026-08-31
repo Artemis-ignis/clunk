@@ -1,32 +1,36 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "./NativeLink";
 import { BrandLockup } from "./BrandMark";
 import { Icon } from "./Icon";
 import { ThemeToggle } from "./ThemeToggle";
 
 /**
- * Ported from agentic-build-and-orchestrate-ai-agents-while-you-sleep/components/mobile-nav.tsx.
- * Same floating glass bar, same burger to dropdown transform, same single row desktop layout.
- * Tinted for the dark palette and given a scrolled state so the bar reads against the hero image.
+ * Public navigation for the Clunk product shell. The primary row follows the
+ * buyer/user split: browse the master's assets, use Clunk with credits, then
+ * inspect the handoff. Workspace and documentation remain utility destinations.
  */
 
-export type ShellSection = "home" | "studio" | "app" | "dashboard" | "pricing" | "docs" | "agents" | "marketplace";
+export type ShellSection = "home" | "series" | "studio" | "app" | "dashboard" | "pricing" | "docs" | "agents" | "marketplace";
 
 const NAV_LINKS: { label: string; href: string; section: ShellSection }[] = [
-  { label: "에셋 스튜디오", href: "/studio", section: "studio" },
-  { label: "에셋 마켓", href: "/marketplace", section: "marketplace" },
-  { label: "검사기", href: "/app", section: "app" },
-  { label: "대시보드", href: "/dashboard", section: "dashboard" },
+  { label: "에셋 제작", href: "/studio", section: "studio" },
+  { label: "마켓", href: "/marketplace", section: "marketplace" },
+  { label: "검사·수정", href: "/app", section: "app" },
+  { label: "게임 에이전트", href: "/connect", section: "agents" },
   { label: "요금", href: "/pricing", section: "pricing" },
-  { label: "문서", href: "/docs", section: "docs" },
-  { label: "에이전트 연결", href: "/connect", section: "agents" },
+];
+
+const UTILITY_NAV_LINKS: { label: string; href: string; section: ShellSection }[] = [
+  { label: "Docs", href: "/docs", section: "docs" },
+  { label: "내 작업공간", href: "/dashboard", section: "dashboard" },
 ];
 
 export function SiteNav({ active }: { active?: ShellSection }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const scrollSentinelRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -38,25 +42,20 @@ export function SiteNav({ active }: { active?: ShellSection }) {
   }, [open]);
 
   useEffect(() => {
-    let frame = 0;
-    const measure = () => {
-      frame = 0;
-      setScrolled(window.scrollY > 24);
-    };
-    const onScroll = () => {
-      if (frame) return;
-      frame = window.requestAnimationFrame(measure);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    measure();
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (frame) window.cancelAnimationFrame(frame);
-    };
+    const sentinel = scrollSentinelRef.current;
+    if (!sentinel || typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      setScrolled(!entry.isIntersecting);
+    }, { threshold: 0 });
+    observer.observe(sentinel);
+    return () => observer.disconnect();
   }, []);
 
   return (
-    <div className="sitenav-dock" data-scrolled={scrolled ? "true" : "false"}>
+    <>
+      <span ref={scrollSentinelRef} className="sitenav-scroll-sentinel" aria-hidden="true" />
+      <div className="sitenav-dock" data-scrolled={scrolled ? "true" : "false"}>
       <div className="sitenav-inner">
         <nav className={`sitenav${scrolled ? " sitenav-scrolled" : ""}`} aria-label="주요 메뉴">
           <Link className="brand" href="/" prefetch={false} aria-label="Clunk 홈">
@@ -78,6 +77,20 @@ export function SiteNav({ active }: { active?: ShellSection }) {
             ))}
           </ul>
 
+          <div className="sitenav-utility" aria-label="보조 메뉴">
+            {UTILITY_NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                className={`sitenav-utility-link${active === link.section ? " sitenav-utility-link-active" : ""}`}
+                href={link.href}
+                prefetch={false}
+                aria-current={active === link.section ? "page" : undefined}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+
           <div className="sitenav-actions">
             <ThemeToggle />
             <Link className="button button-quiet button-sm sitenav-login" href="/login" prefetch={false}>
@@ -86,8 +99,8 @@ export function SiteNav({ active }: { active?: ShellSection }) {
             <Link className="button button-quiet button-sm sitenav-signup" href="/signup" prefetch={false}>
               회원가입
             </Link>
-            <Link className="button button-primary button-sm sitenav-cta" href="/app" prefetch={false}>
-              내 파일 검사 · 로그인
+            <Link className="button button-primary button-sm sitenav-cta" href="/studio" prefetch={false}>
+              Clunk 사용하기
               <Icon name="arrowUpRight" size={14} />
             </Link>
             <button
@@ -122,6 +135,13 @@ export function SiteNav({ active }: { active?: ShellSection }) {
                 <Icon name="arrowRight" size={15} />
               </Link>
             ))}
+            <div className="sitenav-drawer-utility" aria-label="보조 메뉴">
+              {UTILITY_NAV_LINKS.map((link) => (
+                <Link key={link.href} href={link.href} prefetch={false} onClick={() => setOpen(false)}>
+                  {link.label}
+                </Link>
+              ))}
+            </div>
             <div className="sitenav-drawer-actions">
               <Link className="button button-quiet button-sm" href="/login" prefetch={false} onClick={() => setOpen(false)}>
                 로그인
@@ -129,14 +149,15 @@ export function SiteNav({ active }: { active?: ShellSection }) {
               <Link className="button button-quiet button-sm" href="/signup" prefetch={false} onClick={() => setOpen(false)}>
                 회원가입
               </Link>
-              <Link className="button button-primary button-sm" href="/app" prefetch={false} onClick={() => setOpen(false)}>
-                내 파일 검사 · 로그인
+              <Link className="button button-primary button-sm" href="/studio" prefetch={false} onClick={() => setOpen(false)}>
+                Clunk 사용하기
                 <Icon name="arrowUpRight" size={14} />
               </Link>
             </div>
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

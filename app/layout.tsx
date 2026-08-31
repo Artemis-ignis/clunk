@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "./foundry.css";
+import "./site-v4.css";
 import { WebMcpBridge } from "./components/WebMcpBridge";
 import { SITE_ORIGIN } from "./components/site-metadata";
 
@@ -16,22 +18,22 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Clunk - Game AssetOps",
+    default: "Clunk · AI Game Asset Foundry",
     template: "%s | Clunk",
   },
-  description: "실제 GLB와 GLTF를 검사하고 안전하게 최적화하는 Game AssetOps 제품입니다.",
+  description: "게임 에셋을 만들고, 검사하고, Game Ready 근거와 함께 팀에 전달하는 AI Game Asset Foundry입니다.",
   metadataBase: new URL(SITE_ORIGIN),
   openGraph: {
-    title: "Clunk - Make every asset defensible",
-    description: "GLB와 GLTF 팀을 위한 로컬 우선 Game AssetOps 워크스페이스입니다.",
+    title: "Clunk · AI Game Asset Foundry",
+    description: "게임 에셋을 만들고, 검사하고, Game Ready 근거와 함께 팀에 전달합니다.",
     type: "website",
     url: SITE_ORIGIN,
     images: [{ url: `${SITE_ORIGIN}/og.png`, width: 1664, height: 936, alt: "Clunk - Make every asset defensible" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Clunk - Make every asset defensible",
-    description: "GLB와 GLTF 팀을 위한 로컬 우선 Game AssetOps 워크스페이스입니다.",
+    title: "Clunk · AI Game Asset Foundry",
+    description: "게임 에셋을 만들고, 검사하고, Game Ready 근거와 함께 팀에 전달합니다.",
     images: [`${SITE_ORIGIN}/og.png`],
   },
   icons: {

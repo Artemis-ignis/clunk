@@ -9,6 +9,7 @@ import {
   type FrameManifestWriteMode,
   type RuntimeReviewStatus,
 } from "../../../packages/core/src/collaboration-contract";
+import type { ConsumerProjectId } from "../../../packages/core/src/consumer-collaboration";
 import { ClunkHttpError, isSafeRecordId } from "./clunk";
 import { parseEvidencePayload } from "./collaboration-evidence";
 
@@ -29,6 +30,7 @@ export type CollaborationStatusPayload = {
 export type ThreadPayload = CollaborationStatusPayload & {
   subject: string;
   assetId?: string;
+  consumerProject: ConsumerProjectId;
   evidence?: FrameManifest;
   evidenceMode: FrameManifestWriteMode;
 };
@@ -51,6 +53,7 @@ export type StoredEvidence = FrameManifest | {
 
 const AUDIT_STATUSES = new Set<AuditStatus>(["NOT_RUN", "PASS", "FAIL", "BLOCKED"]);
 const RUNTIME_STATUSES = new Set<RuntimeReviewStatus>(["NOT_RUN", "PASS", "GAP", "BLOCKED", "UNAVAILABLE"]);
+const CONSUMER_PROJECTS = new Set<ConsumerProjectId>(["harvest-frontier", "forge-front"]);
 
 function record(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -70,6 +73,14 @@ function optionalId(value: unknown, field: string): string | undefined {
   if (value === undefined || value === null || value === "") return undefined;
   if (!isSafeRecordId(value)) throw new ClunkHttpError(`Invalid collaboration ${field}.`, 400);
   return value;
+}
+
+function consumerProject(value: unknown): ConsumerProjectId {
+  if (value === undefined || value === null || value === "") return "harvest-frontier";
+  if (typeof value !== "string" || !CONSUMER_PROJECTS.has(value as ConsumerProjectId)) {
+    throw new ClunkHttpError("Invalid collaboration consumerProject.", 400);
+  }
+  return value as ConsumerProjectId;
 }
 
 function hash(value: unknown, field: string): string {
@@ -127,6 +138,7 @@ export function parseThreadPayload(value: unknown): ThreadPayload {
     ...parseStatusPayload(source.status ?? source),
     subject: text(source.subject, "subject", 240),
     assetId: optionalId(source.assetId, "assetId"),
+    consumerProject: consumerProject(source.consumerProject),
     evidence: parseEvidencePayload(source.evidence),
     evidenceMode: evidenceMode(source.evidenceMode),
   };

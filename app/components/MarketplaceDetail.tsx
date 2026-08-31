@@ -52,10 +52,18 @@ export function MarketplaceDetail({ slug }: { slug: string }) {
     try {
       const response = await fetch("/api/marketplace/checkout", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: {
+          "content-type": "application/json",
+          "idempotency-key": createIdempotencyKey(),
+        },
         body: JSON.stringify({ listingId: listing.id }),
       });
-      const payload = await response.json() as { error?: string; status?: string };
+      const payload = await response.json() as { error?: string; status?: string; checkoutUrl?: string };
+      if (payload.checkoutUrl) {
+        setMessage("결제 페이지로 이동합니다…");
+        window.location.assign(payload.checkoutUrl);
+        return;
+      }
       setMessage(payload.error ?? payload.status ?? (response.ok ? "구매 요청을 시작했습니다." : "구매를 시작하지 못했습니다."));
     } catch {
       setMessage("구매 연결 상태를 확인하지 못했습니다.");
@@ -67,7 +75,7 @@ export function MarketplaceDetail({ slug }: { slug: string }) {
 
   const previewIsPng = listing.artifact.previewFileName.toLowerCase().endsWith(".png");
   const previewSrc = previewIsPng
-    ? `/api/marketplace/assets/${listing.assetId}?file=${encodeURIComponent(listing.artifact.previewFileName)}`
+    ? `/api/marketplace/assets/${listing.assetId}?file=${encodeURIComponent(listing.artifact.previewFileName)}&preview=1`
     : "/landing/tractor-hero.png";
   const downloadHref = `/api/marketplace/assets/${listing.assetId}?file=${encodeURIComponent(listing.entryFileName)}`;
 
@@ -102,6 +110,11 @@ export function MarketplaceDetail({ slug }: { slug: string }) {
       <div className="marketplace-detail-footer-actions"><Link className="button button-quiet" href="/studio">내 에셋도 만들기 <Icon name="arrowUpRight" size={14} /></Link><Link className="text-link" href="/docs#asset-studio">판매 전 체크리스트 보기 <Icon name="arrowRight" size={14} /></Link></div>
     </>
   );
+}
+
+function createIdempotencyKey(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  return `checkout-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 function EvidenceCard({ label, value, detail }: { label: string; value: EvidenceStatus; detail: string }) {

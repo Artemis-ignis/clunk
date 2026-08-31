@@ -1,0 +1,1 @@
+ALTER TABLE `clunk_collaboration_threads` ADD `consumer_project` text DEFAULT 'harvest-frontier' NOT NULL;

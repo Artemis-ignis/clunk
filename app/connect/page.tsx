@@ -7,6 +7,7 @@ import { SiteShell } from "../components/SiteShell";
 import { AgentsClient } from "../agents/AgentsClient";
 import { createPageMetadata } from "../components/site-metadata";
 import { MCP_HTTP_TOOL_COUNT, MCP_SERVER } from "../components/product-facts";
+import { ProviderStatusPanel } from "../components/ProviderStatusPanel";
 
 export const metadata = createPageMetadata({
   title: "Clunk 연결",
@@ -55,6 +56,8 @@ export default async function ConnectPage() {
           </div>
           <AgentsClient initiallyAuthenticated={Boolean(user)} />
         </section>
+
+        <ProviderStatusPanel />
 
         <section className="connect-boundary" aria-label="연결과 검토의 경계">
           <div><span className="eyebrow">03 · KEEP THE REVIEW SEPARATE</span><h2>연결 PASS는<br /><em>게임 투입 승인이 아닙니다.</em></h2><p>연결은 서버가 응답했다는 증거입니다. 에셋의 구조·정책, shipped runtime, player-facing 화면, 사람의 결정은 각각 별도 상태로 유지합니다.</p></div>

@@ -43,9 +43,15 @@ test("creation and marketplace API surfaces exist and never imply a local path u
   const reviews = await source("app/api/reviews/route.ts");
   const marketplace = await source("app/api/marketplace/route.ts");
   const checkout = await source("app/api/marketplace/checkout/route.ts");
+  const optimizations = await source("app/api/optimizations/route.ts");
   assert.match(generation, /clunk\.asset-generation-result\.v1/);
   assert.match(generation, /sha256/);
   assert.match(generation, /provenance/);
+  assert.match(generation, /reserveCreditOperation/);
+  assert.match(generation, /confirmCreditOperation/);
+  assert.match(generation, /refundCreditOperation/);
+  assert.match(generation, /idempotency-key|idempotencyKey/);
+  assert.match(generation, /STORAGE_NOT_CONFIGURED/);
   assert.doesNotMatch(generation, /localPath|readFile|node:fs/);
   assert.match(reviews, /captureSha256/);
   assert.match(reviews, /humanDecision/);
@@ -54,7 +60,12 @@ test("creation and marketplace API surfaces exist and never imply a local path u
   assert.match(marketplace, /license/);
   assert.match(marketplace, /artifact/);
   assert.match(checkout, /PAYMENT_PROVIDER_NOT_CONFIGURED/);
-  assert.doesNotMatch(checkout, /INSERT.*order|clunk_marketplace_orders/i);
+  assert.match(checkout, /clunk_marketplace_orders/);
+  assert.match(checkout, /idempot/);
+  assert.match(checkout, /createCheckout/);
+  assert.match(optimizations, /applyCreditOperation/);
+  assert.match(optimizations, /key: `optimize:/);
+  assert.match(optimizations, /amount: -1/);
 });
 
 test("the public product surfaces expose creation, library, review, and marketplace actions", async () => {
@@ -71,4 +82,31 @@ test("the public product surfaces expose creation, library, review, and marketpl
   assert.match(studio, /생성|prompt/i);
   assert.match(landing, /실제 제작|마켓|판매/);
   assert.match(marketplace, /검수|라이선스|다운로드/);
+});
+
+test("paid marketplace artifacts never ship as public previews", async () => {
+  const route = await source("app/api/marketplace/assets/[assetId]/route.ts");
+  assert.match(route, /paid \? artifact\.role === "preview" : true/);
+  assert.doesNotMatch(route, /artifact\.role === "page" \|\| artifact\.role === "texture"/);
+});
+
+test("the billing boundary converts zero-decimal currencies exactly once", async () => {
+  const billing = await source("app/api/marketplace/billing.ts");
+  assert.match(billing, /ZERO_DECIMAL_CURRENCIES/);
+  assert.match(billing, /toProviderAmount\(input\.amountCents, input\.currency\)/);
+  assert.match(billing, /fromProviderAmount\(providerAmount, currency\)/);
+  assert.doesNotMatch(billing, /unit_amount\]": String\(input\.amountCents\)/);
+});
+
+test("paid checkout requires an explicit withdrawal-waiver consent before any order exists", async () => {
+  const marketplaceCheckout = await source("app/api/marketplace/checkout/route.ts");
+  assert.match(marketplaceCheckout, /withdrawalConsent \!== true/);
+  assert.match(marketplaceCheckout, /WITHDRAWAL_CONSENT_REQUIRED/);
+  const creditCheckout = await source("app/api/credits/checkout/route.ts");
+  assert.match(creditCheckout, /withdrawalConsent \!== true/);
+  assert.match(creditCheckout, /WITHDRAWAL_CONSENT_REQUIRED/);
+  const catalog = await source("app/components/MarketplaceCatalog.tsx");
+  assert.match(catalog, /withdrawalConsent/);
+  assert.match(catalog, /청약철회가 제한/);
+  assert.match(catalog, /disabled=\{paymentUnavailable \|\| \!withdrawalConsent\}/);
 });

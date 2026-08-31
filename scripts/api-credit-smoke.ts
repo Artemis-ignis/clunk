@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import {
   createAssetBundle,
@@ -14,7 +15,7 @@ import {
 } from "./lib/clunk-api-contract";
 
 const baseUrl = process.env.CLUNK_SMOKE_BASE_URL ?? "http://localhost:3000";
-const userId = process.env.CLUNK_SMOKE_USER_ID ?? "clunk-api-smoke-20260820";
+const userId = process.env.CLUNK_SMOKE_USER_ID ?? `clunk-api-smoke-${randomUUID()}`;
 
 async function apiFor(actor: string, path: string, init: RequestInit = {}): Promise<ApiResult> {
   return apiRequest(baseUrl, actor, path, init);

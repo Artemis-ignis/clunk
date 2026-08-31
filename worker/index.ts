@@ -1,10 +1,20 @@
 /** Cloudflare Worker entry point for the vinext-starter template. */
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
+import { getRuntimeEnvironment, setRuntimeBindings } from "../app/runtime-environment";
+import {
+  stripUpstreamIdentityHeaders,
+  trustsUpstreamIdentityHeaders,
+} from "../app/api/_lib/identity-headers";
+import { enforceRateLimit } from "../app/api/_lib/rate-limit";
 
 interface Env {
   ASSETS: Fetcher;
   DB: D1Database;
+  /** "1" only on a deployment sitting behind the ChatGPT Sites identity proxy. */
+  CLUNK_TRUST_SIWC_HEADERS?: string;
+  /** "1" disables the in-isolate request limiter (local dev and tests). */
+  CLUNK_RATE_LIMIT_DISABLED?: string;
   IMAGES: {
     input(stream: ReadableStream): {
       transform(options: Record<string, unknown>): {
@@ -27,21 +37,52 @@ interface ExecutionContext {
 
 const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    const url = new URL(request.url);
+    setRuntimeBindings(env as unknown as Record<string, unknown>);
+    const runtimeEnvironment = getRuntimeEnvironment();
+
+    // Defense in depth. Unless this deployment is explicitly behind the ChatGPT
+    // Sites identity proxy, inbound `oai-authenticated-*` headers are supplied
+    // by the caller and must never reach the auth boundary. Stripping happens
+    // before anything else reads the request, rate limiting included.
+    const inbound = trustsUpstreamIdentityHeaders(runtimeEnvironment)
+      ? request
+      : stripUpstreamIdentityHeaders(request);
+    const url = new URL(inbound.url);
 
     if (url.pathname === "/_vinext/image") {
       const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
-      return handleImageOptimization(request, {
-        fetchAsset: (path) => env.ASSETS.fetch(new Request(new URL(path, request.url))),
+      return withSecurityHeaders(await handleImageOptimization(inbound, {
+        fetchAsset: (path) => env.ASSETS.fetch(new Request(new URL(path, inbound.url))),
         transformImage: async (body, { width, format, quality }) => {
           const result = await env.IMAGES.input(body).transform(width > 0 ? { width } : {}).output({ format, quality });
           return result.response();
         },
-      }, allowedWidths);
+      }, allowedWidths));
     }
 
-    return handler.fetch(request, env, ctx);
+    const limited = await enforceRateLimit(inbound, runtimeEnvironment);
+    if (limited) return withSecurityHeaders(limited);
+
+    return withSecurityHeaders(await handler.fetch(inbound, env, ctx));
   },
 };
+
+function withSecurityHeaders(response: Response): Response {
+  const values: Record<string, string> = {
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "X-Frame-Options": "DENY",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+    "Content-Security-Policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self' https://accounts.google.com https://github.com; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https:; font-src 'self' data:",
+  };
+  try {
+    for (const [name, value] of Object.entries(values)) response.headers.set(name, value);
+    return response;
+  } catch {
+    const headers = new Headers(response.headers);
+    for (const [name, value] of Object.entries(values)) headers.set(name, value);
+    return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+  }
+}
 
 export default worker;

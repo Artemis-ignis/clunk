@@ -1,10 +1,13 @@
 #!/usr/bin/env node
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import {
   inspectAssetForTarget,
+  normalizeInjectedGate,
   type AssetKind,
   type AssetEvidenceStatus,
+  type AssetOpsGateOverrides,
+  type InjectableGateStage,
 } from "../packages/core/src/index";
 import { loadAssetOpsInput } from "../integrations/shared/node-asset";
 
@@ -16,6 +19,10 @@ try {
   const inputPath = required(args, "path");
   const absolutePath = resolve(inputPath);
   const input = await loadAssetOpsInput(absolutePath);
+  const stageOverrides: AssetOpsGateOverrides = {
+    ...(await loadGate(args.get("import-gate"), "import")),
+    ...(await loadGate(args.get("runtime-gate"), "runtime")),
+  };
   const evidence = inspectAssetForTarget({
     runId: args.get("run-id"),
     sourcePath: absolutePath,
@@ -24,6 +31,7 @@ try {
     targetProfileId: required(args, "target-profile"),
     assetKind: args.get("kind") as AssetKind | undefined,
     bundleFiles: input.bundleFiles,
+    ...(Object.keys(stageOverrides).length ? { stageOverrides } : {}),
   });
   const output = `${JSON.stringify(evidence, null, 2)}\n`;
   if (args.get("out")) await writeFile(resolve(args.get("out")!), output, "utf8");
@@ -32,6 +40,27 @@ try {
 } catch (error) {
   process.stderr.write(`${error instanceof Error ? error.message : "AssetOps inspection failed."}\n`);
   process.exitCode = 2;
+}
+
+/**
+ * `--import-gate` / `--runtime-gate` accept a JSON file produced by a real runner. The honesty guard
+ * lives in the core: an unattested payload is recorded as `notRun` and the reason is printed, so a
+ * fabricated file can never turn an unrun stage into a PASS.
+ */
+async function loadGate(path: string | undefined, stage: InjectableGateStage): Promise<AssetOpsGateOverrides> {
+  if (!path) return {};
+  const absolutePath = resolve(path);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(await readFile(absolutePath, "utf8"));
+  } catch (error) {
+    throw new Error(`Could not read the ${stage} gate file ${absolutePath}: ${error instanceof Error ? error.message : String(error)}`);
+  }
+  const result = normalizeInjectedGate(parsed, stage);
+  if (!result.accepted) {
+    process.stderr.write(`[assetops-inspect] Injected ${stage} gate refused (recorded as notRun): ${result.rejections.join("; ")}\n`);
+  }
+  return { [stage]: result.gate };
 }
 
 function exitCodeFor(status: AssetEvidenceStatus): number {

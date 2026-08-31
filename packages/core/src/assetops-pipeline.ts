@@ -14,6 +14,7 @@ import {
   type AssetEvidenceStages,
   type AssetKind,
   type GateResult,
+  type GateStatus,
   type TargetProfile,
 } from "./assetops-contract";
 import { getBuiltInTargetProfile } from "./assetops-profiles";
@@ -30,6 +31,87 @@ export interface AssetOpsGateOverrides {
   runtime?: GateResult;
   device?: GateResult;
   outputReopen?: GateResult;
+}
+
+export type InjectableGateStage = "import" | "runtime" | "device";
+
+export interface InjectedGateResult {
+  gate: GateResult;
+  accepted: boolean;
+  rejections: readonly string[];
+}
+
+/**
+ * A CLI flag that injects gate evidence is an attack surface: without this guard any caller could
+ * hand the pipeline a bare `{"status":"pass"}` and buy a READY verdict. An injected gate is only
+ * honoured when it names the environment that produced it, the source tree it ran against, and at
+ * least one evidence item. Anything else is downgraded to `notRun` — never silently accepted, and
+ * never upgraded to a pass.
+ */
+export function normalizeInjectedGate(value: unknown, stage: InjectableGateStage): InjectedGateResult {
+  const rejections: string[] = [];
+  const source = value && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : undefined;
+  if (!source) {
+    return { gate: rejectedGate(stage, ["the injected gate must be a JSON object"]), accepted: false, rejections: ["the injected gate must be a JSON object"] };
+  }
+  const status = source.status;
+  if (typeof status !== "string" || !GATE_STATUSES.has(status as GateStatus)) {
+    rejections.push(`status must be one of ${[...GATE_STATUSES].join(", ")}`);
+  }
+  const message = typeof source.message === "string" && source.message.trim().length > 0 ? source.message.trim() : undefined;
+  if (!message) rejections.push("message must be a non-empty string");
+  const environmentId = typeof source.environmentId === "string" && source.environmentId.trim().length > 0
+    ? source.environmentId.trim()
+    : undefined;
+  if (!environmentId) rejections.push("environmentId must name the runner that produced this gate");
+  const sourceTreeHash = typeof source.sourceTreeHash === "string" && /^[a-f0-9]{64}$/i.test(source.sourceTreeHash.trim())
+    ? source.sourceTreeHash.trim().toLowerCase()
+    : undefined;
+  if (!sourceTreeHash) rejections.push("sourceTreeHash must be the 64-character hash of the tree the runner executed");
+  const evidenceItems = Array.isArray(source.evidence) ? source.evidence.filter(isGateEvidence) : [];
+  if (!Array.isArray(source.evidence) || source.evidence.length === 0 || evidenceItems.length !== source.evidence.length) {
+    rejections.push("evidence must be a non-empty array of {key, value} observations");
+  }
+  if (rejections.length > 0) return { gate: rejectedGate(stage, rejections), accepted: false, rejections };
+  const durationMs = typeof source.durationMs === "number" && Number.isFinite(source.durationMs) && source.durationMs >= 0
+    ? source.durationMs
+    : 0;
+  return {
+    accepted: true,
+    rejections: [],
+    gate: {
+      status: status as GateStatus,
+      message: message as string,
+      evidence: [...evidenceItems, { key: "sourceTreeHash", value: sourceTreeHash as string }],
+      durationMs,
+      environmentId: environmentId as string,
+      ...(typeof source.logPath === "string" && source.logPath.trim() ? { logPath: source.logPath.trim() } : {}),
+      ...(typeof source.capturePath === "string" && source.capturePath.trim() ? { capturePath: source.capturePath.trim() } : {}),
+    },
+  };
+}
+
+const GATE_STATUSES = new Set<GateStatus>(["pass", "fail", "blocked", "notRun", "environmentUnavailable", "unsupported"]);
+
+function isGateEvidence(value: unknown): value is { key: string; value: string | number | boolean | null } {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const item = value as Record<string, unknown>;
+  if (typeof item.key !== "string" || item.key.trim().length === 0) return false;
+  return item.value === null
+    || typeof item.value === "string"
+    || typeof item.value === "number"
+    || typeof item.value === "boolean";
+}
+
+function rejectedGate(stage: InjectableGateStage, rejections: readonly string[]): GateResult {
+  return {
+    status: "notRun",
+    message: `Injected ${stage} gate was refused; it is recorded as notRun, not as a pass.`,
+    evidence: rejections.map((reason, index) => ({ key: `rejection${index + 1}`, value: reason })),
+    durationMs: 0,
+  };
 }
 
 export interface InspectAssetForTargetRequest {

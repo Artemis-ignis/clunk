@@ -141,7 +141,7 @@ function createSpritePng(width: number, height: number, frames: number, label: s
         const px = x + ox;
         const cx = cellWidth / 2 + shift;
         const cy = height * 0.53;
-        const dx = x - cx + cellWidth / 2;
+        const dx = x - cx;
         const dy = y - cy;
         const radius = Math.min(cellWidth, height) * 0.19;
         const bodyWidth = cellWidth * 0.25;

@@ -17,6 +17,7 @@ import {
 import { AssetPreview } from "./AssetPreview";
 import { localizeFindingMessage, localizeFindingTitle } from "./finding-labels";
 import { Icon } from "./Icon";
+import Link from "./NativeLink";
 import { readinessHint, readinessNote, resolveReadiness } from "./readiness";
 import { StatusPill } from "./StatusPill";
 import { WorkspaceShell } from "./WorkspaceShell";
@@ -325,7 +326,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
   return (
     <WorkspaceShell
       active="inspector"
-      title="에셋 검사기"
+      title="Game Ready"
       userLabel={userLabel}
       status={<StatusPill status={status} />}
     >
@@ -339,6 +340,20 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
           </li>
         ))}
       </ol>
+
+      <section className="native-series-banner" aria-labelledby="native-series-heading">
+        <div>
+          <span className="mono-label">CLUNK SERIES · GAME READY</span>
+          <h2 id="native-series-heading">검사에서 별도 mesh output까지.</h2>
+          <p>Clunk Game Ready는 기존 Core 게이트와 GitHub에서 감사해 Clunk 내부에 구성한 glTF-Transform·meshoptimizer rail을 함께 사용합니다. 원본은 보존하고 output을 다시 엽니다.</p>
+        </div>
+        <div className="native-series-banner-side">
+          <span><b>INPUT</b> 원본 hash</span>
+          <span><b>OUTPUT</b> 새 GLB hash</span>
+          <span><b>REOPEN</b> fresh evidence</span>
+          <Link className="text-link" href="/series">Clunk Series 장부 보기 <Icon name="arrowUpRight" size={13} /></Link>
+        </div>
+      </section>
 
       {notice ? (
         <div className="banner banner-info">

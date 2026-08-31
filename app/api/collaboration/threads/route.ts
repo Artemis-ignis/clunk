@@ -31,7 +31,7 @@ export async function GET() {
     const db = getRuntimeDb();
     const rows = await db
       .prepare(
-        `SELECT id, subject, asset_id AS assetId, input_hash AS inputHash,
+        `SELECT id, subject, asset_id AS assetId, consumer_project AS consumerProject, input_hash AS inputHash,
           target_profile_id AS targetProfileId, rule_set_id AS ruleSetId,
           status_json AS status, created_by AS createdBy, created_at AS createdAt,
           updated_at AS updatedAt, evidence_json AS evidence
@@ -64,14 +64,15 @@ export async function POST(request: Request) {
     await db
       .prepare(
         `INSERT INTO clunk_collaboration_threads
-         (id, workspace_id, subject, asset_id, input_hash, target_profile_id, rule_set_id, status_json, evidence_json, created_by)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         (id, workspace_id, subject, asset_id, consumer_project, input_hash, target_profile_id, rule_set_id, status_json, evidence_json, created_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .bind(
         threadId,
         workspaceId,
         payload.subject,
         payload.assetId ?? null,
+        payload.consumerProject,
         payload.inputHash,
         payload.profileId,
         payload.ruleSetId,
@@ -86,6 +87,7 @@ export async function POST(request: Request) {
         id: threadId,
         subject: payload.subject,
         assetId: payload.assetId ?? null,
+        consumerProject: payload.consumerProject,
         inputHash: payload.inputHash,
         targetProfileId: payload.profileId,
         ruleSetId: payload.ruleSetId,

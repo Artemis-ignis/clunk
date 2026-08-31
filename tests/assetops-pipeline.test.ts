@@ -1,8 +1,12 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import test from "node:test";
 import {
   inspectAssetForTarget,
+  normalizeInjectedGate,
   type AssetOpsGateOverrides,
 } from "../packages/core/src/assetops-pipeline";
 
@@ -143,3 +147,82 @@ test("Harvest Frontier semantic PASS remains structural-only when runtime eviden
   assert.equal(evidence.stages.runtime.status, "environmentUnavailable");
   assert.ok(!evidence.findings.some((finding) => finding.id.startsWith("HF-")));
 });
+
+// ---------------------------------------------------------------------------
+// Injected gate evidence: a CLI flag is an attack surface, not an approval.
+// ---------------------------------------------------------------------------
+
+const honestGate = {
+  status: "pass",
+  message: "Pixi import runner completed.",
+  durationMs: 1240,
+  environmentId: "pixi-import-runner/8.6.6",
+  sourceTreeHash: "d".repeat(64),
+  evidence: [
+    { key: "runner", value: "pixi-import-runner" },
+    { key: "textures", value: 4 },
+  ],
+};
+
+test("an injected gate without attested identity is downgraded to notRun instead of passing", () => {
+  const noEnvironment = normalizeInjectedGate({ ...honestGate, environmentId: undefined }, "import");
+  assert.equal(noEnvironment.accepted, false);
+  assert.equal(noEnvironment.gate.status, "notRun");
+  assert.ok(noEnvironment.rejections.some((reason) => reason.includes("environmentId")));
+
+  const noSourceTree = normalizeInjectedGate({ ...honestGate, sourceTreeHash: undefined }, "runtime");
+  assert.equal(noSourceTree.gate.status, "notRun");
+  assert.ok(noSourceTree.rejections.some((reason) => reason.includes("sourceTreeHash")));
+
+  const noEvidence = normalizeInjectedGate({ ...honestGate, evidence: [] }, "runtime");
+  assert.equal(noEvidence.gate.status, "notRun");
+  assert.ok(noEvidence.rejections.some((reason) => reason.includes("evidence")));
+
+  const bogusHash = normalizeInjectedGate({ ...honestGate, sourceTreeHash: "not-a-hash" }, "import");
+  assert.equal(bogusHash.gate.status, "notRun");
+});
+
+test("a fully attested injected gate is accepted and keeps its source tree hash in evidence", () => {
+  const accepted = normalizeInjectedGate(honestGate, "import");
+  assert.equal(accepted.accepted, true);
+  assert.equal(accepted.gate.status, "pass");
+  assert.equal(accepted.gate.environmentId, "pixi-import-runner/8.6.6");
+  assert.deepEqual(accepted.rejections, []);
+  assert.ok(accepted.gate.evidence.some((item) => item.key === "sourceTreeHash" && item.value === "d".repeat(64)));
+});
+
+test("assetops-inspect CLI injects attested gates and refuses to inject unattested ones", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "clunk-inspect-gate-"));
+  try {
+    const attestedPath = join(directory, "import-gate.json");
+    const forgedPath = join(directory, "runtime-gate.json");
+    await writeFile(attestedPath, JSON.stringify(honestGate), "utf8");
+    await writeFile(forgedPath, JSON.stringify({ status: "pass", message: "trust me" }), "utf8");
+
+    const accepted = runInspect(["--path", "public/og.png", "--target-profile", "harvest-frontier-web-three", "--import-gate", attestedPath]);
+    assert.equal(accepted.payload.stages.import.status, "pass");
+    assert.equal(accepted.payload.stages.import.environmentId, "pixi-import-runner/8.6.6");
+
+    const refused = runInspect(["--path", "public/og.png", "--target-profile", "harvest-frontier-web-three", "--runtime-gate", forgedPath]);
+    assert.equal(refused.payload.stages.runtime.status, "notRun");
+    assert.notEqual(refused.payload.status, "READY");
+    assert.match(refused.stderr, /runtime gate/i);
+    assert.match(refused.stderr, /environmentId/);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+function runInspect(args: readonly string[]) {
+  const root = resolve(import.meta.dirname, "..");
+  const cli = resolve(root, "scripts", "assetops-inspect-cli.ts");
+  const tsx = resolve(root, "node_modules", "tsx", "dist", "cli.mjs");
+  try {
+    const stdout = execFileSync(process.execPath, [tsx, cli, ...args], { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+    return { status: 0, payload: JSON.parse(stdout.trim()), stderr: "" };
+  } catch (error) {
+    const failure = error as { status?: number; stdout?: string; stderr?: string };
+    if (failure.status === undefined) throw error;
+    return { status: failure.status, payload: JSON.parse(String(failure.stdout ?? "").trim()), stderr: String(failure.stderr ?? "") };
+  }
+}
