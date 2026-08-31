@@ -30,6 +30,7 @@ type Listing = {
 };
 
 type CatalogFilter = "all" | "2d" | "3d" | "motion";
+type CatalogSort = "newest" | "name" | "price-asc" | "price-desc" | "size-asc";
 type CatalogState = "loading" | "ready" | "error";
 type CheckoutState = { status?: string; configured?: boolean; provider?: string | null };
 type CatalogPayload = { ok?: boolean; listings?: Listing[]; checkout?: CheckoutState };
@@ -114,6 +115,7 @@ export function MarketplaceCatalog() {
   const [checkoutState, setCheckoutState] = useState<Record<string, string>>({});
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<CatalogFilter>("all");
+  const [sort, setSort] = useState<CatalogSort>("newest");
 
   useEffect(() => {
     let active = true;
@@ -140,7 +142,7 @@ export function MarketplaceCatalog() {
 
   const filteredListings = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
-    return listings.filter((listing) => {
+    const matched = listings.filter((listing) => {
       const searchable = [listing.title, listing.description, listing.entryFileName, listing.format, listing.licenseStatus]
         .filter(Boolean)
         .join(" ")
@@ -148,7 +150,15 @@ export function MarketplaceCatalog() {
       const matchesQuery = !normalizedQuery || searchable.includes(normalizedQuery);
       return matchesQuery && (filter === "all" || listingFamily(listing) === filter);
     });
-  }, [filter, listings, query]);
+    // The API already returns newest-first, so "newest" keeps server order.
+    if (sort === "newest") return matched;
+    return [...matched].sort((a, b) => {
+      if (sort === "name") return a.title.localeCompare(b.title, "ko-KR");
+      if (sort === "price-asc") return a.priceCents - b.priceCents;
+      if (sort === "price-desc") return b.priceCents - a.priceCents;
+      return (a.byteLength ?? 0) - (b.byteLength ?? 0);
+    });
+  }, [filter, listings, query, sort]);
 
   async function startCheckout(listingId: string) {
     if (checkoutState[listingId]?.includes("확인하는 중")) return;
@@ -205,6 +215,16 @@ export function MarketplaceCatalog() {
                 </button>
               ))}
             </div>
+            <label className={styles.sort}>
+              <span className="sr-only">정렬 기준</span>
+              <select value={sort} onChange={(event) => setSort(event.target.value as CatalogSort)}>
+                <option value="newest">최신순</option>
+                <option value="name">이름순</option>
+                <option value="price-asc">가격 낮은순</option>
+                <option value="price-desc">가격 높은순</option>
+                <option value="size-asc">파일 작은순</option>
+              </select>
+            </label>
             <span className={styles.count} aria-live="polite">{filteredListings.length}개 공개 LISTING</span>
           </div>
           {filteredListings.length === 0 ? <NoResults /> : null}

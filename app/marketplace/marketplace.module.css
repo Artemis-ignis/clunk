@@ -1393,3 +1393,18 @@
   padding: 0 14px;
   font-size: 0.74rem;
 }
+
+/* catalog sort control */
+.sort select {
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--v5-line-strong);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--v5-ink);
+  font-family: inherit;
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+.sort select:focus-visible { outline: 2px solid rgba(139, 92, 246, 0.6); outline-offset: 2px; }
+.sort option { background: #12152a; color: var(--v5-ink); }
