@@ -549,8 +549,25 @@ export function evaluateSpriteSheetReview(manifest: SpriteSheetReviewManifest): 
     if (pixelDiscipline.unavailable) qualityUnavailable = true;
     if (policy.runtimeFramePx !== undefined) {
       if (metrics.runtimeFramePx === undefined) {
-        qualityUnavailable = true;
-        issues.push(metricUnavailableIssue("SPRITE-RUNTIME-SIZE-METRICS-UNAVAILABLE", "runtimeFramePx", enforcement));
+        if (policy.requireRuntimeCapture === false) {
+          // The consumer explicitly declared it has no runtime capture rail:
+          // keep the unverified declaration visible without collapsing the
+          // whole structural review into UNAVAILABLE.
+          issues.push(issue(
+            "SPRITE-RUNTIME-SIZE-NOT-CAPTURED",
+            "ADVISORY",
+            "not captured",
+            `${policy.runtimeFramePx.width}x${policy.runtimeFramePx.height}`,
+            "The declared runtime frame size was not verified because the consumer declared no runtime capture rail (requireRuntimeCapture: false).",
+            "Provide a runtime capture rail (or remove the declaration) so the declared frame size can be measured.",
+            "runtime",
+            enforcement,
+            "metrics.runtimeFramePx",
+          ));
+        } else {
+          qualityUnavailable = true;
+          issues.push(metricUnavailableIssue("SPRITE-RUNTIME-SIZE-METRICS-UNAVAILABLE", "runtimeFramePx", enforcement));
+        }
       } else if (metrics.runtimeFramePx.width !== policy.runtimeFramePx.width || metrics.runtimeFramePx.height !== policy.runtimeFramePx.height) {
         qualityViolations += 1;
         issues.push(issue(

@@ -243,6 +243,40 @@ test("sprite contract preserves direction, hold-last, pivot, hitbox, and opaque-
   assert.equal(report.quality, "PASS");
 });
 
+test("a declared runtime size without a capture rail downgrades honestly instead of blocking everything", () => {
+  // Consumer explicitly declares it has no runtime capture rail: the declared
+  // size stays visible as an ADVISORY not-captured issue, but structural
+  // evaluation is not forced into UNAVAILABLE (FF rescan feedback #1).
+  const optOut = normalizeSpriteSheetReview(baseManifest({
+    qualityPolicy: {
+      mode: "BLOCKING",
+      requiredStates: ["idle", "walk"],
+      runtimeFramePx: { width: 46, height: 46 },
+      requireRuntimeCapture: false,
+      requireHumanReview: false,
+    },
+    metrics: metrics({}),
+  }));
+  assert.notEqual(optOut.quality, "UNAVAILABLE");
+  const notCaptured = optOut.issues.find((entry) => entry.code === "SPRITE-RUNTIME-SIZE-NOT-CAPTURED");
+  assert.ok(notCaptured, "the uncaptured declaration must stay visible");
+  assert.equal(notCaptured?.severity, "ADVISORY");
+  assert.equal(optOut.issues.some((entry) => entry.code === "SPRITE-RUNTIME-SIZE-METRICS-UNAVAILABLE"), false);
+
+  // Without the explicit opt-out the strict behaviour is unchanged.
+  const strict = normalizeSpriteSheetReview(baseManifest({
+    qualityPolicy: {
+      mode: "BLOCKING",
+      requiredStates: ["idle", "walk"],
+      runtimeFramePx: { width: 46, height: 46 },
+      requireHumanReview: false,
+    },
+    metrics: metrics({}),
+  }));
+  assert.equal(strict.quality, "UNAVAILABLE");
+  assert.ok(strict.issues.some((entry) => entry.code === "SPRITE-RUNTIME-SIZE-METRICS-UNAVAILABLE"));
+});
+
 test("sprite pixel gates block clipping, alpha spill, border contact, silhouette, opaque-bottom, and runtime-size failures", () => {
   const report = normalizeSpriteSheetReview(baseManifest({
     qualityPolicy: {

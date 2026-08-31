@@ -291,7 +291,7 @@ function measurePixelArtIndicators(
   width: number,
   height: number,
   declaredGridSize?: number,
-): { hardAlphaRatio: number; uniqueColorCount: number; dominantRunLength: number; offGridPixelRatio: number } {
+): { hardAlphaRatio: number; uniqueColorCount: number; dominantRunLength: number; offGridPixelRatio?: number } {
   const totalPixels = width * height;
   const colors = new Set<number>();
   const runTally = new Map<number, number>();
@@ -324,8 +324,12 @@ function measurePixelArtIndicators(
     }
   }
   const gridSize = declaredGridSize ?? Math.max(1, dominantRunLength);
+  // A 1px grid means there is nothing to snap against: the ratio is
+  // unmeasurable, and an unmeasured value must never surface as a perfect 0
+  // (FF rescan bug report - same shape as the removed constant PASS).
+  const gridMeasurable = gridSize > 1;
   let offGrid = 0;
-  if (gridSize > 1) {
+  if (gridMeasurable) {
     for (let y = 0; y < height; y += 1) {
       const anchorY = Math.floor(y / gridSize) * gridSize;
       for (let x = 0; x < width; x += 1) {
@@ -346,7 +350,7 @@ function measurePixelArtIndicators(
     hardAlphaRatio: totalPixels ? hardAlpha / totalPixels : 0,
     uniqueColorCount: colors.size,
     dominantRunLength,
-    offGridPixelRatio: totalPixels ? offGrid / totalPixels : 0,
+    ...(gridMeasurable ? { offGridPixelRatio: totalPixels ? offGrid / totalPixels : 0 } : {}),
   };
 }
 

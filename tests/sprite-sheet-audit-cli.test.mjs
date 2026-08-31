@@ -53,6 +53,39 @@ test("sprite-sheet CLI turns duplicate motion cells into a blocking quality resu
   }
 });
 
+test("continuous-tone sheets report off-grid ratio as unmeasured, never as a perfect zero", async () => {
+  // FF rescan bug report: with dominantRunLength 1 and no declared pixel grid
+  // there is nothing to snap against, so offGridPixelRatio must be absent
+  // (unmeasured), not silently 0 - the same shape as the removed constant PASS.
+  const directory = await mkdtemp(join(tmpdir(), "clunk-sprite-audit-noise-"));
+  try {
+    const width = 128;
+    const height = 64;
+    const raw = Buffer.alloc(width * height * 4);
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < width; x += 1) {
+        const offset = (y * width + x) * 4;
+        raw[offset] = (x * 7 + y * 13) % 256;
+        raw[offset + 1] = (x * 31 + y * 3) % 256;
+        raw[offset + 2] = (x * 17 + y * 29) % 256;
+        raw[offset + 3] = 255;
+      }
+    }
+    const sheetPath = join(directory, "noise.png");
+    await sharp(raw, { raw: { width, height, channels: 4 } }).png().toFile(sheetPath);
+    const manifestPath = await writeManifest(directory, sheetPath, { duplicateLimit: 1 });
+    const result = runCli(["validate", "--input", manifestPath, "--format", "json"]);
+
+    const measured = result.payload.metrics;
+    assert.equal(measured.dominantRunLength, 1, "the noise fixture must defeat run-length grid inference");
+    assert.equal(measured.offGridPixelRatio, undefined, "an unmeasurable grid must not be reported as 0");
+    assert.equal(typeof measured.hardAlphaRatio, "number");
+    assert.equal(typeof measured.uniqueColorCount, "number");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
 test("sprite-sheet CLI reports a missing local sheet as UNAVAILABLE instead of fabricating metrics", async () => {
   const directory = await mkdtemp(join(tmpdir(), "clunk-sprite-audit-unavailable-"));
   try {
@@ -93,7 +126,10 @@ test("sprite-sheet CLI measures the real cell footprint instead of echoing the d
     assert.equal(result.payload.metrics.runtimeFramePx, undefined, "the audit must not echo target.runtimeFramePx back as a measurement");
     assert.equal(result.payload.static, "FAIL");
     assert.ok(result.payload.issues.some((issue) => issue.code === "SPRITE-LOGICAL-SIZE-MISMATCH"));
-    assert.ok(result.payload.issues.some((issue) => issue.code === "SPRITE-RUNTIME-SIZE-METRICS-UNAVAILABLE"));
+    // The fixture declares requireRuntimeCapture: false, so the missing capture
+    // surfaces as the honest ADVISORY instead of collapsing into UNAVAILABLE -
+    // while the size lie itself still hard-fails below.
+    assert.ok(result.payload.issues.some((issue) => issue.code === "SPRITE-RUNTIME-SIZE-NOT-CAPTURED"));
     assert.equal(result.payload.status, "FAIL");
     assert.equal(result.status, 2, result.stderr);
     assert.equal(result.payload.readiness, "blocked");
