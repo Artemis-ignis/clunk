@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import Link from "./NativeLink";
 import { Icon } from "./Icon";
-import { EmbeddedGlbViewer } from "./review/EmbeddedGlbViewer";
+import { EmbeddedGlbViewer, type MeasuredSpec } from "./review/EmbeddedGlbViewer";
 import styles from "../marketplace/marketplace.module.css";
 
 type Listing = {
@@ -47,6 +47,42 @@ type CheckoutResponse = {
 function listingCreditPrice(priceCents: number, currency: string): number | null {
   if (currency !== "KRW" || priceCents <= 0 || priceCents % 10_000 !== 0) return null;
   return priceCents / 10_000;
+}
+
+const SNIPPET_TABS = [
+  { id: "three" as const, label: "three.js" },
+  { id: "r3f" as const, label: "React Three Fiber" },
+  { id: "clunk" as const, label: "Clunk 검사" },
+];
+
+/** Copy-paste integration code for the exact file the buyer downloads. */
+function buildSnippet(tab: "three" | "r3f" | "clunk", fileName: string): string {
+  if (tab === "three") {
+    return [
+      `import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";`,
+      ``,
+      `new GLTFLoader().load("/assets/${fileName}", (gltf) => {`,
+      `  scene.add(gltf.scene);`,
+      `});`,
+    ].join("\n");
+  }
+  if (tab === "r3f") {
+    return [
+      `import { useGLTF } from "@react-three/drei";`,
+      ``,
+      `export function Asset(props) {`,
+      `  const { scene } = useGLTF("/assets/${fileName}");`,
+      `  return <primitive object={scene} {...props} />;`,
+      `}`,
+    ].join("\n");
+  }
+  return [
+    `# 받은 파일을 그대로 다시 검사합니다 (같은 계약, 같은 수치)`,
+    `npm run clunk -- inspect ./${fileName} --profile web`,
+    ``,
+    `# 에이전트에서는 MCP 툴로 같은 검사를 호출합니다`,
+    `clunk_asset_inspect { path: "./${fileName}", targetProfileId: "web" }`,
+  ].join("\n");
 }
 
 /** 생성형 AI 표시 대상 여부 — 1st-party 상품은 항상 표시(보수적 기본값). */
@@ -256,6 +292,9 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
   const [withdrawalConsent, setWithdrawalConsent] = useState(false);
   const [owned, setOwned] = useState(false);
   const [buying, setBuying] = useState(false);
+  const [measured, setMeasured] = useState<MeasuredSpec | null>(null);
+  const [snippetTab, setSnippetTab] = useState<"three" | "r3f" | "clunk">("three");
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -360,6 +399,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
               src={`/market/${listing.slug}/${listing.entryFileName}`}
               poster={previewUrl}
               alt={`${listing.title} 실제 판매 파일`}
+              onMeasured={setMeasured}
             />
           ) : previewUrl ? (
             <Image src={previewUrl} alt={`${listing.title} 실제 공개 미리보기`} width={900} height={620} priority unoptimized />
@@ -377,6 +417,16 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
             <span className={styles.aiChip}><i>✦</i> 생성형 AI 활용 제작 — luna 이미지 엔진 · Three.js 팩토리</span>
           ) : null}
           <p>{listing.description}</p>
+          {/* Spec measured in this browser from the exact file on sale — the
+              viewer parses it, nothing is restated from metadata. */}
+          {measured ? (
+            <ul className={styles.specList} aria-label="이 파일에서 방금 측정한 사양">
+              <li><b>{measured.triangles.toLocaleString("ko-KR")} 삼각형</b> · 메시 {measured.meshes} · 머티리얼 {measured.materials}</li>
+              <li><b>{measured.bounds.x.toFixed(2)} × {measured.bounds.y.toFixed(2)} × {measured.bounds.z.toFixed(2)} m</b> · 실제 스케일</li>
+              <li><b>{listing.format}</b> ({formatBytes(measured.bytes)}) · 브라우저에서 방금 파싱한 실측값</li>
+              <li>라이선스 <b>{listing.licenseStatus}</b> · 파일·해시·라이선스가 상품 단위로 따라갑니다</li>
+            </ul>
+          ) : null}
           <div className={styles.priceRow}><strong>{formatPrice(listing.priceCents, listing.currency)}</strong><small>{listing.sellerName ?? "Clunk creator"} · {formatBytes(listing.byteLength)} · {listing.entryFileName}</small></div>
           <div className={styles.payState} data-payment-state={checkout?.status ?? "UNKNOWN"} role="status"><span>CHECKOUT STATUS</span><strong>{paymentStatus}</strong><small>결제 제공자 상태를 API 응답 그대로 표시합니다.</small></div>
           {listing.priceCents > 0 ? (
@@ -425,6 +475,47 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
           {message ? <p className={styles.message} role="status">{message}</p> : null}
         </div>
       </section>
+
+      {/\.(glb|gltf)$/i.test(listing.entryFileName) ? (
+        <section className={styles.detailSection} aria-labelledby="detail-integration-heading">
+          <div className={styles.sectionHead}>
+            <span className="cv5-eyebrow">DROP IT IN</span>
+            <h2 id="detail-integration-heading">받은 파일을<br /><em>붙여넣기로 씁니다</em></h2>
+            <p>구매한 GLB를 프로젝트에 넣고 아래 코드를 복사하면 끝입니다. 검사까지 같은 파일로 이어집니다.</p>
+          </div>
+          <div className={styles.snippetBox}>
+            <div className={styles.snippetTabs} role="tablist" aria-label="연동 방식">
+              {SNIPPET_TABS.map((tab) => (
+                <button
+                  type="button"
+                  role="tab"
+                  key={tab.id}
+                  aria-selected={snippetTab === tab.id}
+                  className={snippetTab === tab.id ? styles.snippetTabOn : undefined}
+                  onClick={() => { setSnippetTab(tab.id); setCopied(false); }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <div className={styles.snippetBody}>
+              <pre><code>{buildSnippet(snippetTab, listing.entryFileName)}</code></pre>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnGhost} ${styles.snippetCopy}`}
+                onClick={() => {
+                  void navigator.clipboard.writeText(buildSnippet(snippetTab, listing.entryFileName)).then(
+                    () => { setCopied(true); window.setTimeout(() => setCopied(false), 1800); },
+                    () => setCopied(false),
+                  );
+                }}
+              >
+                {copied ? "복사됨" : "코드 복사"}
+              </button>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <section className={styles.detailSection} aria-labelledby="detail-evidence-heading">
         <div className={styles.sectionHead}><span className="cv5-eyebrow">PUBLIC EVIDENCE</span><h2 id="detail-evidence-heading">상품이 공개된 이유를<br /><em>상태별로 확인합니다</em></h2><p>PUBLISHED는 한 점수의 별명이 아닙니다. 파일·라이선스·런타임·사람의 판단이 각각 기록되어야 합니다.</p></div>

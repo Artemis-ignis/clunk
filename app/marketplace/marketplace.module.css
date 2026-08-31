@@ -1313,3 +1313,83 @@
     transform: none;
   }
 }
+
+/* measured spec bullets (browser-parsed from the file on sale) */
+.specList {
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+.specList li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--v5-ink-dim);
+}
+.specList li::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 0.62em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--v5-grad);
+}
+.specList li b { color: var(--v5-ink); font-weight: 700; }
+
+/* copy-paste integration snippets */
+.snippetBox {
+  border: 1px solid var(--v5-line-strong);
+  border-radius: var(--v5-r-lg);
+  background: linear-gradient(178deg, #12152699, #0b0d18);
+  overflow: hidden;
+}
+.snippetTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--v5-line);
+}
+.snippetTabs button {
+  height: 32px;
+  padding: 0 13px;
+  border-radius: 9px;
+  border: 1px solid var(--v5-line);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--v5-ink-dim);
+  font-family: var(--v5-label);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+}
+.snippetTabs button:hover { color: var(--v5-ink); }
+.snippetTabOn {
+  color: var(--v5-ink) !important;
+  border-color: rgba(139, 92, 246, 0.5) !important;
+  background: var(--v5-grad-soft) !important;
+}
+.snippetBody { position: relative; }
+.snippetBody pre {
+  margin: 0;
+  padding: 16px 18px;
+  overflow-x: auto;
+  background: #0a0d18;
+  font-family: var(--v5-label);
+  font-size: 0.76rem;
+  line-height: 1.72;
+  color: #9fb3d9;
+}
+.snippetCopy {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  height: 32px;
+  padding: 0 14px;
+  font-size: 0.74rem;
+}

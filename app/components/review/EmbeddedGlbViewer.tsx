@@ -11,10 +11,30 @@ import { useEffect, useRef, useState } from "react";
  * Falls back to the poster image if WebGL/loading fails. Exposes the
  * __rvEmbedFrame manual-frame hook (rAF never fires in a hidden pane).
  */
-export function EmbeddedGlbViewer({ src, poster, alt }: { src: string; poster?: string | null; alt: string }) {
+export type MeasuredSpec = {
+  triangles: number;
+  meshes: number;
+  materials: number;
+  bounds: { x: number; y: number; z: number };
+  bytes: number;
+};
+
+export function EmbeddedGlbViewer({
+  src,
+  poster,
+  alt,
+  onMeasured,
+}: {
+  src: string;
+  poster?: string | null;
+  alt: string;
+  onMeasured?: (spec: MeasuredSpec) => void;
+}) {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const [failed, setFailed] = useState(false);
   const [clipName, setClipName] = useState<string | null>(null);
+  const measuredRef = useRef(onMeasured);
+  measuredRef.current = onMeasured;
 
   useEffect(() => {
     const stage = stageRef.current;
@@ -75,6 +95,33 @@ export function EmbeddedGlbViewer({ src, poster, alt }: { src: string; poster?: 
           mixer = new THREE.AnimationMixer(model);
           mixer.clipAction(gltf.animations[0]).play();
           setClipName(gltf.animations[0].name || "animation");
+        }
+
+        // Spec measured from the very bytes the buyer downloads — the page
+        // never restates a number from metadata.
+        if (measuredRef.current) {
+          let triangles = 0;
+          let meshes = 0;
+          const materialSet = new Set<unknown>();
+          model.traverse((node) => {
+            const mesh = node as import("three").Mesh;
+            if (!mesh.isMesh) return;
+            meshes += 1;
+            const geometry = mesh.geometry as import("three").BufferGeometry;
+            const index = geometry.getIndex();
+            const position = geometry.getAttribute("position");
+            triangles += Math.floor((index ? index.count : position?.count ?? 0) / 3);
+            for (const material of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
+              materialSet.add(material);
+            }
+          });
+          measuredRef.current({
+            triangles,
+            meshes,
+            materials: materialSet.size,
+            bounds: { x: size.x, y: size.y, z: size.z },
+            bytes: buffer.byteLength,
+          });
         }
 
         const surfaceStage = stage as HTMLDivElement;
