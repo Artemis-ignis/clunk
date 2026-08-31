@@ -11,19 +11,55 @@ export const metadata = createPageMetadata({
   path: "/settings",
 });
 
+/** Truthful copy for whichever identity the current session actually used. */
+function authDescription(provider: string): {
+  label: string;
+  lede: string;
+  accountNote: string;
+  passwordNote: string;
+} {
+  if (provider === "google" || provider === "github") {
+    const name = provider === "google" ? "Google" : "GitHub";
+    return {
+      label: `${name} OAuth`,
+      lede: `${name} 계정 로그인으로 워크스페이스를 보호합니다.`,
+      accountNote: `${name} OAuth가 반환한 프로필에서 확인합니다.`,
+      passwordNote: `인증은 ${name}가 처리하며 Clunk는 자격 증명을 보관하지 않습니다.`,
+    };
+  }
+  if (provider === "qa") {
+    return {
+      label: "QA 키 세션 (운영자 전용)",
+      lede: "판매 개시 전 QA 키 세션으로 열린 워크스페이스입니다.",
+      accountNote: "QA 로그인이 발급한 서명 세션에서 확인합니다.",
+      passwordNote: "QA 키는 서버 환경변수와 상수시간 비교만 하고 저장하지 않습니다.",
+    };
+  }
+  return {
+    label: "ChatGPT SIWC",
+    lede: "ChatGPT 로그인으로 워크스페이스를 보호합니다.",
+    accountNote: "ChatGPT가 전달한 인증 헤더에서 확인합니다.",
+    passwordNote: "인증은 ChatGPT가 전달한 헤더로만 처리하고, 자체 자격 증명을 만들지 않습니다.",
+  };
+}
+
 export default async function SettingsPage() {
   const user = await requireChatGPTUser("/settings");
 
+  // The page used to state "ChatGPT SIWC" for every session, which is false on
+  // a QA-key or OAuth login (2026-08-31 review). Name the real provider.
+  const auth = authDescription(user.provider);
+
   const rows = [
-    { label: "계정", value: user.email, note: "ChatGPT가 전달한 인증 헤더에서 확인합니다." },
+    { label: "계정", value: user.email, note: auth.accountNote },
     { label: "워크스페이스", value: `${user.displayName}님의 워크스페이스`, note: "인증된 API를 처음 호출할 때 생성됩니다." },
-    { label: "인증", value: "ChatGPT SIWC", note: "v1에서는 앱 자체 이메일과 비밀번호 데이터베이스를 만들지 않습니다." },
+    { label: "인증", value: auth.label, note: "Clunk는 자체 이메일·비밀번호 데이터베이스를 만들지 않습니다." },
     { label: "저장", value: "D1 메타데이터와 비공개 R2 artifact", note: "인증된 워크스페이스에 결과 bundle을 보관하고, 입력 원본은 덮어쓰지 않습니다." },
   ];
 
   const notStored = [
     { label: "원본 에셋 바이트", note: "GLB와 GLTF는 브라우저에서만 열립니다. 서버로 업로드하지 않습니다." },
-    { label: "비밀번호", note: "인증은 ChatGPT가 전달한 헤더로만 처리하고, 자체 자격 증명을 만들지 않습니다." },
+    { label: "비밀번호", note: auth.passwordNote },
     { label: "결제 수단", note: "결제 제공자를 연결하지 않았으므로 카드 정보를 받는 경로가 없습니다." },
     { label: "원본 덮어쓰기", note: "검사·최적화는 별도 output과 Passport를 만들며 입력 원본을 수정하지 않습니다." },
   ];
@@ -37,7 +73,7 @@ export default async function SettingsPage() {
             <br />
             <em>명확하게 유지합니다.</em>
           </h2>
-          <p>ChatGPT 로그인으로 워크스페이스를 보호합니다. 원본 입력과 결과 artifact의 저장 경계를 분리해 표시합니다.</p>
+          <p>{auth.lede} 원본 입력과 결과 artifact의 저장 경계를 분리해 표시합니다.</p>
         </div>
         <div className="settings-boundary-visual" aria-label="Clunk 저장 경계 시각 안내">
           <div className="settings-boundary-topline"><span><i /> STORAGE MAP</span><strong>PRIVATE OUTPUT ONLY</strong></div>

@@ -78,8 +78,22 @@ type WorkspaceAsset = {
 type MeResponse = {
   user?: {
     displayName?: string;
+    provider?: string;
   };
 };
+
+/**
+ * Name the identity the session actually carries. The chip used to read
+ * "SIWC 연결됨" for every session, which was simply false on a QA-key or
+ * OAuth login (2026-08-31 review).
+ */
+function authProviderLabel(provider?: string): string {
+  if (provider === "chatgpt-sites") return "ChatGPT SIWC 연결됨";
+  if (provider === "google") return "Google 계정 연결됨";
+  if (provider === "github") return "GitHub 계정 연결됨";
+  if (provider === "qa") return "QA 키 세션";
+  return "연결됨";
+}
 
 type EvidenceStatuses = {
   structural: "PASS" | "CONDITIONAL" | "BLOCKED" | "NOT_RUN";
@@ -210,6 +224,7 @@ export function DashboardClient() {
   const [credits, setCredits] = useState<number | null>(null);
   const [message, setMessage] = useState("");
   const [userLabel, setUserLabel] = useState("사용자");
+  const [providerLabel, setProviderLabel] = useState("연결됨");
   const [connection, setConnection] = useState<"checking" | "connected" | "auth-required" | "error">("checking");
   const [expandedRunId, setExpandedRunId] = useState<string | null>(null);
   const [loadAttempt, setLoadAttempt] = useState(0);
@@ -259,6 +274,7 @@ export function DashboardClient() {
         if (cancelled) return;
         setConnection("connected");
         setUserLabel(meBody.user?.displayName?.trim() || "사용자");
+        setProviderLabel(authProviderLabel(meBody.user?.provider));
         setRuns(runBody.runs ?? []);
         setPassports(passportBody.passports ?? []);
         setLedger(creditBody.ledger ?? []);
@@ -289,7 +305,7 @@ export function DashboardClient() {
       <span className="conn-dot" />
       <span className="conn-label">
         {connection === "connected"
-          ? "SIWC 연결됨"
+          ? providerLabel
           : connection === "auth-required"
             ? "로그인 필요"
             : connection === "error"

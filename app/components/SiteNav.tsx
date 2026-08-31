@@ -31,6 +31,25 @@ export function SiteNav({ active }: { active?: ShellSection }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const scrollSentinelRef = useRef<HTMLSpanElement>(null);
+  // Signed-in visitors used to still see 로그인/회원가입 on every public page
+  // (2026-08-31 review). The nav asks the same /api/me the workspace uses and
+  // stays anonymous when it answers 401 — never guessing a session.
+  const [session, setSession] = useState<{ displayName: string } | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    void fetch("/api/me", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) return;
+        const body = await response.json() as { user?: { displayName?: string } };
+        const displayName = body.user?.displayName?.trim();
+        if (active && displayName) setSession({ displayName });
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -93,14 +112,22 @@ export function SiteNav({ active }: { active?: ShellSection }) {
 
           <div className="sitenav-actions">
             <ThemeToggle />
-            <Link className="button button-quiet button-sm sitenav-login" href="/login" prefetch={false}>
-              로그인
-            </Link>
-            <Link className="button button-quiet button-sm sitenav-signup" href="/signup" prefetch={false}>
-              회원가입
-            </Link>
-            <Link className="button button-primary button-sm sitenav-cta" href="/studio" prefetch={false}>
-              Clunk 사용하기
+            {session ? (
+              <Link className="button button-quiet button-sm sitenav-login" href="/dashboard" prefetch={false}>
+                {session.displayName}
+              </Link>
+            ) : (
+              <>
+                <Link className="button button-quiet button-sm sitenav-login" href="/login" prefetch={false}>
+                  로그인
+                </Link>
+                <Link className="button button-quiet button-sm sitenav-signup" href="/signup" prefetch={false}>
+                  회원가입
+                </Link>
+              </>
+            )}
+            <Link className="button button-primary button-sm sitenav-cta" href={session ? "/app" : "/studio"} prefetch={false}>
+              {session ? "작업면 열기" : "Clunk 사용하기"}
               <Icon name="arrowUpRight" size={14} />
             </Link>
             <button
@@ -143,14 +170,22 @@ export function SiteNav({ active }: { active?: ShellSection }) {
               ))}
             </div>
             <div className="sitenav-drawer-actions">
-              <Link className="button button-quiet button-sm" href="/login" prefetch={false} onClick={() => setOpen(false)}>
-                로그인
-              </Link>
-              <Link className="button button-quiet button-sm" href="/signup" prefetch={false} onClick={() => setOpen(false)}>
-                회원가입
-              </Link>
-              <Link className="button button-primary button-sm" href="/studio" prefetch={false} onClick={() => setOpen(false)}>
-                Clunk 사용하기
+              {session ? (
+                <Link className="button button-quiet button-sm" href="/dashboard" prefetch={false} onClick={() => setOpen(false)}>
+                  {session.displayName}
+                </Link>
+              ) : (
+                <>
+                  <Link className="button button-quiet button-sm" href="/login" prefetch={false} onClick={() => setOpen(false)}>
+                    로그인
+                  </Link>
+                  <Link className="button button-quiet button-sm" href="/signup" prefetch={false} onClick={() => setOpen(false)}>
+                    회원가입
+                  </Link>
+                </>
+              )}
+              <Link className="button button-primary button-sm" href={session ? "/app" : "/studio"} prefetch={false} onClick={() => setOpen(false)}>
+                {session ? "작업면 열기" : "Clunk 사용하기"}
                 <Icon name="arrowUpRight" size={14} />
               </Link>
             </div>

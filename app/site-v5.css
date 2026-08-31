@@ -551,3 +551,43 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
   .cv5-agent-mock .cv5-mcp-demo { display: none; }
   .cv5-sec[data-snap-section="agent"] .cv5-flow { display: none; }
 }
+
+/* ============================================================================
+   2026-08-31 master full-page review — round 3
+   ========================================================================= */
+
+/* 1. Floating hero cards used to sit ON the panel and cover its footer text.
+      Move them outside the panel's content box and darken the frame so they
+      read as depth, not as pasted white stickers. */
+.cv5-float {
+  background: #10131f;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 22px 50px -26px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(124, 93, 250, 0.1);
+}
+.cv5-float-a { left: -18px; top: 6px; }
+.cv5-float-b { left: 4px; bottom: 96px; }
+.cv5-float-c { right: -18px; bottom: 96px; }
+.cv5-hv-foot { position: relative; z-index: 4; background: #12162a; }
+
+/* 2. Flipped rows put the VISUAL in the narrow column (order swaps position,
+      not track width), so the inspector mock was squeezed with dead space
+      beside it. Give flipped rows the mirrored track sizes. */
+.cv5-sec-grid[data-flip="true"] { grid-template-columns: minmax(0, 1.14fr) minmax(0, 0.86fr); }
+
+/* 3. The tractor render is alpha-cut, so it does not need a light plate —
+      a dark studio ground keeps it from reading as a stray white card. */
+.cv5-inspect-preview {
+  background: radial-gradient(120% 90% at 50% 115%, rgba(99, 102, 241, 0.14), transparent 62%), #0f1320;
+}
+.cv5-inspect-preview small {
+  background: rgba(6, 7, 15, 0.72);
+  color: var(--v5-ink-dim);
+  border: 1px solid var(--v5-line);
+}
+
+/* Float placement, measured (2026-08-31): the panel occupies x80–560 and its
+   header sits at y0–40, the score band at y358–408. Keep every float inside
+   the safe band so they layer over asset thumbnails, never over text. */
+.cv5-float-a { left: -30px; top: 30px; bottom: auto; }
+.cv5-float-b { left: -22px; top: 190px; bottom: auto; }
+.cv5-float-c { right: -30px; top: 120px; bottom: auto; }

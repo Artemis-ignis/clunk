@@ -183,7 +183,11 @@ export function AgentLiveDemo() {
         },
       };
 
-      if (prefersReduced) renderer3d.renderAt(T_BADGE + 1);
+      // Idle frame: draw the finished state immediately so the stage is never
+      // an empty box before the section scrolls into view (or if rAF is
+      // throttled). The loop restarts from t=0 when the section lands.
+      renderer3d.renderAt(T_BADGE + 1);
+      if (prefersReduced) setScene(stateAt(T_BADGE + 1));
     })();
 
     function frame(now: number) {

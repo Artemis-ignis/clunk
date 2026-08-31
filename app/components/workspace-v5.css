@@ -253,3 +253,28 @@
 .workspace-cv5 .settings-boundary-visual > p { color: var(--v5-ink-faint); }
 .workspace-cv5 .settings-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
 .workspace-cv5 .muted-note { color: var(--v5-ink-faint); }
+
+/* ============================================================================
+   2026-08-31 review: /studio's legacy three-up row ("assets live engine") was
+   authored for a full-width page. Inside the workspace shell the sidebar
+   leaves ~865px, so those tracks collapsed to 200/421/220px and 31px headings
+   broke one or two words per line. Stack the row until there is real room.
+   ========================================================================= */
+@media (max-width: 1500px) {
+  .workspace-cv5 .studio-page {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "hero"
+      "series"
+      "assets"
+      "live"
+      "engine"
+      "workflow"
+      "review"
+      "command";
+  }
+}
+
+/* Workspace headings never need landing-scale type. */
+.workspace-cv5 .studio-section-head h3,
+.workspace-cv5 .studio-section-head h2 { font-size: clamp(1.05rem, 1.5vw, 1.4rem); line-height: 1.3; text-wrap: balance; }
