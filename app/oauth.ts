@@ -7,7 +7,11 @@
  * testable without contacting Google or GitHub.
  */
 
-export type OAuthProvider = "google" | "github";
+// "qa" is not a real OAuth provider: it never appears in authorize/callback
+// flows (getOAuthProviderStatus reports it unconfigured) and exists only so
+// the QA sign-in route can mint the same signed first-party session that the
+// PKCE callbacks mint. Sessions stay verifiable by one code path either way.
+export type OAuthProvider = "google" | "github" | "qa";
 
 export type OAuthEnvironment = Record<string, string | undefined>;
 
@@ -53,7 +57,7 @@ export const AUTH_SESSION_TTL_SECONDS = 30 * 24 * 60 * 60;
 const OAUTH_STATE_SECRET = "CLUNK_OAUTH_STATE_SECRET";
 const AUTH_SESSION_SECRET = "CLUNK_AUTH_SESSION_SECRET";
 
-const PROVIDER_KEYS: Record<OAuthProvider, {
+const PROVIDER_KEYS: Record<Exclude<OAuthProvider, "qa">, {
   clientId: string[];
   clientSecret: string[];
   redirectUri: string[];
@@ -120,7 +124,7 @@ export function getOAuthEnvironment(
 }
 
 export function isOAuthProvider(value: unknown): value is OAuthProvider {
-  return value === "google" || value === "github";
+  return value === "google" || value === "github" || value === "qa";
 }
 
 export function oauthTransactionCookieName(provider: OAuthProvider): string {
@@ -131,6 +135,11 @@ export function getOAuthProviderStatus(
   provider: OAuthProvider,
   environment: OAuthEnvironment = getOAuthEnvironment(),
 ): OAuthProviderStatus {
+  if (provider === "qa") {
+    // QA sign-in is key-gated, not OAuth-configured: reporting it unconfigured
+    // keeps it out of every authorize/callback surface that consults status.
+    return { provider, configured: false, missing: ["QA_SIGNIN_IS_NOT_OAUTH"] };
+  }
   const keys = PROVIDER_KEYS[provider];
   const missing: string[] = [];
   if (!firstValue(environment, keys.clientId)) missing.push(keys.clientId[0]);
@@ -509,6 +518,7 @@ function getOAuthProviderConfig(provider: OAuthProvider, environment: OAuthEnvir
   authorizeUrl: string;
   tokenUrl: string;
 } | null {
+  if (provider === "qa") return null; // key-gated sign-in, not an OAuth provider
   const keys = PROVIDER_KEYS[provider];
   const clientId = firstValue(environment, keys.clientId);
   const clientSecret = firstValue(environment, keys.clientSecret);

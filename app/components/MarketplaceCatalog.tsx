@@ -26,7 +26,21 @@ type CatalogFilter = "all" | "2d" | "3d" | "motion";
 type CatalogState = "loading" | "ready" | "error";
 type CheckoutState = { status?: string; configured?: boolean; provider?: string | null };
 type CatalogPayload = { ok?: boolean; listings?: Listing[]; checkout?: CheckoutState };
-type CheckoutResponse = { error?: string; status?: string; checkoutUrl?: string };
+type CheckoutResponse = {
+  error?: string;
+  status?: string;
+  checkoutUrl?: string;
+  creditsCharged?: number;
+  creditsRequired?: number;
+  balance?: number;
+  entitlementId?: string;
+};
+
+/** Mirrors billing.ts: 1 credit = ₩100, internal units are won×100. */
+function listingCreditPrice(priceCents: number, currency: string): number | null {
+  if (currency !== "KRW" || priceCents <= 0 || priceCents % 10_000 !== 0) return null;
+  return priceCents / 10_000;
+}
 type DetailListing = Listing & {
   format: string;
   byteLength: number;
@@ -224,6 +238,8 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
   const [state, setState] = useState<CatalogState>("loading");
   const [message, setMessage] = useState("");
   const [withdrawalConsent, setWithdrawalConsent] = useState(false);
+  const [owned, setOwned] = useState(false);
+  const [buying, setBuying] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -250,13 +266,14 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
     };
   }, [slug]);
 
-  async function startCheckout() {
-    if (!listing) return;
+  async function startCheckout(paymentMethod: "credits" | "card") {
+    if (!listing || buying) return;
     if (listing.priceCents > 0 && !withdrawalConsent) {
       setMessage("결제를 시작하려면 청약철회 제한 동의가 필요합니다.");
       return;
     }
-    setMessage("구매 연결 상태를 확인하는 중입니다…");
+    setBuying(true);
+    setMessage(paymentMethod === "credits" ? "크레딧 결제를 처리하는 중입니다…" : "구매 연결 상태를 확인하는 중입니다…");
     try {
       const response = await fetch("/api/marketplace/checkout", {
         method: "POST",
@@ -264,9 +281,31 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
           "content-type": "application/json",
           "idempotency-key": createIdempotencyKey(),
         },
-        body: JSON.stringify({ listingId: listing.id, withdrawalConsent }),
+        body: JSON.stringify({
+          listingId: listing.id,
+          withdrawalConsent,
+          ...(paymentMethod === "credits" ? { paymentMethod: "credits" } : {}),
+        }),
       });
       const payload = await response.json() as CheckoutResponse;
+      if (response.status === 401) {
+        setMessage("로그인이 필요합니다. 로그인 후 다시 시도해 주세요.");
+        window.location.assign(`/login?return_to=${encodeURIComponent(window.location.pathname)}`);
+        return;
+      }
+      if (payload.status === "PAID_WITH_CREDITS" || payload.status === "ALREADY_OWNED" || payload.status === "ALREADY_PAID") {
+        setOwned(true);
+        setMessage(
+          payload.status === "PAID_WITH_CREDITS"
+            ? `구매 완료 — ${payload.creditsCharged?.toLocaleString("ko-KR") ?? "?"} 크레딧 차감, 잔액 ${payload.balance?.toLocaleString("ko-KR") ?? "?"} 크레딧. 아래에서 파일을 받으세요.`
+            : "이미 보유한 상품입니다. 아래에서 파일을 받으세요.",
+        );
+        return;
+      }
+      if (payload.status === "INSUFFICIENT_CREDITS") {
+        setMessage(`${payload.error ?? "크레딧이 부족합니다."} 요금 페이지에서 크레딧을 충전해 주세요.`);
+        return;
+      }
       if (payload.checkoutUrl) {
         setMessage("결제 페이지로 이동합니다…");
         window.location.assign(payload.checkoutUrl);
@@ -275,6 +314,8 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
       setMessage(payload.error ?? payload.status ?? (response.ok ? "구매 요청을 시작했습니다." : "구매를 시작하지 못했습니다."));
     } catch {
       setMessage("구매 연결 상태를 확인하지 못했습니다.");
+    } finally {
+      setBuying(false);
     }
   }
 
@@ -289,6 +330,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
   const paymentUnavailable = listing.priceCents > 0 && checkout?.status === "PAYMENT_PROVIDER_NOT_CONFIGURED";
   const paymentStatus = paymentUnavailable ? "결제 미설정" : checkout?.status ?? "결제 상태 확인 필요";
   const downloadHref = `/api/marketplace/assets/${encodeURIComponent(listing.assetId)}?file=${encodeURIComponent(listing.entryFileName)}`;
+  const creditPrice = listingCreditPrice(listing.priceCents, listing.currency);
 
   return (
     <>
@@ -319,7 +361,24 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
             </label>
           ) : null}
           <div className="marketplace-detail-actions">
-            {listing.priceCents === 0 ? <a className="button button-primary" href={downloadHref} download={listing.entryFileName}>무료 파일 받기 <Icon name="download" size={15} /></a> : <button type="button" className="button button-primary" onClick={() => void startCheckout()} disabled={paymentUnavailable || !withdrawalConsent}>{paymentUnavailable ? "결제 미설정" : withdrawalConsent ? "구매하기" : "동의 후 구매 가능"} <Icon name="arrowUpRight" size={15} /></button>}
+            {listing.priceCents === 0 ? (
+              <a className="button button-primary" href={downloadHref} download={listing.entryFileName}>무료 파일 받기 <Icon name="download" size={15} /></a>
+            ) : owned ? (
+              <a className="button button-primary" href={downloadHref} download={listing.entryFileName}>구매한 파일 받기 <Icon name="download" size={15} /></a>
+            ) : (
+              <>
+                <button type="button" className="button button-primary" onClick={() => void startCheckout("credits")} disabled={buying || !withdrawalConsent || creditPrice === null}>
+                  {creditPrice === null
+                    ? "크레딧 결제 불가 가격"
+                    : withdrawalConsent
+                      ? `크레딧으로 구매 · ${creditPrice.toLocaleString("ko-KR")} 크레딧`
+                      : "동의 후 구매 가능"} <Icon name="arrowUpRight" size={15} />
+                </button>
+                <button type="button" className="button button-quiet" onClick={() => void startCheckout("card")} disabled={buying || paymentUnavailable || !withdrawalConsent}>
+                  {paymentUnavailable ? "카드 결제 준비 중" : "카드로 결제"}
+                </button>
+              </>
+            )}
           </div>
           {message ? <p className="marketplace-detail-message" role="status">{message}</p> : null}
         </div>

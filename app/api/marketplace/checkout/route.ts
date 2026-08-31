@@ -1,4 +1,5 @@
 import {
+  applyCreditOperation,
   assertSameOrigin,
   ClunkHttpError,
   ensureSchema,
@@ -13,15 +14,17 @@ import {
 } from "../../_lib/clunk";
 import {
   createStripeBillingProvider,
+  creditPriceForListing,
   getBillingEnvironment,
   getBillingStatus,
+  KRW_PER_CREDIT,
   type BillingProvider,
 } from "../billing";
 import { getRuntimeEnvironment } from "../../../runtime-environment";
 
 export const dynamic = "force-dynamic";
 
-type CheckoutPayload = { listingId?: unknown; idempotencyKey?: unknown; withdrawalConsent?: unknown };
+type CheckoutPayload = { listingId?: unknown; idempotencyKey?: unknown; withdrawalConsent?: unknown; paymentMethod?: unknown };
 
 export async function POST(request: Request) {
   try {
@@ -92,6 +95,19 @@ export async function POST(request: Request) {
         listingId: listing.id,
         assetId: listing.assetId,
         entitlementId: activeEntitlement.id,
+      });
+    }
+
+    // Credit rail: purchases paid from the workspace credit balance instead of
+    // a card. No payment provider is involved, so this works under the
+    // pre-launch sales lock; money only ever enters when packs are bought
+    // through a real provider.
+    if (payload.paymentMethod === "credits") {
+      return await settleWithCredits(db, {
+        listing,
+        buyerUserId: user.id,
+        workspaceId,
+        idempotencyKey,
       });
     }
 
@@ -207,6 +223,102 @@ export async function POST(request: Request) {
     }, { status: 201 });
   } catch (error) {
     return jsonError(error);
+  }
+}
+
+type CreditSettlementInput = {
+  listing: { id: string; assetId: string; title: string; priceCents: number; currency: string };
+  buyerUserId: string;
+  workspaceId: string;
+  idempotencyKey: string;
+};
+
+/**
+ * Pays a published listing from the buyer's credit balance. The debit is the
+ * idempotent primitive (same machine as generation debits); the order-PAID
+ * update and the entitlement INSERT ride on its applied guard, so a retried
+ * request can never double-charge or double-grant.
+ */
+async function settleWithCredits(db: D1Database, input: CreditSettlementInput): Promise<Response> {
+  const { listing, buyerUserId, workspaceId, idempotencyKey } = input;
+  const creditPrice = creditPriceForListing(listing.priceCents, listing.currency);
+  if (creditPrice === null) {
+    return privateJson({
+      ok: false,
+      schema: "clunk.marketplace-checkout.v1",
+      status: "LISTING_NOT_CREDIT_PRICED",
+      error: `이 listing은 크레딧 결제 단위(1크레딧 = ₩${KRW_PER_CREDIT})로 나누어떨어지지 않아 크레딧으로 구매할 수 없습니다.`,
+    }, { status: 409 });
+  }
+
+  const orderId = scopedStorageId("order", workspaceId, `${buyerUserId}:${listing.id}:${idempotencyKey}`);
+  const existing = await db.prepare(
+    `SELECT id, status, amount_cents AS amountCents, currency, listing_id AS listingId, buyer_user_id AS buyerUserId
+     FROM clunk_marketplace_orders WHERE id = ? LIMIT 1`,
+  ).bind(orderId).first<{ id: string; status: string; amountCents: number; currency: string; listingId: string; buyerUserId: string }>();
+  if (existing && (existing.listingId !== listing.id || existing.buyerUserId !== buyerUserId || existing.amountCents !== listing.priceCents || existing.currency !== listing.currency)) {
+    throw new ClunkHttpError("동일한 idempotency key가 다른 주문에 사용되었습니다.", 409);
+  }
+  if (existing?.status === "CANCELED" || existing?.status === "REFUNDED") {
+    throw new ClunkHttpError("종료된 주문입니다. 새 idempotency key로 다시 시도하세요.", 409);
+  }
+  if (!existing) {
+    await db.prepare(
+      `INSERT OR IGNORE INTO clunk_marketplace_orders
+       (id, listing_id, buyer_user_id, status, payment_provider, payment_reference, checkout_url, amount_cents, currency)
+       VALUES (?, ?, ?, 'CREATING', 'credits', NULL, NULL, ?, ?)`,
+    ).bind(orderId, listing.id, buyerUserId, listing.priceCents, listing.currency).run();
+  }
+
+  const entitlementId = scopedStorageId("entitlement", buyerUserId, orderId);
+  try {
+    const debit = await applyCreditOperation(
+      db,
+      workspaceId,
+      {
+        key: `market-order:${orderId}`,
+        fingerprint: `listing:${listing.id}:${creditPrice}`,
+        kind: "marketplace-purchase",
+        amount: -creditPrice,
+      },
+      (operationId) => [
+        db.prepare(
+          `UPDATE clunk_marketplace_orders SET status = 'PAID', payment_reference = ?
+           WHERE id = ? AND status IN ('PENDING', 'CREATING')
+             AND EXISTS (SELECT 1 FROM clunk_credit_operations WHERE id = ? AND workspace_id = ? AND status = 'applied')`,
+        ).bind(`credits:${operationId}`, orderId, operationId, workspaceId),
+        db.prepare(
+          `INSERT OR IGNORE INTO clunk_marketplace_entitlements
+           (id, order_id, listing_id, asset_id, buyer_user_id, status, provider_reference)
+           VALUES (?, ?, ?, ?, ?, 'ACTIVE', ?)`,
+        ).bind(entitlementId, orderId, listing.id, listing.assetId, buyerUserId, `credits:${operationId}`),
+      ],
+    );
+    return privateJson({
+      ok: true,
+      schema: "clunk.marketplace-checkout.v1",
+      status: "PAID_WITH_CREDITS",
+      provider: "credits",
+      orderId,
+      listingId: listing.id,
+      assetId: listing.assetId,
+      entitlementId,
+      creditsCharged: creditPrice,
+      balance: debit.balance,
+      idempotent: debit.idempotent,
+      downloadUrl: `/api/marketplace/assets/${listing.assetId}`,
+    }, { status: 201 });
+  } catch (error) {
+    if (error instanceof ClunkHttpError && error.status === 402) {
+      return privateJson({
+        ok: false,
+        schema: "clunk.marketplace-checkout.v1",
+        status: "INSUFFICIENT_CREDITS",
+        creditsRequired: creditPrice,
+        error: `크레딧이 부족합니다. 이 상품은 ${creditPrice.toLocaleString("ko-KR")} 크레딧이 필요합니다.`,
+      }, { status: 402 });
+    }
+    throw error;
   }
 }
 

@@ -1,4 +1,5 @@
 import {
+  applyCreditOperation,
   assertSameOrigin,
   ClunkHttpError,
   ensureSchema,
@@ -67,9 +68,18 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
 
-    const billingEnvironment = getBillingEnvironment(getRuntimeEnvironment());
+    const runtimeEnvironment = getRuntimeEnvironment();
+    const billingEnvironment = getBillingEnvironment(runtimeEnvironment);
     const billingStatus = getBillingStatus(billingEnvironment);
     if (billingStatus.status !== "AVAILABLE") {
+      // Pre-launch QA rail: with no payment provider configured AND the demo
+      // flag explicitly on, grant the pack through the same idempotent order +
+      // credit-operation machine the webhook uses, with provider "demo" and no
+      // money involved. The moment Stripe is configured this branch is
+      // unreachable, so a real deployment cannot hand out demo credits.
+      if (runtimeEnvironment.CLUNK_DEMO_CHECKOUT === "1") {
+        return await grantDemoCreditOrder(db, workspaceId, user.id, pack, idempotencyKey);
+      }
       return privateJson({
         ok: false,
         schema: "clunk.credit-checkout.v1",
@@ -177,6 +187,65 @@ async function createCheckout(
     cancelUrl: new URL("/pricing?credits=canceled", `${origin}/`).toString(),
   });
   return { paymentReference: result.reference, checkoutUrl: result.checkoutUrl };
+}
+
+/**
+ * Demo grant path (QA only, see the caller for the double gate). Reuses the
+ * deterministic order id and the webhook's grant fingerprint so that a later
+ * real payment replay for the same idempotency key can never double-grant.
+ */
+async function grantDemoCreditOrder(
+  db: D1Database,
+  workspaceId: string,
+  buyerUserId: string,
+  pack: { id: string; name: string; credits: number; priceCents: number; currency: string },
+  idempotencyKey: string,
+): Promise<Response> {
+  const orderId = scopedStorageId("credit-order", workspaceId, `${buyerUserId}:${pack.id}:${idempotencyKey}`);
+  const existing = await readOrder(db, orderId);
+  if (existing && (existing.packId !== pack.id || existing.buyerUserId !== buyerUserId || existing.amountCents !== pack.priceCents || existing.currency !== pack.currency)) {
+    throw new ClunkHttpError("동일한 idempotency key가 다른 주문에 사용되었습니다.", 409);
+  }
+  if (existing?.status === "CANCELED" || existing?.status === "REFUNDED") {
+    throw new ClunkHttpError("종료된 주문입니다. 새 idempotency key로 다시 시도하세요.", 409);
+  }
+  if (!existing) {
+    await db.prepare(
+      `INSERT OR IGNORE INTO clunk_credit_orders
+       (id, pack_id, workspace_id, buyer_user_id, status, payment_provider, payment_reference, checkout_url, amount_cents, currency, credits)
+       VALUES (?, ?, ?, ?, 'CREATING', 'demo', NULL, NULL, ?, ?, ?)`,
+    ).bind(orderId, pack.id, workspaceId, buyerUserId, pack.priceCents, pack.currency, pack.credits).run();
+  }
+  const grant = await applyCreditOperation(
+    db,
+    workspaceId,
+    {
+      key: `credit-order:${orderId}`,
+      fingerprint: `pack:${pack.id}:${pack.credits}`,
+      kind: "pack-purchase",
+      amount: pack.credits,
+    },
+    (operationId) => [
+      db.prepare(
+        `UPDATE clunk_credit_orders SET status = 'PAID', payment_reference = ?
+         WHERE id = ? AND status IN ('PENDING', 'CREATING')
+           AND EXISTS (SELECT 1 FROM clunk_credit_operations WHERE id = ? AND workspace_id = ? AND status = 'applied')`,
+      ).bind(`demo:${orderId}`, orderId, operationId, workspaceId),
+    ],
+  );
+  return privateJson({
+    ok: true,
+    schema: "clunk.credit-checkout.v1",
+    status: "DEMO_GRANTED",
+    provider: "demo",
+    demo: true,
+    orderId,
+    packId: pack.id,
+    creditsGranted: pack.credits,
+    balance: grant.balance,
+    idempotent: grant.idempotent,
+    note: "결제 provider가 없는 QA 환경의 데모 지급입니다. 실제 결제가 발생하지 않았습니다.",
+  }, { status: 201 });
 }
 
 type StoredOrder = {

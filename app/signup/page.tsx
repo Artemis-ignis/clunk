@@ -35,7 +35,8 @@ function getAuthErrorMessage(code?: string): string | null {
   return AUTH_ERROR_COPY[code] ?? "인증을 완료하지 못했습니다. 다시 시도해 주세요.";
 }
 
-function providerLabel(provider: "google" | "github"): string {
+function providerLabel(provider: "google" | "github" | "qa"): string {
+  if (provider === "qa") return "QA"; // never listed: qa is not an OAuth provider
   return provider === "google" ? "Google" : "GitHub";
 }
 

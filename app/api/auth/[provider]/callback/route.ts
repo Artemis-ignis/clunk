@@ -23,7 +23,7 @@ type RouteContext = { params: Promise<{ provider: string }> };
 
 export async function GET(request: Request, context: RouteContext): Promise<Response> {
   const { provider: rawProvider } = await context.params;
-  if (!isOAuthProvider(rawProvider)) return authErrorRedirect(request, "unknown_provider", "/");
+  if (!isOAuthProvider(rawProvider) || rawProvider === "qa") return authErrorRedirect(request, "unknown_provider", "/");
 
   const url = new URL(request.url);
   const queryError = url.searchParams.get("error");

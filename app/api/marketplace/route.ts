@@ -40,7 +40,7 @@ export async function GET(request: Request) {
           l.created_at AS createdAt, l.published_at AS publishedAt,
           a.file_name AS entryFileName, a.format, a.byte_length AS byteLength,
           u.display_name AS sellerName,
-          (SELECT aa.file_name FROM clunk_asset_artifacts aa WHERE aa.asset_id = l.asset_id AND aa.role IN ('page', 'texture') ORDER BY aa.created_at ASC LIMIT 1) AS previewFileName
+          (SELECT aa.file_name FROM clunk_asset_artifacts aa WHERE aa.asset_id = l.asset_id AND aa.role IN ('preview', 'page', 'texture') ORDER BY CASE aa.role WHEN 'preview' THEN 0 ELSE 1 END, aa.created_at ASC LIMIT 1) AS previewFileName
          FROM clunk_marketplace_listings l
          JOIN clunk_assets a ON a.id = l.asset_id
          LEFT JOIN clunk_users u ON u.id = (SELECT owner_user_id FROM clunk_workspaces WHERE id = l.workspace_id)
@@ -83,7 +83,7 @@ export async function GET(request: Request) {
         l.created_at AS createdAt, l.published_at AS publishedAt,
         a.file_name AS entryFileName, a.format, a.byte_length AS byteLength,
         u.display_name AS sellerName,
-        (SELECT aa.file_name FROM clunk_asset_artifacts aa WHERE aa.asset_id = l.asset_id AND aa.role IN ('page', 'texture') ORDER BY aa.created_at ASC LIMIT 1) AS previewFileName
+        (SELECT aa.file_name FROM clunk_asset_artifacts aa WHERE aa.asset_id = l.asset_id AND aa.role IN ('preview', 'page', 'texture') ORDER BY CASE aa.role WHEN 'preview' THEN 0 ELSE 1 END, aa.created_at ASC LIMIT 1) AS previewFileName
        FROM clunk_marketplace_listings l
        JOIN clunk_assets a ON a.id = l.asset_id
        LEFT JOIN clunk_users u ON u.id = (SELECT owner_user_id FROM clunk_workspaces WHERE id = l.workspace_id)

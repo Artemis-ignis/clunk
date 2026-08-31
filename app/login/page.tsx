@@ -6,6 +6,7 @@ import {
 } from "../chatgpt-auth";
 import { getOAuthEnvironment, getOAuthProviderStatuses, safeOAuthReturnPath } from "../oauth";
 import { getRuntimeEnvironment } from "../runtime-environment";
+import { QaKeyLogin } from "../components/QaKeyLogin";
 import { BrandLockup } from "../components/BrandMark";
 import Link from "../components/NativeLink";
 import { ThemeToggle } from "../components/ThemeToggle";
@@ -35,8 +36,15 @@ function getAuthErrorMessage(code?: string): string | null {
   return AUTH_ERROR_COPY[code] ?? "인증을 완료하지 못했습니다. 다시 시도해 주세요.";
 }
 
-function providerLabel(provider: "google" | "github"): string {
+function providerLabel(provider: "google" | "github" | "qa"): string {
+  if (provider === "qa") return "QA"; // never listed: qa is not an OAuth provider
   return provider === "google" ? "Google" : "GitHub";
+}
+
+/** QA sign-in shows only where the deployment carries the QA key. */
+function isQaLoginEnabled(): boolean {
+  const key = getRuntimeEnvironment().CLUNK_QA_LOGIN_KEY;
+  return typeof key === "string" && key.length >= 24;
 }
 
 function getReadyOAuthProviders() {
@@ -161,6 +169,7 @@ function AuthJourney({
                   현재 운영 환경에서 전체 OAuth 설정이 확인된 외부 provider가 없어 ChatGPT SIWC만 표시합니다.
                 </p>
               )}
+              {isQaLoginEnabled() ? <QaKeyLogin returnTo={returnTo} /> : null}
             </>
           )}
 

@@ -101,6 +101,22 @@ export function fromProviderAmount(providerAmount: number, currency: string): nu
   return isZeroDecimalCurrency(currency) ? providerAmount * 100 : providerAmount;
 }
 
+/**
+ * Fixed in-app exchange rate: 1 credit = ₩100. Published on /pricing; the
+ * marketplace credit rail refuses any listing whose KRW price is not an exact
+ * whole-credit multiple rather than rounding a payment amount.
+ */
+export const KRW_PER_CREDIT = 100;
+
+/** Internal amount units are minor-units×100 (KRW: won×100). */
+export function creditPriceForListing(priceCents: number, currency: string): number | null {
+  if (currency.toUpperCase() !== "KRW") return null;
+  if (!Number.isSafeInteger(priceCents) || priceCents <= 0) return null;
+  const internalUnitsPerCredit = KRW_PER_CREDIT * 100;
+  if (priceCents % internalUnitsPerCredit !== 0) return null;
+  return priceCents / internalUnitsPerCredit;
+}
+
 export function getBillingEnvironment(overrides: Record<string, unknown> = {}): BillingEnvironment {
   const environment: BillingEnvironment = {};
   if (typeof process !== "undefined" && process.env) {

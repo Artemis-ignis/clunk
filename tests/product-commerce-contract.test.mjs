@@ -108,5 +108,13 @@ test("paid checkout requires an explicit withdrawal-waiver consent before any or
   const catalog = await source("app/components/MarketplaceCatalog.tsx");
   assert.match(catalog, /withdrawalConsent/);
   assert.match(catalog, /청약철회가 제한/);
-  assert.match(catalog, /disabled=\{paymentUnavailable \|\| \!withdrawalConsent\}/);
+  // Both purchase instruments stay consent-gated: the credit button and the
+  // card button each carry !withdrawalConsent in their disabled expression.
+  assert.match(catalog, /disabled=\{buying \|\| \!withdrawalConsent \|\| creditPrice === null\}/);
+  assert.match(catalog, /disabled=\{buying \|\| paymentUnavailable \|\| \!withdrawalConsent\}/);
+  // The server-side consent check runs before the credits branch can settle.
+  const checkoutSource = await source("app/api/marketplace/checkout/route.ts");
+  const consentIndex = checkoutSource.indexOf("WITHDRAWAL_CONSENT_REQUIRED");
+  const creditsIndex = checkoutSource.indexOf('paymentMethod === "credits"');
+  assert.ok(consentIndex > 0 && creditsIndex > consentIndex, "credits settlement must sit behind the consent gate");
 });
