@@ -9,7 +9,9 @@
 import { normalizePlayerFacingQualityEvidence, type PlayerFacingQualityEvidence } from "./player-facing-quality";
 
 export const CONSUMER_VALIDATION_SCHEMA = "clunk.consumer-validation.v1" as const;
-export const CONSUMER_VALIDATION_VERSION = 1 as const;
+// v2 adds the FF presentation/support lane pass (asset.lane) plus the
+// pipeline/lane asset-count split on projects and the summary.
+export const CONSUMER_VALIDATION_VERSION = 2 as const;
 
 export type ConsumerProjectId = "harvest-frontier" | "forge-front";
 export type ConsumerAssetKind = "3d-model" | "2d-image";
@@ -70,6 +72,58 @@ export interface ConsumerIntegrity {
   checks: Readonly<Record<string, ConsumerCheckStatus>>;
 }
 
+/**
+ * One runtime file promoted through an FF presentation/support lane delivery.
+ *
+ * A single vendor delivery (lane sidecar) can ship several runtime files
+ * (e.g. a stacked and an inline wordmark). Every output's runtime bytes are
+ * re-hashed at audit time and compared against the vendor-declared values, so
+ * a declared hash can never be trusted without the recomputed one behind it.
+ */
+export interface ConsumerLaneOutput {
+  id: string;
+  runtimeUrl?: string;
+  /** The runtime file with a freshly recomputed sha256/bytes. */
+  runtime: ConsumerFileRef;
+  declaredSha256: string;
+  declaredBytes: number;
+  /** Recomputed runtime sha256 vs the vendor-declared sha256. */
+  runtimeHash: ConsumerCheckStatus;
+  /** Recomputed runtime byte length vs the vendor-declared byte length. */
+  runtimeBytes: ConsumerCheckStatus;
+  /** Vendor-declared source↔runtime hash match, carried through verbatim. */
+  sourceRuntimeHashMatch?: boolean;
+  dimensions?: { width: number; height: number };
+  hasAlpha?: boolean;
+}
+
+/**
+ * A vendor-delivery lane asset: Clunk output that FF adopted directly into a
+ * presentation/support lane (DOM/CSS chrome), rather than through the Pixi
+ * asset pipeline. It carries the vendor's own review verdicts verbatim
+ * (never inferred) alongside Clunk's re-verification of the shipped bytes.
+ */
+export interface ConsumerLaneEvidence {
+  /** Top-level assetId from the FF sidecar (distinct from the pipeline ids). */
+  deliveryAssetId: string;
+  sidecarPath: string;
+  runId?: string;
+  purpose?: string;
+  targetProfile?: string;
+  /** Back-reference to the vendor delivery manifest, when the sidecar names one. */
+  manifestPath?: string;
+  manifestSha256?: string;
+  /** Recomputed manifest sha256 vs the declared value; NOT_CHECKED if unreadable. */
+  manifestHash: ConsumerCheckStatus;
+  outputs: readonly ConsumerLaneOutput[];
+  /** Vendor-declared verdicts, carried through verbatim (never inferred). */
+  productionReady: boolean;
+  runtimeVerified?: boolean;
+  playerFacing?: string;
+  humanReview: ConsumerHumanReview;
+  evidenceKind?: string;
+}
+
 export interface ConsumerAssetRecord {
   id: string;
   projectId: ConsumerProjectId;
@@ -85,6 +139,11 @@ export interface ConsumerAssetRecord {
   runtimeAttachment: ConsumerRuntimeAttachment;
   provenance: ConsumerProvenance;
   integrity: ConsumerIntegrity;
+  /**
+   * Present only for FF presentation/support lane deliveries. Its presence is
+   * what marks an asset as a lane asset in the pipeline/lane count split.
+   */
+  lane?: ConsumerLaneEvidence;
 }
 
 export interface ConsumerRuntimeEvidence {
@@ -115,6 +174,10 @@ export interface ConsumerProjectRecord {
   runtime: ConsumerRuntimeEvidence;
   checks: Readonly<Record<string, ConsumerCheckStatus>>;
   assets: ConsumerAssetRecord[];
+  /** Derived: assets consumed through the pipeline manifest (asset.lane absent). */
+  pipelineAssetCount: number;
+  /** Derived: assets adopted through a presentation/support lane (asset.lane present). */
+  laneAssetCount: number;
   status: ConsumerProjectStatus;
   limitations: readonly string[];
 }
@@ -122,6 +185,8 @@ export interface ConsumerProjectRecord {
 export interface ConsumerValidationSummary {
   projectCount: number;
   assetCount: number;
+  pipelineAssetCount: number;
+  laneAssetCount: number;
   sourceHashVerifiedCount: number;
   derivedHashVerifiedCount: number;
   runtimeHashVerifiedCount: number;
@@ -169,6 +234,8 @@ export function createConsumerValidationReport(
   const projects = input.projects.map((project) => ({
     ...project,
     assets: project.assets.map((asset) => ({ ...asset })),
+    pipelineAssetCount: countPipelineAssets(project.assets),
+    laneAssetCount: countLaneAssets(project.assets),
     status: deriveProjectStatus(project),
   }));
   const report: ConsumerValidationReport = {
@@ -196,10 +263,20 @@ export function normalizeConsumerValidationReport(value: unknown): ConsumerValid
     ...report,
     projects: report.projects.map((project) => ({
       ...project,
+      pipelineAssetCount: countPipelineAssets(project.assets),
+      laneAssetCount: countLaneAssets(project.assets),
       status: deriveProjectStatus(project),
     })),
     summary: summarizeConsumerValidation(report.projects),
   };
+}
+
+function countLaneAssets(assets: readonly ConsumerAssetRecord[]): number {
+  return assets.filter((asset) => asset.lane !== undefined).length;
+}
+
+function countPipelineAssets(assets: readonly ConsumerAssetRecord[]): number {
+  return assets.length - countLaneAssets(assets);
 }
 
 export function summarizeConsumerValidation(
@@ -213,6 +290,8 @@ export function summarizeConsumerValidation(
   return {
     projectCount: projects.length,
     assetCount: assets.length,
+    pipelineAssetCount: countPipelineAssets(assets),
+    laneAssetCount: countLaneAssets(assets),
     sourceHashVerifiedCount: assets.filter((asset) => asset.source.hashVerified).length,
     derivedHashVerifiedCount: assets.filter((asset) => asset.derived?.hashVerified === true).length,
     runtimeHashVerifiedCount: assets.filter((asset) => asset.runtime.hashVerified).length,
@@ -282,6 +361,15 @@ function validateReport(report: ConsumerValidationReport): void {
     if (!Array.isArray(project.assets) || project.assets.length === 0) {
       throw new Error(`projects.${project.id}.assets must not be empty`);
     }
+    const laneCount = project.assets.filter((asset) => asset.lane !== undefined).length;
+    nonNegativeInteger(project.laneAssetCount, `projects.${project.id}.laneAssetCount`);
+    nonNegativeInteger(project.pipelineAssetCount, `projects.${project.id}.pipelineAssetCount`);
+    if (project.laneAssetCount !== laneCount) {
+      throw new Error(`projects.${project.id}.laneAssetCount must equal the number of assets carrying lane evidence`);
+    }
+    if (project.pipelineAssetCount + project.laneAssetCount !== project.assets.length) {
+      throw new Error(`projects.${project.id}.pipelineAssetCount + laneAssetCount must equal the asset count`);
+    }
     for (const asset of project.assets) {
       if (assetIds.has(asset.id)) throw new Error(`Duplicate consumer asset: ${asset.id}`);
       assetIds.add(asset.id);
@@ -303,6 +391,38 @@ function validateReport(report: ConsumerValidationReport): void {
       validateAttachment(asset.runtimeAttachment, `assets.${asset.id}.runtimeAttachment`);
       validateProvenance(asset.provenance, `assets.${asset.id}.provenance`);
       validateIntegrity(asset.integrity, `assets.${asset.id}.integrity`);
+      if (asset.lane) validateLane(asset, `assets.${asset.id}.lane`);
+    }
+  }
+}
+
+function validateLane(asset: ConsumerAssetRecord, label: string): void {
+  const lane = asset.lane!;
+  requiredText(lane.deliveryAssetId, `${label}.deliveryAssetId`, 200);
+  requiredText(lane.sidecarPath, `${label}.sidecarPath`, 2000);
+  if (lane.runId !== undefined) requiredText(lane.runId, `${label}.runId`, 200);
+  if (lane.targetProfile !== undefined) requiredText(lane.targetProfile, `${label}.targetProfile`, 200);
+  if (lane.manifestPath !== undefined) requiredText(lane.manifestPath, `${label}.manifestPath`, 2000);
+  if (lane.manifestSha256 !== undefined) validateHash(lane.manifestSha256, `${label}.manifestSha256`);
+  if (!["PASS", "FAIL", "NOT_CHECKED"].includes(lane.manifestHash)) throw new Error(`${label}.manifestHash is invalid`);
+  if (typeof lane.productionReady !== "boolean") throw new Error(`${label}.productionReady must be boolean`);
+  if (!["PASS", "NO_GO", "NOT_EVALUATED"].includes(lane.humanReview)) throw new Error(`${label}.humanReview is invalid`);
+  if (!Array.isArray(lane.outputs) || lane.outputs.length === 0) throw new Error(`${label}.outputs must not be empty`);
+  for (const [index, output] of lane.outputs.entries()) {
+    const outputLabel = `${label}.outputs[${index}]`;
+    requiredText(output.id, `${outputLabel}.id`, 200);
+    if (output.runtimeUrl !== undefined) requiredText(output.runtimeUrl, `${outputLabel}.runtimeUrl`, 2000);
+    validateFile(output.runtime, `${outputLabel}.runtime`);
+    validateHash(output.declaredSha256, `${outputLabel}.declaredSha256`);
+    nonNegativeInteger(output.declaredBytes, `${outputLabel}.declaredBytes`);
+    if (!["PASS", "FAIL", "NOT_CHECKED"].includes(output.runtimeHash)) throw new Error(`${outputLabel}.runtimeHash is invalid`);
+    if (!["PASS", "FAIL", "NOT_CHECKED"].includes(output.runtimeBytes)) throw new Error(`${outputLabel}.runtimeBytes is invalid`);
+    // A PASS may never be claimed without the recomputed hash actually matching.
+    if (output.runtimeHash === "PASS" && (!output.runtime.hashVerified || output.runtime.sha256.toLowerCase() !== output.declaredSha256.toLowerCase())) {
+      throw new Error(`${outputLabel}.runtimeHash PASS requires the recomputed runtime hash to match the declared hash`);
+    }
+    if (output.runtimeBytes === "PASS" && output.runtime.bytes !== output.declaredBytes) {
+      throw new Error(`${outputLabel}.runtimeBytes PASS requires the recomputed byte length to match the declared byte length`);
     }
   }
 }

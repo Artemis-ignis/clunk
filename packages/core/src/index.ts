@@ -2050,6 +2050,8 @@ export type {
   ConsumerInspectionStatus,
   ConsumerIntegrity,
   ConsumerIntegrityStatus,
+  ConsumerLaneEvidence,
+  ConsumerLaneOutput,
   ConsumerProjectId,
   ConsumerProjectRecord,
   ConsumerProjectStatus,
