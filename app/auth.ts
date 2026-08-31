@@ -45,7 +45,8 @@ const USER_FULL_NAME_HEADER: typeof UPSTREAM_IDENTITY_FULL_NAME_HEADER =
 const USER_FULL_NAME_ENCODING_HEADER: typeof UPSTREAM_IDENTITY_FULL_NAME_ENCODING_HEADER =
   "oai-authenticated-user-full-name-encoding";
 const PERCENT_ENCODED_UTF8 = "percent-encoded-utf-8";
-const SIGN_IN_PATH = "/signin-with-chatgpt";
+// 2026-08-31: the Sites-host gateway is gone; /login is the only sign-in door.
+const SIGN_IN_PATH = "/login";
 const SIGN_OUT_PATH = "/signout-with-chatgpt";
 const CALLBACK_PATH = "/callback";
 

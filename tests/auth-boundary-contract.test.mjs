@@ -52,7 +52,7 @@ test("forged Sites identity headers cannot authenticate a deployment that did no
   const dashboard = await render("/dashboard", { headers: FORGED_SITES_HEADERS });
   assert.ok([307, 308].includes(dashboard.status));
   const target = new URL(dashboard.headers.get("location"), "http://localhost");
-  assert.equal(target.pathname, "/signin-with-chatgpt");
+  assert.equal(target.pathname, "/login");
   assert.equal(target.searchParams.get("return_to"), "/dashboard");
 });
 

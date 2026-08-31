@@ -64,7 +64,7 @@ test("dashboard keeps unauthenticated users behind the host sign-in gate", async
   const location = response.headers.get("location");
   assert.ok(location);
   const target = new URL(location, "http://localhost");
-  assert.equal(target.pathname, "/signin-with-chatgpt");
+  assert.equal(target.pathname, "/login");
   assert.equal(target.searchParams.get("return_to"), "/dashboard");
 });
 

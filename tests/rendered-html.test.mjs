@@ -107,7 +107,7 @@ test("public navigation uses browser-native anchors on the Sites runtime", async
     "../app/components/LandingHero.tsx",
     "../app/components/HeroAutopsy.tsx",
     "../app/settings/page.tsx",
-    "../app/signin-with-chatgpt/page.tsx",
+    // signin-with-chatgpt is a pure server redirect since 2026-08-31 — no anchors to contract.
     "../app/not-found.tsx",
   ];
 
