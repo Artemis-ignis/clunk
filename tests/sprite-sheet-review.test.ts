@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   normalizeSpriteSheetReview,
+  SPRITE_SHEET_REVIEW_RULESET_ID,
+  SPRITE_SHEET_REVIEW_RULESET_VERSION,
   type SpriteSheetReviewManifest,
 } from "../packages/core/src/sprite-sheet-review";
 
@@ -87,6 +89,12 @@ function baseManifest(overrides: Partial<SpriteSheetReviewManifest> = {}): Sprit
     metrics: metrics(),
     ...overrides,
   };
+}
+
+function manifestWithoutMetrics(): SpriteSheetReviewManifest {
+  const manifest = baseManifest();
+  delete (manifest as { metrics?: unknown }).metrics;
+  return manifest;
 }
 
 test("duplicate sprite frames are structured quality blockers, not visual approval", () => {
@@ -268,4 +276,221 @@ test("sprite pixel gates block clipping, alpha spill, border contact, silhouette
     "SPRITE-SILHOUETTE-COVERAGE",
     "SPRITE-RUNTIME-SIZE",
   ]) assert.ok(report.issues.some((issue) => issue.code === code), code);
+});
+
+// ---------------------------------------------------------------------------
+// Repair 1 — the static lane is measured, not a constant PASS.
+// ---------------------------------------------------------------------------
+
+test("a manifest without measured pixels reports PARSED_ONLY instead of a static PASS", () => {
+  const withoutMetrics = manifestWithoutMetrics();
+  const report = normalizeSpriteSheetReview({
+    ...withoutMetrics,
+    qualityPolicy: { mode: "OFF" },
+  });
+
+  assert.equal(report.static, "PARSED_ONLY");
+  assert.notEqual(report.readiness, "ready");
+});
+
+test("static lane fails when the declared grid cannot fit inside the declared sheet", () => {
+  const report = normalizeSpriteSheetReview(baseManifest({
+    grid: { columns: 4, rows: 4, frameWidth: 64, frameHeight: 64, padding: { x: 8, y: 0 }, spacing: { x: 0, y: 0 } },
+    qualityPolicy: { mode: "OFF" },
+  }));
+
+  assert.equal(report.static, "FAIL");
+  assert.equal(report.readiness, "blocked");
+  assert.ok(report.issues.some((issue) => issue.code === "SPRITE-GRID-GEOMETRY"));
+});
+
+test("static lane fails when a frame is not placed on its declared grid cell", () => {
+  const report = normalizeSpriteSheetReview(baseManifest({
+    frames: [
+      { id: "idle0", index: 0, x: 0, y: 0, width: 64, height: 64, state: "idle", anchor: { x: 0.5, y: 0.9 } },
+      { id: "idle1", index: 1, x: 0, y: 64, width: 64, height: 64, state: "idle", anchor: { x: 0.5, y: 0.9 } },
+      { id: "walk0", index: 2, x: 128, y: 0, width: 64, height: 64, state: "walk", anchor: { x: 0.5, y: 0.9 } },
+      { id: "walk1", index: 3, x: 192, y: 0, width: 64, height: 64, state: "walk", anchor: { x: 0.5, y: 0.9 } },
+    ],
+    qualityPolicy: { mode: "OFF" },
+  }));
+
+  assert.equal(report.static, "FAIL");
+  assert.ok(report.issues.some((issue) => issue.code === "SPRITE-FRAME-CELL-MISMATCH"));
+});
+
+test("static lane fails when the measured cell size contradicts the declared cell or logical frame", () => {
+  const cellMismatch = normalizeSpriteSheetReview(baseManifest({
+    qualityPolicy: { mode: "OFF" },
+    metrics: metrics({ measuredCellPx: { width: 32, height: 64 } }),
+  }));
+  assert.equal(cellMismatch.static, "FAIL");
+  assert.ok(cellMismatch.issues.some((issue) => issue.code === "SPRITE-CELL-SIZE-MISMATCH"));
+
+  const logicalMismatch = normalizeSpriteSheetReview(baseManifest({
+    target: {
+      engine: "pixijs",
+      renderer: "WebGL2",
+      platform: "web",
+      logicalFramePx: { width: 96, height: 96 },
+      runtimeFramePx: { width: 96, height: 96 },
+    },
+    qualityPolicy: { mode: "OFF" },
+    metrics: metrics({ measuredCellPx: { width: 64, height: 64 } }),
+  }));
+  assert.equal(logicalMismatch.static, "FAIL");
+  assert.ok(logicalMismatch.issues.some((issue) => issue.code === "SPRITE-LOGICAL-SIZE-MISMATCH"));
+});
+
+// ---------------------------------------------------------------------------
+// Repair 2 — declared animations are actually evaluated.
+// ---------------------------------------------------------------------------
+
+test("animation playback is NOT_EVALUATED when no frame was observed", () => {
+  const withoutMetrics = manifestWithoutMetrics();
+  const report = normalizeSpriteSheetReview({ ...withoutMetrics, qualityPolicy: { mode: "OFF" } });
+
+  assert.deepEqual([...report.framesObserved], []);
+  assert.equal(report.animationPlayback, "NOT_EVALUATED");
+  assert.notEqual(report.readiness, "ready");
+});
+
+test("animation playback fails when a required state has no declared animation", () => {
+  const report = normalizeSpriteSheetReview(baseManifest({
+    animations: [
+      { id: "idle", state: "idle", fps: 8, loop: true, frameIds: ["idle0", "idle1"], required: true },
+    ],
+    qualityPolicy: { mode: "BLOCKING", requiredStates: ["idle", "walk"], requireRuntimeCapture: false, requireHumanReview: false },
+  }));
+
+  assert.equal(report.animationPlayback, "FAIL");
+  assert.equal(report.readiness, "blocked");
+  assert.ok(report.issues.some((issue) => issue.code === "SPRITE-REQUIRED-ANIMATION-MISSING"));
+});
+
+test("animation playback fails when a clip plays a frame measured as empty", () => {
+  const report = normalizeSpriteSheetReview(baseManifest({
+    qualityPolicy: { mode: "OFF" },
+    metrics: metrics({ emptyFrameIds: ["walk1"] }),
+  }));
+
+  assert.equal(report.animationPlayback, "FAIL");
+  assert.ok(report.issues.some((issue) => issue.code === "SPRITE-ANIMATION-EMPTY-FRAME"));
+});
+
+test("animation playback fails on an unplayable frame rate and observes only measured frames", () => {
+  const report = normalizeSpriteSheetReview(baseManifest({
+    animations: [
+      { id: "idle", state: "idle", fps: 900, loop: true, frameIds: ["idle0", "idle1"], required: true },
+      { id: "walk", state: "walk", fps: 10, loop: true, frameIds: ["walk0", "walk1"], required: true },
+    ],
+    qualityPolicy: { mode: "OFF" },
+  }));
+
+  assert.equal(report.animationPlayback, "FAIL");
+  assert.deepEqual([...report.framesObserved].sort(), ["idle0", "idle1", "walk0", "walk1"]);
+  assert.ok(report.issues.some((issue) => issue.code === "SPRITE-ANIMATION-FPS-RANGE"));
+});
+
+test("a single-frame looping clip is an advisory observation, not a silent pass", () => {
+  const report = normalizeSpriteSheetReview(baseManifest({
+    animations: [
+      { id: "idle", state: "idle", fps: 8, loop: true, frameIds: ["idle0"], required: true },
+      { id: "walk", state: "walk", fps: 10, loop: true, frameIds: ["walk0", "walk1"], required: true },
+    ],
+    qualityPolicy: { mode: "OFF" },
+  }));
+
+  assert.equal(report.animationPlayback, "PASS");
+  assert.ok(report.issues.some((issue) => issue.code === "SPRITE-ANIMATION-STATIC-LOOP"));
+});
+
+// ---------------------------------------------------------------------------
+// Repair 4 — calibrated threshold floors cannot be declared away.
+// ---------------------------------------------------------------------------
+
+test("declared thresholds below the calibrated floor are raised, not honoured", () => {
+  const report = normalizeSpriteSheetReview(baseManifest({
+    qualityPolicy: {
+      mode: "BLOCKING",
+      minMeanFrameDelta: 0.005,
+      minSilhouetteCoverage: 0.002,
+      requireRuntimeCapture: false,
+      requireHumanReview: false,
+    },
+    metrics: metrics({
+      meanFrameDelta: 0.01,
+      silhouetteCoverages: [0.03, 0.04, 0.05, 0.06],
+    }),
+  }));
+
+  assert.equal(report.quality, "BLOCKED");
+  assert.equal(report.effectiveThresholds.minMeanFrameDelta, 0.03);
+  assert.equal(report.effectiveThresholds.minSilhouetteCoverage, 0.08);
+  assert.ok(report.issues.some((issue) => issue.code === "SPRITE-THRESHOLD-BELOW-CALIBRATION"));
+  assert.ok(report.issues.some((issue) => issue.code === "SPRITE-LOW-MEAN-FRAME-DELTA"));
+  assert.ok(report.issues.some((issue) => issue.code === "SPRITE-SILHOUETTE-COVERAGE"));
+});
+
+// ---------------------------------------------------------------------------
+// Repair 5 — pixel-art discipline indicators.
+// ---------------------------------------------------------------------------
+
+test("pixel-art indicators are recorded without gating until the profile opts in", () => {
+  const observed = metrics({
+    hardAlphaRatio: 0.42,
+    uniqueColorCount: 60000,
+    dominantRunLength: 1,
+    offGridPixelRatio: 0.6,
+  });
+  const recorded = normalizeSpriteSheetReview(baseManifest({
+    qualityPolicy: { mode: "BLOCKING", requireRuntimeCapture: false, requireHumanReview: false },
+    metrics: observed,
+  }));
+
+  assert.equal(recorded.metrics?.hardAlphaRatio, 0.42);
+  assert.equal(recorded.metrics?.uniqueColorCount, 60000);
+  assert.equal(recorded.metrics?.dominantRunLength, 1);
+  assert.equal(recorded.metrics?.offGridPixelRatio, 0.6);
+  assert.ok(!recorded.issues.some((issue) => issue.code.startsWith("SPRITE-PIXEL-")));
+
+  const gated = normalizeSpriteSheetReview(baseManifest({
+    qualityPolicy: {
+      mode: "BLOCKING",
+      strictChecks: ["pixel-discipline"],
+      minAlphaCoverage: 0.5,
+      requireRuntimeCapture: false,
+      requireHumanReview: false,
+    },
+    metrics: observed,
+  }));
+
+  assert.equal(gated.quality, "BLOCKED");
+  for (const code of [
+    "SPRITE-PIXEL-HARD-ALPHA",
+    "SPRITE-PIXEL-COLOR-COUNT",
+    "SPRITE-PIXEL-OFF-GRID",
+    "SPRITE-ALPHA-COVERAGE",
+  ]) assert.ok(gated.issues.some((issue) => issue.code === code), code);
+});
+
+test("an opted-in pixel-discipline gate is UNAVAILABLE when the indicators were never measured", () => {
+  const report = normalizeSpriteSheetReview(baseManifest({
+    qualityPolicy: {
+      mode: "BLOCKING",
+      strictChecks: ["pixel-discipline"],
+      requireRuntimeCapture: false,
+      requireHumanReview: false,
+    },
+  }));
+
+  assert.equal(report.quality, "UNAVAILABLE");
+  assert.ok(report.issues.some((issue) => issue.code === "SPRITE-PIXEL-DISCIPLINE-METRICS-UNAVAILABLE"));
+});
+
+test("the sprite review report carries an explicit rule-set version", () => {
+  const report = normalizeSpriteSheetReview(baseManifest());
+  assert.equal(report.ruleSetId, SPRITE_SHEET_REVIEW_RULESET_ID);
+  assert.equal(report.ruleSetVersion, SPRITE_SHEET_REVIEW_RULESET_VERSION);
+  assert.equal(report.ruleSetVersion, "2.0.0");
 });

@@ -9,7 +9,7 @@ import {
 } from "../packages/core/src/sprite-sheet-review";
 import { sha256Hex } from "../packages/core/src/index";
 
-const TOOL_VERSION = "clunk-sprite-sheet-audit/1.0.0";
+const TOOL_VERSION = "clunk-sprite-sheet-audit/2.0.0";
 const EXIT = { pass: 0, failure: 2, unavailable: 4 } as const;
 const [, , command = "validate", ...rawArgs] = process.argv;
 
@@ -52,6 +52,8 @@ try {
     error: error instanceof Error ? error.message : String(error),
     static: "FAIL",
     quality: "UNAVAILABLE",
+    animationPlayback: "NOT_EVALUATED",
+    framesObserved: [],
     visualRuntime: "GAP",
     playerFacing: "NOT_EVALUATED",
     humanDecision: "NOT_EVALUATED",
@@ -90,17 +92,58 @@ async function measureManifest(value: unknown, manifestPath: string): Promise<{ 
   const sharpFactory = await loadSharp();
   const image = await decode(sharpFactory, bytes, filePath);
   const frames = parseFrameCoordinates(source.frames);
-  const target = record(source.target, "target");
-  const runtimeFramePx = target.runtimeFramePx === undefined ? undefined : {
-    width: number(record(target.runtimeFramePx, "target.runtimeFramePx").width, "target.runtimeFramePx.width"),
-    height: number(record(target.runtimeFramePx, "target.runtimeFramePx").height, "target.runtimeFramePx.height"),
+  // The runtime frame size is a runtime property. This audit reads a file, so it measures the real
+  // cell footprint and never echoes target.runtimeFramePx back as if it had been observed. An
+  // existing measured metrics.runtimeFramePx (from a capture rail) is preserved, nothing else.
+  const declaredMetrics = source.metrics === undefined ? undefined : record(source.metrics, "metrics");
+  const carriedRuntimeFramePx = declaredMetrics?.runtimeFramePx === undefined ? undefined : {
+    width: number(record(declaredMetrics.runtimeFramePx, "metrics.runtimeFramePx").width, "metrics.runtimeFramePx.width"),
+    height: number(record(declaredMetrics.runtimeFramePx, "metrics.runtimeFramePx").height, "metrics.runtimeFramePx.height"),
   };
-  const metrics = await measurePixels(sharpFactory, image.data, image.width, image.height, frames, actualHash, runtimeFramePx);
+  const metrics = await measurePixels(sharpFactory, image.data, image.width, image.height, frames, actualHash, {
+    measuredCellPx: measureCellPx(image.width, image.height, source.grid),
+    pixelGridSize: declaredPixelGridSize(source.qualityPolicy),
+    ...(carriedRuntimeFramePx ? { runtimeFramePx: carriedRuntimeFramePx } : {}),
+  });
   return {
     manifest: { ...source, metrics } as unknown as SpriteSheetReviewManifest,
     actualHash,
     actualBytes,
   };
+}
+
+/**
+ * The cell footprint that the decoded sheet actually holds, derived from the declared grid geometry.
+ * Undefined when the sheet cannot be divided into whole cells; the gate then reports UNAVAILABLE
+ * rather than guessing.
+ */
+function measureCellPx(width: number, height: number, value: unknown): { width: number; height: number } | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const grid = value as Record<string, unknown>;
+  const columns = grid.columns;
+  const rows = grid.rows;
+  if (!Number.isInteger(columns) || !Number.isInteger(rows) || (columns as number) <= 0 || (rows as number) <= 0) return undefined;
+  const padding = offsetOf(grid.padding);
+  const spacing = offsetOf(grid.spacing);
+  const cellWidth = (width - padding.x * 2 - Math.max(0, (columns as number) - 1) * spacing.x) / (columns as number);
+  const cellHeight = (height - padding.y * 2 - Math.max(0, (rows as number) - 1) * spacing.y) / (rows as number);
+  if (!Number.isInteger(cellWidth) || !Number.isInteger(cellHeight) || cellWidth <= 0 || cellHeight <= 0) return undefined;
+  return { width: cellWidth, height: cellHeight };
+}
+
+function offsetOf(value: unknown): { x: number; y: number } {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return { x: 0, y: 0 };
+  const point = value as Record<string, unknown>;
+  return {
+    x: typeof point.x === "number" && Number.isFinite(point.x) ? point.x : 0,
+    y: typeof point.y === "number" && Number.isFinite(point.y) ? point.y : 0,
+  };
+}
+
+function declaredPixelGridSize(value: unknown): number | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const size = (value as Record<string, unknown>).pixelGridSize;
+  return Number.isInteger(size) && (size as number) > 0 ? size as number : undefined;
 }
 
 async function loadSharp(): Promise<SharpFactory> {
@@ -129,7 +172,11 @@ async function measurePixels(
   height: number,
   frames: readonly SpriteFrame[],
   sourceHash: string,
-  runtimeFramePx?: { width: number; height: number },
+  geometry: {
+    measuredCellPx?: { width: number; height: number };
+    pixelGridSize?: number;
+    runtimeFramePx?: { width: number; height: number };
+  },
 ): Promise<SpriteSheetMetrics> {
   const frameHashes: Record<string, string> = {};
   const frameAlphaCoverages: number[] = [];
@@ -212,6 +259,7 @@ async function measurePixels(
     deltas.push(total / (left.length * 255));
   }
   const meanFrameDelta = deltas.length ? deltas.reduce((sum, value) => sum + value, 0) / deltas.length : 0;
+  const pixelArt = measurePixelArtIndicators(data, width, height, geometry.pixelGridSize);
   return {
     sourceHash,
     sheetDimensions: { width, height },
@@ -228,7 +276,77 @@ async function measurePixels(
     alphaSpillPixels,
     borderTouchRatios,
     silhouetteCoverages,
-    ...(runtimeFramePx ? { runtimeFramePx } : {}),
+    ...pixelArt,
+    ...(geometry.measuredCellPx ? { measuredCellPx: geometry.measuredCellPx } : {}),
+    ...(geometry.runtimeFramePx ? { runtimeFramePx: geometry.runtimeFramePx } : {}),
+  };
+}
+
+/**
+ * Pixel-art discipline indicators, always recorded so a profile can gate on them later without a
+ * re-measure. The gate itself is opt-in (qualityPolicy.strictChecks) — recording is not judging.
+ */
+function measurePixelArtIndicators(
+  data: Buffer,
+  width: number,
+  height: number,
+  declaredGridSize?: number,
+): { hardAlphaRatio: number; uniqueColorCount: number; dominantRunLength: number; offGridPixelRatio: number } {
+  const totalPixels = width * height;
+  const colors = new Set<number>();
+  const runTally = new Map<number, number>();
+  let hardAlpha = 0;
+  for (let y = 0; y < height; y += 1) {
+    let runLength = 0;
+    let runColor = -1;
+    for (let x = 0; x < width; x += 1) {
+      const pixel = (y * width + x) * 4;
+      const alpha = data[pixel + 3];
+      if (alpha === 0 || alpha === 255) hardAlpha += 1;
+      const packed = data[pixel] * 16777216 + data[pixel + 1] * 65536 + data[pixel + 2] * 256 + alpha;
+      if (alpha > 0) colors.add(packed);
+      if (alpha > 0 && packed === runColor) {
+        runLength += 1;
+        continue;
+      }
+      if (runLength > 0) runTally.set(runLength, (runTally.get(runLength) ?? 0) + 1);
+      runColor = alpha > 0 ? packed : -1;
+      runLength = alpha > 0 ? 1 : 0;
+    }
+    if (runLength > 0) runTally.set(runLength, (runTally.get(runLength) ?? 0) + 1);
+  }
+  let dominantRunLength = 0;
+  let dominantCount = -1;
+  for (const [length, count] of [...runTally.entries()].sort((left, right) => left[0] - right[0])) {
+    if (count > dominantCount) {
+      dominantCount = count;
+      dominantRunLength = length;
+    }
+  }
+  const gridSize = declaredGridSize ?? Math.max(1, dominantRunLength);
+  let offGrid = 0;
+  if (gridSize > 1) {
+    for (let y = 0; y < height; y += 1) {
+      const anchorY = Math.floor(y / gridSize) * gridSize;
+      for (let x = 0; x < width; x += 1) {
+        const anchorX = Math.floor(x / gridSize) * gridSize;
+        if (anchorX === x && anchorY === y) continue;
+        const pixel = (y * width + x) * 4;
+        const anchor = (anchorY * width + anchorX) * 4;
+        if (
+          data[pixel] !== data[anchor]
+          || data[pixel + 1] !== data[anchor + 1]
+          || data[pixel + 2] !== data[anchor + 2]
+          || data[pixel + 3] !== data[anchor + 3]
+        ) offGrid += 1;
+      }
+    }
+  }
+  return {
+    hardAlphaRatio: totalPixels ? hardAlpha / totalPixels : 0,
+    uniqueColorCount: colors.size,
+    dominantRunLength,
+    offGridPixelRatio: totalPixels ? offGrid / totalPixels : 0,
   };
 }
 
@@ -236,7 +354,7 @@ function buildEnvelope(report: SpriteSheetReviewReport, actualHash: string, actu
   const normalized = report;
   const status = report.playerFacing === "NO_GO"
     ? "NO_GO"
-    : report.quality === "BLOCKED"
+    : report.static === "FAIL" || report.animationPlayback === "FAIL" || report.quality === "BLOCKED"
       ? "FAIL"
       : report.quality === "UNAVAILABLE"
         ? "UNAVAILABLE"
