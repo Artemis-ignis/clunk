@@ -966,3 +966,151 @@
   .cv4-btn { height: 46px; padding: 0 18px; font-size: 0.9rem; }
   .cv4-pillar-actions { flex-wrap: wrap; gap: 14px; }
 }
+
+/* ============================================================================
+   Legacy-theme hardening (2026-08-31 live-render incident)
+   globals.css styles bare elements (h1..h4 { color: var(--text-strong) },
+   p { color: var(--text-muted) }) whose variables resolve per html[data-theme].
+   cv4 pages force data-theme="dark" via <ForceDarkTheme/>; the :where() rules
+   below are the second line of defence — zero-specificity-class selectors that
+   beat globals' bare-element rules purely by source order, while never
+   overriding any classed .cv4-* rule.
+   ========================================================================= */
+
+.cv4 { color-scheme: dark; }
+
+:where(.cv4) h1,
+:where(.cv4) h2,
+:where(.cv4) h3,
+:where(.cv4) h4 { color: var(--cv4-ink); }
+
+:where(.cv4) p,
+:where(.cv4) li { color: var(--cv4-ink-dim); }
+
+/* Public cv4 surfaces are dark-only by design: no theme toggle. */
+.cv4 .theme-toggle { display: none; }
+
+/* Never let the light body paint flash behind or around a cv4 page. */
+html:has(.cv4),
+html:has(.cv4) body { background: var(--cv4-bg0, #0a0b0d); }
+
+/* ============================================================================
+   Showcase — wave-1 real inventory grid
+   ========================================================================= */
+
+.cv4-showcase { padding: clamp(56px, 8vw, 104px) 0 clamp(24px, 4vw, 48px); }
+
+.cv4-showcase-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: clamp(20px, 4vw, 56px);
+  align-items: end;
+}
+
+.cv4-showcase-head h2 {
+  margin: 14px 0 0;
+  font-size: clamp(1.7rem, 3.4vw, 2.6rem);
+  font-weight: 720;
+  letter-spacing: -0.028em;
+  line-height: 1.14;
+}
+
+.cv4-showcase-head > p {
+  margin: 0;
+  color: var(--cv4-ink-dim);
+  font-size: 0.98rem;
+  line-height: 1.66;
+}
+
+.cv4-showcase-grid {
+  margin: clamp(30px, 4vw, 44px) 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.cv4-showcase-card a {
+  display: block;
+  position: relative;
+  border: 1px solid var(--cv4-line);
+  border-radius: var(--cv4-radius);
+  background: linear-gradient(180deg, var(--cv4-bg2), var(--cv4-bg1));
+  overflow: hidden;
+  transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.cv4-showcase-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  /* renders come on a light studio backdrop; dim + saturate to sit in the dark UI */
+  filter: saturate(1.04);
+  transition: transform 0.35s ease;
+}
+
+.cv4-showcase-card a:hover {
+  border-color: var(--cv4-line-strong);
+  transform: translateY(-3px);
+  box-shadow: 0 18px 44px -22px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(89, 217, 255, 0.12);
+}
+
+.cv4-showcase-card a:hover img { transform: scale(1.045); }
+
+.cv4-showcase-meta {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 22px 12px 10px;
+  background: linear-gradient(180deg, rgba(10, 11, 13, 0), rgba(10, 11, 13, 0.86) 62%);
+}
+
+.cv4-showcase-meta b {
+  color: #fff;
+  font-size: 0.83rem;
+  font-weight: 640;
+  letter-spacing: -0.01em;
+}
+
+.cv4-showcase-meta span {
+  color: rgba(255, 255, 255, 0.72);
+  font-family: var(--cv4-font-label);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.cv4-showcase-foot {
+  margin-top: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cv4-showcase-foot > span {
+  color: var(--cv4-ink-faint);
+  font-family: var(--cv4-font-label);
+  font-size: 0.68rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 1080px) {
+  .cv4-showcase-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@media (max-width: 880px) {
+  .cv4-showcase-head { grid-template-columns: 1fr; align-items: start; }
+}
+
+@media (max-width: 640px) {
+  .cv4-showcase-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+}

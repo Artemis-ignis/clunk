@@ -1,5 +1,6 @@
 import Link from "./NativeLink";
 import { SiteNav } from "./SiteNav";
+import { ForceDarkTheme } from "./ForceDarkTheme";
 
 /**
  * Shared chrome for the three statutory documents (terms, privacy, refunds).
@@ -64,6 +65,7 @@ export function LegalShell({
 }) {
   return (
     <div className="cv4">
+      <ForceDarkTheme />
       <a className="clunk-home-skip-link" href="#legal-content">본문으로 건너뛰기</a>
       <SiteNav />
 

@@ -3,6 +3,7 @@ import Link from "./components/NativeLink";
 import { Icon } from "./components/Icon";
 import { SiteNav } from "./components/SiteNav";
 import { RevealObserver } from "./components/Reveal";
+import { ForceDarkTheme } from "./components/ForceDarkTheme";
 import { LandingMcpDemo } from "./components/LandingMcpDemo";
 import { createPageMetadata } from "./components/site-metadata";
 import { MCP_HTTP_TOOL_COUNT, RULE_COUNT } from "./components/product-facts";
@@ -30,9 +31,31 @@ const WORKFLOW = [
 
 const AGENT_CLIENTS = ["Claude Code", "Codex CLI", "Cursor", "VS Code", "Grok Build", "Antigravity", "DeepSeek", "GLM", "로컬 에이전트"] as const;
 
+/**
+ * Wave 1 real inventory. Every triangle count below is read from
+ * outputs/market-launch/wave1/measurements/*.json (renderer-measured, not
+ * hand-written); the images are renders of the actual optimized GLBs that
+ * shipped to the Harvest Frontier production line.
+ */
+const SHOWCASE = [
+  { slug: "market-stall", name: "시장 노점", tris: "2,456" },
+  { slug: "greenhouse", name: "온실", tris: "5,756" },
+  { slug: "storage-shed", name: "창고 헛간", tris: "1,620" },
+  { slug: "haystack", name: "건초 더미", tris: "1,322" },
+  { slug: "fence-gate", name: "울타리 게이트", tris: "520" },
+  { slug: "crate-produce", name: "농산물 상자", tris: "782" },
+  { slug: "broadleaf-full", name: "활엽수 · 라운드", tris: "1,730" },
+  { slug: "column-flame", name: "활엽수 · 플레임", tris: "2,120" },
+  { slug: "conifer-spire", name: "침엽수 · 스파이어", tris: "860" },
+  { slug: "broadleaf-forked", name: "활엽수 · 포크", tris: "2,136" },
+  { slug: "conifer-umbrella", name: "침엽수 · 우산", tris: "1,772" },
+  { slug: "crate-closed", name: "뚜껑 상자", tris: "700" },
+] as const;
+
 export default function Home() {
   return (
     <div className="cv4">
+      <ForceDarkTheme />
       <RevealObserver />
       <a className="clunk-home-skip-link" href="#main-content">본문으로 건너뛰기</a>
       <SiteNav active="home" />
@@ -81,6 +104,47 @@ export default function Home() {
           </div>
         </section>
 
+        {/* SHOWCASE — real wave-1 inventory ---------------------------- */}
+        <section className="cv4-showcase" id="showcase" data-snap-section="showcase" aria-labelledby="showcase-heading">
+          <div className="cv4-frame">
+            <div className="cv4-showcase-head cv4-reveal">
+              <div>
+                <span className="cv4-eyebrow">REAL INVENTORY / WAVE 1</span>
+                <h2 id="showcase-heading">목업이 아니라, 실제 제품 파일입니다</h2>
+              </div>
+              <p>
+                아래 12종은 실게임(Harvest Frontier) 납품 라인에서 나온 최적화 GLB의 렌더입니다.
+                삼각형 수는 손으로 적은 값이 아니라 렌더러가 실측한 수치 그대로입니다.
+              </p>
+            </div>
+            <ul className="cv4-showcase-grid" aria-label="Wave 1 실제 에셋 12종">
+              {SHOWCASE.map((asset, index) => (
+                <li className="cv4-showcase-card cv4-reveal" data-delay={String(index % 4)} key={asset.slug}>
+                  <Link href="/marketplace" prefetch={false} aria-label={`${asset.name} — 마켓에서 보기`}>
+                    <img
+                      src={`/landing/showcase/${asset.slug}.webp`}
+                      alt={`${asset.name} 저폴리 3D 에셋 렌더`}
+                      width={560}
+                      height={560}
+                      loading={index < 6 ? "eager" : "lazy"}
+                    />
+                    <span className="cv4-showcase-meta">
+                      <b>{asset.name}</b>
+                      <span>{asset.tris} TRIS</span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <div className="cv4-showcase-foot cv4-reveal">
+              <Link className="cv4-link" href="/marketplace" prefetch={false}>
+                마켓에서 전체 인벤토리 보기 <Icon name="arrowRight" size={15} />
+              </Link>
+              <span>19종 준비 완료 · 판매 개시는 통신판매업 신고 완료 후</span>
+            </div>
+          </div>
+        </section>
+
         {/* PILLAR 01 — MAKE & SELL ------------------------------------ */}
         <section className="cv4-pillar" id="make" data-snap-section="make" aria-labelledby="pillar-make">
           <div className="cv4-frame cv4-pillar-grid">
@@ -106,15 +170,15 @@ export default function Home() {
                 <div className="cv4-panel-head"><span>CLUNK MARKET / REAL FILES</span><span>GLB · PNG</span></div>
                 <div className="cv4-market-grid">
                   <div className="cv4-asset-card">
-                    <Image src="/landing/tractor-hero.png" alt="실게임에 납품된 저폴리 트랙터 3D 에셋 렌더" width={900} height={610} priority />
+                    <Image src="/landing/tractor-hero.png" alt="실게임에 납품된 저폴리 트랙터 3D 에셋 렌더" width={900} height={610} priority unoptimized />
                     <div className="cv4-asset-meta">농기계 트랙터 <span>3D · 39,320 TRIS</span></div>
                   </div>
                   <div className="cv4-asset-card">
-                    <Image src="/landing/market-stall.webp" alt="luna 엔진으로 생성한 시장 노점 2D 에셋" width={880} height={880} />
+                    <Image src="/landing/market-stall.webp" alt="luna 엔진으로 생성한 시장 노점 2D 에셋" width={880} height={880} unoptimized />
                     <div className="cv4-asset-meta">시장 노점 <span>2D · LUNA</span></div>
                   </div>
                   <div className="cv4-asset-card">
-                    <Image src="/landing/crate-ref.webp" alt="luna 엔진으로 생성한 나무 상자 2D 에셋" width={880} height={880} />
+                    <Image src="/landing/crate-ref.webp" alt="luna 엔진으로 생성한 나무 상자 2D 에셋" width={880} height={880} unoptimized />
                     <div className="cv4-asset-meta">나무 상자 <span>2D · LUNA</span></div>
                   </div>
                 </div>
