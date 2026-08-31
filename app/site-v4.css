@@ -48,7 +48,7 @@
   --cv4-pass: #3ecf8e;
   --cv4-warn: #ffb224;
   /* type */
-  --cv4-font-sans: "Pretendard Variable", Pretendard, var(--font-geist-sans), "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --cv4-font-sans: "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
   --cv4-font-label: "Space Grotesk V", "Space Grotesk", var(--font-geist-mono), ui-monospace, monospace;
   /* rhythm */
   --cv4-frame: 1180px;

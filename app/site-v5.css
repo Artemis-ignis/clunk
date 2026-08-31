@@ -33,8 +33,11 @@
   --v5-amber: #fbbf24;
   --v5-red: #f87171;
 
-  --v5-font: "Pretendard Variable", Pretendard, var(--font-geist-sans), "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
-  --v5-label: "Space Grotesk V", "Space Grotesk", var(--font-geist-mono), ui-monospace, monospace;
+  /* No nested var() here: an undefined inner variable poisons the whole
+     custom property (guaranteed-invalid) and silently drops the page to the
+     system font — the exact "cheap AI look" the 2026-08-31 review caught. */
+  --v5-font: "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --v5-label: "Space Grotesk V", "Space Grotesk", ui-monospace, "Cascadia Mono", monospace;
 
   --v5-frame: 1200px;
   --v5-r: 14px;

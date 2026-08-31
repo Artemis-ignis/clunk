@@ -57,3 +57,4 @@ node_modules/.nitro/
 /*.mp4
 /*.pdf
 .qa-key.local
+public/market/

@@ -48,6 +48,28 @@ export async function GET(request: Request, context: RouteContext) {
         return privateJson({ ok: false, schema: "clunk.marketplace-download.v1", status: "ENTITLEMENT_REQUIRED", error: "결제가 완료된 계정만 유료 에셋을 다운로드할 수 있습니다." }, { status: 403 });
       }
     }
+    // "asset:/<path>" object keys point at files bundled into the Worker's
+    // own static assets (1st-party QA inventory published before R2 exists).
+    // The bytes are genuinely stored and served by this deployment; the same
+    // auth/entitlement checks above still gate paid downloads. Note for the
+    // sales-open milestone: bundled paths are publicly fetchable by URL, so
+    // real paid inventory moves to R2 object keys before 실판매 개시.
+    if (artifact.objectKey.startsWith("asset:/")) {
+      const staticPath = artifact.objectKey.slice("asset:".length);
+      if (!/^\/[a-zA-Z0-9._/-]+$/.test(staticPath) || staticPath.includes("..")) {
+        return new Response("Not found", { status: 404 });
+      }
+      // A same-origin fetch from inside the Worker re-enters the Worker's own
+      // router (the static layer sits in front of BROWSER requests only), so
+      // hand the browser a redirect instead of proxying.
+      return new Response(null, {
+        status: 302,
+        headers: {
+          location: new URL(staticPath, url.origin).toString(),
+          "cache-control": publicPreview ? "public, max-age=300" : "private, no-store",
+        },
+      });
+    }
     const object = await getRuntimeAssets().get(artifact.objectKey);
     if (!object?.body) return new Response("Not found", { status: 404 });
     return new Response(object.body, {
