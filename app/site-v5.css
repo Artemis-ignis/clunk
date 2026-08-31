@@ -417,3 +417,7 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
 .cv5-market-card figcaption { min-width: 0; }
 .cv5-market-card figcaption span:first-child,
 .cv5-market-card figcaption { overflow: hidden; }
+
+/* Tractor frame keeps the render's own aspect; no dead white column. */
+.cv5-inspect { align-items: start; }
+.cv5-inspect-preview { aspect-ratio: 900 / 610; min-height: 0; }
