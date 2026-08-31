@@ -1,0 +1,85 @@
+/* Direct-review surface (cv5 tokens defined in app/site-v5.css). */
+
+.rv-main { padding: 120px 0 96px; }
+.rv-head h1 { margin: 14px 0 0; font-size: clamp(1.7rem, 3.4vw, 2.5rem); font-weight: 830; letter-spacing: -0.034em; }
+.rv-head p { margin: 14px 0 0; max-width: 640px; line-height: 1.7; }
+
+.rv-tabs { display: flex; gap: 8px; margin: 28px 0 14px; }
+.rv-tabs button {
+  height: 40px; padding: 0 18px; border-radius: 11px; border: 1px solid var(--v5-line-strong);
+  background: rgba(255, 255, 255, 0.03); color: var(--v5-ink-dim);
+  font-family: var(--v5-label); font-size: 0.74rem; font-weight: 700; letter-spacing: 0.06em; cursor: pointer;
+}
+.rv-tabs button.on { background: var(--v5-grad-soft); border-color: rgba(139, 92, 246, 0.5); color: var(--v5-ink); }
+
+.rv-glb, .rv-sprite {
+  display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 14px;
+  border: 1px solid var(--v5-line-strong); border-radius: var(--v5-r-lg);
+  background: linear-gradient(178deg, #12152699, #0b0d18);
+  box-shadow: 0 36px 90px -40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(124, 93, 250, 0.08);
+  padding: 14px;
+}
+
+.rv-canvas { position: relative; min-height: 520px; border: 1px solid var(--v5-line); border-radius: 14px; overflow: hidden; background: #0a0c16; }
+.rv-canvas canvas { display: block; width: 100% !important; height: 100% !important; position: absolute; inset: 0; }
+
+.rv-status {
+  position: absolute; inset: auto 12px 12px 12px; z-index: 2;
+  padding: 10px 14px; border-radius: 10px; border: 1px solid var(--v5-line-strong);
+  background: rgba(6, 7, 15, 0.82); color: var(--v5-ink-dim); font-size: 0.82rem;
+}
+
+.rv-panel { display: grid; gap: 14px; align-content: start; border-left: 1px solid var(--v5-line); padding-left: 14px; }
+.rv-panel-head { font-family: var(--v5-label); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em; color: var(--v5-ink-faint); }
+.rv-stats { margin: 0; display: grid; gap: 6px; }
+.rv-stats div { display: flex; justify-content: space-between; gap: 10px; border: 1px solid var(--v5-line); border-radius: 9px; padding: 8px 11px; font-size: 0.76rem; }
+.rv-stats dt { font-family: var(--v5-label); font-size: 0.6rem; letter-spacing: 0.08em; color: var(--v5-ink-faint); }
+.rv-stats dd { margin: 0; color: var(--v5-ink); font-variant-numeric: tabular-nums; text-align: right; overflow-wrap: anywhere; }
+.rv-empty { margin: 0; font-size: 0.8rem; color: var(--v5-ink-faint); line-height: 1.6; }
+
+.rv-toggles { display: grid; gap: 8px; }
+.rv-toggles label { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--v5-ink-dim); }
+.rv-toggles input[type="range"] { flex: 1; accent-color: #8b5cf6; }
+.rv-toggles input[type="checkbox"] { width: 15px; height: 15px; accent-color: #8b5cf6; }
+
+.rv-clips { display: grid; gap: 6px; }
+.rv-clips button {
+  height: 32px; padding: 0 12px; border-radius: 9px; border: 1px solid var(--v5-line);
+  background: rgba(255, 255, 255, 0.03); color: var(--v5-ink-dim);
+  font-size: 0.76rem; text-align: left; cursor: pointer;
+}
+.rv-clips button.on, .rv-clips button:hover { border-color: rgba(139, 92, 246, 0.5); color: var(--v5-ink); }
+
+/* sprite stage */
+.rv-sprite-stage { position: relative; height: 520px; border: 1px solid var(--v5-line); border-radius: 14px; overflow: hidden; background: #0d1017; }
+/* absolute canvas: its bitmap follows the stage box, never feeds layout back */
+.rv-sprite-canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+.rv-sprite-sequence {
+  position: absolute; inset: 14px 18px auto 18px; z-index: 2;
+  font-weight: 700; color: var(--v5-ink); font-size: 0.95rem; letter-spacing: -0.01em;
+}
+.rv-sprite-sequence span { color: var(--v5-ink-dim); }
+.rv-sprite-sequence span:first-child { color: var(--v5-ink); }
+.rv-sprite-hud {
+  position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%);
+  display: flex; gap: 12px; align-items: baseline;
+  font-family: var(--v5-label); font-size: 0.72rem; color: var(--v5-ink-dim);
+}
+.rv-sprite-hud b { color: var(--v5-cyan); font-size: 0.86rem; font-variant-numeric: tabular-nums; }
+
+/* inventory rail */
+.rv-inventory { margin-top: 14px; border: 1px solid var(--v5-line); border-radius: 14px; padding: 12px 14px; background: rgba(255, 255, 255, 0.015); }
+.rv-inventory-row { display: flex; gap: 10px; overflow-x: auto; padding: 10px 2px 4px; }
+.rv-inventory-row button {
+  flex: 0 0 auto; display: grid; gap: 6px; justify-items: center; width: 96px;
+  border: 1px solid var(--v5-line); border-radius: 11px; padding: 8px 6px;
+  background: rgba(255, 255, 255, 0.02); color: var(--v5-ink-dim); font-size: 0.66rem; cursor: pointer;
+}
+.rv-inventory-row button:hover { border-color: rgba(139, 92, 246, 0.5); color: var(--v5-ink); }
+.rv-inventory-row img { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; }
+
+@media (max-width: 880px) {
+  .rv-glb, .rv-sprite { grid-template-columns: 1fr; }
+  .rv-panel { border-left: 0; border-top: 1px solid var(--v5-line); padding-left: 0; padding-top: 14px; }
+  .rv-canvas, .rv-sprite-stage { min-height: 380px; }
+}

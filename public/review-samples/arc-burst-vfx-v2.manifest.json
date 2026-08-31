@@ -1,0 +1,321 @@
+{
+  "schema": "clunk.sprite-sheet-review.v1",
+  "schemaVersion": "1",
+  "evidenceKind": "CONTRACT_FIXTURE",
+  "assetId": "arc-burst-vfx",
+  "source": {
+    "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\market-2d\\forge-front\\vfx\\arc-burst-vfx-v2.png",
+    "origin": "imagegen",
+    "sha256": "c7a40486c9eaa8294da42d0cc40725491243f6ded4dec18dcbaaf15033aa1143",
+    "bytes": 10406,
+    "licenseStatus": "original-generated-no-third-party-reference",
+    "referenceRole": "codex-luna black-background render outputs/luna/arc-burst-vfx-v2-a1/arc-burst-vfx-v2-a1.png -> luminance-key alpha, palette quantise, 1x pixel-grid snap"
+  },
+  "target": {
+    "engine": "pixi-js",
+    "renderer": "WebGL2",
+    "platform": "web",
+    "logicalFramePx": {
+      "width": 40,
+      "height": 108
+    },
+    "runtimeFramePx": {
+      "width": 40,
+      "height": 108
+    }
+  },
+  "sheet": {
+    "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\market-2d\\forge-front\\vfx\\arc-burst-vfx-v2.png",
+    "sha256": "c7a40486c9eaa8294da42d0cc40725491243f6ded4dec18dcbaaf15033aa1143",
+    "bytes": 10406,
+    "width": 320,
+    "height": 108
+  },
+  "grid": {
+    "columns": 8,
+    "rows": 1,
+    "frameWidth": 40,
+    "frameHeight": 108,
+    "padding": {
+      "x": 0,
+      "y": 0
+    },
+    "spacing": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "frames": [
+    {
+      "id": "arc-burst-seed-0",
+      "index": 0,
+      "x": 0,
+      "y": 0,
+      "width": 40,
+      "height": 108,
+      "state": "seed",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "id": "arc-burst-ignite-1",
+      "index": 1,
+      "x": 40,
+      "y": 0,
+      "width": 40,
+      "height": 108,
+      "state": "ignite",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "id": "arc-burst-expand-2",
+      "index": 2,
+      "x": 80,
+      "y": 0,
+      "width": 40,
+      "height": 108,
+      "state": "expand",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "id": "arc-burst-burst-3",
+      "index": 3,
+      "x": 120,
+      "y": 0,
+      "width": 40,
+      "height": 108,
+      "state": "burst",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "id": "arc-burst-peak-4",
+      "index": 4,
+      "x": 160,
+      "y": 0,
+      "width": 40,
+      "height": 108,
+      "state": "peak",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "id": "arc-burst-scatter-5",
+      "index": 5,
+      "x": 200,
+      "y": 0,
+      "width": 40,
+      "height": 108,
+      "state": "scatter",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "id": "arc-burst-fade-6",
+      "index": 6,
+      "x": 240,
+      "y": 0,
+      "width": 40,
+      "height": 108,
+      "state": "fade",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "id": "arc-burst-dissipate-7",
+      "index": 7,
+      "x": 280,
+      "y": 0,
+      "width": 40,
+      "height": 108,
+      "state": "dissipate",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "animations": [
+    {
+      "id": "arc-burst-vfx-seed",
+      "state": "seed",
+      "fps": 36,
+      "loop": false,
+      "holdLast": true,
+      "frameIds": [
+        "arc-burst-seed-0"
+      ],
+      "required": true
+    },
+    {
+      "id": "arc-burst-vfx-ignite",
+      "state": "ignite",
+      "fps": 36,
+      "loop": false,
+      "holdLast": true,
+      "frameIds": [
+        "arc-burst-ignite-1"
+      ],
+      "required": false
+    },
+    {
+      "id": "arc-burst-vfx-expand",
+      "state": "expand",
+      "fps": 36,
+      "loop": false,
+      "holdLast": true,
+      "frameIds": [
+        "arc-burst-expand-2"
+      ],
+      "required": false
+    },
+    {
+      "id": "arc-burst-vfx-burst",
+      "state": "burst",
+      "fps": 36,
+      "loop": false,
+      "holdLast": true,
+      "frameIds": [
+        "arc-burst-burst-3"
+      ],
+      "required": true
+    },
+    {
+      "id": "arc-burst-vfx-peak",
+      "state": "peak",
+      "fps": 36,
+      "loop": false,
+      "holdLast": true,
+      "frameIds": [
+        "arc-burst-peak-4"
+      ],
+      "required": false
+    },
+    {
+      "id": "arc-burst-vfx-scatter",
+      "state": "scatter",
+      "fps": 36,
+      "loop": false,
+      "holdLast": true,
+      "frameIds": [
+        "arc-burst-scatter-5"
+      ],
+      "required": false
+    },
+    {
+      "id": "arc-burst-vfx-fade",
+      "state": "fade",
+      "fps": 36,
+      "loop": false,
+      "holdLast": true,
+      "frameIds": [
+        "arc-burst-fade-6"
+      ],
+      "required": false
+    },
+    {
+      "id": "arc-burst-vfx-dissipate",
+      "state": "dissipate",
+      "fps": 36,
+      "loop": false,
+      "holdLast": true,
+      "frameIds": [
+        "arc-burst-dissipate-7"
+      ],
+      "required": true
+    },
+    {
+      "id": "arc-burst-vfx-discharge",
+      "state": "burst",
+      "fps": 36,
+      "loop": false,
+      "holdLast": false,
+      "frameIds": [
+        "arc-burst-seed-0",
+        "arc-burst-ignite-1",
+        "arc-burst-expand-2",
+        "arc-burst-burst-3",
+        "arc-burst-peak-4",
+        "arc-burst-scatter-5",
+        "arc-burst-fade-6",
+        "arc-burst-dissipate-7"
+      ],
+      "required": true
+    }
+  ],
+  "qualityPolicy": {
+    "mode": "BLOCKING",
+    "requiredStates": [
+      "seed",
+      "burst",
+      "dissipate"
+    ],
+    "minDistinctFrameRatio": 1,
+    "maxDuplicateFrameRatio": 0,
+    "minMeanFrameDelta": 0.03,
+    "requireTransparentBackground": true,
+    "requireOpaqueBottom": false,
+    "maxClippingPixels": 0,
+    "maxAlphaSpillPixels": 0,
+    "maxBorderTouchRatio": 0,
+    "minSilhouetteCoverage": 0.12,
+    "minAlphaCoverage": 0.1,
+    "maxAlphaCoverage": 0.85,
+    "minHardAlphaRatio": 1,
+    "maxUniqueColorCount": 32,
+    "runtimeFramePx": {
+      "width": 40,
+      "height": 108
+    },
+    "requireRuntimeCapture": false,
+    "requireHumanReview": false
+  }
+}

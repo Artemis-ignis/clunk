@@ -399,6 +399,15 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
                 </button>
               </>
             )}
+            {/^\/market\//.test(`/market/${listing.slug}/`) && /\.(glb|gltf)$/i.test(listing.entryFileName) ? (
+              <Link
+                className={`${styles.btn} ${styles.btnGhost}`}
+                href={`/review?glb=${encodeURIComponent(`/market/${listing.slug}/${listing.entryFileName}`)}`}
+                prefetch={false}
+              >
+                3D 뷰어에서 검수 <Icon name="box" size={15} />
+              </Link>
+            ) : null}
           </div>
           {message ? <p className={styles.message} role="status">{message}</p> : null}
         </div>

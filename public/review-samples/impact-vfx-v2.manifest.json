@@ -1,0 +1,281 @@
+{
+  "schema": "clunk.sprite-sheet-review.v1",
+  "schemaVersion": "1",
+  "evidenceKind": "CONTRACT_FIXTURE",
+  "assetId": "impact-vfx",
+  "source": {
+    "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\market-2d\\forge-front\\vfx\\impact-vfx-v2.png",
+    "origin": "imagegen",
+    "sha256": "9ba87cf736c00166a00cca7561419843192d13e16d8e9914005e7c5dd0b719a0",
+    "bytes": 8634,
+    "licenseStatus": "original-generated-no-third-party-reference",
+    "referenceRole": "codex-luna black-background render outputs/luna/impact-vfx-v2-a4/impact-vfx-v2-a4.png -> luminance-key alpha, palette quantise, 1x pixel-grid snap"
+  },
+  "target": {
+    "engine": "pixi-js",
+    "renderer": "WebGL2",
+    "platform": "web",
+    "logicalFramePx": {
+      "width": 96,
+      "height": 96
+    },
+    "runtimeFramePx": {
+      "width": 96,
+      "height": 96
+    }
+  },
+  "sheet": {
+    "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\market-2d\\forge-front\\vfx\\impact-vfx-v2.png",
+    "sha256": "9ba87cf736c00166a00cca7561419843192d13e16d8e9914005e7c5dd0b719a0",
+    "bytes": 8634,
+    "width": 768,
+    "height": 96
+  },
+  "grid": {
+    "columns": 8,
+    "rows": 1,
+    "frameWidth": 96,
+    "frameHeight": 96,
+    "padding": {
+      "x": 0,
+      "y": 0
+    },
+    "spacing": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "frames": [
+    {
+      "id": "impact-vfx-ignite-0",
+      "index": 0,
+      "x": 0,
+      "y": 0,
+      "width": 96,
+      "height": 96,
+      "state": "ignite",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "id": "impact-vfx-burst-1",
+      "index": 1,
+      "x": 96,
+      "y": 0,
+      "width": 96,
+      "height": 96,
+      "state": "burst",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "id": "impact-vfx-burst-2",
+      "index": 2,
+      "x": 192,
+      "y": 0,
+      "width": 96,
+      "height": 96,
+      "state": "burst",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "id": "impact-vfx-ring-3",
+      "index": 3,
+      "x": 288,
+      "y": 0,
+      "width": 96,
+      "height": 96,
+      "state": "ring",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "id": "impact-vfx-ring-4",
+      "index": 4,
+      "x": 384,
+      "y": 0,
+      "width": 96,
+      "height": 96,
+      "state": "ring",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "id": "impact-vfx-dissipate-5",
+      "index": 5,
+      "x": 480,
+      "y": 0,
+      "width": 96,
+      "height": 96,
+      "state": "dissipate",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "id": "impact-vfx-dissipate-6",
+      "index": 6,
+      "x": 576,
+      "y": 0,
+      "width": 96,
+      "height": 96,
+      "state": "dissipate",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "id": "impact-vfx-dissipate-7",
+      "index": 7,
+      "x": 672,
+      "y": 0,
+      "width": 96,
+      "height": 96,
+      "state": "dissipate",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "animations": [
+    {
+      "id": "impact-vfx-ignite",
+      "state": "ignite",
+      "fps": 24,
+      "loop": false,
+      "holdLast": true,
+      "frameIds": [
+        "impact-vfx-ignite-0"
+      ],
+      "required": true
+    },
+    {
+      "id": "impact-vfx-burst",
+      "state": "burst",
+      "fps": 24,
+      "loop": false,
+      "holdLast": false,
+      "frameIds": [
+        "impact-vfx-burst-1",
+        "impact-vfx-burst-2"
+      ],
+      "required": true
+    },
+    {
+      "id": "impact-vfx-ring",
+      "state": "ring",
+      "fps": 24,
+      "loop": false,
+      "holdLast": false,
+      "frameIds": [
+        "impact-vfx-ring-3",
+        "impact-vfx-ring-4"
+      ],
+      "required": false
+    },
+    {
+      "id": "impact-vfx-dissipate",
+      "state": "dissipate",
+      "fps": 24,
+      "loop": false,
+      "holdLast": false,
+      "frameIds": [
+        "impact-vfx-dissipate-5",
+        "impact-vfx-dissipate-6",
+        "impact-vfx-dissipate-7"
+      ],
+      "required": true
+    },
+    {
+      "id": "impact-vfx-impact",
+      "state": "burst",
+      "fps": 24,
+      "loop": false,
+      "holdLast": false,
+      "frameIds": [
+        "impact-vfx-ignite-0",
+        "impact-vfx-burst-1",
+        "impact-vfx-burst-2",
+        "impact-vfx-ring-3",
+        "impact-vfx-ring-4",
+        "impact-vfx-dissipate-5",
+        "impact-vfx-dissipate-6",
+        "impact-vfx-dissipate-7"
+      ],
+      "required": false
+    }
+  ],
+  "qualityPolicy": {
+    "mode": "BLOCKING",
+    "requiredStates": [
+      "ignite",
+      "burst",
+      "dissipate"
+    ],
+    "minDistinctFrameRatio": 1,
+    "maxDuplicateFrameRatio": 0,
+    "minMeanFrameDelta": 0.03,
+    "requireTransparentBackground": true,
+    "requireOpaqueBottom": false,
+    "maxClippingPixels": 0,
+    "maxAlphaSpillPixels": 0,
+    "maxBorderTouchRatio": 0,
+    "minSilhouetteCoverage": 0.12,
+    "minAlphaCoverage": 0.1,
+    "maxAlphaCoverage": 0.85,
+    "minHardAlphaRatio": 1,
+    "maxUniqueColorCount": 32,
+    "runtimeFramePx": {
+      "width": 96,
+      "height": 96
+    },
+    "requireRuntimeCapture": false,
+    "requireHumanReview": false
+  }
+}
