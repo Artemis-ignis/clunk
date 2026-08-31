@@ -4,6 +4,7 @@ import { SiteNav } from "./components/SiteNav";
 import { RevealObserver } from "./components/Reveal";
 import { ForceDarkTheme } from "./components/ForceDarkTheme";
 import { LandingMcpDemo } from "./components/LandingMcpDemo";
+import { AgentLiveDemo } from "./components/AgentLiveDemo";
 import { createPageMetadata } from "./components/site-metadata";
 import { MCP_HTTP_TOOL_COUNT, RULE_COUNT } from "./components/product-facts";
 
@@ -247,32 +248,11 @@ export default function Home() {
             </div>
             <div className="cv5-sec-visual cv5-reveal" data-delay="1">
               <div className="cv5-mock">
-                <div className="cv5-mock-bar"><span>AGENT <b>WORKSPACE</b></span><span>MCP · REAL ENDPOINT</span></div>
-                <div className="cv5-mock-body cv5-agent">
-                  <div className="cv5-chat">
-                    <div className="cv5-msg cv5-msg-user">온실 GLB 만들어서 web 프로파일로 검사하고, 게시 준비까지 해줘.</div>
-                    <div className="cv5-msg cv5-msg-bot">
-                      팩토리 레일로 생성 후 같은 프로파일로 재검사합니다.
-                      <div className="cv5-steps">
-                        <span><b>✓</b><code>clunk_asset_author</code> — greenhouse.glb 생성 · 5,756 tris</span>
-                        <span><b>✓</b><code>clunk_asset_inspect</code> — 정책 {RULE_COUNT}룰 · 하드 블로커 0</span>
-                        <span><b>✓</b><code>clunk_optimize</code> — 허용 연산만 · 새 파일 출력</span>
-                        <span><b>✓</b><code>clunk_passport</code> — 입력→출력 digest 봉인</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="cv5-agent-side">
-                    <div className="cv5-agent-assets">
-                      <header>연결된 에셋</header>
-                      <div>
-                        <img src="/landing/showcase/greenhouse.webp" alt="" width={112} height={112} loading="lazy" />
-                        <img src="/landing/showcase/market-stall.webp" alt="" width={112} height={112} loading="lazy" />
-                        <img src="/landing/showcase/broadleaf-full.webp" alt="" width={112} height={112} loading="lazy" />
-                      </div>
-                    </div>
-                    <div className="cv5-mcp-demo">
-                      <LandingMcpDemo />
-                    </div>
+                <div className="cv5-mock-bar"><span>AGENT <b>WORKSPACE</b></span><span>LIVE · MCP REAL ENDPOINT</span></div>
+                <div className="cv5-mock-body cv5-agent-mock">
+                  <AgentLiveDemo />
+                  <div className="cv5-mcp-demo">
+                    <LandingMcpDemo />
                   </div>
                 </div>
               </div>

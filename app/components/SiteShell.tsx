@@ -2,7 +2,6 @@ import Link from "./NativeLink";
 import Image from "next/image";
 import { BrandMark } from "./BrandMark";
 import { SiteNav, type ShellSection } from "./SiteNav";
-import { SnapRoot } from "./SnapRoot";
 import { getBillingEnvironment, getBillingStatus } from "../api/marketplace/billing";
 import { getRuntimeEnvironment } from "../runtime-environment";
 
@@ -24,7 +23,9 @@ export function SiteShell({
 
   return (
     <div className="site-shell">
-      <SnapRoot />
+      {/* Scroll snap is a landing-only device (2026-08-31 master review):
+          mandatory document snap on content pages traps the scroll short of
+          buttons. Content pages scroll naturally. */}
       <SiteNav active={active} />
       {children}
       <footer className="site-footer">

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import Link from "./NativeLink";
 import { Icon } from "./Icon";
+import { EmbeddedGlbViewer } from "./review/EmbeddedGlbViewer";
 import styles from "../marketplace/marketplace.module.css";
 
 type Listing = {
@@ -352,7 +353,19 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
       <div className={styles.breadcrumb}><Link href="/marketplace">에셋 마켓</Link><Icon name="chevronRight" size={13} /><span>{listing.title}</span></div>
       <section className={styles.detailHero}>
         <div className={styles.preview}>
-          {previewUrl ? <Image src={previewUrl} alt={`${listing.title} 실제 공개 미리보기`} width={900} height={620} priority unoptimized /> : <PreviewUnavailable listing={listing} />}
+          {/* polyfork-style live product view: the shipped GLB itself, orbitable,
+              with its animation playing — not a screenshot of it. */}
+          {/\.(glb|gltf)$/i.test(listing.entryFileName) ? (
+            <EmbeddedGlbViewer
+              src={`/market/${listing.slug}/${listing.entryFileName}`}
+              poster={previewUrl}
+              alt={`${listing.title} 실제 판매 파일`}
+            />
+          ) : previewUrl ? (
+            <Image src={previewUrl} alt={`${listing.title} 실제 공개 미리보기`} width={900} height={620} priority unoptimized />
+          ) : (
+            <PreviewUnavailable listing={listing} />
+          )}
           <span className={styles.stamp}>PUBLISHED · API VERIFIED</span>
         </div>
         <div className={styles.buyPanel}>

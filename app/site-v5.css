@@ -95,9 +95,20 @@ html:has(.cv5) body { background: var(--v5-bg0, #06070f); }
   color: var(--v5-ink-dim); font-size: 0.9rem; font-weight: 550; letter-spacing: -0.01em; transition: color .18s, background .18s;
 }
 .cv5 .sitenav-link:hover { color: var(--v5-ink); background: rgba(255, 255, 255, 0.05); }
-.cv5 .sitenav-link-active { color: var(--v5-ink); }
-.cv5 .sitenav-link-active::after { content: ""; display: block; position: relative; top: 13px; left: 50%; transform: translateX(-50%); width: 16px; height: 2px; border-radius: 2px; background: var(--v5-grad); position: absolute; bottom: 4px; }
 .cv5 .sitenav-link { position: relative; }
+.cv5 .sitenav-link-active { color: var(--v5-ink); }
+/* one clean indicator: a short gradient bar centered under the label */
+.cv5 .sitenav-link-active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 3px;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--v5-grad);
+}
 .cv5 .sitenav-utility { display: flex; gap: 2px; }
 .cv5 .sitenav-utility-link { display: inline-flex; align-items: center; height: 36px; padding: 0 11px; border-radius: 9px; color: var(--v5-ink-faint); font-size: 0.82rem; }
 .cv5 .sitenav-utility-link:hover { color: var(--v5-ink); }
@@ -408,9 +419,10 @@ html:has(.cv5) body { background: var(--v5-bg0, #06070f); }
 .cv5 .landing-mcp-tabs button::before,
 .cv5 .landing-mcp-tabs button::after { content: none !important; display: none !important; }
 
-/* Scroll snap: proximity (never trap-scroll), offset for the fixed 68px nav. */
+/* Scroll snap: LANDING ONLY (.cv5-snap root), proximity so it never traps,
+   offset for the fixed 68px nav. Content pages must scroll naturally. */
 html:has(.cv5-snap) { scroll-snap-type: y proximity; }
-.cv5 [data-snap-section] { scroll-snap-align: start; scroll-margin-top: 74px; }
+.cv5-snap [data-snap-section] { scroll-snap-align: start; scroll-margin-top: 74px; }
 @media (prefers-reduced-motion: reduce) { html:has(.cv5-snap) { scroll-snap-type: none; } }
 
 /* legacy .public-hero-frame rules are inert here; keep the hero self-managed */
@@ -424,3 +436,107 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
 /* Tractor frame keeps the render's own aspect; no dead white column. */
 .cv5-inspect { align-items: start; }
 .cv5-inspect-preview { aspect-ratio: 900 / 610; min-height: 0; }
+
+/* ============================================================================
+   Section 03 live scene — typing chat + real-time GLB modelling (2026-08-31)
+   ========================================================================= */
+
+/* the section fills the viewport so the snap lands it flush (nav overlays
+   its own top padding; scroll-margin reset so 100svh actually fits) */
+.cv5-snap [data-snap-section="agent"] { scroll-margin-top: 0; }
+.cv5-sec[data-snap-section="agent"] {
+  min-height: 100svh;
+  display: grid;
+  align-items: center;
+  padding: 92px 0 36px;
+  box-sizing: border-box;
+}
+
+.cv5-agent-mock { display: grid; gap: 12px; }
+.cv5-agent-live { display: grid; grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr); gap: 12px; }
+
+.cv5-agent-live .cv5-chat { min-height: 320px; }
+
+.cv5-agent-stage {
+  position: relative;
+  border: 1px solid var(--v5-line);
+  border-radius: 12px;
+  background:
+    radial-gradient(120% 90% at 50% 110%, rgba(99, 102, 241, 0.14), transparent 60%),
+    #0d1017;
+  min-height: 320px;
+  overflow: hidden;
+}
+.cv5-agent-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+.cv5-agent-stage-tag {
+  position: absolute; left: 10px; top: 10px; z-index: 2;
+  font-family: var(--v5-label); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em;
+  color: var(--v5-ink-faint); background: rgba(6, 7, 15, 0.72); border: 1px solid var(--v5-line);
+  border-radius: 7px; padding: 4px 8px;
+}
+
+.cv5-agent-scan {
+  position: absolute; right: 10px; top: 10px; z-index: 2;
+  font-family: var(--v5-label); font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em;
+  color: var(--v5-amber); background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.4);
+  border-radius: 7px; padding: 4px 8px;
+  animation: cv5-scan-blink 0.5s steps(2) infinite;
+}
+@keyframes cv5-scan-blink { 50% { opacity: 0.45; } }
+
+.cv5-agent-badge {
+  position: absolute; right: 10px; bottom: 10px; z-index: 2;
+  font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em;
+  color: var(--v5-green); background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.45);
+  border-radius: 9px; padding: 7px 11px;
+  animation: cv5-badge-pop 0.35s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+@keyframes cv5-badge-pop { from { transform: scale(0.6); opacity: 0; } }
+
+.cv5-caret {
+  display: inline-block; width: 2px; height: 1em; margin-left: 2px; vertical-align: -0.15em;
+  background: var(--v5-cyan);
+  animation: cv5-caret-blink 0.85s steps(2) infinite;
+}
+@keyframes cv5-caret-blink { 50% { opacity: 0; } }
+
+.cv5-step-in { animation: cv5-step-in 0.3s ease; }
+@keyframes cv5-step-in { from { opacity: 0; transform: translateY(6px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .cv5-caret, .cv5-agent-scan, .cv5-agent-badge, .cv5-step-in { animation: none; }
+}
+@media (max-width: 880px) {
+  .cv5-sec[data-snap-section="agent"] { min-height: 0; padding: 56px 0 0; display: block; }
+  .cv5-agent-live { grid-template-columns: 1fr; }
+  .cv5-agent-stage { min-height: 260px; }
+}
+
+/* ============================================================================
+   Embedded product 3D viewer (marketplace detail, polyfork-style)
+   ========================================================================= */
+.cv5-embed3d {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 50% 115%, rgba(99, 102, 241, 0.12), transparent 62%),
+    #0d1017;
+  border: 1px solid var(--v5-line-strong);
+  min-height: 420px;
+}
+.cv5-embed3d canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.cv5-embed3d-hint {
+  position: absolute; left: 12px; bottom: 12px; z-index: 2;
+  font-family: var(--v5-label); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em;
+  color: var(--v5-ink-dim); background: rgba(6, 7, 15, 0.72); border: 1px solid var(--v5-line);
+  border-radius: 8px; padding: 6px 10px;
+}
+.cv5-embed3d-anim {
+  position: absolute; right: 12px; bottom: 12px; z-index: 2;
+  font-family: var(--v5-label); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em;
+  color: var(--v5-cyan); background: rgba(89, 217, 255, 0.08); border: 1px solid rgba(89, 217, 255, 0.35);
+  border-radius: 8px; padding: 5px 9px;
+}
+.cv5-embed3d-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
