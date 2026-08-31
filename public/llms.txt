@@ -8,13 +8,13 @@ Status: private pilot (Korea first). Billing is a working demo ledger, not a pay
 
 ## Public surfaces
 
-- [Clunk home](https://clunk.honna1.chatgpt.site/): sample-first product walkthrough and evidence states.
-- [Clunk Series](https://clunk.honna1.chatgpt.site/series): Clunk-native Forge, Sprite, Material, Motion, Game Ready, and Market surfaces with the audited GitHub source ledger.
-- [Asset Studio](https://clunk.honna1.chatgpt.site/studio): authenticated native series authoring, real artifact bytes, and review Draft flow.
-- [Kits](https://clunk.honna1.chatgpt.site/kits): authenticated projects and hash-only Clunk Kit manifests.
-- [Asset detail](https://clunk.honna1.chatgpt.site/assets/:assetId): authenticated artifact hashes, provenance, evidence, and downloads.
-- [Connect](https://clunk.honna1.chatgpt.site/connect): official HTTP MCP setup and handshake entry point.
-- [Documentation](https://clunk.honna1.chatgpt.site/docs): contracts, asset families, and runtime boundaries.
+- [Clunk home](https://clunk.ddakdama-app.workers.dev/): sample-first product walkthrough and evidence states.
+- [Clunk Series](https://clunk.ddakdama-app.workers.dev/series): Clunk-native Forge, Sprite, Material, Motion, Game Ready, and Market surfaces with the audited GitHub source ledger.
+- [Asset Studio](https://clunk.ddakdama-app.workers.dev/studio): authenticated native series authoring, real artifact bytes, and review Draft flow.
+- [Kits](https://clunk.ddakdama-app.workers.dev/kits): authenticated projects and hash-only Clunk Kit manifests.
+- [Asset detail](https://clunk.ddakdama-app.workers.dev/assets/:assetId): authenticated artifact hashes, provenance, evidence, and downloads.
+- [Connect](https://clunk.ddakdama-app.workers.dev/connect): official HTTP MCP setup and handshake entry point.
+- [Documentation](https://clunk.ddakdama-app.workers.dev/docs): contracts, asset families, and runtime boundaries.
 
 Clunk HTTP MCP: shipped at `/api/mcp`. The official setup surfaces are `/connect` and
 `/agents#connect`; `/mcp` is not a public website connection route. It is Clunk's own streamable
@@ -81,7 +81,7 @@ The public catalog is `/series` and the authenticated creation surface is `/stud
 
 Open `/connect` (or `/agents#connect`), sign in, click `Clunk 연결 키 만들기`, and use the generated client block. The
 canonical endpoint is the same-origin `/api/mcp` route (production:
-`https://clunk.honna1.chatgpt.site/api/mcp`). The key is displayed once and can be revoked from the
+`https://clunk.ddakdama-app.workers.dev/api/mcp`). The key is displayed once and can be revoked from the
 same page. A minimal request is:
 
 ```http

@@ -28,6 +28,7 @@
   ],
   "exclude": [
     "node_modules",
+    "outputs",
     "integrations/vscode",
     "agentic-build-and-orchestrate-ai-agents-while-you-sleep",
     "liquid-glass-login-page",

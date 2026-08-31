@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-const DEFAULT_SITE_ORIGIN = "https://clunk.honna1.chatgpt.site";
+const DEFAULT_SITE_ORIGIN = "https://clunk.ddakdama-app.workers.dev";
 
 function resolveSiteOrigin() {
   const configured = process.env.CLUNK_SITE_ORIGIN?.trim().replace(/\/$/, "");

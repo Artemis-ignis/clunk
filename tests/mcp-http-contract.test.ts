@@ -69,13 +69,13 @@ test("MCP initialize and tools/list responses are stable JSON-RPC results", () =
 
 test("each client guide is generated from one Clunk endpoint and one issued key", () => {
   const connection: AgentConnection = {
-    endpoint: "https://clunk.honna1.chatgpt.site/api/mcp",
+    endpoint: "https://clunk.ddakdama-app.workers.dev/api/mcp",
     apiKey: "clunk_live_test_key",
   };
   const guides = buildAgentGuides(connection);
   const byKey = new Map(guides.map((guide) => [guide.key, guide]));
 
-  assert.match(byKey.get("claude-code")?.code ?? "", /https:\/\/clunk\.honna1\.chatgpt\.site\/api\/mcp/);
+  assert.match(byKey.get("claude-code")?.code ?? "", /https:\/\/clunk\.ddakdama-app\.workers\.dev\/api\/mcp/);
   assert.match(byKey.get("claude-code")?.code ?? "", /clunk_live_test_key/);
   assert.match(byKey.get("codex")?.code ?? "", /codex mcp add clunk --url/);
   assert.match(byKey.get("codex")?.code ?? "", /CLUNK_API_KEY/);

@@ -4,7 +4,7 @@ import { useMemo, useState, useSyncExternalStore } from "react";
 import { buildAgentGuides, type AgentGuideKey } from "./agent-guides";
 import { Icon } from "./Icon";
 
-const FALLBACK_ENDPOINT = "https://clunk.honna1.chatgpt.site/api/mcp";
+const FALLBACK_ENDPOINT = "https://clunk.ddakdama-app.workers.dev/api/mcp";
 const subscribeToOrigin = () => () => {};
 const getClientEndpoint = () => `${window.location.origin}/api/mcp`;
 const getServerEndpoint = () => FALLBACK_ENDPOINT;
