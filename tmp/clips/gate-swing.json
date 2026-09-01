@@ -1,0 +1,7 @@
+{
+  "name": "swing",
+  "fps": 8,
+  "tracks": [
+    { "node": "gate_pivot", "axis": "y", "degrees": [0, -22, -48, -74, -90, -74, -48, -22] }
+  ]
+}

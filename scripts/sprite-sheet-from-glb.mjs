@@ -118,9 +118,13 @@ const gltf = await new Promise((ok, fail) => loader.parse(arrayBuffer, "", ok, f
 const root = gltf.scene;
 root.updateMatrixWorld(true);
 
-/** Flattens the scene into world-space triangles carrying their material's display colour. */
-const triangles = [];
-{
+/**
+ * Flattens the scene into world-space triangles carrying their material's display colour.
+ * Re-run per pose: a rotated pivot changes matrixWorld, and the triangles are what the
+ * rasteriser sees, so a cached list would draw every frame in the rest pose.
+ */
+function collectTriangles() {
+  const triangles = [];
   const a = new THREE.Vector3();
   const b = new THREE.Vector3();
   const c = new THREE.Vector3();
@@ -164,9 +168,15 @@ const triangles = [];
       triangles.push({ a: a.clone(), b: b.clone(), c: c.clone(), rgb });
     }
   });
+  return triangles;
 }
+
+let triangles = collectTriangles();
 if (!triangles.length) throw new Error("The model contains no triangles to rasterise.");
 
+// Framing is fixed from the REST pose and reused for every frame. Reframing per frame
+// would make the subject breathe as a limb swings, which reads as the camera moving
+// rather than the character.
 const box = new THREE.Box3().setFromObject(root);
 const centre = box.getCenter(new THREE.Vector3());
 const radius = Math.max(box.getSize(new THREE.Vector3()).length() / 2, 1e-6);
@@ -347,14 +357,74 @@ const VIEWS = VIEW_COUNT === 4
   ? CARDINAL
   : [CARDINAL[0], DIAGONAL[0], CARDINAL[1], DIAGONAL[1], CARDINAL[2], DIAGONAL[2], CARDINAL[3], DIAGONAL[3]];
 
+/**
+ * A clip rotates named nodes. Our factories already expose them — the fence gate hangs
+ * its leaf under `gate_pivot`, the well turns its drum under `winch_pivot` — because a
+ * consumer animates the asset by rotating one node rather than by swapping meshes. The
+ * same discipline is what lets a sheet be baked from the model rather than drawn twice.
+ *
+ * {
+ *   "name": "walk", "fps": 8,
+ *   "tracks": [{ "node": "leg_l_pivot", "axis": "x", "degrees": [0, 25, 0, -25] }]
+ * }
+ *
+ * Every track must declare the same number of keys: that count is the frame count.
+ */
+let clip = null;
+if (options.has("clip")) {
+  clip = JSON.parse(await readFile(resolve(options.get("clip")), "utf8"));
+  if (!Array.isArray(clip.tracks) || !clip.tracks.length) throw new Error("A clip needs at least one track.");
+  const lengths = new Set(clip.tracks.map((track) => track.degrees.length));
+  if (lengths.size !== 1) throw new Error("Every track in a clip must declare the same number of keys.");
+  clip.frames = [...lengths][0];
+  if (clip.frames < 1) throw new Error("A clip needs at least one key per track.");
+  for (const track of clip.tracks) {
+    const node = root.getObjectByName(track.node);
+    if (!node) {
+      const named = [];
+      root.traverse((n) => { if (n.name) named.push(n.name); });
+      throw new Error(`Clip track targets "${track.node}", which this model does not carry. It exposes: ${named.join(", ") || "(no named nodes)"}`);
+    }
+    // The rest rotation is the base every key is applied on top of, so a clip that
+    // returns to 0 returns the asset to the pose the author shipped.
+    track.target = node;
+    track.rest = node.rotation[track.axis];
+  }
+}
+
+/** Applies frame `index` of the clip and rebuilds the world-space triangle list. */
+function pose(index) {
+  if (!clip) return;
+  for (const track of clip.tracks) {
+    track.target.rotation[track.axis] = track.rest + (track.degrees[index] * Math.PI) / 180;
+  }
+  root.updateMatrixWorld(true);
+  triangles = collectTriangles();
+}
+
 await mkdir(outDir, { recursive: true });
 const stem = basename(glbPath).replace(/\.glb$/i, "");
-const cells = VIEWS.map((view) => render(view.dir));
+
+// Frame-major within each direction: south0..south3, west0..west3. An engine slicing a
+// row at a time gets one direction's cycle, which is the order sprite runtimes expect.
+const FRAME_COUNT = clip ? clip.frames : 1;
+const cells = [];
+const cellMeta = [];
+for (const view of VIEWS) {
+  for (let f = 0; f < FRAME_COUNT; f += 1) {
+    pose(f);
+    cells.push(render(view.dir));
+    cellMeta.push({ view: view.tag, frame: f });
+  }
+}
+pose(0);
 const palette = PALETTE ? quantise(cells, PALETTE) : [];
 
 const written = [];
-for (let i = 0; i < VIEWS.length; i += 1) {
-  const file = join(outDir, `${stem}.${VIEWS[i].tag}.png`);
+for (let i = 0; i < cells.length; i += 1) {
+  const meta = cellMeta[i];
+  const suffix = clip ? `${clip.name}.${meta.view}.${String(meta.frame).padStart(2, "0")}` : meta.view;
+  const file = join(outDir, `${stem}.${suffix}.png`);
   await writeFile(file, encodePngRgba(CELL, CELL, cells[i]));
   written.push(file);
 }
@@ -457,14 +527,21 @@ const dominantRunLength = (() => {
 let sheetFile = null;
 let manifestFile = null;
 if (WRITE_SHEET) {
-  const sheetWidth = CELL * VIEWS.length;
-  const sheet = Buffer.alloc(sheetWidth * CELL * 4);
+  // One row per direction when a clip is playing, so a runtime can point at a row and
+  // get that facing's cycle; a single row when the sheet is stills.
+  const columns = FRAME_COUNT;
+  const rows = VIEWS.length;
+  const sheetWidth = CELL * columns;
+  const sheetHeight = CELL * rows;
+  const sheet = Buffer.alloc(sheetWidth * sheetHeight * 4);
   for (let i = 0; i < cells.length; i += 1) {
+    const col = i % columns;
+    const row = Math.floor(i / columns);
     for (let y = 0; y < CELL; y += 1) {
-      cells[i].copy(sheet, (y * sheetWidth + i * CELL) * 4, y * CELL * 4, (y + 1) * CELL * 4);
+      cells[i].copy(sheet, ((row * CELL + y) * sheetWidth + col * CELL) * 4, y * CELL * 4, (y + 1) * CELL * 4);
     }
   }
-  const sheetBytes = encodePngRgba(sheetWidth, CELL, sheet);
+  const sheetBytes = encodePngRgba(sheetWidth, sheetHeight, sheet);
   sheetFile = join(outDir, `${stem}.sheet.png`);
   await writeFile(sheetFile, sheetBytes);
   written.push(sheetFile);
@@ -473,6 +550,7 @@ if (WRITE_SHEET) {
   // sheet can be inspected the moment it is written. A shape the auditor rejects would
   // leave a hand-editing step in the middle of the pipeline, which is not a pipeline.
   const sheetHash = createHash("sha256").update(sheetBytes).digest("hex");
+  const state = clip ? clip.name : "idle";
   const manifest = {
     schema: "clunk.sprite-sheet-review.v1",
     schemaVersion: "1",
@@ -498,25 +576,25 @@ if (WRITE_SHEET) {
       sha256: sheetHash,
       bytes: sheetBytes.length,
       width: sheetWidth,
-      height: CELL,
+      height: sheetHeight,
     },
     grid: {
-      columns: VIEWS.length,
-      rows: 1,
+      columns,
+      rows,
       frameWidth: CELL,
       frameHeight: CELL,
       padding: { x: 0, y: 0 },
       spacing: { x: 0, y: 0 },
     },
-    frames: VIEWS.map((view, i) => ({
-      id: `idle_${view.tag}`,
+    frames: cellMeta.map((meta, i) => ({
+      id: `${state}_${meta.view}_${String(meta.frame).padStart(2, "0")}`,
       index: i,
-      x: i * CELL,
-      y: 0,
+      x: (i % columns) * CELL,
+      y: Math.floor(i / columns) * CELL,
       width: CELL,
       height: CELL,
-      state: "idle",
-      direction: view.tag,
+      state,
+      direction: meta.view,
       // The model rests on the ground, so the sprite's contact point is the cell's
       // bottom centre — where an engine will place it against a tile.
       anchor: { x: CELL / 2, y: CELL - 1 },
@@ -524,12 +602,12 @@ if (WRITE_SHEET) {
     // One still per direction. These are facings, not a played animation, so each is its
     // own single-frame state rather than a cycle the auditor would check for motion.
     animations: VIEWS.map((view) => ({
-      id: `idle_${view.tag}`,
-      state: "idle",
+      id: `${state}_${view.tag}`,
+      state,
       direction: view.tag,
-      fps: 1,
-      loop: false,
-      frameIds: [`idle_${view.tag}`],
+      fps: clip?.fps ?? 1,
+      loop: Boolean(clip),
+      frameIds: Array.from({ length: FRAME_COUNT }, (_, f) => `${state}_${view.tag}_${String(f).padStart(2, "0")}`),
     })),
     qualityPolicy: {
       mode: "BLOCKING",
@@ -546,9 +624,9 @@ if (WRITE_SHEET) {
       sheetDimensions: { width: sheetWidth, height: CELL },
       alphaCoverage: Number((coverage.reduce((sum, c) => sum + c, 0) / coverage.length).toFixed(6)),
       frameAlphaCoverages: coverage.map((c) => Number(c.toFixed(6))),
-      frameHashes: Object.fromEntries(VIEWS.map((view, i) => [`idle_${view.tag}`, frameHashes[i]])),
+      frameHashes: Object.fromEntries(cellMeta.map((meta, i) => [`${state}_${meta.view}_${String(meta.frame).padStart(2, "0")}`, frameHashes[i]])),
       hasTransparentPixels: anyTransparent,
-      emptyFrameIds: VIEWS.filter((_, i) => coverage[i] === 0).map((view) => `idle_${view.tag}`),
+      emptyFrameIds: cellMeta.filter((_, i) => coverage[i] === 0).map((meta) => `${state}_${meta.view}_${String(meta.frame).padStart(2, "0")}`),
       borderTouchRatios: borderTouchRatios.map((r) => Number(r.toFixed(6))),
       silhouetteCoverages: coverage.map((c) => Number(c.toFixed(6))),
       measuredCellPx: { width: CELL, height: CELL },
@@ -565,6 +643,7 @@ if (WRITE_SHEET) {
       triangles: triangles.length,
       views: VIEW_COUNT,
       pitch: PITCH,
+      clip: clip ? { name: clip.name, fps: clip.fps, frames: clip.frames, tracks: clip.tracks.map((t) => ({ node: t.node, axis: t.axis, degrees: t.degrees })) } : null,
       palette: PALETTE
         ? { requested: PALETTE, produced: palette.length, colours: palette.map((c) => `#${c.map((n) => n.toString(16).padStart(2, "0")).join("")}`) }
         : null,

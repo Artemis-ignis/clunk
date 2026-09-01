@@ -1,0 +1,827 @@
+{
+  "schema": "clunk.sprite-sheet-review.v1",
+  "schemaVersion": "1",
+  "evidenceKind": "CONTRACT_FIXTURE",
+  "assetId": "fence-gate.m1.clunk-optimized",
+  "source": {
+    "path": "fence-gate.m1.clunk-optimized.sheet.png",
+    "origin": "procedural",
+    "sha256": "e8ea08cd2e40d7c6e8a2dc1113e4c35a331c37203fc5cac37c42de71fd2f2c2b",
+    "bytes": 8760
+  },
+  "target": {
+    "engine": "engine-agnostic",
+    "renderer": "clunk-software-rasteriser",
+    "platform": "2d",
+    "logicalFramePx": {
+      "width": 64,
+      "height": 64
+    }
+  },
+  "sheet": {
+    "path": "fence-gate.m1.clunk-optimized.sheet.png",
+    "sha256": "e8ea08cd2e40d7c6e8a2dc1113e4c35a331c37203fc5cac37c42de71fd2f2c2b",
+    "bytes": 8760,
+    "width": 512,
+    "height": 256
+  },
+  "grid": {
+    "columns": 8,
+    "rows": 4,
+    "frameWidth": 64,
+    "frameHeight": 64,
+    "padding": {
+      "x": 0,
+      "y": 0
+    },
+    "spacing": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "frames": [
+    {
+      "id": "swing_south_00",
+      "index": 0,
+      "x": 0,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_south_01",
+      "index": 1,
+      "x": 64,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_south_02",
+      "index": 2,
+      "x": 128,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_south_03",
+      "index": 3,
+      "x": 192,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_south_04",
+      "index": 4,
+      "x": 256,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_south_05",
+      "index": 5,
+      "x": 320,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_south_06",
+      "index": 6,
+      "x": 384,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_south_07",
+      "index": 7,
+      "x": 448,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_west_00",
+      "index": 8,
+      "x": 0,
+      "y": 64,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_west_01",
+      "index": 9,
+      "x": 64,
+      "y": 64,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_west_02",
+      "index": 10,
+      "x": 128,
+      "y": 64,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_west_03",
+      "index": 11,
+      "x": 192,
+      "y": 64,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_west_04",
+      "index": 12,
+      "x": 256,
+      "y": 64,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_west_05",
+      "index": 13,
+      "x": 320,
+      "y": 64,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_west_06",
+      "index": 14,
+      "x": 384,
+      "y": 64,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_west_07",
+      "index": 15,
+      "x": 448,
+      "y": 64,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_north_00",
+      "index": 16,
+      "x": 0,
+      "y": 128,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_north_01",
+      "index": 17,
+      "x": 64,
+      "y": 128,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_north_02",
+      "index": 18,
+      "x": 128,
+      "y": 128,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_north_03",
+      "index": 19,
+      "x": 192,
+      "y": 128,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_north_04",
+      "index": 20,
+      "x": 256,
+      "y": 128,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_north_05",
+      "index": 21,
+      "x": 320,
+      "y": 128,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_north_06",
+      "index": 22,
+      "x": 384,
+      "y": 128,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_north_07",
+      "index": 23,
+      "x": 448,
+      "y": 128,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_east_00",
+      "index": 24,
+      "x": 0,
+      "y": 192,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_east_01",
+      "index": 25,
+      "x": 64,
+      "y": 192,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_east_02",
+      "index": 26,
+      "x": 128,
+      "y": 192,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_east_03",
+      "index": 27,
+      "x": 192,
+      "y": 192,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_east_04",
+      "index": 28,
+      "x": 256,
+      "y": 192,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_east_05",
+      "index": 29,
+      "x": 320,
+      "y": 192,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_east_06",
+      "index": 30,
+      "x": 384,
+      "y": 192,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_east_07",
+      "index": 31,
+      "x": 448,
+      "y": 192,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    }
+  ],
+  "animations": [
+    {
+      "id": "swing_south",
+      "state": "swing",
+      "direction": "south",
+      "fps": 8,
+      "loop": true,
+      "frameIds": [
+        "swing_south_00",
+        "swing_south_01",
+        "swing_south_02",
+        "swing_south_03",
+        "swing_south_04",
+        "swing_south_05",
+        "swing_south_06",
+        "swing_south_07"
+      ]
+    },
+    {
+      "id": "swing_west",
+      "state": "swing",
+      "direction": "west",
+      "fps": 8,
+      "loop": true,
+      "frameIds": [
+        "swing_west_00",
+        "swing_west_01",
+        "swing_west_02",
+        "swing_west_03",
+        "swing_west_04",
+        "swing_west_05",
+        "swing_west_06",
+        "swing_west_07"
+      ]
+    },
+    {
+      "id": "swing_north",
+      "state": "swing",
+      "direction": "north",
+      "fps": 8,
+      "loop": true,
+      "frameIds": [
+        "swing_north_00",
+        "swing_north_01",
+        "swing_north_02",
+        "swing_north_03",
+        "swing_north_04",
+        "swing_north_05",
+        "swing_north_06",
+        "swing_north_07"
+      ]
+    },
+    {
+      "id": "swing_east",
+      "state": "swing",
+      "direction": "east",
+      "fps": 8,
+      "loop": true,
+      "frameIds": [
+        "swing_east_00",
+        "swing_east_01",
+        "swing_east_02",
+        "swing_east_03",
+        "swing_east_04",
+        "swing_east_05",
+        "swing_east_06",
+        "swing_east_07"
+      ]
+    }
+  ],
+  "qualityPolicy": {
+    "mode": "BLOCKING",
+    "strictChecks": [
+      "pixel-discipline"
+    ],
+    "pixelGridSize": 1,
+    "requireTransparentBackground": true,
+    "minAlphaCoverage": 0.05,
+    "maxAlphaCoverage": 0.92
+  },
+  "metrics": {
+    "sourceHash": "e8ea08cd2e40d7c6e8a2dc1113e4c35a331c37203fc5cac37c42de71fd2f2c2b",
+    "sheetDimensions": {
+      "width": 512,
+      "height": 64
+    },
+    "alphaCoverage": 0.180603,
+    "frameAlphaCoverages": [
+      0.240723,
+      0.249512,
+      0.229736,
+      0.159668,
+      0.155762,
+      0.159668,
+      0.229736,
+      0.249512,
+      0.086914,
+      0.129639,
+      0.174561,
+      0.1875,
+      0.190186,
+      0.1875,
+      0.174561,
+      0.129639,
+      0.239746,
+      0.227783,
+      0.204346,
+      0.174805,
+      0.151123,
+      0.174805,
+      0.204346,
+      0.227783,
+      0.087646,
+      0.143555,
+      0.173584,
+      0.172852,
+      0.172119,
+      0.172852,
+      0.173584,
+      0.143555
+    ],
+    "frameHashes": {
+      "swing_south_00": "7257e9b4ca3cb649c0a071477543ec2ddd056d533e27625da9fb155f906f17fd",
+      "swing_south_01": "142e810ab78a4535cf69798dfcc647c29edcefa97aaad09810fe817af694f9c2",
+      "swing_south_02": "1e097d9c771c57af4b1cd5c8d14961f8b3f67cee291494dd16ab88d3f05159a2",
+      "swing_south_03": "2510a70980455451d719b5665e17fbc670de7ca79aaeae7121b640b8732fc074",
+      "swing_south_04": "11ab0306322872c4226cbc4b5881059ea9385db92f9aed0f155a0a6c5e561878",
+      "swing_south_05": "2510a70980455451d719b5665e17fbc670de7ca79aaeae7121b640b8732fc074",
+      "swing_south_06": "1e097d9c771c57af4b1cd5c8d14961f8b3f67cee291494dd16ab88d3f05159a2",
+      "swing_south_07": "142e810ab78a4535cf69798dfcc647c29edcefa97aaad09810fe817af694f9c2",
+      "swing_west_00": "a8424006632a159eef3e28018194f147289061560ad5d6e218a2784105400421",
+      "swing_west_01": "bd0e7e8ef8a9983913f46315a6221c36d34d21bf3a4c179f67dd4edc0aecb91b",
+      "swing_west_02": "c60e3b83a13d59527e96fa683b96f5f76f8b1645da5bdc10ac083a6d5c3a1164",
+      "swing_west_03": "d8588054418420a04065ca5afc4defbb4285a7ad75dec2a30b5ed4d59f29d4e1",
+      "swing_west_04": "8968a5c1698392d3c4057e043b8d964e31d4408406088527e672ecdc54cb2cb7",
+      "swing_west_05": "d8588054418420a04065ca5afc4defbb4285a7ad75dec2a30b5ed4d59f29d4e1",
+      "swing_west_06": "c60e3b83a13d59527e96fa683b96f5f76f8b1645da5bdc10ac083a6d5c3a1164",
+      "swing_west_07": "bd0e7e8ef8a9983913f46315a6221c36d34d21bf3a4c179f67dd4edc0aecb91b",
+      "swing_north_00": "84fa06403377fd9502293b4dfc0ae539f0e3cbcb215eb70bb5ae5e15ba0fd4aa",
+      "swing_north_01": "cf93a9295d9b6b0b645c02c3b009210db5f16d4dfdaaa950407575ddcfc38e9b",
+      "swing_north_02": "284c7e3e0e98b34f63827650b3eb0ea1745ad746d41f9ecf6e126d5ae7785357",
+      "swing_north_03": "085a754901fc0ebaa580c53e1e3ae7d1fe0f9ade43cba9c722e47574bfe0c7af",
+      "swing_north_04": "0569389480f3b713f392d27c012453624f4e140c3d5c018e27aa40cd577dad3d",
+      "swing_north_05": "085a754901fc0ebaa580c53e1e3ae7d1fe0f9ade43cba9c722e47574bfe0c7af",
+      "swing_north_06": "284c7e3e0e98b34f63827650b3eb0ea1745ad746d41f9ecf6e126d5ae7785357",
+      "swing_north_07": "cf93a9295d9b6b0b645c02c3b009210db5f16d4dfdaaa950407575ddcfc38e9b",
+      "swing_east_00": "2d2974eee492961020bcf504edd7c929f7dba1681d9814459fc3a4c222d6a55c",
+      "swing_east_01": "928c253fc3d52de4c2488d9bbaf10c07770b59b75de87341c2eab09ff01e7c7a",
+      "swing_east_02": "734dc2bd0246221e2151f5bbdd60d5e0b03f9b8cb52c9271a460be74c28d3c83",
+      "swing_east_03": "e7a96b58bd91afe37645b1f10654267391fe5338b58d8b8c5ab720250d337d6c",
+      "swing_east_04": "d80486f0e000758e4d30579a16651256290310e234e9768d77250d03030bb616",
+      "swing_east_05": "e7a96b58bd91afe37645b1f10654267391fe5338b58d8b8c5ab720250d337d6c",
+      "swing_east_06": "734dc2bd0246221e2151f5bbdd60d5e0b03f9b8cb52c9271a460be74c28d3c83",
+      "swing_east_07": "928c253fc3d52de4c2488d9bbaf10c07770b59b75de87341c2eab09ff01e7c7a"
+    },
+    "hasTransparentPixels": true,
+    "emptyFrameIds": [],
+    "borderTouchRatios": [
+      0.02381,
+      0.02381,
+      0.031746,
+      0.035714,
+      0.043651,
+      0.035714,
+      0.031746,
+      0.02381,
+      0.055556,
+      0.055556,
+      0.055556,
+      0.103175,
+      0.111111,
+      0.103175,
+      0.055556,
+      0.055556,
+      0.02381,
+      0.02381,
+      0.02381,
+      0.02381,
+      0.02381,
+      0.02381,
+      0.02381,
+      0.02381,
+      0.055556,
+      0.055556,
+      0.055556,
+      0.119048,
+      0.103175,
+      0.119048,
+      0.055556,
+      0.055556
+    ],
+    "silhouetteCoverages": [
+      0.240723,
+      0.249512,
+      0.229736,
+      0.159668,
+      0.155762,
+      0.159668,
+      0.229736,
+      0.249512,
+      0.086914,
+      0.129639,
+      0.174561,
+      0.1875,
+      0.190186,
+      0.1875,
+      0.174561,
+      0.129639,
+      0.239746,
+      0.227783,
+      0.204346,
+      0.174805,
+      0.151123,
+      0.174805,
+      0.204346,
+      0.227783,
+      0.087646,
+      0.143555,
+      0.173584,
+      0.172852,
+      0.172119,
+      0.172852,
+      0.173584,
+      0.143555
+    ],
+    "measuredCellPx": {
+      "width": 64,
+      "height": 64
+    },
+    "hardAlphaRatio": 1,
+    "uniqueColorCount": 14,
+    "dominantRunLength": 1,
+    "offGridPixelRatio": 0,
+    "distinctFrameRatio": 0.625
+  },
+  "generation": {
+    "glb": "fence-gate.m1.clunk-optimized.glb",
+    "glbSha256": "a7c3c710e2edc5e158d00dbc9a32eaae270486f04e51ee7a50cd0449b0d3eb6c",
+    "triangles": 520,
+    "views": 4,
+    "pitch": 0.62,
+    "clip": {
+      "name": "swing",
+      "fps": 8,
+      "frames": 8,
+      "tracks": [
+        {
+          "node": "gate_pivot",
+          "axis": "y",
+          "degrees": [
+            0,
+            -22,
+            -48,
+            -74,
+            -90,
+            -74,
+            -48,
+            -22
+          ]
+        }
+      ]
+    },
+    "palette": {
+      "requested": 32,
+      "produced": 32,
+      "colours": [
+        "#291f16",
+        "#442f1f",
+        "#3f362a",
+        "#513c29",
+        "#6c4e32",
+        "#735336",
+        "#756855",
+        "#8a6741",
+        "#8f724d",
+        "#97774f",
+        "#97774f",
+        "#97774f",
+        "#97774f",
+        "#97774f",
+        "#a19b8d",
+        "#a19b8d",
+        "#a19b8d",
+        "#a19b8d",
+        "#a19b8d",
+        "#af7f4f",
+        "#af7f4f",
+        "#af7f4f",
+        "#af7f4f",
+        "#af7f4f",
+        "#af7f4f",
+        "#af7f4f",
+        "#af7f4f",
+        "#af7f4f",
+        "#a19b8d",
+        "#a19b8d",
+        "#c39863",
+        "#ddae72"
+      ]
+    },
+    "coverage": [
+      0.2407,
+      0.2495,
+      0.2297,
+      0.1597,
+      0.1558,
+      0.1597,
+      0.2297,
+      0.2495,
+      0.0869,
+      0.1296,
+      0.1746,
+      0.1875,
+      0.1902,
+      0.1875,
+      0.1746,
+      0.1296,
+      0.2397,
+      0.2278,
+      0.2043,
+      0.1748,
+      0.1511,
+      0.1748,
+      0.2043,
+      0.2278,
+      0.0876,
+      0.1436,
+      0.1736,
+      0.1729,
+      0.1721,
+      0.1729,
+      0.1736,
+      0.1436
+    ]
+  }
+}
