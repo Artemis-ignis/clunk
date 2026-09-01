@@ -1556,3 +1556,75 @@
   color: var(--v5-ink-faint);
   white-space: nowrap;
 }
+
+/* Browse by colour. Sits in the control row with the search box and the family tabs;
+   the chips are the shop's own measured colour families, so the row changes when the
+   catalogue does. */
+.colourRow {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.colourLabel {
+  font-size: 0.74rem;
+  color: var(--v5-ink-faint);
+  margin-right: 2px;
+}
+.colourChip {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--v5-line-strong);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+.colourChip:hover,
+.colourChip:focus-visible { transform: scale(1.12); }
+/* The ring is drawn outside the swatch so it reads against any fill, light or dark. */
+.colourChipOn {
+  box-shadow: 0 0 0 2px var(--v5-bg, #06070f), 0 0 0 4px var(--v5-ink);
+}
+.colourClear {
+  border: 0;
+  background: none;
+  padding: 2px 4px;
+  font-size: 0.74rem;
+  color: var(--v5-ink-dim);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* Match-by-colour control and the badge it puts on cards. */
+.colourPick {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+}
+.colourPick input[type="color"] {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--v5-line-strong);
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+/* Chrome draws its own inset swatch; strip it so the control is the colour. */
+.colourPick input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+.colourPick input[type="color"]::-webkit-color-swatch { border: 0; border-radius: 50%; }
+.colourValue {
+  font-family: var(--v5-font-mono, ui-monospace, monospace);
+  font-size: 0.72rem;
+  color: var(--v5-ink-dim);
+}
+.colourBadge {
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: #0b0d18cc;
+  border: 1px solid var(--v5-line-strong);
+  font-size: 0.68rem;
+  color: var(--v5-ink);
+}

@@ -135,6 +135,12 @@ export function MarketplaceCatalog() {
   const [sort, setSort] = useState<CatalogSort>(
     CATALOG_SORTS.has(initial.get("sort") ?? "") ? initial.get("sort") as CatalogSort : "newest",
   );
+  // A hex, or empty for no colour filter. Shareable like the rest: a link to the browns is
+  // a link someone can send.
+  const [colour, setColour] = useState(() => {
+    const value = initial.get("colour") ?? "";
+    return /^#[0-9a-f]{6}$/i.test(value) ? value.toLowerCase() : "";
+  });
 
   // replaceState, not push: a filter is a view of one page, and stacking every keystroke
   // in history turns the back button into an undo log for the search box.
@@ -148,13 +154,14 @@ export function MarketplaceCatalog() {
     apply("cat", filter, "all");
     apply("sort", sort, "newest");
     apply("q", query.trim(), "");
+    apply("colour", colour, "");
     const search = params.toString();
     window.history.replaceState(
       null,
       "",
       search ? `?${search}${window.location.hash}` : `${window.location.pathname}${window.location.hash}`,
     );
-  }, [filter, sort, query]);
+  }, [filter, sort, query, colour]);
 
   useEffect(() => {
     let active = true;
@@ -189,6 +196,11 @@ export function MarketplaceCatalog() {
       const matchesQuery = !normalizedQuery || searchable.includes(normalizedQuery);
       return matchesQuery && (filter === "all" || listingFamily(listing) === filter);
     });
+    // Picking a colour is itself a sort instruction — the asset carrying most of it should
+    // lead — so it overrides whatever the sort select happens to say.
+    if (colour) {
+      return [...matched].sort((a, b) => (carriesColour(b, colour) ?? 0) - (carriesColour(a, colour) ?? 0));
+    }
     // The API already returns newest-first, so "newest" keeps server order.
     if (sort === "newest") return matched;
     return [...matched].sort((a, b) => {
@@ -197,7 +209,7 @@ export function MarketplaceCatalog() {
       if (sort === "price-desc") return b.priceCents - a.priceCents;
       return (a.byteLength ?? 0) - (b.byteLength ?? 0);
     });
-  }, [filter, listings, query, sort]);
+  }, [colour, filter, listings, query, sort]);
 
   return (
     <div className={styles.catalog} data-testid="marketplace-catalog" data-snap-section="catalog-results">
@@ -213,6 +225,7 @@ export function MarketplaceCatalog() {
               <span className="sr-only">에셋 검색</span>
               <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="이름, 형식, 라이선스로 찾기" type="search" />
             </label>
+            <ColourPicker value={colour} onChange={setColour} />
             <div className={styles.tabs} role="tablist" aria-label="에셋 패밀리">
               {CATALOG_FILTERS.map((option) => (
                 <button
@@ -242,7 +255,7 @@ export function MarketplaceCatalog() {
           {filteredListings.length === 0 ? <NoResults /> : null}
           <div className={styles.grid}>
             {filteredListings.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} />
+              <ListingCard key={listing.id} listing={listing} colour={colour} />
             ))}
           </div>
         </>
@@ -274,10 +287,11 @@ function cardSpec(listing: Listing): string | null {
   return null;
 }
 
-function ListingCard({ listing }: { listing: Listing }) {
+function ListingCard({ listing, colour }: { listing: Listing; colour?: string }) {
   const previewUrl = getPreviewUrl(listing);
   const price = formatPrice(listing.priceCents, listing.currency);
   const spec = cardSpec(listing);
+  const colourShare = colour ? carriesColour(listing, colour) : null;
 
   // One card, one link. A grid is for choosing what to open, so the card carries
   // the picture, the name, the number that decides fit, and the price — the buy
@@ -291,6 +305,11 @@ function ListingCard({ listing }: { listing: Listing }) {
           <PreviewUnavailable listing={listing} />
         )}
         <span className={styles.cardBadges} aria-hidden="true">
+          {/* Why this card is where it is. Reordering a grid without saying what reordered
+              it reads as the shop shuffling itself. */}
+          {colourShare !== null ? (
+            <span className={styles.colourBadge}>이 색 {Math.round(colourShare * 100)}%</span>
+          ) : null}
           <span className={styles.formatBadge}>{formatLabel(listing)}</span>
           <span className={`${styles.priceBadge}${listing.priceCents === 0 ? ` ${styles.priceBadgeFree}` : ""}`}>{price}</span>
         </span>
@@ -823,5 +842,69 @@ function ColourMatches({ matches }: { matches: ColourMatch[] }) {
         ))}
       </ul>
     </section>
+  );
+}
+
+/** #rrggbb to 0..1 components. Palette hexes are written by us, so no parsing guard. */
+function hexToRgb(hex: string): [number, number, number] {
+  return [
+    parseInt(hex.slice(1, 3), 16) / 255,
+    parseInt(hex.slice(3, 5), 16) / 255,
+    parseInt(hex.slice(5, 7), 16) / 255,
+  ];
+}
+
+/**
+ * How much of a listing's surface is within reach of this colour, or null if none is.
+ *
+ * Reach rather than equality: two greens a few percent apart are the same colour to anyone
+ * choosing assets for a scene, and demanding an exact hex would return nothing for almost
+ * every pick. The shares of every colour inside the radius are added, so an asset that is
+ * mostly this colour outranks one that only has a trim of it.
+ */
+const COLOUR_REACH = 0.2;
+function carriesColour(listing: Listing, hex: string): number | null {
+  if (!listing.palette?.length) return null;
+  const [r, g, b] = hexToRgb(hex);
+  let share = 0;
+  for (const entry of listing.palette) {
+    const [r2, g2, b2] = hexToRgb(entry.hex);
+    if (Math.hypot(r - r2, g - g2, b - b2) <= COLOUR_REACH) share += entry.share;
+  }
+  return share > 0 ? share : null;
+}
+
+/**
+ * Match the catalogue against a colour you already have.
+ *
+ * The question a game developer actually arrives with is whether a thing will sit next to
+ * what is already in their scene, and no keyword answers it. Because the palettes are
+ * measured, this can: pick the colour, and the grid leads with whatever carries most of it.
+ *
+ * It sorts rather than filters. This catalogue is largely browns and tans, so a filter would
+ * hide two thirds of the shop to answer "is there anything green" — putting the green first
+ * and saying how green it is answers the same question without throwing the rest away.
+ */
+function ColourPicker({ value, onChange }: { value: string; onChange: (hex: string) => void }) {
+  return (
+    <div className={styles.colourRow}>
+      <label className={styles.colourPick}>
+        <span className={styles.colourLabel}>내 게임 색으로 맞추기</span>
+        <input
+          type="color"
+          value={value || "#8a6a44"}
+          onChange={(event) => onChange(event.target.value.toLowerCase())}
+          aria-label="맞출 색 고르기"
+        />
+      </label>
+      {value ? (
+        <>
+          <code className={styles.colourValue}>{value}</code>
+          <button type="button" className={styles.colourClear} onClick={() => onChange("")}>
+            해제
+          </button>
+        </>
+      ) : null}
+    </div>
   );
 }
