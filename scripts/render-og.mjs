@@ -75,7 +75,7 @@ const background = `
 
   <!-- 54px, not 62: the first line is the longest and has to clear the tile column at
        x=738. Measured, not guessed — at 62 it ran under the market stall. -->
-  <text x="72" y="232" font-family="${KO}" font-size="54" font-weight="800" fill="#f2f4ff">게임 제작의 모든 과정을</text>
+  <text x="72" y="232" font-family="${KO}" font-size="54" font-weight="800" fill="#f2f4ff">게임 에셋의 모든 과정을</text>
   <text x="72" y="302" font-family="${KO}" font-size="54" font-weight="800" fill="url(#ink)">Clunk 하나로</text>
 
   <text x="72" y="378" font-family="${KO}" font-size="25" fill="#a8adc4">에셋을 만들고, 게임에 넣어도 되는지 확인하고,</text>
