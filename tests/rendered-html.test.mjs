@@ -107,7 +107,7 @@ test("the docs surface redirects to the published GitBook manual", async () => {
   // was replaced by a real GitBook site, so every former /docs route is now a
   // permanent cross-domain redirect. The pages themselves are contracted from
   // docs/gitbook/*.md, which mirrors the published site byte-for-byte.
-  const base = "https://ai-safety-gate.gitbook.io/clunk";
+  const base = "https://clunk.gitbook.io/docs";
   for (const [pathname, target] of [
     ["/docs", `${base}/`],
     ["/docs/quickstart", `${base}/quickstart`],

@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
  * slugs (our /docs/cli became /clunk/cli-ci), and an unknown segment must not
  * be forwarded blindly into a 404 on someone else's domain.
  */
-const GITBOOK_BASE = "https://ai-safety-gate.gitbook.io/clunk";
+const GITBOOK_BASE = "https://clunk.gitbook.io/docs";
 
 const ROUTE_MAP: Record<string, string> = {
   "": "/",
