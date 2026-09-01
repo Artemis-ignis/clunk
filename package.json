@@ -60,7 +60,9 @@
     "asset:sheet": "node scripts/sprite-sheet-from-glb.mjs",
     "asset:og": "node scripts/render-og.mjs",
     "scene:budget": "node scripts/scene-budget-cli.mjs",
-    "asset:palette": "tsx scripts/palette-cli.ts"
+    "asset:palette": "tsx scripts/palette-cli.ts",
+    "asset:palette:index": "tsx scripts/palette-index-cli.ts",
+    "market:verify": "tsx scripts/market-verify-cli.ts"
   },
   "dependencies": {
     "@gltf-transform/core": "^4.2.1",
