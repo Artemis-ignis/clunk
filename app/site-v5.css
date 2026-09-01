@@ -600,3 +600,54 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
 .cv5-nf-links { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 34px; }
 .cv5-nf-links a { color: var(--v5-ink-dim); font-size: 0.88rem; border-bottom: 1px solid transparent; }
 .cv5-nf-links a:hover { color: var(--v5-ink); border-bottom-color: var(--v5-line-strong); }
+
+/* ---------------------------------------------------------------------------
+   Workspace chrome and label fixes (2026-09-01)
+
+   The dashboard is a cv5 surface, so cv5 redefined --foundry-paper-strong to a
+   translucent value and the foundry rule that paints .workspace-toolbar also
+   cleared its blur. The sticky bar ended up 78% transparent with nothing behind
+   it, so the hero copy read straight through the toolbar while scrolling.
+   Sticky chrome has to be an opaque reading surface.
+--------------------------------------------------------------------------- */
+.cv5.foundry-workspace-page .workspace-toolbar {
+  background: var(--v5-bg0);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* The empty-workspace stamp explains what to do next in a full Korean
+   sentence; nowrap + ellipsis cut it mid-word. Let the sentence wrap. */
+.cv5 .dashboard-welcome-stamp small {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  line-height: 1.5;
+}
+
+/* Each asset-family tile is a fifth of the board, and the label row put the
+   name and its detail side by side in that width — so every label truncated
+   ("Spr…", "ATL…", "GLB / …"). Stack them instead; the column fits both. */
+.cv5 .dashboard-asset-family > span {
+  display: grid;
+  align-items: start;
+  justify-content: stretch;
+  gap: 1px;
+}
+
+.cv5 .dashboard-asset-family strong,
+.cv5 .dashboard-asset-family small {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+.cv5 .dashboard-asset-family strong {
+  font-size: 0.64rem;
+  letter-spacing: -0.01em;
+}
+
+.cv5 .dashboard-asset-family small {
+  font-size: 0.5rem;
+  letter-spacing: -0.01em;
+}
