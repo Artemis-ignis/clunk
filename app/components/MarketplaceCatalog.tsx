@@ -225,6 +225,8 @@ function cardSpec(listing: Listing): string | null {
   if (bundle) return `합계 ${bundle[1]} 삼각형 · 드로우콜 ${bundle[2]}`;
   const perTemplate = d.match(/템플릿당 ([\d,]+~[\d,]+) tris/);
   if (perTemplate) return `템플릿당 ${perTemplate[1]} 삼각형`;
+  const sheet = d.match(/(\d+)×(\d+) RGBA PNG (\d+)컷/u);
+  if (sheet) return `${sheet[1]}×${sheet[2]} · ${sheet[3]}컷`;
   const tileSet = d.match(/심리스 판정은 SEAMLESS (\d+)종 · SOFT-SEAM (\d+)종/);
   if (tileSet) return `1024² · 심리스 ${tileSet[1]}종 · 소프트심 ${tileSet[2]}종`;
   const tile = d.match(/(\d+)x(\d+) 심리스 타일[\s\S]*?판정은 (SEAMLESS|SOFT-SEAM)/);
