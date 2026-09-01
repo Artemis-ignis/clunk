@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getRuntimeDb, ensureSchema } from "../../api/_lib/clunk";
-import { createPageMetadata } from "../../components/site-metadata";
+import { createPageMetadata, SITE_ORIGIN } from "../../components/site-metadata";
 import { SiteShell } from "../../components/SiteShell";
 import { ForceDarkTheme } from "../../components/ForceDarkTheme";
 import { MarketplaceListingDetail } from "../../components/MarketplaceCatalog";
@@ -20,32 +20,113 @@ export const metadata = createPageMetadata({
  * client-rendered "존재하지 않는 listing" card (a soft 404 that search engines
  * and link checkers read as a real page). Verify on the server instead.
  */
-async function isPublishedSlug(slug: string): Promise<boolean> {
-  if (!/^[a-z0-9가-힣][a-z0-9가-힣-]{0,95}$/i.test(slug)) return false;
+/**
+ * The listing as this page needs it server-side: enough to decide the 404 and to emit the
+ * structured data. Storage being unavailable is not proof a listing is missing, so that
+ * case reports found with no row and the client surfaces the real error.
+ */
+async function readListing(slug: string): Promise<{
+  found: boolean;
+  listing: {
+    slug: string;
+    title: string;
+    description: string;
+    priceCents: number;
+    currency: string;
+    assetId: string;
+    previewFileName: string | null;
+  } | null;
+}> {
+  if (!/^[a-z0-9가-힣][a-z0-9가-힣-]{0,95}$/i.test(slug)) return { found: false, listing: null };
   try {
     const db = getRuntimeDb();
     await ensureSchema(db);
     const row = await db
-      .prepare("SELECT 1 AS ok FROM clunk_marketplace_listings WHERE slug = ? AND status = 'PUBLISHED' LIMIT 1")
+      .prepare(
+        `SELECT l.slug, l.title, l.description, l.price_cents AS priceCents, l.currency, l.asset_id AS assetId,
+          (SELECT aa.file_name FROM clunk_asset_artifacts aa
+             WHERE aa.asset_id = l.asset_id AND aa.role = 'preview' LIMIT 1) AS previewFileName
+         FROM clunk_marketplace_listings l
+         WHERE l.slug = ? AND l.status = 'PUBLISHED' LIMIT 1`,
+      )
       .bind(slug)
-      .first<{ ok: number }>();
-    return Boolean(row?.ok);
+      .first<{
+        slug: string;
+        title: string;
+        description: string;
+        priceCents: number;
+        currency: string;
+        assetId: string;
+        previewFileName: string | null;
+      }>();
+    return { found: Boolean(row), listing: row ?? null };
   } catch {
-    // Storage unavailable is not proof the listing is missing; let the client
-    // surface the real error instead of claiming a 404.
-    return true;
+    return { found: true, listing: null };
   }
+}
+
+/**
+ * Product and BreadcrumbList for the listing. Thirty-three products were on sale with no
+ * structured data at all, which keeps every one of them out of the search results that
+ * carry a price. Only fields read from the row are emitted: an absent preview means no
+ * image key rather than a guessed path.
+ */
+function structuredData(listing: NonNullable<Awaited<ReturnType<typeof readListing>>["listing"]>) {
+  const url = `${SITE_ORIGIN}/marketplace/${encodeURIComponent(listing.slug)}`;
+  const image = listing.previewFileName
+    ? `${SITE_ORIGIN}/api/marketplace/assets/${encodeURIComponent(listing.assetId)}`
+      + `?file=${encodeURIComponent(listing.previewFileName)}&preview=1`
+    : null;
+  return [
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: listing.title,
+      sku: listing.slug,
+      description: listing.description,
+      brand: { "@type": "Brand", name: "Clunk" },
+      url,
+      ...(image ? { image: [image] } : {}),
+      offers: {
+        "@type": "Offer",
+        price: (listing.priceCents / 100).toFixed(0),
+        priceCurrency: /^[A-Z]{3}$/u.test(listing.currency) ? listing.currency : "KRW",
+        url,
+        // Sales open when the mail-order filing completes. Until then the listing is
+        // browsable and the offer says so, rather than claiming it can be bought today.
+        availability: "https://schema.org/PreOrder",
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "에셋 마켓", item: `${SITE_ORIGIN}/marketplace` },
+        { "@type": "ListItem", position: 2, name: listing.title, item: url },
+      ],
+    },
+  ];
 }
 
 export default async function MarketplaceListingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  if (!(await isPublishedSlug(slug))) notFound();
+  const { found, listing } = await readListing(slug);
+  if (!found) notFound();
   return (
     <div className="cv5">
       <ForceDarkTheme />
       <div className="cv5-stars" aria-hidden="true" />
       <SiteShell active="marketplace">
         <main className={`${styles.page} ${styles.detailPage}`} data-snap-section="listing-detail" data-listing-slug={slug}>
+          {listing
+            ? structuredData(listing).map((block, index) => (
+                <script
+                  key={index}
+                  type="application/ld+json"
+                  dangerouslySetInnerHTML={{ __html: JSON.stringify(block) }}
+                />
+              ))
+            : null}
           <div className="cv5-frame">
             <noscript>
               <section className={styles.noScriptRecovery} aria-labelledby="listing-not-found-heading">

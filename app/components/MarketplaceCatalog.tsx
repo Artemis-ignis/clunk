@@ -101,6 +101,9 @@ type DetailListing = Listing & {
 };
 type DetailPayload = { ok?: boolean; error?: string; listing?: DetailListing; checkout?: CheckoutState };
 
+/** The sort ids the select offers; anything else in the URL falls back to newest. */
+const CATALOG_SORTS = new Set<string>(["newest", "name", "price-asc", "price-desc", "size-asc"]);
+
 const CATALOG_FILTERS: readonly { id: CatalogFilter; label: string }[] = [
   { id: "all", label: "전체" },
   { id: "2d", label: "2D / Sprite" },
@@ -112,9 +115,38 @@ export function MarketplaceCatalog() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [state, setState] = useState<CatalogState>("loading");
   const [catalogCheckout, setCatalogCheckout] = useState<CheckoutState | null>(null);
-  const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<CatalogFilter>("all");
-  const [sort, setSort] = useState<CatalogSort>("newest");
+  // The chosen category, search and sort live in the URL rather than only in React state.
+  // Three things were impossible while they did not: sending someone a link to "3D / GLB",
+  // returning to the view you were on, and a crawler ever seeing a category page at all —
+  // every filtered view was the same URL as the unfiltered one.
+  const initial = typeof window === "undefined" ? new URLSearchParams() : new URLSearchParams(window.location.search);
+  const [query, setQuery] = useState(initial.get("q") ?? "");
+  const [filter, setFilter] = useState<CatalogFilter>(
+    CATALOG_FILTERS.some((option) => option.id === initial.get("cat")) ? initial.get("cat") as CatalogFilter : "all",
+  );
+  const [sort, setSort] = useState<CatalogSort>(
+    CATALOG_SORTS.has(initial.get("sort") ?? "") ? initial.get("sort") as CatalogSort : "newest",
+  );
+
+  // replaceState, not push: a filter is a view of one page, and stacking every keystroke
+  // in history turns the back button into an undo log for the search box.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const apply = (key: string, value: string, fallback: string) => {
+      if (value === fallback) params.delete(key);
+      else params.set(key, value);
+    };
+    apply("cat", filter, "all");
+    apply("sort", sort, "newest");
+    apply("q", query.trim(), "");
+    const search = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      search ? `?${search}${window.location.hash}` : `${window.location.pathname}${window.location.hash}`,
+    );
+  }, [filter, sort, query]);
 
   useEffect(() => {
     let active = true;

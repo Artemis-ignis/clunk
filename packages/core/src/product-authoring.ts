@@ -336,4 +336,20 @@ function concatBytes(parts: readonly Uint8Array[]): Uint8Array { const result = 
 function align4(value: number): number { return (value + 3) & ~3; }
 function clampInt(value: number, min: number, max: number): number { return Number.isFinite(value) ? Math.max(min, Math.min(max, Math.round(value))) : min; }
 function cleanLabel(value: string): string { const label = value.trim(); if (!label) throw new Error("A label is required."); if (label.length > 80) throw new Error("Label is too long."); return label; }
-function safeName(value: string): string { return value.toLowerCase().replace(/[^a-z0-9-_]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 48) || "clunk-asset"; }
+/**
+ * A file name a Korean user recognises as the thing they just made.
+ *
+ * Stripping to [a-z0-9] erased every Hangul label completely: "농부 캐릭터" became "-" and
+ * the file shipped as "-.png". Hangul syllables are kept — every path that serves these
+ * runs the name through encodeURIComponent already — and only the characters a file
+ * system or a header would actually choke on are replaced.
+ */
+function safeName(value: string): string {
+  const cleaned = value
+    .toLowerCase()
+    .replace(/[^a-z0-9ㄱ-ㆎ가-힣-_]+/gu, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48);
+  return cleaned || "clunk-asset";
+}
