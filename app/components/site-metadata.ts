@@ -21,17 +21,24 @@ export function createPageMetadata({
   title,
   description,
   path,
+  standalone = false,
 }: {
   title: string;
   description: string;
   path: string;
+  /**
+   * Use the title as-is instead of through the layout's "%s | Clunk" template. For the
+   * home page, whose title already ends in the product name — "…을 Clunk 하나로 | Clunk"
+   * reads like a stutter in a tab.
+   */
+  standalone?: boolean;
 }): Metadata {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   const canonical = `${SITE_ORIGIN}${normalizedPath}`;
   const image = `${SITE_ORIGIN}/og.png`;
 
   return {
-    title,
+    title: standalone ? { absolute: title } : title,
     description,
     alternates: { canonical },
     openGraph: {
