@@ -262,17 +262,17 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
                 <label>제목<input value={subject} onChange={(event) => setSubject(event.target.value)} maxLength={240} /></label>
               </div>
               <label>메모<textarea aria-label="협업 메모 입력" value={body} onChange={(event) => setBody(event.target.value)} rows={3} placeholder="예: GLB audit PASS지만 shipped camera에서 작물 반복과 지형 경계가 보입니다." maxLength={10000} /></label>
-              <label>스크린샷/frame manifest <span className="field-hint">선택 · clunk.frame-manifest.v1 JSON · 아래는 schema template</span><textarea aria-label="frame manifest JSON 입력" className="collaboration-evidence-input" value={evidenceDraft} onChange={(event) => setEvidenceDraft(event.target.value)} rows={7} placeholder={FRAME_MANIFEST_SCHEMA_TEMPLATE} maxLength={100000} /></label>
+              <label>화면 캡처 정보 <span className="field-hint">선택 사항 · 도구가 만들어 준 JSON이 있으면 붙여 넣으세요</span><textarea aria-label="화면 캡처 정보 입력" className="collaboration-evidence-input" value={evidenceDraft} onChange={(event) => setEvidenceDraft(event.target.value)} rows={7} placeholder={FRAME_MANIFEST_SCHEMA_TEMPLATE} maxLength={100000} /></label>
               <div className="collaboration-form-grid">
-                <label>inputHash<input value={effectiveInputHash} onChange={(event) => setInputHash(event.target.value.trim().toLowerCase())} placeholder="64자리 sha256" /></label>
-                <label>custom profile<input value={effectiveProfileId} onChange={(event) => setProfileId(event.target.value)} /></label>
-                <label>base profile<input value={baseProfileId} onChange={(event) => setBaseProfileId(event.target.value)} /></label>
-                <label>rule set<input value={effectiveRuleSetId} onChange={(event) => setRuleSetId(event.target.value)} /></label>
+                <label>검사한 파일 코드<input value={effectiveInputHash} onChange={(event) => setInputHash(event.target.value.trim().toLowerCase())} placeholder="64자리 코드" /></label>
+                <label>적용한 기준<input value={effectiveProfileId} onChange={(event) => setProfileId(event.target.value)} /></label>
+                <label>기준 원본<input value={baseProfileId} onChange={(event) => setBaseProfileId(event.target.value)} /></label>
+                <label>규칙 묶음<input value={effectiveRuleSetId} onChange={(event) => setRuleSetId(event.target.value)} /></label>
               </div>
               <div className="collaboration-form-grid collaboration-form-grid-selects">
-                <label>Clunk 감사<select value={assetAudit} onChange={(event) => setAssetAudit(event.target.value as typeof assetAudit)}><option value="PASS">PASS · static policy</option><option value="FAIL">FAIL</option><option value="BLOCKED">BLOCKED</option></select></label>
-                <label>시각·런타임 검토<select value={visualRuntime} onChange={(event) => setVisualRuntime(event.target.value as typeof visualRuntime)}><option value="GAP">GAP · 후속 작업 필요</option><option value="NOT_RUN">NOT_RUN</option><option value="UNAVAILABLE">UNAVAILABLE · 엔진/런너 없음</option><option value="PASS">PASS</option><option value="BLOCKED">BLOCKED</option></select></label>
-                <label>evidence write mode<select value={evidenceMode} onChange={(event) => setEvidenceMode(event.target.value as typeof evidenceMode)}><option value="replace">replace · full snapshot</option><option value="append">append · keep existing IDs</option></select></label>
+                <label>파일 검사 결과<select value={assetAudit} onChange={(event) => setAssetAudit(event.target.value as typeof assetAudit)}><option value="PASS">통과</option><option value="FAIL">실패</option><option value="BLOCKED">차단</option></select></label>
+                <label>화면에서 확인<select value={visualRuntime} onChange={(event) => setVisualRuntime(event.target.value as typeof visualRuntime)}><option value="GAP">아직 증거가 없음</option><option value="NOT_RUN">실행하지 않음</option><option value="UNAVAILABLE">확인할 엔진이 없음</option><option value="PASS">문제 없음</option><option value="BLOCKED">이대로는 못 씀</option></select></label>
+                <label>기록 방식<select value={evidenceMode} onChange={(event) => setEvidenceMode(event.target.value as typeof evidenceMode)}><option value="replace">전체 새로 쓰기</option><option value="append">기존에 덧붙이기</option></select></label>
               </div>
               <div className="collaboration-form-foot">
                 <span>현재 상태: <strong className={`collab-readiness collab-readiness-${slug(collaborationStatus({ assetAudit, visualRuntime, profileId: effectiveProfileId, baseProfileId, ruleSetId: effectiveRuleSetId, inputHash: effectiveInputHash }).readiness)}`}>{collaborationLabel(collaborationStatus({ assetAudit, visualRuntime, profileId: effectiveProfileId, baseProfileId, ruleSetId: effectiveRuleSetId, inputHash: effectiveInputHash }))}</strong></span>
@@ -307,7 +307,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
       ) : null}
 
       {error ? <p className="collaboration-error" role="alert"><Icon name="triangleAlert" size={15} />{error}</p> : null}
-      <p className="collaboration-contract-note"><code>POST /api/collaboration/threads</code> · <code>GET/POST /api/collaboration/threads/:threadId/evidence</code> · <code>evidence: clunk.frame-manifest.v1</code> · <code>comparison: clunk.frame-comparison.v1</code> · gap closeout은 개별 상태 · 인증된 workspace 범위 · inputHash 고정 · assetAudit와 visualRuntime/playerFacing 분리 · readinessReason으로 conditional 원인을 기계 판독 · HTTP MCP는 <code>/api/mcp</code> + workspace Bearer key로 evidence를 받을 수 있습니다.</p>
+      <p className="collaboration-contract-note">메모와 화면 캡처는 이 작업실 안에만 저장됩니다.</p>
     </section>
   );
 }
@@ -348,8 +348,28 @@ function freshnessLabel(freshness: "CURRENT" | "STALE" | "UNKNOWN"): string {
   if (freshness === "STALE") return "STALE EVIDENCE · NOT CURRENT APPROVAL";
   return "FRESHNESS UNKNOWN · NOT CURRENT APPROVAL";
 }
+/**
+ * This used to concatenate three constants — "CONDITIONAL · SCENE_GAP ·
+ * PROFILE_NOT_VERIFIED" — and print them at the reviewer. A person reading
+ * their own thread needs to know what is done and what is left.
+ */
+const READINESS_SENTENCE: Record<string, string> = {
+  ready: "확인 끝났습니다",
+  conditional: "조건부 — 남은 확인이 있습니다",
+  blocked: "차단 — 이대로는 쓸 수 없습니다",
+};
+
+const READINESS_REASON_SENTENCE: Record<string, string> = {
+  PLAYER_FACING_SCENE_GAP: "게임 화면 증거가 아직 없습니다",
+  ENGINE_ENVIRONMENT_UNAVAILABLE: "확인할 엔진 환경이 없습니다",
+  PROFILE_NOT_VERIFIED: "사용한 기준이 확인되지 않았습니다",
+  SCENE_GAP: "장면에서 확인할 것이 남았습니다",
+};
+
 function collaborationLabel(status: CollaborationStatus): string {
-  return `${collaborationReadinessLevel(status).toUpperCase()} · ${status.readiness} · ${status.readinessReason}`;
+  const level = READINESS_SENTENCE[status.readiness] ?? status.readiness;
+  const reason = READINESS_REASON_SENTENCE[status.readinessReason];
+  return reason ? `${level} · ${reason}` : level;
 }
 
 const FRAME_MANIFEST_SCHEMA_TEMPLATE = `// SCHEMA TEMPLATE · NOT STORED HF EVIDENCE · replace every <...>
