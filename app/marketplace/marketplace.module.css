@@ -1635,3 +1635,10 @@
   font-size: 0.68rem;
   color: var(--v5-ink);
 }
+
+/* The struck price beside "베타 무료": the number people will pay later, shown now so the
+   beta reads as a gift with a stated value rather than a product with no price. */
+.priceStruck { opacity: 0.55; font-weight: 500; margin-right: 6px; }
+
+/* A file row before the visitor holds the entitlement: the same slot the link uses, muted. */
+.fileLocked { font-size: 0.78rem; color: var(--v5-ink-faint); white-space: nowrap; }

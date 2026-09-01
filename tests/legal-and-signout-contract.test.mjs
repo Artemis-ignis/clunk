@@ -36,21 +36,28 @@ function sessionCookie(response) {
 
 const LEGAL_ROUTES = ["/terms", "/privacy", "/refunds"];
 
-test("법적 문서 3종이 200으로 렌더되고 시행 전 초안임을 배지로 밝힌다", async () => {
+test("법적 문서 3종이 200으로 렌더되고 시행 중임을 배지로 밝힌다", async () => {
   for (const pathname of LEGAL_ROUTES) {
     const response = await render(pathname);
     assert.equal(response.status, 200, pathname);
     assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i, pathname);
     const html = await response.text();
 
-    assert.ok(html.includes("초안 · 시행 전"), `${pathname} 상태 배지가 없습니다`);
+    // 2026-09-02: 무료 베타 개시와 함께 세 문서는 시행 중이다. 효력을 통신판매업 신고에
+    // 묶어 두면 이미 로그인해 쓰는 사람에게 "당신 데이터를 규율하는 방침이 아직 없다"고
+    // 말하는 셈이 된다 — 신고는 유상 판매의 조건이지, 계정을 덮는 방침의 조건이 아니다.
+    assert.ok(html.includes("시행 중 · 무료 베타"), `${pathname} 상태 배지가 없습니다`);
+    assert.ok(html.includes("이 문서는 2026-09-02부터 시행 중입니다"), `${pathname} 시행 고지문이 없습니다`);
     assert.ok(
-      html.includes("통신판매업 신고가 완료되기 전까지 유상 판매를 개시하지 않으며"),
-      `${pathname} 판매 미개시 고지문이 없습니다`,
+      html.includes("유상 판매에 관한 조항은 유료 전환을 미리 공지한 뒤부터 적용됩니다"),
+      `${pathname} 유상 조항 유예 고지가 없습니다`,
     );
+    assert.ok(html.includes("시행일 2026-09-02"), `${pathname} 시행일이 없습니다`);
+    assert.ok(html.includes("최종 수정일 2026-09-02"), `${pathname} 최종 수정일이 없습니다`);
     assert.ok(html.includes("초안 작성일 2026-08-31"), `${pathname} 초안 작성일이 없습니다`);
-    assert.ok(html.includes("최종 수정일 2026-08-31"), `${pathname} 최종 수정일이 없습니다`);
-    assert.ok(html.includes("시행일 미정"), `${pathname} 시행일 상태가 없습니다`);
+    for (const stale of ["초안 · 시행 전", "시행일 미정", "이 문서도 시행 전 초안입니다"]) {
+      assert.ok(!html.includes(stale), `${pathname}에 옛 문구가 남아 있습니다: ${stale}`);
+    }
   }
 });
 
@@ -66,11 +73,14 @@ test("사업자 표시사항은 등록증 실값과 정확히 일치하고, 미�
     ]) {
       assert.ok(html.includes(realValue), `${pathname}에 등록증 실값 ${realValue} 이 없습니다`);
     }
-    // 통신판매업 신고 전에는 신고번호를 지어내지 않고, 판매 미개시를 함께 고지한다.
+    // 통신판매업 신고 전에는 신고번호를 지어내지 않는다. 무료 베타에는 해당 사항이 없다고
+    // 말하고, 유료 판매를 시작할 때 신고 후 채운다.
     assert.ok(
-      html.includes("[통신판매업 신고번호 — 신고 준비 중 · 완료 전까지 유상 판매 미개시]"),
+      html.includes("[유료 판매를 시작할 때 신고 후 기재 — 무료 베타 중에는 해당 없음]"),
       `${pathname}에 통신판매업 미신고 플레이스홀더가 없습니다`,
     );
+    // 호스팅은 확정 사실이라 플레이스홀더가 아니다(방침이 이미 D1·R2를 명시한다).
+    assert.ok(html.includes("Cloudflare, Inc. (미국)"), `${pathname}에 호스팅 제공자 실값이 없습니다`);
     // 등록번호 형태의 숫자는 등록증의 실번호 하나만 존재해야 한다(지어낸 번호 금지).
     const registrationLike = html.match(/\b\d{3}-\d{2}-\d{5}\b/g) ?? [];
     assert.ok(registrationLike.length > 0, `${pathname}에 사업자등록번호가 없습니다`);
@@ -236,6 +246,10 @@ test("결제 미개시 안내는 결제 provider 미설정 상태에서만 렌�
   assert.match(footer, /billingConfigured \? null :/);
 
   // 기본 테스트 환경에는 결제 설정이 없으므로 CONFIG_REQUIRED = 안내 문장 노출.
+  // 2026-09-02: 문장은 "신고 절차 진행 중"이 아니라 무료 베타를 말한다 — 절차 대기는
+  // 고장으로 읽히고, 베타는 계획으로 읽힌다.
   const html = await (await render("/pricing")).text();
-  assert.ok(html.includes("아직 유료 결제를 받지 않습니다"), "결제 미설정 상태에서 안내가 사라졌습니다");
+  assert.ok(html.includes("지금은 무료 베타 기간입니다. 모든 기능을 결제 없이 쓸 수 있습니다."), "결제 미설정 상태에서 베타 안내가 없습니다");
+  assert.ok(!html.includes("아직 유료 결제를 받지 않습니다"), "옛 결제 미개시 문구가 남아 있습니다");
+  assert.ok(!html.includes("통신판매업 신고 절차 진행 중"), "옛 신고 절차 문구가 남아 있습니다");
 });

@@ -71,6 +71,39 @@ export async function POST(request: Request) {
     if (listing.sellerUserId === user.id) {
       throw new ClunkHttpError("자신이 판매 중인 listing은 구매할 수 없습니다.", 409);
     }
+
+    // Free beta: nothing is sold, so a signed-in request for any listing is granted, not
+    // charged. This sits before the withdrawal-consent check on purpose — 청약철회 consent
+    // is a condition of a paid digital sale, and there is no sale. The order row records
+    // the grant at ₩0 under its own provider so a later paid order for the same asset is
+    // never mistaken for it, and so the entitlement has the order it is required to have.
+    if (!areSalesOpen()) {
+      const orderId = scopedStorageId("order", workspaceId, `${user.id}:${listing.id}:beta`);
+      const reference = `beta:${user.id}:${listing.id}`;
+      const entitlementId = scopedStorageId("entitlement", user.id, orderId);
+      await db.batch([
+        db.prepare(
+          `INSERT OR IGNORE INTO clunk_marketplace_orders
+           (id, listing_id, buyer_user_id, status, payment_provider, payment_reference, checkout_url, amount_cents, currency)
+           VALUES (?, ?, ?, 'BETA_GRANTED', 'beta', ?, NULL, 0, ?)`,
+        ).bind(orderId, listing.id, user.id, reference, listing.currency),
+        db.prepare(
+          `INSERT OR IGNORE INTO clunk_marketplace_entitlements
+           (id, order_id, listing_id, asset_id, buyer_user_id, status, provider_reference)
+           VALUES (?, ?, ?, ?, ?, 'ACTIVE', ?)`,
+        ).bind(entitlementId, orderId, listing.id, listing.assetId, user.id, reference),
+      ]);
+      return privateJson({
+        ok: true,
+        schema: "clunk.marketplace-checkout.v1",
+        status: "BETA_GRANTED",
+        provider: "beta",
+        listingId: listing.id,
+        assetId: listing.assetId,
+        entitlementId,
+        downloadUrl: `/api/marketplace/assets/${listing.assetId}`,
+      });
+    }
     // 전자상거래법 제17조 2항 5호: 제공이 개시된 디지털 콘텐츠의 청약철회 제한은
     // 결제 전 고지·동의가 있어야 성립한다. 동의 없는 요청에는 주문도 세션도 만들지
     // 않는다 — 주문 기록 자체가 동의 시점의 기록을 겸하게 하기 위해서다.

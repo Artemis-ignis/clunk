@@ -255,7 +255,7 @@ export function MarketplaceCatalog() {
           {filteredListings.length === 0 ? <NoResults /> : null}
           <div className={styles.grid}>
             {filteredListings.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} colour={colour} />
+              <ListingCard key={listing.id} listing={listing} colour={colour} beta={catalogCheckout?.status === "PAYMENT_PROVIDER_NOT_CONFIGURED"} />
             ))}
           </div>
         </>
@@ -287,7 +287,7 @@ function cardSpec(listing: Listing): string | null {
   return null;
 }
 
-function ListingCard({ listing, colour }: { listing: Listing; colour?: string }) {
+function ListingCard({ listing, colour, beta }: { listing: Listing; colour?: string; beta?: boolean }) {
   const previewUrl = getPreviewUrl(listing);
   const price = formatPrice(listing.priceCents, listing.currency);
   const spec = cardSpec(listing);
@@ -311,7 +311,7 @@ function ListingCard({ listing, colour }: { listing: Listing; colour?: string })
             <span className={styles.colourBadge}>이 색 {Math.round(colourShare * 100)}%</span>
           ) : null}
           <span className={styles.formatBadge}>{formatLabel(listing)}</span>
-          <span className={`${styles.priceBadge}${listing.priceCents === 0 ? ` ${styles.priceBadgeFree}` : ""}`}>{price}</span>
+          <span className={`${styles.priceBadge}${listing.priceCents === 0 || beta ? ` ${styles.priceBadgeFree}` : ""}`}>{beta && listing.priceCents > 0 ? <><s className={styles.priceStruck}>{price}</s> 베타 무료</> : price}</span>
         </span>
       </span>
       <span className={styles.cardBody}>
@@ -375,14 +375,23 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
     };
   }, [slug]);
 
-  async function startCheckout(paymentMethod: "credits" | "card") {
+  async function startCheckout(paymentMethod: "credits" | "card" | "beta") {
     if (!listing || buying) return;
-    if (listing.priceCents > 0 && !withdrawalConsent) {
+    // Withdrawal-limit consent is a condition of a paid digital sale. The beta grant is not a
+    // sale, and its panel does not show the checkbox — so this guard, left as it was, made
+    // the beta button return silently on every click.
+    if (paymentMethod !== "beta" && listing.priceCents > 0 && !withdrawalConsent) {
       setMessage("결제를 시작하려면 청약철회 제한 동의가 필요합니다.");
       return;
     }
     setBuying(true);
-    setMessage(paymentMethod === "credits" ? "크레딧 결제를 처리하는 중입니다…" : "구매 연결 상태를 확인하는 중입니다…");
+    setMessage(
+      paymentMethod === "beta"
+        ? "받는 중입니다…"
+        : paymentMethod === "credits"
+          ? "크레딧 결제를 처리하는 중입니다…"
+          : "구매 연결 상태를 확인하는 중입니다…",
+    );
     try {
       const response = await fetch("/api/marketplace/checkout", {
         method: "POST",
@@ -393,7 +402,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
         body: JSON.stringify({
           listingId: listing.id,
           withdrawalConsent,
-          ...(paymentMethod === "credits" ? { paymentMethod: "credits" } : {}),
+          ...(paymentMethod === "card" ? {} : { paymentMethod }),
         }),
       });
       const payload = await response.json() as CheckoutResponse;
@@ -402,10 +411,12 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
         window.location.assign(`/login?return_to=${encodeURIComponent(window.location.pathname)}`);
         return;
       }
-      if (payload.status === "PAID_WITH_CREDITS" || payload.status === "ALREADY_OWNED" || payload.status === "ALREADY_PAID") {
+      if (payload.status === "PAID_WITH_CREDITS" || payload.status === "ALREADY_OWNED" || payload.status === "ALREADY_PAID" || payload.status === "BETA_GRANTED") {
         setOwned(true);
         setMessage(
-          payload.status === "PAID_WITH_CREDITS"
+          payload.status === "BETA_GRANTED"
+              ? "받았습니다 — 베타 기간이라 결제 없이 드립니다. 아래에서 파일을 받으세요."
+              : payload.status === "PAID_WITH_CREDITS"
             ? `구매 완료 — ${payload.creditsCharged?.toLocaleString("ko-KR") ?? "?"} 크레딧 차감, 잔액 ${payload.balance?.toLocaleString("ko-KR") ?? "?"} 크레딧. 아래에서 파일을 받으세요.`
             : "이미 보유한 상품입니다. 아래에서 파일을 받으세요.",
         );
@@ -437,6 +448,9 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
 
   const previewUrl = getPreviewUrl({ assetId: listing.artifact.assetId, previewFileName: listing.artifact.previewFileName });
   const paymentUnavailable = listing.priceCents > 0 && checkout?.status === "PAYMENT_PROVIDER_NOT_CONFIGURED";
+  // Until sales open, the payment-provider gap is the beta: nothing is sold and every
+  // signed-in visitor is granted the file.
+  const beta = checkout?.status === "PAYMENT_PROVIDER_NOT_CONFIGURED";
   const downloadHref = `/api/marketplace/assets/${encodeURIComponent(listing.assetId)}?file=${encodeURIComponent(listing.entryFileName)}`;
   const creditPrice = listingCreditPrice(listing.priceCents, listing.currency);
 
@@ -500,13 +514,13 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
               straight into their own material rather than eyedropping a screenshot. */}
           {measured?.palette.length ? <PaletteStrip palette={measured.palette} /> : null}
           {matches.length ? <ColourMatches matches={matches} /> : null}
-          <div className={styles.priceRow}><strong>{formatPrice(listing.priceCents, listing.currency)}</strong><small>{listing.sellerName ?? "Clunk creator"} · {formatBytes(listing.byteLength)} · {listing.entryFileName}</small></div>
+          <div className={styles.priceRow}><strong>{beta && listing.priceCents > 0 ? <><s className={styles.priceStruck}>{formatPrice(listing.priceCents, listing.currency)}</s> 베타 무료</> : formatPrice(listing.priceCents, listing.currency)}</strong><small>{listing.sellerName ?? "Clunk creator"} · {formatBytes(listing.byteLength)} · {listing.entryFileName}</small></div>
           {listing.priceCents > 0 && paymentUnavailable ? (
             <p className={styles.payState} data-payment-state={checkout?.status ?? "UNKNOWN"} role="status">
               무료 베타 기간입니다. 로그인하면 이 에셋을 결제 없이 받을 수 있고, 표시된 가격은 유료 전환 후의 값입니다.
             </p>
           ) : null}
-          {listing.priceCents > 0 ? (
+          {listing.priceCents > 0 && !beta ? (
             <label className={styles.consent}>
               <input
                 type="checkbox"
@@ -524,7 +538,13 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
             {listing.priceCents === 0 ? (
               <a className={`${styles.btn} ${styles.btnPrimary}`} href={downloadHref} download={listing.entryFileName}>무료 파일 받기 <Icon name="download" size={15} /></a>
             ) : owned ? (
-              <a className={`${styles.btn} ${styles.btnPrimary}`} href={downloadHref} download={listing.entryFileName}>구매한 파일 받기 <Icon name="download" size={15} /></a>
+              <a className={`${styles.btn} ${styles.btnPrimary}`} href={downloadHref} download={listing.entryFileName}>{beta ? "받은 파일 내려받기" : "구매한 파일 받기"} <Icon name="download" size={15} /></a>
+            ) : beta ? (
+              // The beta has one action. Consent to a withdrawal limit is a condition of a
+              // paid sale, and a card button that can never work is a broken button.
+              <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => void startCheckout("beta")} disabled={buying}>
+                {buying ? "받는 중…" : "베타 기간 무료로 받기"} <Icon name="download" size={15} />
+              </button>
             ) : (
               <>
                 <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => void startCheckout("credits")} disabled={buying || !withdrawalConsent || creditPrice === null}>
@@ -603,8 +623,10 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
       </section>
 
       <section className={styles.detailSection} aria-labelledby="detail-package-heading">
-        <div className={styles.sectionHead}><span className="cv5-eyebrow">받는 파일</span><h2 id="detail-package-heading">결제하면<br /><em>이 파일들을 받습니다</em></h2></div>
-        <div className={styles.files}>{listing.artifacts.map((artifact) => <article className={styles.fileRow} key={artifact.fileName}><div><Icon name={artifact.contentType === "image/png" ? "image" : artifact.contentType.includes("gltf") ? "box" : "fileJson"} size={17} /><strong>{artifact.fileName}</strong></div><span>{artifact.role} · {formatBytes(artifact.byteLength)}</span><code>{artifact.sha256.slice(0, 16)}…</code><a href={`/api/marketplace/assets/${encodeURIComponent(listing.assetId)}?file=${encodeURIComponent(artifact.fileName)}`} download={artifact.fileName}>다운로드</a></article>)}</div>
+        <div className={styles.sectionHead}><span className="cv5-eyebrow">받는 파일</span><h2 id="detail-package-heading">{beta ? "받으면" : "결제하면"}<br /><em>이 파일들이 열립니다</em></h2></div>
+        {/* A download link that answers 401 in JSON is not a link, it is a trap. Until the
+            visitor holds the entitlement the row says what will open it instead. */}
+        <div className={styles.files}>{listing.artifacts.map((artifact) => <article className={styles.fileRow} key={artifact.fileName}><div><Icon name={artifact.contentType === "image/png" ? "image" : artifact.contentType.includes("gltf") ? "box" : "fileJson"} size={17} /><strong>{artifact.fileName}</strong></div><span>{artifact.role} · {formatBytes(artifact.byteLength)}</span><code>{artifact.sha256.slice(0, 16)}…</code>{owned || listing.priceCents === 0 ? <a href={`/api/marketplace/assets/${encodeURIComponent(listing.assetId)}?file=${encodeURIComponent(artifact.fileName)}`} download={artifact.fileName}>다운로드</a> : <span className={styles.fileLocked}>{beta ? "받기 버튼을 누르면 열립니다" : "결제 후 열립니다"}</span>}</article>)}</div>
       </section>
     </>
   );
