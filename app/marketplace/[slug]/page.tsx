@@ -60,17 +60,18 @@ export default async function MarketplaceListingPage({ params }: { params: Promi
           <section className={styles.detailBuyerGuide} data-snap-section="detail-use" aria-labelledby="detail-buyer-heading">
             <div className="cv5-frame">
               <div className={styles.buyerGrid}>
+                {/* This paragraph used to explain our API envelope, the word
+                    "entitlement", and an error constant to a person who came here
+                    to buy a 3D model. Nobody outside this repo speaks that way. */}
                 <div className={styles.sectionHead}>
-                  <span className="cv5-eyebrow">구매 후</span>
                   <h2 id="detail-buyer-heading">
-                    파일은 구매하고,
+                    에셋은 한 번 사고,
                     <br />
-                    <em>Clunk는 크레딧으로 사용합니다</em>
+                    <em>Clunk 기능은 크레딧으로</em>
                   </h2>
                   <p>
-                    상품의 가격·라이선스·파일 상태는 위 API 결과를 기준으로 표시됩니다. 결제와
-                    entitlement가 확인된 뒤에만 유료 artifact를 받을 수 있으며, 결제 미설정
-                    상태는 PAYMENT_PROVIDER_NOT_CONFIGURED로 숨기지 않고 안내합니다.
+                    산 파일은 계정에 남아 언제든 다시 받을 수 있습니다. 검사·최적화 같은
+                    Clunk 기능은 쓴 만큼 크레딧으로 계산합니다.
                   </p>
                 </div>
                 <div className={styles.detailBuyerActions}>

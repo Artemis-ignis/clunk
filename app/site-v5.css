@@ -749,3 +749,71 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
   .cv5-line-wide { display: none; }
   .cv5-line-narrow { display: block; }
 }
+
+/* -------------------------------------------------- live market showcase
+   The landing reads the shop instead of carrying a hand-typed copy of it, so
+   these are real controls over real listings: the tabs filter the grid and each
+   count is the number of listings actually behind it. */
+.cv5-showcase-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: clamp(20px, 3vw, 30px); }
+.cv5-showcase-tab {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 15px; border: 1px solid var(--v5-line); border-radius: var(--v5-r-pill);
+  background: transparent; color: var(--v5-ink-faint); font: inherit; font-size: 0.83rem;
+  cursor: pointer; transition: color .18s, border-color .18s, background-color .18s;
+}
+.cv5-showcase-tab:hover { color: var(--v5-ink); border-color: rgba(139, 92, 246, 0.45); }
+.cv5-showcase-tab.is-on { background: var(--v5-grad-soft); border-color: rgba(139, 92, 246, 0.45); color: var(--v5-ink); font-weight: 600; }
+.cv5-showcase-tab i {
+  font-style: normal; font-family: var(--v5-label); font-size: 0.62rem;
+  font-variant-numeric: tabular-nums; color: var(--v5-ink-faint);
+}
+.cv5-showcase-tab.is-on i { color: var(--v5-cyan); }
+
+.cv5-showcase-live .cv5-showcase-grid { margin-top: clamp(16px, 2.4vw, 22px); }
+.cv5-showcase-card.is-loading { aspect-ratio: 1; border: 1px solid var(--v5-line); border-radius: var(--v5-r); background: #171a2c; }
+.cv5-showcase-noart { display: block; aspect-ratio: 1; background: radial-gradient(circle at 50% 34%, rgba(124, 93, 250, 0.18), transparent 60%), #14172a; }
+.cv5-showcase-meta { flex-wrap: wrap; }
+.cv5-showcase-meta i {
+  font-style: normal; font-family: var(--v5-label); font-size: 0.68rem; font-weight: 700;
+  color: #fff; margin-left: auto; white-space: nowrap;
+}
+.cv5-showcase-fallback { margin-top: 24px; color: var(--v5-ink-faint); }
+.cv5-showcase-fallback a { color: var(--v5-cyan); }
+
+/* Inside the section-01 panel the same component runs at a smaller scale. */
+.cv5-market .cv5-showcase-tabs { margin-top: 0; gap: 6px; }
+.cv5-market .cv5-showcase-tab { padding: 5px 10px; font-size: 0.7rem; }
+.cv5-market .cv5-showcase-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.cv5-market .cv5-showcase-meta { padding: 16px 8px 7px; }
+.cv5-market .cv5-showcase-meta b { font-size: 0.68rem; }
+.cv5-market .cv5-showcase-meta span, .cv5-market .cv5-showcase-meta i { font-size: 0.54rem; }
+
+/* The inspect panel holds a live canvas now, not a poster. */
+.cv5-inspect-preview > div { width: 100%; height: 100%; min-height: 240px; }
+.cv5-inspect-preview canvas { display: block; width: 100%; height: 100%; }
+
+@media (max-width: 980px) {
+  .cv5-market .cv5-showcase-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .cv5-showcase-tabs { gap: 6px; }
+  .cv5-showcase-tab { padding: 7px 12px; font-size: 0.78rem; }
+  .cv5-market .cv5-showcase-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* 01 — one asset Clunk made, live, with the numbers its inspector read. */
+.cv5-make { display: grid; gap: 12px; }
+.cv5-make-stage {
+  position: relative; border: 1px solid var(--v5-line); border-radius: 12px;
+  overflow: hidden; background: #14172a; min-height: 260px;
+}
+.cv5-make-stage > div { width: 100%; height: 100%; min-height: 260px; }
+.cv5-make-stage canvas { display: block; width: 100%; height: 100%; }
+.cv5-make-facts { display: grid; grid-template-columns: 1.6fr repeat(3, 1fr); gap: 8px; }
+.cv5-make-facts div {
+  border: 1px solid var(--v5-line); border-radius: 10px; padding: 9px 11px;
+  display: grid; gap: 2px; align-content: center;
+}
+.cv5-make-facts b { color: var(--v5-ink); font-size: 0.86rem; font-variant-numeric: tabular-nums; }
+.cv5-make-facts span { font-family: var(--v5-label); font-size: 0.56rem; letter-spacing: 0.07em; color: var(--v5-ink-faint); }
+@media (max-width: 640px) { .cv5-make-facts { grid-template-columns: 1fr 1fr; } }

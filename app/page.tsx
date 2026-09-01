@@ -7,7 +7,9 @@ import { LandingMcpDemo } from "./components/LandingMcpDemo";
 import { AgentLiveDemo } from "./components/AgentLiveDemo";
 import { SiteFooter } from "./components/SiteFooter";
 import { createPageMetadata } from "./components/site-metadata";
-import { MCP_HTTP_TOOL_COUNT, RULE_COUNT } from "./components/product-facts";
+import { RULE_COUNT } from "./components/product-facts";
+import { LandingMarketShowcase } from "./components/LandingMarketShowcase";
+import { EmbeddedGlbViewer } from "./components/review/EmbeddedGlbViewer";
 
 export const metadata = createPageMetadata({
   title: "게임 에셋 파운드리",
@@ -153,21 +155,22 @@ export default function Home() {
             <div className="cv5-sec-visual cv5-reveal" data-delay="1">
               <div className="cv5-mock">
                 <div className="cv5-mock-bar"><span>CLUNK <b>MARKET</b></span><span>1차 19종</span></div>
-                <div className="cv5-mock-body cv5-market">
-                  <div className="cv5-market-side">
-                    <span className="on">추천</span>
-                    <span>구조물</span>
-                    <span>수목</span>
-                    <span>소품</span>
-                    <span>2D · VFX</span>
+                {/* This section is about MAKING an asset, so it shows one Clunk
+                    authored, turning, with the numbers its own inspector read off
+                    the file. A grid of things to buy belongs in the market section
+                    below and was showing the same widget twice on one page. */}
+                <div className="cv5-mock-body cv5-make">
+                  <div className="cv5-make-stage">
+                    <EmbeddedGlbViewer
+                      src="/market/cozy-market-stall/market-stall.m1.clunk-optimized.glb"
+                      alt="Clunk가 만든 코지 마켓 스톨 — 드래그해서 돌려보세요"
+                    />
                   </div>
-                  <div className="cv5-market-grid">
-                    {MARKET_CELLS.map((asset) => (
-                      <figure className="cv5-market-card" key={asset.slug} style={{ margin: 0 }}>
-                        <ShowcaseImg slug={asset.slug} name={asset.name} />
-                        <figcaption>{asset.name}<b>{asset.tris} TRIS</b></figcaption>
-                      </figure>
-                    ))}
+                  <div className="cv5-make-facts">
+                    <div><b>코지 마켓 스톨</b><span>Clunk Three.js 팩토리로 제작</span></div>
+                    <div><b>2,456</b><span>삼각형</span></div>
+                    <div><b>31</b><span>드로우콜</span></div>
+                    <div><b>210 KB</b><span>GLB</span></div>
                   </div>
                 </div>
               </div>
@@ -198,20 +201,30 @@ export default function Home() {
               <div className="cv5-mock">
                 <div className="cv5-mock-bar"><span>에셋 <b>검사</b></span><span>tractor.glb</span></div>
                 <div className="cv5-mock-body cv5-inspect">
+                  {/* A picture of a 3D asset proves nothing about a 3D asset.
+                      This is the tractor's own GLB, loaded and turning, so the
+                      section about inspecting files shows a real file. */}
                   <div className="cv5-inspect-preview">
-                    <img src="/landing/tractor-hero.png" alt="저폴리 트랙터 3D 에셋 렌더" width={900} height={610} loading="lazy" />
-                    <small>실제 게임에 들어간 에셋</small>
+                    <EmbeddedGlbViewer
+                      src="/landing/tractor.compact.m1.glb"
+                      poster="/landing/tractor-hero.png"
+                      alt="Harvest Frontier에 들어간 저폴리 트랙터 — 드래그해서 돌려보세요"
+                    />
+                    <small>드래그해서 돌려보세요 · Harvest Frontier에 들어간 파일</small>
                   </div>
                   <div className="cv5-inspect-panel">
                     <div className="cv5-score">
                       <span className="cv5-score-ring"><i>100</i></span>
                       <div><span>게임 적합도</span><b>바로 넣어도 됩니다</b></div>
                     </div>
+                    {/* Two rows used to say the same thing, and neither said what
+                        "예산" was. It is the ceiling the chosen target profile sets
+                        — so the row names the target instead of the jargon. */}
                     <div className="cv5-find">
-                      <div><b>삼각형</b><span>39,320 / 예산 40,000 · 98% 사용</span></div>
-                      <div><b>드로우콜</b><span>98</span></div>
-                      <div><b>용량 · 파일 코드</b><span>840,136 B · f64e63b2…</span></div>
-                      <div data-tone="warn"><b>삼각형 예산</b><span>98% 사용 — 여유 680개</span></div>
+                      <div><b>삼각형</b><span>39,320개</span></div>
+                      <div><b>드로우콜</b><span>98회</span></div>
+                      <div><b>용량</b><span>840 KB</span></div>
+                      <div data-tone="warn"><b>웹 게임 기준</b><span>상한 40,000개 중 39,320개 — 680개 남음</span></div>
                     </div>
                     <div className="cv5-ops">
                       <span><b>✓</b>빈 노드 정리</span>
@@ -263,19 +276,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* STATS — measured only ---------------------------------------- */}
-        <section className="cv5-stats" data-snap-section="proof" aria-label="Clunk 요약">
-          <div className="cv5-frame">
-            
-            <div className="cv5-stats-grid">
-              <div className="cv5-stat"><b>{RULE_COUNT}</b><span>검사 항목</span></div>
-              <div className="cv5-stat"><b>{MCP_HTTP_TOOL_COUNT}</b><span>에이전트 연동 기능</span></div>
-              <div className="cv5-stat"><b>19</b><span>바로 받는 에셋</span></div>
-              <div className="cv5-stat"><b>5종</b><span>2D·3D 지원 포맷</span></div>
-            </div>
-          </div>
-        </section>
-
         {/* SHOWCASE ------------------------------------------------------ */}
         <section className="cv5-showcase" id="showcase" data-snap-section="showcase" aria-labelledby="showcase-heading">
           <div className="cv5-frame">
@@ -288,16 +288,7 @@ export default function Home() {
                 농장·마을 배경에 바로 쓰는 저폴리 모델입니다. 삼각형 수를 보고 고르세요.
               </p>
             </div>
-            <ul className="cv5-showcase-grid" aria-label="마켓 1차 에셋 12종 미리보기">
-              {SHOWCASE.map((asset, index) => (
-                <li className="cv5-showcase-card cv5-reveal" data-delay={String(index % 4)} key={asset.slug}>
-                  <Link href="/marketplace" prefetch={false} aria-label={`${asset.name} — 마켓에서 보기`}>
-                    <ShowcaseImg slug={asset.slug} name={asset.name} />
-                    <span className="cv5-showcase-meta"><b>{asset.name}</b><span>{asset.tris} TRIS</span></span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <LandingMarketShowcase />
             <div className="cv5-showcase-foot cv5-reveal">
               <Link className="cv5-more" href="/marketplace" prefetch={false}>
                 마켓에서 전체 인벤토리 보기 <Icon name="arrowRight" size={15} />
