@@ -40,7 +40,9 @@ test("Asset Studio exposes the complete 2D/3D authoring-to-runtime boundary", as
   assert.match(model, /spine-project/);
   assert.match(model, /animation-clip/);
   assert.match(model, /ENVIRONMENT_UNAVAILABLE/);
-  assert.match(client, /Asset Studio/);
+  // 2026-09-01: the page title is 에셋 만들기 now — the Korean reference sites
+  // label the action rather than naming an English product surface.
+  assert.match(client, /에셋 만들기/);
   assert.match(model, /2D Sprite/);
   assert.match(model, /Spine Rig/);
   assert.match(model, /3D Model/);
@@ -51,7 +53,11 @@ test("Asset Studio exposes the complete 2D/3D authoring-to-runtime boundary", as
   assert.match(client, /내 Workspace|자신의 프로젝트|Workspace에 저장/);
   assert.doesNotMatch(client, /판매 Draft 저장|마켓 상품 초안 만들기/);
   assert.doesNotMatch(client, /CONTRACT FIXTURE|clunk-sprite-sample|tractor-hero/);
-  for (const marker of ["PIXEL CONTRACT", "RUNTIME", "HUMAN REVIEW", "READINESS", "DECLARED_METADATA_ONLY"]) assert.match(client, new RegExp(marker));
+  // 2026-09-01: the four sprite lanes and the metadata-only caveat are still
+  // all there, in the Korean a user can read instead of the raw constants.
+  for (const marker of ["시트 규격", "엔진 화면", "사람 검토", "종합", "그림 자체의 검사는 아직"]) {
+    assert.match(client, new RegExp(marker));
+  }
   assert.match(shell, /\/studio/);
   assert.match(docs, /Asset Studio/);
   assert.match(llms, /\/studio/);

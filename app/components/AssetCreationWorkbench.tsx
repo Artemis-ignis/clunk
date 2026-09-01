@@ -66,6 +66,17 @@ const ASSET_OPTIONS: readonly { id: AssetKind; label: string; target: string; hi
 
 const REVIEW_OPTIONS: readonly ReviewStatus[] = ["NOT_EVALUATED", "PASS", "GAP", "NO_GO", "UNAVAILABLE"];
 
+/** The select used to render the raw enum. A person picking a review outcome
+ *  should read a sentence, not a constant. */
+const REVIEW_OPTION_LABELS: Record<ReviewStatus, string> = {
+  NOT_EVALUATED: "아직 확인 안 함",
+  PASS: "문제 없음",
+  GAP: "확인할 증거가 없음",
+  NO_GO: "이대로는 못 씀",
+  UNAVAILABLE: "확인할 환경이 없음",
+  PENDING: "확인 중",
+};
+
 type AssetCreationWorkbenchProps = {
   assetKind?: AssetKind;
   onAssetKindChange?: (assetKind: AssetKind) => void;
@@ -254,7 +265,7 @@ export function AssetCreationWorkbench({
     <section className="creation-workbench" data-testid="asset-creation-workbench" aria-labelledby="creation-workbench-heading">
       <div className="creation-workbench-header">
         <div>
-          <span className="mono-label">LIVE NATIVE SERIES · clunk-series-native-v1 · /api/series</span>
+          <span className="mono-label">작업 종류</span>
           <h3 id="creation-workbench-heading">실제 에셋을 만들고, 결과를 닫습니다.</h3>
           <p>{selectedSeries.label}가 선택한 종류에 맞는 별도 bytes를 만들고, 같은 target profile로 fresh inspection을 실행합니다. 마켓 상품을 만드는 것이 아니라, 내 작업공간에서 Clunk 기능을 크레딧으로 쓰는 것입니다.</p>
         </div>
@@ -295,24 +306,24 @@ export function AssetCreationWorkbench({
             </small>
           </label>
           <label className="creation-field"><span>제작 프롬프트</span><textarea value={prompt} onChange={(event) => setPrompt(event.target.value)} rows={4} maxLength={2_000} /></label>
-          <div className="creation-form-foot"><span>target · <code>{selectedOption.target}</code>{selectedProjectId ? ` · project ${selectedProjectId.slice(0, 12)}…` : ""} · 저장 성공 시 1 credit</span><button type="submit" className="button button-primary button-sm" disabled={phase === "generating"}>{phase === "generating" ? "생성·검사 중…" : "내 Workspace에서 생성"}<Icon name="arrowRight" size={14} /></button></div>
+          <div className="creation-form-foot"><span>target · <code>{selectedOption.target}</code>{selectedProjectId ? ` · project ${selectedProjectId.slice(0, 12)}…` : ""} · 저장에 성공하면 크레딧 1개</span><button type="submit" className="button button-primary button-sm" disabled={phase === "generating"}>{phase === "generating" ? "만드는 중…" : "에셋 만들기"}<Icon name="arrowRight" size={14} /></button></div>
           <p className={`creation-message creation-message-${phase}`}>{message}</p>
         </form>
 
         <div className="creation-result-panel">
-          {imageArtifact?.bytesBase64 ? <div className="creation-image-preview"><Image unoptimized src={`data:${imageArtifact.contentType};base64,${imageArtifact.bytesBase64}`} alt={`${label} 실제 생성 PNG`} width={assetKind === "2d-image" ? 256 : 384} height={assetKind === "2d-image" ? 256 : 96} /><span className="creation-image-stamp">REAL RGBA BYTES</span></div> : null}
+          {imageArtifact?.bytesBase64 ? <div className="creation-image-preview"><Image unoptimized src={`data:${imageArtifact.contentType};base64,${imageArtifact.bytesBase64}`} alt={`${label} — 생성된 이미지`} width={assetKind === "2d-image" ? 256 : 384} height={assetKind === "2d-image" ? 256 : 96} /><span className="creation-image-stamp">생성된 이미지</span></div> : null}
           {modelArtifact?.bytesBase64 ? <AssetPreview bytes={decodeBase64(modelArtifact.bytesBase64)} fileName={modelArtifact.fileName} /> : null}
           {!imageArtifact && !modelArtifact ? <div className="creation-result-empty">
             <Icon name="box" size={24} />
             <strong>아직 생성 결과가 없습니다</strong>
             <span>생성 실행이 성공하면 이 자리에 실제 artifact bytes, hash와 저장 상태를 표시합니다.</span>
           </div> : null}
-          {result ? <div className="creation-artifact-list"><div className="creation-artifact-heading"><span>OUTPUT BUNDLE</span><strong>{result.artifacts.length} files · {result.entryFileName}</strong></div>{result.artifacts.map((artifact) => <div className="creation-artifact-row" key={artifact.fileName}><span><Icon name={artifact.contentType === "image/png" ? "download" : artifact.contentType === "model/gltf-binary" ? "box" : "fileJson"} size={14} />{artifact.fileName}</span><small>{formatBytes(artifact.byteLength)} · {artifact.sha256.slice(0, 12)}…</small>{result.storageStatus === "STORED" ? <a className="text-link" href={`/api/assets/${encodeURIComponent(result.assetId)}?file=${encodeURIComponent(artifact.fileName)}&download=1`} download={artifact.fileName}>받기 <Icon name="download" size={12} /></a> : <small>R2 unavailable</small>}</div>)}<div className="creation-artifact-links"><Link className="text-link" href={`/assets/${encodeURIComponent(result.assetId)}`}>Asset detail <Icon name="arrowUpRight" size={13} /></Link><Link className="text-link" href="/kits">Kit에 담기 <Icon name="boxes" size={13} /></Link></div></div> : null}
+          {result ? <div className="creation-artifact-list"><div className="creation-artifact-heading"><span>생성된 파일</span><strong>{result.artifacts.length}개 · {result.entryFileName}</strong></div>{result.artifacts.map((artifact) => <div className="creation-artifact-row" key={artifact.fileName}><span><Icon name={artifact.contentType === "image/png" ? "download" : artifact.contentType === "model/gltf-binary" ? "box" : "fileJson"} size={14} />{artifact.fileName}</span><small>{formatBytes(artifact.byteLength)} · {artifact.sha256.slice(0, 12)}…</small>{result.storageStatus === "STORED" ? <a className="text-link" href={`/api/assets/${encodeURIComponent(result.assetId)}?file=${encodeURIComponent(artifact.fileName)}&download=1`} download={artifact.fileName}>받기 <Icon name="download" size={12} /></a> : <small>저장 확인 중이라 아직 받을 수 없습니다</small>}</div>)}<div className="creation-artifact-links"><Link className="text-link" href={`/assets/${encodeURIComponent(result.assetId)}`}>자세히 보기 <Icon name="arrowUpRight" size={13} /></Link><Link className="text-link" href="/kits">모음집에 담기 <Icon name="boxes" size={13} /></Link></div></div> : null}
         </div>
       </div>
 
       {!result && remixSourceAssetId ? <section className="creation-remix-card creation-remix-card-standalone" aria-labelledby="creation-source-remix-heading">
-        <div className="creation-card-heading"><div><span className="mono-label">REFINE · EXISTING WORKSPACE ASSET</span><h4 id="creation-source-remix-heading">기존 에셋에서 새 버전 만들기</h4></div><Icon name="reset" size={18} /></div>
+        <div className="creation-card-heading"><div><span className="mono-label">기존 에셋 다듬기</span><h4 id="creation-source-remix-heading">기존 에셋에서 새 버전 만들기</h4></div><Icon name="reset" size={18} /></div>
         <p>Workspace에서 선택한 원본을 보존한 채 현재 Clunk Series와 프롬프트로 새 artifact를 만듭니다.</p>
         <div className="creation-source-reference"><span>SOURCE ASSET</span><code>{remixSourceAssetId}</code><Link className="text-link" href={`/assets/${encodeURIComponent(remixSourceAssetId)}`}>원본 보기 <Icon name="arrowUpRight" size={12} /></Link></div>
         <label className="creation-field"><span>변경 프롬프트</span><textarea value={remixPrompt} onChange={(event) => setRemixPrompt(event.target.value)} rows={3} maxLength={2_000} /></label>
@@ -322,26 +333,26 @@ export function AssetCreationWorkbench({
 
       {result ? <>
         <div className="creation-evidence-lanes" aria-label="생성 결과 evidence 상태">
-          <EvidenceLane label="STATIC / BYTE" value={staticStatus} detail="hash · parser · policy" tone={statusTone(staticStatus)} />
-          <EvidenceLane label="VISUAL RUNTIME" value={runtimeStatus} detail="renderer capture 별도" tone={statusTone(runtimeStatus)} />
-          <EvidenceLane label="PLAYER-FACING" value="NOT_EVALUATED" detail="실제 게임 화면 필요" tone="pending" />
-          <EvidenceLane label="HUMAN REVIEW" value="NOT_EVALUATED" detail="사람 결정 필요" tone="pending" />
+          <EvidenceLane label="파일 검사" value={staticStatus} detail="파일 내용과 규칙 확인" tone={statusTone(staticStatus)} />
+          <EvidenceLane label="엔진 화면" value={runtimeStatus} detail="엔진에서 찍은 화면 필요" tone={statusTone(runtimeStatus)} />
+          <EvidenceLane label="게임 화면" value="NOT_EVALUATED" detail="실제 게임 화면 필요" tone="pending" />
+          <EvidenceLane label="사람 검토" value="NOT_EVALUATED" detail="직접 보고 판단" tone="pending" />
         </div>
         <div className="creation-provenance-row"><span><b>PROVENANCE</b> {result.provenance.provider} · prompt {result.provenance.promptHash.slice(0, 12)}…</span><span><b>PRODUCTION READY</b> false</span><span><b>ASSET ID</b> {result.assetId.slice(0, 18)}…</span><span><b>CREDITS</b> {typeof result.credits === "number" ? `잔액 ${result.credits}` : "차감 없음"}</span>{result.projectId ? <span><b>PROJECT</b> {result.projectId.slice(0, 18)}…</span> : null}{result.sourceAssetId ? <span><b>SOURCE ASSET</b> {result.sourceAssetId.slice(0, 18)}…</span> : null}</div>
 
         <div className="creation-actions-grid">
           <section className="creation-remix-card" aria-labelledby="creation-remix-heading">
-            <div className="creation-card-heading"><div><span className="mono-label">REFINE · SOURCE-LINKED REMIX</span><h4 id="creation-remix-heading">원본을 보존하고 새 버전 만들기</h4></div><Icon name="reset" size={18} /></div>
+            <div className="creation-card-heading"><div><span className="mono-label">새 버전 만들기</span><h4 id="creation-remix-heading">원본을 보존하고 새 버전 만들기</h4></div><Icon name="reset" size={18} /></div>
             <p>Remix는 현재 Workspace의 asset id와 hash를 원본으로 기록하고, 새 output asset을 만듭니다. 원본 bytes는 덮어쓰지 않습니다.</p>
             <label className="creation-field"><span>변경 프롬프트</span><textarea value={remixPrompt} onChange={(event) => setRemixPrompt(event.target.value)} rows={3} maxLength={2_000} /></label>
             <div className="creation-remix-actions"><button type="button" className="button button-quiet button-sm" onClick={() => void remix()} disabled={busyAction !== null}>{busyAction === "remix" ? "Remix 작성 중…" : "source-linked Remix"}<Icon name="reset" size={14} /></button><Link className="button button-quiet button-sm" href="/kits">Kit 만들기 <Icon name="boxes" size={14} /></Link></div>
             {remixMessage ? <p className="creation-inline-message" role="status">{remixMessage}</p> : null}
           </section>
           <section className="creation-review-card" aria-labelledby="creation-review-heading">
-            <div className="creation-card-heading"><div><span className="mono-label">REVIEW · /api/reviews</span><h4 id="creation-review-heading">검수 evidence를 직접 기록</h4></div><Icon name="inspect" size={18} /></div>
-            <p>자동 검사 결과와 실제 런타임·사람 결정을 한 점수로 합치지 않습니다. PASS를 선택할 때는 fresh capture hash가 필요합니다.</p>
-            <div className="creation-status-selects">{(["visualRuntime", "playerFacing", "humanDecision"] as const).map((key) => <label key={key}><span>{key === "visualRuntime" ? "VISUAL RUNTIME" : key === "playerFacing" ? "PLAYER-FACING" : "HUMAN DECISION"}</span><select value={reviewStatus[key]} onChange={(event) => setReviewStatus((current) => ({ ...current, [key]: event.target.value as ReviewStatus }))}>{REVIEW_OPTIONS.map((option) => <option value={option} key={option}>{option}</option>)}</select></label>)}</div>
-            <div className="creation-form-two-col"><label className="creation-field"><span>fresh capture SHA-256 · PASS일 때 필수</span><input value={captureSha256} onChange={(event) => setCaptureSha256(event.target.value)} placeholder="64자리 hex" /></label><label className="creation-field"><span>사람의 메모</span><input value={reviewNote} onChange={(event) => setReviewNote(event.target.value)} placeholder="검토 근거를 적으세요" /></label></div>
+            <div className="creation-card-heading"><div><span className="mono-label">검수 기록</span><h4 id="creation-review-heading">직접 확인한 결과를 남기세요</h4></div><Icon name="inspect" size={18} /></div>
+            <p>파일 검사 점수와 직접 눈으로 본 결과는 따로 기록합니다. &ldquo;문제 없음&rdquo;을 고르려면 방금 찍은 화면의 확인 코드가 필요합니다.</p>
+            <div className="creation-status-selects">{(["visualRuntime", "playerFacing", "humanDecision"] as const).map((key) => <label key={key}><span>{key === "visualRuntime" ? "엔진에서 확인" : key === "playerFacing" ? "게임 화면에서 확인" : "최종 판단"}</span><select value={reviewStatus[key]} onChange={(event) => setReviewStatus((current) => ({ ...current, [key]: event.target.value as ReviewStatus }))}>{REVIEW_OPTIONS.map((option) => <option value={option} key={option}>{REVIEW_OPTION_LABELS[option]}</option>)}</select></label>)}</div>
+            <div className="creation-form-two-col"><label className="creation-field"><span>화면 확인 코드 (&ldquo;문제 없음&rdquo; 선택 시 필요)</span><input value={captureSha256} onChange={(event) => setCaptureSha256(event.target.value)} placeholder="64자리 코드를 붙여 넣으세요" /></label><label className="creation-field"><span>검토 메모</span><input value={reviewNote} onChange={(event) => setReviewNote(event.target.value)} placeholder="검토 근거를 적으세요" /></label></div>
             <button type="button" className="button button-quiet button-sm" onClick={() => void saveReview()} disabled={busyAction !== null}>{busyAction === "review" ? "저장 중…" : "검수 기록 저장"}<Icon name="check" size={14} /></button>
             {reviewMessage ? <p className="creation-inline-message" role="status">{reviewMessage}</p> : null}
           </section>
@@ -352,8 +363,19 @@ export function AssetCreationWorkbench({
   );
 }
 
+/** The lane used to print the raw status constant (PASS, GAP, NOT_EVALUATED).
+ *  A person reading their own asset should see words, not an enum. */
+const LANE_VALUE_LABELS: Record<string, string> = {
+  PASS: "통과",
+  GAP: "증거 없음",
+  NO_GO: "사용 불가",
+  NOT_EVALUATED: "확인 전",
+  PENDING: "확인 중",
+  UNAVAILABLE: "확인할 환경 없음",
+};
+
 function EvidenceLane({ label, value, detail, tone }: { label: string; value: string; detail: string; tone: "pass" | "pending" | "fail" }) {
-  return <article className={`creation-evidence-lane creation-evidence-lane-${tone}`}><span>{label}</span><strong>{value}</strong><small>{detail}</small></article>;
+  return <article className={`creation-evidence-lane creation-evidence-lane-${tone}`}><span>{label}</span><strong>{LANE_VALUE_LABELS[value] ?? value}</strong><small>{detail}</small></article>;
 }
 
 function staticInspectionStatus(result: GenerationResult): ReviewStatus {

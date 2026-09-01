@@ -79,7 +79,8 @@ export default function Home() {
                 게임 제작의 모든 과정을<br /><em>CLUNK 하나로</em>
               </h1>
               <p className="cv5-hero-lede">
-                만들고, 검사하고, 바로 씁니다. 크레딧 하나로 전부.
+                만든 에셋이 내 게임에서 돌아갈지, 넣기 전에 알려줍니다.
+                삼각형 수와 드로우콜을 엔진 기준에 맞춰 검사하고, 넘치면 그 자리에서 줄입니다.
               </p>
               <div className="cv5-cta-row">
                 <Link className="cv5-btn cv5-btn-primary" href="/studio" prefetch={false}>
@@ -110,7 +111,7 @@ export default function Home() {
                   ))}
                 </div>
                 <div className="cv5-hv-foot">
-                  <span>납품 트랙터 재검사</span>
+                  <span>트랙터 검사 결과</span>
                   <b>100/100 · 블로커 0</b>
                 </div>
               </div>
@@ -189,8 +190,8 @@ export default function Home() {
                 <div className="cv5-mock-bar"><span>ASSET <b>INSPECTOR</b></span><span>tractor.compact.m1.glb · 2026-09-01 실측 · HF 프로파일</span></div>
                 <div className="cv5-mock-body cv5-inspect">
                   <div className="cv5-inspect-preview">
-                    <img src="/landing/tractor-hero.png" alt="실게임에 납품된 저폴리 트랙터 3D 에셋 렌더" width={900} height={610} loading="lazy" />
-                    <small>HARVEST FRONTIER 납품분</small>
+                    <img src="/landing/tractor-hero.png" alt="저폴리 트랙터 3D 에셋 렌더" width={900} height={610} loading="lazy" />
+                    <small>직접 개발 중인 게임의 에셋</small>
                   </div>
                   <div className="cv5-inspect-panel">
                     <div className="cv5-score">
@@ -223,12 +224,12 @@ export default function Home() {
               <div className="cv5-sec-kicker"><span className="cv5-num">03</span><small>제작 에이전트</small></div>
               <h2 id="sec-agent">게임 제작 에이전트</h2>
               <p>
-                Claude Code, Cursor, Codex에 연결하면 에이전트가 직접 만들고 검사합니다.
+                Claude Code, Cursor, Codex에 연결하면, 에이전트가 대화만으로 에셋을 만들고 검사까지 끝냅니다.
               </p>
               <ul className="cv5-points">
-                <li><b>MCP {MCP_HTTP_TOOL_COUNT}개 기능</b> — 생성·검사·검수를 에이전트가 직접</li>
-                <li><b>CI 연동</b> — 검사에 걸리면 빌드를 멈춥니다</li>
-                <li><b>실전 검증</b> — 개발 중인 게임 두 곳에 납품하며 다듬었습니다</li>
+                <li><b>말로 만듭니다</b> — &ldquo;시장 노점 만들어줘&rdquo; 한 줄이면 GLB가 나옵니다</li>
+                <li><b>문제를 먼저 알려줍니다</b> — 무엇이 걸렸는지 짚어 주고, 고칠지 물어봅니다</li>
+                <li><b>직접 쓰면서 만듭니다</b> — 저희가 개발 중인 게임에 넣어 가며 다듬고 있습니다</li>
               </ul>
               <div>
                 <Link className="cv5-more" href="/connect" prefetch={false}>에이전트 연결 가이드 <Icon name="arrowRight" size={15} /></Link>
@@ -261,7 +262,7 @@ export default function Home() {
               <div className="cv5-stat"><b>{RULE_COUNT}</b><span>파일 하나를 검사하는 항목 수</span></div>
               <div className="cv5-stat"><b>{MCP_HTTP_TOOL_COUNT}</b><span>에이전트가 쓸 수 있는 기능</span></div>
               <div className="cv5-stat"><b>19</b><span>마켓 1차 상품 · 파일 94개</span></div>
-              <div className="cv5-stat"><b>100/100</b><span>실제 게임에 납품된 트랙터 재검사 점수</span></div>
+              <div className="cv5-stat"><b>100/100</b><span>게임에 실제로 들어간 트랙터 검사 점수</span></div>
             </div>
           </div>
         </section>
@@ -275,7 +276,7 @@ export default function Home() {
                 <h2 id="showcase-heading">마켓에 올라와 있는 에셋</h2>
               </div>
               <p>
-                농장 게임에 납품하며 다듬은 저폴리 모델입니다. 삼각형 수는 파일에서 직접 읽었습니다.
+                저희가 개발 중인 농장 게임에 넣어 가며 다듬은 저폴리 모델입니다.
               </p>
             </div>
             <ul className="cv5-showcase-grid" aria-label="Wave 1 실제 에셋 12종">

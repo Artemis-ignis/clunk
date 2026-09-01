@@ -64,7 +64,11 @@ test("Studio authoring uses the native Clunk Series execution rail", async () =>
   assert.match(studio, /Motion Lab/);
   assert.match(client, /AssetCreationWorkbench[\s\S]*seriesId/);
   assert.match(workbench, /\/api\/series/);
-  assert.match(workbench, /clunk-series-native-v1/);
+  // 2026-09-01: the workbench used to print the rule-set id in a label on
+  // screen. Users never needed to read it; the rail identity is contracted
+  // where it is actually declared and served.
+  const seriesRoute = await source("app/api/series/route.ts");
+  assert.match(seriesRoute, /clunk-series-native-v1/);
   assert.doesNotMatch(workbench, /fal\.ai|api\.fal\.ai|replicate\.com/i);
 });
 

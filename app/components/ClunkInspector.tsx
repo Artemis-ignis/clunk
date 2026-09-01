@@ -160,7 +160,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
     setNotice(
       saved.idempotent
         ? "이미 저장된 검사라 크레딧 차감 없이 기존 기록에 연결했습니다."
-        : "워크스페이스에 검사를 저장했습니다. 데모 크레딧 1개를 사용했습니다.",
+        : "워크스페이스에 검사를 저장했습니다. 크레딧 1개를 사용했습니다.",
     );
   }
 
@@ -297,7 +297,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
         }) });
         const body = await response.json().catch(() => ({})) as { error?: string };
         if (!response.ok) throw new Error(body.error ?? "최적화 저장에 실패했습니다.");
-        setNotice("최적화를 저장했습니다. 데모 크레딧 1개를 사용했고 Passport가 준비되었습니다.");
+        setNotice("최적화를 저장했습니다. 크레딧 1개를 사용했습니다. 검사 증명서를 받을 수 있습니다.");
       }
     } catch (caught) { setError(caught instanceof Error ? caught.message : "최적화에 실패했습니다."); }
     finally { setBusy("idle"); }
@@ -391,7 +391,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
                 </>
               ) : (
                 <>
-                  파일당 데모 크레딧 <strong>1개</strong>가 <strong>성공한 검사에만</strong>{" "}
+                  파일당 크레딧 <strong>1개</strong>를 <strong>성공한 검사에만</strong>{" "}
                   차감됩니다. 시작 버튼을 누르기 전에는 아무것도 차감되지 않습니다.
                 </>
               )}

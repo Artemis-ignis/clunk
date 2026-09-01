@@ -710,3 +710,22 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
 .cv5 {
   --v5-ink-faint: rgba(233, 236, 248, 0.58);
 }
+
+/* The agent step rows are icon + tool name + a Korean note. Laying them out as
+   a single flex line let the note wrap under the checkmark and pushed the
+   fourth step out of the panel (2026-09-01). Give the note its own column and
+   let it wrap inside that column. */
+.cv5-steps span {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: 7px;
+  row-gap: 2px;
+  line-height: 1.55;
+  letter-spacing: 0;
+  word-break: keep-all;
+}
+
+.cv5-agent-live .cv5-chat {
+  min-height: 340px;
+}

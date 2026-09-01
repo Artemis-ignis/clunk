@@ -77,9 +77,16 @@ test("the public product surfaces expose creation, library, review, and marketpl
   await access(new URL("public/samples/product-sprite/clunk-sprite-sample.png", root));
   assert.equal(hosting.r2, "ASSETS");
   assert.match(nav, /marketplace/);
-  assert.match(studio, new RegExp("api/generation"));
-  assert.match(studio, new RegExp("api/reviews"));
-  assert.match(studio, /생성|prompt/i);
+  // 2026-09-01: the studio page used to print its own API paths on screen.
+  // Users never needed to read those, so the wiring is contracted where it
+  // actually lives — in the component that calls them.
+  const facts = await source("app/components/product-facts.ts");
+  const workbench = await source("app/components/AssetCreationWorkbench.tsx");
+  assert.match(facts, new RegExp("api/generation"));
+  assert.match(workbench, new RegExp("api/reviews"));
+  // 2026-09-01: the surface says 만들기 now — the reference sites label the
+  // action, not the pipeline stage. The contract follows the word the user reads.
+  assert.match(studio, /만들기|생성|prompt/i);
   assert.match(landing, /실제 제작|마켓|판매/);
   assert.match(marketplace, /검수|라이선스|다운로드/);
 });

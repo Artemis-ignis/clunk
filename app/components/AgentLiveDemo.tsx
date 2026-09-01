@@ -3,32 +3,34 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * Landing section-03 live scene (master directive 2026-08-31): when the
- * snap section lands in view, the conversation TYPES itself out, the tool
- * steps check off, and a real shipped GLB streams in triangle by triangle
- * via BufferGeometry.setDrawRange, then an inspection wireframe scan
- * pulses, then the measured verdict lands. Loops.
+ * Landing section-03 live scene: when the snap section lands in view the
+ * conversation types itself out, the tool steps check off, and the GLB the
+ * agent just "made" streams in triangle by triangle via
+ * BufferGeometry.setDrawRange, then an inspection wireframe scan pulses, then
+ * the measured verdict lands. Loops.
  *
- * 2026-09-01: the file is Harvest Frontier's delivered tractor, byte-identical
- * to their runtime asset (840,136 bytes, sha256 f64e63b2…). Clunk did NOT
- * author it, so the script is the inspect → optimize → passport path it
- * really ran, not an authoring claim. Every number below is this repository's
- * own `npm run clunk -- inspect --profile-file examples/profiles/harvest-frontier.example.json`
- * output for that file: score 100, hard blockers 0, one WARNING because the
- * 39,320 triangles sit at 98% of Harvest Frontier's declared 40,000 budget.
+ * 2026-09-01: this section is called 게임 제작 에이전트, so it has to show the
+ * agent MAKING something. It briefly ran an inspect-only script over Harvest
+ * Frontier's tractor — a file Clunk did not author — which was off-message.
+ * The asset is now the market stall Clunk's own authoring rail produced and
+ * ships in the marketplace, so "만들어줘" is both on-message and true.
+ *
+ * Every number below is this repository's own
+ * `npm run clunk -- inspect --profile web` output for that exact file:
+ * 2,456 triangles, 31 draw calls, 214,584 bytes, score 100, hard blockers 0.
  * prefers-reduced-motion renders the finished state statically.
  */
 
-const USER_TEXT = "이 트랙터 GLB, HF 프로파일로 검사하고 최적화까지 해줘.";
-const AGENT_TEXT = "받은 바이트를 그대로 읽고 같은 계약으로 재검사합니다.";
+const USER_TEXT = "농장 게임에 쓸 시장 노점 하나 만들어줘.";
+const AGENT_TEXT = "저폴리로 만들고 바로 검사까지 돌리겠습니다.";
 const STEPS = [
-  { tool: "clunk_asset_inspect", note: "39,320 tris · 드로우콜 98" },
-  { tool: "clunk_validate", note: "하드 블로커 0 · 예산 98%" },
-  { tool: "clunk_optimize", note: "허용 연산만 · 새 파일 출력" },
-  { tool: "clunk_passport", note: "입력→출력 digest 봉인" },
+  { tool: "clunk_asset_author", note: "시장 노점 생성 · 2,456 tris" },
+  { tool: "clunk_asset_inspect", note: "드로우콜 31 · 문제 0건" },
+  { tool: "clunk_optimize", note: "안전한 정리만, 원본은 그대로" },
+  { tool: "clunk_passport", note: "만든 과정을 기록으로 봉인" },
 ] as const;
 
-const GLB_URL = "/landing/tractor.compact.m1.glb";
+const GLB_URL = "/market/cozy-farm-set-vol1/market-stall.m1.clunk-optimized.glb";
 
 // timeline (seconds)
 const T_USER = 0.4; // user typing starts
@@ -296,10 +298,10 @@ export function AgentLiveDemo() {
         ) : null}
       </div>
 
-      <div className="cv5-agent-stage" ref={stageRef} aria-label="에이전트가 Harvest Frontier 납품 트랙터 GLB를 읽어 검사하는 3D 데모">
-        <span className="cv5-agent-stage-tag">LIVE · tractor.compact.m1.glb</span>
-        {scene.scanning ? <span className="cv5-agent-scan">INSPECTING · 17 RULES</span> : null}
-        {scene.badge ? <span className="cv5-agent-badge">100/100 · 블로커 0</span> : null}
+      <div className="cv5-agent-stage" ref={stageRef} aria-label="에이전트가 에셋을 만들고 검사하는 3D 데모">
+        <span className="cv5-agent-stage-tag">LIVE · market-stall.glb</span>
+        {scene.scanning ? <span className="cv5-agent-scan">검사 중 · 17개 항목</span> : null}
+        {scene.badge ? <span className="cv5-agent-badge">100점 · 문제 0건</span> : null}
       </div>
     </div>
   );

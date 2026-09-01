@@ -72,7 +72,7 @@ export default function MarketplacePage() {
                     <Image src="/landing/tractor-hero.png" alt="" width={720} height={520} priority />
                   </div>
                   <div className={styles.heroPanelFoot}>
-                    <span>실게임 납품 GLB 재검사</span>
+                    <span>트랙터 검사 결과</span>
                     <b>100/100 · 블로커 0</b>
                   </div>
                 </div>

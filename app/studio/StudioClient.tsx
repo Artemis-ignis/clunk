@@ -93,7 +93,7 @@ export function StudioClient({ userLabel, initialSourceAssetId }: { userLabel: s
   }
 
   async function reviewSpriteSheet() {
-    setSpriteReview({ phase: "loading", message: "DECLARED_METADATA_ONLY 계약을 확인하는 중입니다…" });
+    setSpriteReview({ phase: "loading", message: "스프라이트 규격을 확인하는 중입니다…" });
     try {
       const response = await fetch("/api/sprite-review", {
         method: "POST",
@@ -102,18 +102,18 @@ export function StudioClient({ userLabel, initialSourceAssetId }: { userLabel: s
       });
       const payload = await response.json() as { ok?: boolean; report?: SpriteReviewState["report"]; verificationMode?: string; error?: string };
       if (!response.ok || !payload.ok || !payload.report) throw new Error(payload.error ?? (response.status === 401 ? "인증이 필요합니다. 로그인된 Workspace에서 다시 시도하세요." : "sprite review를 실행하지 못했습니다."));
-      setSpriteReview({ phase: "success", message: `${payload.verificationMode ?? "DECLARED_METADATA_ONLY"} · 선언 계약 응답을 받았습니다. 실제 PNG 재해시는 local CLI에서 수행하세요.`, report: payload.report });
+      setSpriteReview({ phase: "success", message: "규격 확인이 끝났습니다. 그림 자체의 검사는 아직 진행되지 않았습니다.", report: payload.report });
     } catch (error) {
       setSpriteReview({ phase: "error", message: error instanceof Error ? error.message : "sprite review를 실행하지 못했습니다." });
     }
   }
 
   return (
-    <WorkspaceShell active="studio" title="Asset Studio" userLabel={userLabel}>
+    <WorkspaceShell active="studio" title="에셋 만들기" userLabel={userLabel}>
       <div className="studio-page">
         <header className="studio-command-hero">
           <div className="studio-command-hero-copy">
-            <span className="mono-label">CREATE SPACE · 2D + 3D · PROMPT → ARTIFACT</span>
+            <span className="mono-label">2D·3D 에셋 만들기</span>
             <h2>내 Workspace에서 무엇을 쓸까요?</h2>
             <p>포맷을 고르고 프롬프트를 입력하면 Clunk 기능이 크레딧 1개를 사용해 실제 artifact를 만듭니다. 결과의 hash·구조·런타임·사람 검토 상태는 각각 따로 확인합니다.</p>
             <div className="studio-command-hero-proof" aria-label="Studio가 기록하는 결과">
@@ -134,7 +134,7 @@ export function StudioClient({ userLabel, initialSourceAssetId }: { userLabel: s
         <section className="studio-series-rail" aria-labelledby="studio-series-heading">
           <div className="studio-series-rail-head">
             <div>
-              <span className="mono-label">CLUNK SERIES · NATIVE WORKSPACES</span>
+              <span className="mono-label">작업 종류 고르기</span>
               <h3 id="studio-series-heading">Clunk의 작업면을 고르세요.</h3>
             </div>
             <p>깃허브에서 감사한 자료는 출발점이고, 실행은 Clunk 내부 authoring·inspection 계약으로 닫습니다.</p>
@@ -160,15 +160,15 @@ export function StudioClient({ userLabel, initialSourceAssetId }: { userLabel: s
         <section className="studio-live-authoring" aria-labelledby="studio-live-authoring-heading">
           <div className="studio-live-authoring-head">
             <div>
-              <span className="mono-label">LIVE WORKSPACE FLOW · CREATE → INSPECT → REVIEW · 1 CREDIT</span>
+              <span className="mono-label">만들기 → 검사 → 검토 · 크레딧 1개</span>
               <h3 id="studio-live-authoring-heading">프롬프트에서 실제 artifact까지</h3>
             </div>
-            <span className="studio-live-authoring-api">/api/series · /api/generation compatibility · /api/reviews · /api/marketplace</span>
+            
           </div>
           <AssetCreationWorkbench assetKind={assetKind} onAssetKindChange={selectAssetKind} seriesId={seriesId} onSeriesIdChange={selectSeries} initialSourceAssetId={initialSourceAssetId} />
         </section>
 
-        <section className="studio-workflow" aria-label="Asset Studio workflow">
+        <section className="studio-workflow" aria-label="제작 순서">
           {STUDIO_WORKFLOW_STEPS.map((step, index) => (
             <div className="studio-workflow-step" key={step.index}>
               <span>{step.index}</span>
@@ -182,7 +182,7 @@ export function StudioClient({ userLabel, initialSourceAssetId }: { userLabel: s
         <section className="studio-section" aria-labelledby="studio-assets-heading">
           <div className="studio-section-head">
             <div>
-              <span className="mono-label">01 · CHOOSE AN ASSET FAMILY</span>
+              <span className="mono-label">1단계 · 만들 종류 고르기</span>
               <h3 id="studio-assets-heading">2D와 3D를 같은 작업면에서</h3>
             </div>
             <span className="studio-section-count">{STUDIO_ASSET_CARDS.length} asset kinds</span>
@@ -229,7 +229,7 @@ export function StudioClient({ userLabel, initialSourceAssetId }: { userLabel: s
         <section className="studio-section studio-engine-section" aria-labelledby="studio-engine-heading">
           <div className="studio-section-head">
             <div>
-              <span className="mono-label">02 · GAME READY TARGET</span>
+              <span className="mono-label">2단계 · 사용할 엔진 고르기</span>
               <h3 id="studio-engine-heading">Game Ready는 실행 증거로</h3>
             </div>
             <span className={`studio-status ${selectedEngine.runtimeStatus === "AVAILABLE" ? "studio-status-available" : "studio-status-unavailable"}`}><span />{STATUS_LABELS[selectedEngine.runtimeStatus]}</span>
@@ -246,7 +246,7 @@ export function StudioClient({ userLabel, initialSourceAssetId }: { userLabel: s
               >
                 <Icon name={item.id === "web-three" ? "radar" : item.id === "mobile" ? "activity" : "plug"} size={18} />
                 <strong>{item.label}</strong>
-                <small>{item.runtimeStatus === "AVAILABLE" ? "contract + capture" : "ENVIRONMENT_UNAVAILABLE"}</small>
+                <small>{item.runtimeStatus === "AVAILABLE" ? "연결 가능" : "지금은 연결할 수 없습니다"}</small>
               </button>
             ))}
           </div>
@@ -260,44 +260,44 @@ export function StudioClient({ userLabel, initialSourceAssetId }: { userLabel: s
               <div><dt>Metadata</dt><dd>provenance · license · hash</dd></div>
             </dl>
             <p>Static policy score, shipped runtime, player-facing 화면과 human review는 각각 별도 evidence lane입니다.</p>
-            <Link className="button button-quiet button-sm" href="/app">Game Ready details <Icon name="arrowUpRight" size={14} /></Link>
+            <Link className="button button-quiet button-sm" href="/app">엔진 연결 상태 보기 <Icon name="arrowUpRight" size={14} /></Link>
           </div>
         </section>
 
         <section className="studio-review-section" aria-labelledby="studio-review-heading">
           <div className="studio-section-head">
             <div>
-              <span className="mono-label">03 · SPRITE REVIEW</span>
+              <span className="mono-label">3단계 · 스프라이트 확인</span>
               <h3 id="studio-review-heading">Pixel contract와 사람 검토를 분리해서 실행</h3>
             </div>
             <button className="button button-primary button-sm" type="button" onClick={() => void reviewSpriteSheet()} disabled={spriteReview.phase === "loading"}>
-              {spriteReview.phase === "loading" ? "호출 중…" : "Sprite review 호출"}
+              {spriteReview.phase === "loading" ? "확인 중…" : "스프라이트 확인하기"}
             </button>
           </div>
-          <p className="studio-review-intro">이 버튼은 인증된 `/api/sprite-review`를 실제 호출합니다. HTTP 응답은 <code>DECLARED_METADATA_ONLY</code>이며, local CLI의 RGBA byte rehash 없이는 파일 자체의 PASS를 주장하지 않습니다.</p>
+          <p className="studio-review-intro">시트에 적힌 규격(격자·프레임·상태)이 서로 맞는지 확인합니다. 그림 자체가 제대로 그려졌는지는 아래 검수 뷰어에서 직접 보세요.</p>
           <LiveEvidenceShowcase variant="studio" compact />
           <div className={`studio-review-message studio-review-message-${spriteReview.phase}`} role="status" aria-live="polite">{spriteReview.message}</div>
           <div className="studio-review-lanes" data-testid="sprite-review-lanes">
-            <ReviewLane label="PIXEL CONTRACT" value={spriteReview.report?.quality ?? "NOT_RUN"} detail="grid · motion delta · alpha · silhouette" />
-            <ReviewLane label="RUNTIME" value={spriteReview.report?.visualRuntime ?? "GAP"} detail="shipped Pixi/WebGL2 capture" />
-            <ReviewLane label="HUMAN REVIEW" value={spriteReview.report?.humanDecision ?? "NOT_EVALUATED"} detail="reviewer decision is never inferred" />
-            <ReviewLane label="READINESS" value={spriteReview.report?.readiness ?? "conditional"} detail="all lanes must be separately ready" />
+            <ReviewLane label="시트 규격" value={spriteReview.report?.quality ?? "NOT_RUN"} detail="격자 · 프레임 간 변화 · 투명도 · 외곽선" />
+            <ReviewLane label="엔진 화면" value={spriteReview.report?.visualRuntime ?? "GAP"} detail="엔진에서 찍은 화면이 필요합니다" />
+            <ReviewLane label="사람 검토" value={spriteReview.report?.humanDecision ?? "NOT_EVALUATED"} detail="직접 보고 판단해야 합니다" />
+            <ReviewLane label="종합" value={spriteReview.report?.readiness ?? "conditional"} detail="위 세 가지가 모두 끝나야 완료입니다" />
           </div>
         </section>
 
         <section className="studio-command-grid" aria-label="실행 명령과 결과 경계">
           <article className="studio-command-card">
-            <div className="studio-card-heading"><div><span className="mono-label">03 · RUN THE REAL RAIL</span><h3>선택한 작업을 로컬에서 실행</h3></div><Icon name="terminal" size={20} /></div>
+            <div className="studio-card-heading"><div><span className="mono-label">내 컴퓨터에서 실행하기</span><h3>선택한 작업을 로컬에서 실행</h3></div><Icon name="terminal" size={20} /></div>
             <p>Clunk는 원본을 덮어쓰지 않습니다. 선택한 종류에 맞는 authoring adapter가 별도 output을 만들고, 같은 target profile로 fresh reopen evidence를 기록합니다.</p>
             <div className="studio-command"><code>{command}</code><CopyCodeButton value={command} /></div>
-            <div className="studio-command-links"><Link href="/agents#connect" className="text-link">MCP로 에이전트 연결 <Icon name="arrowUpRight" size={13} /></Link><Link href="/docs/asset-studio" className="text-link">CLI schema 보기 <Icon name="arrowRight" size={13} /></Link></div>
+            <div className="studio-command-links"><Link href="/agents#connect" className="text-link">MCP로 에이전트 연결 <Icon name="arrowUpRight" size={13} /></Link><Link href="/docs/asset-studio" className="text-link">명령어 설명 보기 <Icon name="arrowRight" size={13} /></Link></div>
           </article>
           <article className="studio-boundary-card">
-            <span className="mono-label">04 · DO NOT COLLAPSE THE REVIEW</span>
+            <span className="mono-label">점수와 화면은 다른 판정입니다</span>
             <h3>점수와 화면은 다른 판정입니다.</h3>
-            <div className="studio-boundary-row"><span className="studio-boundary-dot studio-dot-static" /><div><strong>STRUCTURAL</strong><small>parser · policy · hash · blocker</small></div><b>PASS</b></div>
-            <div className="studio-boundary-row"><span className="studio-boundary-dot studio-dot-runtime" /><div><strong>VISUAL RUNTIME</strong><small>shipped renderer · frame evidence</small></div><b>GAP</b></div>
-            <div className="studio-boundary-row"><span className="studio-boundary-dot studio-dot-human" /><div><strong>PLAYER FACING</strong><small>human review · scene/readability</small></div><b>NOT_EVALUATED</b></div>
+            <div className="studio-boundary-row"><span className="studio-boundary-dot studio-dot-static" /><div><strong>파일 검사</strong><small>파일 내용과 규칙, 차단 문제</small></div><b>여기서 끝납니다</b></div>
+            <div className="studio-boundary-row"><span className="studio-boundary-dot studio-dot-runtime" /><div><strong>엔진 화면</strong><small>엔진에서 실제로 그려 봐야 압니다</small></div><b>직접 확인</b></div>
+            <div className="studio-boundary-row"><span className="studio-boundary-dot studio-dot-human" /><div><strong>게임 화면</strong><small>플레이어에게 잘 보이는지</small></div><b>직접 확인</b></div>
           </article>
         </section>
       </div>
@@ -309,7 +309,20 @@ function Capability({ label, value, tone, detail }: { label: string; value: stri
   return <div className={`studio-capability studio-capability-${tone.toLowerCase()}`}><span>{label}</span><strong>{value}</strong><small>{detail}</small></div>;
 }
 
+/** The lane printed the raw status constant; a person reads words. */
+const REVIEW_LANE_LABELS: Record<string, string> = {
+  PASS: "통과",
+  GAP: "증거 없음",
+  NOT_RUN: "아직 실행 안 함",
+  NOT_EVALUATED: "확인 전",
+  NO_GO: "사용 불가",
+  UNAVAILABLE: "확인할 환경 없음",
+  ready: "완료",
+  conditional: "조건부",
+  blocked: "차단",
+};
+
 function ReviewLane({ label, value, detail }: { label: string; value: string; detail: string }) {
   const tone = value === "PASS" || value === "ready" ? "pass" : value === "NOT_RUN" || value === "GAP" || value === "NOT_EVALUATED" || value === "conditional" ? "pending" : "fail";
-  return <article className={`studio-review-lane studio-review-lane-${tone}`}><span>{label}</span><strong>{value}</strong><small>{detail}</small></article>;
+  return <article className={`studio-review-lane studio-review-lane-${tone}`}><span>{label}</span><strong>{REVIEW_LANE_LABELS[value] ?? value}</strong><small>{detail}</small></article>;
 }
