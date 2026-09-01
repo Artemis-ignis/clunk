@@ -27,7 +27,15 @@ type Listing = {
    * 생성형 AI 라벨을 노출한다.
    */
   aiGenerated?: boolean;
+  /**
+   * The colours measured in this listing's own file, biggest share first. Served with the
+   * catalogue so a card can show them without the visitor downloading the model.
+   */
+  palette?: Array<{ hex: string; share: number }> | null;
 };
+
+/** A listing the shop found by comparing measured colour, not by matching a tag. */
+type ColourMatch = { slug: string; title: string; distance: number; palette: Array<{ hex: string; share: number }> };
 
 type CatalogFilter = "all" | "2d" | "3d" | "motion";
 type CatalogSort = "newest" | "name" | "price-asc" | "price-desc" | "size-asc";
@@ -99,7 +107,7 @@ type DetailListing = Listing & {
   artifacts: Array<{ fileName: string; role: string; contentType: string; byteLength: number; sha256: string }>;
   evidence: { static: string; visualRuntime: string; playerFacing: string; humanDecision: string };
 };
-type DetailPayload = { ok?: boolean; error?: string; listing?: DetailListing; checkout?: CheckoutState };
+type DetailPayload = { ok?: boolean; error?: string; listing?: DetailListing; checkout?: CheckoutState; matchesByColour?: ColourMatch[] };
 
 /** The sort ids the select offers; anything else in the URL falls back to newest. */
 const CATALOG_SORTS = new Set<string>(["newest", "name", "price-asc", "price-desc", "size-asc"]);
@@ -294,6 +302,16 @@ function ListingCard({ listing }: { listing: Listing }) {
           {/* AI기본법 제31조② 표시 의무 — 생성형 AI 산출물임을 상품 카드에서 바로 알린다. */}
           {isAiGenerated(listing) ? <span className={styles.aiChipMini}>✦ AI 생성</span> : null}
         </span>
+        {/* The asset's own colours, in proportion. Scanning a grid for something that fits
+            an existing scene is most of what browsing a shop is, and a thumbnail buried in
+            a shadowed render does not answer it. */}
+        {listing.palette?.length ? (
+          <span className={styles.cardPalette} aria-hidden="true">
+            {listing.palette.map((entry) => (
+              <span key={entry.hex} style={{ background: entry.hex, flexGrow: Math.max(entry.share, 0.02) }} />
+            ))}
+          </span>
+        ) : null}
       </span>
     </Link>
   );
@@ -310,6 +328,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
   const [measured, setMeasured] = useState<MeasuredSpec | null>(null);
   const [snippetTab, setSnippetTab] = useState<"three" | "r3f" | "clunk">("three");
   const [copied, setCopied] = useState(false);
+  const [matches, setMatches] = useState<ColourMatch[]>([]);
 
   useEffect(() => {
     let active = true;
@@ -322,6 +341,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
         if (active) {
           setListing(payload.listing);
           setCheckout(payload.checkout ?? null);
+          setMatches(payload.matchesByColour ?? []);
           setState("ready");
         }
       })
@@ -460,6 +480,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
               whether this asset sits in their game's palette — and can take the hex
               straight into their own material rather than eyedropping a screenshot. */}
           {measured?.palette.length ? <PaletteStrip palette={measured.palette} /> : null}
+          {matches.length ? <ColourMatches matches={matches} /> : null}
           <div className={styles.priceRow}><strong>{formatPrice(listing.priceCents, listing.currency)}</strong><small>{listing.sellerName ?? "Clunk creator"} · {formatBytes(listing.byteLength)} · {listing.entryFileName}</small></div>
           {listing.priceCents > 0 && paymentUnavailable ? (
             <p className={styles.payState} data-payment-state={checkout?.status ?? "UNKNOWN"} role="status">
@@ -765,5 +786,42 @@ function PaletteStrip({ palette }: { palette: Array<{ hex: string; share: number
         ))}
       </ul>
     </div>
+  );
+}
+
+/**
+ * Other listings whose measured colours sit closest to this one.
+ *
+ * Every shop has a "goes with this" rail and almost all of them run on tags someone typed.
+ * Ours is measured: the colours come out of the files, so this is the one recommendation on
+ * the site that is a number rather than an opinion. It also crosses kinds without anyone
+ * declaring a relationship — a sprite sheet baked from a model reliably lands next to the
+ * model it came from, which is the shop checking its own claim that the two match.
+ *
+ * The distance is shown, because a recommendation a buyer cannot audit is just a banner.
+ */
+function ColourMatches({ matches }: { matches: ColourMatch[] }) {
+  return (
+    <section className={styles.matches}>
+      <h3 className={styles.matchesTitle}>색이 맞는 에셋</h3>
+      <p className={styles.matchesNote}>
+        태그가 아니라 파일에서 잰 색으로 고른 것입니다. 숫자는 색 거리이고, 0에 가까울수록 같은 팔레트입니다.
+      </p>
+      <ul className={styles.matchesList}>
+        {matches.map((match) => (
+          <li key={match.slug}>
+            <Link href={`/marketplace/${encodeURIComponent(match.slug)}`}>
+              <span className={styles.matchBar} aria-hidden="true">
+                {match.palette.map((entry) => (
+                  <span key={entry.hex} style={{ background: entry.hex, flexGrow: Math.max(entry.share, 0.02) }} />
+                ))}
+              </span>
+              <span className={styles.matchName}>{match.title}</span>
+              <span className={styles.matchScore}>색 거리 {match.distance.toFixed(3)}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

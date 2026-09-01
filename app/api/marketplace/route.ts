@@ -1,4 +1,5 @@
 import { accessFor } from "../_lib/access";
+import { PALETTE_MEASURED_AT, matchesByColour, paletteFor } from "../_lib/listing-palettes";
 import {
   assertSameOrigin,
   ClunkHttpError,
@@ -74,7 +75,12 @@ export async function GET(request: Request) {
             humanDecision: normalizeEvidenceStatus(review?.humanDecision),
           },
           license: listing.licenseStatus,
+          palette: paletteFor(String(listing.slug)) ?? null,
         },
+        // "Goes with this" computed from measured colour rather than from a tag someone
+        // typed. Titles come from the same query the catalogue uses, so a listing that was
+        // unpublished cannot be recommended.
+        matchesByColour: await matchesByColour(db, String(listing.slug)),
         checkout: checkoutStatus(),
         access: accessFor({ authenticated: false }),
       }, { headers: { "cache-control": "public, max-age=30" } });
@@ -94,6 +100,9 @@ export async function GET(request: Request) {
     return Response.json({
       ok: true,
       schema: "clunk.marketplace-catalog.v1",
+      // Stamped once for the whole response rather than per listing: it is one snapshot,
+      // and a reader needs to know how old it is, not to see the same date 33 times.
+      paletteMeasuredAt: PALETTE_MEASURED_AT,
       listings: rows.results.map((row) => ({
         ...row,
         artifact: {
@@ -102,6 +111,7 @@ export async function GET(request: Request) {
           assetId: row.assetId,
         },
         license: row.licenseStatus,
+        palette: paletteFor(String(row.slug)) ?? null,
       })),
       checkout: checkoutStatus(),
       access: accessFor({ authenticated: false }),

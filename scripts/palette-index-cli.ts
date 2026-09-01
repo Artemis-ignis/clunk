@@ -25,6 +25,19 @@ const ORIGIN =
   originArg > -1 ? process.argv[originArg + 1] : "https://clunk.artemis-clunk.workers.dev";
 const OUT = "app/data/listing-palettes.json";
 
+/**
+ * sharp resolves as `unknown` under this tsconfig's module settings, so the one call this
+ * script makes is narrowed here rather than sprinkling casts through the loop. Same shape
+ * scripts/luna-imagegen.ts uses.
+ */
+const decodeRgba = (bytes: Buffer) =>
+  (sharp as unknown as (input: Buffer) => {
+    ensureAlpha: () => { raw: () => { toBuffer: (o: { resolveWithObject: true }) => Promise<{ data: Uint8Array }> } };
+  })(bytes)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
 const loader = new GLTFLoader();
 loader.setMeshoptDecoder(MeshoptDecoder);
 
@@ -45,12 +58,21 @@ for (const listing of listings) {
   // The public shop route, not the entitlement-gated asset API: this is the same URL the
   // product page viewer loads, so the palette describes exactly what a visitor sees.
   const url = `${ORIGIN}/market/${listing.slug}/${encodeURIComponent(listing.artifact.entryFileName)}`;
-  const response = await fetch(url);
-  if (!response.ok) {
-    skipped.push({ slug: listing.slug, why: `HTTP ${response.status}` });
+  // Retried because the origin currently returns intermittent 500s on the large texture
+  // files — see `npm run market:verify`. Retrying here measures the catalogue; it does not
+  // make the delivery problem go away, and the verifier is what reports that.
+  let bytes: Buffer | null = null;
+  let lastStatus = 0;
+  for (let attempt = 0; attempt < 6 && bytes === null; attempt += 1) {
+    const response = await fetch(`${url}?attempt=${attempt}`);
+    lastStatus = response.status;
+    if (response.ok) bytes = Buffer.from(await response.arrayBuffer());
+    else await response.body?.cancel().catch(() => undefined);
+  }
+  if (bytes === null) {
+    skipped.push({ slug: listing.slug, why: `HTTP ${lastStatus} (6회 재시도)` });
     continue;
   }
-  const bytes = Buffer.from(await response.arrayBuffer());
   try {
     if (listing.format === "model/gltf-binary") {
       const gltf = await loader.parseAsync(
@@ -59,7 +81,7 @@ for (const listing of listings) {
       );
       palettes[listing.slug] = readPalette(THREE, gltf.scene);
     } else if (listing.format === "image/png") {
-      const { data } = await sharp(bytes).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+      const { data } = await decodeRgba(bytes);
       palettes[listing.slug] = readImagePalette(data);
     } else {
       skipped.push({ slug: listing.slug, why: `형식 ${listing.format}` });

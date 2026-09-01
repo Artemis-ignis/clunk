@@ -1491,3 +1491,68 @@
   background: #ffffffd9;
   mix-blend-mode: difference;
 }
+
+/* The listing's measured colours as one proportional bar under the card body. Reads as
+   part of the card rather than a control: it is information, not something to click. */
+.cardPalette {
+  display: flex;
+  height: 4px;
+  margin: 10px 0 0;
+  border-radius: 999px;
+  overflow: hidden;
+  opacity: 0.85;
+}
+.cardPalette > span { display: block; min-width: 2px; }
+
+/* Colour-matched listings. A quiet rail under the spec, not a merchandising banner —
+   the swatch bar is the argument, so the row is mostly that. */
+.matches { margin: 22px 0 0; }
+.matchesTitle {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--v5-ink);
+}
+.matchesNote {
+  margin: 4px 0 10px;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--v5-ink-faint);
+}
+.matchesList { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.matchesList a {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border: 1px solid var(--v5-line);
+  border-radius: var(--v5-r-md);
+  text-decoration: none;
+  transition: border-color 0.14s ease, background 0.14s ease;
+}
+.matchesList a:hover,
+.matchesList a:focus-visible {
+  border-color: var(--v5-line-strong);
+  background: #ffffff08;
+}
+.matchBar {
+  display: flex;
+  height: 20px;
+  border-radius: var(--v5-r-sm);
+  overflow: hidden;
+}
+.matchBar > span { display: block; min-width: 2px; }
+.matchName {
+  font-size: 0.82rem;
+  color: var(--v5-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.matchScore {
+  font-family: var(--v5-font-mono, ui-monospace, monospace);
+  font-size: 0.7rem;
+  color: var(--v5-ink-faint);
+  white-space: nowrap;
+}
