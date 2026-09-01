@@ -3,6 +3,13 @@ import { Icon } from "./components/Icon";
 import { SiteNav } from "./components/SiteNav";
 import { SiteFooter } from "./components/SiteFooter";
 import { ForceDarkTheme } from "./components/ForceDarkTheme";
+import { createPageMetadata } from "./components/site-metadata";
+
+export const metadata = createPageMetadata({
+  title: "찾을 수 없는 주소",
+  description: "요청한 주소에 해당하는 Clunk 페이지가 없습니다. 마켓·검사·문서로 이어서 이동할 수 있습니다.",
+  path: "/",
+});
 
 /**
  * Branded 404 on the unified cv5 system. It used to render the legacy
