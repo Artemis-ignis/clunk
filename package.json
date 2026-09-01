@@ -59,7 +59,8 @@
     "db:generate": "drizzle-kit generate",
     "asset:sheet": "node scripts/sprite-sheet-from-glb.mjs",
     "asset:og": "node scripts/render-og.mjs",
-    "scene:budget": "node scripts/scene-budget-cli.mjs"
+    "scene:budget": "node scripts/scene-budget-cli.mjs",
+    "asset:palette": "tsx scripts/palette-cli.ts"
   },
   "dependencies": {
     "@gltf-transform/core": "^4.2.1",

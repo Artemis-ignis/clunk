@@ -456,6 +456,10 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
               <li><b>{licenseLabel(listing.licenseStatus)}</b> · 게임·앱·의뢰 작업에 쓸 수 있고, 원본 재판매만 제외됩니다</li>
             </ul>
           ) : null}
+          {/* The file's own colours, area-weighted, so a buyer can tell before paying
+              whether this asset sits in their game's palette — and can take the hex
+              straight into their own material rather than eyedropping a screenshot. */}
+          {measured?.palette.length ? <PaletteStrip palette={measured.palette} /> : null}
           <div className={styles.priceRow}><strong>{formatPrice(listing.priceCents, listing.currency)}</strong><small>{listing.sellerName ?? "Clunk creator"} · {formatBytes(listing.byteLength)} · {listing.entryFileName}</small></div>
           {listing.priceCents > 0 && paymentUnavailable ? (
             <p className={styles.payState} data-payment-state={checkout?.status ?? "UNKNOWN"} role="status">
@@ -716,4 +720,50 @@ function listingFamily(listing: Listing): Exclude<CatalogFilter, "all"> {
   if (value.includes("motion") || value.includes("animation")) return "motion";
   if (value.includes("png") || value.includes("sprite") || value.includes("atlas") || value.includes("spine") || value.includes("2d")) return "2d";
   return "3d";
+}
+
+/**
+ * The palette the viewer measured, as swatches you can copy.
+ *
+ * Meshy and polyfork both show an asset's colours; for us it is not decoration but the
+ * same kind of evidence as the triangle count — read out of the file on sale, with the
+ * share of surface each colour covers, so the ordering is the one the eye sees rather
+ * than the one the material list happens to be in.
+ */
+function PaletteStrip({ palette }: { palette: Array<{ hex: string; share: number }> }) {
+  const [copied, setCopied] = useState<string | null>(null);
+  const copy = (hex: string) => {
+    // Clipboard access is refused in some embeddings; falling back to a select-all
+    // textarea would be worse than simply not confirming.
+    void navigator.clipboard?.writeText(hex).then(
+      () => {
+        setCopied(hex);
+        window.setTimeout(() => setCopied((current) => (current === hex ? null : current)), 1400);
+      },
+      () => undefined,
+    );
+  };
+  return (
+    <div className={styles.palette}>
+      <span className={styles.paletteLabel}>파일 안의 색 {palette.length}가지 · 면적 비율</span>
+      <ul className={styles.paletteRow}>
+        {palette.map((entry) => (
+          <li key={entry.hex}>
+            <button
+              type="button"
+              className={styles.swatch}
+              style={{ background: entry.hex }}
+              onClick={() => copy(entry.hex)}
+              title={`${entry.hex} · 표면의 ${(entry.share * 100).toFixed(1)}%`}
+              aria-label={`${entry.hex}, 표면의 ${(entry.share * 100).toFixed(1)} 퍼센트. 눌러서 복사`}
+            >
+              <span className={styles.swatchHex}>{copied === entry.hex ? "복사됨" : entry.hex}</span>
+              {/* The bar is the share, drawn to the same number the tooltip states. */}
+              <span className={styles.swatchShare} style={{ width: `${Math.max(entry.share * 100, 3)}%` }} />
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }

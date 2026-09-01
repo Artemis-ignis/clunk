@@ -1431,3 +1431,63 @@
 }
 .sort select:focus-visible { outline: 2px solid rgba(139, 92, 246, 0.6); outline-offset: 2px; }
 .sort option { background: #12152a; color: var(--v5-ink); }
+
+/* Measured palette: the file's own colours, copyable, sized by how much of the
+   surface each one covers. Sits between the spec list and the price. */
+.palette {
+  margin: 14px 0 0;
+  display: grid;
+  gap: 7px;
+}
+.paletteLabel {
+  font-size: 0.74rem;
+  letter-spacing: 0.02em;
+  color: var(--v5-ink-faint);
+}
+.paletteRow {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.swatch {
+  position: relative;
+  width: 74px;
+  height: 46px;
+  padding: 0;
+  border: 1px solid var(--v5-line-strong);
+  border-radius: var(--v5-r-sm);
+  cursor: pointer;
+  overflow: hidden;
+  display: block;
+  transition: transform 0.14s ease, border-color 0.14s ease;
+}
+.swatch:hover,
+.swatch:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--v5-ink);
+}
+/* The hex sits on its own colour, so it needs a ground of its own rather than a
+   guess at whether the swatch is light or dark. */
+.swatchHex {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 2px 0 3px;
+  font-family: var(--v5-font-mono, ui-monospace, monospace);
+  font-size: 0.66rem;
+  letter-spacing: 0.01em;
+  color: #fff;
+  background: #0b0d18cc;
+  text-align: center;
+}
+/* The share, drawn as the width of the same number the label states. */
+.swatchShare {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 3px;
+  background: #ffffffd9;
+  mix-blend-mode: difference;
+}

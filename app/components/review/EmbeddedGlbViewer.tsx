@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { readPalette, type PaletteEntry } from "./measure-palette";
+
 /**
  * Product-page 3D viewer (polyfork-style, master directive 2026-08-31):
  * the listing's real GLB loads INTO the page — drag to orbit, wheel to zoom,
@@ -23,6 +25,12 @@ export type MeasuredSpec = {
    */
   groundOffset: number;
   bytes: number;
+  /**
+   * Every colour actually present in the file, with the share of visible surface it
+   * covers. Area-weighted rather than counted, because a colour on four large faces
+   * reads as the asset's colour while the same colour on forty slivers does not.
+   */
+  palette: PaletteEntry[];
 };
 
 export function EmbeddedGlbViewer({
@@ -174,6 +182,7 @@ export function EmbeddedGlbViewer({
             // model onto the floor for display.
             groundOffset: minYInFile,
             bytes: buffer.byteLength,
+            palette: readPalette(THREE, model),
           });
         }
 
