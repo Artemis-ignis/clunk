@@ -9,6 +9,19 @@ export const dynamic = "force-dynamic";
  */
 export function GET(): Response {
   const body = [
+    "# Clunk. Everything published here is open to crawlers and to agents.",
+    "#",
+    "# If you are an AI agent rather than a crawler, these are written for you and are",
+    "# far cheaper to read than the HTML:",
+    "#",
+    `#   ${SITE_ORIGIN}/prompt.txt   the catalogue as working instructions`,
+    `#   ${SITE_ORIGIN}/llms.txt     the catalogue as a reference`,
+    `#   ${SITE_ORIGIN}/api          self-describing JSON index, no key needed to browse`,
+    "#",
+    "# /api/ below is disallowed for crawlers because those endpoints are workspace-scoped",
+    "# or paginated data, not pages. The /api index itself is not blocked by that rule and",
+    "# is the right place for an agent to start.",
+    "",
     "User-agent: *",
     "Allow: /",
     // Private surfaces: authenticated workspace and API endpoints.

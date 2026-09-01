@@ -16,6 +16,12 @@ export type MeasuredSpec = {
   meshes: number;
   materials: number;
   bounds: { x: number; y: number; z: number };
+  /**
+   * Where the model sits against y=0 in the file, before the viewer recentres it. Zero
+   * means placing it at ground level just works; a negative number is how far it sinks,
+   * which a consumer has to offset by. The tree pack reaches -0.44 m.
+   */
+  groundOffset: number;
   bytes: number;
 };
 
@@ -97,6 +103,9 @@ export function EmbeddedGlbViewer({
         const bounds = new THREE.Box3().setFromObject(model);
         const size = bounds.getSize(new THREE.Vector3());
         const center = bounds.getCenter(new THREE.Vector3());
+        // Read before the model is moved onto the floor for display: the number a buyer
+        // needs is where the file puts it, not where the viewer puts it.
+        const minYInFile = bounds.min.y;
         model.position.set(-center.x, -bounds.min.y, -center.z);
         // Frame from the bounding SPHERE, not the longest edge: a flat fence and
         // a tall greenhouse then arrive at the same apparent size instead of one
@@ -161,6 +170,9 @@ export function EmbeddedGlbViewer({
             meshes,
             materials: materialSet.size,
             bounds: { x: size.x, y: size.y, z: size.z },
+            // Captured from the file's own transform, above, before the viewer moved the
+            // model onto the floor for display.
+            groundOffset: minYInFile,
             bytes: buffer.byteLength,
           });
         }

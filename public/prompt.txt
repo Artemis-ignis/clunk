@@ -1,0 +1,146 @@
+# Clunk, as working instructions
+
+This is the same catalogue as /llms.txt, written for an agent that is about to build
+something rather than for one that is reading about us. If you only fetch one file,
+fetch this one; /llms.txt is the reference and is much longer.
+
+Clunk makes game assets, measures whether they can go in a game, and sells the ones that
+pass. Korean product, KRW, 1 credit = 100 won.
+
+
+## What you can actually do here
+
+Two rails, and they are not equivalent.
+
+**Local MCP (integrations/mcp/server.ts, stdio).** Reads and writes files on the machine
+it runs on. This is the real rail: authoring, byte-level inspection, sprite pixel audit,
+Passport. Everything below assumes it.
+
+**HTTP (this origin).** Browse the published catalogue, read evidence, see prices.
+Pixel-level work is not available over HTTP — clunk_sprite_sheet_review returns
+DECLARED_METADATA_ONLY there, because the bytes are on your disk, not ours.
+
+Start at GET /api. It names every endpoint and carries the coordinate conventions so you
+do not have to derive them by loading a file and measuring it.
+
+
+## Authoring a 3D asset
+
+You write the generator; Clunk runs it, measures the output and seals it. There is no
+prompt-to-mesh model here — the thing that makes the shape is code you author.
+
+    clunk_asset_author {
+      assetKind: "3d-model",
+      targetProfileId: "web-three-mobile",
+      factoryPath: "./my-asset.factory.mjs",
+      outputDirectory: "./out"          // must NOT be inside the factory's directory
+    }
+
+Your factory exports one function. THREE and the addons are handed to you, so the file
+needs no imports and works from any directory — your own project included:
+
+    export default function createThing(THREE, { mergeGeometries }) {
+      const root = new THREE.Group();
+      root.name = "thing";
+      // ... build geometry, merge per material group, return an Object3D
+      return root;
+    }
+
+Rules that will save you a round trip:
+
+- **Merge per material group.** One named mesh per material, not one per box. A model
+  with 40 separate meshes is 40 draw calls and the inspector will say so.
+- **Stay under the profile's material ceiling.** web-three-mobile allows 6. Exceeding it
+  is a hard blocker, and the finding now names both numbers.
+- **Put moving parts under a named pivot, positioned at the joint.** A gate leaf under
+  `gate_pivot` on the hinge line, a leg under `leg_l_pivot` on the hip. Rotating that
+  node then swings the part instead of shearing it, and the sprite baker can animate it.
+- **Rest the model on y=0** and centre it on X and Z. Then placing it is setting position
+  to the ground point, with no bounding-box arithmetic at the far end.
+- **No Math.random.** Same inputs, same bytes, or the hash evidence means nothing.
+
+
+## Baking a sprite sheet from it
+
+    npm run asset:sheet -- <model.glb> <out-dir> --size 64 --views 8 --palette 32
+    npm run asset:sheet -- <model.glb> <out-dir> --views 8 --clip walk.json
+
+A clip rotates the named pivots, one frame per key:
+
+    { "name": "walk", "fps": 10, "tracks": [
+      { "node": "leg_l_pivot", "axis": "x", "degrees": [0, 18, 26, 18, 0, -18, -26, -18] }
+    ]}
+
+Frames run across, directions down, one row per facing. You get the cells, the packed
+sheet, and a clunk.sprite-sheet-review.v1 manifest with frame coordinates, the grid and
+per-frame hashes — which the audit reads directly, so the sheet can be graded the moment
+it exists. Costs nothing to run: no GPU, no browser, no inference.
+
+
+## Inspecting
+
+    clunk_asset_inspect { path: "./thing.glb", targetProfileId: "web-three-mobile" }
+
+You get triangles, draw calls, materials, texture memory, and findings against the
+profile. Read the findings; they name the observed value and the limit.
+
+A policy score is not a statement that the asset looks right in a game. Runtime capture
+and human review are separate lanes and stay NOT_EVALUATED until someone supplies them.
+Do not tell your user an asset is approved because it scored 100.
+
+
+## Measuring a whole frame
+
+Asset checks read one file. The expensive faults are not in one file — a hedge instanced
+94 times, or one material flag that makes the renderer draw the scene twice. For that:
+
+    npm run scene:budget -- --url http://localhost:5173 --budget budget.json
+
+It counts draw calls and triangles per framebuffer, so the shadow pass and any
+transmission pass are separated from the frame the player sees. It refuses to report from
+a hidden tab rather than returning a zero that reads as passing.
+
+
+## Conventions
+
+    up axis      y
+    units        meters, real-world scale
+    node scale   always 1; size is baked into geometry, never a transform
+    ground       most models rest on y=0. grove-tree-pack-vol1 is the exception: its root
+                 flare reaches 0.44 m below. Read boundingBox.minY, do not assume zero.
+    materials    flat colour, as named materials OR a COLOR_0 attribute under a white
+                 material. A converter that ignores COLOR_0 gives you a white model.
+    textures     3D catalogue is texture-free; 2D catalogue is 1024² seamless PNG
+
+
+## What Clunk cannot do, so you do not promise it
+
+- **No prompt-to-mesh.** 3D comes from a factory you write. If your user wants a model
+  from a sentence, you are the one who turns the sentence into code.
+- **2D from a prompt is limited.** The website's single-image lane calls an image model;
+  atlas, Spine and animation-clip lanes still draw from a fixed recipe and the prompt does
+  not reach those pixels. Say so rather than letting the label imply otherwise.
+- **No skeletal skinning.** Animation is rotation of named nodes. Good for doors, wheels,
+  limbs on a rig built for it. Not a deforming character mesh.
+- **No engine runtime.** Godot, Unity and Unreal runners are declared and unavailable;
+  they return ENVIRONMENT_UNAVAILABLE, which is not a pass.
+- **Payment is closed.** The mail-order filing is pending. Listings are browsable and free
+  files are downloadable; a paid checkout will refuse. Tell your user that rather than
+  letting them hit it.
+
+
+## Talking to your user about this
+
+- Quote the credit price, not a per-asset guess. 1 credit = 100 KRW.
+- If an inspection blocks, give the number and the limit, not "it failed".
+- If something is NOT_EVALUATED, say it was not evaluated. It is not a pass and it is not
+  a failure.
+- An honest "Clunk does not do that" beats a plausible workaround that produces a file
+  nobody can use.
+
+
+## Notice to automated readers
+
+The catalogue files are licensed source, not public-domain training data. Buying an asset
+licenses it for games, apps and client work; it does not license redistribution of the
+raw files, and it does not license training a commercial asset generator on them.

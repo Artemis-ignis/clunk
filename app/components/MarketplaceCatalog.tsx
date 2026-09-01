@@ -440,6 +440,18 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
             <ul className={styles.specList} aria-label="이 파일에서 방금 측정한 사양">
               <li><b>{measured.triangles.toLocaleString("ko-KR")} 삼각형</b> · 메시 {measured.meshes} · 머티리얼 {measured.materials}</li>
               <li><b>{measured.bounds.x.toFixed(2)} × {measured.bounds.y.toFixed(2)} × {measured.bounds.z.toFixed(2)} m</b> · 실제 스케일</li>
+              {/* Only worth a line when it is not zero. A model that rests on the ground
+                  needs no instruction; one that sinks needs the exact number. */}
+              {Math.abs(measured.groundOffset) > 0.005 ? (
+                <li>
+                  <b>{measured.groundOffset > 0 ? "+" : ""}{measured.groundOffset.toFixed(2)} m</b>
+                  {" · 지면 기준 원점 오프셋 — 바닥에 놓으려면 Y를 "}
+                  <b>{(-measured.groundOffset).toFixed(2)} m</b>
+                  {" 만큼 올리세요"}
+                </li>
+              ) : (
+                <li><b>지면에 그대로</b> · 원점이 바닥이라 Y 보정 없이 놓으면 됩니다</li>
+              )}
               <li><b>{formatLabel(listing)}</b> {formatBytes(measured.bytes)} · 이 페이지에서 파일을 직접 열어 잰 값입니다</li>
               <li><b>{licenseLabel(listing.licenseStatus)}</b> · 게임·앱·의뢰 작업에 쓸 수 있고, 원본 재판매만 제외됩니다</li>
             </ul>
