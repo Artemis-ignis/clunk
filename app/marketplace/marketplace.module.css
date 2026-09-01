@@ -811,6 +811,13 @@
   align-content: start;
   padding: clamp(108px, 13vh, 144px) 0 clamp(28px, 4vw, 48px);
 }
+/* A grid item's minimum width is its content's, and a <pre> full of one long command line
+   is 481px of content. On a 375px phone the single track grew to fit it, the layout viewport
+   grew with the track, and the buy button, the viewer and the buy panel all ran off the right
+   edge. Letting items shrink below their content keeps the track at the viewport; the <pre>
+   already scrolls inside itself. */
+.detailPage > * { min-width: 0; }
+.snippetBox { min-width: 0; max-width: 100%; }
 
 .breadcrumb {
   display: flex;

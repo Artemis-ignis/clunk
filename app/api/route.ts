@@ -75,7 +75,7 @@ export function GET(request: Request) {
       sales_open: areSalesOpen(),
       ...(areSalesOpen()
         ? {}
-        : { sales_note: "통신판매업 신고 절차가 끝나기 전까지 결제를 받지 않습니다. 목록과 상세는 그대로 열려 있습니다." }),
+        : { sales_note: "무료 베타 기간입니다. 결제를 받지 않으며, 목록·상세·검사·생성은 그대로 열려 있습니다." }),
     },
 
     "if the asset does not exist": "GET /api/marketplace?slug=… returns 404 with a JSON body naming the collection endpoint.",

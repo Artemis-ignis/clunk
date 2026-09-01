@@ -503,7 +503,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
           <div className={styles.priceRow}><strong>{formatPrice(listing.priceCents, listing.currency)}</strong><small>{listing.sellerName ?? "Clunk creator"} · {formatBytes(listing.byteLength)} · {listing.entryFileName}</small></div>
           {listing.priceCents > 0 && paymentUnavailable ? (
             <p className={styles.payState} data-payment-state={checkout?.status ?? "UNKNOWN"} role="status">
-              통신판매업 신고 절차가 끝나면 결제를 엽니다. 그때까지 이 상품은 담아두고 볼 수만 있습니다.
+              무료 베타 기간입니다. 로그인하면 이 에셋을 결제 없이 받을 수 있고, 표시된 가격은 유료 전환 후의 값입니다.
             </p>
           ) : null}
           {listing.priceCents > 0 ? (
@@ -668,8 +668,8 @@ function CheckoutNotice() {
   return (
     <div className={styles.checkoutNotice} role="status">
       <Icon name="circleAlert" size={17} />
-      <strong>유료 에셋은 아직 결제할 수 없습니다</strong>
-      <span>통신판매업 신고 절차가 끝나면 판매를 시작합니다. 그때까지 무료 에셋은 그대로 받을 수 있습니다.</span>
+      <strong>무료 베타 — 결제 없이 받습니다</strong>
+      <span>지금은 무료 베타 기간입니다. 로그인하면 모든 에셋을 결제 없이 받을 수 있고, 유료 전환 전에 이 자리와 이메일로 먼저 알립니다.</span>
     </div>
   );
 }
@@ -761,7 +761,11 @@ function createIdempotencyKey(): string {
 
 function listingFamily(listing: Listing): Exclude<CatalogFilter, "all"> {
   const value = `${listing.entryFileName} ${listing.format ?? ""}`.toLowerCase();
-  if (value.includes("motion") || value.includes("animation")) return "motion";
+  // An animated sheet has the same ".sheet.png" file name as a static one; what makes it
+  // Motion is the clip, which lives in the slug and the title. Without this the Motion chip
+  // matched nothing and sat on the page returning "0 assets" to everyone who clicked it.
+  const animated = /-(swing|door|walk)-/.test(listing.slug) || /애니메이션|여닫기|걷기|문 열기/.test(listing.title);
+  if (animated || value.includes("motion") || value.includes("animation")) return "motion";
   if (value.includes("png") || value.includes("sprite") || value.includes("atlas") || value.includes("spine") || value.includes("2d")) return "2d";
   return "3d";
 }

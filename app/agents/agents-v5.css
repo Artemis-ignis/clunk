@@ -215,6 +215,14 @@
 .agents-cv5 .agents-v4-final { padding: clamp(56px, 8vw, 80px) 0 20px; }
 
 /* ------------------------------------------------------------- asset strip */
+/* The strip had no surface rule of its own and inherited a light one from a global, while
+   every text node inside kept the dark theme's ink — white on white for the whole section.
+   Same surface as the sections around it. */
+.agents-cv5 .agent-asset-strip {
+  background: var(--v5-panel, var(--v5-surface, #0b0d18));
+  color: var(--v5-ink);
+  border-bottom: 1px solid var(--v5-line);
+}
 .agents-cv5 .agent-asset-strip-copy strong { color: var(--v5-ink); font-weight: 800; letter-spacing: -0.03em; }
 .agents-cv5 .agent-asset-strip-copy small { color: var(--v5-ink-faint); }
 .agents-cv5 .agent-asset-strip-items > div {

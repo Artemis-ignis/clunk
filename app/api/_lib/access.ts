@@ -49,7 +49,7 @@ export function accessFor(options: {
         images_per_day: WORKSPACE_IMAGES_PER_DAY,
       },
       sales_open: salesOpen,
-      ...(salesOpen ? {} : { sales_note: "통신판매업 신고 전이라 결제는 아직 열지 않았습니다." }),
+      ...(salesOpen ? {} : { sales_note: "무료 베타 기간입니다. 결제 없이 씁니다; 유료 전환은 미리 공지합니다." }),
     };
   }
 
@@ -79,7 +79,7 @@ export function accessFor(options: {
       ? { cannot: [] }
       : {
           cannot: ["buy credits", "buy a paid listing"],
-          sales_note: "통신판매업 신고 절차가 끝나면 결제를 엽니다. 그때까지 남은 크레딧으로는 정상 사용됩니다.",
+          sales_note: "무료 베타 기간입니다. 크레딧은 가입 지급분과 월 지급분으로 쓰고, 결제는 유료 전환 때 미리 공지한 뒤 엽니다.",
         }),
   };
 }

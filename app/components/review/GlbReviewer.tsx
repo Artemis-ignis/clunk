@@ -278,11 +278,9 @@ export function GlbReviewer({ initialUrl }: { initialUrl?: string | null }) {
     return () => window.removeEventListener("clunk:review-load-glb", listener);
   }, [loadUrl]);
 
-  async function onDrop(event: React.DragEvent) {
-    event.preventDefault();
-    const file = [...event.dataTransfer.files].find((candidate) => /\.(glb|gltf)$/i.test(candidate.name));
-    if (!file) {
-      setStatus(".glb 파일을 놓아주세요.");
+  async function loadFile(file: File | undefined) {
+    if (!file || !/\.(glb|gltf)$/i.test(file.name)) {
+      setStatus(".glb 파일을 골라주세요.");
       return;
     }
     setStatus("불러오는 중…");
@@ -291,6 +289,11 @@ export function GlbReviewer({ initialUrl }: { initialUrl?: string | null }) {
     } catch (error) {
       setStatus(`파싱 실패: ${error instanceof Error ? error.message : "unknown"}`);
     }
+  }
+
+  async function onDrop(event: React.DragEvent) {
+    event.preventDefault();
+    await loadFile([...event.dataTransfer.files].find((candidate) => /\.(glb|gltf)$/i.test(candidate.name)));
   }
 
   return (
@@ -303,6 +306,19 @@ export function GlbReviewer({ initialUrl }: { initialUrl?: string | null }) {
         aria-label="3D 에셋 검수 캔버스 — 드래그로 회전, 휠로 줌, GLB 파일 드롭 가능"
       >
         {status ? <div className="rv-status">{status}</div> : null}
+        {/* Drag-and-drop is the fast path on a desktop and no path at all on a phone or
+            from a keyboard. The input is the same loader with a button in front of it. */}
+        <label className="rv-open">
+          <input
+            type="file"
+            accept=".glb,.gltf,model/gltf-binary,model/gltf+json"
+            onChange={(event) => {
+              void loadFile(event.target.files?.[0]);
+              event.target.value = "";
+            }}
+          />
+          <span>파일 열기</span>
+        </label>
       </div>
 
       <aside className="rv-panel">

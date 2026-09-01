@@ -238,7 +238,7 @@ export default function PricingPage() {
               </div>
               <div className={styles.packsNote}>
                 <span><b>1 크레딧 = ₩100</b> · 결제 금액은 원화 기준으로 환산됩니다</span>
-                <span>판매 개시는 <b>통신판매업 신고 완료 후</b> — 그 전에는 구매가 열리지 않습니다</span>
+                <span>지금은 <b>무료 베타</b> — 크레딧은 가입 지급분과 월 지급분으로 쓰고, 결제는 유료 전환 때 미리 공지한 뒤 엽니다</span>
               </div>
               <CreditPacksPanel />
             </div>

@@ -22,5 +22,7 @@ export const SALES_LOCKED_BODY = {
   ok: false as const,
   schema: "clunk.sales-lock.v1" as const,
   status: "SALES_NOT_OPEN" as const,
-  error: "통신판매업 신고 절차가 끝나기 전까지는 결제를 받지 않습니다.",
+  // The lock used to explain itself as paperwork, which read as a broken product. It is the
+  // free beta: nothing is sold yet, on purpose.
+  error: "무료 베타 기간이라 결제를 받지 않습니다. 지금은 모든 기능을 결제 없이 씁니다.",
 };

@@ -46,7 +46,7 @@ export function SiteFooter() {
       <div className="cv5-frame cv5-footer-legal">
         <span>아르테미스(Artemis) · 대표 박준성 · 사업자등록번호 361-02-03814 · 인천광역시 제물포구 화도진로 16, 109동 1604호</span>
         {billingConfigured ? null : (
-          <span>통신판매업 신고 절차 진행 중이라 아직 유료 결제를 받지 않습니다.</span>
+          <span>지금은 무료 베타 기간입니다. 모든 기능을 결제 없이 쓸 수 있습니다.</span>
         )}
       </div>
     </footer>

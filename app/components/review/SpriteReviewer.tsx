@@ -117,16 +117,19 @@ export function SpriteReviewer() {
     }
   }, []);
 
-  async function onDrop(event: React.DragEvent) {
-    event.preventDefault();
-    const files = [...event.dataTransfer.files];
+  async function loadPair(files: File[]) {
     const png = files.find((file) => /\.png$/i.test(file.name));
     const manifest = files.find((file) => /\.json$/i.test(file.name));
     if (!png || !manifest) {
-      setStatus("PNG 시트와 manifest JSON을 한 번에 드롭해야 합니다.");
+      setStatus("PNG 시트와 manifest JSON을 함께 골라주세요.");
       return;
     }
     await loadFromSources(png, manifest, png.name.replace(/\.png$/i, ""));
+  }
+
+  async function onDrop(event: React.DragEvent) {
+    event.preventDefault();
+    await loadPair([...event.dataTransfer.files]);
   }
 
   useEffect(() => {
@@ -234,6 +237,19 @@ export function SpriteReviewer() {
   return (
     <div className="rv-sprite">
       <div className="rv-sprite-stage" onDragOver={(event) => event.preventDefault()} onDrop={onDrop}>
+        {/* Same loader as the drop, for phones and keyboards. Two files at once, like the drop. */}
+        <label className="rv-open">
+          <input
+            type="file"
+            multiple
+            accept=".png,.json,image/png,application/json"
+            onChange={(event) => {
+              void loadPair([...(event.target.files ?? [])]);
+              event.target.value = "";
+            }}
+          />
+          <span>파일 열기</span>
+        </label>
         {doc ? (
           <div className="rv-sprite-sequence" aria-label="상태 순서">
             {doc.anims.map((anim, index) => (
