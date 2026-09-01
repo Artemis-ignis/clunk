@@ -12,13 +12,14 @@ import { LandingMarketShowcase } from "./components/LandingMarketShowcase";
 import { EmbeddedGlbViewer } from "./components/review/EmbeddedGlbViewer";
 
 export const metadata = createPageMetadata({
-  // The mission, not the feature list. "게임 제작의 모든 과정" is the line for the day the
-  // game-agent axis ships; today the product covers the whole life of an asset — making,
-  // inspecting, selling, handing to an agent — and that is what the title promises.
-  title: "게임 에셋의 모든 과정을 Clunk 하나로",
-  description: "게임 에셋을 만들고, 게임에 넣어도 되는지 검사하고, 마켓에 파는 것까지 Clunk 하나로. 저폴리 3D 모델과 2D 스프라이트를 크레딧으로 바로 사용하세요.",
+  // Category, then what you make — the shape a search title takes ("AI 3D 모델 생성기:
+  // 텍스트와 이미지로 3D 만들기"), because it is what people type and what a link card
+  // has room to show. Not "AI 3D 생성기": our 3D is authored in code, not from a sentence,
+  // and a visitor who arrives expecting prompt-to-mesh leaves. The mission line belongs in
+  // the hero, where it has room.
+  title: "게임 에셋 생성기: 저폴리 3D와 스프라이트 시트 만들기",
+  description: "저폴리 3D 모델과 스프라이트 시트를 만들고, 게임에 넣어도 되는지 파일 단위로 검사하고, 검사를 통과한 에셋을 마켓에서 바로 받습니다. 게임 에셋의 모든 과정을 Clunk 하나로.",
   path: "/",
-  standalone: true,
 });
 
 /**
