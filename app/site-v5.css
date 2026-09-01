@@ -651,3 +651,13 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
   font-size: 0.5rem;
   letter-spacing: -0.01em;
 }
+
+/* If the GLB cannot be decoded in this browser the stage must still show the
+   asset instead of an empty box (2026-09-01: the tractor requires
+   EXT_meshopt_compression and silently failed to a blank panel). */
+.cv5-agent-stage[data-glb-fallback="true"] {
+  background-image: url("/landing/tractor-hero.png");
+  background-position: center 62%;
+  background-repeat: no-repeat;
+  background-size: 84% auto;
+}

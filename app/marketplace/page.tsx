@@ -81,7 +81,7 @@ export default function MarketplacePage() {
                   </div>
                   <div className={styles.heroPanelFoot}>
                     <span>실게임 납품 GLB 재검사</span>
-                    <b>100/100 · PASS</b>
+                    <b>100/100 · 블로커 0</b>
                   </div>
                 </div>
               </div>

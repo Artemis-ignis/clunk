@@ -5,25 +5,30 @@ import { useEffect, useRef, useState } from "react";
 /**
  * Landing section-03 live scene (master directive 2026-08-31): when the
  * snap section lands in view, the conversation TYPES itself out, the tool
- * steps check off, and the real greenhouse GLB is MODELLED live in 3D —
- * triangles stream in via BufferGeometry.setDrawRange, then an inspection
- * wireframe scan pulses, then the measured 100/100 badge lands. Loops.
+ * steps check off, and a real shipped GLB streams in triangle by triangle
+ * via BufferGeometry.setDrawRange, then an inspection wireframe scan
+ * pulses, then the measured verdict lands. Loops.
  *
- * Real data only: the GLB is the shipped wave-1 product file and every
- * number in the script is the renderer-measured value for that file.
+ * 2026-09-01: the file is Harvest Frontier's delivered tractor, byte-identical
+ * to their runtime asset (840,136 bytes, sha256 f64e63b2…). Clunk did NOT
+ * author it, so the script is the inspect → optimize → passport path it
+ * really ran, not an authoring claim. Every number below is this repository's
+ * own `npm run clunk -- inspect --profile-file examples/profiles/harvest-frontier.example.json`
+ * output for that file: score 100, hard blockers 0, one WARNING because the
+ * 39,320 triangles sit at 98% of Harvest Frontier's declared 40,000 budget.
  * prefers-reduced-motion renders the finished state statically.
  */
 
-const USER_TEXT = "온실 GLB 만들어서 web 프로파일로 검사하고, 게시 준비까지 해줘.";
-const AGENT_TEXT = "팩토리 레일로 생성 후 같은 프로파일로 재검사합니다.";
+const USER_TEXT = "이 트랙터 GLB, HF 프로파일로 검사하고 최적화까지 해줘.";
+const AGENT_TEXT = "받은 바이트를 그대로 읽고 같은 계약으로 재검사합니다.";
 const STEPS = [
-  { tool: "clunk_asset_author", note: "greenhouse.glb 생성 · 5,756 tris" },
-  { tool: "clunk_asset_inspect", note: "정책 17룰 · 하드 블로커 0" },
+  { tool: "clunk_asset_inspect", note: "39,320 tris · 드로우콜 98" },
+  { tool: "clunk_validate", note: "하드 블로커 0 · 예산 98%" },
   { tool: "clunk_optimize", note: "허용 연산만 · 새 파일 출력" },
   { tool: "clunk_passport", note: "입력→출력 digest 봉인" },
 ] as const;
 
-const GLB_URL = "/market/cozy-greenhouse/greenhouse.m1.clunk-optimized.glb";
+const GLB_URL = "/landing/tractor.compact.m1.glb";
 
 // timeline (seconds)
 const T_USER = 0.4; // user typing starts
@@ -113,8 +118,17 @@ export function AgentLiveDemo() {
       let wireframeOn = false;
 
       try {
-        const buffer = await (await fetch(GLB_URL)).arrayBuffer();
-        const gltf = await new GLTFLoader().parseAsync(buffer, "");
+        // The delivered tractor declares EXT_meshopt_compression,
+        // EXT_mesh_gpu_instancing and KHR_mesh_quantization as *required*.
+        // Without the meshopt decoder GLTFLoader throws and the stage silently
+        // renders an empty box — which is exactly what shipped before.
+        const { MeshoptDecoder } = await import("three/examples/jsm/libs/meshopt_decoder.module.js");
+        const loader = new GLTFLoader();
+        loader.setMeshoptDecoder(MeshoptDecoder);
+        const response = await fetch(GLB_URL);
+        if (!response.ok) throw new Error(`GLB ${response.status}`);
+        const buffer = await response.arrayBuffer();
+        const gltf = await loader.parseAsync(buffer, "");
         if (disposed) return;
         const model = gltf.scene;
         const bounds = new THREE.Box3().setFromObject(model);
@@ -122,9 +136,15 @@ export function AgentLiveDemo() {
         const center = bounds.getCenter(new THREE.Vector3());
         model.position.set(-center.x, -bounds.min.y, -center.z);
         pivot.add(model);
-        const radius = Math.max(size.x, size.y, size.z);
+        const radius = Math.max(size.x, size.y, size.z) || 1;
         camera.position.set(radius * 1.15, radius * 0.72, radius * 1.3);
         camera.lookAt(0, size.y * 0.42, 0);
+        // The camera frames the model by its own radius, so the clip planes have
+        // to follow it. A fixed far plane of 100 hid every asset authored in
+        // units larger than a few metres — the stage rendered an empty box.
+        camera.near = Math.max(radius / 1000, 0.001);
+        camera.far = radius * 20;
+        camera.updateProjectionMatrix();
 
         let cursor = 0;
         model.traverse((node) => {
@@ -137,8 +157,10 @@ export function AgentLiveDemo() {
         });
         totalIndices = cursor;
       } catch {
-        // 3D 실패 시에도 채팅·스텝 연출은 계속된다.
+        // A failed load must not leave a silent empty box: fall back to the
+        // still render of the same file so the stage always shows the asset.
         buildMeshes = [];
+        stage.dataset.glbFallback = "true";
       }
 
       const surfaceStage = stage as HTMLDivElement;
@@ -274,10 +296,10 @@ export function AgentLiveDemo() {
         ) : null}
       </div>
 
-      <div className="cv5-agent-stage" ref={stageRef} aria-label="에이전트가 실물 온실 GLB를 조립·검사하는 3D 데모">
-        <span className="cv5-agent-stage-tag">LIVE · greenhouse.glb</span>
+      <div className="cv5-agent-stage" ref={stageRef} aria-label="에이전트가 Harvest Frontier 납품 트랙터 GLB를 읽어 검사하는 3D 데모">
+        <span className="cv5-agent-stage-tag">LIVE · tractor.compact.m1.glb</span>
         {scene.scanning ? <span className="cv5-agent-scan">INSPECTING · 17 RULES</span> : null}
-        {scene.badge ? <span className="cv5-agent-badge">100/100 · PASS</span> : null}
+        {scene.badge ? <span className="cv5-agent-badge">100/100 · 블로커 0</span> : null}
       </div>
     </div>
   );

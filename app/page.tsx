@@ -113,7 +113,7 @@ export default function Home() {
                 </div>
                 <div className="cv5-hv-foot">
                   <span>실게임 납품 GLB 재검사</span>
-                  <b>100/100 · PASS</b>
+                  <b>100/100 · 블로커 0</b>
                 </div>
               </div>
               <div className="cv5-float cv5-float-a"><img src="/landing/showcase/conifer-spire.webp" alt="" width={240} height={240} loading="eager" /><small>860 TRIS</small></div>
@@ -192,7 +192,7 @@ export default function Home() {
             </div>
             <div className="cv5-sec-visual cv5-reveal" data-delay="1">
               <div className="cv5-mock">
-                <div className="cv5-mock-bar"><span>ASSET <b>INSPECTOR</b></span><span>tractor.compact.m1.glb · 2026-08-31 실측</span></div>
+                <div className="cv5-mock-bar"><span>ASSET <b>INSPECTOR</b></span><span>tractor.compact.m1.glb · 2026-09-01 실측 · HF 프로파일</span></div>
                 <div className="cv5-mock-body cv5-inspect">
                   <div className="cv5-inspect-preview">
                     <img src="/landing/tractor-hero.png" alt="실게임에 납품된 저폴리 트랙터 3D 에셋 렌더" width={900} height={610} loading="lazy" />
@@ -201,13 +201,13 @@ export default function Home() {
                   <div className="cv5-inspect-panel">
                     <div className="cv5-score">
                       <span className="cv5-score-ring"><i>100</i></span>
-                      <div><span>GAME-READY SCORE</span><b>FRESH REINSPECTION · PASS</b></div>
+                      <div><span>GAME-READY SCORE · HF 프로파일</span><b>하드 블로커 0 · 경고 1</b></div>
                     </div>
                     <div className="cv5-find">
-                      <div><b>TRIANGLES</b><span>39,320 / 예산 40,000</span></div>
+                      <div><b>TRIANGLES</b><span>39,320 / HF 예산 40,000 · 98%</span></div>
                       <div><b>DRAW CALLS</b><span>98</span></div>
                       <div><b>BYTES · SHA-256</b><span>840,136 · f64e63b2…</span></div>
-                      <div data-tone="warn"><b>GEO-TRIANGLE-BUDGET</b><span>WARNING · 숨기지 않음</span></div>
+                      <div data-tone="warn"><b>GEO-TRIANGLE-BUDGET</b><span>WARNING · 예산 98% 사용</span></div>
                     </div>
                     <div className="cv5-ops">
                       <span><b>✓</b>빈 노드 정리</span>
@@ -269,7 +269,7 @@ export default function Home() {
               <div className="cv5-stat"><b>{RULE_COUNT}</b><span>정적 검사 정책 룰 — 코드에서 직접 셉니다</span></div>
               <div className="cv5-stat"><b>{MCP_HTTP_TOOL_COUNT}</b><span>에이전트용 MCP 툴 — HTTP·로컬 동일 계약</span></div>
               <div className="cv5-stat"><b>19</b><span>실물 에셋 상품 · 94개 파일 — 게시 대기</span></div>
-              <div className="cv5-stat"><b>100/100</b><span>실게임 납품 GLB 재검사 · 2026-08-31</span></div>
+              <div className="cv5-stat"><b>100/100</b><span>실게임 납품 GLB 재검사 · HF 프로파일 · 2026-09-01</span></div>
             </div>
           </div>
         </section>
