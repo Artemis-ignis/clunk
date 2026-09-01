@@ -1,3 +1,4 @@
+import { accessFor } from "../_lib/access";
 import {
   applyCreditOperation,
   getCredits,
@@ -23,10 +24,14 @@ export async function GET() {
       )
       .bind(workspaceId)
       .all();
+    const credits = await getCredits(db, workspaceId);
     return privateJson({
       ok: true,
       mode: "DEMO",
-      credits: await getCredits(db, workspaceId),
+      credits,
+      // The balance alone does not tell a caller what it can do with it. This says so in
+      // the same response, so an agent never has to spend one call to find out.
+      access: accessFor({ authenticated: true, credits }),
       ledger: rows.results,
     });
   } catch (error) {

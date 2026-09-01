@@ -1,4 +1,5 @@
 import { ensureSchema, getRuntimeDb, jsonError } from "../../_lib/clunk";
+import { accessFor } from "../../_lib/access";
 import { areSalesOpen } from "../../_lib/sales-lock";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +27,9 @@ export async function GET() {
       purchasable: salesOpen && pack.status === "ACTIVE" && Number(pack.priceCents) > 0,
     })).filter((pack) => salesOpen || !/QA/i.test(pack.name));
     return Response.json(
-      { ok: true, schema: "clunk.credit-packs.v1", packs },
+      // Anonymous here: this route is public, so it reports what an anonymous caller can
+      // do and what signing in would add, rather than pretending to know a balance.
+      { ok: true, schema: "clunk.credit-packs.v1", packs, access: accessFor({ authenticated: false }) },
       { headers: { "cache-control": "public, max-age=60" } },
     );
   } catch (error) {

@@ -149,6 +149,13 @@ async function ensureColumn(
   }
 }
 
+/**
+ * Credits a workspace starts with. Exported because the API states this number to a
+ * caller who has not signed in yet, and a second copy of it there would drift from the
+ * grant that actually runs.
+ */
+export const SIGNUP_GRANT_CREDITS = 25;
+
 export async function ensureWorkspace(
   db: D1Database,
   user: AuthUser & { userId: string },
@@ -186,9 +193,9 @@ export async function ensureWorkspace(
       .bind(subscriptionId, workspaceId),
     db
       .prepare(
-        `INSERT OR IGNORE INTO clunk_credit_ledger (id, workspace_id, amount, reason, reference_id) VALUES (?, ?, 25, 'demo-grant', 'initial')`,
+        `INSERT OR IGNORE INTO clunk_credit_ledger (id, workspace_id, amount, reason, reference_id) VALUES (?, ?, ?, 'demo-grant', 'initial')`,
       )
-      .bind(creditId, workspaceId),
+      .bind(creditId, workspaceId, SIGNUP_GRANT_CREDITS),
   ]);
   return workspaceId;
 }

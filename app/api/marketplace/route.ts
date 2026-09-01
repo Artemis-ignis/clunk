@@ -1,3 +1,4 @@
+import { accessFor } from "../_lib/access";
 import {
   assertSameOrigin,
   ClunkHttpError,
@@ -75,6 +76,7 @@ export async function GET(request: Request) {
           license: listing.licenseStatus,
         },
         checkout: checkoutStatus(),
+        access: accessFor({ authenticated: false }),
       }, { headers: { "cache-control": "public, max-age=30" } });
     }
     const rows = await db.prepare(
@@ -102,6 +104,7 @@ export async function GET(request: Request) {
         license: row.licenseStatus,
       })),
       checkout: checkoutStatus(),
+      access: accessFor({ authenticated: false }),
     }, { headers: { "cache-control": "public, max-age=30" } });
   } catch (error) {
     return jsonError(error);
@@ -179,6 +182,7 @@ export async function POST(request: Request) {
       listing: { id: listingId, assetId: asset.id, slug, title, description, priceCents, currency, licenseStatus, status, seller: user.displayName },
       publicationGate: { ...gate, readiness: publicationReadiness(gate), publishable: canPublishListing(gate) },
       checkout: checkoutStatus(),
+      access: accessFor({ authenticated: false }),
     });
   } catch (error) {
     return jsonError(error);

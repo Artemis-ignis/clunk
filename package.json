@@ -31,7 +31,7 @@
     "auth:boundary:test": "node --test tests/auth-boundary-contract.test.mjs",
     "legal:test": "node --test tests/legal-and-signout-contract.test.mjs",
     "provider:test": "tsx tests/provider-runtime-contract.test.ts && node --test tests/provider-route-contract.test.mjs",
-    "billing:test": "tsx tests/billing-contract.test.ts && node --test tests/billing-route-contract.test.mjs tests/credit-pack-contract.test.mjs",
+    "billing:test": "tsx tests/billing-contract.test.ts && node --test tests/billing-route-contract.test.mjs tests/credit-pack-contract.test.mjs tests/api-access-contract.test.mjs",
     "series:mesh": "tsx scripts/clunk-series-cli.ts",
     "api:smoke": "tsx scripts/api-credit-smoke.ts",
     "foundry:smoke": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\\foundry-runtime-smoke.ps1",
