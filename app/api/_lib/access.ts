@@ -1,5 +1,6 @@
 import { SIGNUP_GRANT_CREDITS } from "./clunk";
 import { areSalesOpen } from "./sales-lock";
+import { WORKSPACE_IMAGES_PER_DAY, type BudgetSnapshot } from "./ai-budget";
 
 /**
  * What this caller can do right now, and what the next step would add.
@@ -22,6 +23,8 @@ export type AccessBlock = Record<string, unknown>;
 export function accessFor(options: {
   authenticated: boolean;
   credits?: number | null;
+  /** Today's image budget, when the caller has read it. Left out, the fixed limits are stated. */
+  imageBudget?: BudgetSnapshot | null;
 }): AccessBlock {
   const salesOpen = areSalesOpen();
 
@@ -41,6 +44,9 @@ export function accessFor(options: {
         credits_on_signup: SIGNUP_GRANT_CREDITS,
         credit_price_krw: CREDIT_KRW,
         generate_cost_credits: 1,
+        // Stated up front, because a beta limit discovered on the ninth picture is a
+        // worse experience than one read before the first.
+        images_per_day: WORKSPACE_IMAGES_PER_DAY,
       },
       sales_open: salesOpen,
       ...(salesOpen ? {} : { sales_note: "통신판매업 신고 전이라 결제는 아직 열지 않았습니다." }),
@@ -56,6 +62,18 @@ export function accessFor(options: {
     // Division, not a promise: it is how many generate calls the current balance covers,
     // and it goes stale the moment one is spent.
     generates_remaining: credits,
+    // The image budget is the beta's real ceiling and it is measured, not asserted: the
+    // number of images left is what the ledger says minus what has been recorded today.
+    ...(options.imageBudget
+      ? {
+          images_today: {
+            remaining: options.imageBudget.workspaceRemainingImages,
+            per_day: options.imageBudget.workspaceImagesPerDay,
+            beta_pool_remaining: options.imageBudget.globalRemainingImages,
+            resets_at: options.imageBudget.resetsAt,
+          },
+        }
+      : { images_per_day: WORKSPACE_IMAGES_PER_DAY }),
     can: ["author assets", "run inspections", "hold entitlements"],
     ...(salesOpen
       ? { cannot: [] }

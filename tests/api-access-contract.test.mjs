@@ -49,6 +49,6 @@ test("공개 API 응답이 access 블록을 싣는다", () => {
   }
   assert.match(
     readFileSync("app/api/credits/route.ts", "utf8"),
-    /access: accessFor\(\{ authenticated: true, credits \}\)/,
+    /access: accessFor\(\{ authenticated: true, credits, imageBudget \}\)/,
   );
 });

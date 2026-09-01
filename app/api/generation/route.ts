@@ -18,6 +18,8 @@ import {
 import { verifyStoredArtifactPersistence as verifyStorageEvidence } from "../../../packages/core/src/billing";
 import { createProceduralAuthoring, type ProceduralAuthoringRequest } from "../../../packages/core/src/product-authoring";
 import { generateImage } from "../_lib/image-generation";
+import { IMAGE_MODEL } from "../_lib/image-generation";
+import { budgetRefusal, releaseImageBudget, reserveImageBudget } from "../_lib/ai-budget";
 import { publicationReadiness } from "../../../packages/core/src/product-contract";
 import type { AssetKind } from "../../../packages/core/src/assetops-contract";
 
@@ -119,7 +121,16 @@ export async function POST(request: Request) {
     let generatedEntry: { bytes: Uint8Array; fileName: string; contentType: string } | undefined;
     let imageProvider: string | null = null;
     if (assetKind === "2d-image") {
+      // The free allowance is checked before the model is asked and before a credit is
+      // charged. A refusal here costs the caller nothing and tells them when to come back.
+      const budget = await reserveImageBudget(db, workspaceId, { model: IMAGE_MODEL });
+      if (budget.status !== "OK") {
+        return privateJson(budgetRefusal(budget), { status: 429, headers: { "retry-after": String(Math.max(1, Math.ceil((Date.parse(budget.resetsAt) - Date.now()) / 1000))) } });
+      }
       const generated = await generateImage({ prompt });
+      // No binding means no call was made, so the seat goes back. Every other outcome —
+      // including a rejection or a failure — was a real call and stays on the ledger.
+      if (generated.status === "BINDING_UNAVAILABLE") await releaseImageBudget(db, budget.reservationId);
       if (generated.status === "GENERATED") {
         generatedEntry = {
           bytes: generated.bytes,

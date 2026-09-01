@@ -50,6 +50,8 @@ const SCHEMA_STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS clunk_asset_kits (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL, title TEXT NOT NULL, description TEXT NOT NULL DEFAULT '', status TEXT NOT NULL DEFAULT 'DRAFT', manifest_json TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
   `CREATE TABLE IF NOT EXISTS clunk_asset_kit_members (kit_id TEXT NOT NULL, workspace_id TEXT NOT NULL, asset_id TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'member', source_hash TEXT NOT NULL, position INTEGER NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (kit_id, asset_id))`,
   `CREATE INDEX IF NOT EXISTS idx_clunk_generation_workspace_created ON clunk_generation_jobs(workspace_id, created_at DESC)`,
+  `CREATE TABLE IF NOT EXISTS clunk_ai_usage (id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL, day TEXT NOT NULL, model TEXT NOT NULL, neurons REAL NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`,
+  `CREATE INDEX IF NOT EXISTS idx_clunk_ai_usage_day_workspace ON clunk_ai_usage(day, workspace_id)`,
   `CREATE INDEX IF NOT EXISTS idx_clunk_artifacts_asset_created ON clunk_asset_artifacts(asset_id, created_at ASC)`,
   `CREATE INDEX IF NOT EXISTS idx_clunk_reviews_asset_created ON clunk_asset_reviews(asset_id, created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_clunk_listings_status_created ON clunk_marketplace_listings(status, created_at DESC)`,

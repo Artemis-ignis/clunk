@@ -1,4 +1,5 @@
 import { accessFor } from "../_lib/access";
+import { imageBudgetSnapshot } from "../_lib/ai-budget";
 import {
   applyCreditOperation,
   getCredits,
@@ -24,14 +25,14 @@ export async function GET() {
       )
       .bind(workspaceId)
       .all();
-    const credits = await getCredits(db, workspaceId);
+    const [credits, imageBudget] = await Promise.all([getCredits(db, workspaceId), imageBudgetSnapshot(db, workspaceId)]);
     return privateJson({
       ok: true,
       mode: "DEMO",
       credits,
       // The balance alone does not tell a caller what it can do with it. This says so in
       // the same response, so an agent never has to spend one call to find out.
-      access: accessFor({ authenticated: true, credits }),
+      access: accessFor({ authenticated: true, credits, imageBudget }),
       ledger: rows.results,
     });
   } catch (error) {
