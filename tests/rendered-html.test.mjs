@@ -68,12 +68,12 @@ test("landing language covers the full 2D and 3D asset path", async () => {
   const html = await response.text();
   // 2026-09-01: the landing stopped defending its own numbers and now tells the
   // reader what the number is for. The contract follows the fact, not the slogan.
-  assert.match(html, /개발 중인 농장 게임에 넣어 가며 다듬은/);
-  assert.match(html, /GAME-READY SCORE/i);
+  assert.match(html, /농장·마을 배경에 바로 쓰는 저폴리 모델/);
+  assert.match(html, /게임 적합도/);
   // 2026-09-01: the three section labels are Korean now — the Korean reference
   // sites the master gave (meshy.ai/ko, aetherforgeai.com/ko) use no English
   // eyebrows at all.
-  assert.match(html, /제작과 판매/);
+  assert.match(html, /에셋 제작/);
   assert.match(html, /검사와 수정/);
   assert.match(html, /제작 에이전트/);
   assert.match(html, /Sprite.*Atlas|Atlas.*Sprite/);

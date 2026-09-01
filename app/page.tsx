@@ -79,8 +79,8 @@ export default function Home() {
                 게임 제작의 모든 과정을<br /><em>CLUNK 하나로</em>
               </h1>
               <p className="cv5-hero-lede">
-                만든 에셋이 내 게임에서 돌아갈지, 넣기 전에 알려줍니다.
-                삼각형 수와 드로우콜을 엔진 기준에 맞춰 검사하고, 넘치면 그 자리에서 줄입니다.
+                에셋을 만들고, 게임에 넣어도 되는지 바로 확인하세요.
+                삼각형 수부터 드로우콜까지, 엔진 예산에 맞는지 파일을 열어 확인해 드립니다.
               </p>
               <div className="cv5-cta-row">
                 <Link className="cv5-btn cv5-btn-primary" href="/studio" prefetch={false}>
@@ -126,8 +126,8 @@ export default function Home() {
         <section className="cv5-sec" id="make" data-snap-section="make" aria-labelledby="sec-make">
           <div className="cv5-frame cv5-sec-grid">
             <div className="cv5-sec-copy cv5-reveal">
-              <div className="cv5-sec-kicker"><span className="cv5-num">01</span><small>제작과 판매</small></div>
-              <h2 id="sec-make">게임 에셋 제작 및 판매</h2>
+              <div className="cv5-sec-kicker"><span className="cv5-num">01</span><small>에셋 제작</small></div>
+              <h2 id="sec-make">게임 에셋 제작</h2>
               <p>
                 한 줄이면 2D가, 몇 초면 3D 모델이 나옵니다. 검사를 통과한 것만 마켓에 올립니다.
               </p>
@@ -187,22 +187,22 @@ export default function Home() {
             </div>
             <div className="cv5-sec-visual cv5-reveal" data-delay="1">
               <div className="cv5-mock">
-                <div className="cv5-mock-bar"><span>ASSET <b>INSPECTOR</b></span><span>tractor.compact.m1.glb · 2026-09-01 실측 · HF 프로파일</span></div>
+                <div className="cv5-mock-bar"><span>에셋 <b>검사</b></span><span>tractor.glb</span></div>
                 <div className="cv5-mock-body cv5-inspect">
                   <div className="cv5-inspect-preview">
                     <img src="/landing/tractor-hero.png" alt="저폴리 트랙터 3D 에셋 렌더" width={900} height={610} loading="lazy" />
-                    <small>직접 개발 중인 게임의 에셋</small>
+                    <small>실제 게임에 들어간 에셋</small>
                   </div>
                   <div className="cv5-inspect-panel">
                     <div className="cv5-score">
                       <span className="cv5-score-ring"><i>100</i></span>
-                      <div><span>GAME-READY SCORE · HF 프로파일</span><b>하드 블로커 0 · 경고 1</b></div>
+                      <div><span>게임 적합도</span><b>바로 넣어도 됩니다</b></div>
                     </div>
                     <div className="cv5-find">
-                      <div><b>TRIANGLES</b><span>39,320 / HF 예산 40,000 · 98%</span></div>
-                      <div><b>DRAW CALLS</b><span>98</span></div>
-                      <div><b>BYTES · SHA-256</b><span>840,136 · f64e63b2…</span></div>
-                      <div data-tone="warn"><b>GEO-TRIANGLE-BUDGET</b><span>WARNING · 예산 98% 사용</span></div>
+                      <div><b>삼각형</b><span>39,320 / 예산 40,000 · 98% 사용</span></div>
+                      <div><b>드로우콜</b><span>98</span></div>
+                      <div><b>용량 · 파일 코드</b><span>840,136 B · f64e63b2…</span></div>
+                      <div data-tone="warn"><b>삼각형 예산</b><span>98% 사용 — 여유 680개</span></div>
                     </div>
                     <div className="cv5-ops">
                       <span><b>✓</b>빈 노드 정리</span>
@@ -229,7 +229,7 @@ export default function Home() {
               <ul className="cv5-points">
                 <li><b>말로 만듭니다</b> — &ldquo;시장 노점 만들어줘&rdquo; 한 줄이면 GLB가 나옵니다</li>
                 <li><b>문제를 먼저 알려줍니다</b> — 무엇이 걸렸는지 짚어 주고, 고칠지 물어봅니다</li>
-                <li><b>직접 쓰면서 만듭니다</b> — 저희가 개발 중인 게임에 넣어 가며 다듬고 있습니다</li>
+                <li><b>어디서든 그대로</b> — Unity, Godot, Three.js에 바로 넣어 씁니다</li>
               </ul>
               <div>
                 <Link className="cv5-more" href="/connect" prefetch={false}>에이전트 연결 가이드 <Icon name="arrowRight" size={15} /></Link>
@@ -255,14 +255,14 @@ export default function Home() {
         </section>
 
         {/* STATS — measured only ---------------------------------------- */}
-        <section className="cv5-stats" data-snap-section="proof" aria-label="Clunk 실측 지표">
+        <section className="cv5-stats" data-snap-section="proof" aria-label="Clunk 요약">
           <div className="cv5-frame">
-            <p className="cv5-stats-note cv5-stats-note-top">지금 Clunk가 할 수 있는 것</p>
+            
             <div className="cv5-stats-grid">
-              <div className="cv5-stat"><b>{RULE_COUNT}</b><span>파일 하나를 검사하는 항목 수</span></div>
-              <div className="cv5-stat"><b>{MCP_HTTP_TOOL_COUNT}</b><span>에이전트가 쓸 수 있는 기능</span></div>
-              <div className="cv5-stat"><b>19</b><span>마켓 1차 상품 · 파일 94개</span></div>
-              <div className="cv5-stat"><b>100/100</b><span>게임에 실제로 들어간 트랙터 검사 점수</span></div>
+              <div className="cv5-stat"><b>{RULE_COUNT}</b><span>검사 항목</span></div>
+              <div className="cv5-stat"><b>{MCP_HTTP_TOOL_COUNT}</b><span>에이전트 연동 기능</span></div>
+              <div className="cv5-stat"><b>19</b><span>바로 받는 에셋</span></div>
+              <div className="cv5-stat"><b>5종</b><span>2D·3D 지원 포맷</span></div>
             </div>
           </div>
         </section>
@@ -276,10 +276,10 @@ export default function Home() {
                 <h2 id="showcase-heading">마켓에 올라와 있는 에셋</h2>
               </div>
               <p>
-                저희가 개발 중인 농장 게임에 넣어 가며 다듬은 저폴리 모델입니다.
+                농장·마을 배경에 바로 쓰는 저폴리 모델입니다. 삼각형 수를 보고 고르세요.
               </p>
             </div>
-            <ul className="cv5-showcase-grid" aria-label="Wave 1 실제 에셋 12종">
+            <ul className="cv5-showcase-grid" aria-label="마켓 1차 에셋 12종 미리보기">
               {SHOWCASE.map((asset, index) => (
                 <li className="cv5-showcase-card cv5-reveal" data-delay={String(index % 4)} key={asset.slug}>
                   <Link href="/marketplace" prefetch={false} aria-label={`${asset.name} — 마켓에서 보기`}>
@@ -293,7 +293,7 @@ export default function Home() {
               <Link className="cv5-more" href="/marketplace" prefetch={false}>
                 마켓에서 전체 인벤토리 보기 <Icon name="arrowRight" size={15} />
               </Link>
-              <small>통신판매업 신고 절차가 끝나는 대로 판매를 시작합니다.</small>
+              
             </div>
           </div>
         </section>

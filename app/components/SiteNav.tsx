@@ -16,7 +16,7 @@ export type ShellSection = "home" | "series" | "studio" | "app" | "dashboard" | 
 
 const NAV_LINKS: { label: string; href: string; section: ShellSection }[] = [
   { label: "에셋 제작", href: "/studio", section: "studio" },
-  { label: "에셋 판매", href: "/marketplace", section: "marketplace" },
+  { label: "에셋 마켓", href: "/marketplace", section: "marketplace" },
   { label: "에셋 검사", href: "/app", section: "app" },
   { label: "제작 에이전트", href: "/connect", section: "agents" },
   { label: "요금", href: "/pricing", section: "pricing" },

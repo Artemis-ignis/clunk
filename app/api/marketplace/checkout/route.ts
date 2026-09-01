@@ -22,6 +22,8 @@ import {
 } from "../billing";
 import { getRuntimeEnvironment } from "../../../runtime-environment";
 
+import { areSalesOpen, SALES_LOCKED_BODY } from "../../_lib/sales-lock";
+
 export const dynamic = "force-dynamic";
 
 type CheckoutPayload = { listingId?: unknown; idempotencyKey?: unknown; withdrawalConsent?: unknown; paymentMethod?: unknown };
@@ -99,10 +101,12 @@ export async function POST(request: Request) {
     }
 
     // Credit rail: purchases paid from the workspace credit balance instead of
-    // a card. No payment provider is involved, so this works under the
-    // pre-launch sales lock; money only ever enters when packs are bought
-    // through a real provider.
+    // a card. This used to be treated as exempt from the pre-launch lock
+    // because no payment provider is involved — but new workspaces are granted
+    // 25 credits, so a visitor could sign in and complete a real purchase with
+    // an entitlement while the footer said sales had not started.
     if (payload.paymentMethod === "credits") {
+      if (!areSalesOpen()) return Response.json(SALES_LOCKED_BODY, { status: 503 });
       return await settleWithCredits(db, {
         listing,
         buyerUserId: user.id,

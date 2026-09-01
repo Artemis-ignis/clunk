@@ -22,19 +22,19 @@ export const metadata: Metadata = {
     default: "Clunk · AI Game Asset Foundry",
     template: "%s | Clunk",
   },
-  description: "게임 에셋을 만들고, 검사하고, Game Ready 근거와 함께 팀에 전달하는 AI Game Asset Foundry입니다.",
+  description: "게임 에셋을 만들고, 게임에 넣어도 되는지 검사하는 곳입니다.",
   metadataBase: new URL(SITE_ORIGIN),
   openGraph: {
     title: "Clunk · AI Game Asset Foundry",
-    description: "게임 에셋을 만들고, 검사하고, Game Ready 근거와 함께 팀에 전달합니다.",
+    description: "게임 에셋을 만들고, 게임에 넣어도 되는지 검사합니다.",
     type: "website",
     url: SITE_ORIGIN,
-    images: [{ url: `${SITE_ORIGIN}/og.png`, width: 1664, height: 936, alt: "Clunk - Make every asset defensible" }],
+    images: [{ url: `${SITE_ORIGIN}/og.png`, width: 1664, height: 936, alt: "Clunk — 게임 에셋 제작과 검사" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Clunk · AI Game Asset Foundry",
-    description: "게임 에셋을 만들고, 검사하고, Game Ready 근거와 함께 팀에 전달합니다.",
+    description: "게임 에셋을 만들고, 게임에 넣어도 되는지 검사합니다.",
     images: [`${SITE_ORIGIN}/og.png`],
   },
   icons: {

@@ -16,7 +16,11 @@ test("credit packs ship DRAFT with no invented price and a public honest catalog
 
   await access(path.join(root, "app", "api", "credits", "packs", "route.ts"));
   const packs = await source("app/api/credits/packs/route.ts");
-  assert.match(packs, /purchasable: pack\.status === "ACTIVE" && Number\(pack\.priceCents\) > 0/);
+  // 2026-09-01: the pre-launch sales lock gates purchasability too. Three
+  // "(QA 임시가)" packs had reached the public pricing page with real prices and
+  // working buy buttons while the mail-order filing was still pending.
+  assert.match(packs, /purchasable: salesOpen && pack\.status === "ACTIVE" && Number\(pack\.priceCents\) > 0/);
+  assert.match(packs, /areSalesOpen/);
 });
 
 test("credit checkout mirrors the marketplace order state machine", async () => {

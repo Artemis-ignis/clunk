@@ -19,6 +19,7 @@ import {
   type BillingProvider,
 } from "../../marketplace/billing";
 import { getRuntimeEnvironment } from "../../../runtime-environment";
+import { areSalesOpen, SALES_LOCKED_BODY } from "../../_lib/sales-lock";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +33,10 @@ type CheckoutPayload = { packId?: unknown; idempotencyKey?: unknown; withdrawalC
  */
 export async function POST(request: Request) {
   try {
+    // Nothing may complete a purchase before the mail-order filing lands, and
+    // that has to be the first check — the demo-checkout branch below grants
+    // credits with no provider at all.
+    if (!areSalesOpen()) return Response.json(SALES_LOCKED_BODY, { status: 503 });
     assertSameOrigin(request);
     const { user, workspaceId } = await requireClunkContext();
     const payload = await parseJson<CheckoutPayload>(request, 32 * 1024);

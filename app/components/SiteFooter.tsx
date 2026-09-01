@@ -23,7 +23,7 @@ export function SiteFooter() {
         </div>
         <nav className="cv5-footer-col" aria-label="제품">
           <header>제품</header>
-          <Link href="/marketplace" prefetch={false}>에셋 판매</Link>
+          <Link href="/marketplace" prefetch={false}>에셋 마켓</Link>
           <Link href="/studio" prefetch={false}>에셋 제작</Link>
           <Link href="/app" prefetch={false}>에셋 검사</Link>
           <Link href="/connect" prefetch={false}>제작 에이전트</Link>
