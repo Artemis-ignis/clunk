@@ -12,14 +12,15 @@ async function source(relativePath) {
 }
 
 /**
- * /docs became a multi-page GitBook manual on 2026-08-31: the sections that used
- * to be anchors on app/docs/page.tsx are now app/docs/<topic>/page.tsx, and the
- * long listings live in app/docs/docs-content.ts. These assertions freeze that
- * the DOCS SURFACE publishes a fact, not which file holds it, so read them all.
+ * The manual moved to a real GitBook site on 2026-09-01 and /docs now redirects
+ * there, so the docs surface is docs/gitbook/*.md — the Git Sync source kept
+ * byte-identical to the published pages. These assertions freeze that the DOCS
+ * SURFACE publishes a fact, not which file holds it, so read them all.
  */
 async function docsSurface() {
-  const dir = new URL("app/docs/", root);
-  const names = (await readdir(dir, { recursive: true })).filter((name) => /\.tsx?$/.test(name));
+  // 2026-09-01: docs live on GitBook; docs/gitbook/*.md mirrors the published pages.
+  const dir = new URL("docs/gitbook/", root);
+  const names = (await readdir(dir)).filter((name) => name.endsWith(".md"));
   const parts = await Promise.all(
     names.map((name) => readFile(new URL(name.replaceAll("\\", "/"), dir), "utf8")),
   );

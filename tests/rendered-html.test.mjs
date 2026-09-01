@@ -38,7 +38,7 @@ test("inspector explains that policy score is not player-facing approval", async
 });
 
 test("server-renders public product routes", async () => {
-  for (const pathname of ["/pricing", "/docs", "/series"]) {
+  for (const pathname of ["/pricing", "/series"]) {
     const response = await render(pathname);
     assert.equal(response.status, 200, pathname);
     const html = await response.text();
@@ -76,49 +76,6 @@ test("landing language covers the full 2D and 3D asset path", async () => {
   assert.match(html, /크레딧/);
 });
 
-test("docs expose a navigable GitBook-style information architecture", async () => {
-  // 2026-08-31 master directive ("깃북으로 해서 페이지별로 나눠서 만들지"): /docs
-  // is no longer one long scroll. The contract it froze is unchanged in spirit —
-  // a persistent table of contents, a search, and the one-file-three-states
-  // evidence visual — but each section is now its own route, so the assertions
-  // follow the sections to their pages. Class names moved from the legacy
-  // .docs-* rules (light cards in globals.css) to the cv5-native dv5-* set.
-  const response = await render("/docs");
-  assert.equal(response.status, 200);
-  const html = await response.text();
-  assert.match(html, /dv5-layout/);
-  assert.match(html, /dv5-sidebar/);
-  assert.match(html, /문서 목차/);
-  assert.match(html, /문서 검색/);
-  assert.match(html, /빠른 시작/);
-  assert.match(html, /클라이언트별 설정/);
-  assert.match(html, /계약과 상태/);
-  assert.match(html, /브라우저 WebMCP/);
-  assert.match(html, /dv5-evidence/);
-  assert.match(html, /ONE FILE · THREE STATES/);
-  // the light legacy docs card must never float on the cv5 shell again
-  assert.doesNotMatch(html, /docs-page-redesign|docs-hero-v2|sample-workbench/);
-
-  for (const [pathname, marker] of [
-    ["/docs/quickstart", /mcpServers/],
-    ["/docs/clients", /claude mcp add --transport http/],
-    ["/docs/cli", /clunk -- inspect/],
-    ["/docs/asset-studio", /clunk-series-native-v1/],
-    ["/docs/contracts", /clunk\.asset-inspection-evidence\.v2/],
-    ["/docs/harvest-frontier", /clunk\.frame-comparison\.v1/],
-    ["/docs/webmcp", /document\.modelContext/],
-    ["/docs/scope", /지원 surface/],
-  ]) {
-    const page = await render(pathname);
-    assert.equal(page.status, 200, pathname);
-    const pageHtml = await page.text();
-    assert.match(pageHtml, marker, pathname);
-    assert.match(pageHtml, /dv5-sidebar/, pathname);
-    assert.match(pageHtml, /dv5-pager/, pathname);
-    assert.doesNotMatch(pageHtml, /docs-page-redesign|docs-hero-v2/, pathname);
-  }
-});
-
 test("public navigation uses browser-native anchors on the Sites runtime", async () => {
   const { readFile } = await import("node:fs/promises");
   const files = [
@@ -127,9 +84,6 @@ test("public navigation uses browser-native anchors on the Sites runtime", async
     "../app/components/AuthEntryCard.tsx",
     "../app/components/DashboardClient.tsx",
     "../app/components/WorkspaceShell.tsx",
-    "../app/docs/page.tsx",
-    // the docs manual renders every breadcrumb/pager link through this frame
-    "../app/docs/DocsPageFrame.tsx",
     "../app/pricing/page.tsx",
     "../app/components/PassportClient.tsx",
     "../app/components/SiteShell.tsx",
@@ -146,14 +100,29 @@ test("public navigation uses browser-native anchors on the Sites runtime", async
     assert.match(source, /NativeLink/u, file);
   }
 
-  // The docs manual is many routes now, so contract the whole directory instead
-  // of listing pages one by one: no docs page may reach for next/link.
-  const { readdir } = await import("node:fs/promises");
-  const docsDir = new URL("../app/docs/", import.meta.url);
-  const docsFiles = (await readdir(docsDir, { recursive: true })).filter((name) => /\.tsx?$/.test(name));
-  assert.ok(docsFiles.length >= 9, "docs should be split into per-topic pages");
-  for (const name of docsFiles) {
-    const source = await readFile(new URL(name.replaceAll("\\", "/"), docsDir), "utf8");
-    assert.doesNotMatch(source, /from ["']next\/link["']/u, name);
+});
+
+test("the docs surface redirects to the published GitBook manual", async () => {
+  // 2026-09-01 master directive ("① GitBook으로 리다이렉트"): the in-app manual
+  // was replaced by a real GitBook site, so every former /docs route is now a
+  // permanent cross-domain redirect. The pages themselves are contracted from
+  // docs/gitbook/*.md, which mirrors the published site byte-for-byte.
+  const base = "https://ai-safety-gate.gitbook.io/clunk";
+  for (const [pathname, target] of [
+    ["/docs", `${base}/`],
+    ["/docs/quickstart", `${base}/quickstart`],
+    ["/docs/clients", `${base}/clients`],
+    ["/docs/cli", `${base}/cli-ci`],
+    ["/docs/asset-studio", `${base}/asset-studio`],
+    ["/docs/contracts", `${base}/contracts`],
+    ["/docs/harvest-frontier", `${base}/harvest-frontier`],
+    ["/docs/webmcp", `${base}/webmcp`],
+    ["/docs/scope", `${base}/scope`],
+    // anything else under the old manual lands on the GitBook home rather than a 404
+    ["/docs/does-not-exist", `${base}/`],
+  ]) {
+    const response = await render(pathname);
+    assert.equal(response.status, 308, pathname);
+    assert.equal(response.headers.get("location"), target, pathname);
   }
 });

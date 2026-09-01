@@ -1,13 +1,14 @@
+---
+description: CLI는 실제 바이트를 읽고 JSON evidence와 0/2/4 exit code를 남깁니다
+---
+
 # CLI와 CI
-CLI는 실제 바이트를 읽고 JSON evidence와 0/2/4 exit code를 남깁니다. 긴 예시는 필요할 때만 펼칩니다.
 
-## 실행 명령
+CLI는 실제 바이트를 읽고 JSON evidence와 `0/2/4` exit code를 남깁니다. CI는 이 exit code만 보고 게이트를 판단합니다.
 
-GLB/GLTF inspect · validate · optimize 실행 명령 보기
+## GLB / GLTF 검사
 
-**clunk-cli**
-
-```
+```bash
 # 검사: 실제 바이트에서 JSON evidence 생성
 $ npm.cmd run clunk -- inspect public/samples/clunk-messy-sample.glb --profile pc
 
@@ -21,13 +22,11 @@ $ npm.cmd run clunk -- optimize public/samples/clunk-messy-sample.glb --out out/
 $ npm.cmd run clunk -- passport public/samples/clunk-messy-sample.glb out/quad.glb
 ```
 
-원본은 유지하고 output을 fresh reopen합니다.
+원본은 절대 수정하지 않고 output을 fresh reopen합니다.
 
-texture · portrait · evidence 읽기 쉬움·증거 CLI 보기
+## 텍스처 · UI · evidence
 
-**texture + portrait + evidence**
-
-```
+```bash
 # texture: 실제 gameplay 거리 band를 포함한 정적 측정
 $ npm.cmd run asset:readability -- --config examples/texture-audit/harvest-frontier.textures.json --format json --strict
 
@@ -39,11 +38,9 @@ $ npm.cmd run asset:evidence -- normalize --input evidence.json
 $ npm.cmd run asset:evidence -- validate --input evidence.json --required
 ```
 
-clunk.texture-audit.v1: 0 PASS · 2 FAIL · 4 UNAVAILABLE.
+`clunk.texture-audit.v1` — exit 0 PASS · 2 FAIL · 4 UNAVAILABLE.
 
-Pixi sprite sheet review RGBA rehash와 HTTP 경계 보기
-
-**Pixi sprite sheet review**
+## Pixi 스프라이트 시트 리뷰
 
 ```
 schema: clunk.sprite-sheet-review.v1
@@ -61,13 +58,11 @@ verificationMode: DECLARED_METADATA_ONLY
 visualRuntime: GAP · playerFacing: NOT_EVALUATED · humanDecision: NOT_EVALUATED
 ```
 
-clunk.sprite-sheet-review.v1: local byte rehash와 HTTP DECLARED\_METADATA\_ONLY를 분리합니다.
+로컬 바이트 rehash와 HTTP `DECLARED_METADATA_ONLY`를 분리합니다.
 
-Atlas · PNG · Spine bundle 멀티파일 manifest 보기
+## 멀티파일 번들 (Atlas · PNG · Spine)
 
-**multi-file AssetOps bundle**
-
-```
+```json
 {
   "schema": "clunk.asset-inspection-request.v2",
   "entryFileName": "skeleton.json",
@@ -80,4 +75,4 @@ Atlas · PNG · Spine bundle 멀티파일 manifest 보기
 }
 ```
 
-entryFileName·fileCount·역할·relatesTo를 보존합니다.
+`entryFileName` · `fileCount` · 역할 · `relatesTo`를 그대로 보존합니다.

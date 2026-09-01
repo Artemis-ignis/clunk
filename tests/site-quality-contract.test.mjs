@@ -25,7 +25,7 @@ test("metadata never falls back to a localhost origin and public pages declare c
   assert.match(metadata, /https:\/\/clunk\.artemis-clunk\.workers\.dev/);
   assert.doesNotMatch(layout, /metadataBase:\s*new URL\(process\.env\.CLUNK_SITE_ORIGIN \?\? ["']http:\/\/localhost:3000/);
 
-  for (const page of ["app/page.tsx", "app/agents/page.tsx", "app/docs/page.tsx", "app/pricing/page.tsx"]) {
+  for (const page of ["app/page.tsx", "app/agents/page.tsx", "app/pricing/page.tsx"]) {
     const pageSource = await source(page);
     assert.match(pageSource, /createPageMetadata|alternates\s*:/, `${page} needs a canonical metadata declaration`);
   }
@@ -54,7 +54,7 @@ test("the sign-in boundary sends visitors to a door that exists", async () => {
 });
 
 test("public source links use connect instead of the provider-conflicting mcp route", async () => {
-  for (const page of ["app/page.tsx", "app/agents/page.tsx", "app/docs/page.tsx", "app/pricing/page.tsx"]) {
+  for (const page of ["app/page.tsx", "app/agents/page.tsx", "app/pricing/page.tsx"]) {
     const pageSource = await source(page);
     assert.doesNotMatch(pageSource, /href\s*=\s*["']\/mcp(?:["'#])/);
   }

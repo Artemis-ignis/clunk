@@ -23,7 +23,7 @@ export function SiteFooter() {
         </nav>
         <nav className="cv5-footer-col" aria-label="리소스">
           <header>RESOURCES</header>
-          <Link href="/docs" prefetch={false}>Docs</Link>
+          <Link href="https://ai-safety-gate.gitbook.io/clunk" prefetch={false}>Docs</Link>
           <Link href="/review" prefetch={false}>검수 뷰어</Link>
           <Link href="/connect" prefetch={false}>MCP 연결</Link>
           <Link href="/dashboard" prefetch={false}>내 작업공간</Link>

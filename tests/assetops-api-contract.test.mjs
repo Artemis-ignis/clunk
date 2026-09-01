@@ -13,17 +13,20 @@ async function source(relativePath) {
 
 
 /**
- * /docs became a multi-page GitBook manual on 2026-08-31: the sections that used
- * to be anchors on app/docs/page.tsx are now app/docs/<topic>/page.tsx, and the
- * long listings live in app/docs/docs-content.ts. This assertion freezes that the
- * DOCS SURFACE publishes a fact, not which file holds it, so read them all.
+ * The manual moved to a real GitBook site on 2026-09-01 and /docs now redirects
+ * there, so the docs surface is docs/gitbook/*.md — the Git Sync source kept
+ * byte-identical to the published pages. This assertion freezes that the DOCS
+ * SURFACE publishes a fact, not which file holds it, so read them all.
  */
 async function docsSurface() {
+  // 2026-09-01: the docs surface moved to GitBook and /docs redirects there.
+  // The published pages are mirrored in docs/gitbook/*.md (kept byte-identical
+  // to the live site), so the contract still reads the docs surface itself.
   const { readdir, readFile: read } = await import("node:fs/promises");
-  const dir = new URL("../app/docs/", import.meta.url);
-  const names = (await readdir(dir, { recursive: true })).filter((name) => /\.tsx?$/.test(name));
+  const dir = new URL("../docs/gitbook/", import.meta.url);
+  const names = (await readdir(dir)).filter((name) => name.endsWith(".md"));
   const parts = await Promise.all(
-    names.map((name) => read(new URL(name.replaceAll("\\", "/"), dir), "utf8")),
+    names.map((name) => read(new URL(name, dir), "utf8")),
   );
   return parts.join("\n");
 }

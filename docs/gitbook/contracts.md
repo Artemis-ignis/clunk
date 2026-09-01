@@ -1,23 +1,23 @@
+---
+description: 점수는 구조 계약의 한 축입니다 — 화면과 사람의 판단은 별도 필드
+---
+
 # 계약과 상태
-점수는 구조 계약의 한 축입니다. 실제 게임 화면과 사람의 판단은 각각 별도 필드이며 자동 승격하지 않습니다.
+
+점수는 구조 계약의 한 축입니다. 실제 게임 화면과 사람의 판단은 각각 별도 필드이며 **자동 승격하지 않습니다**.
 
 ## 네 개의 상태
 
-STATIC**PASS**bytes · hash · policy
+| 필드            | 기본값            | 근거                    |
+| ------------- | -------------- | --------------------- |
+| STATIC        | PASS           | bytes · hash · policy |
+| RUNTIME       | GAP            | shipped frame 필요      |
+| PLAYER FACING | NOT\_EVALUATED | 실제 화면 판정 전            |
+| HUMAN         | PENDING        | 사람 판정 대기              |
 
-RUNTIME**GAP**shipped frame 필요
+## asset inspection evidence
 
-PLAYER**NOT\_EVALUATED**실제 화면 전
-
-HUMAN**PENDING**사람 판정 대기
-
-## 계약 JSON
-
-asset inspection evidence JSON 계약 예시 보기
-
-clunk.asset-inspection-evidence.v2json
-
-```
+```json
 {
   "schema": "clunk.asset-inspection-evidence.v2",
   "evidenceKind": "CONTRACT_FIXTURE",
@@ -42,13 +42,11 @@ clunk.asset-inspection-evidence.v2json
 }
 ```
 
-CONTRACT\_FIXTURE (static only) | PLAYER\_FACING\_CAPTURE (hashed screenshot/frame required); finding ownership을 보존합니다.
+`CONTRACT_FIXTURE`는 static 전용, `PLAYER_FACING_CAPTURE`는 해시된 화면 캡처가 필수입니다.
 
-shipped frame manifest JSON runtime 입력 보기
+## shipped frame manifest
 
-frame-manifest.v1json
-
-```
+```json
 {
   "schema": "clunk.frame-manifest.v1",
   "runId": "HF-M111-baseline",
@@ -70,6 +68,4 @@ frame-manifest.v1json
 }
 ```
 
-reviewStatus: NOT\_EVALUATED · visualRuntime: GAP · playerFacing: NOT\_EVALUATED; renderer pair는 별도 제출합니다.
-
-**기본 경계**reviewStatus=NOT\_EVALUATED · visualRuntime=GAP · playerFacing=NOT\_EVALUATED
+기본 경계는 항상 `reviewStatus=NOT_EVALUATED · visualRuntime=GAP · playerFacing=NOT_EVALUATED`입니다.
