@@ -6,8 +6,8 @@
   "source": {
     "path": "storage-shed.m1.clunk-optimized.sheet.png",
     "origin": "procedural",
-    "sha256": "49dbfe96e76959820b2ba906aff4e0d3f037320fdee0acea9679fdb54b13cdb8",
-    "bytes": 4685
+    "sha256": "d185d9cc5eb4131c716339bd29c485dfd08e6f6c9f4b0da93603290bf226c31f",
+    "bytes": 4529
   },
   "target": {
     "engine": "engine-agnostic",
@@ -20,14 +20,14 @@
   },
   "sheet": {
     "path": "storage-shed.m1.clunk-optimized.sheet.png",
-    "sha256": "49dbfe96e76959820b2ba906aff4e0d3f037320fdee0acea9679fdb54b13cdb8",
-    "bytes": 4685,
-    "width": 512,
-    "height": 64
+    "sha256": "d185d9cc5eb4131c716339bd29c485dfd08e6f6c9f4b0da93603290bf226c31f",
+    "bytes": 4529,
+    "width": 64,
+    "height": 512
   },
   "grid": {
-    "columns": 8,
-    "rows": 1,
+    "columns": 1,
+    "rows": 8,
     "frameWidth": 64,
     "frameHeight": 64,
     "padding": {
@@ -41,7 +41,7 @@
   },
   "frames": [
     {
-      "id": "idle_south",
+      "id": "idle_south_00",
       "index": 0,
       "x": 0,
       "y": 0,
@@ -55,10 +55,10 @@
       }
     },
     {
-      "id": "idle_southwest",
+      "id": "idle_southwest_00",
       "index": 1,
-      "x": 64,
-      "y": 0,
+      "x": 0,
+      "y": 64,
       "width": 64,
       "height": 64,
       "state": "idle",
@@ -69,10 +69,10 @@
       }
     },
     {
-      "id": "idle_west",
+      "id": "idle_west_00",
       "index": 2,
-      "x": 128,
-      "y": 0,
+      "x": 0,
+      "y": 128,
       "width": 64,
       "height": 64,
       "state": "idle",
@@ -83,10 +83,10 @@
       }
     },
     {
-      "id": "idle_northwest",
+      "id": "idle_northwest_00",
       "index": 3,
-      "x": 192,
-      "y": 0,
+      "x": 0,
+      "y": 192,
       "width": 64,
       "height": 64,
       "state": "idle",
@@ -97,10 +97,10 @@
       }
     },
     {
-      "id": "idle_north",
+      "id": "idle_north_00",
       "index": 4,
-      "x": 256,
-      "y": 0,
+      "x": 0,
+      "y": 256,
       "width": 64,
       "height": 64,
       "state": "idle",
@@ -111,10 +111,10 @@
       }
     },
     {
-      "id": "idle_northeast",
+      "id": "idle_northeast_00",
       "index": 5,
-      "x": 320,
-      "y": 0,
+      "x": 0,
+      "y": 320,
       "width": 64,
       "height": 64,
       "state": "idle",
@@ -125,10 +125,10 @@
       }
     },
     {
-      "id": "idle_east",
+      "id": "idle_east_00",
       "index": 6,
-      "x": 384,
-      "y": 0,
+      "x": 0,
+      "y": 384,
       "width": 64,
       "height": 64,
       "state": "idle",
@@ -139,10 +139,10 @@
       }
     },
     {
-      "id": "idle_southeast",
+      "id": "idle_southeast_00",
       "index": 7,
-      "x": 448,
-      "y": 0,
+      "x": 0,
+      "y": 448,
       "width": 64,
       "height": 64,
       "state": "idle",
@@ -161,7 +161,7 @@
       "fps": 1,
       "loop": false,
       "frameIds": [
-        "idle_south"
+        "idle_south_00"
       ]
     },
     {
@@ -171,7 +171,7 @@
       "fps": 1,
       "loop": false,
       "frameIds": [
-        "idle_southwest"
+        "idle_southwest_00"
       ]
     },
     {
@@ -181,7 +181,7 @@
       "fps": 1,
       "loop": false,
       "frameIds": [
-        "idle_west"
+        "idle_west_00"
       ]
     },
     {
@@ -191,7 +191,7 @@
       "fps": 1,
       "loop": false,
       "frameIds": [
-        "idle_northwest"
+        "idle_northwest_00"
       ]
     },
     {
@@ -201,7 +201,7 @@
       "fps": 1,
       "loop": false,
       "frameIds": [
-        "idle_north"
+        "idle_north_00"
       ]
     },
     {
@@ -211,7 +211,7 @@
       "fps": 1,
       "loop": false,
       "frameIds": [
-        "idle_northeast"
+        "idle_northeast_00"
       ]
     },
     {
@@ -221,7 +221,7 @@
       "fps": 1,
       "loop": false,
       "frameIds": [
-        "idle_east"
+        "idle_east_00"
       ]
     },
     {
@@ -231,7 +231,7 @@
       "fps": 1,
       "loop": false,
       "frameIds": [
-        "idle_southeast"
+        "idle_southeast_00"
       ]
     }
   ],
@@ -246,9 +246,9 @@
     "maxAlphaCoverage": 0.92
   },
   "metrics": {
-    "sourceHash": "49dbfe96e76959820b2ba906aff4e0d3f037320fdee0acea9679fdb54b13cdb8",
+    "sourceHash": "d185d9cc5eb4131c716339bd29c485dfd08e6f6c9f4b0da93603290bf226c31f",
     "sheetDimensions": {
-      "width": 512,
+      "width": 64,
       "height": 64
     },
     "alphaCoverage": 0.57019,
@@ -263,14 +263,14 @@
       0.602051
     ],
     "frameHashes": {
-      "idle_south": "f64a9939a793790bb78b5c3064be1b83af776166a4ec65ff9dacffb4db897f37",
-      "idle_southwest": "b4e0be14e472ea9350e919d7c37661401ad352b226fc598eb31ffc5ebb13c030",
-      "idle_west": "f30ce68472e43f5c23a1fe7e590e1d98cc47871a8bf4ba6a1cfd3ceff57d0792",
-      "idle_northwest": "7ee28ae993ba1fe4324803f56a0e1ebb35abbdb44a33044f89ebebabbb386f20",
-      "idle_north": "3418bc4e7084bf9858ad0c5cd1002f3f4059f1586fe46a2f3599ab2e98aab2db",
-      "idle_northeast": "8c08c57b9f9bcf2d7af6404e80dc74df409f906dcb182d499c442669ed56faa3",
-      "idle_east": "2b6c9d4d5bf086a46f75be691f59050d8da3243ad8263f07fa6908d08bcd620a",
-      "idle_southeast": "8ec0960ebed6fff89e7df8faf3e86040943d0f2f1ae32d8ec1a32f3b925586f3"
+      "idle_south_00": "db821c913bd1ad2f6784479aed21521d59b1396620c9cb7e582e2ad8c8d7d0b2",
+      "idle_southwest_00": "0a3d19c47a2c2e19be8c1e4e0fb20a3987067e1f08d1de76e3f175734791cd60",
+      "idle_west_00": "3ae50ed04654d975c94ae5da18ab36150b675de7440e8a107461a37916cba465",
+      "idle_northwest_00": "669ca0e71e31b21527ce1105a8651123d4afb65b61b15364d03851003b14d146",
+      "idle_north_00": "3fd0bc7e198d3799789e1984e485a7827994b1fbd8b76a3f8603d60b366cec00",
+      "idle_northeast_00": "a9329a44c9a1c6e1aea6ea40ea5b51b25367cbcd8b0f39cf8e7a68658d151c1a",
+      "idle_east_00": "bfeea38f266cf5149ca5b7563b3e89508ac70603c1e49de88c47522e4b7ac885",
+      "idle_southeast_00": "37acb4e6d562c45a558713e8103d17b55c6025a47ab2e7cf0d294e8af5460007"
     },
     "hasTransparentPixels": true,
     "emptyFrameIds": [],
@@ -299,7 +299,7 @@
       "height": 64
     },
     "hardAlphaRatio": 1,
-    "uniqueColorCount": 19,
+    "uniqueColorCount": 20,
     "dominantRunLength": 1,
     "offGridPixelRatio": 0,
     "distinctFrameRatio": 1
@@ -310,42 +310,43 @@
     "triangles": 1620,
     "views": 8,
     "pitch": 0.62,
+    "clip": null,
     "palette": {
       "requested": 32,
       "produced": 32,
       "colours": [
-        "#30241a",
-        "#402e1f",
-        "#503524",
-        "#603225",
+        "#241913",
+        "#35271b",
+        "#303231",
+        "#3b2e20",
+        "#373f41",
+        "#423221",
+        "#423221",
+        "#443221",
+        "#463525",
         "#423727",
-        "#4f3928",
-        "#553b29",
-        "#51524e",
-        "#69655b",
-        "#834534",
-        "#835537",
-        "#876b47",
-        "#876b47",
-        "#716c61",
-        "#7f918b",
-        "#8c653e",
-        "#8c653e",
-        "#8c653e",
-        "#8c653e",
-        "#8c653e",
-        "#906b44",
-        "#ac6d4b",
-        "#97774f",
-        "#b48351",
-        "#a19b8d",
-        "#a19b8d",
-        "#a19b8d",
-        "#a19b8d",
-        "#a19b8d",
-        "#a19b8d",
-        "#a19b8d",
-        "#c16347"
+        "#423728",
+        "#533524",
+        "#824632",
+        "#865939",
+        "#815e3a",
+        "#886644",
+        "#866b4a",
+        "#896c48",
+        "#6d7068",
+        "#a5553e",
+        "#bc6146",
+        "#cb684b",
+        "#ce694c",
+        "#ce694c",
+        "#bc8954",
+        "#aea897",
+        "#aea897",
+        "#aea897",
+        "#aea897",
+        "#aea897",
+        "#aea797",
+        "#aea797"
       ]
     },
     "coverage": [

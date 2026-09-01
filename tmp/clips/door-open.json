@@ -1,0 +1,7 @@
+{
+  "name": "open",
+  "fps": 10,
+  "tracks": [
+    { "node": "door_pivot", "axis": "y", "degrees": [0, -14, -34, -56, -74, -85, -90, -90] }
+  ]
+}

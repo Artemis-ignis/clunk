@@ -1,0 +1,1503 @@
+{
+  "schema": "clunk.sprite-sheet-review.v1",
+  "schemaVersion": "1",
+  "evidenceKind": "CONTRACT_FIXTURE",
+  "assetId": "fence-gate.m1.clunk-optimized",
+  "source": {
+    "path": "fence-gate.m1.clunk-optimized.sheet.png",
+    "origin": "procedural",
+    "sha256": "bfbd2af8db31143f83f9fc8e8741bfb753920c994ac4985000590fd503f71300",
+    "bytes": 19961
+  },
+  "target": {
+    "engine": "engine-agnostic",
+    "renderer": "clunk-software-rasteriser",
+    "platform": "2d",
+    "logicalFramePx": {
+      "width": 64,
+      "height": 64
+    }
+  },
+  "sheet": {
+    "path": "fence-gate.m1.clunk-optimized.sheet.png",
+    "sha256": "bfbd2af8db31143f83f9fc8e8741bfb753920c994ac4985000590fd503f71300",
+    "bytes": 19961,
+    "width": 512,
+    "height": 512
+  },
+  "grid": {
+    "columns": 8,
+    "rows": 8,
+    "frameWidth": 64,
+    "frameHeight": 64,
+    "padding": {
+      "x": 0,
+      "y": 0
+    },
+    "spacing": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "frames": [
+    {
+      "id": "swing_south_00",
+      "index": 0,
+      "x": 0,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_south_01",
+      "index": 1,
+      "x": 64,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_south_02",
+      "index": 2,
+      "x": 128,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_south_03",
+      "index": 3,
+      "x": 192,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_south_04",
+      "index": 4,
+      "x": 256,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_south_05",
+      "index": 5,
+      "x": 320,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_south_06",
+      "index": 6,
+      "x": 384,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_south_07",
+      "index": 7,
+      "x": 448,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_southwest_00",
+      "index": 8,
+      "x": 0,
+      "y": 64,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "southwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_southwest_01",
+      "index": 9,
+      "x": 64,
+      "y": 64,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "southwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_southwest_02",
+      "index": 10,
+      "x": 128,
+      "y": 64,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "southwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_southwest_03",
+      "index": 11,
+      "x": 192,
+      "y": 64,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "southwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_southwest_04",
+      "index": 12,
+      "x": 256,
+      "y": 64,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "southwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_southwest_05",
+      "index": 13,
+      "x": 320,
+      "y": 64,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "southwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_southwest_06",
+      "index": 14,
+      "x": 384,
+      "y": 64,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "southwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_southwest_07",
+      "index": 15,
+      "x": 448,
+      "y": 64,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "southwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_west_00",
+      "index": 16,
+      "x": 0,
+      "y": 128,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_west_01",
+      "index": 17,
+      "x": 64,
+      "y": 128,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_west_02",
+      "index": 18,
+      "x": 128,
+      "y": 128,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_west_03",
+      "index": 19,
+      "x": 192,
+      "y": 128,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_west_04",
+      "index": 20,
+      "x": 256,
+      "y": 128,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_west_05",
+      "index": 21,
+      "x": 320,
+      "y": 128,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_west_06",
+      "index": 22,
+      "x": 384,
+      "y": 128,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_west_07",
+      "index": 23,
+      "x": 448,
+      "y": 128,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_northwest_00",
+      "index": 24,
+      "x": 0,
+      "y": 192,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "northwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_northwest_01",
+      "index": 25,
+      "x": 64,
+      "y": 192,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "northwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_northwest_02",
+      "index": 26,
+      "x": 128,
+      "y": 192,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "northwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_northwest_03",
+      "index": 27,
+      "x": 192,
+      "y": 192,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "northwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_northwest_04",
+      "index": 28,
+      "x": 256,
+      "y": 192,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "northwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_northwest_05",
+      "index": 29,
+      "x": 320,
+      "y": 192,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "northwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_northwest_06",
+      "index": 30,
+      "x": 384,
+      "y": 192,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "northwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_northwest_07",
+      "index": 31,
+      "x": 448,
+      "y": 192,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "northwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_north_00",
+      "index": 32,
+      "x": 0,
+      "y": 256,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_north_01",
+      "index": 33,
+      "x": 64,
+      "y": 256,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_north_02",
+      "index": 34,
+      "x": 128,
+      "y": 256,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_north_03",
+      "index": 35,
+      "x": 192,
+      "y": 256,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_north_04",
+      "index": 36,
+      "x": 256,
+      "y": 256,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_north_05",
+      "index": 37,
+      "x": 320,
+      "y": 256,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_north_06",
+      "index": 38,
+      "x": 384,
+      "y": 256,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_north_07",
+      "index": 39,
+      "x": 448,
+      "y": 256,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_northeast_00",
+      "index": 40,
+      "x": 0,
+      "y": 320,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "northeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_northeast_01",
+      "index": 41,
+      "x": 64,
+      "y": 320,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "northeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_northeast_02",
+      "index": 42,
+      "x": 128,
+      "y": 320,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "northeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_northeast_03",
+      "index": 43,
+      "x": 192,
+      "y": 320,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "northeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_northeast_04",
+      "index": 44,
+      "x": 256,
+      "y": 320,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "northeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_northeast_05",
+      "index": 45,
+      "x": 320,
+      "y": 320,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "northeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_northeast_06",
+      "index": 46,
+      "x": 384,
+      "y": 320,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "northeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_northeast_07",
+      "index": 47,
+      "x": 448,
+      "y": 320,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "northeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_east_00",
+      "index": 48,
+      "x": 0,
+      "y": 384,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_east_01",
+      "index": 49,
+      "x": 64,
+      "y": 384,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_east_02",
+      "index": 50,
+      "x": 128,
+      "y": 384,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_east_03",
+      "index": 51,
+      "x": 192,
+      "y": 384,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_east_04",
+      "index": 52,
+      "x": 256,
+      "y": 384,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_east_05",
+      "index": 53,
+      "x": 320,
+      "y": 384,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_east_06",
+      "index": 54,
+      "x": 384,
+      "y": 384,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_east_07",
+      "index": 55,
+      "x": 448,
+      "y": 384,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_southeast_00",
+      "index": 56,
+      "x": 0,
+      "y": 448,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "southeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_southeast_01",
+      "index": 57,
+      "x": 64,
+      "y": 448,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "southeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_southeast_02",
+      "index": 58,
+      "x": 128,
+      "y": 448,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "southeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_southeast_03",
+      "index": 59,
+      "x": 192,
+      "y": 448,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "southeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_southeast_04",
+      "index": 60,
+      "x": 256,
+      "y": 448,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "southeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_southeast_05",
+      "index": 61,
+      "x": 320,
+      "y": 448,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "southeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_southeast_06",
+      "index": 62,
+      "x": 384,
+      "y": 448,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "southeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "swing_southeast_07",
+      "index": 63,
+      "x": 448,
+      "y": 448,
+      "width": 64,
+      "height": 64,
+      "state": "swing",
+      "direction": "southeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    }
+  ],
+  "animations": [
+    {
+      "id": "swing_south",
+      "state": "swing",
+      "direction": "south",
+      "fps": 8,
+      "loop": true,
+      "frameIds": [
+        "swing_south_00",
+        "swing_south_01",
+        "swing_south_02",
+        "swing_south_03",
+        "swing_south_04",
+        "swing_south_05",
+        "swing_south_06",
+        "swing_south_07"
+      ]
+    },
+    {
+      "id": "swing_southwest",
+      "state": "swing",
+      "direction": "southwest",
+      "fps": 8,
+      "loop": true,
+      "frameIds": [
+        "swing_southwest_00",
+        "swing_southwest_01",
+        "swing_southwest_02",
+        "swing_southwest_03",
+        "swing_southwest_04",
+        "swing_southwest_05",
+        "swing_southwest_06",
+        "swing_southwest_07"
+      ]
+    },
+    {
+      "id": "swing_west",
+      "state": "swing",
+      "direction": "west",
+      "fps": 8,
+      "loop": true,
+      "frameIds": [
+        "swing_west_00",
+        "swing_west_01",
+        "swing_west_02",
+        "swing_west_03",
+        "swing_west_04",
+        "swing_west_05",
+        "swing_west_06",
+        "swing_west_07"
+      ]
+    },
+    {
+      "id": "swing_northwest",
+      "state": "swing",
+      "direction": "northwest",
+      "fps": 8,
+      "loop": true,
+      "frameIds": [
+        "swing_northwest_00",
+        "swing_northwest_01",
+        "swing_northwest_02",
+        "swing_northwest_03",
+        "swing_northwest_04",
+        "swing_northwest_05",
+        "swing_northwest_06",
+        "swing_northwest_07"
+      ]
+    },
+    {
+      "id": "swing_north",
+      "state": "swing",
+      "direction": "north",
+      "fps": 8,
+      "loop": true,
+      "frameIds": [
+        "swing_north_00",
+        "swing_north_01",
+        "swing_north_02",
+        "swing_north_03",
+        "swing_north_04",
+        "swing_north_05",
+        "swing_north_06",
+        "swing_north_07"
+      ]
+    },
+    {
+      "id": "swing_northeast",
+      "state": "swing",
+      "direction": "northeast",
+      "fps": 8,
+      "loop": true,
+      "frameIds": [
+        "swing_northeast_00",
+        "swing_northeast_01",
+        "swing_northeast_02",
+        "swing_northeast_03",
+        "swing_northeast_04",
+        "swing_northeast_05",
+        "swing_northeast_06",
+        "swing_northeast_07"
+      ]
+    },
+    {
+      "id": "swing_east",
+      "state": "swing",
+      "direction": "east",
+      "fps": 8,
+      "loop": true,
+      "frameIds": [
+        "swing_east_00",
+        "swing_east_01",
+        "swing_east_02",
+        "swing_east_03",
+        "swing_east_04",
+        "swing_east_05",
+        "swing_east_06",
+        "swing_east_07"
+      ]
+    },
+    {
+      "id": "swing_southeast",
+      "state": "swing",
+      "direction": "southeast",
+      "fps": 8,
+      "loop": true,
+      "frameIds": [
+        "swing_southeast_00",
+        "swing_southeast_01",
+        "swing_southeast_02",
+        "swing_southeast_03",
+        "swing_southeast_04",
+        "swing_southeast_05",
+        "swing_southeast_06",
+        "swing_southeast_07"
+      ]
+    }
+  ],
+  "qualityPolicy": {
+    "mode": "BLOCKING",
+    "strictChecks": [
+      "pixel-discipline"
+    ],
+    "pixelGridSize": 1,
+    "requireTransparentBackground": true,
+    "minAlphaCoverage": 0.05,
+    "maxAlphaCoverage": 0.92
+  },
+  "metrics": {
+    "sourceHash": "bfbd2af8db31143f83f9fc8e8741bfb753920c994ac4985000590fd503f71300",
+    "sheetDimensions": {
+      "width": 512,
+      "height": 64
+    },
+    "alphaCoverage": 0.202484,
+    "frameAlphaCoverages": [
+      0.240723,
+      0.249512,
+      0.229736,
+      0.159668,
+      0.155762,
+      0.159668,
+      0.229736,
+      0.249512,
+      0.239746,
+      0.256104,
+      0.281494,
+      0.301025,
+      0.273682,
+      0.301025,
+      0.281494,
+      0.256104,
+      0.086914,
+      0.129639,
+      0.174561,
+      0.1875,
+      0.190186,
+      0.1875,
+      0.174561,
+      0.129639,
+      0.240479,
+      0.211914,
+      0.163818,
+      0.178223,
+      0.189453,
+      0.178223,
+      0.163818,
+      0.211914,
+      0.239746,
+      0.227783,
+      0.204346,
+      0.174805,
+      0.151123,
+      0.174805,
+      0.204346,
+      0.227783,
+      0.239014,
+      0.228516,
+      0.222412,
+      0.221924,
+      0.216797,
+      0.221924,
+      0.222412,
+      0.228516,
+      0.087646,
+      0.143555,
+      0.173584,
+      0.172852,
+      0.172119,
+      0.172852,
+      0.173584,
+      0.143555,
+      0.240234,
+      0.212646,
+      0.177734,
+      0.211426,
+      0.205811,
+      0.211426,
+      0.177734,
+      0.212646
+    ],
+    "frameHashes": {
+      "swing_south_00": "e81796b446d6fbe7a08c7f82ac1375667ea6797354c3d7f132b9a97ee8a4a4b5",
+      "swing_south_01": "0d705ea4c7848168a9b63e2c33b1f0fab4decafedace4a0a67960bb2c7e7e9ca",
+      "swing_south_02": "070c9510b5fbb3de2ba8c996dd53ec91ebd71db926c910b334baa5c015621785",
+      "swing_south_03": "51ea3c6b943d174f358efb29723d3e1499a26d4984d00007cb92e7fa4b993914",
+      "swing_south_04": "50bb766b201a2164ba1d1d6c2e63b525593814247485be7bb5c2882def9d5ddc",
+      "swing_south_05": "51ea3c6b943d174f358efb29723d3e1499a26d4984d00007cb92e7fa4b993914",
+      "swing_south_06": "070c9510b5fbb3de2ba8c996dd53ec91ebd71db926c910b334baa5c015621785",
+      "swing_south_07": "0d705ea4c7848168a9b63e2c33b1f0fab4decafedace4a0a67960bb2c7e7e9ca",
+      "swing_southwest_00": "bf05773a71a5f9b4f8dc9931e2e9ab23e99008be9edfbbca1c86c30d26d5dd89",
+      "swing_southwest_01": "3be1c9b2b5c4ecdd3ccb29bb9ae794927bd2a7586c2a6ca6ec3b0dda4a0666d8",
+      "swing_southwest_02": "123288bf46f6fd7e27a8590ac992cb01d3d72b7c3cf64a6883ffe9cbf8ce6b35",
+      "swing_southwest_03": "a9131a518d3fdc3e921d7e630717ae5f8781c54255cc16201dba88df3aab3bfe",
+      "swing_southwest_04": "7ca596c6aa816375dfa19d7c4d5ad5dc1688aa269142e9a7e92e18701a412622",
+      "swing_southwest_05": "a9131a518d3fdc3e921d7e630717ae5f8781c54255cc16201dba88df3aab3bfe",
+      "swing_southwest_06": "123288bf46f6fd7e27a8590ac992cb01d3d72b7c3cf64a6883ffe9cbf8ce6b35",
+      "swing_southwest_07": "3be1c9b2b5c4ecdd3ccb29bb9ae794927bd2a7586c2a6ca6ec3b0dda4a0666d8",
+      "swing_west_00": "444784711d0beb92070d8696895ef1cb4b1300b6a58ac2a5451b26ff2c52b405",
+      "swing_west_01": "1f582864c39cfc8d1aa02cdd18bff130046be4dfff5c1aa57fa7194bc0071ce3",
+      "swing_west_02": "e01766c0fe7efc4f6c162cb58a9b3a39aa91500b847cd4bb45aa29b01526025f",
+      "swing_west_03": "88d51e09a342f37adffcf4ceab91547a42afc4bcb788d67a7c6491891f989bd1",
+      "swing_west_04": "2b7d339e050ac5efa8a0229f28f7dae4efce7da8e7c40450d4090b7763e23d0d",
+      "swing_west_05": "88d51e09a342f37adffcf4ceab91547a42afc4bcb788d67a7c6491891f989bd1",
+      "swing_west_06": "e01766c0fe7efc4f6c162cb58a9b3a39aa91500b847cd4bb45aa29b01526025f",
+      "swing_west_07": "1f582864c39cfc8d1aa02cdd18bff130046be4dfff5c1aa57fa7194bc0071ce3",
+      "swing_northwest_00": "63ba7efc57ae940abc61b37f9f324eedcc42dc5b171d6000da8ce414f5325bae",
+      "swing_northwest_01": "33a71e78ef098943ed65ea7dcd18c9d46ea68ff6d16967ff3e09949e1b60ce45",
+      "swing_northwest_02": "a22dbb24be47decc99f9ad37985ac4c30dab9fb0d7fc9d7535e53243fdcdd980",
+      "swing_northwest_03": "9db1e4df451a2fc744c504d7d03711ceaf4569ae623cd312b636c3552e2c444c",
+      "swing_northwest_04": "0ec85f11cade023f037425b8655a15f427f3d78ec962f802754bdf17da88df56",
+      "swing_northwest_05": "9db1e4df451a2fc744c504d7d03711ceaf4569ae623cd312b636c3552e2c444c",
+      "swing_northwest_06": "a22dbb24be47decc99f9ad37985ac4c30dab9fb0d7fc9d7535e53243fdcdd980",
+      "swing_northwest_07": "33a71e78ef098943ed65ea7dcd18c9d46ea68ff6d16967ff3e09949e1b60ce45",
+      "swing_north_00": "f60c85221831cc9f1fe683a9841875cf85dae071df824247c42d4367e56e28d9",
+      "swing_north_01": "90c73f65febac64ec0c53215e7c688354b7daea048e88392de8bcf2cbfa5735a",
+      "swing_north_02": "f5595b6c3f668bcfaf86158ac6b0d46ec883e4da43f044dccaf71168d5749c9c",
+      "swing_north_03": "36be8dd2167f61934bd5044f18f6817d27becb242a1811f56faca56de4cc43d0",
+      "swing_north_04": "abf602e1788e94c4b04bce0b116941840d1afeadc819783407b03b41d95ce3e6",
+      "swing_north_05": "36be8dd2167f61934bd5044f18f6817d27becb242a1811f56faca56de4cc43d0",
+      "swing_north_06": "f5595b6c3f668bcfaf86158ac6b0d46ec883e4da43f044dccaf71168d5749c9c",
+      "swing_north_07": "90c73f65febac64ec0c53215e7c688354b7daea048e88392de8bcf2cbfa5735a",
+      "swing_northeast_00": "aafb5e57845aa14bf73e7fe608bcc5975620d195de7fa0454a6548680134ac0f",
+      "swing_northeast_01": "cb9f20a9f2d4126ace27744b786894c16594ac5d5031b2c8f6a5f4a79e0cae4c",
+      "swing_northeast_02": "b31211fd0c2cbd489c7c26fd52a2dd94e91d41236b5cbe5d2424970ad41f946f",
+      "swing_northeast_03": "20c5350fc25f3044091e12480c4979a99cdb0cffa561a92a93fcc659df8df180",
+      "swing_northeast_04": "8771bd25128dd22485ade6c6c1a2ff914ca727ab2275394cc9e6937ce2e49e47",
+      "swing_northeast_05": "20c5350fc25f3044091e12480c4979a99cdb0cffa561a92a93fcc659df8df180",
+      "swing_northeast_06": "b31211fd0c2cbd489c7c26fd52a2dd94e91d41236b5cbe5d2424970ad41f946f",
+      "swing_northeast_07": "cb9f20a9f2d4126ace27744b786894c16594ac5d5031b2c8f6a5f4a79e0cae4c",
+      "swing_east_00": "f5f01d444fee972550edccbc85d98c0049393caa0506dec9d4a39acee59a15ba",
+      "swing_east_01": "25b247a7c1bfb5e9c5509e58f6958ba04454af980aac5a13375ca1c1bf42a5c2",
+      "swing_east_02": "392fe90856c2c18d5a4cbecb248403230288996b7fd0382c8f3cdd2f43af2203",
+      "swing_east_03": "59492ac7d3c1cbc330f325c5fdbb076647a2ac9dca2ec4019b33f59e7fb9eb8a",
+      "swing_east_04": "82d39d78fc8dcff9c42cc48375af8c1b86cb6e28bf08c5e29f4db7b623715837",
+      "swing_east_05": "59492ac7d3c1cbc330f325c5fdbb076647a2ac9dca2ec4019b33f59e7fb9eb8a",
+      "swing_east_06": "392fe90856c2c18d5a4cbecb248403230288996b7fd0382c8f3cdd2f43af2203",
+      "swing_east_07": "25b247a7c1bfb5e9c5509e58f6958ba04454af980aac5a13375ca1c1bf42a5c2",
+      "swing_southeast_00": "98cb5293ef2f6fd9cd174588196d52d5f7009d9021016de046e18e472c745852",
+      "swing_southeast_01": "cd7eae5b039a68ec08a13b12c9ac66406d68aeaa35a6ad0fb9efd6a6ff0bede8",
+      "swing_southeast_02": "c4862be4f0cc50f98fc34b0130ee2d7649e767981a3ef83c2e006564315b9dd7",
+      "swing_southeast_03": "5c92d57d8d506d7873363058eaef11a895401c6823a4719acd32e9cd81bb2209",
+      "swing_southeast_04": "27cd9bad425f437ed3ae2a2e61042ce10fd4aedc444c8025a090ad6eb833610c",
+      "swing_southeast_05": "5c92d57d8d506d7873363058eaef11a895401c6823a4719acd32e9cd81bb2209",
+      "swing_southeast_06": "c4862be4f0cc50f98fc34b0130ee2d7649e767981a3ef83c2e006564315b9dd7",
+      "swing_southeast_07": "cd7eae5b039a68ec08a13b12c9ac66406d68aeaa35a6ad0fb9efd6a6ff0bede8"
+    },
+    "hasTransparentPixels": true,
+    "emptyFrameIds": [],
+    "borderTouchRatios": [
+      0.02381,
+      0.02381,
+      0.031746,
+      0.035714,
+      0.043651,
+      0.035714,
+      0.031746,
+      0.02381,
+      0,
+      0,
+      0,
+      0.027778,
+      0.047619,
+      0.027778,
+      0,
+      0,
+      0.055556,
+      0.055556,
+      0.055556,
+      0.103175,
+      0.111111,
+      0.103175,
+      0.055556,
+      0.055556,
+      0,
+      0,
+      0,
+      0,
+      0.047619,
+      0,
+      0,
+      0,
+      0.02381,
+      0.02381,
+      0.02381,
+      0.02381,
+      0.02381,
+      0.02381,
+      0.02381,
+      0.02381,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0.055556,
+      0.055556,
+      0.055556,
+      0.119048,
+      0.103175,
+      0.119048,
+      0.055556,
+      0.055556,
+      0,
+      0,
+      0,
+      0.055556,
+      0.055556,
+      0.055556,
+      0,
+      0
+    ],
+    "silhouetteCoverages": [
+      0.240723,
+      0.249512,
+      0.229736,
+      0.159668,
+      0.155762,
+      0.159668,
+      0.229736,
+      0.249512,
+      0.239746,
+      0.256104,
+      0.281494,
+      0.301025,
+      0.273682,
+      0.301025,
+      0.281494,
+      0.256104,
+      0.086914,
+      0.129639,
+      0.174561,
+      0.1875,
+      0.190186,
+      0.1875,
+      0.174561,
+      0.129639,
+      0.240479,
+      0.211914,
+      0.163818,
+      0.178223,
+      0.189453,
+      0.178223,
+      0.163818,
+      0.211914,
+      0.239746,
+      0.227783,
+      0.204346,
+      0.174805,
+      0.151123,
+      0.174805,
+      0.204346,
+      0.227783,
+      0.239014,
+      0.228516,
+      0.222412,
+      0.221924,
+      0.216797,
+      0.221924,
+      0.222412,
+      0.228516,
+      0.087646,
+      0.143555,
+      0.173584,
+      0.172852,
+      0.172119,
+      0.172852,
+      0.173584,
+      0.143555,
+      0.240234,
+      0.212646,
+      0.177734,
+      0.211426,
+      0.205811,
+      0.211426,
+      0.177734,
+      0.212646
+    ],
+    "measuredCellPx": {
+      "width": 64,
+      "height": 64
+    },
+    "hardAlphaRatio": 1,
+    "uniqueColorCount": 19,
+    "dominantRunLength": 1,
+    "offGridPixelRatio": 0,
+    "distinctFrameRatio": 0.625
+  },
+  "generation": {
+    "glb": "fence-gate.m1.clunk-optimized.glb",
+    "glbSha256": "a7c3c710e2edc5e158d00dbc9a32eaae270486f04e51ee7a50cd0449b0d3eb6c",
+    "triangles": 520,
+    "views": 8,
+    "pitch": 0.62,
+    "clip": {
+      "name": "swing",
+      "fps": 8,
+      "frames": 8,
+      "tracks": [
+        {
+          "node": "gate_pivot",
+          "axis": "y",
+          "degrees": [
+            0,
+            -22,
+            -48,
+            -74,
+            -90,
+            -74,
+            -48,
+            -22
+          ]
+        }
+      ]
+    },
+    "palette": {
+      "requested": 32,
+      "produced": 32,
+      "colours": [
+        "#231913",
+        "#382b1c",
+        "#423625",
+        "#373631",
+        "#4b3323",
+        "#5f482e",
+        "#675b48",
+        "#745636",
+        "#70614c",
+        "#805d3d",
+        "#91744e",
+        "#a58459",
+        "#aa875b",
+        "#ad895b",
+        "#ad895b",
+        "#aea897",
+        "#aea897",
+        "#aea897",
+        "#aea897",
+        "#aea897",
+        "#aea797",
+        "#aea897",
+        "#bf8d57",
+        "#cea26a",
+        "#c4a478",
+        "#aea797",
+        "#aea897",
+        "#aea897",
+        "#aea897",
+        "#aea797",
+        "#aea897",
+        "#daab70"
+      ]
+    },
+    "coverage": [
+      0.2407,
+      0.2495,
+      0.2297,
+      0.1597,
+      0.1558,
+      0.1597,
+      0.2297,
+      0.2495,
+      0.2397,
+      0.2561,
+      0.2815,
+      0.301,
+      0.2737,
+      0.301,
+      0.2815,
+      0.2561,
+      0.0869,
+      0.1296,
+      0.1746,
+      0.1875,
+      0.1902,
+      0.1875,
+      0.1746,
+      0.1296,
+      0.2405,
+      0.2119,
+      0.1638,
+      0.1782,
+      0.1895,
+      0.1782,
+      0.1638,
+      0.2119,
+      0.2397,
+      0.2278,
+      0.2043,
+      0.1748,
+      0.1511,
+      0.1748,
+      0.2043,
+      0.2278,
+      0.239,
+      0.2285,
+      0.2224,
+      0.2219,
+      0.2168,
+      0.2219,
+      0.2224,
+      0.2285,
+      0.0876,
+      0.1436,
+      0.1736,
+      0.1729,
+      0.1721,
+      0.1729,
+      0.1736,
+      0.1436,
+      0.2402,
+      0.2126,
+      0.1777,
+      0.2114,
+      0.2058,
+      0.2114,
+      0.1777,
+      0.2126
+    ]
+  }
+}

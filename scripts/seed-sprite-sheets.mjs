@@ -49,6 +49,12 @@ const TITLES = {
   "grove-tree-pack-vol1": "그로브 트리 팩 Vol.1 (6종)",
 };
 
+/** Korean names for the clips, so a title reads as a product rather than a track id. */
+const CLIP_LABELS = { swing: "여닫기", open: "문 열기" };
+
+/** A source directory suffixed with a clip is a distinct product, not another sheet. */
+const ANIMATED_SUFFIX = { "cozy-fence-gate-swing": "cozy-fence-gate", "cozy-storage-shed-door": "cozy-storage-shed" };
+
 const q = (value) => `'${String(value).replace(/'/g, "''")}'`;
 const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
 
@@ -82,6 +88,10 @@ for (const sourceSlug of readdirSync(sheetsRoot).sort()) {
   const manifestFiles = readdirSync(dir).filter((f) => f.endsWith(".sheet.json")).sort();
   if (!manifestFiles.length) continue;
 
+  // An animated directory carries its clip in the name. The title comes from the model it
+  // was rendered from; the slug keeps the clip so the still and the animation stay two
+  // separate products rather than overwriting each other.
+  const titleKey = ANIMATED_SUFFIX[sourceSlug] ?? sourceSlug;
   const slug = `${sourceSlug}-sprites`;
   const assetId = `asset-sp-${sourceSlug}`;
   const destDir = join(root, "public", "market", slug);
@@ -110,12 +120,24 @@ for (const sourceSlug of readdirSync(sheetsRoot).sort()) {
   const views = sheets[0].manifest.generation.views;
   const models = sheets.length;
 
-  const title = `${TITLES[sourceSlug] ?? sourceSlug} — 스프라이트 시트 (${cell}×${cell}, ${views}방향)`;
+  // A clip in the manifest means the sheet moves, and a moving sheet is a different
+  // product with a different title, a different sentence and its own price.
+  const clip = sheets[0].manifest.generation.clip;
+  const fps = clip ? sheets[0].manifest.animations[0].fps : null;
+
+  const title = clip
+    ? `${TITLES[titleKey] ?? sourceSlug} — ${CLIP_LABELS[clip.name] ?? clip.name} 애니메이션 (${cell}×${cell}, ${views}방향 × ${clip.frames}프레임)`
+    : `${TITLES[titleKey] ?? sourceSlug} — 스프라이트 시트 (${cell}×${cell}, ${views}방향)`;
+
   const description = [
-    `${models === 1 ? "" : `모델 ${models}종 · `}${cell}×${cell} RGBA PNG ${cells}컷으로, 한 모델을 ${views}방향에서 렌더했습니다.`,
+    clip
+      ? `${cell}×${cell} RGBA PNG ${cells}컷으로, ${views}방향 각각에 ${clip.frames}프레임짜리 ${CLIP_LABELS[clip.name] ?? clip.name} 동작이 들어 있습니다. 방향당 한 줄이라 한 줄을 그대로 재생하면 됩니다 (${fps}fps 루프).`
+      : `${models === 1 ? "" : `모델 ${models}종 · `}${cell}×${cell} RGBA PNG ${cells}컷으로, 한 모델을 ${views}방향에서 렌더했습니다.`,
     `투명 배경이고 팔레트는 ${palette.size}색이며, 시트 합계는 ${(bytes / 1024).toFixed(1)} KB입니다.`,
     `같은 이름의 3D 상품(${sourceTriangles.toLocaleString("ko-KR")} 삼각형)을 Clunk 렌더러로 구운 것이라, 3D와 2D가 같은 형태·같은 팔레트를 씁니다.`,
-    `프레임 좌표·격자·해시가 담긴 clunk.sprite-sheet-review.v1 매니페스트가 함께 들어 있고, Clunk 스프라이트 검사에서 규격 PASS·픽셀 품질 PASS입니다.`,
+    clip
+      ? `프레임 좌표·격자·해시·프레임별 해시가 담긴 clunk.sprite-sheet-review.v1 매니페스트가 함께 들어 있고, Clunk 스프라이트 검사에서 규격 PASS·픽셀 품질 PASS·애니메이션 재생 PASS입니다.`
+      : `프레임 좌표·격자·해시가 담긴 clunk.sprite-sheet-review.v1 매니페스트가 함께 들어 있고, Clunk 스프라이트 검사에서 규격 PASS·픽셀 품질 PASS입니다.`,
   ].join(" ");
 
   const entry = sheets[0];

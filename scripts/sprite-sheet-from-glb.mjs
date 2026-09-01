@@ -182,7 +182,12 @@ const centre = box.getCenter(new THREE.Vector3());
 const radius = Math.max(box.getSize(new THREE.Vector3()).length() / 2, 1e-6);
 
 // --- Rasteriser --------------------------------------------------------------------------
-const KEY_DIR = new THREE.Vector3(0.52, 0.74, 0.42).normalize(); // warm sun, high and to the right
+// The key light travels with the camera. A world-fixed sun is right for one render and
+// wrong for a sheet: the facings that turn away from it come out as black silhouettes,
+// and a sprite sheet whose north view is unreadable is not a sheet. Every direction gets
+// the same light from the same relative place — high, to the right, slightly behind the
+// viewer — which is how a commercial pack reads the same at every facing.
+const KEY_OFFSET = { right: 0.52, up: 0.74, toward: 0.42 };
 const KEY = [1.0, 0.94, 0.84];
 const SKY = [0.62, 0.72, 0.82]; // cool hemisphere fill from above
 const AMBIENT = 0.2;
@@ -195,6 +200,11 @@ function render(dir) {
   const forward = new THREE.Vector3().subVectors(centre, eye).normalize();
   const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
   const up = new THREE.Vector3().crossVectors(right, forward).normalize();
+  const keyDir = new THREE.Vector3()
+    .addScaledVector(right, KEY_OFFSET.right)
+    .addScaledVector(up, KEY_OFFSET.up)
+    .addScaledVector(forward, -KEY_OFFSET.toward)
+    .normalize();
   const focal = 1 / Math.tan((30 * Math.PI) / 360);
   const v = new THREE.Vector3();
 
@@ -227,7 +237,7 @@ function render(dir) {
     ac.subVectors(tri.c, tri.a);
     normal.crossVectors(ab, ac).normalize();
     if (normal.dot(new THREE.Vector3().subVectors(eye, tri.a)) < 0) normal.negate();
-    const key = Math.max(0, normal.dot(KEY_DIR)) * 0.82;
+    const key = Math.max(0, normal.dot(keyDir)) * 0.82;
     const sky = (normal.y * 0.5 + 0.5) * 0.34;
     const shade = tri.rgb.map((channel, i) => channel * (AMBIENT + key * KEY[i] + sky * SKY[i]));
 
