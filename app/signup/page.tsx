@@ -101,14 +101,13 @@ function AuthJourney({
           <div className="cv5-auth-intro">
             <span className="cv5-badge">✦ CLUNK <b>WORKSPACE</b></span>
             <h1>
-              실제 작업을 위한
+              계정 하나로
               <br />
-              <em>첫 인증.</em>
+              <em>바로 시작합니다.</em>
             </h1>
             <p className="cv5-auth-lede">
-              Clunk는 자체 비밀번호를 만들거나 보관하지 않습니다. Google·GitHub OAuth로
-              Workspace를 시작하면 요청한 경로로 돌아갑니다. OAuth 앱 등록이 끝나지 않은
-              provider는 준비 중으로 정직하게 표시합니다.
+              따로 가입 폼을 채울 필요가 없습니다. Google이나 GitHub 계정으로 한 번
+              로그인하면 내 작업공간이 만들어지고, 그 자리에서 바로 쓸 수 있습니다.
             </p>
             <div className="cv5-auth-facts">
               <div className="cv5-auth-fact">
@@ -134,7 +133,7 @@ function AuthJourney({
             <p className="cv5-auth-copy">
               {signedIn
                 ? "현재 브라우저의 인증 상태를 확인했습니다. 계속하면 요청한 작업면으로 이동합니다."
-                : "새 비밀번호를 만드는 가입 폼은 없습니다. OAuth 인증이 곧 가입이며, 첫 로그인에서 개인 Workspace가 만들어집니다."}
+                : "쓰시는 계정을 고르면 첫 로그인에서 내 작업공간이 만들어집니다."}
             </p>
 
             {errorMessage ? <p className="cv5-auth-alert" role="alert">{errorMessage}</p> : null}
@@ -168,7 +167,7 @@ function AuthJourney({
                       >
                         {/* 한 개의 문자열로 렌더해야 라벨 사이에 RSC 텍스트 분리 주석이 끼지 않는다. */}
                         {`${providerLabel(status.provider)}로 계속하기`}
-                        <small>OAUTH · PKCE ↗</small>
+                        <small>계정으로 시작 ↗</small>
                       </Link>
                     ) : (
                       <div className="cv5-auth-provider" data-ready="false" key={status.provider}>
@@ -201,7 +200,7 @@ function AuthJourney({
 
             <p className="cv5-auth-switch">
               이미 Workspace를 사용 중이신가요?{" "}
-              <Link href="/login">로그인 흐름 보기</Link>
+              <Link href="/login">로그인하기</Link>
             </p>
           </section>
         </div>

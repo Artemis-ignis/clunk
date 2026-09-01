@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata = createPageMetadata({
   title: "로그인",
-  description: "Google·GitHub OAuth 또는 운영자 QA 키로 Clunk Workspace에 로그인하고 요청한 작업면으로 돌아갑니다.",
+  description: "Google 또는 GitHub 계정으로 Clunk에 로그인하고, 보던 작업 화면으로 그대로 돌아갑니다.",
   path: "/login",
 });
 
@@ -115,9 +115,8 @@ function AuthJourney({
               <em>돌아옵니다.</em>
             </h1>
             <p className="cv5-auth-lede">
-              Clunk는 자체 비밀번호를 만들거나 보관하지 않습니다. Google·GitHub OAuth로
-              로그인하고, 판매 개시 전에는 운영자 전용 QA 키 로그인을 함께 사용합니다.
-              인증이 끝나면 요청한 경로로 돌아갑니다.
+              Clunk는 비밀번호를 따로 만들지도, 보관하지도 않습니다.
+              Google이나 GitHub 계정으로 로그인하면 보던 화면으로 그대로 돌아갑니다.
             </p>
             <div className="cv5-auth-facts">
               <div className="cv5-auth-fact">
@@ -143,7 +142,7 @@ function AuthJourney({
             <p className="cv5-auth-copy">
               {signedIn
                 ? "현재 브라우저의 인증 상태를 확인했습니다. 계속하면 요청한 작업면으로 이동합니다."
-                : "설정이 완료된 인증 수단만 버튼으로 열립니다. OAuth 앱 등록이 끝나지 않은 provider는 준비 중으로 표시합니다."}
+                : "쓰시는 계정을 고르세요. 처음이라면 이 로그인으로 바로 가입됩니다."}
             </p>
 
             {errorMessage ? <p className="cv5-auth-alert" role="alert">{errorMessage}</p> : null}
@@ -177,7 +176,7 @@ function AuthJourney({
                       >
                         {/* 한 개의 문자열로 렌더해야 라벨 사이에 RSC 텍스트 분리 주석이 끼지 않는다. */}
                         {`${providerLabel(status.provider)}로 계속하기`}
-                        <small>OAUTH · PKCE ↗</small>
+                        <small>계정으로 로그인 ↗</small>
                       </Link>
                     ) : (
                       <div className="cv5-auth-provider" data-ready="false" key={status.provider}>
@@ -195,8 +194,7 @@ function AuthJourney({
                 </div>
                 {readyCount === 0 && !hostSiwc ? (
                   <p className="cv5-auth-hint">
-                    OAuth 앱 등록이 완료되면 위 버튼이 자동으로 활성화됩니다.
-                    {qaEnabled ? " 그 전까지는 운영자 전용 QA 키 로그인만 열려 있습니다." : null}
+                    로그인 수단을 준비하는 중입니다. 잠시 후 다시 시도해 주세요.
                   </p>
                 ) : null}
                 {qaEnabled ? <QaKeyLogin returnTo={returnTo} /> : null}
@@ -211,7 +209,7 @@ function AuthJourney({
 
             <p className="cv5-auth-switch">
               Clunk Workspace를 처음 사용하시나요?{" "}
-              <Link href="/signup">가입 흐름 보기</Link>
+              <Link href="/signup">가입 안내 보기</Link>
             </p>
           </section>
         </div>

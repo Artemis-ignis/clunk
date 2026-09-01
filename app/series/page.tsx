@@ -33,7 +33,7 @@ export default function SeriesPage() {
             <div className="hero-status-line"><span className="status-dot status-dot-on" /><span>CLUNK SERIES · NATIVE BUILD</span><code>2D + 3D</code></div>
             <span className="eyebrow">Clunk 내부 시리즈</span>
             <span className="eyebrow">AUTHOR · INSPECT · PACKAGE · SHIP</span>
-            <h1>Clunk가 만든<br /><em>실제 작업면.</em></h1>
+            <h1>Clunk를 이루는<br /><em>여섯 가지 도구.</em></h1>
             <p>
               Clunk 제품군은 파일 자체를 읽는 데서 시작해 검사, 근거,
               패키징 계약으로 연결합니다. 사용자는 공개 에셋을 구매하거나 인증된
@@ -55,7 +55,7 @@ export default function SeriesPage() {
               <span>REFERENCE</span><i>→</i><span>AUTHOR</span><i>→</i><span>INSPECT</span><i>→</i><span>PACKAGE</span>
             </div>
             <div className="series-board-output"><span className="series-board-orbit" /><strong>Clunk</strong><small>real bytes · hash · Passport</small></div>
-            <div className="series-board-note"><span>RUNTIME BOUNDARY</span><b>내부 코드로 실행</b><small>외부 API 성공을 가장하지 않음</small></div>
+            <div className="series-board-note"><span>실행 방식</span><b>Clunk 안에서 직접 실행</b><small>외부 서비스에 맡기지 않습니다</small></div>
           </div>
         </header>
 
@@ -66,10 +66,10 @@ export default function SeriesPage() {
           aria-labelledby="series-catalog-heading"
         >
           <div className="series-section-heading">
-            <div><span className="eyebrow">THE CLUNK PRODUCT FAMILY</span><h2 id="series-catalog-heading">Clunk가 만든 제품군,<br /><em>각자의 작업면</em></h2></div>
+            <div><span className="eyebrow">제품군</span><h2 id="series-catalog-heading">여섯 도구가<br /><em>같은 규칙을 씁니다</em></h2></div>
             <p>
-              catalog의 각 항목은 실제 코드에 등록된 제품입니다. authoring, inspection,
-              packaging, market surface가 같은 provenance, hash, evidence, license 규칙을 공유합니다.
+              만들기, 검사하기, 묶어서 내보내기, 마켓에 올리기 — 하는 일은 달라도
+              출처 기록과 파일 지문, 검사 근거, 라이선스를 다루는 규칙은 모두 같습니다.
             </p>
           </div>
           <ClunkSeriesCatalog catalog={catalog} sources={sources} />

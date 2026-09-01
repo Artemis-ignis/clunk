@@ -78,8 +78,8 @@ function parseManifest(raw: RawManifest, sheet: HTMLImageElement, name: string):
 }
 
 const SAMPLES = [
-  { label: "impact-vfx (FF 납품)", png: "/review-samples/impact-vfx-v2.png", manifest: "/review-samples/impact-vfx-v2.manifest.json" },
-  { label: "arc-burst-vfx (FF 납품)", png: "/review-samples/arc-burst-vfx-v2.png", manifest: "/review-samples/arc-burst-vfx-v2.manifest.json" },
+  { label: "impact-vfx · 타격 이펙트", png: "/review-samples/impact-vfx-v2.png", manifest: "/review-samples/impact-vfx-v2.manifest.json" },
+  { label: "arc-burst-vfx · 폭발 이펙트", png: "/review-samples/arc-burst-vfx-v2.png", manifest: "/review-samples/arc-burst-vfx-v2.manifest.json" },
 ] as const;
 
 const STATE_SECONDS = 2.4;
@@ -246,7 +246,7 @@ export function SpriteReviewer() {
         {status ? <div className="rv-status">{status}</div> : null}
       </div>
       <aside className="rv-panel">
-        <header className="rv-panel-head">SHEET / 실측</header>
+        <header className="rv-panel-head">시트 정보</header>
         {doc ? (
           <dl className="rv-stats">
             <div><dt>NAME</dt><dd>{doc.name}</dd></div>
@@ -255,7 +255,7 @@ export function SpriteReviewer() {
             <div><dt>STATES</dt><dd>{doc.anims.length}</dd></div>
           </dl>
         ) : (
-          <p className="rv-empty">manifest의 grid·frames·animations를 그대로 재생합니다 — 지어낸 프레임 없음.</p>
+          <p className="rv-empty">manifest에 적힌 격자·프레임·애니메이션 그대로 재생합니다.</p>
         )}
         <div className="rv-toggles">
           <label>확대 ×{scale}
@@ -263,7 +263,7 @@ export function SpriteReviewer() {
           </label>
         </div>
         <div className="rv-clips">
-          <header className="rv-panel-head">1ST-PARTY SAMPLES</header>
+          <header className="rv-panel-head">샘플로 열어 보기</header>
           {SAMPLES.map((sample) => (
             <button type="button" key={sample.label} onClick={() => void loadFromSources(sample.png, sample.manifest, sample.label)}>
               {sample.label}

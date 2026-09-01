@@ -306,7 +306,7 @@ export function GlbReviewer({ initialUrl }: { initialUrl?: string | null }) {
       </div>
 
       <aside className="rv-panel">
-        <header className="rv-panel-head">MEASURED / 실측</header>
+        <header className="rv-panel-head">파일에서 읽은 값</header>
         {stats ? (
           <dl className="rv-stats">
             <div><dt>FILE</dt><dd>{stats.fileName}</dd></div>

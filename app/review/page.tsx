@@ -29,7 +29,7 @@ export default function ReviewPage({ searchParams }: { searchParams?: Promise<{ 
       <main id="main-content" className="rv-main">
         <div className="cv5-frame">
           <header className="rv-head">
-            <span className="cv5-eyebrow">DIRECT REVIEW / 직접 검수</span>
+            <span className="cv5-eyebrow">직접 검수</span>
             <h1>눈으로 돌려보고, 재생해보고, 판정합니다</h1>
             <p>
               3D는 실측 스탯과 함께 회전·와이어프레임·애니메이션 클립으로, 2D는 상태별

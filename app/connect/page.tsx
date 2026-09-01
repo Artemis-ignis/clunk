@@ -30,13 +30,13 @@ export default async function ConnectPage() {
       <main className="connect-page">
         <header className="connect-hero public-hero-frame public-hero-connect">
           <div className="connect-hero-copy">
-            <div className="hero-status-line"><span className="status-dot status-dot-on" /><span>OFFICIAL CONNECTION SURFACE</span><code>v{MCP_SERVER.version}</code></div>
-            <span className="eyebrow">SAMPLE FIRST · CONNECT SECOND</span>
+            <div className="hero-status-line"><span className="status-dot status-dot-on" /><span>공식 연결 페이지</span><code>v{MCP_SERVER.version}</code></div>
+            <span className="eyebrow">먼저 보고, 그다음 연결</span>
             <h1>
               <span>결과를 먼저 보고,</span>
               <em>에이전트를 연결하세요.</em>
             </h1>
-            <p>공개 샘플은 바로 확인하고, 내 파일·workspace 이력은 로그인 뒤 이어집니다. HTTP는 로컬 경로를 읽지 않고 업로드된 bytes와 manifest만 받습니다.</p>
+            <p>아래 샘플은 로그인 없이 바로 눌러 볼 수 있습니다. 내 파일과 작업 기록은 로그인한 뒤부터 쌓입니다. 원격 연결은 내 컴퓨터의 파일 경로를 읽지 않고, 직접 올린 파일만 받습니다.</p>
             <div className="connect-hero-actions">
               <a className="button button-primary" href="#connect">연결 설정 시작 <Icon name="chevronDown" size={15} /></a>
               <Link className="button button-quiet" href="/agents#connect">전체 에이전트 가이드 <Icon name="arrowRight" size={15} /></Link>
@@ -52,7 +52,7 @@ export default async function ConnectPage() {
         <section className="connect-sample-section" aria-labelledby="connect-sample-heading">
           <div className="connect-section-heading">
             <div><span className="eyebrow">01 · SEE THE PRODUCT</span><h2 id="connect-sample-heading">파일 하나가<br /><em>근거 있는 결과가 되는 과정</em></h2></div>
-            <p>이 결과는 <code>CONTRACT_FIXTURE</code>입니다. STATIC PASS가 runtime·player-facing·human PASS로 자동 승격되지 않는 경계를 직접 눌러 보세요.</p>
+            <p>아래는 미리 준비된 예시 파일이라 크레딧이 들지 않습니다. 파일 검사를 통과했다고 해서 게임 화면에서도 괜찮다는 뜻은 아니라는 점을, 직접 눌러 보며 확인해 보세요.</p>
           </div>
           <SampleRunWorkbench compact />
         </section>

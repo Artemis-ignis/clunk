@@ -67,7 +67,7 @@ export function SampleRunWorkbench({ compact = false }: { compact?: boolean }) {
 }
 
 function SourceStage() {
-  return <div className="sample-stage sample-stage-source"><div className="sample-file-stack"><div className="sample-file-card sample-file-card-back"><span>2D FAMILY</span><strong>Sprite / Atlas</strong><small>supported family · UI preview</small></div><div className="sample-file-card sample-file-card-mid"><span>2D FAMILY</span><strong>Spine / Motion</strong><small>supported family · UI preview</small></div><div className="sample-file-card sample-file-card-front"><span>REAL SAMPLE</span><strong>{CLI_SAMPLE.file}</strong><small>{CLI_SAMPLE.byteLength.toLocaleString()} B · source bytes</small><Icon name="fileJson" size={19} /></div></div><div className="sample-stage-caption"><span>01</span><strong>Source bytes stay traceable.</strong><small>hash · byte length · provenance</small></div></div>;
+  return <div className="sample-stage sample-stage-source"><div className="sample-file-stack"><div className="sample-file-card sample-file-card-back"><span>2D FAMILY</span><strong>Sprite / Atlas</strong><small>지원 형식 · 화면 예시</small></div><div className="sample-file-card sample-file-card-mid"><span>2D FAMILY</span><strong>Spine / Motion</strong><small>지원 형식 · 화면 예시</small></div><div className="sample-file-card sample-file-card-front"><span>REAL SAMPLE</span><strong>{CLI_SAMPLE.file}</strong><small>{CLI_SAMPLE.byteLength.toLocaleString()} B · source bytes</small><Icon name="fileJson" size={19} /></div></div><div className="sample-stage-caption"><span>01</span><strong>원본 파일은 그대로 둡니다.</strong><small>해시 · 용량 · 출처를 함께 기록</small></div></div>;
 }
 
 function InspectionStage() {
