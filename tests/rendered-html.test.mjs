@@ -32,8 +32,10 @@ test("inspector explains that policy score is not player-facing approval", async
     new URL("../app/components/ClunkInspector.tsx", import.meta.url),
     "utf8",
   ));
-  assert.match(source, /정적 정책 점수/);
-  assert.match(source, /player-facing/);
+  // 2026-09-01: the inspector says this in Korean now instead of naming the
+  // internal lanes. The boundary itself is unchanged.
+  assert.match(source, /파일 규격 점수/);
+  assert.match(source, /게임 화면/);
   assert.match(source, /NOT_EVALUATED/);
 });
 

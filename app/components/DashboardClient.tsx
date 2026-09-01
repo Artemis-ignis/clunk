@@ -91,7 +91,7 @@ function authProviderLabel(provider?: string): string {
   if (provider === "chatgpt-sites") return "ChatGPT SIWC 연결됨";
   if (provider === "google") return "Google 계정 연결됨";
   if (provider === "github") return "GitHub 계정 연결됨";
-  if (provider === "qa") return "QA 키 세션";
+  if (provider === "qa") return "임시 접속";
   return "연결됨";
 }
 
@@ -214,6 +214,13 @@ function isHumanDecision(value: unknown): value is EvidenceStatuses["humanDecisi
   return value === "PASS" || value === "PASS_WITH_FOLLOW_UP" || value === "NO_GO" || value === "PENDING" || value === "NOT_EVALUATED";
 }
 
+/** resolveStoredReadiness returns ready|conditional|blocked; a person reads words. */
+const READINESS_TEXT: Record<string, string> = {
+  ready: "통과",
+  conditional: "조건부",
+  blocked: "차단",
+};
+
 export function DashboardClient() {
   const [runs, setRuns] = useState<Run[]>([]);
   const [passports, setPassports] = useState<Passport[]>([]);
@@ -282,11 +289,11 @@ export function DashboardClient() {
         setProjects(projectBody.projects ?? []);
         setProjectsState(projectResponse.ok ? "ready" : "unavailable");
         setCredits(creditBody.credits);
-        if (!projectResponse.ok) setMessage("프로젝트 API를 사용할 수 없어 에셋·검사·크레딧만 표시합니다.");
+        if (!projectResponse.ok) setMessage("프로젝트 목록을 잠시 불러올 수 없습니다. 나머지는 정상 표시됩니다.");
       } catch {
         if (cancelled) return;
         setConnection("error");
-        setMessage("워크스페이스 데이터를 불러오지 못했습니다. 네트워크와 D1 연결 상태를 확인하세요.");
+        setMessage("연결이 끊겼습니다. 인터넷 상태를 확인한 뒤 다시 시도해 주세요.");
       }
     }
     void loadWorkspace();
@@ -316,15 +323,15 @@ export function DashboardClient() {
   );
 
   return (
-    <WorkspaceShell active="overview" title="Asset Workspace" userLabel={userLabel} status={connectionChip}>
+    <WorkspaceShell active="overview" title="내 작업실" userLabel={userLabel} status={connectionChip}>
       <section className="ws-welcome ws-welcome-evidence">
         <div className="ws-welcome-copy">
-          <span className="mono-label">ASSETS · GENERATIONS · GAME READY</span>
+          <span className="mono-label">내 에셋과 검사 현황</span>
           <h2>만든 에셋과<br /><em>다음 증거를 한눈에.</em></h2>
           <p>생성 결과와 저장된 에셋을 먼저 확인하고, 구조·런타임·플레이어 화면·사람 검토를 순서대로 이어갑니다.</p>
           <div className="ws-welcome-actions">
-            <Link className="button button-primary" href="/studio">Create asset <Icon name="arrowUpRight" size={15} /></Link>
-            <Link className="button button-quiet" href="/app">Game Ready 열기 <Icon name="arrowRight" size={15} /></Link>
+            <Link className="button button-primary" href="/studio">에셋 만들기 <Icon name="arrowUpRight" size={15} /></Link>
+            <Link className="button button-quiet" href="/app">에셋 검사하기 <Icon name="arrowRight" size={15} /></Link>
             <Link className="button button-quiet" href="#collaboration">프레임 증거 연결 <Icon name="chevronDown" size={15} /></Link>
           </div>
         </div>
@@ -332,13 +339,13 @@ export function DashboardClient() {
           <div className="dashboard-welcome-preview">
             <AssetFamilyVisual kind={latestRun ? runVisualKind(latestRun.format) : "model"} compact />
             <div className="dashboard-welcome-stamp">
-              <span>{latestRun ? "LATEST RUN" : "EMPTY WORKSPACE"}</span>
+              <span>{latestRun ? "최근 검사" : "아직 비어 있음"}</span>
               <strong>{latestRun?.fileName ?? "저장된 검사 없음"}</strong>
               <small>{latestRun ? `${latestRun.score}/100 · ${latestRun.findingCount} findings` : "실제 파일을 검사하면 결과가 표시됩니다"}</small>
             </div>
           </div>
           <div className="dashboard-welcome-next">
-            <span className="mono-label">NEXT EVIDENCE</span>
+            <span className="mono-label">다음에 할 일</span>
             <strong>{latestRun ? nextVerification.action : "첫 실제 검사 실행"}</strong>
             <small>{latestRun ? nextVerification.title : "아직 저장된 결과가 없어 다음 증거를 계산할 수 없습니다."}</small>
           </div>
@@ -348,7 +355,7 @@ export function DashboardClient() {
       {connection === "checking" ? (
         <div className="banner banner-info ws-banner" role="status" aria-live="polite">
           <span className="spinner" />
-          <p>워크스페이스와 SIWC 인증을 확인하는 중입니다...</p>
+          <p>불러오는 중입니다…</p>
         </div>
       ) : null}
       {connection === "auth-required" ? (
@@ -474,10 +481,10 @@ export function DashboardClient() {
           ) : null}
           <div className="panel-head">
             <div>
-              <span className="mono-label">크레딧 원장</span>
+              <span className="mono-label">크레딧 내역</span>
               <h3>사용량</h3>
             </div>
-            <span className="mono-label">API 원장</span>
+            
           </div>
           {ledger.length ? (
             <ul className="ledger-list">
@@ -559,7 +566,7 @@ function WorkspaceDataOverview({
     <section className="ws-split" aria-label="프로젝트와 에셋">
       <article className="panel projects-panel">
         <div className="panel-head">
-          <div><span className="mono-label">PROJECTS · API</span><h3>프로젝트</h3></div>
+          <div><span className="mono-label">프로젝트</span><h3>프로젝트</h3></div>
           <Link className="text-link" href="/kits">관리 <Icon name="arrowRight" size={13} /></Link>
         </div>
         {projectsState === "loading" ? <p className="muted-note">프로젝트를 불러오는 중입니다.</p> : projects.length ? (
@@ -570,7 +577,7 @@ function WorkspaceDataOverview({
       </article>
       <article className="panel">
         <div className="panel-head">
-          <div><span className="mono-label">ASSET LIBRARY · API</span><h3>내 에셋 라이브러리</h3></div>
+          <div><span className="mono-label">내 에셋</span><h3>내 에셋 라이브러리</h3></div>
           <Link className="text-link" href="/assets">전체 보기 <Icon name="arrowRight" size={13} /></Link>
         </div>
         {assets.length ? <div className="project-list" data-testid="dashboard-asset-list">{assets.slice(0, 5).map((asset) => <Link className="project-row" href={`/assets/${encodeURIComponent(asset.id)}`} key={asset.id}><Icon name="box" size={15} /><span><strong>{asset.fileName}</strong><small>{asset.assetKind} · {asset.format.toUpperCase()} · {asset.storageStatus}</small></span><Icon name="arrowRight" size={13} /></Link>)}</div> : <div className="empty-block"><Icon name="box" size={21} /><strong>아직 저장된 에셋이 없습니다</strong><p>생성 또는 실제 검사를 실행하면 Workspace 에셋이 여기에 표시됩니다.</p><Link className="button button-quiet button-sm" href="/assets">라이브러리 열기 <Icon name="arrowRight" size={13} /></Link></div>}
@@ -585,7 +592,7 @@ function DashboardAssetBoard({ latestRun, statuses }: { latestRun: Run | null; s
     <section className="dashboard-asset-board" aria-labelledby="dashboard-asset-board-heading">
       <div className="dashboard-asset-board-visual">
         <AssetFamilyVisual kind="model" />
-         <div className="dashboard-asset-board-stamp"><span>{hasRun ? "LATEST RUN" : "EMPTY WORKSPACE"}</span><strong>{latestRun ? resolveStoredReadiness(latestRun) : "NO RUN RECORDED"}</strong><small>{hasRun ? "실제 저장된 검사" : "실제 파일을 검사하면 결과가 표시됩니다"}</small></div>
+         <div className="dashboard-asset-board-stamp"><span>{hasRun ? "최근 검사" : "아직 비어 있음"}</span><strong>{latestRun ? (READINESS_TEXT[resolveStoredReadiness(latestRun)] ?? resolveStoredReadiness(latestRun)) : "검사한 파일이 없습니다"}</strong><small>{hasRun ? "저장된 검사 결과" : "GLB 파일을 올려 보세요"}</small></div>
         <div className="dashboard-asset-family-rail" aria-label="지원 에셋 패밀리">
           {DASHBOARD_ASSET_FAMILIES.map((item) => (
             <Link href={item.kind === "model" ? "/app" : "/studio"} className="dashboard-asset-family" key={item.kind}>
@@ -596,15 +603,15 @@ function DashboardAssetBoard({ latestRun, statuses }: { latestRun: Run | null; s
         </div>
       </div>
       <div className="dashboard-asset-board-copy">
-        <span className="mono-label">FROM FILE TO DECISION</span>
+        <span className="mono-label">파일에서 판단까지</span>
         <h3 id="dashboard-asset-board-heading">대시보드에서<br /><em>다음 행동이 보여야 합니다.</em></h3>
         <p>{hasRun ? `${latestRun?.fileName ?? "최근 에셋"}의 다음 증거를 이어 붙이세요.` : "실제 파일을 올리면 이 보드가 저장된 결과와 다음 행동으로 바뀝니다."}</p>
-        <div className="dashboard-asset-board-steps"><span className="is-done"><b>01</b> bytes</span><span className={hasRun ? "is-done" : ""}><b>02</b> inspect</span><span className={statuses.visualRuntime === "PASS" ? "is-done" : ""}><b>03</b> capture</span><span className={statuses.humanDecision === "PASS" ? "is-done" : ""}><b>04</b> review</span></div>
+        <div className="dashboard-asset-board-steps"><span className="is-done"><b>01</b> 파일</span><span className={hasRun ? "is-done" : ""}><b>02</b> 검사</span><span className={statuses.visualRuntime === "PASS" ? "is-done" : ""}><b>03</b> 화면 확인</span><span className={statuses.humanDecision === "PASS" ? "is-done" : ""}><b>04</b> 검토</span></div>
         <div className="dashboard-status-stack" aria-label="현재 증거 상태">
-          <DashboardStatusRow label="STATIC / POLICY" value={statuses.structural} detail="bytes · hash · blocker" tone={statuses.structural === "PASS" ? "pass" : "pending"} />
-          <DashboardStatusRow label="VISUAL RUNTIME" value={statuses.visualRuntime} detail="shipped frame" tone={statuses.visualRuntime === "PASS" ? "pass" : "pending"} />
-          <DashboardStatusRow label="PLAYER FACING" value={statuses.playerFacing} detail="in-game readability" tone={statuses.playerFacing === "PASS" ? "pass" : "pending"} />
-          <DashboardStatusRow label="HUMAN REVIEW" value={statuses.humanDecision} detail="reviewer decision" tone={statuses.humanDecision === "PASS" ? "pass" : "pending"} />
+          <DashboardStatusRow label="파일 규격" value={statuses.structural} detail="파일 내용과 차단 문제" tone={statuses.structural === "PASS" ? "pass" : "pending"} />
+          <DashboardStatusRow label="엔진 화면" value={statuses.visualRuntime} detail="엔진에서 찍은 화면" tone={statuses.visualRuntime === "PASS" ? "pass" : "pending"} />
+          <DashboardStatusRow label="게임 화면" value={statuses.playerFacing} detail="게임 안에서 잘 보이는지" tone={statuses.playerFacing === "PASS" ? "pass" : "pending"} />
+          <DashboardStatusRow label="사람 검토" value={statuses.humanDecision} detail="직접 보고 내린 판단" tone={statuses.humanDecision === "PASS" ? "pass" : "pending"} />
         </div>
         <Link className="button button-primary button-sm" href={hasRun ? "#collaboration" : "/app"}>{hasRun ? "다음 증거 연결" : "첫 실제 검사 실행"}<Icon name="arrowRight" size={14} /></Link>
       </div>
@@ -621,12 +628,12 @@ function GenerationOverview({ jobs }: { jobs: GenerationJob[] }) {
   const staticStatus = evidence?.stages?.structure?.status === "pass" && evidence?.stages?.policy?.status === "pass" ? "PASS" : latest ? "GAP" : "NOT_RUN";
   return (
     <section className="dashboard-generation-overview" aria-labelledby="dashboard-generation-heading">
-      <div className="dashboard-generation-visual"><AssetFamilyVisual kind={kind} compact /><div className="dashboard-generation-visual-label"><span>AUTHORING PREVIEW</span><strong>{latest ? latest.assetKind : "2D + 3D"}</strong></div></div>
+      <div className="dashboard-generation-visual"><AssetFamilyVisual kind={kind} compact /><div className="dashboard-generation-visual-label"><span>최근 만든 에셋</span><strong>{latest ? latest.assetKind : "2D + 3D"}</strong></div></div>
       <div className="dashboard-generation-copy">
-        <div className="dashboard-generation-head"><div><span className="mono-label">RECENT CREATION · REAL BYTES</span><h3 id="dashboard-generation-heading">만든 결과도 이곳에서 이어집니다.</h3></div><span className={`dashboard-generation-status dashboard-generation-status-${latest ? "ready" : "empty"}`}>{latest ? latest.status : "EMPTY"}</span></div>
+        <div className="dashboard-generation-head"><div><span className="mono-label">최근 만든 에셋</span><h3 id="dashboard-generation-heading">만든 결과도 이곳에서 이어집니다.</h3></div><span className={`dashboard-generation-status dashboard-generation-status-${latest ? "ready" : "empty"}`}>{latest ? latest.status : "EMPTY"}</span></div>
         {latest ? <><div className="dashboard-generation-name-row"><strong className="dashboard-generation-name">{latest.assetId ? latest.assetId : `생성 작업 ${latest.id}`}</strong>{latest.assetId ? <Link className="text-link" href={`/assets/${encodeURIComponent(latest.assetId)}`}>Asset detail <Icon name="arrowUpRight" size={12} /></Link> : null}</div><p>{latest.prompt}</p><div className="dashboard-generation-meta"><span><b>STATIC</b>{staticStatus}</span><span><b>STORAGE</b>{latest.storageStatus}</span><span><b>PROVIDER</b>{provenance?.provider ?? latest.provider}</span><span><b>OPERATION</b>{recipe?.operation ?? "create"}</span><span><b>PROJECT</b>{latest.projectId ? latest.projectId.slice(0, 12) + "…" : "workspace"}</span><span><b>READINESS</b>{latest.assetId ? "별도 검수 필요" : "산출물 없음"}</span></div>{recipe?.sourceAssetId ? <small className="dashboard-generation-lineage">SOURCE ASSET · {recipe.sourceAssetId} · 원본을 보존한 Remix</small> : null}<small className="dashboard-generation-note">생성·fresh reopen은 기록됐지만 runtime, player-facing, human review는 자동으로 채워지지 않습니다.</small></> : <p>아직 만든 에셋이 없습니다. Studio에서 실제 작업을 실행하면 artifact와 hash가 이 카드에 남습니다.</p>}
         <div className="dashboard-generation-actions"><Link className="button button-primary button-sm" href="/studio">{latest ? "다음 에셋 만들기" : "첫 에셋 만들기"}<Icon name="arrowRight" size={14} /></Link><Link className="button button-quiet button-sm" href="/kits">Kit / 프로젝트</Link><Link className="button button-quiet button-sm" href="/marketplace">Discover</Link></div>
-        {jobs.length > 1 ? <div className="dashboard-generation-history" data-testid="generation-history"><div className="dashboard-generation-history-head"><span className="mono-label">GENERATION HISTORY</span><small>{jobs.length} saved jobs</small></div><div className="dashboard-generation-history-list">{jobs.slice(0, 5).map((job) => { const jobRecipe = parseGenerationRecipe(job.recipeJson); return <div className="dashboard-generation-history-row" key={job.id}><span className="dashboard-generation-history-kind">{generationVisualKind(job.assetKind).toUpperCase()}</span><span className="dashboard-generation-history-main"><strong>{job.assetId ?? job.id}</strong><small>{jobRecipe?.operation === "remix" ? "REMIX" : "CREATE"} · {job.storageStatus}</small></span>{job.assetId ? <Link className="text-link" href={`/assets/${encodeURIComponent(job.assetId)}`}>열기 <Icon name="arrowUpRight" size={11} /></Link> : null}</div>; })}</div></div> : null}
+        {jobs.length > 1 ? <div className="dashboard-generation-history" data-testid="generation-history"><div className="dashboard-generation-history-head"><span className="mono-label">만든 기록</span><small>{jobs.length} saved jobs</small></div><div className="dashboard-generation-history-list">{jobs.slice(0, 5).map((job) => { const jobRecipe = parseGenerationRecipe(job.recipeJson); return <div className="dashboard-generation-history-row" key={job.id}><span className="dashboard-generation-history-kind">{generationVisualKind(job.assetKind).toUpperCase()}</span><span className="dashboard-generation-history-main"><strong>{job.assetId ?? job.id}</strong><small>{jobRecipe?.operation === "remix" ? "REMIX" : "CREATE"} · {job.storageStatus}</small></span>{job.assetId ? <Link className="text-link" href={`/assets/${encodeURIComponent(job.assetId)}`}>열기 <Icon name="arrowUpRight" size={11} /></Link> : null}</div>; })}</div></div> : null}
       </div>
     </section>
   );
@@ -706,7 +713,7 @@ function EvidenceLanes({ statuses, hasRun }: { statuses: EvidenceStatuses; hasRu
     <section className="evidence-lanes" id="evidence" aria-labelledby="evidence-lanes-heading">
       <div className="evidence-lanes-head">
         <div>
-          <span className="mono-label">READINESS IS A CHAIN, NOT A SCORE</span>
+          <span className="mono-label">점수 하나로 끝나지 않습니다</span>
           <h3 id="evidence-lanes-heading">지금 무엇을 믿을 수 있는지</h3>
         </div>
         <span className="evidence-lanes-count">4 separate decisions</span>
@@ -744,7 +751,7 @@ function NextVerificationRail({ next }: { next: NextVerification }) {
         </Link>
         <Link className="button button-quiet button-sm" href="/studio">Asset Studio</Link>
         <Link className="button button-quiet button-sm" href="/agents#connect">에이전트 연결</Link>
-        <Link className="button button-quiet button-sm" href="/docs/contracts">계약 보기</Link>
+        <Link className="button button-quiet button-sm" href="/docs/contracts">검사 기준 보기</Link>
       </div>
     </section>
   );

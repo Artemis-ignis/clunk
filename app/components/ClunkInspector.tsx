@@ -74,6 +74,16 @@ function headroomPercent(report: InspectionReport): number | null {
   return Math.round(Math.max(0, Math.min(...axes)) * 100);
 }
 
+/** Evidence lanes used to print their raw constant; a person reads words. */
+const STATUS_TEXT: Record<string, string> = {
+  PASS: "통과",
+  GAP: "증거 없음",
+  NO_GO: "사용 불가",
+  NOT_EVALUATED: "확인 전",
+  PENDING: "확인 중",
+  UNAVAILABLE: "확인할 환경 없음",
+};
+
 export function ClunkInspector({ userLabel }: InspectorProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState("");
@@ -126,14 +136,14 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
     try {
       const nextReport = inspectAsset(createAssetBundle(name, bytes), activePolicy);
       setReport(nextReport);
-      if (isSample) setNotice("데모 샘플입니다. 이 로컬 결과는 워크스페이스 이력과 크레딧 사용량에서 제외됩니다.");
+      if (isSample) setNotice("예시 파일입니다. 기록과 크레딧에 반영되지 않습니다.");
       else if (isCustomActive)
         setNotice(
-          `커스텀 프로파일(${customProfileName ?? "JSON"}) 검사 — 로컬 결과 전용이라 저장과 크레딧 차감이 없습니다.`,
+          `내 기준(${customProfileName ?? "직접 올린 파일"})으로 검사했습니다. 저장과 크레딧 사용은 없습니다.`,
         );
       else await persistAnalysis(nextReport);
     } catch (caught) {
-      setReport(null); setError(caught instanceof Error ? caught.message : "에셋 검사에 실패했습니다.");
+      setReport(null); setError(caught instanceof Error ? caught.message : "이 파일을 열지 못했습니다. GLB 또는 GLTF 파일인지 확인해 주세요.");
     } finally { setBusy("idle"); }
   }
 
@@ -150,7 +160,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
       hardBlockerCount: nextReport.score.hardBlockerCount, findingCount: nextReport.findings.length, report: nextReport, evidenceV2,
     }) });
     const body = await response.json().catch(() => ({})) as { assetId?: string; idempotent?: boolean; error?: string };
-    if (!response.ok) throw new Error(body.error ?? "워크스페이스 저장에 실패했습니다.");
+    if (!response.ok) throw new Error(body.error ?? "검사 결과를 저장하지 못했습니다. 크레딧은 사용되지 않았습니다.");
     return { assetId: body.assetId ?? null, idempotent: body.idempotent === true };
   }
 
@@ -159,7 +169,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
     setAssetId(saved.assetId);
     setNotice(
       saved.idempotent
-        ? "이미 저장된 검사라 크레딧 차감 없이 기존 기록에 연결했습니다."
+        ? "같은 파일을 이미 검사했습니다. 크레딧은 사용되지 않았습니다."
         : "워크스페이스에 검사를 저장했습니다. 크레딧 1개를 사용했습니다.",
     );
   }
@@ -224,8 +234,8 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
     setNotice(
       isCustomActive
         ? `일괄 검사 완료(커스텀 프로파일 · 로컬 전용): 성공 ${okCount}건, 실패 ${failCount}건 · 크레딧 차감 없음`
-        : `일괄 검사 완료: 성공 ${okCount}건, 실패 ${failCount}건 · 크레딧 ${debitCount}개 차감${
-            reused > 0 ? ` (이미 저장된 검사 ${reused}건은 차감 없음)` : ""
+        : `${okCount}개 검사 완료, ${failCount}개 실패 · 크레딧 ${debitCount}개 사용${
+            reused > 0 ? ` · 이미 검사한 ${reused}개는 차감 없음` : ""
           }`,
     );
     // Land the user on a result instead of an empty detail pane.
@@ -270,7 +280,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
 
   async function loadSample(name: string) {
     const response = await fetch(`/samples/${name}`);
-    if (!response.ok) throw new Error("샘플 에셋을 불러오지 못했습니다.");
+    if (!response.ok) throw new Error("예시 파일을 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.");
     await loadAsset(name, new Uint8Array(await response.arrayBuffer()), true);
   }
 
@@ -281,14 +291,14 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
       const result = optimizeAsset(createAssetBundle(fileName, sourceBytes), activePolicy);
       const reopened = inspectAsset(createAssetBundle(result.outputFileName, result.outputBytes), activePolicy);
       if (reopened.inputHash !== result.outputHash || reopened.resultDigest !== result.after.resultDigest) {
-        throw new Error("출력 바이트 재오픈 검증이 일치하지 않습니다.");
+        throw new Error("정리한 파일을 다시 열어 확인하는 데 실패했습니다. 원본은 그대로 있습니다.");
       }
       setOptimization(result);
       setDownloadGate("verified");
       if (sampleMode) {
         setNotice("데모 샘플을 로컬에서 최적화했습니다. 크레딧과 워크스페이스 이력은 변하지 않습니다.");
       } else if (isCustomActive) {
-        setNotice("커스텀 프로파일 최적화 — 로컬 결과 전용이라 저장과 크레딧 차감이 없습니다. 파일과 Passport는 아래에서 내려받을 수 있습니다.");
+        setNotice("내 기준으로 정리했습니다. 크레딧은 사용되지 않았습니다. 파일은 아래에서 받으세요.");
       } else {
         const response = await fetch("/api/optimizations", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
           optimizationId: `optimization-${result.inputHash.slice(0, 12)}-${result.outputHash.slice(0, 12)}`,
@@ -296,10 +306,10 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
           operations: result.operations, passport: result.passport, reinspection: result.after,
         }) });
         const body = await response.json().catch(() => ({})) as { error?: string };
-        if (!response.ok) throw new Error(body.error ?? "최적화 저장에 실패했습니다.");
+        if (!response.ok) throw new Error(body.error ?? "정리한 파일을 저장하지 못했습니다. 아래에서 바로 받을 수 있습니다.");
         setNotice("최적화를 저장했습니다. 크레딧 1개를 사용했습니다. 검사 증명서를 받을 수 있습니다.");
       }
-    } catch (caught) { setError(caught instanceof Error ? caught.message : "최적화에 실패했습니다."); }
+    } catch (caught) { setError(caught instanceof Error ? caught.message : "파일을 정리하지 못했습니다. 원본은 그대로 있습니다."); }
     finally { setBusy("idle"); }
   }
 
@@ -326,7 +336,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
   return (
     <WorkspaceShell
       active="inspector"
-      title="Game Ready"
+      title="에셋 검사"
       userLabel={userLabel}
       status={<StatusPill status={status} />}
     >
@@ -343,15 +353,15 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
 
       <section className="native-series-banner" aria-labelledby="native-series-heading">
         <div>
-          <span className="mono-label">CLUNK SERIES · GAME READY</span>
-          <h2 id="native-series-heading">검사에서 별도 mesh output까지.</h2>
-          <p>Clunk Game Ready는 기존 Core 게이트와 GitHub에서 감사해 Clunk 내부에 구성한 glTF-Transform·meshoptimizer rail을 함께 사용합니다. 원본은 보존하고 output을 다시 엽니다.</p>
+          <span className="mono-label">에셋 검사</span>
+          <h2 id="native-series-heading">검사하고, 정리한 새 파일까지</h2>
+          <p>원본은 그대로 두고, 정리한 새 파일을 만들어 다시 검사합니다.</p>
         </div>
         <div className="native-series-banner-side">
-          <span><b>INPUT</b> 원본 hash</span>
-          <span><b>OUTPUT</b> 새 GLB hash</span>
-          <span><b>REOPEN</b> fresh evidence</span>
-          <Link className="text-link" href="/series">Clunk Series 장부 보기 <Icon name="arrowUpRight" size={13} /></Link>
+          <span><b>원본</b> 그대로 보관</span>
+          <span><b>결과</b> 정리한 새 파일</span>
+          <span><b>재검사</b> 새 파일 다시 확인</span>
+          <Link className="text-link" href="/series">Clunk 제품군 보기 <Icon name="arrowUpRight" size={13} /></Link>
         </div>
       </section>
 
@@ -636,7 +646,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
               <div>
                 <strong title={fileName || undefined}>{fileName || "선택된 에셋 없음"}</strong>
                 <small title={report?.analysisId}>
-                  {report ? `analysis ${report.analysisId}` : "입력 에셋을 기다리는 중"}
+                  {report ? `검사 번호 ${report.analysisId}` : "파일을 올려 주세요"}
                 </small>
               </div>
             </div>
@@ -652,13 +662,13 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
             <div className="panel-head">
               <div>
                 <span className="mono-label">관측 메트릭</span>
-                <h3>실제 바이트가 말하는 것</h3>
+                <h3>파일에서 읽은 수치</h3>
               </div>
-              {report ? <span className="mono-label">{report.ruleSetId} v{report.ruleSetVersion}</span> : null}
+              {report ? <span className="mono-label">검사 규칙 v{report.ruleSetVersion}</span> : null}
             </div>
             <dl className="metrics-grid">
-              <Metric label="Scene / 노드" value={report ? `${report.metrics.sceneCount} / ${report.metrics.nodeCount}` : "대기"} />
-              <Metric label="Mesh / Primitive" value={report ? `${report.metrics.meshCount} / ${report.metrics.primitiveCount}` : "대기"} />
+              <Metric label="장면 / 오브젝트" value={report ? `${report.metrics.sceneCount} / ${report.metrics.nodeCount}` : "—"} />
+              <Metric label="메시 / 조각" value={report ? `${report.metrics.meshCount} / ${report.metrics.primitiveCount}` : "—"} />
               <Metric label="정점" value={report ? report.metrics.vertexCount.toLocaleString() : "대기"} />
               <Metric label="삼각형" value={report ? report.metrics.triangleCount.toLocaleString() : "대기"} />
               <Metric label="머티리얼" value={report ? `${report.metrics.materialCount}` : "대기"} />
@@ -670,17 +680,17 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
         <aside className="inspector-result">
           <div className="panel score-card">
             <div className="panel-head">
-              <span className="mono-label">정적 정책 점수 · POLICY ONLY</span>
+              <span className="mono-label">파일 규격 점수</span>
               <Icon name="gauge" size={16} />
             </div>
             <p className={`score-number${report ? "" : " score-number-idle"}`}>
-              <strong>{report ? report.score.score : "실행 대기"}</strong>
+              <strong>{report ? report.score.score : "—"}</strong>
               {report ? <span>/ 100</span> : null}
             </p>
             <div className="score-track">
               <span style={{ width: `${report?.score.score ?? 0}%` }} />
             </div>
-            <strong className="evidence-boundary-note">STRUCTURAL ONLY · NOT VISUAL APPROVAL</strong>
+            <strong className="evidence-boundary-note">파일 규격만 본 점수입니다. 화면에서 어떻게 보이는지는 직접 확인하세요.</strong>
             <p className="score-note">
               {readiness
                 ? `${readinessNote(readiness)} 브라우저 화면과 visualRuntime은 별도이며 현재 player-facing: NOT_EVALUATED입니다.`
@@ -691,7 +701,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
           <div className="panel evidence-v2-card">
             <div className="panel-head">
               <div>
-                <span className="mono-label">PROVENANCE · V2</span>
+                <span className="mono-label">출처 기록</span>
                 <h3>시각 판정은 별도 레인.</h3>
               </div>
               <span className="mono-label">{evidenceV2?.schema ?? "대기"}</span>
@@ -699,23 +709,20 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
             {evidenceV2 ? (
               <>
                 <div className="evidence-v2-status-grid">
-                  <span><small>structural</small><strong>{evidenceV2.statuses.structural}</strong></span>
-                  <span><small>visualRuntime</small><strong>{evidenceV2.statuses.visualRuntime}</strong></span>
-                  <span><small>playerFacing</small><strong>{evidenceV2.statuses.playerFacing}</strong></span>
-                  <span><small>humanDecision</small><strong>{evidenceV2.statuses.humanDecision}</strong></span>
+                  <span><small>파일 구조</small><strong>{STATUS_TEXT[evidenceV2.statuses.structural] ?? evidenceV2.statuses.structural}</strong></span>
+                  <span><small>엔진 화면</small><strong>{STATUS_TEXT[evidenceV2.statuses.visualRuntime] ?? evidenceV2.statuses.visualRuntime}</strong></span>
+                  <span><small>게임 화면</small><strong>{STATUS_TEXT[evidenceV2.statuses.playerFacing] ?? evidenceV2.statuses.playerFacing}</strong></span>
+                  <span><small>사람 검토</small><strong>{STATUS_TEXT[evidenceV2.statuses.humanDecision] ?? evidenceV2.statuses.humanDecision}</strong></span>
                 </div>
-                <p className="score-note">
-                  <code>CONTRACT_FIXTURE</code> · inspectionRunId <code>{evidenceV2.identity.inspectionRunId}</code> · profileHash <code>{evidenceV2.identity.profileHash.slice(0, 12)}…</code>
-                </p>
-                <p className="score-note">{evidenceV2.limitation}. 실제 WebGPU/WebGL2 캡처와 사람 판정이 없으면 GAP/NOT_EVALUATED입니다.</p>
+                <p className="score-note">엔진에서 찍은 화면과 사람의 확인이 있어야 마지막 두 항목이 완료됩니다.</p>
               </>
-            ) : <p className="score-note">v2 provenance envelope를 만들 수 있는 실제 검사 결과를 기다리는 중입니다.</p>}
+            ) : <p className="score-note">파일을 검사하면 여기에 결과가 나타납니다.</p>}
           </div>
 
           <div className="panel findings-card">
             <div className="panel-head">
               <div>
-                <span className="mono-label">정책 finding</span>
+                <span className="mono-label">발견된 문제</span>
                 {report ? <h3>{`${report.findings.length}건 기록`}</h3> : null}
               </div>
             </div>
@@ -768,8 +775,8 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
         <section className="panel passport-panel">
           <div className="passport-head">
             <div>
-              <span className="mono-label">새 재검사와 Passport</span>
-              <h3>두 해시에 연결된 전후 결과.</h3>
+              <span className="mono-label">검사 증명서</span>
+              <h3>정리 전후를 함께 남깁니다</h3>
               <p>{optimization.operations.map((operation) => `${operation.id} x${operation.count}`).join(", ")}</p>
             </div>
             {optimizedReadiness ? (
@@ -800,7 +807,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
               className="button button-quiet"
               onClick={() => download(passportToBytes(optimization.passport), `${optimization.passport.passportId}.json`, "application/json")}
             >
-              Passport 다운로드
+              증명서 내려받기
               <Icon name="download" size={15} />
             </button>
           </div>

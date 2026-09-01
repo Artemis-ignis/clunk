@@ -197,7 +197,9 @@ test("asset evidence UI exposes digest, byte provenance, and freshness without c
   assert.match(panel, /STALE EVIDENCE/);
   assert.match(panel, /FRESHNESS UNKNOWN/);
   assert.match(panel, /STRUCTURAL ONLY/);
-  assert.match(inspector, /STRUCTURAL ONLY.*NOT VISUAL APPROVAL/);
+  // 2026-09-01: the boundary reads in Korean now — the constant was never
+  // meant for the person looking at their own file.
+  assert.match(inspector, /파일 규격만 본 점수입니다/);
   assert.match(inspector, /resultDigest/);
   assert.match(dashboard, /resultDigest/);
   assert.match(docs, /clunk\.asset-evidence-ref\.v1/);
