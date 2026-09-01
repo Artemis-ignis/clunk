@@ -10,7 +10,7 @@ import styles from "./marketplace.module.css";
 
 export const metadata = createPageMetadata({
   title: "에셋 마켓",
-  description: "게임에 바로 넣을 수 있는 저폴리 3D 모델과 2D 스프라이트를 삼각형 수·용량·라이선스까지 확인하고 고르는 Clunk 마켓입니다.",
+  description: "Clunk가 직접 만들어 파는 저폴리 3D 에셋. 삼각형 수와 용량을 확인하고 3D로 돌려 본 뒤 크레딧으로 받으세요.",
   path: "/marketplace",
 });
 
@@ -45,15 +45,14 @@ export default function MarketplacePage() {
           <header className={styles.hero} data-snap-section="hero">
             <div className={`cv5-frame ${styles.heroGrid}`}>
               <div>
-                <span className="cv5-badge">✦ 직접 만들고 검사한 <b>에셋만 올립니다</b></span>
+                <span className="cv5-badge">✦ Clunk가 <b>직접 만든 에셋</b></span>
                 <h1>
-                  게임에 넣기 전에
+                  게임에 바로 넣는
                   <br />
-                  <em>수치부터 확인하세요</em>
+                  <em>저폴리 3D 에셋</em>
                 </h1>
                 <p className={styles.heroLede}>
-                  삼각형 수, 파일 용량, 라이선스를 상품마다 적어 두었습니다.
-                  받기 전에 3D 뷰어로 직접 돌려 보고 결정하세요.
+                  삼각형 수와 용량을 보고, 3D로 돌려 본 뒤 받으세요.
                 </p>
                 <div className={styles.heroActions}>
                   <Link className="cv5-btn cv5-btn-primary" href="#catalog">
@@ -66,7 +65,7 @@ export default function MarketplacePage() {
                 <div className="cv5-flow" aria-label="공개 마켓 원칙">
                   <span><b>GLB</b> 즉시 사용</span>
                   <span><b>3D</b> 미리보기</span>
-                  <span><b>라이선스</b> 명시</span>
+                  <span><b>크레딧</b> 결제</span>
                 </div>
               </div>
 

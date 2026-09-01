@@ -226,13 +226,15 @@ test("설정 화면이 로그아웃 경로와 그 경계를 정직하게 안내�
   assert.ok(settings.includes("인증 제공자"), "호스트 세션 경계 설명이 없습니다");
 });
 
-test("DEMO 배너는 결제 provider 미설정 상태에서만 렌더된다", async () => {
-  const shell = await source("app/components/SiteShell.tsx");
-  assert.match(shell, /getBillingStatus/);
-  assert.match(shell, /AVAILABLE/);
-  assert.match(shell, /billingConfigured \? null :/);
+test("결제 미개시 안내는 결제 provider 미설정 상태에서만 렌더된다", async () => {
+  // 2026-09-01: "DEMO MODE · 실제 결제 아님"은 방문자에게 고장난 사이트로 읽혀
+  // 공용 푸터의 평범한 한 문장으로 옮겼다. 게이트는 그대로 실제 결제 설정 상태다.
+  const footer = await source("app/components/SiteFooter.tsx");
+  assert.match(footer, /getBillingStatus/);
+  assert.match(footer, /AVAILABLE/);
+  assert.match(footer, /billingConfigured \? null :/);
 
-  // 기본 테스트 환경에는 Stripe 설정이 없으므로 CONFIG_REQUIRED = 배너 노출.
+  // 기본 테스트 환경에는 결제 설정이 없으므로 CONFIG_REQUIRED = 안내 문장 노출.
   const html = await (await render("/pricing")).text();
-  assert.ok(html.includes("DEMO MODE"), "결제 미설정 상태에서 배너가 사라졌습니다");
+  assert.ok(html.includes("아직 유료 결제를 받지 않습니다"), "결제 미설정 상태에서 안내가 사라졌습니다");
 });

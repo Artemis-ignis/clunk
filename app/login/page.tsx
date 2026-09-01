@@ -52,9 +52,15 @@ function sessionProviderLabel(provider: string): string {
 }
 
 /** QA sign-in shows only where the deployment carries the QA key. */
+/**
+ * The operator QA key is a maintenance door, not a way for a visitor to sign
+ * in. It used to render on the public login page labelled "운영자 전용", which
+ * told every visitor about a login they can never use. Google and GitHub both
+ * work since 2026-09-01, so the form is off the public page; the operator still
+ * reaches it directly through POST /api/auth/qa.
+ */
 function isQaLoginEnabled(): boolean {
-  const key = getRuntimeEnvironment().CLUNK_QA_LOGIN_KEY;
-  return typeof key === "string" && key.length >= 24;
+  return false;
 }
 
 /**

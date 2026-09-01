@@ -22,7 +22,7 @@ test("server-renders the Clunk landing page", async () => {
   assert.match(html, /게임 제작의 모든 과정을/);
   assert.match(html, /마켓 둘러보기/);
   assert.match(html, /무료로 시작하기/);
-  assert.match(html, /지금 마켓에 올라와 있는 에셋/);
+  assert.match(html, /마켓에 올라와 있는 에셋/);
   assert.doesNotMatch(html, /DEMO MODE|실제 제작부터|에셋 만들기|CONTRACT_FIXTURE|SAMPLE/);
   assert.doesNotMatch(html, /Your site is taking shape|react-loading-skeleton|codex-preview/);
 });
@@ -68,11 +68,14 @@ test("landing language covers the full 2D and 3D asset path", async () => {
   const html = await response.text();
   // 2026-09-01: the landing stopped defending its own numbers and now tells the
   // reader what the number is for. The contract follows the fact, not the slogan.
-  assert.match(html, /각 파일에서 직접 읽은 값/);
+  assert.match(html, /삼각형 수는 파일에서 직접 읽었습니다/);
   assert.match(html, /GAME-READY SCORE/i);
-  assert.match(html, /MAKE &amp; SELL|MAKE & SELL/);
-  assert.match(html, /INSPECT &amp; REPAIR|INSPECT & REPAIR/);
-  assert.match(html, /GAME AGENT/);
+  // 2026-09-01: the three section labels are Korean now — the Korean reference
+  // sites the master gave (meshy.ai/ko, aetherforgeai.com/ko) use no English
+  // eyebrows at all.
+  assert.match(html, /제작과 판매/);
+  assert.match(html, /검사와 수정/);
+  assert.match(html, /제작 에이전트/);
   assert.match(html, /Sprite.*Atlas|Atlas.*Sprite/);
   assert.match(html, /Spine/);
   assert.match(html, /크레딧/);

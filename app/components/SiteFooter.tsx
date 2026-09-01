@@ -8,6 +8,12 @@ import { getRuntimeEnvironment } from "../runtime-environment";
  * /review were missing it entirely until the 2026-08-31 audit.
  */
 export function SiteFooter() {
+  // The "no paid checkout yet" line is a claim about the payment boundary, so it
+  // tracks the real boundary: it shows only while no payment provider is
+  // configured. Once billing is AVAILABLE the sentence would be a lie.
+  const billingConfigured =
+    getBillingStatus(getBillingEnvironment(getRuntimeEnvironment())).status === "AVAILABLE";
+
   return (
     <footer className="cv5-footer">
       <div className="cv5-frame cv5-footer-inner">
@@ -16,7 +22,7 @@ export function SiteFooter() {
           <p>게임 에셋을 만들고, 검사하고, 판매하는 곳입니다.</p>
         </div>
         <nav className="cv5-footer-col" aria-label="제품">
-          <header>PRODUCT</header>
+          <header>제품</header>
           <Link href="/marketplace" prefetch={false}>에셋 판매</Link>
           <Link href="/studio" prefetch={false}>에셋 제작</Link>
           <Link href="/app" prefetch={false}>에셋 검사</Link>
@@ -24,14 +30,14 @@ export function SiteFooter() {
           <Link href="/pricing" prefetch={false}>요금 · 크레딧</Link>
         </nav>
         <nav className="cv5-footer-col" aria-label="리소스">
-          <header>RESOURCES</header>
+          <header>자료</header>
           <Link href="https://clunk.gitbook.io/docs" prefetch={false}>Docs</Link>
           <Link href="/review" prefetch={false}>검수 뷰어</Link>
           <Link href="/connect" prefetch={false}>MCP 연결</Link>
           <Link href="/dashboard" prefetch={false}>내 작업공간</Link>
         </nav>
         <nav className="cv5-footer-col" aria-label="법적 고지">
-          <header>LEGAL</header>
+          <header>약관</header>
           <Link href="/terms" prefetch={false}>이용약관</Link>
           <Link href="/privacy" prefetch={false}>개인정보처리방침</Link>
           <Link href="/refunds" prefetch={false}>취소·환불정책</Link>

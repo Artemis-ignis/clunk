@@ -30,7 +30,7 @@ test("login preserves the dashboard return path and lists truthful providers", a
   // button this deployment cannot honor; the return path stays visible.
   assert.match(html, /Google로 계속하기/);
   assert.match(html, /GitHub로 계속하기/);
-  assert.match(html, /가입 흐름 보기/);
+  assert.match(html, /가입 안내 보기/);
   assert.match(html, /\/dashboard/);
 });
 
@@ -39,8 +39,8 @@ test("signup is a first-class route and links back to login", async () => {
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /ChatGPT로 Workspace 시작/);
-  assert.match(html, /가입 폼은 없습니다/);
-  assert.match(html, /로그인 흐름 보기/);
+  assert.match(html, /첫 로그인에서 내 작업공간이 만들어집니다/);
+  assert.match(html, /로그인하기/);
   assert.match(html, /href="\/login/);
 });
 

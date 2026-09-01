@@ -79,9 +79,7 @@ export default function Home() {
                 게임 제작의 모든 과정을<br /><em>CLUNK 하나로</em>
               </h1>
               <p className="cv5-hero-lede">
-                에셋을 만들고, 게임에 넣어도 되는지 확인하고, 파는 것까지 —
-                흩어져 있던 과정을 크레딧 하나로 잇습니다.
-                작업마다 결과 파일과 검사 기록이 남아 나중에 근거를 되짚을 수 있습니다.
+                만들고, 검사하고, 바로 씁니다. 크레딧 하나로 전부.
               </p>
               <div className="cv5-cta-row">
                 <Link className="cv5-btn cv5-btn-primary" href="/studio" prefetch={false}>
@@ -102,7 +100,7 @@ export default function Home() {
 
             <div className="cv5-hero-visual" aria-hidden="true">
               <div className="cv5-hv-panel">
-                <div className="cv5-hv-head"><span>CLUNK <b>MARKET</b></span><span>REAL FILES · GLB</span></div>
+                <div className="cv5-hv-head"><span>CLUNK <b>MARKET</b></span><span>GLB 파일</span></div>
                 <div className="cv5-hv-grid">
                   {HERO_CELLS.map((asset) => (
                     <figure className="cv5-hv-cell" key={asset.slug} style={{ margin: 0 }}>
@@ -127,26 +125,24 @@ export default function Home() {
         <section className="cv5-sec" id="make" data-snap-section="make" aria-labelledby="sec-make">
           <div className="cv5-frame cv5-sec-grid">
             <div className="cv5-sec-copy cv5-reveal">
-              <div className="cv5-sec-kicker"><span className="cv5-num">01</span><small>CLUNK · MAKE &amp; SELL</small></div>
+              <div className="cv5-sec-kicker"><span className="cv5-num">01</span><small>제작과 판매</small></div>
               <h2 id="sec-make">게임 에셋 제작 및 판매</h2>
               <p>
-                한 줄 설명으로 2D 이미지를, 코드 기반 생성기로 3D 모델(GLB)을 만듭니다.
-                만든 파일은 검사를 통과해야 마켓에 올라가고, 무엇으로 어떻게 만들었는지와
-                라이선스가 상품에 함께 붙습니다.
+                한 줄이면 2D가, 몇 초면 3D 모델이 나옵니다. 검사를 통과한 것만 마켓에 올립니다.
               </p>
               <ul className="cv5-points">
-                <li><b>2D 이미지 생성</b> — 사용한 문장과 모델, 파일 지문이 함께 기록됩니다</li>
-                <li><b>3D 모델 생성</b> — 게임에 바로 쓰는 가벼운 GLB로 나옵니다</li>
-                <li><b>판매 전 7가지 확인</b> — 파일·출처·라이선스·검사·검수를 모두 통과해야 공개됩니다</li>
+                <li><b>2D 이미지</b> — 스프라이트·아이콘·이펙트를 문장으로</li>
+                <li><b>3D 모델</b> — 게임에 바로 넣는 저폴리 GLB로</li>
+                <li><b>라이선스 명시</b> — 어디에 써도 되는지 상품마다 표시</li>
               </ul>
               <div>
                 <Link className="cv5-more" href="/marketplace" prefetch={false}>마켓 보기 <Icon name="arrowRight" size={15} /></Link>
-                <Link className="cv5-more" href="/studio" prefetch={false}>Studio에서 제작 <Icon name="arrowRight" size={15} /></Link>
+                <Link className="cv5-more" href="/studio" prefetch={false}>직접 만들기 <Icon name="arrowRight" size={15} /></Link>
               </div>
             </div>
             <div className="cv5-sec-visual cv5-reveal" data-delay="1">
               <div className="cv5-mock">
-                <div className="cv5-mock-bar"><span>CLUNK <b>MARKET</b></span><span>WAVE 1 · 19 PRODUCTS</span></div>
+                <div className="cv5-mock-bar"><span>CLUNK <b>MARKET</b></span><span>1차 19종</span></div>
                 <div className="cv5-mock-body cv5-market">
                   <div className="cv5-market-side">
                     <span className="on">추천</span>
@@ -173,21 +169,19 @@ export default function Home() {
         <section className="cv5-sec" id="inspect" data-tone="green" data-snap-section="inspect" aria-labelledby="sec-inspect">
           <div className="cv5-frame cv5-sec-grid" data-flip="true">
             <div className="cv5-sec-copy cv5-reveal">
-              <div className="cv5-sec-kicker"><span className="cv5-num">02</span><small>CLUNK · INSPECT &amp; REPAIR</small></div>
+              <div className="cv5-sec-kicker"><span className="cv5-num">02</span><small>검사와 수정</small></div>
               <h2 id="sec-inspect">게임 에셋 검사 및 수정</h2>
               <p>
-                파일을 직접 열어 {RULE_COUNT}가지 항목을 검사하고, 게임에 넣어도 되는
-                상태인지 점수로 알려줍니다. 고칠 때는 안전한 작업만 골라 쓰고 원본은
-                그대로 두며, 무엇을 어떻게 고쳤는지가 기록으로 남습니다.
+                올리면 {RULE_COUNT}가지를 검사해 점수로 알려줍니다. 고치는 것도 여기서, 원본은 그대로.
               </p>
               <ul className="cv5-points">
-                <li><b>수치를 직접 셉니다</b> — 삼각형 수, 드로우콜, 텍스처 용량을 파일에서 읽어 계산합니다</li>
-                <li><b>2D도 함께</b> — 스프라이트 시트(Sprite·Atlas)와 Spine 애니메이션을 한 묶음으로 검사합니다</li>
-                <li><b>점수와 승인은 별개</b> — 파일 검사를 통과해도 화면에서 어떻게 보이는지는 직접 확인해야 합니다</li>
+                <li><b>실제 수치</b> — 삼각형·드로우콜·텍스처 용량을 파일에서 직접</li>
+                <li><b>2D도 함께</b> — 스프라이트 시트(Sprite·Atlas)와 Spine까지</li>
+                <li><b>눈으로 확인</b> — 3D 뷰어로 돌려 보고 판단하세요</li>
               </ul>
               <div>
                 <Link className="cv5-more" href="/app" prefetch={false}>검사 시작 <Icon name="arrowRight" size={15} /></Link>
-                <Link className="cv5-more" href="/docs" prefetch={false}>검사 계약 읽기 <Icon name="arrowRight" size={15} /></Link>
+                <Link className="cv5-more" href="/docs" prefetch={false}>문서 보기 <Icon name="arrowRight" size={15} /></Link>
               </div>
             </div>
             <div className="cv5-sec-visual cv5-reveal" data-delay="1">
@@ -226,17 +220,15 @@ export default function Home() {
         <section className="cv5-sec" id="agent" data-snap-section="agent" aria-labelledby="sec-agent">
           <div className="cv5-frame cv5-sec-grid">
             <div className="cv5-sec-copy cv5-reveal">
-              <div className="cv5-sec-kicker"><span className="cv5-num">03</span><small>CLUNK · GAME AGENT</small></div>
+              <div className="cv5-sec-kicker"><span className="cv5-num">03</span><small>제작 에이전트</small></div>
               <h2 id="sec-agent">게임 제작 에이전트</h2>
               <p>
-                쓰던 AI 코딩 도구에 Clunk를 연결하면 에이전트가 에셋 생성과 검사를
-                직접 실행합니다. 원격으로 붙이든 내 컴퓨터에서 돌리든 같은
-                {" "}{MCP_HTTP_TOOL_COUNT}개 기능이라, 내 작업과 자동 빌드가 같은 결과를 냅니다.
+                Claude Code, Cursor, Codex에 연결하면 에이전트가 직접 만들고 검사합니다.
               </p>
               <ul className="cv5-points">
-                <li><b>MCP {MCP_HTTP_TOOL_COUNT}개 기능</b> — 생성·검사·기록·검수를 에이전트가 직접 실행합니다</li>
-                <li><b>터미널 · VS Code · Codex</b> — 검사에 실패하면 빌드를 멈추도록 걸어둘 수 있습니다</li>
-                <li><b>실제 게임에서 씁니다</b> — 개발 중인 게임 두 곳의 납품 파일로 검사 기준을 맞춰왔습니다</li>
+                <li><b>MCP {MCP_HTTP_TOOL_COUNT}개 기능</b> — 생성·검사·검수를 에이전트가 직접</li>
+                <li><b>CI 연동</b> — 검사에 걸리면 빌드를 멈춥니다</li>
+                <li><b>실전 검증</b> — 개발 중인 게임 두 곳에 납품하며 다듬었습니다</li>
               </ul>
               <div>
                 <Link className="cv5-more" href="/connect" prefetch={false}>에이전트 연결 가이드 <Icon name="arrowRight" size={15} /></Link>
@@ -279,13 +271,11 @@ export default function Home() {
           <div className="cv5-frame">
             <div className="cv5-showcase-head cv5-reveal">
               <div>
-                <span className="cv5-eyebrow">마켓 1차 물량</span>
-                <h2 id="showcase-heading">지금 마켓에 올라와 있는 에셋</h2>
+                <span className="cv5-eyebrow">마켓</span>
+                <h2 id="showcase-heading">마켓에 올라와 있는 에셋</h2>
               </div>
               <p>
-                개발 중인 농장 게임에 납품하며 다듬은 저폴리 3D 모델입니다.
-                함께 적힌 삼각형 수는 각 파일에서 직접 읽은 값이라, 예산이 빠듯한
-                프로젝트에서도 미리 계산해 보고 넣을 수 있습니다.
+                농장 게임에 납품하며 다듬은 저폴리 모델입니다. 삼각형 수는 파일에서 직접 읽었습니다.
               </p>
             </div>
             <ul className="cv5-showcase-grid" aria-label="Wave 1 실제 에셋 12종">
@@ -310,9 +300,9 @@ export default function Home() {
         {/* CLOSER -------------------------------------------------------- */}
         <section className="cv5-closer" id="start" data-snap-section="start" aria-labelledby="start-heading">
           <div className="cv5-frame">
-            <span className="cv5-eyebrow" style={{ justifyContent: "center" }}>START WITH CLUNK</span>
+            <span className="cv5-eyebrow" style={{ justifyContent: "center" }}>시작하기</span>
             <h2 id="start-heading">필요한 에셋부터<br /><em>골라 보세요</em></h2>
-            <p>마켓에서 바로 받아 쓰거나, 직접 만들어 검사까지 돌려보세요. 쓰던 AI 도구에 연결하는 데는 몇 분이면 충분합니다.</p>
+            <p>마켓에서 바로 받거나, 직접 만들어 보세요.</p>
             <div className="cv5-cta-row" style={{ marginTop: 34 }}>
               <Link className="cv5-btn cv5-btn-primary" href="/studio" prefetch={false}>
                 Clunk 시작하기 <Icon name="arrowUpRight" size={17} />

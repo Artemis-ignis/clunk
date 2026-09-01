@@ -32,9 +32,7 @@ export default function ReviewPage({ searchParams }: { searchParams?: Promise<{ 
             <span className="cv5-eyebrow">직접 검수</span>
             <h1>눈으로 돌려보고, 재생해보고, 판정합니다</h1>
             <p>
-              3D는 실측 스탯과 함께 회전·와이어프레임·애니메이션 클립으로, 2D는 상태별
-              실재생을 지면선과 고정 기준 스프라이트 옆에서 확인합니다. 여기 보이는 수치는
-              전부 브라우저 파서가 방금 그 파일에서 직접 센 값입니다.
+              GLB는 돌려 보고, 스프라이트는 재생해 보세요. 옆에 뜨는 수치는 올린 파일에서 바로 읽습니다.
             </p>
           </header>
           <ReviewSurfaceLoader searchParams={searchParams} />

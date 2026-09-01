@@ -108,8 +108,7 @@ export default function PricingPage() {
                   <em>크레딧으로 실행합니다</em>
                 </h1>
                 <p className={styles.heroLede}>
-                  마켓에서 완성된 에셋을 사는 것과, 내 파일로 Clunk 기능을 직접 돌리는 것은
-                  요금이 다릅니다. 이 페이지는 뒤쪽 — 기능을 돌릴 때 쓰는 크레딧을 설명합니다.
+                  에셋을 받든 검사를 돌리든 같은 크레딧을 씁니다. 1 크레딧 = ₩100.
                 </p>
                 <div className={styles.actions}>
                   <Link className="cv5-btn cv5-btn-primary" href="/login?return_to=%2Fdashboard">
@@ -163,13 +162,12 @@ export default function PricingPage() {
           >
             <div className="cv5-frame">
               <div className={`${styles.sectionHead} cv5-reveal`}>
-                <span className="cv5-eyebrow">크레딧을 쓰는 곳</span>
+                <span className="cv5-eyebrow">크레딧이 드는 작업</span>
                 <h2 id="operations-title">
-                  크레딧은 <em>내가 실행한 작업</em>에만 씁니다
+                  <em>실패하면</em> 돌려받습니다
                 </h2>
                 <p>
-                  마켓에 올라온 에셋을 사는 것과, 내 파일로 Clunk 기능을 돌리는 것은 별개입니다.
-                  크레딧이 줄어드는 건 아래 네 가지 작업을 실행했을 때뿐입니다.
+                  아래 네 가지가 크레딧을 씁니다. 각 1크레딧.
                 </p>
               </div>
               <div className={`${styles.opGrid} cv5-reveal`} data-delay="1">
@@ -197,11 +195,10 @@ export default function PricingPage() {
               <div className={`${styles.sectionHead} cv5-reveal`}>
                 <span className="cv5-eyebrow">차감 규칙</span>
                 <h2 id="rules-title">
-                  <em>성공한 작업</em>에만 차감됩니다
+                  <em>실패하면</em> 돌려받습니다
                 </h2>
                 <p>
-                  작업이 중간에 실패하면 크레딧은 그대로 남습니다. 같은 요청을 두 번 보내도
-                  한 번만 차감됩니다.
+                  실패한 작업은 차감하지 않습니다. 같은 요청을 두 번 보내도 한 번만.
                 </p>
               </div>
               <div className={styles.ruleList}>
@@ -233,11 +230,10 @@ export default function PricingPage() {
               <div className={`${styles.sectionHead} cv5-reveal`}>
                 <span className="cv5-eyebrow">크레딧 팩</span>
                 <h2 id="packs-title">
-                  크레딧 <em>충전</em>
+                  <em>충전</em>하기
                 </h2>
                 <p>
-                  아직 가격을 정하지 못한 팩은 &ldquo;확정 전&rdquo;으로 두었습니다. 가격이 정해지기 전까지는
-                  구매 버튼이 열리지 않으니, 잘못된 금액으로 결제될 일은 없습니다.
+                  가격이 정해진 팩부터 순서대로 엽니다.
                 </p>
               </div>
               <div className={styles.packsNote}>
