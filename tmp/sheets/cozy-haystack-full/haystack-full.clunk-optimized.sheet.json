@@ -6,8 +6,8 @@
   "source": {
     "path": "haystack-full.clunk-optimized.sheet.png",
     "origin": "procedural",
-    "sha256": "3f062612c4ddf0754a2e82a61873efdc85ff67973035026576c345d0dfe3ddae",
-    "bytes": 9205
+    "sha256": "d29830cee35aadbbd5d479f530db7926ed78fcffc1865e8d12fc2b50bb8499ac",
+    "bytes": 6771
   },
   "target": {
     "engine": "engine-agnostic",
@@ -20,8 +20,8 @@
   },
   "sheet": {
     "path": "haystack-full.clunk-optimized.sheet.png",
-    "sha256": "3f062612c4ddf0754a2e82a61873efdc85ff67973035026576c345d0dfe3ddae",
-    "bytes": 9205,
+    "sha256": "d29830cee35aadbbd5d479f530db7926ed78fcffc1865e8d12fc2b50bb8499ac",
+    "bytes": 6771,
     "width": 64,
     "height": 512
   },
@@ -246,31 +246,31 @@
     "maxAlphaCoverage": 0.92
   },
   "metrics": {
-    "sourceHash": "3f062612c4ddf0754a2e82a61873efdc85ff67973035026576c345d0dfe3ddae",
+    "sourceHash": "d29830cee35aadbbd5d479f530db7926ed78fcffc1865e8d12fc2b50bb8499ac",
     "sheetDimensions": {
       "width": 64,
       "height": 64
     },
-    "alphaCoverage": 0.421173,
+    "alphaCoverage": 0.237244,
     "frameAlphaCoverages": [
-      0.373535,
-      0.424805,
-      0.415527,
-      0.440186,
-      0.388428,
-      0.448242,
-      0.437256,
-      0.441406
+      0.206055,
+      0.244385,
+      0.237061,
+      0.248047,
+      0.21167,
+      0.252686,
+      0.245605,
+      0.252441
     ],
     "frameHashes": {
-      "idle_south_00": "41aef5eb6eb13379048ea5c82c7cd5379c736a1f4839ab05f1ebe804a53c47e7",
-      "idle_southwest_00": "3dc8b39c3fdccc4a7aec382984d59f469da0c7d9ead58e80dc73745c6cadfcde",
-      "idle_west_00": "638584ea23314f1d3122418590cab0128efd7bd8843efb807164859025088d34",
-      "idle_northwest_00": "8aa6d60644720fb76817b1b85531df9dd4197c2dd63e0e4e80dba90c81d54d9e",
-      "idle_north_00": "a8f5bdba1bef499433a7adad433c4b3b255035c29769cf011e595b25e68e97bb",
-      "idle_northeast_00": "c44496e34f7b336867d448f07421f10730eefbf376ee2bb2a493e376a25ea794",
-      "idle_east_00": "d05744cfb50c25067f5ac6aa86b05641b35bee6593e1e09abaad8fbc30c3bf0f",
-      "idle_southeast_00": "0ea60ead446e2c63f177538f9776bfde9a25c54cc7709f57424f5189d0a5042b"
+      "idle_south_00": "f45b8f318533fd3219c6b4f1d98863764389daef9754c0b1bcd82a8fdd04094e",
+      "idle_southwest_00": "b2d05e43fd2d034901ce3e056d3566b50dcd96ca552149744fa7b276c2f4aee1",
+      "idle_west_00": "388cd3b46e51d741934241cf879c8c8ca03fb6ad0c5bf5cf566cfd355ce33a01",
+      "idle_northwest_00": "960de2f27e8312df8511de2f90d5d6747269b8302c8ac61fcfd0ae9cc9b6b41a",
+      "idle_north_00": "13b01c4314411f4e300b97ce509a072f5513df0df5effc828296c21eb11c5f34",
+      "idle_northeast_00": "7364ecae436bd2baa1c09d674b89ed1b142fb9e08818f490bd698af29480be6d",
+      "idle_east_00": "f2a6921b5ea92d95d8cb61bba28cce6ee7535d240e4431dcf5fd8e448a85748f",
+      "idle_southeast_00": "81e58261622b8e801d102748f8d2ef19406a706f1c3db0556c61bd00e8124362"
     },
     "hasTransparentPixels": true,
     "emptyFrameIds": [],
@@ -279,20 +279,20 @@
       0,
       0,
       0,
-      0.003968,
-      0.027778,
+      0,
+      0,
       0,
       0
     ],
     "silhouetteCoverages": [
-      0.373535,
-      0.424805,
-      0.415527,
-      0.440186,
-      0.388428,
-      0.448242,
-      0.437256,
-      0.441406
+      0.206055,
+      0.244385,
+      0.237061,
+      0.248047,
+      0.21167,
+      0.252686,
+      0.245605,
+      0.252441
     ],
     "measuredCellPx": {
       "width": 64,
@@ -315,49 +315,49 @@
       "requested": 32,
       "produced": 32,
       "colours": [
-        "#39301d",
-        "#433b29",
+        "#39301e",
+        "#433c29",
         "#4a4029",
-        "#4b4737",
+        "#4c4737",
         "#5d4b2c",
-        "#5d543d",
-        "#685432",
-        "#755b32",
-        "#6d5d3d",
-        "#7b663e",
+        "#5d553d",
+        "#6f5832",
+        "#6c5d3e",
+        "#7c663e",
         "#8b6f3f",
-        "#72674c",
-        "#7e704f",
-        "#8a754b",
+        "#71674b",
+        "#7f704f",
+        "#8b754a",
         "#8b7b57",
         "#9f7d47",
-        "#9e8555",
-        "#a08b60",
+        "#9f8555",
+        "#a08a5f",
         "#a4946d",
         "#b58f52",
         "#b79963",
         "#c49956",
-        "#c6a164",
+        "#c6a163",
         "#d2a761",
         "#bca16e",
-        "#bda87a",
+        "#bea87a",
         "#d1ae72",
-        "#dfbb7b",
-        "#d4be8d",
-        "#e8c689",
-        "#ecd49e",
-        "#f9e5ae"
+        "#dfba7b",
+        "#d3be8d",
+        "#e8c688",
+        "#ecd39c",
+        "#f5dfa9",
+        "#fdebb4"
       ]
     },
     "coverage": [
-      0.3735,
-      0.4248,
-      0.4155,
-      0.4402,
-      0.3884,
-      0.4482,
-      0.4373,
-      0.4414
+      0.2061,
+      0.2444,
+      0.2371,
+      0.248,
+      0.2117,
+      0.2527,
+      0.2456,
+      0.2524
     ]
   }
 }

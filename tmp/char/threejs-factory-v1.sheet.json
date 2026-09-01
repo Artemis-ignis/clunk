@@ -1,0 +1,1559 @@
+{
+  "schema": "clunk.sprite-sheet-review.v1",
+  "schemaVersion": "1",
+  "evidenceKind": "CONTRACT_FIXTURE",
+  "assetId": "threejs-factory-v1",
+  "source": {
+    "path": "threejs-factory-v1.sheet.png",
+    "origin": "procedural",
+    "sha256": "e41782d4561ae0d2d1b42c4bfd3b3f8957c203b73ee6e80f08825b134bbfcc35",
+    "bytes": 13952
+  },
+  "target": {
+    "engine": "engine-agnostic",
+    "renderer": "clunk-software-rasteriser",
+    "platform": "2d",
+    "logicalFramePx": {
+      "width": 64,
+      "height": 64
+    }
+  },
+  "sheet": {
+    "path": "threejs-factory-v1.sheet.png",
+    "sha256": "e41782d4561ae0d2d1b42c4bfd3b3f8957c203b73ee6e80f08825b134bbfcc35",
+    "bytes": 13952,
+    "width": 512,
+    "height": 512
+  },
+  "grid": {
+    "columns": 8,
+    "rows": 8,
+    "frameWidth": 64,
+    "frameHeight": 64,
+    "padding": {
+      "x": 0,
+      "y": 0
+    },
+    "spacing": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "frames": [
+    {
+      "id": "walk_south_00",
+      "index": 0,
+      "x": 0,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_south_01",
+      "index": 1,
+      "x": 64,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_south_02",
+      "index": 2,
+      "x": 128,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_south_03",
+      "index": 3,
+      "x": 192,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_south_04",
+      "index": 4,
+      "x": 256,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_south_05",
+      "index": 5,
+      "x": 320,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_south_06",
+      "index": 6,
+      "x": 384,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_south_07",
+      "index": 7,
+      "x": 448,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_southwest_00",
+      "index": 8,
+      "x": 0,
+      "y": 64,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "southwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_southwest_01",
+      "index": 9,
+      "x": 64,
+      "y": 64,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "southwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_southwest_02",
+      "index": 10,
+      "x": 128,
+      "y": 64,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "southwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_southwest_03",
+      "index": 11,
+      "x": 192,
+      "y": 64,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "southwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_southwest_04",
+      "index": 12,
+      "x": 256,
+      "y": 64,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "southwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_southwest_05",
+      "index": 13,
+      "x": 320,
+      "y": 64,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "southwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_southwest_06",
+      "index": 14,
+      "x": 384,
+      "y": 64,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "southwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_southwest_07",
+      "index": 15,
+      "x": 448,
+      "y": 64,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "southwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_west_00",
+      "index": 16,
+      "x": 0,
+      "y": 128,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_west_01",
+      "index": 17,
+      "x": 64,
+      "y": 128,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_west_02",
+      "index": 18,
+      "x": 128,
+      "y": 128,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_west_03",
+      "index": 19,
+      "x": 192,
+      "y": 128,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_west_04",
+      "index": 20,
+      "x": 256,
+      "y": 128,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_west_05",
+      "index": 21,
+      "x": 320,
+      "y": 128,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_west_06",
+      "index": 22,
+      "x": 384,
+      "y": 128,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_west_07",
+      "index": 23,
+      "x": 448,
+      "y": 128,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_northwest_00",
+      "index": 24,
+      "x": 0,
+      "y": 192,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "northwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_northwest_01",
+      "index": 25,
+      "x": 64,
+      "y": 192,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "northwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_northwest_02",
+      "index": 26,
+      "x": 128,
+      "y": 192,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "northwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_northwest_03",
+      "index": 27,
+      "x": 192,
+      "y": 192,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "northwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_northwest_04",
+      "index": 28,
+      "x": 256,
+      "y": 192,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "northwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_northwest_05",
+      "index": 29,
+      "x": 320,
+      "y": 192,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "northwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_northwest_06",
+      "index": 30,
+      "x": 384,
+      "y": 192,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "northwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_northwest_07",
+      "index": 31,
+      "x": 448,
+      "y": 192,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "northwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_north_00",
+      "index": 32,
+      "x": 0,
+      "y": 256,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_north_01",
+      "index": 33,
+      "x": 64,
+      "y": 256,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_north_02",
+      "index": 34,
+      "x": 128,
+      "y": 256,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_north_03",
+      "index": 35,
+      "x": 192,
+      "y": 256,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_north_04",
+      "index": 36,
+      "x": 256,
+      "y": 256,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_north_05",
+      "index": 37,
+      "x": 320,
+      "y": 256,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_north_06",
+      "index": 38,
+      "x": 384,
+      "y": 256,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_north_07",
+      "index": 39,
+      "x": 448,
+      "y": 256,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_northeast_00",
+      "index": 40,
+      "x": 0,
+      "y": 320,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "northeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_northeast_01",
+      "index": 41,
+      "x": 64,
+      "y": 320,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "northeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_northeast_02",
+      "index": 42,
+      "x": 128,
+      "y": 320,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "northeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_northeast_03",
+      "index": 43,
+      "x": 192,
+      "y": 320,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "northeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_northeast_04",
+      "index": 44,
+      "x": 256,
+      "y": 320,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "northeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_northeast_05",
+      "index": 45,
+      "x": 320,
+      "y": 320,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "northeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_northeast_06",
+      "index": 46,
+      "x": 384,
+      "y": 320,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "northeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_northeast_07",
+      "index": 47,
+      "x": 448,
+      "y": 320,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "northeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_east_00",
+      "index": 48,
+      "x": 0,
+      "y": 384,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_east_01",
+      "index": 49,
+      "x": 64,
+      "y": 384,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_east_02",
+      "index": 50,
+      "x": 128,
+      "y": 384,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_east_03",
+      "index": 51,
+      "x": 192,
+      "y": 384,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_east_04",
+      "index": 52,
+      "x": 256,
+      "y": 384,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_east_05",
+      "index": 53,
+      "x": 320,
+      "y": 384,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_east_06",
+      "index": 54,
+      "x": 384,
+      "y": 384,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_east_07",
+      "index": 55,
+      "x": 448,
+      "y": 384,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_southeast_00",
+      "index": 56,
+      "x": 0,
+      "y": 448,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "southeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_southeast_01",
+      "index": 57,
+      "x": 64,
+      "y": 448,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "southeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_southeast_02",
+      "index": 58,
+      "x": 128,
+      "y": 448,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "southeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_southeast_03",
+      "index": 59,
+      "x": 192,
+      "y": 448,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "southeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_southeast_04",
+      "index": 60,
+      "x": 256,
+      "y": 448,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "southeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_southeast_05",
+      "index": 61,
+      "x": 320,
+      "y": 448,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "southeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_southeast_06",
+      "index": 62,
+      "x": 384,
+      "y": 448,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "southeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "walk_southeast_07",
+      "index": 63,
+      "x": 448,
+      "y": 448,
+      "width": 64,
+      "height": 64,
+      "state": "walk",
+      "direction": "southeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    }
+  ],
+  "animations": [
+    {
+      "id": "walk_south",
+      "state": "walk",
+      "direction": "south",
+      "fps": 10,
+      "loop": true,
+      "frameIds": [
+        "walk_south_00",
+        "walk_south_01",
+        "walk_south_02",
+        "walk_south_03",
+        "walk_south_04",
+        "walk_south_05",
+        "walk_south_06",
+        "walk_south_07"
+      ]
+    },
+    {
+      "id": "walk_southwest",
+      "state": "walk",
+      "direction": "southwest",
+      "fps": 10,
+      "loop": true,
+      "frameIds": [
+        "walk_southwest_00",
+        "walk_southwest_01",
+        "walk_southwest_02",
+        "walk_southwest_03",
+        "walk_southwest_04",
+        "walk_southwest_05",
+        "walk_southwest_06",
+        "walk_southwest_07"
+      ]
+    },
+    {
+      "id": "walk_west",
+      "state": "walk",
+      "direction": "west",
+      "fps": 10,
+      "loop": true,
+      "frameIds": [
+        "walk_west_00",
+        "walk_west_01",
+        "walk_west_02",
+        "walk_west_03",
+        "walk_west_04",
+        "walk_west_05",
+        "walk_west_06",
+        "walk_west_07"
+      ]
+    },
+    {
+      "id": "walk_northwest",
+      "state": "walk",
+      "direction": "northwest",
+      "fps": 10,
+      "loop": true,
+      "frameIds": [
+        "walk_northwest_00",
+        "walk_northwest_01",
+        "walk_northwest_02",
+        "walk_northwest_03",
+        "walk_northwest_04",
+        "walk_northwest_05",
+        "walk_northwest_06",
+        "walk_northwest_07"
+      ]
+    },
+    {
+      "id": "walk_north",
+      "state": "walk",
+      "direction": "north",
+      "fps": 10,
+      "loop": true,
+      "frameIds": [
+        "walk_north_00",
+        "walk_north_01",
+        "walk_north_02",
+        "walk_north_03",
+        "walk_north_04",
+        "walk_north_05",
+        "walk_north_06",
+        "walk_north_07"
+      ]
+    },
+    {
+      "id": "walk_northeast",
+      "state": "walk",
+      "direction": "northeast",
+      "fps": 10,
+      "loop": true,
+      "frameIds": [
+        "walk_northeast_00",
+        "walk_northeast_01",
+        "walk_northeast_02",
+        "walk_northeast_03",
+        "walk_northeast_04",
+        "walk_northeast_05",
+        "walk_northeast_06",
+        "walk_northeast_07"
+      ]
+    },
+    {
+      "id": "walk_east",
+      "state": "walk",
+      "direction": "east",
+      "fps": 10,
+      "loop": true,
+      "frameIds": [
+        "walk_east_00",
+        "walk_east_01",
+        "walk_east_02",
+        "walk_east_03",
+        "walk_east_04",
+        "walk_east_05",
+        "walk_east_06",
+        "walk_east_07"
+      ]
+    },
+    {
+      "id": "walk_southeast",
+      "state": "walk",
+      "direction": "southeast",
+      "fps": 10,
+      "loop": true,
+      "frameIds": [
+        "walk_southeast_00",
+        "walk_southeast_01",
+        "walk_southeast_02",
+        "walk_southeast_03",
+        "walk_southeast_04",
+        "walk_southeast_05",
+        "walk_southeast_06",
+        "walk_southeast_07"
+      ]
+    }
+  ],
+  "qualityPolicy": {
+    "mode": "BLOCKING",
+    "strictChecks": [
+      "pixel-discipline"
+    ],
+    "pixelGridSize": 1,
+    "requireTransparentBackground": true,
+    "minAlphaCoverage": 0.05,
+    "maxAlphaCoverage": 0.92
+  },
+  "metrics": {
+    "sourceHash": "e41782d4561ae0d2d1b42c4bfd3b3f8957c203b73ee6e80f08825b134bbfcc35",
+    "sheetDimensions": {
+      "width": 512,
+      "height": 64
+    },
+    "alphaCoverage": 0.163483,
+    "frameAlphaCoverages": [
+      0.169922,
+      0.165283,
+      0.162842,
+      0.165283,
+      0.169922,
+      0.165283,
+      0.162842,
+      0.165283,
+      0.179199,
+      0.183105,
+      0.182373,
+      0.183105,
+      0.179199,
+      0.169922,
+      0.172852,
+      0.169922,
+      0.118896,
+      0.137939,
+      0.144287,
+      0.137939,
+      0.118896,
+      0.137451,
+      0.144287,
+      0.137451,
+      0.176758,
+      0.17041,
+      0.175049,
+      0.17041,
+      0.176758,
+      0.182861,
+      0.182129,
+      0.182861,
+      0.164551,
+      0.164307,
+      0.160889,
+      0.164307,
+      0.164551,
+      0.164307,
+      0.160889,
+      0.164307,
+      0.176758,
+      0.182861,
+      0.182129,
+      0.182861,
+      0.176758,
+      0.17041,
+      0.175049,
+      0.17041,
+      0.118896,
+      0.137451,
+      0.144287,
+      0.137451,
+      0.118896,
+      0.137939,
+      0.144287,
+      0.137939,
+      0.179199,
+      0.169922,
+      0.172852,
+      0.169922,
+      0.179199,
+      0.183105,
+      0.182373,
+      0.183105
+    ],
+    "frameHashes": {
+      "walk_south_00": "42a809a184ee165c879c2c792c9e86f98b06fcff16194ca34d8b7f1094db5f9f",
+      "walk_south_01": "82cf17561b80c90e6b11cf13210dd7c1aeaa78ed1233316f39eaa65d389c1572",
+      "walk_south_02": "426e6a39baf6ed58f842ea867413f90ae1c27bbb759f3376767a515c712f80f7",
+      "walk_south_03": "82cf17561b80c90e6b11cf13210dd7c1aeaa78ed1233316f39eaa65d389c1572",
+      "walk_south_04": "42a809a184ee165c879c2c792c9e86f98b06fcff16194ca34d8b7f1094db5f9f",
+      "walk_south_05": "a9278738fe4c0c2f89d65e39aebbe4b046346b4352d53d42c15ee96c2b83110a",
+      "walk_south_06": "583cbb2e503f448665409a586a29caa3ea377b4768a163d90e8df29ecb5ffbf1",
+      "walk_south_07": "a9278738fe4c0c2f89d65e39aebbe4b046346b4352d53d42c15ee96c2b83110a",
+      "walk_southwest_00": "68f6b1689264370489037ab4a373dedf519b894172f144af59a4a0fa4a41a613",
+      "walk_southwest_01": "17a36f82d875b4033a80bfac0ab8ace191d0f9b85d64446ae5c10fa0e59a05ad",
+      "walk_southwest_02": "1b087607ab67fb00237173f64ee52cffc5e51a7e44a49951faebf29ca1e473c3",
+      "walk_southwest_03": "17a36f82d875b4033a80bfac0ab8ace191d0f9b85d64446ae5c10fa0e59a05ad",
+      "walk_southwest_04": "68f6b1689264370489037ab4a373dedf519b894172f144af59a4a0fa4a41a613",
+      "walk_southwest_05": "c239b37de13b1bf97fe3b78e053123257adedc34b2013f1dbe11324fb7c7ca3f",
+      "walk_southwest_06": "a05d260a045e60117b35b04bf1570185ea1b0a482ad9872a077bf0c30ca017d2",
+      "walk_southwest_07": "c239b37de13b1bf97fe3b78e053123257adedc34b2013f1dbe11324fb7c7ca3f",
+      "walk_west_00": "02986a42084cefbc28184c3f01770f1046c4d422fcc57ae40692c097a5d56932",
+      "walk_west_01": "60732693f33d94b5b9441bed844f1bfc80042b1cb6984c849f3ca4f47aa30f8b",
+      "walk_west_02": "d9780411a58e34d845f8696d337cb307033ebbb9c82b7db5ca692bf623bfad37",
+      "walk_west_03": "60732693f33d94b5b9441bed844f1bfc80042b1cb6984c849f3ca4f47aa30f8b",
+      "walk_west_04": "02986a42084cefbc28184c3f01770f1046c4d422fcc57ae40692c097a5d56932",
+      "walk_west_05": "b5f1a9527cba9e50595752fdb147ab8ce3a78f52498de5976785922ee6cf2130",
+      "walk_west_06": "91ab7aac32295d96d355afa1826806031164dd528364912292ed86ed551048f2",
+      "walk_west_07": "b5f1a9527cba9e50595752fdb147ab8ce3a78f52498de5976785922ee6cf2130",
+      "walk_northwest_00": "4e2866a21012cb20637c64001213e4d528a191e99b642ae1a1f2d0ed1392d111",
+      "walk_northwest_01": "a30b5d991767ba1f4bf34557934f1643dc28eff96cc08a77917e44e8c3242d4a",
+      "walk_northwest_02": "75df3c2a49a1789659e77698f515c2ad49358013268f070db52ba893309850d1",
+      "walk_northwest_03": "a30b5d991767ba1f4bf34557934f1643dc28eff96cc08a77917e44e8c3242d4a",
+      "walk_northwest_04": "4e2866a21012cb20637c64001213e4d528a191e99b642ae1a1f2d0ed1392d111",
+      "walk_northwest_05": "1f6937632dab035cb0259df7cdc698935461dea81ba4d8bb625700ec5a655eda",
+      "walk_northwest_06": "180c48a38fc55da16117027b0c779af7a8db39e7a474ade17a8b5739e6462bfc",
+      "walk_northwest_07": "1f6937632dab035cb0259df7cdc698935461dea81ba4d8bb625700ec5a655eda",
+      "walk_north_00": "c63906e8ec2d55ebed7be30e02bf237d0605d36e415144e0a614824755d501f1",
+      "walk_north_01": "29beff1011e51ebfafb42d057ea1b90190690f0140182ccf7969dfe950baf522",
+      "walk_north_02": "e32418efad9ff0e650bf4fb6227fbc2cf639f45b0570b1e18661a209e6fa35a9",
+      "walk_north_03": "29beff1011e51ebfafb42d057ea1b90190690f0140182ccf7969dfe950baf522",
+      "walk_north_04": "c63906e8ec2d55ebed7be30e02bf237d0605d36e415144e0a614824755d501f1",
+      "walk_north_05": "b5f5d4242a89d3e796326ad11ff00c932399d233a8856486c84470d6312af5bc",
+      "walk_north_06": "bc0897af04a328b73b6d92e0ea230a36f436f84ce6fc9d9535a9bd908428b77c",
+      "walk_north_07": "b5f5d4242a89d3e796326ad11ff00c932399d233a8856486c84470d6312af5bc",
+      "walk_northeast_00": "a2ac873666d43ed574297a2858cb18f960b7d4ae5d82ba8b6f22349fa1693866",
+      "walk_northeast_01": "98d2e8556bc65d3ed776f15eaedfc35d60f8e6746031d2a5c08ede400d935958",
+      "walk_northeast_02": "936bed2119126650440fc11e3ea78b579018750a8da8571b0e15ca1894200ef5",
+      "walk_northeast_03": "98d2e8556bc65d3ed776f15eaedfc35d60f8e6746031d2a5c08ede400d935958",
+      "walk_northeast_04": "a2ac873666d43ed574297a2858cb18f960b7d4ae5d82ba8b6f22349fa1693866",
+      "walk_northeast_05": "8d95a2e2624c6e5c5cfbad4dc0b082221b83b9323f555d3ff81835c84cf34d90",
+      "walk_northeast_06": "ceee800902a3d51cd3076d76b70b967e312108c1e144621c5e3ca612299face6",
+      "walk_northeast_07": "8d95a2e2624c6e5c5cfbad4dc0b082221b83b9323f555d3ff81835c84cf34d90",
+      "walk_east_00": "a09c44714d59f8913897d200ee28cd0874cfb4b7e5905c3b43fbc6c1f0eb585b",
+      "walk_east_01": "72d4d9b061334c1b6912de3bb28d4847fe96eaa474493a25e69f3f9d6d2e6c51",
+      "walk_east_02": "cab45ded6a52175d2ce91aa57435823a940735d3d4867b58f4f729d37fd478f3",
+      "walk_east_03": "72d4d9b061334c1b6912de3bb28d4847fe96eaa474493a25e69f3f9d6d2e6c51",
+      "walk_east_04": "a09c44714d59f8913897d200ee28cd0874cfb4b7e5905c3b43fbc6c1f0eb585b",
+      "walk_east_05": "e9c494cca444ec9401b4e00d35edd844d525aaef46544700caf811b8526dc5ef",
+      "walk_east_06": "c55484f02144f6ac2137c475c19ed4d82b58f51d35821711baab2a2b3d8cd267",
+      "walk_east_07": "e9c494cca444ec9401b4e00d35edd844d525aaef46544700caf811b8526dc5ef",
+      "walk_southeast_00": "fd4ffe9be2bd6b22f57c5f7bd88a7a93eec8086e2ee23802566bfece5e4b5dbd",
+      "walk_southeast_01": "1f530864bc158abc0514f4063205f7a54de0740a84a8c06821cbc5d0ecaa5ee4",
+      "walk_southeast_02": "1ef2e1bf7222ce36b25d71f442763bafe8be07dcd5bea50aac4f751eae7bcf9c",
+      "walk_southeast_03": "1f530864bc158abc0514f4063205f7a54de0740a84a8c06821cbc5d0ecaa5ee4",
+      "walk_southeast_04": "fd4ffe9be2bd6b22f57c5f7bd88a7a93eec8086e2ee23802566bfece5e4b5dbd",
+      "walk_southeast_05": "ba346d93365fc805614a372424a97ce99832e01107ac6b079107690d7321f67c",
+      "walk_southeast_06": "d1ab313d1ebebf7f2a0d9ee1a04536bba810c77f4f60f457fc15bdedf75b396c",
+      "walk_southeast_07": "ba346d93365fc805614a372424a97ce99832e01107ac6b079107690d7321f67c"
+    },
+    "hasTransparentPixels": true,
+    "emptyFrameIds": [],
+    "borderTouchRatios": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "silhouetteCoverages": [
+      0.169922,
+      0.165283,
+      0.162842,
+      0.165283,
+      0.169922,
+      0.165283,
+      0.162842,
+      0.165283,
+      0.179199,
+      0.183105,
+      0.182373,
+      0.183105,
+      0.179199,
+      0.169922,
+      0.172852,
+      0.169922,
+      0.118896,
+      0.137939,
+      0.144287,
+      0.137939,
+      0.118896,
+      0.137451,
+      0.144287,
+      0.137451,
+      0.176758,
+      0.17041,
+      0.175049,
+      0.17041,
+      0.176758,
+      0.182861,
+      0.182129,
+      0.182861,
+      0.164551,
+      0.164307,
+      0.160889,
+      0.164307,
+      0.164551,
+      0.164307,
+      0.160889,
+      0.164307,
+      0.176758,
+      0.182861,
+      0.182129,
+      0.182861,
+      0.176758,
+      0.17041,
+      0.175049,
+      0.17041,
+      0.118896,
+      0.137451,
+      0.144287,
+      0.137451,
+      0.118896,
+      0.137939,
+      0.144287,
+      0.137939,
+      0.179199,
+      0.169922,
+      0.172852,
+      0.169922,
+      0.179199,
+      0.183105,
+      0.182373,
+      0.183105
+    ],
+    "measuredCellPx": {
+      "width": 64,
+      "height": 64
+    },
+    "hardAlphaRatio": 1,
+    "uniqueColorCount": 30,
+    "dominantRunLength": 1,
+    "offGridPixelRatio": 0,
+    "distinctFrameRatio": 0.625
+  },
+  "generation": {
+    "glb": "threejs-factory-v1.glb",
+    "glbSha256": "4ef999a0de685f4bea066fb2625de8217099bbb2d308d893ada466095dfbc9fe",
+    "triangles": 480,
+    "views": 8,
+    "pitch": 0.62,
+    "clip": {
+      "name": "walk",
+      "fps": 10,
+      "frames": 8,
+      "tracks": [
+        {
+          "node": "leg_l_pivot",
+          "axis": "x",
+          "degrees": [
+            0,
+            18,
+            26,
+            18,
+            0,
+            -18,
+            -26,
+            -18
+          ]
+        },
+        {
+          "node": "leg_r_pivot",
+          "axis": "x",
+          "degrees": [
+            0,
+            -18,
+            -26,
+            -18,
+            0,
+            18,
+            26,
+            18
+          ]
+        },
+        {
+          "node": "arm_l_pivot",
+          "axis": "x",
+          "degrees": [
+            0,
+            -14,
+            -20,
+            -14,
+            0,
+            14,
+            20,
+            14
+          ]
+        },
+        {
+          "node": "arm_r_pivot",
+          "axis": "x",
+          "degrees": [
+            0,
+            14,
+            20,
+            14,
+            0,
+            -14,
+            -20,
+            -14
+          ]
+        },
+        {
+          "node": "torso_pivot",
+          "axis": "x",
+          "degrees": [
+            0,
+            2,
+            3,
+            2,
+            0,
+            2,
+            3,
+            2
+          ]
+        }
+      ]
+    },
+    "palette": {
+      "requested": 32,
+      "produced": 32,
+      "colours": [
+        "#332118",
+        "#17212e",
+        "#1e2d3e",
+        "#30455b",
+        "#43271a",
+        "#533e29",
+        "#4b3e30",
+        "#4f4135",
+        "#5b4a3c",
+        "#614f40",
+        "#495a6b",
+        "#415d79",
+        "#425e7b",
+        "#456381",
+        "#774b31",
+        "#8a482d",
+        "#7f6644",
+        "#9c7b54",
+        "#d66e45",
+        "#d27a51",
+        "#caa36c",
+        "#de7348",
+        "#e07348",
+        "#e17448",
+        "#e8784a",
+        "#ec794b",
+        "#ef7b4c",
+        "#f17c4d",
+        "#dfad84",
+        "#e3b77c",
+        "#e7c06d",
+        "#f1ca73"
+      ]
+    },
+    "coverage": [
+      0.1699,
+      0.1653,
+      0.1628,
+      0.1653,
+      0.1699,
+      0.1653,
+      0.1628,
+      0.1653,
+      0.1792,
+      0.1831,
+      0.1824,
+      0.1831,
+      0.1792,
+      0.1699,
+      0.1729,
+      0.1699,
+      0.1189,
+      0.1379,
+      0.1443,
+      0.1379,
+      0.1189,
+      0.1375,
+      0.1443,
+      0.1375,
+      0.1768,
+      0.1704,
+      0.175,
+      0.1704,
+      0.1768,
+      0.1829,
+      0.1821,
+      0.1829,
+      0.1646,
+      0.1643,
+      0.1609,
+      0.1643,
+      0.1646,
+      0.1643,
+      0.1609,
+      0.1643,
+      0.1768,
+      0.1829,
+      0.1821,
+      0.1829,
+      0.1768,
+      0.1704,
+      0.175,
+      0.1704,
+      0.1189,
+      0.1375,
+      0.1443,
+      0.1375,
+      0.1189,
+      0.1379,
+      0.1443,
+      0.1379,
+      0.1792,
+      0.1699,
+      0.1729,
+      0.1699,
+      0.1792,
+      0.1831,
+      0.1824,
+      0.1831
+    ]
+  }
+}

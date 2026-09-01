@@ -1,0 +1,11 @@
+{
+  "name": "walk",
+  "fps": 10,
+  "tracks": [
+    { "node": "leg_l_pivot", "axis": "x", "degrees": [0, 18, 26, 18, 0, -18, -26, -18] },
+    { "node": "leg_r_pivot", "axis": "x", "degrees": [0, -18, -26, -18, 0, 18, 26, 18] },
+    { "node": "arm_l_pivot", "axis": "x", "degrees": [0, -14, -20, -14, 0, 14, 20, 14] },
+    { "node": "arm_r_pivot", "axis": "x", "degrees": [0, 14, 20, 14, 0, -14, -20, -14] },
+    { "node": "torso_pivot", "axis": "x", "degrees": [0, 2, 3, 2, 0, 2, 3, 2] }
+  ]
+}

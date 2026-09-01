@@ -47,13 +47,17 @@ const TITLES = {
   "cozy-market-stall": "코지 마켓 스톨",
   "cozy-storage-shed": "코지 창고 헛간",
   "grove-tree-pack-vol1": "그로브 트리 팩 Vol.1 (6종)",
+  "farmhand": "팜핸드 (밀짚모자 농부)",
 };
 
 /** Korean names for the clips, so a title reads as a product rather than a track id. */
-const CLIP_LABELS = { swing: "여닫기", open: "문 열기" };
+const CLIP_LABELS = { swing: "여닫기", open: "문 열기", walk: "걷기" };
 
 /** A source directory suffixed with a clip is a distinct product, not another sheet. */
-const ANIMATED_SUFFIX = { "cozy-fence-gate-swing": "cozy-fence-gate", "cozy-storage-shed-door": "cozy-storage-shed" };
+const ANIMATED_SUFFIX = { "cozy-fence-gate-swing": "cozy-fence-gate", "cozy-storage-shed-door": "cozy-storage-shed", "farmhand-walk": "farmhand" };
+
+/** Models authored for a sheet rather than rendered from a listing that already exists. */
+const AUTHORED_FOR_SPRITE = new Set(["farmhand"]);
 
 const q = (value) => `'${String(value).replace(/'/g, "''")}'`;
 const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
@@ -134,7 +138,12 @@ for (const sourceSlug of readdirSync(sheetsRoot).sort()) {
       ? `${cell}×${cell} RGBA PNG ${cells}컷으로, ${views}방향 각각에 ${clip.frames}프레임짜리 ${CLIP_LABELS[clip.name] ?? clip.name} 동작이 들어 있습니다. 방향당 한 줄이라 한 줄을 그대로 재생하면 됩니다 (${fps}fps 루프).`
       : `${models === 1 ? "" : `모델 ${models}종 · `}${cell}×${cell} RGBA PNG ${cells}컷으로, 한 모델을 ${views}방향에서 렌더했습니다.`,
     `투명 배경이고 팔레트는 ${palette.size}색이며, 시트 합계는 ${(bytes / 1024).toFixed(1)} KB입니다.`,
-    `같은 이름의 3D 상품(${sourceTriangles.toLocaleString("ko-KR")} 삼각형)을 Clunk 렌더러로 구운 것이라, 3D와 2D가 같은 형태·같은 팔레트를 씁니다.`,
+    // Only the sheets rendered from a model that is itself on sale can claim the pairing.
+    // The farmhand was authored for this sheet and has no 3D listing beside it; saying it
+    // did would be a sentence the catalogue cannot back.
+    TITLES[titleKey] && !AUTHORED_FOR_SPRITE.has(titleKey)
+      ? `같은 이름의 3D 상품(${sourceTriangles.toLocaleString("ko-KR")} 삼각형)을 Clunk 렌더러로 구운 것이라, 3D와 2D가 같은 형태·같은 팔레트를 씁니다.`
+      : `Clunk가 코드로 만든 ${sourceTriangles.toLocaleString("ko-KR")} 삼각형 3D 모델을 렌더한 것이라, 모든 방향·모든 프레임이 같은 모델에서 나옵니다.`,
     clip
       ? `프레임 좌표·격자·해시·프레임별 해시가 담긴 clunk.sprite-sheet-review.v1 매니페스트가 함께 들어 있고, Clunk 스프라이트 검사에서 규격 PASS·픽셀 품질 PASS·애니메이션 재생 PASS입니다.`
       : `프레임 좌표·격자·해시가 담긴 clunk.sprite-sheet-review.v1 매니페스트가 함께 들어 있고, Clunk 스프라이트 검사에서 규격 PASS·픽셀 품질 PASS입니다.`,

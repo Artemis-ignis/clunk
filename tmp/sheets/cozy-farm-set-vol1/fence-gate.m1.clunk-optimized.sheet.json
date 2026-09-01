@@ -6,8 +6,8 @@
   "source": {
     "path": "fence-gate.m1.clunk-optimized.sheet.png",
     "origin": "procedural",
-    "sha256": "21ff19196313c12c89db09276c51ffbf823f82468bc1fd9c3cadf606ad75630d",
-    "bytes": 3998
+    "sha256": "a13dfe5313d97024a99b0aabe59a1352b2d58cd1cbd772a4758e71e87b567dcb",
+    "bytes": 3091
   },
   "target": {
     "engine": "engine-agnostic",
@@ -20,8 +20,8 @@
   },
   "sheet": {
     "path": "fence-gate.m1.clunk-optimized.sheet.png",
-    "sha256": "21ff19196313c12c89db09276c51ffbf823f82468bc1fd9c3cadf606ad75630d",
-    "bytes": 3998,
+    "sha256": "a13dfe5313d97024a99b0aabe59a1352b2d58cd1cbd772a4758e71e87b567dcb",
+    "bytes": 3091,
     "width": 64,
     "height": 512
   },
@@ -246,60 +246,60 @@
     "maxAlphaCoverage": 0.92
   },
   "metrics": {
-    "sourceHash": "21ff19196313c12c89db09276c51ffbf823f82468bc1fd9c3cadf606ad75630d",
+    "sourceHash": "a13dfe5313d97024a99b0aabe59a1352b2d58cd1cbd772a4758e71e87b567dcb",
     "sheetDimensions": {
       "width": 64,
       "height": 64
     },
-    "alphaCoverage": 0.201813,
+    "alphaCoverage": 0.116608,
     "frameAlphaCoverages": [
-      0.240723,
-      0.239746,
-      0.086914,
-      0.240479,
-      0.239746,
-      0.239014,
-      0.087646,
-      0.240234
+      0.139648,
+      0.136719,
+      0.054199,
+      0.135742,
+      0.139648,
+      0.136475,
+      0.053711,
+      0.136719
     ],
     "frameHashes": {
-      "idle_south_00": "2293c92c28a6aa6188d192784aa11e415b0b8abb504ad40a6c01aeeeffb2db50",
-      "idle_southwest_00": "51b93a5cdd0cefe938145084373d26f06c3dd6e1e5d918d8cc7763d28b4361f4",
-      "idle_west_00": "a29c2f4050e991930edd3be699b2d36aaabe63e1b3b490dd7d2356b43878c870",
-      "idle_northwest_00": "1c7030a626ca6b946254837884a27eb5f58ac136adb8fac1e121d8070534f61f",
-      "idle_north_00": "412555e67bb757a1ebcb0d22a94a77560def18c8cd2ff76e63d914320f4d5f58",
-      "idle_northeast_00": "06d53d8a05e1efcfa244ca643379cf85388079f7f996b0bcb7357142317d9f2f",
-      "idle_east_00": "dda01ba2e762dfc73155b7b3b0d6aeb657434bb26ffa7fef2b6cc1d0937ca916",
-      "idle_southeast_00": "1ef647b9ea06e20e2e250ce98c311b2dc6dc7d62ce26833742e6191f81285757"
+      "idle_south_00": "3733dc11760b518dcdbdbb521e8738c75a1d8d1bb61772e85f2e8f3fd7b39bc8",
+      "idle_southwest_00": "be3a26dcd8f6e4dcf4e548b2d22721dc6cb7cae85a6fd314670945b73ab1985f",
+      "idle_west_00": "cd30e21260f8952238d5523fd03e0bd427a5f0b2cc033073191a64e4d51ccacc",
+      "idle_northwest_00": "4fa5d2e20026eeb38384282375b98bc434bcb0b8da11ba1c982eecbd840a19a8",
+      "idle_north_00": "b760fa0e70a74428a3f9a2bf3fdc8825918aaba4e1e3899b6f78b06d929649c5",
+      "idle_northeast_00": "ed84705f9a0505c72f965a0b00e3661f3f2c799816c3d85a8d8e71361c18ada4",
+      "idle_east_00": "f9e47c126a62ea15cacbef757ed826b88b055b6242c132ee04ff600967a402e9",
+      "idle_southeast_00": "3a36e915dcf773314154003d7177dd57ee6502df7f5408da4c0878b6ccc50a70"
     },
     "hasTransparentPixels": true,
     "emptyFrameIds": [],
     "borderTouchRatios": [
-      0.02381,
       0,
-      0.055556,
       0,
-      0.02381,
       0,
-      0.055556,
+      0,
+      0,
+      0,
+      0,
       0
     ],
     "silhouetteCoverages": [
-      0.240723,
-      0.239746,
-      0.086914,
-      0.240479,
-      0.239746,
-      0.239014,
-      0.087646,
-      0.240234
+      0.139648,
+      0.136719,
+      0.054199,
+      0.135742,
+      0.139648,
+      0.136475,
+      0.053711,
+      0.136719
     ],
     "measuredCellPx": {
       "width": 64,
       "height": 64
     },
     "hardAlphaRatio": 1,
-    "uniqueColorCount": 19,
+    "uniqueColorCount": 16,
     "dominantRunLength": 1,
     "offGridPixelRatio": 0,
     "distinctFrameRatio": 1
@@ -316,48 +316,48 @@
       "produced": 32,
       "colours": [
         "#231913",
-        "#382f22",
+        "#382f23",
         "#4a3323",
-        "#443828",
-        "#684e32",
+        "#423727",
+        "#493d2c",
+        "#524430",
         "#735434",
-        "#635846",
         "#735434",
-        "#735434",
-        "#705a40",
-        "#6a665c",
-        "#6a665c",
-        "#805e3e",
-        "#8d714c",
-        "#a08057",
+        "#5f5545",
+        "#6f5c46",
+        "#836241",
+        "#92754f",
+        "#a8865b",
         "#757065",
         "#a8865b",
         "#a8865b",
+        "#757065",
+        "#757065",
         "#aea897",
-        "#aea897",
-        "#aea897",
-        "#c18f59",
         "#aea897",
         "#aea797",
-        "#cea26a",
+        "#aea897",
+        "#bd8a55",
         "#cea26a",
         "#cea26a",
         "#cea26a",
         "#aea797",
+        "#aea897",
+        "#aea897",
         "#aea797",
-        "#d3a66c",
-        "#e7b577"
+        "#aea897",
+        "#daab70"
       ]
     },
     "coverage": [
-      0.2407,
-      0.2397,
-      0.0869,
-      0.2405,
-      0.2397,
-      0.239,
-      0.0876,
-      0.2402
+      0.1396,
+      0.1367,
+      0.0542,
+      0.1357,
+      0.1396,
+      0.1365,
+      0.0537,
+      0.1367
     ]
   }
 }

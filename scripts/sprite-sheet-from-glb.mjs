@@ -196,7 +196,12 @@ function render(dir) {
   const rgba = Buffer.alloc(CELL * CELL * 4); // zero-filled: fully transparent
   const depth = new Float64Array(CELL * CELL).fill(Infinity);
 
-  const eye = new THREE.Vector3(...dir).normalize().multiplyScalar(radius * 3.1).add(centre);
+  // Distance that actually fits the bounding sphere: d = r / sin(fov/2), plus a small
+  // margin. A fixed multiple of the radius happened to work for the wide, squat models
+  // in this catalogue and cut the head and boots off the first tall one — a character is
+  // 1.62 m of mostly height, and 3.1 radii at a 30 degree field shows 1.46 m of it.
+  const fitDistance = (radius / Math.sin((30 * Math.PI) / 360)) * 1.06;
+  const eye = new THREE.Vector3(...dir).normalize().multiplyScalar(fitDistance).add(centre);
   const forward = new THREE.Vector3().subVectors(centre, eye).normalize();
   const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
   const up = new THREE.Vector3().crossVectors(right, forward).normalize();

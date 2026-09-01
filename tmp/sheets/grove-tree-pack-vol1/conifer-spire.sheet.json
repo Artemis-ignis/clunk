@@ -6,8 +6,8 @@
   "source": {
     "path": "conifer-spire.sheet.png",
     "origin": "procedural",
-    "sha256": "c0af3ea1628f5723955d6eb4427e0d8136178cc9b04dc520fb45ec6956ca68d2",
-    "bytes": 4970
+    "sha256": "3e73a13fb1333e894c8e8d82b777f5a9068ec69fe7eb68195e65be6cf0e94dc6",
+    "bytes": 3831
   },
   "target": {
     "engine": "engine-agnostic",
@@ -20,8 +20,8 @@
   },
   "sheet": {
     "path": "conifer-spire.sheet.png",
-    "sha256": "c0af3ea1628f5723955d6eb4427e0d8136178cc9b04dc520fb45ec6956ca68d2",
-    "bytes": 4970,
+    "sha256": "3e73a13fb1333e894c8e8d82b777f5a9068ec69fe7eb68195e65be6cf0e94dc6",
+    "bytes": 3831,
     "width": 64,
     "height": 512
   },
@@ -246,31 +246,31 @@
     "maxAlphaCoverage": 0.92
   },
   "metrics": {
-    "sourceHash": "c0af3ea1628f5723955d6eb4427e0d8136178cc9b04dc520fb45ec6956ca68d2",
+    "sourceHash": "3e73a13fb1333e894c8e8d82b777f5a9068ec69fe7eb68195e65be6cf0e94dc6",
     "sheetDimensions": {
       "width": 64,
       "height": 64
     },
-    "alphaCoverage": 0.241699,
+    "alphaCoverage": 0.137756,
     "frameAlphaCoverages": [
-      0.240234,
-      0.247803,
-      0.241211,
-      0.248535,
-      0.240967,
-      0.240723,
-      0.231201,
-      0.24292
+      0.137695,
+      0.139404,
+      0.136963,
+      0.140869,
+      0.137695,
+      0.137451,
+      0.132813,
+      0.13916
     ],
     "frameHashes": {
-      "idle_south_00": "a40620dbffc6b01e6723329b30b3e99bd98717504c2928b0efd585216d1403ea",
-      "idle_southwest_00": "cc59f497ff0e96a8d3fa03445ec80900d1643c2438dceeee5723fe3cd693fa51",
-      "idle_west_00": "d88c9652c71c6bbb197030e1ac35204ae5b055d433f3e30e4190db5e03fa3c3e",
-      "idle_northwest_00": "e15a731ebe38fe988be138d606cdcc6e6b17623d4483fc3ed6f095835bb67f7c",
-      "idle_north_00": "7152f5731d053874b4cd0ce6e278af02019c85da36895f2758761e90baee0a22",
-      "idle_northeast_00": "d157681f9c41809ce48a78662f745b8cbb6c2d49ea460083863e74ae82308349",
-      "idle_east_00": "006ab7b8f7c10de0f11d8cfac856cf7539d31867b5bd562ba42a4b535efd044e",
-      "idle_southeast_00": "1ebfa688002c23ebc55448f3f21e0acd387424bd6f954d028e1159b39161ab63"
+      "idle_south_00": "da060b0ca585758729196efbe1185b5b78e18fd58104eab87eed74cd29735714",
+      "idle_southwest_00": "a9149aec7f7cea5e52f498217b7278a1e78de1604c060b028c39887fb5d23257",
+      "idle_west_00": "1c651e86db428f6da3ff82095cedf553c4e5c35273394c96aebfbf8371bd623d",
+      "idle_northwest_00": "ff03baac9632822c2e5672de3dee8d6416bb593fc0225629aac5257af420612b",
+      "idle_north_00": "344c5dddafe7d1babeca963c33aa7264322e783d0c2a3c5e33b4c2df5868ddeb",
+      "idle_northeast_00": "d2075d8a9c83f6a58826c27a0c21547e94b855215669c88a88ffb0c9a83fdaba",
+      "idle_east_00": "f0672f034aa98c8e8d7bbf1f3938280e589944d37c95414d584260fefa4aa401",
+      "idle_southeast_00": "867dcfcbb8354b1c4ee5d722102b6748128f844888d01c3fa8568a962bd44f4a"
     },
     "hasTransparentPixels": true,
     "emptyFrameIds": [],
@@ -285,21 +285,21 @@
       0
     ],
     "silhouetteCoverages": [
-      0.240234,
-      0.247803,
-      0.241211,
-      0.248535,
-      0.240967,
-      0.240723,
-      0.231201,
-      0.24292
+      0.137695,
+      0.139404,
+      0.136963,
+      0.140869,
+      0.137695,
+      0.137451,
+      0.132813,
+      0.13916
     ],
     "measuredCellPx": {
       "width": 64,
       "height": 64
     },
     "hardAlphaRatio": 1,
-    "uniqueColorCount": 30,
+    "uniqueColorCount": 29,
     "dominantRunLength": 1,
     "offGridPixelRatio": 0,
     "distinctFrameRatio": 1
@@ -315,49 +315,49 @@
       "requested": 32,
       "produced": 32,
       "colours": [
-        "#15231c",
-        "#21362a",
-        "#2a3c31",
-        "#2b4134",
-        "#2c4636",
-        "#2f4236",
-        "#314638",
-        "#304839",
-        "#314c3b",
-        "#344d3d",
-        "#364e3e",
-        "#384e3f",
-        "#3a4f3f",
-        "#3b5042",
-        "#40281f",
-        "#3b5042",
-        "#3b5042",
-        "#3c5042",
-        "#533227",
-        "#6a3f31",
-        "#3c5844",
-        "#4a6751",
-        "#55735a",
-        "#5a785e",
-        "#5b7a5f",
-        "#5c7a60",
-        "#5e7a60",
-        "#5f7a60",
-        "#607b60",
-        "#617b60",
-        "#93513c",
-        "#648367"
+        "#0d1813",
+        "#14211b",
+        "#192a21",
+        "#1e3127",
+        "#23372c",
+        "#263a2f",
+        "#283c30",
+        "#2a1a15",
+        "#293730",
+        "#293830",
+        "#2a3a32",
+        "#293d31",
+        "#2a3d32",
+        "#2d1d18",
+        "#2b3c32",
+        "#2b3d32",
+        "#2b3d32",
+        "#2e1d18",
+        "#452a21",
+        "#2d3d34",
+        "#452a21",
+        "#4a2b20",
+        "#523126",
+        "#523126",
+        "#683d2e",
+        "#2f4738",
+        "#3b5744",
+        "#4a6650",
+        "#547259",
+        "#5a7a5f",
+        "#5f7f63",
+        "#668569"
       ]
     },
     "coverage": [
-      0.2402,
-      0.2478,
-      0.2412,
-      0.2485,
-      0.241,
-      0.2407,
-      0.2312,
-      0.2429
+      0.1377,
+      0.1394,
+      0.137,
+      0.1409,
+      0.1377,
+      0.1375,
+      0.1328,
+      0.1392
     ]
   }
 }
