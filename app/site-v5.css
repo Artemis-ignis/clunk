@@ -37,7 +37,12 @@
      custom property (guaranteed-invalid) and silently drops the page to the
      system font — the exact "cheap AI look" the 2026-08-31 review caught. */
   --v5-font: "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
-  --v5-label: "Space Grotesk V", "Space Grotesk", ui-monospace, "Cascadia Mono", monospace;
+  /* Space Grotesk carries no Hangul, so every Korean label in a label/eyebrow/
+     stat slot was falling through to a system monospace face and rendering at
+     the wrong metrics next to the Latin digits beside it. Font fallback is
+     per-character: Latin and figures still come from Space Grotesk, Hangul now
+     comes from the same face the rest of the page reads in. */
+  --v5-label: "Space Grotesk V", "Space Grotesk", "Pretendard Variable", "Pretendard Fallback", Pretendard, "Malgun Gothic", ui-monospace, "Cascadia Mono", monospace;
 
   --v5-frame: 1200px;
   --v5-r: 14px;
@@ -663,36 +668,38 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
 }
 
 /* ---------------------------------------------------------------------------
-   Korean typography (2026-09-01)
+   Korean typography — measured against aetherforgeai.com/ko (2026-09-01)
 
-   The tracking on this site was set for Latin display type: -0.042em on the
-   hero, -0.035em on section headings, -0.012em inherited by every element.
-   Hangul syllable blocks are wider than Latin glyphs and Pretendard is already
-   tight, so at 40–65px that pulls 받침 into the next block. The Korean
-   reference sites the master gave sit around -0.02em on headings and 0 on body.
+   That site keeps one rule with no exceptions: every heading 24px and up
+   tracks -0.025em, every body size tracks 0, and body leading is x1.625
+   regardless of size. Headings sit between 1.04 and 1.25. Our sheet had
+   -0.042em on the hero, -0.012em inherited by everything, and body leading
+   ranging from 1.40 to 1.75.
 --------------------------------------------------------------------------- */
 .cv5 {
   letter-spacing: 0;
+  --v5-ink-faint: rgba(233, 236, 248, 0.58);
 }
 
-.cv5-hero h1,
-.cv5-closer h2,
-.cv5-nf h1 {
-  letter-spacing: -0.02em;
+.cv5 h1,
+.cv5 h2,
+.cv5 h3,
+.cv5-stats-grid b {
+  letter-spacing: -0.025em;
 }
 
+.cv5-hero h1 { line-height: 1.12; }
 .cv5-sec-copy h2,
 .cv5-showcase-head h2,
-.cv5-stats-grid b {
-  letter-spacing: -0.015em;
-}
+.cv5-closer h2,
+.cv5-nf h1 { line-height: 1.18; }
 
-/* Hangul body text needs looser leading than Latin; anything under 1.5 crowds
-   the 받침 of one line into the 초성 of the next. */
+/* Body leading is one number at every size, the way the reference sets it. */
 .cv5 p,
 .cv5 li,
-.cv5 dd {
-  line-height: 1.7;
+.cv5 dd,
+.cv5-hero-lede {
+  line-height: 1.625;
 }
 
 /* Real content must stay readable. 8–9px labels read as a low-resolution
@@ -705,10 +712,15 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
   font-size: 0.6875rem;
 }
 
-/* --v5-ink-faint was 3.58:1 on the page ground — under the 4.5:1 the text it
-   paints needs. */
+/* Radius was 12 different values across one page. The reference uses four:
+   10 for controls, 12 for small cards, 16 for panels, 24 for feature cards,
+   plus a pill. Round ours onto the same ladder. */
 .cv5 {
-  --v5-ink-faint: rgba(233, 236, 248, 0.58);
+  --v5-r-sm: 10px;
+  --v5-r: 12px;
+  --v5-r-md: 16px;
+  --v5-r-lg: 24px;
+  --v5-r-pill: 999px;
 }
 
 /* The agent step rows are icon + tool name + a Korean note. Laying them out as
@@ -728,4 +740,12 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
 
 .cv5-agent-live .cv5-chat {
   min-height: 340px;
+}
+
+/* One headline, two hand-set line breaks. Only one span is ever displayed. */
+.cv5-line-narrow { display: none; }
+
+@media (max-width: 720px) {
+  .cv5-line-wide { display: none; }
+  .cv5-line-narrow { display: block; }
 }

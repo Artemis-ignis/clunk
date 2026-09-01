@@ -314,6 +314,7 @@
 .card {
   display: flex;
   flex-direction: column;
+  text-decoration: none;
   border: 1px solid var(--v5-line);
   border-radius: var(--v5-r);
   overflow: hidden;
@@ -331,6 +332,28 @@
   display: block;
   position: relative;
   background: #191c2e;
+}
+
+/* A grid row is scanned, not read: the name, then the number that decides
+   whether the file fits the budget. Nothing else earns a line here. */
+.cardTitle {
+  display: block;
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+  color: var(--v5-ink);
+}
+
+.cardSpec {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-family: var(--v5-label);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--v5-ink-faint);
 }
 
 .previewUnavailable {
@@ -428,8 +451,8 @@
 
 .cardBody {
   display: grid;
-  gap: 8px;
-  padding: 14px 15px 15px;
+  gap: 5px;
+  padding: 12px 14px 14px;
   border-top: 1px solid var(--v5-line);
 }
 

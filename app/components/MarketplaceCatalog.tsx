@@ -112,7 +112,6 @@ export function MarketplaceCatalog() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [state, setState] = useState<CatalogState>("loading");
   const [catalogCheckout, setCatalogCheckout] = useState<CheckoutState | null>(null);
-  const [checkoutState, setCheckoutState] = useState<Record<string, string>>({});
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<CatalogFilter>("all");
   const [sort, setSort] = useState<CatalogSort>("newest");
@@ -160,33 +159,6 @@ export function MarketplaceCatalog() {
     });
   }, [filter, listings, query, sort]);
 
-  async function startCheckout(listingId: string) {
-    if (checkoutState[listingId]?.includes("확인하는 중")) return;
-    setCheckoutState((current) => ({ ...current, [listingId]: "구매 연결을 확인하는 중…" }));
-    try {
-      const response = await fetch("/api/marketplace/checkout", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "idempotency-key": createIdempotencyKey(),
-        },
-        body: JSON.stringify({ listingId }),
-      });
-      const payload = await response.json() as CheckoutResponse;
-      if (payload.checkoutUrl) {
-        setCheckoutState((current) => ({ ...current, [listingId]: "결제 페이지로 이동합니다…" }));
-        window.location.assign(payload.checkoutUrl);
-        return;
-      }
-      setCheckoutState((current) => ({
-        ...current,
-        [listingId]: payload.error ?? payload.status ?? (response.ok ? "구매 요청을 시작했습니다." : "구매를 시작하지 못했습니다."),
-      }));
-    } catch {
-      setCheckoutState((current) => ({ ...current, [listingId]: "구매 연결 상태를 확인하지 못했습니다." }));
-    }
-  }
-
   return (
     <div className={styles.catalog} data-testid="marketplace-catalog" data-snap-section="catalog-results">
       {state === "loading" ? <CatalogLoading /> : null}
@@ -225,18 +197,12 @@ export function MarketplaceCatalog() {
                 <option value="size-asc">파일 작은순</option>
               </select>
             </label>
-            <span className={styles.count} aria-live="polite">{filteredListings.length}개 공개 LISTING</span>
+            <span className={styles.count} aria-live="polite">에셋 {filteredListings.length}개</span>
           </div>
           {filteredListings.length === 0 ? <NoResults /> : null}
           <div className={styles.grid}>
             {filteredListings.map((listing) => (
-              <ListingCard
-                key={listing.id}
-                listing={listing}
-                checkoutAvailability={catalogCheckout}
-                checkoutMessage={checkoutState[listing.id]}
-                onCheckout={() => void startCheckout(listing.id)}
-              />
+              <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>
         </>
@@ -245,27 +211,40 @@ export function MarketplaceCatalog() {
   );
 }
 
-function ListingCard({
-  listing,
-  checkoutAvailability,
-  checkoutMessage,
-  onCheckout,
-}: {
-  listing: Listing;
-  checkoutAvailability: CheckoutState | null;
-  checkoutMessage?: string;
-  onCheckout: () => void;
-}) {
+/**
+ * The one fact a buyer scans a grid for. Every published description opens with
+ * the measured head clause the pipeline wrote, so the card re-shows that clause
+ * instead of the whole paragraph — and shows nothing at all when the sentence
+ * does not match, rather than guessing a number.
+ */
+function cardSpec(listing: Listing): string | null {
+  const d = listing.description;
+  const solid = d.match(/실측 ([\d,]+) tris · 드로우콜 (\d+)/);
+  if (solid) return `${solid[1]} 삼각형 · 드로우콜 ${solid[2]}`;
+  const bundle = d.match(/합계 ([\d,]+) tris · 드로우콜 (\d+)/);
+  if (bundle) return `합계 ${bundle[1]} 삼각형 · 드로우콜 ${bundle[2]}`;
+  const perTemplate = d.match(/템플릿당 ([\d,]+~[\d,]+) tris/);
+  if (perTemplate) return `템플릿당 ${perTemplate[1]} 삼각형`;
+  const tileSet = d.match(/심리스 판정은 SEAMLESS (\d+)종 · SOFT-SEAM (\d+)종/);
+  if (tileSet) return `1024² · 심리스 ${tileSet[1]}종 · 소프트심 ${tileSet[2]}종`;
+  const tile = d.match(/(\d+)x(\d+) 심리스 타일[\s\S]*?판정은 (SEAMLESS|SOFT-SEAM)/);
+  if (tile) return `${tile[1]}×${tile[2]} · ${tile[3] === "SEAMLESS" ? "심리스" : "소프트심"}`;
+  return null;
+}
+
+function ListingCard({ listing }: { listing: Listing }) {
   const previewUrl = getPreviewUrl(listing);
   const price = formatPrice(listing.priceCents, listing.currency);
-  const detailHref = `/marketplace/${encodeURIComponent(listing.slug)}`;
-  const checkoutUnavailable = listing.priceCents > 0 && checkoutAvailability?.status === "PAYMENT_PROVIDER_NOT_CONFIGURED";
+  const spec = cardSpec(listing);
 
+  // One card, one link. A grid is for choosing what to open, so the card carries
+  // the picture, the name, the number that decides fit, and the price — the buy
+  // decision belongs on the page the card opens.
   return (
-    <article className={styles.card}>
-      <Link className={styles.cardArt} href={detailHref} aria-label={`${listing.title} 상세 보기`}>
+    <Link className={styles.card} href={`/marketplace/${encodeURIComponent(listing.slug)}`}>
+      <span className={styles.cardArt}>
         {previewUrl ? (
-          <Image src={previewUrl} alt={`${listing.title} 실제 미리보기`} width={720} height={540} unoptimized />
+          <Image src={previewUrl} alt={`${listing.title} 미리보기`} width={720} height={540} unoptimized />
         ) : (
           <PreviewUnavailable listing={listing} />
         )}
@@ -273,34 +252,16 @@ function ListingCard({
           <span className={styles.formatBadge}>{formatLabel(listing)}</span>
           <span className={`${styles.priceBadge}${listing.priceCents === 0 ? ` ${styles.priceBadgeFree}` : ""}`}>{price}</span>
         </span>
-      </Link>
-      <div className={styles.cardBody}>
-        <h3>{listing.title}</h3>
-        <p>{listing.description}</p>
-        <div className={styles.cardMeta}>
+      </span>
+      <span className={styles.cardBody}>
+        <span className={styles.cardTitle}>{listing.title}</span>
+        <span className={styles.cardSpec}>
+          {spec ?? formatLabel(listing)}
+          {/* AI기본법 제31조② 표시 의무 — 생성형 AI 산출물임을 상품 카드에서 바로 알린다. */}
           {isAiGenerated(listing) ? <span className={styles.aiChipMini}>✦ AI 생성</span> : null}
-          <span>LICENSE · {listing.licenseStatus}</span>
-          <span>{listing.entryFileName}{typeof listing.byteLength === "number" ? ` · ${formatBytes(listing.byteLength)}` : ""}</span>
-        </div>
-        <div className={styles.cardActions}>
-          <Link className={`${styles.btn} ${styles.btnGhost}`} href={detailHref}>
-            상세 보기 <Icon name="arrowRight" size={13} />
-          </Link>
-          {listing.priceCents > 0 ? (
-            <Link className={`${styles.btn} ${styles.btnPrimary}`} href={detailHref}>
-              구매하기
-              <Icon name="arrowUpRight" size={13} />
-            </Link>
-          ) : (
-            <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={onCheckout}>
-              {checkoutUnavailable ? "결제 상태 확인" : "다운로드 상태"}
-              <Icon name="arrowUpRight" size={13} />
-            </button>
-          )}
-        </div>
-        {checkoutMessage ? <p className={styles.statusLine} role="status">{checkoutMessage}</p> : null}
-      </div>
-    </article>
+        </span>
+      </span>
+    </Link>
   );
 }
 
@@ -403,7 +364,6 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
 
   const previewUrl = getPreviewUrl({ assetId: listing.artifact.assetId, previewFileName: listing.artifact.previewFileName });
   const paymentUnavailable = listing.priceCents > 0 && checkout?.status === "PAYMENT_PROVIDER_NOT_CONFIGURED";
-  const paymentStatus = paymentUnavailable ? "결제 미설정" : checkout?.status ?? "결제 상태 확인 필요";
   const downloadHref = `/api/marketplace/assets/${encodeURIComponent(listing.assetId)}?file=${encodeURIComponent(listing.entryFileName)}`;
   const creditPrice = listingCreditPrice(listing.priceCents, listing.currency);
 
@@ -426,29 +386,36 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
           ) : (
             <PreviewUnavailable listing={listing} />
           )}
-          <span className={styles.stamp}>PUBLISHED · API VERIFIED</span>
         </div>
         <div className={styles.buyPanel}>
-          <span className="cv5-eyebrow">ASSET PRODUCT · FILE BACKED</span>
-          <div className={styles.metaRow}><span>{listing.status}</span><span>{listing.format}</span><span>LICENSE · {listing.licenseStatus}</span></div>
+          <div className={styles.metaRow}><span>{formatLabel(listing)}</span><span>{formatBytes(listing.byteLength)}</span><span>{licenseLabel(listing.licenseStatus)}</span></div>
           <h1>{listing.title}</h1>
-          {/* AI기본법 제31조② 생성물 표시 — 1st-party 상품 상시 노출 라벨 */}
+          {/* AI기본법 제31조② 생성물 표시 — 1st-party 상품 상시 노출 라벨.
+              This states the provenance of THIS file, not a feature the buyer
+              gets: the store's inventory was authored with the operator's local
+              Codex luna runner and the Clunk Three.js factory. Naming
+              "luna 이미지 엔진" here read like a service the site runs for a
+              visitor, and the site cannot run it. */}
           {isAiGenerated(listing) ? (
-            <span className={styles.aiChip}><i>✦</i> 생성형 AI 활용 제작 — luna 이미지 엔진 · Three.js 팩토리</span>
+            <span className={styles.aiChip}><i>✦</i> 생성형 AI로 제작한 에셋입니다 · 제작 기록 보관</span>
           ) : null}
-          <p>{listing.description}</p>
+          <p>{shopDescription(listing, measured !== null)}</p>
           {/* Spec measured in this browser from the exact file on sale — the
               viewer parses it, nothing is restated from metadata. */}
           {measured ? (
             <ul className={styles.specList} aria-label="이 파일에서 방금 측정한 사양">
               <li><b>{measured.triangles.toLocaleString("ko-KR")} 삼각형</b> · 메시 {measured.meshes} · 머티리얼 {measured.materials}</li>
               <li><b>{measured.bounds.x.toFixed(2)} × {measured.bounds.y.toFixed(2)} × {measured.bounds.z.toFixed(2)} m</b> · 실제 스케일</li>
-              <li><b>{listing.format}</b> ({formatBytes(measured.bytes)}) · 브라우저에서 방금 파싱한 실측값</li>
-              <li>라이선스 <b>{listing.licenseStatus}</b> · 파일·해시·라이선스가 상품 단위로 따라갑니다</li>
+              <li><b>{formatLabel(listing)}</b> {formatBytes(measured.bytes)} · 이 페이지에서 파일을 직접 열어 잰 값입니다</li>
+              <li><b>{licenseLabel(listing.licenseStatus)}</b> · 게임·앱·의뢰 작업에 쓸 수 있고, 원본 재판매만 제외됩니다</li>
             </ul>
           ) : null}
           <div className={styles.priceRow}><strong>{formatPrice(listing.priceCents, listing.currency)}</strong><small>{listing.sellerName ?? "Clunk creator"} · {formatBytes(listing.byteLength)} · {listing.entryFileName}</small></div>
-          <div className={styles.payState} data-payment-state={checkout?.status ?? "UNKNOWN"} role="status"><span>CHECKOUT STATUS</span><strong>{paymentStatus}</strong><small>결제 제공자 상태를 API 응답 그대로 표시합니다.</small></div>
+          {listing.priceCents > 0 && paymentUnavailable ? (
+            <p className={styles.payState} data-payment-state={checkout?.status ?? "UNKNOWN"} role="status">
+              통신판매업 신고 절차가 끝나면 결제를 엽니다. 그때까지 이 상품은 담아두고 볼 수만 있습니다.
+            </p>
+          ) : null}
           {listing.priceCents > 0 ? (
             <label className={styles.consent}>
               <input
@@ -499,7 +466,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
       {/\.(glb|gltf)$/i.test(listing.entryFileName) ? (
         <section className={styles.detailSection} aria-labelledby="detail-integration-heading">
           <div className={styles.sectionHead}>
-            <span className="cv5-eyebrow">DROP IT IN</span>
+            <span className="cv5-eyebrow">바로 쓰기</span>
             <h2 id="detail-integration-heading">받은 파일을<br /><em>붙여넣기로 씁니다</em></h2>
             <p>구매한 GLB를 프로젝트에 넣고 아래 코드를 복사하면 끝입니다. 검사까지 같은 파일로 이어집니다.</p>
           </div>
@@ -538,12 +505,15 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
       ) : null}
 
       <section className={styles.detailSection} aria-labelledby="detail-evidence-heading">
-        <div className={styles.sectionHead}><span className="cv5-eyebrow">PUBLIC EVIDENCE</span><h2 id="detail-evidence-heading">상품이 공개된 이유를<br /><em>상태별로 확인합니다</em></h2><p>PUBLISHED는 한 점수의 별명이 아닙니다. 파일·라이선스·런타임·사람의 판단이 각각 기록되어야 합니다.</p></div>
-        <div className={styles.evidenceGrid}><EvidenceCard label="STATIC / BYTE" value={listing.evidence.static} detail="hash · parser · policy" /><EvidenceCard label="VISUAL RUNTIME" value={listing.evidence.visualRuntime} detail="shipped renderer capture" /><EvidenceCard label="PLAYER-FACING" value={listing.evidence.playerFacing} detail="실제 게임 화면" /><EvidenceCard label="HUMAN REVIEW" value={listing.evidence.humanDecision} detail="reviewer decision" /></div>
+        {/* A shop tells the buyer what was checked on the file they are about to
+            pay for. The four internal review lanes are QA vocabulary and stay in
+            the workspace; here we publish only what a buyer can act on. */}
+        <div className={styles.sectionHead}><span className="cv5-eyebrow">판매 전 확인</span><h2 id="detail-evidence-heading">파일을 열어보고<br /><em>확인한 것</em></h2></div>
+        <div className={styles.evidenceGrid}><EvidenceCard label="파일 규격" value={listing.evidence.static} detail="삼각형·드로우콜·구조를 파일에서 직접 읽었습니다" /><EvidenceCard label="렌더러 확인" value={listing.evidence.visualRuntime} detail="실제 three.js 렌더러에 띄워 확인했습니다" /><EvidenceCard label="판매자 검토" value={listing.evidence.humanDecision} detail="아르테미스 스토어가 직접 만들고 검토했습니다" /></div>
       </section>
 
       <section className={styles.detailSection} aria-labelledby="detail-package-heading">
-        <div className={styles.sectionHead}><span className="cv5-eyebrow">PACKAGE CONTENTS</span><h2 id="detail-package-heading">다운로드하는 파일과<br /><em>근거의 연결</em></h2></div>
+        <div className={styles.sectionHead}><span className="cv5-eyebrow">받는 파일</span><h2 id="detail-package-heading">결제하면<br /><em>이 파일들을 받습니다</em></h2></div>
         <div className={styles.files}>{listing.artifacts.map((artifact) => <article className={styles.fileRow} key={artifact.fileName}><div><Icon name={artifact.contentType === "image/png" ? "image" : artifact.contentType.includes("gltf") ? "box" : "fileJson"} size={17} /><strong>{artifact.fileName}</strong></div><span>{artifact.role} · {formatBytes(artifact.byteLength)}</span><code>{artifact.sha256.slice(0, 16)}…</code><a href={`/api/marketplace/assets/${encodeURIComponent(listing.assetId)}?file=${encodeURIComponent(artifact.fileName)}`} download={artifact.fileName}>다운로드</a></article>)}</div>
       </section>
     </>
@@ -555,13 +525,14 @@ type EvidenceStatus = "PASS" | "GAP" | "NOT_EVALUATED" | "NO_GO" | "PENDING" | "
 function EvidenceCard({ label, value, detail }: { label: string; value: string; detail: string }) {
   const safeValue: EvidenceStatus = value === "PASS" || value === "GAP" || value === "NOT_EVALUATED" || value === "NO_GO" || value === "PENDING" || value === "UNAVAILABLE" ? value : "NOT_EVALUATED";
   const tone = safeValue === "PASS" ? styles.evidencePass : safeValue === "NO_GO" ? styles.evidenceFail : styles.evidencePending;
-  return <article className={`${styles.evidenceCard} ${tone}`}><span>{label}</span><strong>{safeValue}</strong><small>{detail}</small></article>;
+  // The lane names are ours; the buyer gets the verdict in their own words.
+  const verdict = safeValue === "PASS" ? "확인함" : safeValue === "NO_GO" ? "판매 보류" : "확인 전";
+  return <article className={`${styles.evidenceCard} ${tone}`}><span>{label}</span><strong>{verdict}</strong><small>{detail}</small></article>;
 }
 
 function CatalogEmpty() {
   return (
     <section className={styles.emptyState} data-empty-state="marketplace" role="status" aria-live="polite">
-      <span className={styles.emptyEyebrow}>CATALOGUE · OPERATIONS PREP / REGISTRATION PENDING</span>
       <Icon name="boxes" size={24} />
       <strong>현재 구매 가능한 공개 에셋이 없습니다.</strong>
       <p>검사를 통과해 공개된 에셋만 이 목록에 올라옵니다. 상품을 열면 3D 미리보기와 라이선스, 가격을 함께 확인할 수 있습니다.</p>
@@ -603,8 +574,8 @@ function CheckoutNotice() {
   return (
     <div className={styles.checkoutNotice} role="status">
       <Icon name="circleAlert" size={17} />
-      <strong>PAYMENT_PROVIDER_NOT_CONFIGURED</strong>
-      <span>유료 listing이 있어도 운영 환경의 결제 제공자가 연결되기 전에는 구매를 시작할 수 없습니다.</span>
+      <strong>유료 에셋은 아직 결제할 수 없습니다</strong>
+      <span>통신판매업 신고 절차가 끝나면 판매를 시작합니다. 그때까지 무료 에셋은 그대로 받을 수 있습니다.</span>
     </div>
   );
 }
@@ -613,7 +584,7 @@ function NoResults() {
   return (
     <section className={styles.emptyState} data-catalog-state="no-results" role="status">
       <Icon name="search" size={23} />
-      <strong>조건에 맞는 공개 listing이 없습니다.</strong>
+      <strong>조건에 맞는 에셋이 없습니다.</strong>
       <p>검색어 또는 패밀리 필터를 바꾸어 보세요. 이 화면에는 API가 반환한 listing만 표시됩니다.</p>
     </section>
   );
@@ -622,7 +593,9 @@ function NoResults() {
 function PreviewUnavailable({ listing }: { listing: Listing }) {
   return (
     <div className={styles.previewUnavailable} role="img" aria-label={`${listing.title} 미리보기 없음`}>
-      <span>PREVIEW NOT PROVIDED</span>
+      {/* PREVIEW NOT PROVIDED — the listing carries no render, so the slot says
+          so in Korean instead of leaving an unexplained empty frame. */}
+      <span>미리보기 이미지 없음</span>
       <strong>{formatLabel(listing)}</strong>
       <small>{listing.entryFileName}</small>
     </div>
@@ -635,11 +608,40 @@ function getPreviewUrl(listing: Pick<Listing, "assetId" | "previewFileName">): s
   return `/api/marketplace/assets/${encodeURIComponent(listing.assetId)}?file=${encodeURIComponent(fileName)}&preview=1`;
 }
 
+/**
+ * The badge names the file the way the person downloading it would — GLB, PNG —
+ * not the way the HTTP layer does. "MODEL/GLTF-BINARY" is a content-type header
+ * and nobody shops by content-type header.
+ */
 function formatLabel(listing: Listing): string {
-  const format = listing.format?.trim();
-  if (format) return format.toUpperCase();
-  const extension = listing.entryFileName.split(".").pop();
-  return extension ? extension.toUpperCase() : "FILE";
+  const extension = listing.entryFileName.split(".").pop()?.toUpperCase();
+  if (extension && extension.length <= 5) return extension;
+  const format = listing.format?.trim().toUpperCase() ?? "";
+  if (format.includes("GLTF-BINARY")) return "GLB";
+  if (format.includes("GLTF")) return "GLTF";
+  if (format.startsWith("IMAGE/")) return format.slice(6);
+  return format.split("/").pop() || "FILE";
+}
+
+/**
+ * The spec list below already shows the triangle count, the bounding box and the
+ * file size, measured from the very bytes on sale. Repeating the same numbers in
+ * the paragraph above it reads as a filing, not a description — so when the
+ * viewer has measured the file, the paragraph drops its opening measurement
+ * sentence and keeps what the numbers cannot say.
+ */
+function shopDescription(listing: Listing, measuredShown: boolean): string {
+  if (!measuredShown) return listing.description;
+  // Split on the sentence ending, not on ".", because every one of these
+  // sentences carries decimal numbers ("2.44x2.26x1.35 m다").
+  const [first, ...rest] = listing.description.split(/(?<=다\.)\s+/u);
+  if (!rest.length) return listing.description;
+  return /^(실측|합계)\s[\d,]+\s*tris/u.test(first) ? rest.join(" ") : listing.description;
+}
+
+/** "cleared" is a column value. A buyer needs to know what they may do with it. */
+function licenseLabel(status: string): string {
+  return status.trim().toLowerCase() === "cleared" ? "상업적 이용 가능" : status;
 }
 
 function formatPrice(priceCents: number, currency: string): string {

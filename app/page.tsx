@@ -75,8 +75,17 @@ export default function Home() {
           <div className="cv5-frame cv5-hero-grid">
             <div>
               <span className="cv5-badge">✦ 게임 제작을 위한 <b>단 하나의 AI 슈퍼앱</b></span>
+              {/* Korean headlines are broken by hand at each breakpoint, the way
+                  the Korean reference site does it: a browser wrapping Hangul
+                  splits on whatever fits, which lands mid-어절 at narrow widths.
+                  Desktop takes two lines, mobile four. */}
               <h1 id="home-heading">
-                게임 제작의 모든 과정을<br /><em>CLUNK 하나로</em>
+                <span className="cv5-line-wide">
+                  게임 제작의 모든 과정을<br /><em>CLUNK 하나로</em>
+                </span>
+                <span className="cv5-line-narrow">
+                  게임 제작의<br />모든 과정을<br /><em>CLUNK<br />하나로</em>
+                </span>
               </h1>
               <p className="cv5-hero-lede">
                 에셋을 만들고, 게임에 넣어도 되는지 바로 확인하세요.

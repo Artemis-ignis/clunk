@@ -49,8 +49,8 @@ export default async function MarketplaceListingPage({ params }: { params: Promi
           <div className="cv5-frame">
             <noscript>
               <section className={styles.noScriptRecovery} aria-labelledby="listing-not-found-heading">
-                <span>CLUNK MARKET · LISTING LOOKUP</span>
-                <h1 id="listing-not-found-heading">존재하지 않는 공개 listing입니다.</h1>
+                <span>CLUNK MARKET</span>
+                <h1 id="listing-not-found-heading">판매 중이 아닌 주소입니다.</h1>
                 <p>상품이 삭제되었거나 아직 공개되지 않았습니다. 마켓으로 돌아가 현재 구매 가능한 에셋을 확인해 주세요.</p>
                 <Link className="cv5-btn cv5-btn-ghost" href="/marketplace">마켓으로 돌아가기 <Icon name="arrowLeft" size={15} /></Link>
               </section>
@@ -61,7 +61,7 @@ export default async function MarketplaceListingPage({ params }: { params: Promi
             <div className="cv5-frame">
               <div className={styles.buyerGrid}>
                 <div className={styles.sectionHead}>
-                  <span className="cv5-eyebrow">BUY THE ASSET · USE CLUNK</span>
+                  <span className="cv5-eyebrow">구매 후</span>
                   <h2 id="detail-buyer-heading">
                     파일은 구매하고,
                     <br />

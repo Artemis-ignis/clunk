@@ -115,7 +115,12 @@ export function StudioClient({ userLabel, initialSourceAssetId }: { userLabel: s
           <div className="studio-command-hero-copy">
             <span className="mono-label">2D·3D 에셋 만들기</span>
             <h2>내 Workspace에서 무엇을 쓸까요?</h2>
-            <p>포맷을 고르고 프롬프트를 입력하면 Clunk 기능이 크레딧 1개를 사용해 실제 artifact를 만듭니다. 결과의 hash·구조·런타임·사람 검토 상태는 각각 따로 확인합니다.</p>
+            {/* 2026-09-01: this said a prompt makes the artifact. It does not.
+                createProceduralAuthoring (packages/core/src/product-authoring.ts)
+                draws from the recipe and the label hash; the prompt is recorded
+                as provenance and never reaches the pixels. Saying otherwise took
+                a credit for something the user did not get. */}
+            <p>포맷을 고르면 Clunk 레시피가 크레딧 1개로 실제 파일을 만들고, 그 파일을 그 자리에서 검사합니다. 프롬프트는 제작 기록에만 남고 그림 자체를 바꾸지는 않습니다 — 그림을 프롬프트대로 그리는 생성은 아직 이 화면에서 제공하지 않습니다.</p>
             <div className="studio-command-hero-proof" aria-label="Studio가 기록하는 결과">
               <span><i /> 실제 bytes</span>
               <span><i /> fresh reopen</span>
@@ -161,7 +166,7 @@ export function StudioClient({ userLabel, initialSourceAssetId }: { userLabel: s
           <div className="studio-live-authoring-head">
             <div>
               <span className="mono-label">만들기 → 검사 → 검토 · 크레딧 1개</span>
-              <h3 id="studio-live-authoring-heading">프롬프트에서 실제 artifact까지</h3>
+              <h3 id="studio-live-authoring-heading">레시피에서 실제 파일까지</h3>
             </div>
             
           </div>

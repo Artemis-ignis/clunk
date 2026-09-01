@@ -62,18 +62,28 @@ export default function MarketplacePage() {
                 </div>
               </div>
 
+              {/* The window of a shop shows what the shop sells. This is the real
+                  render of a listing on this page, with that listing's own price
+                  and measured triangle count — not a sample from elsewhere. */}
               <div aria-hidden="true">
                 <div className={styles.heroPanel}>
                   <div className={styles.heroPanelHead}>
-                    <span>CLUNK <b>MARKET</b></span>
-                    <span>GLB 파일</span>
+                    <span>코지 마켓 스톨</span>
+                    <span>GLB · 210 KB</span>
                   </div>
                   <div className={styles.heroPanelArt}>
-                    <Image src="/landing/tractor-hero.png" alt="" width={720} height={520} priority />
+                    <Image
+                      src="/api/marketplace/assets/asset-w1-cozy-market-stall?file=preview-cozy-market-stall.webp&preview=1"
+                      alt=""
+                      width={720}
+                      height={520}
+                      unoptimized
+                      priority
+                    />
                   </div>
                   <div className={styles.heroPanelFoot}>
-                    <span>트랙터 검사 결과</span>
-                    <b>100/100 · 블로커 0</b>
+                    <span>2,456 삼각형 · 드로우콜 31</span>
+                    <b>₩6,900</b>
                   </div>
                 </div>
               </div>

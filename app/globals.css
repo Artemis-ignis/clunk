@@ -3,6 +3,32 @@
 /* The only @font-face declarations in the app. They used to live in site-v4.css,
    a stylesheet whose .cv4 selectors match nothing any more — deleting that dead
    file would have silently removed every webfont, so the faces moved here. */
+/* ---------------------------------------------------------------------------
+   Korean typesetting (2026-09-01)
+
+   Measured against the Korean reference site the master gave
+   (aetherforgeai.com/ko): headings track -0.025em and body tracks 0; body
+   leading is a fixed 1.625 at every size (13/15/18px all resolve to x1.625);
+   and word-break: keep-all is applied to 47 elements site-wide so a Korean
+   line never breaks inside a word. Hangul has no inter-word hyphenation to
+   fall back on, so the default break-anywhere behaviour splits 어절 mid-word.
+--------------------------------------------------------------------------- */
+:where(h1, h2, h3, h4, h5, p, li, dd, dt, blockquote, figcaption, small, label, button, a) {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* A metric-matched fallback so the 2MB Korean face can swap in without moving
+   the layout. The overrides come from Pretendard's own metrics. */
+@font-face {
+  font-family: "Pretendard Fallback";
+  src: local("Malgun Gothic"), local("Apple SD Gothic Neo"), local("Arial");
+  ascent-override: 93.76%;
+  descent-override: 23.75%;
+  line-gap-override: 0%;
+  size-adjust: 101.55%;
+}
+
 @font-face {
   font-family: "Pretendard Variable";
   src: url("/fonts/PretendardVariable.woff2") format("woff2-variations");
@@ -85,9 +111,9 @@
      chance — the page dropped to a browser default instead. Literal families
      first; the legacy --font-geist-* names stay defined so the 44 rules that
      still reference them resolve to something real. */
-  --font-sans: "Pretendard Variable", Pretendard, "Apple SD Gothic Neo",
-    "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
-  --font-mono: "Space Grotesk V", "Space Grotesk", ui-monospace, "SFMono-Regular", Consolas, "D2Coding", monospace;
+  --font-sans: "Pretendard Variable", "Pretendard Fallback", Pretendard,
+    "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+  --font-mono: "Space Grotesk V", "Space Grotesk", "Pretendard Variable", "Pretendard Fallback", Pretendard, "Malgun Gothic", ui-monospace, "SFMono-Regular", Consolas, "D2Coding", monospace;
   --font-geist-sans: var(--font-sans);
   --font-geist-mono: var(--font-mono);
 

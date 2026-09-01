@@ -1,20 +1,9 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "./foundry.css";
 import "./site-v5.css";
 import { WebMcpBridge } from "./components/WebMcpBridge";
 import { SITE_ORIGIN } from "./components/site-metadata";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: {
@@ -55,7 +44,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
+    <html lang="ko" suppressHydrationWarning>
       <head>
         {/* 2026-09-01: the Korean face is what every visitor actually reads, and
             it was the one font NOT preloaded — so the first paint of every page
