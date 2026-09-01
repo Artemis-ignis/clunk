@@ -141,8 +141,14 @@ for (const sourceSlug of readdirSync(sheetsRoot).sort()) {
     // Only the sheets rendered from a model that is itself on sale can claim the pairing.
     // The farmhand was authored for this sheet and has no 3D listing beside it; saying it
     // did would be a sentence the catalogue cannot back.
+    //
+    // It used to say the two share a palette. Measuring both (npm run asset:palette:index)
+    // showed that is not true and could not be: the sheet is the model under this
+    // renderer's lighting, then reduced to a fixed number of colours. It is the nearest
+    // thing in the whole shop to its model, which is worth saying — but nearest is not
+    // identical, and the earlier sentence promised identical.
     TITLES[titleKey] && !AUTHORED_FOR_SPRITE.has(titleKey)
-      ? `같은 이름의 3D 상품(${sourceTriangles.toLocaleString("ko-KR")} 삼각형)을 Clunk 렌더러로 구운 것이라, 3D와 2D가 같은 형태·같은 팔레트를 씁니다.`
+      ? `같은 이름의 3D 상품(${sourceTriangles.toLocaleString("ko-KR")} 삼각형)을 Clunk 렌더러로 구운 것이라 형태가 같은 메시입니다. 색은 그 모델의 색에 조명을 입혀 ${palette.size}색으로 줄인 것이라, 3D와 나란히 놓아도 겉도지 않지만 같은 색값은 아닙니다.`
       : `Clunk가 코드로 만든 ${sourceTriangles.toLocaleString("ko-KR")} 삼각형 3D 모델을 렌더한 것이라, 모든 방향·모든 프레임이 같은 모델에서 나옵니다.`,
     clip
       ? `프레임 좌표·격자·해시·프레임별 해시가 담긴 clunk.sprite-sheet-review.v1 매니페스트가 함께 들어 있고, Clunk 스프라이트 검사에서 규격 PASS·픽셀 품질 PASS·애니메이션 재생 PASS입니다.`
