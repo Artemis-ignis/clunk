@@ -36,7 +36,7 @@
   background: rgba(251, 191, 36, 0.08);
   color: var(--v5-amber);
   font-family: var(--v5-label);
-  font-size: 0.62rem;
+  font-size: 0.72rem;
   letter-spacing: 0.1em;
 }
 
@@ -171,7 +171,7 @@
   gap: 16px;
   color: var(--v5-ink-faint);
   font-family: var(--v5-label);
-  font-size: 0.62rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.12em;
 }
@@ -232,7 +232,7 @@
 .ledgerFacts span {
   color: var(--v5-ink-faint);
   font-family: var(--v5-label);
-  font-size: 0.56rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.1em;
 }
@@ -290,7 +290,7 @@
 .opEndpoint {
   color: var(--v5-ink-faint);
   font-family: var(--v5-label);
-  font-size: 0.62rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -434,7 +434,7 @@
   background: rgba(255, 255, 255, 0.03);
   color: var(--v5-ink-dim);
   font-family: var(--v5-label);
-  font-size: 0.66rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   line-height: 1.45;
@@ -497,7 +497,7 @@
   background: var(--v5-grad);
   color: #fff;
   font-family: var(--v5-label);
-  font-size: 0.58rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   box-shadow: var(--v5-glow);
@@ -506,7 +506,7 @@
 .packName {
   color: var(--v5-ink-faint);
   font-family: var(--v5-label);
-  font-size: 0.66rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -743,4 +743,77 @@
     transition: none;
     transform: none;
   }
+}
+
+/* Planned plans. Three cards, the middle one lifted; every figure on them is a constant
+   the product runs on, so the card is a statement rather than a mockup. */
+.planGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+.plan {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  padding: 24px 22px;
+  border: 1px solid var(--v5-line-strong);
+  border-radius: var(--v5-r-lg, 18px);
+  background: linear-gradient(178deg, #12152699, #0b0d18);
+}
+.planFeatured {
+  border-color: var(--v5-ink);
+  box-shadow: 0 0 0 1px var(--v5-ink) inset, 0 24px 60px -30px #6a5cff66;
+}
+.plan header { display: grid; gap: 6px; }
+.planName {
+  font-family: var(--v5-label);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--v5-ink-faint);
+}
+.planPrice {
+  font-size: clamp(1.9rem, 3vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--v5-ink);
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.planPrice small { font-size: 0.8rem; font-weight: 500; color: var(--v5-ink-dim); letter-spacing: 0; }
+.planAnnual { font-size: 0.8rem; color: var(--v5-ink-dim); }
+.planList { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.planList li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--v5-ink-dim);
+}
+.planList li::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 0.62em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--v5-grad, var(--v5-ink));
+}
+.planList li b { color: var(--v5-ink); font-weight: 700; }
+.planNote { margin: 0; font-size: 0.8rem; color: var(--v5-ink-dim); }
+.planState {
+  justify-self: start;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--v5-line-strong);
+  font-size: 0.72rem;
+  color: var(--v5-ink);
+}
+@media (max-width: 900px) {
+  .planGrid { grid-template-columns: 1fr; }
 }

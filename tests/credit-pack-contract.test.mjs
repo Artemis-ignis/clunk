@@ -64,7 +64,27 @@ test("the pricing surface renders pack state from the API and never invents a pr
   assert.match(panel, /가격 확정 전/);
   assert.match(panel, /withdrawalConsent: consent/);
   assert.doesNotMatch(panel, /₩\s?\d|\d+,\d+원/);
+  // 2026-09-02, free beta: the page no longer renders the pack panel — three cards with no
+  // price and no button read as a shop that had crashed. It states the PLANNED prices
+  // instead, labelled as such, and every grant figure is imported from the module that
+  // enforces it rather than typed on the page.
   const pricing = await source("app/pricing/page.tsx");
-  assert.match(pricing, /CreditPacksPanel/);
-  assert.match(pricing, /pricing-packs/);
+  assert.doesNotMatch(pricing, /CreditPacksPanel/, "베타 중 요금 페이지는 팩 패널을 그리지 않는다");
+  assert.match(pricing, /SIGNUP_GRANT_CREDITS/);
+  assert.match(pricing, /BETA_MONTHLY_GRANT_CREDITS/);
+  assert.match(pricing, /WORKSPACE_IMAGES_PER_DAY/);
+  assert.match(pricing, /예정 가격/);
+  assert.match(pricing, /30일 전/);
+  assert.doesNotMatch(pricing, /충전하기|구매하기/, "베타 중에는 살 수 있는 것처럼 보이는 버튼이 없어야 한다");
+
+  // The planned figures on the page are the ones the plan document records.
+  const plan = await source("docs/free-beta-plan.ko.md");
+  for (const figure of ["₩9,900/월", "₩29,000/월", "500 = ₩45,000", "2,000 = ₩160,000", "6,000 = ₩420,000"]) {
+    assert.ok(plan.includes(figure), `계획 문서에 ${figure} 이 없다`);
+  }
+  for (const [credits, price] of [["500", "45_000"], ["2_000", "160_000"], ["6_000", "420_000"]]) {
+    assert.ok(pricing.includes(`{ credits: ${credits}, priceKrw: ${price} }`), `페이지의 팩 ${credits} 가 계획과 다르다`);
+  }
+  assert.match(pricing, /monthly: 9_900,\s*annual: 99_000/);
+  assert.match(pricing, /monthly: 29_000,\s*annual: 290_000/);
 });

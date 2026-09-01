@@ -159,7 +159,7 @@ export default function Home() {
             </div>
             <div className="cv5-sec-visual cv5-reveal" data-delay="1">
               <div className="cv5-mock">
-                <div className="cv5-mock-bar"><span>CLUNK <b>MARKET</b></span><span>1차 19종</span></div>
+                <div className="cv5-mock-bar"><span>CLUNK <b>MARKET</b></span><span>공개 카탈로그</span></div>
                 {/* This section is about MAKING an asset, so it shows one Clunk
                     authored, turning, with the numbers its own inspector read off
                     the file. A grid of things to buy belongs in the market section
@@ -290,7 +290,7 @@ export default function Home() {
                 <h2 id="showcase-heading">마켓에 올라와 있는 에셋</h2>
               </div>
               <p>
-                농장·마을 배경에 바로 쓰는 저폴리 모델입니다. 삼각형 수를 보고 고르세요.
+                농장·마을 배경에 바로 쓰는 저폴리 모델과 스프라이트 시트, 심리스 텍스처입니다. 삼각형 수와 프레임 수를 보고 고르세요.
               </p>
             </div>
             <LandingMarketShowcase />

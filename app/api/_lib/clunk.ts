@@ -75,6 +75,7 @@ export async function requireClunkContext(): Promise<ClunkUserContext> {
   const db = getRuntimeDb();
   await ensureSchema(db);
   const workspaceId = await ensureWorkspace(db, user);
+  await grantMonthlyCredits(db, workspaceId);
   return { user, workspaceId };
 }
 
@@ -157,6 +158,23 @@ async function ensureColumn(
  * grant that actually runs.
  */
 export const SIGNUP_GRANT_CREDITS = 25;
+
+/**
+ * Credits every workspace receives each calendar month during the beta (and on the Free
+ * plan after it). Granted lazily on the first authenticated request of the month; the
+ * ledger id carries the month, so a retry or a second request the same month is a no-op.
+ */
+export const BETA_MONTHLY_GRANT_CREDITS = 30;
+
+async function grantMonthlyCredits(db: D1Database, workspaceId: string): Promise<void> {
+  const month = new Date().toISOString().slice(0, 7);
+  await db
+    .prepare(
+      `INSERT OR IGNORE INTO clunk_credit_ledger (id, workspace_id, amount, reason, reference_id) VALUES (?, ?, ?, 'monthly-grant', ?)`,
+    )
+    .bind(`credit-monthly-${workspaceId}-${month}`, workspaceId, BETA_MONTHLY_GRANT_CREDITS, month)
+    .run();
+}
 
 export async function ensureWorkspace(
   db: D1Database,

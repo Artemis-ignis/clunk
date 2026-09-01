@@ -306,7 +306,7 @@ html:has(.cv5) body { background: var(--v5-bg0, #06070f); }
 .cv5-showcase-head { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: clamp(18px, 3vw, 48px); align-items: end; }
 .cv5-showcase-head h2 { margin: 14px 0 0; font-size: clamp(1.6rem, 3vw, 2.3rem); font-weight: 830; letter-spacing: -0.032em; line-height: 1.16; }
 .cv5-showcase-head > p { margin: 0; font-size: 0.94rem; line-height: 1.68; }
-.cv5-eyebrow { display: inline-flex; align-items: center; gap: 9px; font-family: var(--v5-label); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.16em; color: var(--v5-ink-faint); }
+.cv5-eyebrow { display: inline-flex; align-items: center; gap: 9px; font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.16em; color: var(--v5-ink-faint); }
 .cv5-eyebrow::before { content: ""; width: 22px; height: 1.5px; background: var(--v5-grad); }
 .cv5-showcase-grid { margin: clamp(26px, 4vw, 40px) 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 13px; }
 .cv5-showcase-card a { display: block; position: relative; border: 1px solid var(--v5-line); border-radius: var(--v5-r); overflow: hidden; background: #171a2c; transition: transform .22s, border-color .22s, box-shadow .22s; }
