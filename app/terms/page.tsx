@@ -1,6 +1,7 @@
 import { createPageMetadata } from "../components/site-metadata";
 import {
   LEGAL_DRAFT_DATE,
+  LEGAL_EFFECTIVE_DATE,
   LEGAL_OPERATOR_ROWS,
   LegalRows,
   LegalShell,
@@ -22,13 +23,13 @@ export default function TermsPage() {
     <LegalShell
       eyebrow="CLUNK / LEGAL"
       title="이용약관"
-      lede="Clunk(이하 “서비스”)가 제공하는 게임 에셋 생성·검사·마켓 기능의 이용 조건입니다. 운영자(아르테미스)의 사업자 등록은 완료되었으며, 통신판매업 신고가 완료되기 전까지는 유상 거래를 개시하지 않습니다."
+      lede="Clunk(이하 “서비스”)가 제공하는 게임 에셋 생성·검사·마켓 기능의 이용 조건입니다. 운영자(아르테미스)의 사업자 등록은 완료되어 있으며, 지금은 무료 베타 기간이라 유상 거래는 하지 않습니다."
     >
       <section aria-labelledby="terms-operator">
         <h2 id="terms-operator">사업자 표시사항</h2>
         <p>
           전자상거래 등에서의 소비자보호에 관한 법률 제10조가 요구하는 표시사항입니다.
-          현재 어느 항목도 확정되지 않았으므로 <b>지어낸 값을 넣지 않고 플레이스홀더로 표시</b>합니다.
+          확정된 항목은 사업자등록증명 그대로 기재했고, 미확정 항목은 <b>지어낸 값 대신 [ ]로 표시</b>합니다.
         </p>
         <LegalRows rows={LEGAL_OPERATOR_ROWS} />
         <p className="cv5-legal-note">
@@ -215,8 +216,8 @@ export default function TermsPage() {
           라이선스 문서에 따릅니다.
         </p>
         <p className="cv5-legal-note">
-          부칙 — 이 약관 초안은 {LEGAL_DRAFT_DATE} 작성되었으며, 사업자 표시사항 확정 후 시행일을
-          고지하는 시점부터 효력이 발생합니다.
+          부칙 — 이 약관은 {LEGAL_DRAFT_DATE} 작성되어 {LEGAL_EFFECTIVE_DATE}부터 시행합니다. 유상 판매에
+          관한 조항은 유료 전환을 최소 30일 전에 공지한 뒤부터 적용합니다.
         </p>
       </section>
     </LegalShell>

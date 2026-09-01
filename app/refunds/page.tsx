@@ -1,6 +1,7 @@
 import { createPageMetadata } from "../components/site-metadata";
 import {
   LEGAL_DRAFT_DATE,
+  LEGAL_EFFECTIVE_DATE,
   LEGAL_OPERATOR_ROWS,
   LegalRows,
   LegalShell,
@@ -27,8 +28,7 @@ export default function RefundsPage() {
       <section aria-labelledby="refunds-operator">
         <h2 id="refunds-operator">판매자 표시사항</h2>
         <p>
-          청약철회와 환불의 상대방이 되는 통신판매업자 정보입니다. 등록 전이므로 플레이스홀더로 표시하며,
-          확정 전까지 유상 거래를 개시하지 않습니다.
+          청약철회와 환불의 상대방이 되는 통신판매업자 정보입니다. 무료 베타 기간이라 유상 거래가 없고, 유료 전환 시 신고번호와 연락처를 채웁니다.
         </p>
         <LegalRows rows={LEGAL_OPERATOR_ROWS} />
       </section>
@@ -132,8 +132,9 @@ export default function RefundsPage() {
           <a href="/terms">이용약관</a>, 개인정보 처리는 <a href="/privacy">개인정보처리방침</a>을 따릅니다.
         </p>
         <p className="cv5-legal-note">
-          이 정책 초안은 {LEGAL_DRAFT_DATE} 작성되었으며, 사업자 표시사항과 결제 전 동의 절차가
-          확정·구현된 뒤 시행일을 고지하는 시점부터 효력이 발생합니다.
+          이 정책은 {LEGAL_DRAFT_DATE} 작성되어 {LEGAL_EFFECTIVE_DATE}부터 시행합니다. 무료 베타 기간에는
+          결제가 없으므로 유상 환불 조항은 유료 전환 후 적용되고, 받은 파일이 손상됐거나 내려받히지 않는
+          문제는 아래 연락처로 알려 주시면 다시 제공합니다.
         </p>
       </section>
     </LegalShell>

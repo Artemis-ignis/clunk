@@ -1,6 +1,7 @@
 import { createPageMetadata } from "../components/site-metadata";
 import {
   LEGAL_DRAFT_DATE,
+  LEGAL_EFFECTIVE_DATE,
   LegalRows,
   LegalShell,
   type LegalRow,
@@ -35,7 +36,7 @@ export default function PrivacyPage() {
     <LegalShell
       eyebrow="CLUNK / PRIVACY"
       title="개인정보처리방침"
-      lede="Clunk가 어떤 개인정보를 어떤 목적으로 처리하고 어디에 보관하는지, 이용자가 무엇을 요구할 수 있는지를 실제 구현된 저장 구조에 맞춰 정리한 초안입니다."
+      lede="Clunk가 어떤 개인정보를 어떤 목적으로 처리하고 어디에 보관하는지, 이용자가 무엇을 요구할 수 있는지를 실제 구현된 저장 구조에 맞춰 정리한 것입니다."
     >
       <section aria-labelledby="privacy-officer">
         <h2 id="privacy-officer">개인정보보호책임자</h2>
@@ -159,8 +160,7 @@ export default function PrivacyPage() {
           이용자에게 불리한 변경은 최소 30일 전에 공지합니다.
         </p>
         <p className="cv5-legal-note">
-          이 방침 초안은 {LEGAL_DRAFT_DATE} 작성되었으며, 개인정보보호책임자 지정과 통신판매업
-          신고가 완료되어 시행일을 고지하는 시점부터 효력이 발생합니다. 침해 신고·상담은 개인정보침해신고센터(118),
+          이 방침은 {LEGAL_DRAFT_DATE} 작성되어 {LEGAL_EFFECTIVE_DATE}부터 시행합니다. 침해 신고·상담은 개인정보침해신고센터(118),
           개인정보 분쟁조정위원회, 대검찰청·경찰청 사이버수사 창구를 이용할 수 있습니다.
         </p>
       </section>

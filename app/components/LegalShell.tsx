@@ -18,9 +18,16 @@ import "./legal-v5.css";
  */
 
 export const LEGAL_DRAFT_DATE = "2026-08-31";
+/**
+ * In force from the day the free beta opened. These documents used to tie their own effect
+ * to the 통신판매업 filing, which told a person already signed in that no terms and no
+ * privacy policy governed their data yet. The filing gates paid sales, not the policy that
+ * covers an account — 개인정보 보호법 제30조 applies to every processor, paid or not.
+ */
+export const LEGAL_EFFECTIVE_DATE = "2026-09-02";
 
 export const LEGAL_DRAFT_NOTICE =
-  "사업자 등록은 완료되었습니다(아르테미스, 개업 2026-08-24). 다만 통신판매업 신고가 완료되기 전까지 유상 판매를 개시하지 않으며, 이 문서도 시행 전 초안입니다. 남은 [ ] 항목은 확정되는 대로 채워지고, 그때 시행일을 고지합니다.";
+  "이 문서는 2026-09-02부터 시행 중입니다. 지금은 무료 베타라 결제가 없고, 유상 판매에 관한 조항은 유료 전환을 미리 공지한 뒤부터 적용됩니다. 남은 [ ] 항목은 확정되는 대로 채웁니다.";
 
 export type LegalRow = { label: string; value: string; placeholder?: boolean };
 
@@ -32,11 +39,13 @@ export const LEGAL_OPERATOR_ROWS: LegalRow[] = [
   { label: "상호", value: "아르테미스(Artemis)" },
   { label: "대표자", value: "박준성" },
   { label: "사업자등록번호", value: "361-02-03814" },
-  { label: "통신판매업 신고번호", value: "[통신판매업 신고번호 — 신고 준비 중 · 완료 전까지 유상 판매 미개시]", placeholder: true },
+  { label: "통신판매업 신고번호", value: "[유료 판매를 시작할 때 신고 후 기재 — 무료 베타 중에는 해당 없음]", placeholder: true },
   { label: "사업장 주소", value: "인천광역시 제물포구 화도진로 16, 109동 1604호(송림동, 동인천역 파크푸르지오)" },
   { label: "연락처", value: "[대표 전화번호 — 확정 후 기재]", placeholder: true },
   { label: "전자우편", value: "[고객문의 이메일 — 운영 계정 확정 후 기재]", placeholder: true },
-  { label: "호스팅 제공자", value: "[호스팅 사업자 — 운영 배포처 확정 후 기재]", placeholder: true },
+  // Stated, not placeholder: the privacy policy already names D1 and R2, and this is where
+  // the site runs.
+  { label: "호스팅 제공자", value: "Cloudflare, Inc. (미국) — Workers · D1 · R2" },
 ];
 
 export function LegalRows({ rows }: { rows: LegalRow[] }) {
@@ -56,8 +65,8 @@ export function LegalShell({
   eyebrow,
   title,
   lede,
-  effectiveDate = LEGAL_DRAFT_DATE,
-  updatedDate = LEGAL_DRAFT_DATE,
+  effectiveDate = LEGAL_EFFECTIVE_DATE,
+  updatedDate = LEGAL_EFFECTIVE_DATE,
   children,
 }: {
   eyebrow: string;
@@ -81,14 +90,14 @@ export function LegalShell({
             <h1>{title}</h1>
             <p className="cv5-legal-lede">{lede}</p>
             <p className="cv5-legal-status" role="note">
-              <strong>초안 · 시행 전</strong>
+              <strong>시행 중 · 무료 베타</strong>
               <span>{LEGAL_DRAFT_NOTICE}</span>
             </p>
             {/* 한 개의 문자열로 렌더해야 날짜 앞에 RSC 텍스트 분리 주석이 끼지 않는다. */}
             <ul className="cv5-legal-dates">
-              <li>{`초안 작성일 ${effectiveDate}`}</li>
+              <li>{`시행일 ${effectiveDate}`}</li>
               <li>{`최종 수정일 ${updatedDate}`}</li>
-              <li>시행일 미정 — 사업자 정보 확정 후 고지</li>
+              <li>{`초안 작성일 ${LEGAL_DRAFT_DATE}`}</li>
             </ul>
           </header>
 
