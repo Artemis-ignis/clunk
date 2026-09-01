@@ -7,21 +7,23 @@ import { SITE_ORIGIN } from "./components/site-metadata";
 
 export const metadata: Metadata = {
   title: {
-    default: "Clunk · AI Game Asset Foundry",
+    default: "Clunk — 게임 에셋 제작과 검사",
     template: "%s | Clunk",
   },
   description: "게임 에셋을 만들고, 게임에 넣어도 되는지 검사하는 곳입니다.",
   metadataBase: new URL(SITE_ORIGIN),
   openGraph: {
-    title: "Clunk · AI Game Asset Foundry",
+    title: "Clunk — 게임 에셋 제작과 검사",
     description: "게임 에셋을 만들고, 게임에 넣어도 되는지 검사합니다.",
     type: "website",
     url: SITE_ORIGIN,
-    images: [{ url: `${SITE_ORIGIN}/og.png`, width: 1664, height: 936, alt: "Clunk — 게임 에셋 제작과 검사" }],
+    // 1200x630 is what scripts/render-og.mjs writes. A declared size that disagrees with
+    // the file makes a scraper reserve the wrong box and letterbox the card.
+    images: [{ url: `${SITE_ORIGIN}/og.png`, width: 1200, height: 630, alt: "Clunk — 게임 에셋 제작과 검사" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Clunk · AI Game Asset Foundry",
+    title: "Clunk — 게임 에셋 제작과 검사",
     description: "게임 에셋을 만들고, 게임에 넣어도 되는지 검사합니다.",
     images: [`${SITE_ORIGIN}/og.png`],
   },

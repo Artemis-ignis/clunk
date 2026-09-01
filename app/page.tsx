@@ -12,7 +12,7 @@ import { LandingMarketShowcase } from "./components/LandingMarketShowcase";
 import { EmbeddedGlbViewer } from "./components/review/EmbeddedGlbViewer";
 
 export const metadata = createPageMetadata({
-  title: "게임 에셋 파운드리",
+  title: "게임 에셋 만들고 검사하고 받기",
   description: "게임 에셋을 만들고, 게임에 넣어도 되는지 검사하고, 마켓에 파는 것까지 Clunk 하나로. 저폴리 3D 모델과 2D 스프라이트를 크레딧으로 바로 사용하세요.",
   path: "/",
 });

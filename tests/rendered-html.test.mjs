@@ -17,7 +17,11 @@ test("server-renders the Clunk landing page", async () => {
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
-  assert.match(html, /<title>게임 에셋 파운드리 \| Clunk<\/title>/i);
+  // 2026-09-01: "파운드리" is our word for the pipeline, not one a buyer searches for,
+  // and this title is what a shared link shows. The contract is that the landing titles
+  // itself in Korean with the brand, not that it uses one particular phrase.
+  assert.match(html, /<title>[^<]*게임 에셋[^<]*\| Clunk<\/title>/i);
+  assert.doesNotMatch(html, /파운드리|Foundry/i);
   assert.match(html, /단 하나의 AI 슈퍼앱/);
   assert.match(html, /게임 제작의 모든 과정을/);
   assert.match(html, /마켓 둘러보기/);
