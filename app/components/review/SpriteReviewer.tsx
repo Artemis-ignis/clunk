@@ -14,7 +14,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
  */
 
 type Frame = { id: string; x: number; y: number; width: number; height: number };
-type Anim = { state: string; fps: number; loop: boolean; holdLast: boolean; frames: Frame[] };
+type Anim = { state: string; label: string; fps: number; loop: boolean; holdLast: boolean; frames: Frame[] };
 type SpriteDoc = { name: string; sheet: HTMLImageElement; frames: Frame[]; anims: Anim[]; cellW: number; cellH: number };
 
 type RawManifest = {
@@ -57,12 +57,22 @@ function parseManifest(raw: RawManifest, sheet: HTMLImageElement, name: string):
 
   const anims: Anim[] = (raw.animations ?? []).map((anim, index) => ({
     state: anim.state ?? anim.id ?? `state-${index}`,
+    label: anim.state ?? anim.id ?? `state-${index}`,
     fps: anim.fps ?? 12,
     loop: anim.loop ?? true,
     holdLast: anim.holdLast ?? false,
     frames: (anim.frameIds ?? []).map((id) => frameById.get(id)).filter((frame): frame is Frame => Boolean(frame)),
   })).filter((anim) => anim.frames.length > 0);
-  if (anims.length === 0) anims.push({ state: "all-frames", fps: 12, loop: true, holdLast: false, frames });
+  if (anims.length === 0) anims.push({ state: "all-frames", label: "all-frames", fps: 12, loop: true, holdLast: false, frames });
+
+  // A sheet may legitimately carry two animations with the same state name
+  // (impact-vfx ships a 2-frame and an 8-frame "burst"). Showing "burst"
+  // twice reads as a bug, so disambiguate with the real frame count.
+  const stateCounts = new Map<string, number>();
+  for (const anim of anims) stateCounts.set(anim.state, (stateCounts.get(anim.state) ?? 0) + 1);
+  for (const anim of anims) {
+    anim.label = (stateCounts.get(anim.state) ?? 0) > 1 ? `${anim.state}·${anim.frames.length}f` : anim.state;
+  }
 
   return { name, sheet, frames, anims, cellW, cellH };
 }
@@ -167,13 +177,13 @@ export function SpriteReviewer() {
 
       const groundY = Math.round(height * 0.72);
       // ground line + tick marks (the video's baseline).
-      context.strokeStyle = "rgba(233,236,248,0.35)";
+      context.strokeStyle = "rgba(233,236,248,0.55)";
       context.lineWidth = 1;
       context.beginPath();
       context.moveTo(24, groundY + 0.5);
       context.lineTo(width - 24, groundY + 0.5);
       context.stroke();
-      context.strokeStyle = "rgba(233,236,248,0.18)";
+      context.strokeStyle = "rgba(233,236,248,0.3)";
       for (let x = 24; x <= width - 24; x += 48) {
         context.beginPath();
         context.moveTo(x + 0.5, groundY);
@@ -187,10 +197,10 @@ export function SpriteReviewer() {
       const refH = reference.height * pixelScale;
       const refX = Math.round(width * 0.18 - refW / 2);
       context.drawImage(document_.sheet, reference.x, reference.y, reference.width, reference.height, refX, groundY - refH, refW, refH);
-      context.fillStyle = "rgba(233,236,248,0.5)";
-      context.font = "600 11px 'Space Grotesk V','Space Grotesk',monospace";
+      context.fillStyle = "rgba(233,236,248,0.72)";
+      context.font = "600 12px 'Space Grotesk V','Space Grotesk',monospace";
       context.textAlign = "center";
-      context.fillText("기준 · " + document_.anims[0].state, width * 0.18, groundY + 22);
+      context.fillText("기준 · " + document_.anims[0].label, width * 0.18, groundY + 22);
 
       // live animated instance, centered.
       const liveW = frame.width * pixelScale;
@@ -201,7 +211,7 @@ export function SpriteReviewer() {
       // HUD text at ~10Hz, and only on change — a per-frame setState would
       // re-render the component 60×/s and starve the canvas loop.
       const hudTime = `${(Math.floor(cycle * 10) / 10).toFixed(1)}초`;
-      const hudState = `${anim.state} · ${anim.fps}fps${anim.loop ? " · loop" : anim.holdLast ? " · hold" : ""}`;
+      const hudState = `${anim.label} · ${anim.fps}fps${anim.loop ? " · loop" : anim.holdLast ? " · hold" : ""}`;
       if (hudRef.current?.time !== hudTime || hudRef.current?.state !== hudState) {
         hudRef.current = { time: hudTime, state: hudState };
         setHud(hudRef.current);
@@ -227,7 +237,7 @@ export function SpriteReviewer() {
         {doc ? (
           <div className="rv-sprite-sequence" aria-label="상태 순서">
             {doc.anims.map((anim, index) => (
-              <span key={`${anim.state}-${index}`}>{index > 0 ? " → " : ""}{anim.state}</span>
+              <span key={`${anim.state}-${index}`}>{index > 0 ? " → " : ""}{anim.label}</span>
             ))}
           </div>
         ) : null}
