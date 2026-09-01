@@ -599,7 +599,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
             pay for. The four internal review lanes are QA vocabulary and stay in
             the workspace; here we publish only what a buyer can act on. */}
         <div className={styles.sectionHead}><span className="cv5-eyebrow">판매 전 확인</span><h2 id="detail-evidence-heading">파일을 열어보고<br /><em>확인한 것</em></h2></div>
-        <div className={styles.evidenceGrid}><EvidenceCard label="파일 규격" value={listing.evidence.static} detail="삼각형·드로우콜·구조를 파일에서 직접 읽었습니다" /><EvidenceCard label="렌더러 확인" value={listing.evidence.visualRuntime} detail="실제 three.js 렌더러에 띄워 확인했습니다" /><EvidenceCard label="판매자 검토" value={listing.evidence.humanDecision} detail="아르테미스 스토어가 직접 만들고 검토했습니다" /></div>
+        <div className={styles.evidenceGrid}><EvidenceCard label="파일 규격" value={listing.evidence.static} detail="삼각형·드로우콜·구조를 파일에서 직접 읽었습니다" pending="아직 파일을 읽어 재보지 않았습니다" /><EvidenceCard label="렌더러 확인" value={listing.evidence.visualRuntime} detail="실제 three.js 렌더러에 띄워 확인했습니다" pending="렌더러에 올려 본 기록이 없습니다. 페이지 위의 미리보기는 지금 여러분 브라우저가 그린 것입니다" /><EvidenceCard label="판매자 검토" value={listing.evidence.humanDecision} detail="아르테미스 스토어가 직접 만들고 검토했습니다" pending="판매자가 아직 검토하지 않았습니다" /></div>
       </section>
 
       <section className={styles.detailSection} aria-labelledby="detail-package-heading">
@@ -612,12 +612,16 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
 
 type EvidenceStatus = "PASS" | "GAP" | "NOT_EVALUATED" | "NO_GO" | "PENDING" | "UNAVAILABLE";
 
-function EvidenceCard({ label, value, detail }: { label: string; value: string; detail: string }) {
+function EvidenceCard({ label, value, detail, pending }: { label: string; value: string; detail: string; pending: string }) {
   const safeValue: EvidenceStatus = value === "PASS" || value === "GAP" || value === "NOT_EVALUATED" || value === "NO_GO" || value === "PENDING" || value === "UNAVAILABLE" ? value : "NOT_EVALUATED";
   const tone = safeValue === "PASS" ? styles.evidencePass : safeValue === "NO_GO" ? styles.evidenceFail : styles.evidencePending;
   // The lane names are ours; the buyer gets the verdict in their own words.
   const verdict = safeValue === "PASS" ? "확인함" : safeValue === "NO_GO" ? "판매 보류" : "확인 전";
-  return <article className={`${styles.evidenceCard} ${tone}`}><span>{label}</span><strong>{verdict}</strong><small>{detail}</small></article>;
+  // The line under the verdict used to describe the check in the past tense whatever the
+  // verdict said, so a texture that was never put in a renderer still read "we loaded it
+  // into three.js and checked" under the words "not checked yet". A card that has not
+  // passed says what has not happened.
+  return <article className={`${styles.evidenceCard} ${tone}`}><span>{label}</span><strong>{verdict}</strong><small>{safeValue === "PASS" ? detail : pending}</small></article>;
 }
 
 function CatalogEmpty() {

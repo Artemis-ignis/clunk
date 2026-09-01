@@ -62,7 +62,8 @@
     "scene:budget": "node scripts/scene-budget-cli.mjs",
     "asset:palette": "tsx scripts/palette-cli.ts",
     "asset:palette:index": "tsx scripts/palette-index-cli.ts",
-    "market:verify": "tsx scripts/market-verify-cli.ts"
+    "market:verify": "tsx scripts/market-verify-cli.ts",
+    "cf:usage": "node scripts/cf-usage-cli.mjs"
   },
   "dependencies": {
     "@gltf-transform/core": "^4.2.1",

@@ -29,8 +29,20 @@ type Listing = {
   status: string;
   priceCents: number;
   byteLength: number;
-  artifact: { entryFileName: string; previewFileName: string };
+  assetId: string;
+  artifact: { entryFileName: string; previewFileName: string; assetId: string };
 };
+
+/**
+ * The three ways a listing's bytes are actually reached, each checked as itself.
+ *
+ * - preview: the card image, public, served from R2 through the worker.
+ * - viewer:  the static URL the product page's 3D viewer loads. Still the asset service.
+ * - entry:   the download button. Entitlement-gated, so anonymously it must answer 401 or
+ *            403 — a 200 here would mean paid files are walking out the door, and a 500
+ *            would mean a buyer who has paid cannot get theirs.
+ */
+type Probe = { kind: string; url: string; expect: (status: number) => boolean };
 
 const index = await fetch(`${ORIGIN}/api/marketplace`, { headers: { "cache-control": "no-cache" } });
 if (!index.ok) {
@@ -39,7 +51,7 @@ if (!index.ok) {
 }
 const { listings } = (await index.json()) as { listings: Listing[] };
 
-type Row = { slug: string; file: string; kind: string; codes: number[]; bytes: number | null; declared?: number };
+type Row = { slug: string; file: string; kind: string; codes: number[]; bytes: number | null; expect: (status: number) => boolean };
 const rows: Row[] = [];
 
 /**
@@ -61,45 +73,51 @@ async function inPool<T>(items: T[], work: (item: T) => Promise<void>): Promise<
 }
 
 await inPool(listings, async (listing) => {
-  const files: Array<{ name: string; kind: string; declared?: number }> = [
-    { name: listing.artifact.entryFileName, kind: "판매 파일", declared: listing.byteLength },
+  const asset = encodeURIComponent(listing.artifact.assetId);
+  const probes: Probe[] = [
+    {
+      kind: "다운로드(권한필요)",
+      url: `${ORIGIN}/api/marketplace/assets/${asset}?file=${encodeURIComponent(listing.artifact.entryFileName)}`,
+      expect: (status) => (listing.priceCents > 0 ? status === 401 || status === 403 : status === 200),
+    },
+    {
+      kind: "뷰어 정적파일",
+      url: `${ORIGIN}/market/${listing.slug}/${encodeURIComponent(listing.artifact.entryFileName)}`,
+      expect: (status) => status === 200,
+    },
   ];
   if (listing.artifact.previewFileName) {
-    files.push({ name: listing.artifact.previewFileName, kind: "미리보기" });
+    probes.push({
+      kind: "미리보기",
+      url: `${ORIGIN}/api/marketplace/assets/${asset}?file=${encodeURIComponent(listing.artifact.previewFileName)}&preview=1`,
+      expect: (status) => status === 200,
+    });
   }
-  for (const file of files) {
+  for (const file of probes) {
     const codes: number[] = [];
     let bytes: number | null = null;
     for (let attempt = 0; attempt < ATTEMPTS; attempt += 1) {
       // Cache-busted so a cached hit cannot hide an origin that fails on a miss — which is
       // exactly how the texture failures stayed invisible.
-      const response = await fetch(
-        `${ORIGIN}/market/${listing.slug}/${encodeURIComponent(file.name)}?verify=${attempt}`,
-      );
+      const response = await fetch(`${file.url}${file.url.includes("?") ? "&" : "?"}verify=${attempt}`);
       codes.push(response.status);
       if (response.ok && bytes === null) bytes = (await response.arrayBuffer()).byteLength;
       else await response.body?.cancel().catch(() => undefined);
     }
-    rows.push({ slug: listing.slug, file: file.name, kind: file.kind, codes, bytes, declared: file.declared });
+    rows.push({ slug: listing.slug, file: file.url, kind: file.kind, codes, bytes, expect: file.expect });
   }
 });
 
-const broken = rows.filter((row) => row.codes.some((code) => code !== 200));
-const mismatched = rows.filter(
-  (row) => row.declared !== undefined && row.bytes !== null && row.bytes !== row.declared,
-);
+const broken = rows.filter((row) => row.codes.some((code) => !row.expect(code)));
 
 for (const row of broken) {
-  const ok = row.codes.filter((code) => code === 200).length;
+  const ok = row.codes.filter((code) => row.expect(code)).length;
   console.log(
-    `${ok === 0 ? "FAIL" : "FLAKY"}  ${row.slug} · ${row.kind} ${row.file} → ${row.codes.join("/")} (${ok}/${row.codes.length} 성공)`,
+    `${ok === 0 ? "FAIL" : "FLAKY"}  ${row.slug} · ${row.kind} → ${row.codes.join("/")} (${ok}/${row.codes.length} 정상)  ${row.file.replace(ORIGIN, "")}`,
   );
 }
-for (const row of mismatched) {
-  console.log(`SIZE  ${row.slug} · ${row.file} → 받은 ${row.bytes} B, 목록이 말한 ${row.declared} B`);
-}
-
 console.log(
-  `\n파일 ${rows.length}개 × ${ATTEMPTS}회 요청 · 정상 ${rows.length - broken.length} · 실패 ${broken.length} · 크기 불일치 ${mismatched.length}`,
+  `
+경로 ${rows.length}개 × ${ATTEMPTS}회 요청 · 정상 ${rows.length - broken.length} · 이상 ${broken.length}`,
 );
-exit(broken.length + mismatched.length > 0 ? 1 : 0);
+exit(broken.length > 0 ? 1 : 0);

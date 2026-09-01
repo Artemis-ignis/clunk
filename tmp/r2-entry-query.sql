@@ -1,0 +1,1 @@
+SELECT id, file_name AS fileName, content_type AS contentType, byte_length AS byteLength, sha256, object_key AS objectKey FROM clunk_asset_artifacts WHERE role = 'entry' AND object_key LIKE 'asset:/%' ORDER BY id;

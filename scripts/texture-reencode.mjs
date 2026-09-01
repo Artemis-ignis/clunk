@@ -73,7 +73,17 @@ for (const product of manifest.products) {
     // Never write a re-encode that is not smaller: a larger file would be a pure loss, and
     // the only reason to touch these bytes at all is that they are too big.
     if (encoded.length >= original.length) {
-      console.log(`${file.path}: 그대로 (${original.length} → ${encoded.length})`);
+      // Nothing to rewrite, but the manifest still has to describe what is on disk. A file
+      // is listed twice when it belongs to a bundle as well as its own product, and the
+      // second pass used to skip straight past without syncing the record — which left the
+      // bundle publishing the hash of bytes that no longer existed.
+      const actual = createHash("sha256").update(original).digest("hex");
+      if (file.byteLength !== original.length || file.sha256 !== actual) {
+        file.byteLength = original.length;
+        file.sha256 = actual;
+        changed += 1;
+      }
+      console.log(`${file.path}: 그대로 (${original.length}B)`);
       continue;
     }
     const sha256 = createHash("sha256").update(encoded).digest("hex");
