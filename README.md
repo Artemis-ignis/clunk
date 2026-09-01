@@ -1,0 +1,34 @@
+# Clunk 문서
+
+Clunk는 게임 에셋의 **생성 · 검사 · 판매 · 에이전트 연동**을 하나의 증거 체인으로 묶는 파운드리입니다. 이 문서는 읽는 순서가 곧 실행 순서가 되도록 구성했습니다.
+
+제품 사이트: [clunk.artemis-clunk.workers.dev](https://clunk.artemis-clunk.workers.dev)
+
+## 판정을 읽는 법
+
+같은 에셋이라도 네 가지 증거는 서로 다릅니다. 어느 하나가 다른 하나로 자동 승격되지 않습니다.
+
+| 상태            | 의미                    |
+| ------------- | --------------------- |
+| STRUCTURAL    | 바이트 · 해시 · 정책 룰 검사 결과 |
+| RUNTIME       | 실제 렌더러에서 캡처한 화면 증거    |
+| PLAYER FACING | 실제 게임 화면에서의 판정        |
+| HUMAN         | 사람이 내린 최종 결정          |
+
+## 문서 순서
+
+**시작하기** — 빠른 시작, 클라이언트별 설정
+
+**실행** — CLI와 CI, Asset Studio
+
+**계약과 협업** — 계약과 상태, Harvest Frontier
+
+**브라우저와 범위** — 브라우저 WebMCP, 지원 범위
+
+왼쪽 사이드바의 순서와 동일하며, 각 문서는 한 주제만 다룹니다.
+
+## 바로 실행하기
+
+* [에이전트 연결 화면](https://clunk.artemis-clunk.workers.dev/connect) — 키 발급과 설정 블록 복사
+* [내 파일 검사](https://clunk.artemis-clunk.workers.dev/app) — 실제 바이트로 Game Ready 점수 확인
+* [검수 뷰어](https://clunk.artemis-clunk.workers.dev/review) — 3D 회전·2D 재생으로 직접 판정
