@@ -120,7 +120,7 @@ export function StudioClient({ userLabel, initialSourceAssetId }: { userLabel: s
                 draws from the recipe and the label hash; the prompt is recorded
                 as provenance and never reaches the pixels. Saying otherwise took
                 a credit for something the user did not get. */}
-            <p>포맷을 고르면 Clunk 레시피가 크레딧 1개로 실제 파일을 만들고, 그 파일을 그 자리에서 검사합니다. 프롬프트는 제작 기록에만 남고 그림 자체를 바꾸지는 않습니다 — 그림을 프롬프트대로 그리는 생성은 아직 이 화면에서 제공하지 않습니다.</p>
+            <p>포맷을 고르고 원하는 그림을 문장으로 적으면, 크레딧 1개로 파일을 만들고 그 자리에서 검사합니다. 2D 이미지는 문장대로 그려지고, 나머지 포맷은 아직 규격에 맞는 파일을 그리는 단계입니다.</p>
             <div className="studio-command-hero-proof" aria-label="Studio가 기록하는 결과">
               <span><i /> 실제 bytes</span>
               <span><i /> fresh reopen</span>

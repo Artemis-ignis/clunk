@@ -51,8 +51,13 @@ if (process.env.CLUNK_CF_WITH_R2 === "1") {
 } else {
   delete config.r2_buckets;
 }
+// Workers AI. Unlike D1 and R2 this binds a capability on the account rather than a
+// resource that has to be created first, so it is declared unconditionally: the route
+// behind it checks whether the binding arrived and says so when it did not.
+config.ai = { binding: "AI" };
+
 writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
-console.log(`patched ${configPath}: name=${config.name}, d1=${D1_DATABASE_NAME}(${D1_DATABASE_ID.slice(0, 8)}…), r2=${R2_BUCKET}`);
+console.log(`patched ${configPath}: name=${config.name}, d1=${D1_DATABASE_NAME}(${D1_DATABASE_ID.slice(0, 8)}…), r2=${R2_BUCKET}, ai=AI`);
 
 if (process.argv.includes("--dry-run")) {
   console.log("dry-run: skipping wrangler deploy");

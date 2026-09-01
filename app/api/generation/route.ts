@@ -17,6 +17,7 @@ import {
 } from "../_lib/clunk";
 import { verifyStoredArtifactPersistence as verifyStorageEvidence } from "../../../packages/core/src/billing";
 import { createProceduralAuthoring, type ProceduralAuthoringRequest } from "../../../packages/core/src/product-authoring";
+import { generateImage } from "../_lib/image-generation";
 import { publicationReadiness } from "../../../packages/core/src/product-contract";
 import type { AssetKind } from "../../../packages/core/src/assetops-contract";
 
@@ -107,6 +108,33 @@ export async function POST(request: Request) {
     const targetProfileId = typeof payload.targetProfileId === "string" && payload.targetProfileId.trim()
       ? payload.targetProfileId.trim()
       : TARGET_BY_KIND[assetKind as AssetKind];
+    // The recipe draws a placeholder whose picture the prompt did not choose. For a
+    // single 2D image, ask the image model first and hand its bytes to the recipe as the
+    // entry artifact: the plan, evidence and inspection below then describe the file that
+    // actually ships, rather than describing a drawing nobody receives.
+    //
+    // A refusal or an outage is returned to the caller instead of being papered over with
+    // the placeholder, because a credit is about to be charged and the person paying it
+    // should not get a circle when they asked for a farmer.
+    let generatedEntry: { bytes: Uint8Array; fileName: string; contentType: string } | undefined;
+    let imageProvider: string | null = null;
+    if (assetKind === "2d-image") {
+      const generated = await generateImage({ prompt });
+      if (generated.status === "GENERATED") {
+        generatedEntry = {
+          bytes: generated.bytes,
+          fileName: `${payload.label.trim().toLowerCase().replace(/[^a-z0-9-_]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 48) || "clunk-asset"}.jpg`,
+          contentType: generated.contentType,
+        };
+        imageProvider = generated.model;
+      } else if (generated.status === "REJECTED") {
+        return privateJson({ ok: false, status: "PROMPT_REJECTED", error: generated.reason }, { status: 422 });
+      } else if (generated.status === "FAILED") {
+        return privateJson({ ok: false, status: "IMAGE_MODEL_UNAVAILABLE", error: generated.reason }, { status: 503 });
+      }
+      // BINDING_UNAVAILABLE falls through to the recipe; the response names the provider.
+    }
+
     const result = createProceduralAuthoring({
       assetKind: assetKind as AssetKind,
       label: payload.label,
@@ -115,10 +143,12 @@ export async function POST(request: Request) {
       ...(payload.width !== undefined ? { width: payload.width } : {}),
       ...(payload.height !== undefined ? { height: payload.height } : {}),
       ...(payload.frames !== undefined ? { frames: payload.frames } : {}),
+      ...(generatedEntry ? { entry: generatedEntry } : {}),
       ...(payload.license !== undefined ? { license: payload.license } : {}),
     });
     const entry = result.artifacts.find((artifact) => artifact.role === "entry") ?? result.artifacts[0];
     if (!entry) throw new Error("Generated result has no entry artifact.");
+
     const generationId = `gen-${result.plan.requestHash.slice(0, 32)}`;
     const assetId = scopedStorageId("asset", workspaceId, entry.sha256);
     const idempotencyKey = readIdempotencyKey(request, payload.idempotencyKey, result.plan.requestHash);
@@ -228,7 +258,13 @@ export async function POST(request: Request) {
       assetId,
       ...(projectId ? { projectId } : {}),
       status: "COMPLETED",
-      provider: "clunk-procedural-v1",
+      // Which one drew this. A caller that asked for a farmer and received the recipe
+      // placeholder has to be able to tell without opening the file.
+      provider: result.provenance.provider,
+      ...(assetKind === "2d-image" && !imageProvider
+        ? { promptApplied: false, promptNote: "이미지 모델이 연결되지 않아 레시피가 규격에 맞는 파일을 그렸습니다. 프롬프트는 제작 기록에만 남았습니다." }
+        : {}),
+      ...(imageProvider ? { promptApplied: true, imageModel: imageProvider } : {}),
       entryFileName: result.entryFileName,
       storageStatus,
       artifacts: result.artifacts.map((artifact) => ({

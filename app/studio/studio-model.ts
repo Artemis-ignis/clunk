@@ -72,7 +72,7 @@ export const STUDIO_ASSET_CARDS: readonly StudioAssetCard[] = [
     attachStatus: "AVAILABLE",
     recipeId: "sprite-sheet-factory-v1",
     formats: "PNG · JPG · WebP",
-    limitation: "이 레시피는 규격에 맞는 스프라이트를 코드로 그립니다. 프롬프트대로 그림을 그려 주는 이미지 생성은 아직 이 화면에 없습니다.",
+    limitation: "문장대로 그림을 만든 뒤 픽셀·메모리 규격을 검사합니다. 게임 화면에서의 최종 판정은 별도 캡처가 필요합니다.",
   },
   {
     id: "sprite-atlas",
