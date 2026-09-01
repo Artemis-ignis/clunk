@@ -21,17 +21,17 @@ import "./workspace-v5.css";
 export type WorkspaceSection = "overview" | "assets" | "studio" | "inspector" | "passports" | "kits" | "pricing" | "docs" | "settings";
 
 const PRIMARY_NAV: { section: WorkspaceSection; label: string; href: string; icon: IconName }[] = [
-  { section: "overview", label: "Dashboard", href: "/dashboard", icon: "layout" },
-  { section: "assets", label: "에셋 라이브러리", href: "/assets", icon: "folder" },
-  { section: "studio", label: "Create", href: "/studio", icon: "boxes" },
-  { section: "kits", label: "Kits", href: "/kits", icon: "folder" },
-  { section: "inspector", label: "Game Ready", href: "/app", icon: "scan" },
-  { section: "passports", label: "Passports", href: "/passport", icon: "badge" },
+  { section: "overview", label: "홈", href: "/dashboard", icon: "layout" },
+  { section: "assets", label: "내 에셋", href: "/assets", icon: "folder" },
+  { section: "studio", label: "만들기", href: "/studio", icon: "boxes" },
+  { section: "kits", label: "모음집", href: "/kits", icon: "folder" },
+  { section: "inspector", label: "검사", href: "/app", icon: "scan" },
+  { section: "passports", label: "검사 증명서", href: "/passport", icon: "badge" },
 ];
 
 const SECONDARY_NAV: { section: WorkspaceSection; label: string; href: string; icon: IconName }[] = [
-  { section: "pricing", label: "크레딧과 플랜", href: "/pricing", icon: "credit" },
-  { section: "docs", label: "규칙과 문서", href: "/docs", icon: "book" },
+  { section: "pricing", label: "크레딧·요금제", href: "/pricing", icon: "credit" },
+  { section: "docs", label: "도움말", href: "/docs", icon: "book" },
 ];
 
 export function WorkspaceShell({
@@ -60,7 +60,7 @@ export function WorkspaceShell({
         </span>
         <span>
           <strong>Clunk</strong>
-          <small>Asset Workspace</small>
+          <small>내 작업실</small>
         </span>
       </Link>
 
@@ -107,9 +107,9 @@ export function WorkspaceShell({
           설정
         </Link>
         <div className="rail-plan">
-          <span className="mono-label">PRIVATE WORKSPACE</span>
+          <span className="mono-label">내 워크스페이스</span>
           <strong>크레딧 사용량</strong>
-          <small>작업 성공 시 API 원장에 기록됩니다</small>
+          <small>검사와 생성에 사용됩니다</small>
         </div>
       </div>
     </div>
@@ -176,7 +176,7 @@ export function WorkspaceShell({
           <h1 className="workspace-title">{title}</h1>
           <Link className="workspace-quick-action" href="/app" prefetch={false}>
             <Icon name="scan" size={14} />
-            <span>새 검사</span>
+            <span>에셋 검사하기</span>
           </Link>
           <div className="workspace-toolbar-end">
             {status}

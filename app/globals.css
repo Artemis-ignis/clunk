@@ -1,5 +1,25 @@
 @import "tailwindcss/index.css";
 
+/* The only @font-face declarations in the app. They used to live in site-v4.css,
+   a stylesheet whose .cv4 selectors match nothing any more — deleting that dead
+   file would have silently removed every webfont, so the faces moved here. */
+@font-face {
+  font-family: "Pretendard Variable";
+  src: url("/fonts/PretendardVariable.woff2") format("woff2-variations");
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Space Grotesk V";
+  src: url("/fonts/SpaceGroteskVariable.woff2") format("woff2-variations");
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+
 /* ============================================================================
    Clunk design tokens
    Light first. One accent family plus a single support accent, one radius system,
@@ -59,9 +79,17 @@
   --danger-soft: rgba(179, 33, 60, 0.09);
 
   /* type */
-  --font-sans: var(--font-geist-sans), "Pretendard Variable", Pretendard, "Apple SD Gothic Neo",
+  /* 2026-09-01: these two stacks used to START with var(--font-geist-sans).
+     A custom property that resolves to nothing makes the whole declaration
+     guaranteed-invalid, so the Korean fallbacks written after it never got a
+     chance — the page dropped to a browser default instead. Literal families
+     first; the legacy --font-geist-* names stay defined so the 44 rules that
+     still reference them resolve to something real. */
+  --font-sans: "Pretendard Variable", Pretendard, "Apple SD Gothic Neo",
     "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), "SFMono-Regular", Consolas, "D2Coding", monospace;
+  --font-mono: "Space Grotesk V", "Space Grotesk", ui-monospace, "SFMono-Regular", Consolas, "D2Coding", monospace;
+  --font-geist-sans: var(--font-sans);
+  --font-geist-mono: var(--font-mono);
 
   --fs-1: 0.8rem;      /* 12.8 label, caption */
   --fs-2: 1rem;        /* 16   body */

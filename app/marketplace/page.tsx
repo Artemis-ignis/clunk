@@ -21,17 +21,10 @@ export const metadata = createPageMetadata({
  */
 
 const BUYER_STEPS = [
-  { index: "01", label: "DISCOVER", detail: "실제 preview와 파일 형식을 확인합니다." },
-  { index: "02", label: "BUY", detail: "가격·라이선스와 결제 상태를 확인합니다." },
-  { index: "03", label: "RECEIVE", detail: "권한이 확인된 계정에서 파일을 받습니다." },
-  { index: "04", label: "USE", detail: "Clunk 제품 기능은 크레딧으로 사용합니다." },
-] as const;
-
-const CATALOG_POLICIES = [
-  { label: "LISTING", value: "PUBLISHED ONLY", detail: "공개 API 응답에 있는 상품만 표시" },
-  { label: "PREVIEW", value: "FILE BACKED", detail: "등록된 preview artifact만 사용" },
-  { label: "LICENSE", value: "DECLARED", detail: "상품이 반환한 라이선스 상태 표시" },
-  { label: "CHECKOUT", value: "LIVE STATUS", detail: "결제 제공자 연결 상태를 숨기지 않음" },
+  { index: "01", label: "고르기", detail: "삼각형 수와 용량을 보고 3D로 돌려 보세요." },
+  { index: "02", label: "결제하기", detail: "크레딧으로 바로 결제합니다." },
+  { index: "03", label: "받기", detail: "결제 즉시 파일을 내려받습니다." },
+  { index: "04", label: "넣기", detail: "받은 GLB를 그대로 게임에 넣으세요." },
 ] as const;
 
 export default function MarketplacePage() {
@@ -56,7 +49,7 @@ export default function MarketplacePage() {
                 </p>
                 <div className={styles.heroActions}>
                   <Link className="cv5-btn cv5-btn-primary" href="#catalog">
-                    구매 가능한 에셋 보기 <Icon name="arrowRight" size={16} />
+                    에셋 보기 <Icon name="arrowRight" size={16} />
                   </Link>
                   <Link className="cv5-btn cv5-btn-ghost" href="/app" prefetch={false}>
                     Clunk 제품 사용하기 <Icon name="arrowUpRight" size={16} />
@@ -73,7 +66,7 @@ export default function MarketplacePage() {
                 <div className={styles.heroPanel}>
                   <div className={styles.heroPanelHead}>
                     <span>CLUNK <b>MARKET</b></span>
-                    <span>REAL FILES · GLB</span>
+                    <span>GLB 파일</span>
                   </div>
                   <div className={styles.heroPanelArt}>
                     <Image src="/landing/tractor-hero.png" alt="" width={720} height={520} priority />
@@ -90,15 +83,11 @@ export default function MarketplacePage() {
           <section id="catalog" className={styles.catalogSection} data-snap-section="catalog" aria-labelledby="marketplace-catalog-heading">
             <div className="cv5-frame">
               <div className={styles.sectionHead}>
-                <span className="cv5-eyebrow">DISCOVER · PUBLIC CATALOG</span>
+                <span className="cv5-eyebrow">에셋 목록</span>
                 <h2 id="marketplace-catalog-heading">
-                  지금 구매할 수 있는 <em>실제 에셋</em>
+                  지금 받을 수 있는 <em>에셋</em>
                 </h2>
-                <p>
-                  이 목록은 <code>/api/marketplace</code>가 PUBLISHED로 반환한 listing만
-                  렌더링합니다. 파일 미리보기, 형식, 라이선스, 가격과 결제 연결 상태를
-                  상품별로 확인할 수 있습니다.
-                </p>
+                <p>삼각형 수, 용량, 라이선스를 상품마다 확인하세요.</p>
               </div>
               <MarketplaceCatalog />
             </div>
@@ -108,23 +97,20 @@ export default function MarketplacePage() {
             <div className={`cv5-frame ${styles.buyerGrid}`}>
               <div className="cv5-reveal">
                 <div className={styles.sectionHead}>
-                  <span className="cv5-eyebrow">BUY ASSETS · USE CLUNK</span>
+                  <span className="cv5-eyebrow">받는 방법</span>
                   <h2 id="marketplace-buyer-heading">
-                    에셋은 구매하고,
+                    에셋도 검사도,
                     <br />
-                    <em>Clunk는 크레딧으로 씁니다</em>
+                    <em>크레딧 하나로</em>
                   </h2>
-                  <p>
-                    구매한 파일은 결제와 entitlement가 확인된 계정에 전달됩니다. Clunk의
-                    생성·검사·Game Ready 기능은 별도 크레딧 정책에 따라 사용합니다.
-                  </p>
+                  <p>결제하면 바로 받습니다. 1 크레딧 = ₩100.</p>
                 </div>
                 <div className={styles.buyerActions}>
                   <Link className="cv5-btn cv5-btn-primary" href="/app" prefetch={false}>
-                    Clunk 제품 열기 <Icon name="arrowUpRight" size={16} />
+                    내 파일 검사하기 <Icon name="arrowUpRight" size={16} />
                   </Link>
                   <Link className="cv5-btn cv5-btn-ghost" href="/pricing" prefetch={false}>
-                    크레딧 보기 <Icon name="credit" size={16} />
+                    요금 보기 <Icon name="credit" size={16} />
                   </Link>
                 </div>
               </div>
@@ -140,25 +126,6 @@ export default function MarketplacePage() {
             </div>
           </section>
 
-          <section className={styles.boundary} data-snap-section="catalog-policy" aria-label="공개 마켓 상품 표시 기준">
-            <div className="cv5-frame">
-              <div className={`${styles.sectionHead} cv5-reveal`}>
-                <span className="cv5-eyebrow">PUBLIC CATALOG POLICY</span>
-                <h2>
-                  목록에는 <em>확인 가능한 정보만</em> 남깁니다
-                </h2>
-              </div>
-              <div className={`${styles.policyGrid} cv5-reveal`} data-delay="1">
-                {CATALOG_POLICIES.map((policy) => (
-                  <div className={styles.policyCard} key={policy.label}>
-                    <span>{policy.label}</span>
-                    <strong>{policy.value}</strong>
-                    <small>{policy.detail}</small>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
         </main>
       </SiteShell>
     </div>

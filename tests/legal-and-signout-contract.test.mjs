@@ -223,7 +223,8 @@ test("설정 화면이 로그아웃 경로와 그 경계를 정직하게 안내�
   const settings = await source("app/settings/page.tsx");
   assert.match(settings, /chatGPTSignOutPath/);
   assert.ok(settings.includes("이 브라우저에서 로그아웃"));
-  assert.ok(settings.includes("인증 제공자"), "호스트 세션 경계 설명이 없습니다");
+  // 2026-09-01: "인증 제공자"라는 내부 표현 대신 사용자가 아는 이름으로 경계를 설명한다.
+  assert.ok(settings.includes("Google·GitHub 계정 로그인은 그대로 유지됩니다"), "호스트 세션 경계 설명이 없습니다");
 });
 
 test("결제 미개시 안내는 결제 provider 미설정 상태에서만 렌더된다", async () => {

@@ -57,6 +57,26 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
+      <head>
+        {/* 2026-09-01: the Korean face is what every visitor actually reads, and
+            it was the one font NOT preloaded — so the first paint of every page
+            was the OS fallback and the layout reflowed once Pretendard finally
+            arrived. It goes ahead of everything else now. */}
+        <link
+          rel="preload"
+          href="/fonts/PretendardVariable.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/SpaceGroteskVariable.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className="antialiased">
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
         <WebMcpBridge />

@@ -4,7 +4,9 @@
 > It keeps structural evidence, engine import/runtime evidence, and player-facing review separate.
 > 한국어: 실제 2D·Sprite·Spine·애니메이션·3D 에셋을 목표 엔진에 대조하되 화면 판정과 분리하는 품질 게이트입니다.
 
-Status: private pilot (Korea first). Billing is a working demo ledger, not a payment provider.
+Status: Korea first. One credit pays for everything — 1 credit = KRW 100 — and the same credit
+buys a marketplace asset or runs an inspection. Paid checkout opens once the Korean mail-order
+business filing completes.
 
 ## Public surfaces
 
@@ -165,13 +167,6 @@ Tools returned by local stdio `tools/list`:
 
 `clunk_validate` and `clunk_passport` remain backward-compatible calls in the local server but
 are not advertised by the current seven-tool catalog.
-
-Harvest Frontier acceptance fixture:
-`examples/frame-manifest/harvest-frontier-m123-camera-review.example.json`.
-Validate it with `npm.cmd exec -- tsx tests/harvest-frontier-m123-acceptance.test.ts`.
-The fixture records real M123 WebGPU/WebGL2 candidate hashes, numeric camera checks, and the
-canonical tractor structural evidence; it intentionally reports `reviewStatus=NOT_EVALUATED`,
-`visualRuntime=GAP`, `playerFacing=NOT_EVALUATED`, and pending human review.
 
 Typical agent loop: `initialize` -> `tools/list` -> `clunk_asset_inspect` or
 `clunk_sprite_sheet_review` -> (if fixable) `clunk_optimize` -> fresh evidence review.
@@ -682,7 +677,6 @@ remains `reviewStatus: NOT_EVALUATED`, `visualRuntime: GAP`, `playerFacing: NOT_
 
 HF M103 packaged WebGPU handoff (`sourceHead=3e5fffa`, run
 `HF-M103-current-visual-webgpu-r02`) is recorded as received evidence. The no-HUD frame
-is `C:/Users/50106/Desktop/Harvest Frontier/.logs/screenshots/M103/shipped-visual/HF-M103-current-visual-webgpu-r02-03-game-nohud.png`,
 `2844135` bytes, SHA-256
 `f1b65c61a2cf322bafaea659cd6871111b98c3351d67aaed4a566aab078185e8`. The received
 auxiliary hashes are title
@@ -758,6 +752,33 @@ player-facing visual PASS. `textureCount=0` is not automatically a defect becaus
 belong to procedural/material runtime authoring; ownership and runtime usage must remain
 explicit in linked evidence, and a shipped WebGPU/WebGL2 frame plus human review is still
 required for player-facing approval.
+
+## Bundled asset requests
+
+For Sprite Atlas and Spine projects, use the bounded multi-file request contract. This is the
+authenticated bundle path for a Spine JSON + atlas + PNG project, and the same shape is accepted
+by the remote HTTP MCP when sent with a workspace Bearer key:
+
+```json
+POST /api/assetops/inspect
+{
+  "schema": "clunk.asset-inspection-request.v2",
+  "entryFileName": "spine/character.json",
+  "files": [
+    { "fileName": "spine/character.json", "role": "entry", "bytesBase64": "<SPINE_JSON>" },
+    { "fileName": "spine/character.atlas", "role": "atlas", "relatesTo": ["spine/character.json"], "bytesBase64": "<ATLAS_TEXT>" },
+    { "fileName": "spine/body.png", "role": "page", "relatesTo": ["spine/character.atlas"], "bytesBase64": "<PNG_BYTES>" }
+  ],
+  "targetProfileId": "web-three",
+  "assetKind": "spine-project"
+}
+```
+
+The response is `clunk.asset-inspection-response.v2` and adds a non-persistent `bundle` summary:
+`entryFileName`, `fileCount`, `totalBytes`, and each member's `fileName`, byte count, SHA-256,
+optional `role`, and validated `relatesTo` file names. `role` is one of
+`entry|project|atlas|page|texture|skeleton|animation|buffer|sidecar|unknown`; relations must point
+to another submitted file. Names are safe relative slash paths only. Raw bytes are never persisted.
 
 ## Safety boundaries
 

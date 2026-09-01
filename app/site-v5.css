@@ -661,3 +661,52 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
   background-repeat: no-repeat;
   background-size: 84% auto;
 }
+
+/* ---------------------------------------------------------------------------
+   Korean typography (2026-09-01)
+
+   The tracking on this site was set for Latin display type: -0.042em on the
+   hero, -0.035em on section headings, -0.012em inherited by every element.
+   Hangul syllable blocks are wider than Latin glyphs and Pretendard is already
+   tight, so at 40–65px that pulls 받침 into the next block. The Korean
+   reference sites the master gave sit around -0.02em on headings and 0 on body.
+--------------------------------------------------------------------------- */
+.cv5 {
+  letter-spacing: 0;
+}
+
+.cv5-hero h1,
+.cv5-closer h2,
+.cv5-nf h1 {
+  letter-spacing: -0.02em;
+}
+
+.cv5-sec-copy h2,
+.cv5-showcase-head h2,
+.cv5-stats-grid b {
+  letter-spacing: -0.015em;
+}
+
+/* Hangul body text needs looser leading than Latin; anything under 1.5 crowds
+   the 받침 of one line into the 초성 of the next. */
+.cv5 p,
+.cv5 li,
+.cv5 dd {
+  line-height: 1.7;
+}
+
+/* Real content must stay readable. 8–9px labels read as a low-resolution
+   mockup — the reference sites bottom out at 11–12px. */
+.cv5-hv-cell span,
+.cv5-showcase-meta span,
+.cv5-float small,
+.cv5-inspect-preview small,
+.cv5 .dashboard-asset-family small {
+  font-size: 0.6875rem;
+}
+
+/* --v5-ink-faint was 3.58:1 on the page ground — under the 4.5:1 the text it
+   paints needs. */
+.cv5 {
+  --v5-ink-faint: rgba(233, 236, 248, 0.58);
+}
