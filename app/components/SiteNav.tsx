@@ -12,7 +12,7 @@ import { ThemeToggle } from "./ThemeToggle";
  * inspect the handoff. Workspace and documentation remain utility destinations.
  */
 
-export type ShellSection = "home" | "series" | "studio" | "app" | "dashboard" | "pricing" | "docs" | "agents" | "marketplace";
+export type ShellSection = "home" | "series" | "studio" | "app" | "dashboard" | "pricing" | "docs" | "agents" | "marketplace" | "review";
 
 const NAV_LINKS: { label: string; href: string; section: ShellSection }[] = [
   { label: "에셋 제작", href: "/studio", section: "studio" },
@@ -23,6 +23,9 @@ const NAV_LINKS: { label: string; href: string; section: ShellSection }[] = [
 ];
 
 const UTILITY_NAV_LINKS: { label: string; href: string; section: ShellSection }[] = [
+  // /review had zero inbound links until 2026-08-31 — the direct-review viewer
+  // the master asked for was reachable only by typing the URL.
+  { label: "검수 뷰어", href: "/review", section: "review" },
   { label: "Docs", href: "/docs", section: "docs" },
   { label: "내 작업공간", href: "/dashboard", section: "dashboard" },
 ];
@@ -38,12 +41,12 @@ export function SiteNav({ active }: { active?: ShellSection }) {
 
   useEffect(() => {
     let active = true;
-    void fetch("/api/me", { cache: "no-store" })
+    void fetch("/api/session", { cache: "no-store" })
       .then(async (response) => {
         if (!response.ok) return;
-        const body = await response.json() as { user?: { displayName?: string } };
-        const displayName = body.user?.displayName?.trim();
-        if (active && displayName) setSession({ displayName });
+        const body = await response.json() as { authenticated?: boolean; displayName?: string };
+        const displayName = body.displayName?.trim();
+        if (active && body.authenticated && displayName) setSession({ displayName });
       })
       .catch(() => {});
     return () => {

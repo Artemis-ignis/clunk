@@ -71,6 +71,26 @@ export default async function ConnectPage() {
           <div><span className="eyebrow">03 · KEEP THE REVIEW SEPARATE</span><h2>연결 PASS는<br /><em>게임 투입 승인이 아닙니다.</em></h2><p>연결은 서버가 응답했다는 증거입니다. 에셋의 구조·정책, shipped runtime, player-facing 화면, 사람의 결정은 각각 별도 상태로 유지합니다.</p></div>
           <div className="connect-boundary-grid"><div><span>STATIC</span><strong>PASS</strong><small>bytes · hash · policy</small></div><div><span>RUNTIME</span><strong>GAP</strong><small>shipped frame 필요</small></div><div><span>PLAYER</span><strong>NOT_EVALUATED</strong><small>실제 게임 화면 전</small></div><div><span>HUMAN</span><strong>PENDING</strong><small>사람 검토 대기</small></div></div>
         </section>
+
+        {/* /agents and /mcp had zero inbound links (2026-08-31 crawl): the two
+            deeper connection surfaces were unreachable from the site. */}
+        <section className="connect-deeper" aria-label="더 깊은 연결 문서">
+          <span className="eyebrow">GO DEEPER</span>
+          <div className="connect-deeper-grid">
+            <Link className="connect-deeper-card" href="/agents" prefetch={false}>
+              <strong>에이전트 결과 화면</strong>
+              <span>생성 직후 검사 결과를 에이전트가 읽는 방식과 evidence 뷰어</span>
+            </Link>
+            <Link className="connect-deeper-card" href="/mcp" prefetch={false}>
+              <strong>MCP 엔드포인트 상세</strong>
+              <span>/api/mcp 계약, 인증 키, 도구 목록과 전송 방식</span>
+            </Link>
+            <Link className="connect-deeper-card" href="/review" prefetch={false}>
+              <strong>검수 뷰어</strong>
+              <span>3D 회전·와이어프레임과 2D 상태 재생으로 직접 판정</span>
+            </Link>
+          </div>
+        </section>
       </main>
       </SiteShell>
     </div>

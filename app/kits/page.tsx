@@ -11,7 +11,7 @@ import "../components/cv5-surface.css";
 export const dynamic = "force-dynamic";
 
 export const metadata = createPageMetadata({
-  title: "Kits · Clunk",
+  title: "Kits",
   description: "검증된 Workspace 에셋을 hash-only manifest로 묶는 Clunk 작업면을 안내합니다.",
   path: "/kits",
 });

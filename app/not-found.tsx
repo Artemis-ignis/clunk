@@ -1,54 +1,46 @@
 import Link from "./components/NativeLink";
-import { BrandLockup } from "./components/BrandMark";
 import { Icon } from "./components/Icon";
+import { SiteNav } from "./components/SiteNav";
+import { SiteFooter } from "./components/SiteFooter";
+import { ForceDarkTheme } from "./components/ForceDarkTheme";
 
-/** Branded, theme-aware 404 — the default framework page is English-only and dead-ends. */
+/**
+ * Branded 404 on the unified cv5 system. It used to render the legacy
+ * light-theme card with a generic title, so a mistyped URL looked like a
+ * different product (2026-08-31 audit).
+ */
 export default function NotFound() {
   return (
-    <main className="nf-page snap-section" data-snap-section="not-found">
-      <div className="nf-card">
-        <Link className="brand" href="/" aria-label="Clunk 홈">
-          <BrandLockup gradientId="clunk-404" />
-        </Link>
-        <p className="nf-code num" aria-hidden="true">
-          404
-        </p>
-        <h1>이 주소에는 아무것도 없습니다.</h1>
-        <p className="nf-lead">
-          주소가 바뀌었거나 잘못 입력된 경로입니다. 파일은 원래 자리에 그대로 있으니, 아래에서
-          가던 길을 이어가세요.
-        </p>
-        <div className="nf-actions">
-          <Link className="button button-primary" href="/">
-            홈으로
-            <Icon name="arrowRight" size={15} />
-          </Link>
-          <Link className="button button-quiet" href="/app">
-            검사기 열기
-            <Icon name="arrowUpRight" size={15} />
-          </Link>
-          <Link className="button button-quiet" href="/docs">
-            문서 보기
-            <Icon name="arrowRight" size={15} />
-          </Link>
-          <Link className="button button-quiet" href="/marketplace">
-            공개 에셋 보기
-            <Icon name="arrowRight" size={15} />
-          </Link>
-          <Link className="button button-quiet" href="/series">
-            제품군 보기
-            <Icon name="arrowRight" size={15} />
-          </Link>
-          <Link className="button button-quiet" href="/kits">
-            Kits 안내
-            <Icon name="arrowRight" size={15} />
-          </Link>
-          <Link className="button button-quiet" href="/mcp">
-            MCP 연결
-            <Icon name="arrowRight" size={15} />
-          </Link>
+    <div className="cv5">
+      <ForceDarkTheme />
+      <div className="cv5-stars" aria-hidden="true" />
+      <SiteNav />
+      <main className="cv5-nf">
+        <div className="cv5-frame">
+          <span className="cv5-eyebrow">404 · NOT FOUND</span>
+          <h1>이 주소에는 <em>아무것도 없습니다.</em></h1>
+          <p>
+            주소가 바뀌었거나 잘못 입력된 경로입니다. 파일과 검사 기록은 원래 자리에
+            그대로 있으니, 아래에서 가던 길을 이어가세요.
+          </p>
+          <div className="cv5-cta-row">
+            <Link className="cv5-btn cv5-btn-primary" href="/" prefetch={false}>
+              홈으로 <Icon name="arrowRight" size={16} />
+            </Link>
+            <Link className="cv5-btn cv5-btn-ghost" href="/marketplace" prefetch={false}>
+              공개 에셋 보기
+            </Link>
+          </div>
+          <div className="cv5-nf-links">
+            <Link href="/app" prefetch={false}>에셋 검사</Link>
+            <Link href="/review" prefetch={false}>검수 뷰어</Link>
+            <Link href="/connect" prefetch={false}>제작 에이전트</Link>
+            <Link href="/docs" prefetch={false}>문서</Link>
+            <Link href="/pricing" prefetch={false}>요금 · 크레딧</Link>
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+      <SiteFooter />
+    </div>
   );
 }

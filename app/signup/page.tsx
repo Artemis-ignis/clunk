@@ -8,6 +8,7 @@ import { getOAuthEnvironment, getOAuthProviderStatuses, safeOAuthReturnPath } fr
 import { getRuntimeEnvironment } from "../runtime-environment";
 import { trustsUpstreamIdentityHeaders } from "../api/_lib/identity-headers";
 import { SiteNav } from "../components/SiteNav";
+import { SiteFooter } from "../components/SiteFooter";
 import { ForceDarkTheme } from "../components/ForceDarkTheme";
 import Link from "../components/NativeLink";
 import { createPageMetadata } from "../components/site-metadata";
@@ -205,6 +206,7 @@ function AuthJourney({
           </section>
         </div>
       </main>
+      <SiteFooter />
 
       <footer className="cv5-auth-foot">
         <div className="cv5-frame">CLUNK · AUTHENTICATED WORKSPACE</div>

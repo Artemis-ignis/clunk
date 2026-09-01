@@ -591,3 +591,12 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
 .cv5-float-a { left: -30px; top: 30px; bottom: auto; }
 .cv5-float-b { left: -22px; top: 190px; bottom: auto; }
 .cv5-float-c { right: -30px; top: 120px; bottom: auto; }
+
+/* 404 (cv5) — the legacy light card made a mistyped URL look like another product */
+.cv5-nf { padding: clamp(140px, 20vh, 220px) 0 clamp(60px, 8vw, 110px); }
+.cv5-nf h1 { margin: 16px 0 0; font-size: clamp(2rem, 4.4vw, 3.1rem); font-weight: 860; letter-spacing: -0.04em; line-height: 1.14; }
+.cv5-nf h1 em { font-style: normal; background: var(--v5-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.cv5-nf > .cv5-frame > p { margin: 18px 0 0; max-width: 520px; line-height: 1.72; }
+.cv5-nf-links { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 34px; }
+.cv5-nf-links a { color: var(--v5-ink-dim); font-size: 0.88rem; border-bottom: 1px solid transparent; }
+.cv5-nf-links a:hover { color: var(--v5-ink); border-bottom-color: var(--v5-line-strong); }

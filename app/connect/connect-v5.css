@@ -178,3 +178,29 @@
   .connect-cv5 .connect-section-heading > p { justify-self: start; }
   .connect-cv5 .connect-boundary { grid-template-columns: 1fr; }
 }
+
+/* deeper-surface links (2026-08-31: /agents, /mcp, /review were orphaned) */
+.connect-deeper { margin-top: clamp(40px, 6vw, 72px); }
+.connect-deeper .eyebrow { color: var(--v5-ink-faint); }
+.connect-deeper-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+.connect-deeper-card {
+  display: grid;
+  gap: 6px;
+  padding: 18px 20px;
+  border: 1px solid var(--v5-line);
+  border-radius: var(--v5-r);
+  background: rgba(255, 255, 255, 0.025);
+  transition: border-color .2s, transform .2s, background .2s;
+}
+.connect-deeper-card:hover {
+  border-color: rgba(139, 92, 246, 0.5);
+  background: rgba(255, 255, 255, 0.045);
+  transform: translateY(-2px);
+}
+.connect-deeper-card strong { color: var(--v5-ink); font-size: 0.98rem; font-weight: 700; }
+.connect-deeper-card span { color: var(--v5-ink-dim); font-size: 0.84rem; line-height: 1.6; }

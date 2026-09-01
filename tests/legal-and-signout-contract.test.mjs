@@ -119,16 +119,21 @@ test("취소·환불정책이 청약철회 제한과 결제 전 동의 구조를
 });
 
 test("랜딩과 SiteShell 푸터가 세 법적 문서를 모두 링크한다", async () => {
-  for (const file of ["app/page.tsx", "app/components/SiteShell.tsx"]) {
+  // 2026-08-31: the cv5 footer moved into the shared SiteFooter component so
+  // /login, /signup and /review (which had no footer at all) carry the same
+  // statutory links. The contract now reads that component plus SiteShell.
+  for (const file of ["app/components/SiteFooter.tsx", "app/components/SiteShell.tsx"]) {
     const page = await source(file);
     for (const href of LEGAL_ROUTES) {
       assert.match(page, new RegExp(`href="${href}"`), `${file}에 ${href} 링크가 없습니다`);
     }
   }
 
-  const landing = await (await render("/")).text();
-  for (const href of LEGAL_ROUTES) {
-    assert.ok(landing.includes(`href="${href}"`), `랜딩 렌더 결과에 ${href} 링크가 없습니다`);
+  for (const route of ["/", "/login", "/signup", "/review"]) {
+    const html = await (await render(route)).text();
+    for (const href of LEGAL_ROUTES) {
+      assert.ok(html.includes(`href="${href}"`), `${route} 렌더 결과에 ${href} 링크가 없습니다`);
+    }
   }
 });
 

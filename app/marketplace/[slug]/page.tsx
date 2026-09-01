@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+import { getRuntimeDb, ensureSchema } from "../../api/_lib/clunk";
 import { createPageMetadata } from "../../components/site-metadata";
 import { SiteShell } from "../../components/SiteShell";
 import { ForceDarkTheme } from "../../components/ForceDarkTheme";
@@ -13,8 +15,31 @@ export const metadata = createPageMetadata({
   path: "/marketplace",
 });
 
+/**
+ * A slug that is not a published listing used to answer 200 with a
+ * client-rendered "존재하지 않는 listing" card (a soft 404 that search engines
+ * and link checkers read as a real page). Verify on the server instead.
+ */
+async function isPublishedSlug(slug: string): Promise<boolean> {
+  if (!/^[a-z0-9가-힣][a-z0-9가-힣-]{0,95}$/i.test(slug)) return false;
+  try {
+    const db = getRuntimeDb();
+    await ensureSchema(db);
+    const row = await db
+      .prepare("SELECT 1 AS ok FROM clunk_marketplace_listings WHERE slug = ? AND status = 'PUBLISHED' LIMIT 1")
+      .bind(slug)
+      .first<{ ok: number }>();
+    return Boolean(row?.ok);
+  } catch {
+    // Storage unavailable is not proof the listing is missing; let the client
+    // surface the real error instead of claiming a 404.
+    return true;
+  }
+}
+
 export default async function MarketplaceListingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  if (!(await isPublishedSlug(slug))) notFound();
   return (
     <div className="cv5">
       <ForceDarkTheme />

@@ -39,7 +39,7 @@ export function createPageMetadata({
       description,
       url: canonical,
       type: "website",
-      images: [{ url: image, width: 1664, height: 936, alt: "Clunk - Make every asset defensible" }],
+      images: [{ url: image, width: 1200, height: 675, alt: "Clunk - Make every asset defensible" }],
     },
     twitter: {
       card: "summary_large_image",

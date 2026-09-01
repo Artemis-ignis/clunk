@@ -1,4 +1,5 @@
 import { SiteNav } from "../components/SiteNav";
+import { SiteFooter } from "../components/SiteFooter";
 import { ForceDarkTheme } from "../components/ForceDarkTheme";
 import { createPageMetadata } from "../components/site-metadata";
 import { ReviewSurface } from "./ReviewSurface";
@@ -24,7 +25,7 @@ export default function ReviewPage({ searchParams }: { searchParams?: Promise<{ 
       <ForceDarkTheme />
       <div className="cv5-stars" aria-hidden="true" />
       <a className="clunk-home-skip-link" href="#main-content">본문으로 건너뛰기</a>
-      <SiteNav active="app" />
+      <SiteNav active="review" />
       <main id="main-content" className="rv-main">
         <div className="cv5-frame">
           <header className="rv-head">
@@ -39,6 +40,7 @@ export default function ReviewPage({ searchParams }: { searchParams?: Promise<{ 
           <ReviewSurfaceLoader searchParams={searchParams} />
         </div>
       </main>
+      <SiteFooter />
     </div>
   );
 }
