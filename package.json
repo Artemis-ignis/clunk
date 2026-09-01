@@ -56,7 +56,8 @@
     "site:preflight": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\\site-preflight.ps1",
     "release:preflight": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\\release-preflight.ps1",
     "health:smoke": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\\health-smoke.ps1",
-    "db:generate": "drizzle-kit generate"
+    "db:generate": "drizzle-kit generate",
+    "asset:sheet": "node scripts/sprite-sheet-from-glb.mjs"
   },
   "dependencies": {
     "@gltf-transform/core": "^4.2.1",

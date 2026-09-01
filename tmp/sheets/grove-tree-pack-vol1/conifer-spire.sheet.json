@@ -1,0 +1,362 @@
+{
+  "schema": "clunk.sprite-sheet-review.v1",
+  "schemaVersion": "1",
+  "evidenceKind": "CONTRACT_FIXTURE",
+  "assetId": "conifer-spire",
+  "source": {
+    "path": "conifer-spire.sheet.png",
+    "origin": "procedural",
+    "sha256": "4499995d8dd564954da06e1d6a55c086340f9b6999f61af437c76e0372c92f53",
+    "bytes": 5356
+  },
+  "target": {
+    "engine": "engine-agnostic",
+    "renderer": "clunk-software-rasteriser",
+    "platform": "2d",
+    "logicalFramePx": {
+      "width": 64,
+      "height": 64
+    }
+  },
+  "sheet": {
+    "path": "conifer-spire.sheet.png",
+    "sha256": "4499995d8dd564954da06e1d6a55c086340f9b6999f61af437c76e0372c92f53",
+    "bytes": 5356,
+    "width": 512,
+    "height": 64
+  },
+  "grid": {
+    "columns": 8,
+    "rows": 1,
+    "frameWidth": 64,
+    "frameHeight": 64,
+    "padding": {
+      "x": 0,
+      "y": 0
+    },
+    "spacing": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "frames": [
+    {
+      "id": "idle_south",
+      "index": 0,
+      "x": 0,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "idle",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "idle_southwest",
+      "index": 1,
+      "x": 64,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "idle",
+      "direction": "southwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "idle_west",
+      "index": 2,
+      "x": 128,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "idle",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "idle_northwest",
+      "index": 3,
+      "x": 192,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "idle",
+      "direction": "northwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "idle_north",
+      "index": 4,
+      "x": 256,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "idle",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "idle_northeast",
+      "index": 5,
+      "x": 320,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "idle",
+      "direction": "northeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "idle_east",
+      "index": 6,
+      "x": 384,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "idle",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "idle_southeast",
+      "index": 7,
+      "x": 448,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "idle",
+      "direction": "southeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    }
+  ],
+  "animations": [
+    {
+      "id": "idle_south",
+      "state": "idle",
+      "direction": "south",
+      "fps": 1,
+      "loop": false,
+      "frameIds": [
+        "idle_south"
+      ]
+    },
+    {
+      "id": "idle_southwest",
+      "state": "idle",
+      "direction": "southwest",
+      "fps": 1,
+      "loop": false,
+      "frameIds": [
+        "idle_southwest"
+      ]
+    },
+    {
+      "id": "idle_west",
+      "state": "idle",
+      "direction": "west",
+      "fps": 1,
+      "loop": false,
+      "frameIds": [
+        "idle_west"
+      ]
+    },
+    {
+      "id": "idle_northwest",
+      "state": "idle",
+      "direction": "northwest",
+      "fps": 1,
+      "loop": false,
+      "frameIds": [
+        "idle_northwest"
+      ]
+    },
+    {
+      "id": "idle_north",
+      "state": "idle",
+      "direction": "north",
+      "fps": 1,
+      "loop": false,
+      "frameIds": [
+        "idle_north"
+      ]
+    },
+    {
+      "id": "idle_northeast",
+      "state": "idle",
+      "direction": "northeast",
+      "fps": 1,
+      "loop": false,
+      "frameIds": [
+        "idle_northeast"
+      ]
+    },
+    {
+      "id": "idle_east",
+      "state": "idle",
+      "direction": "east",
+      "fps": 1,
+      "loop": false,
+      "frameIds": [
+        "idle_east"
+      ]
+    },
+    {
+      "id": "idle_southeast",
+      "state": "idle",
+      "direction": "southeast",
+      "fps": 1,
+      "loop": false,
+      "frameIds": [
+        "idle_southeast"
+      ]
+    }
+  ],
+  "qualityPolicy": {
+    "mode": "BLOCKING",
+    "strictChecks": [
+      "pixel-discipline"
+    ],
+    "pixelGridSize": 1,
+    "requireTransparentBackground": true,
+    "minAlphaCoverage": 0.05,
+    "maxAlphaCoverage": 0.92
+  },
+  "metrics": {
+    "sourceHash": "4499995d8dd564954da06e1d6a55c086340f9b6999f61af437c76e0372c92f53",
+    "sheetDimensions": {
+      "width": 512,
+      "height": 64
+    },
+    "alphaCoverage": 0.241699,
+    "frameAlphaCoverages": [
+      0.240234,
+      0.247803,
+      0.241211,
+      0.248535,
+      0.240967,
+      0.240723,
+      0.231201,
+      0.24292
+    ],
+    "frameHashes": {
+      "idle_south": "a342c5859e401f3af5e216807d2147cd70b34b9792224201f5a9ca9e4eae0e03",
+      "idle_southwest": "c81af74aa63df3e9edf801a35a5dc728b413d6df730dac5142b90638ddbbe9f5",
+      "idle_west": "474308a878ef252ecbc25938e0b7f8b9e19d2ddae03d70f1a9e131a42c30dac4",
+      "idle_northwest": "36e193d65b32d00dfbcfeecad592cd0824e71968362661dc051200e551324d37",
+      "idle_north": "60e1e6624d36de345c2a46c03694d27a3dd15c8cfc84344a299c713f62fa9791",
+      "idle_northeast": "c44e280d80d09eccf5475e881a2d68c4a97a5990d1e48b3ea5e1a021e417cc0b",
+      "idle_east": "5aa72bf430eb1d11288622a6c4dce10d19e47e6517403582f97ea83af49ab6d0",
+      "idle_southeast": "cb220b03a7797d28c76f82a477b5a5948f718bc24b6b55438e09462461a52d37"
+    },
+    "hasTransparentPixels": true,
+    "emptyFrameIds": [],
+    "borderTouchRatios": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "silhouetteCoverages": [
+      0.240234,
+      0.247803,
+      0.241211,
+      0.248535,
+      0.240967,
+      0.240723,
+      0.231201,
+      0.24292
+    ],
+    "measuredCellPx": {
+      "width": 64,
+      "height": 64
+    },
+    "hardAlphaRatio": 1,
+    "uniqueColorCount": 30,
+    "dominantRunLength": 1,
+    "offGridPixelRatio": 0,
+    "distinctFrameRatio": 1
+  },
+  "generation": {
+    "glb": "conifer-spire.glb",
+    "glbSha256": "b0931f519c5b6b2080e9ea8e3daf01e532a4fda828b514933adf0bc7c966d1cf",
+    "triangles": 860,
+    "views": 8,
+    "pitch": 0.62,
+    "palette": {
+      "requested": 32,
+      "produced": 32,
+      "colours": [
+        "#0b1411",
+        "#0f1a16",
+        "#101c17",
+        "#121e19",
+        "#131e1a",
+        "#131f1b",
+        "#141f1b",
+        "#141f1b",
+        "#2d1d18",
+        "#15231d",
+        "#1e3127",
+        "#243b2e",
+        "#2c4536",
+        "#375440",
+        "#3e5d47",
+        "#46644e",
+        "#4d6a53",
+        "#537258",
+        "#56775c",
+        "#57775c",
+        "#784737",
+        "#7b4736",
+        "#59755c",
+        "#59755c",
+        "#7d4837",
+        "#59765d",
+        "#5c7c60",
+        "#638467",
+        "#6a8a6b",
+        "#6f8e70",
+        "#779575",
+        "#7b9b7a"
+      ]
+    },
+    "coverage": [
+      0.2402,
+      0.2478,
+      0.2412,
+      0.2485,
+      0.241,
+      0.2407,
+      0.2312,
+      0.2429
+    ]
+  }
+}

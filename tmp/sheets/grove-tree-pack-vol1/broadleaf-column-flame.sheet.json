@@ -1,0 +1,362 @@
+{
+  "schema": "clunk.sprite-sheet-review.v1",
+  "schemaVersion": "1",
+  "evidenceKind": "CONTRACT_FIXTURE",
+  "assetId": "broadleaf-column-flame",
+  "source": {
+    "path": "broadleaf-column-flame.sheet.png",
+    "origin": "procedural",
+    "sha256": "4f36da142bedc88142c8ad887ca973342e1947ac81aabaeda0f279a5818c33c0",
+    "bytes": 5289
+  },
+  "target": {
+    "engine": "engine-agnostic",
+    "renderer": "clunk-software-rasteriser",
+    "platform": "2d",
+    "logicalFramePx": {
+      "width": 64,
+      "height": 64
+    }
+  },
+  "sheet": {
+    "path": "broadleaf-column-flame.sheet.png",
+    "sha256": "4f36da142bedc88142c8ad887ca973342e1947ac81aabaeda0f279a5818c33c0",
+    "bytes": 5289,
+    "width": 512,
+    "height": 64
+  },
+  "grid": {
+    "columns": 8,
+    "rows": 1,
+    "frameWidth": 64,
+    "frameHeight": 64,
+    "padding": {
+      "x": 0,
+      "y": 0
+    },
+    "spacing": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "frames": [
+    {
+      "id": "idle_south",
+      "index": 0,
+      "x": 0,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "idle",
+      "direction": "south",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "idle_southwest",
+      "index": 1,
+      "x": 64,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "idle",
+      "direction": "southwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "idle_west",
+      "index": 2,
+      "x": 128,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "idle",
+      "direction": "west",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "idle_northwest",
+      "index": 3,
+      "x": 192,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "idle",
+      "direction": "northwest",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "idle_north",
+      "index": 4,
+      "x": 256,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "idle",
+      "direction": "north",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "idle_northeast",
+      "index": 5,
+      "x": 320,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "idle",
+      "direction": "northeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "idle_east",
+      "index": 6,
+      "x": 384,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "idle",
+      "direction": "east",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    },
+    {
+      "id": "idle_southeast",
+      "index": 7,
+      "x": 448,
+      "y": 0,
+      "width": 64,
+      "height": 64,
+      "state": "idle",
+      "direction": "southeast",
+      "anchor": {
+        "x": 32,
+        "y": 63
+      }
+    }
+  ],
+  "animations": [
+    {
+      "id": "idle_south",
+      "state": "idle",
+      "direction": "south",
+      "fps": 1,
+      "loop": false,
+      "frameIds": [
+        "idle_south"
+      ]
+    },
+    {
+      "id": "idle_southwest",
+      "state": "idle",
+      "direction": "southwest",
+      "fps": 1,
+      "loop": false,
+      "frameIds": [
+        "idle_southwest"
+      ]
+    },
+    {
+      "id": "idle_west",
+      "state": "idle",
+      "direction": "west",
+      "fps": 1,
+      "loop": false,
+      "frameIds": [
+        "idle_west"
+      ]
+    },
+    {
+      "id": "idle_northwest",
+      "state": "idle",
+      "direction": "northwest",
+      "fps": 1,
+      "loop": false,
+      "frameIds": [
+        "idle_northwest"
+      ]
+    },
+    {
+      "id": "idle_north",
+      "state": "idle",
+      "direction": "north",
+      "fps": 1,
+      "loop": false,
+      "frameIds": [
+        "idle_north"
+      ]
+    },
+    {
+      "id": "idle_northeast",
+      "state": "idle",
+      "direction": "northeast",
+      "fps": 1,
+      "loop": false,
+      "frameIds": [
+        "idle_northeast"
+      ]
+    },
+    {
+      "id": "idle_east",
+      "state": "idle",
+      "direction": "east",
+      "fps": 1,
+      "loop": false,
+      "frameIds": [
+        "idle_east"
+      ]
+    },
+    {
+      "id": "idle_southeast",
+      "state": "idle",
+      "direction": "southeast",
+      "fps": 1,
+      "loop": false,
+      "frameIds": [
+        "idle_southeast"
+      ]
+    }
+  ],
+  "qualityPolicy": {
+    "mode": "BLOCKING",
+    "strictChecks": [
+      "pixel-discipline"
+    ],
+    "pixelGridSize": 1,
+    "requireTransparentBackground": true,
+    "minAlphaCoverage": 0.05,
+    "maxAlphaCoverage": 0.92
+  },
+  "metrics": {
+    "sourceHash": "4f36da142bedc88142c8ad887ca973342e1947ac81aabaeda0f279a5818c33c0",
+    "sheetDimensions": {
+      "width": 512,
+      "height": 64
+    },
+    "alphaCoverage": 0.204102,
+    "frameAlphaCoverages": [
+      0.200195,
+      0.210938,
+      0.196289,
+      0.211426,
+      0.19458,
+      0.211426,
+      0.198242,
+      0.209717
+    ],
+    "frameHashes": {
+      "idle_south": "4f782bfc2689f289f453ad24aeb063a0db92cb1193e3e646cbd100d3684f3a64",
+      "idle_southwest": "d8bb993d8d5ed811a65858d232a3fbe4973f1f2511631d0918af4f67e1f65d07",
+      "idle_west": "c42e8a404393bdd9bc69daefc155237a97755ec4f0b47230066c1318cd3e2b54",
+      "idle_northwest": "4dc65131f53c8cfc14522567103f683f18a0f436fcbe17f9b64ddd43f47f89c2",
+      "idle_north": "57b5e345be099ea64580fc5f50b7b99dc79623189d40a624120c4f5a11031285",
+      "idle_northeast": "81a3878f76cd4889ca066c5775b97eb4900a330694d6b469c81bce6efc9e6caf",
+      "idle_east": "dd2112fb0f29dd6e30458afa31a2ab5e997a23662c62a4c48d1da99e1e064672",
+      "idle_southeast": "88336aba105638c2792bd9ff1a61159ad13ceb48a1c52ee502969842b255799c"
+    },
+    "hasTransparentPixels": true,
+    "emptyFrameIds": [],
+    "borderTouchRatios": [
+      0.027778,
+      0.02381,
+      0.02381,
+      0.027778,
+      0.027778,
+      0.02381,
+      0.02381,
+      0.027778
+    ],
+    "silhouetteCoverages": [
+      0.200195,
+      0.210938,
+      0.196289,
+      0.211426,
+      0.19458,
+      0.211426,
+      0.198242,
+      0.209717
+    ],
+    "measuredCellPx": {
+      "width": 64,
+      "height": 64
+    },
+    "hardAlphaRatio": 1,
+    "uniqueColorCount": 32,
+    "dominantRunLength": 1,
+    "offGridPixelRatio": 0,
+    "distinctFrameRatio": 1
+  },
+  "generation": {
+    "glb": "broadleaf-column-flame.glb",
+    "glbSha256": "75d1cb84d24cd186f334d619d8c1686e768c2650692840f8c367e98ee8b672dd",
+    "triangles": 2120,
+    "views": 8,
+    "pitch": 0.62,
+    "palette": {
+      "requested": 32,
+      "produced": 32,
+      "colours": [
+        "#182019",
+        "#202821",
+        "#253026",
+        "#2c382d",
+        "#384636",
+        "#3f4a39",
+        "#44523e",
+        "#495742",
+        "#4a5a43",
+        "#4c5d45",
+        "#54664c",
+        "#5a644e",
+        "#5d6a51",
+        "#596c52",
+        "#5c6d53",
+        "#5f7155",
+        "#657658",
+        "#6a5f4f",
+        "#6b6051",
+        "#69765a",
+        "#766b59",
+        "#6c795e",
+        "#7c705e",
+        "#6e8160",
+        "#7b8c6a",
+        "#889973",
+        "#97a880",
+        "#a4b68c",
+        "#b1c396",
+        "#b8cb9d",
+        "#c2d2a4",
+        "#cdddae"
+      ]
+    },
+    "coverage": [
+      0.2002,
+      0.2109,
+      0.1963,
+      0.2114,
+      0.1946,
+      0.2114,
+      0.1982,
+      0.2097
+    ]
+  }
+}

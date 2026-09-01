@@ -1,0 +1,97 @@
+{
+  "schema": "clunk.sprite-sheet-manifest.v1",
+  "sheet": {
+    "path": "threejs-factory-v1.sheet.png",
+    "widthPx": 256,
+    "heightPx": 64,
+    "sha256": "853fe1953f496bf11176b0f60f498e9d182e3baea3e6bcb20ae6ec6cd03f68a1"
+  },
+  "grid": {
+    "columns": 4,
+    "rows": 1,
+    "cellWidthPx": 64,
+    "cellHeightPx": 64
+  },
+  "source": {
+    "glb": "threejs-factory-v1.glb",
+    "triangles": 1180,
+    "views": 4,
+    "pitch": 0.62
+  },
+  "palette": {
+    "requested": 32,
+    "produced": 32,
+    "colours": [
+      "#1a1411",
+      "#241913",
+      "#242424",
+      "#272525",
+      "#2f2d2b",
+      "#342a25",
+      "#382e28",
+      "#4d3322",
+      "#342f2c",
+      "#3e352f",
+      "#42413e",
+      "#514d47",
+      "#5c3d29",
+      "#5b473a",
+      "#5b493d",
+      "#5b493d",
+      "#5c4a3e",
+      "#5d4a3e",
+      "#724c33",
+      "#5d4b3f",
+      "#5d544c",
+      "#645e56",
+      "#746e65",
+      "#7a7469",
+      "#7d776b",
+      "#7d776b",
+      "#948e83",
+      "#948e83",
+      "#948e83",
+      "#948e83",
+      "#948e83",
+      "#948e83"
+    ]
+  },
+  "frames": [
+    {
+      "id": "south",
+      "state": "idle",
+      "x": 0,
+      "y": 0,
+      "w": 64,
+      "h": 64,
+      "coverage": 0.4275
+    },
+    {
+      "id": "west",
+      "state": "idle",
+      "x": 64,
+      "y": 0,
+      "w": 64,
+      "h": 64,
+      "coverage": 0.3845
+    },
+    {
+      "id": "north",
+      "state": "idle",
+      "x": 128,
+      "y": 0,
+      "w": 64,
+      "h": 64,
+      "coverage": 0.428
+    },
+    {
+      "id": "east",
+      "state": "idle",
+      "x": 192,
+      "y": 0,
+      "w": 64,
+      "h": 64,
+      "coverage": 0.3843
+    }
+  ]
+}

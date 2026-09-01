@@ -324,10 +324,16 @@ function measurePixelArtIndicators(
     }
   }
   const gridSize = declaredGridSize ?? Math.max(1, dominantRunLength);
-  // A 1px grid means there is nothing to snap against: the ratio is
+  // An INFERRED 1px grid means there was nothing to snap against: the ratio is
   // unmeasurable, and an unmeasured value must never surface as a perfect 0
   // (FF rescan bug report - same shape as the removed constant PASS).
-  const gridMeasurable = gridSize > 1;
+  //
+  // A DECLARED grid of 1 is a different statement. The author is saying the art is
+  // drawn at its own resolution rather than upscaled, and on a 1px grid every pixel
+  // sits on the grid by definition. Treating that as unmeasurable made the discipline
+  // gate impossible to satisfy for native-resolution art, which is not the same thing
+  // as art whose scale we could not read.
+  const gridMeasurable = gridSize > 1 || declaredGridSize === 1;
   let offGrid = 0;
   if (gridMeasurable) {
     for (let y = 0; y < height; y += 1) {
