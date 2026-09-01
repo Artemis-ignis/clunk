@@ -58,7 +58,8 @@
     "health:smoke": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\\health-smoke.ps1",
     "db:generate": "drizzle-kit generate",
     "asset:sheet": "node scripts/sprite-sheet-from-glb.mjs",
-    "asset:og": "node scripts/render-og.mjs"
+    "asset:og": "node scripts/render-og.mjs",
+    "scene:budget": "node scripts/scene-budget-cli.mjs"
   },
   "dependencies": {
     "@gltf-transform/core": "^4.2.1",
