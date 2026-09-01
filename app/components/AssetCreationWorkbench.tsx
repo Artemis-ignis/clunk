@@ -256,7 +256,7 @@ export function AssetCreationWorkbench({
         <div>
           <span className="mono-label">LIVE NATIVE SERIES · clunk-series-native-v1 · /api/series</span>
           <h3 id="creation-workbench-heading">실제 에셋을 만들고, 결과를 닫습니다.</h3>
-          <p>{selectedSeries.label}가 선택한 종류에 맞는 별도 bytes를 만들고, 같은 target profile로 fresh inspection을 실행합니다. 이 작업은 마스터의 상품을 만드는 것이 아니라 내 Workspace에서 Clunk 기능을 크레딧으로 사용하는 흐름입니다.</p>
+          <p>{selectedSeries.label}가 선택한 종류에 맞는 별도 bytes를 만들고, 같은 target profile로 fresh inspection을 실행합니다. 마켓 상품을 만드는 것이 아니라, 내 작업공간에서 Clunk 기능을 크레딧으로 쓰는 것입니다.</p>
         </div>
         <div className={`creation-phase creation-phase-${phase}`} role="status" aria-live="polite">
           <span className="creation-phase-dot" />

@@ -1,4 +1,6 @@
 import Link from "./NativeLink";
+import { getBillingEnvironment, getBillingStatus } from "../api/marketplace/billing";
+import { getRuntimeEnvironment } from "../runtime-environment";
 
 /**
  * Shared cv5 footer. It carries the statutory operator disclosure and the
@@ -11,7 +13,7 @@ export function SiteFooter() {
       <div className="cv5-frame cv5-footer-inner">
         <div className="cv5-footer-brand">
           <strong>CLUNK</strong>
-          <p>게임 에셋 파운드리 — 만들고, 증명하고, 판매합니다. 모든 결과는 실제 바이트와 검사 근거로 남습니다.</p>
+          <p>게임 에셋을 만들고, 검사하고, 판매하는 곳입니다.</p>
         </div>
         <nav className="cv5-footer-col" aria-label="제품">
           <header>PRODUCT</header>
@@ -37,7 +39,9 @@ export function SiteFooter() {
       </div>
       <div className="cv5-frame cv5-footer-legal">
         <span>아르테미스(Artemis) · 대표 박준성 · 사업자등록번호 361-02-03814 · 인천광역시 제물포구 화도진로 16, 109동 1604호</span>
-        <span>통신판매업 신고 완료 전 — 유료 결제 미개시</span>
+        {billingConfigured ? null : (
+          <span>통신판매업 신고 절차 진행 중이라 아직 유료 결제를 받지 않습니다.</span>
+        )}
       </div>
     </footer>
   );

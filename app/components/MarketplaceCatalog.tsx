@@ -564,9 +564,9 @@ function CatalogEmpty() {
       <span className={styles.emptyEyebrow}>CATALOGUE · OPERATIONS PREP / REGISTRATION PENDING</span>
       <Icon name="boxes" size={24} />
       <strong>현재 구매 가능한 공개 에셋이 없습니다.</strong>
-      <p>마스터가 제작·업로드한 에셋 중 공개 조건을 충족한 listing만 이 카탈로그에 표시됩니다. 등록된 실상품이 연결되면 파일 미리보기, 라이선스, 가격과 구매 상태를 이곳에서 확인할 수 있습니다.</p>
+      <p>검사를 통과해 공개된 에셋만 이 목록에 올라옵니다. 상품을 열면 3D 미리보기와 라이선스, 가격을 함께 확인할 수 있습니다.</p>
       <div className={styles.emptyActions}>
-        <Link className={`${styles.btn} ${styles.btnPrimary}`} href="/app">Clunk 제품 사용하기 <Icon name="arrowUpRight" size={13} /></Link>
+        <Link className={`${styles.btn} ${styles.btnPrimary}`} href="/app">내 파일 검사하기 <Icon name="arrowUpRight" size={13} /></Link>
         <Link className={`${styles.btn} ${styles.btnGhost}`} href="/pricing">크레딧 확인하기 <Icon name="credit" size={13} /></Link>
       </div>
     </section>
@@ -576,10 +576,10 @@ function CatalogEmpty() {
 function CatalogLoading() {
   return (
     <section className={styles.emptyState} data-catalog-state="loading" role="status" aria-live="polite">
-      <span className={styles.emptyEyebrow}>CATALOGUE · LIVE DATA</span>
+      <span className={styles.emptyEyebrow}>불러오는 중</span>
       <span className="spinner" />
-      <strong>공개 listing을 확인하는 중입니다.</strong>
-      <p>마스터가 공개한 실제 파일만 불러옵니다.</p>
+      <strong>에셋 목록을 불러오고 있습니다.</strong>
+      <p>잠시만 기다려 주세요.</p>
     </section>
   );
 }

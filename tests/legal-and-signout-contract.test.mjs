@@ -122,14 +122,16 @@ test("랜딩과 SiteShell 푸터가 세 법적 문서를 모두 링크한다", a
   // 2026-08-31: the cv5 footer moved into the shared SiteFooter component so
   // /login, /signup and /review (which had no footer at all) carry the same
   // statutory links. The contract now reads that component plus SiteShell.
-  for (const file of ["app/components/SiteFooter.tsx", "app/components/SiteShell.tsx"]) {
+  // 2026-09-01: SiteShell delegates its whole footer to SiteFooter, so the links
+  // live in one file and every shell route is checked by rendering instead.
+  for (const file of ["app/components/SiteFooter.tsx"]) {
     const page = await source(file);
     for (const href of LEGAL_ROUTES) {
       assert.match(page, new RegExp(`href="${href}"`), `${file}에 ${href} 링크가 없습니다`);
     }
   }
 
-  for (const route of ["/", "/login", "/signup", "/review"]) {
+  for (const route of ["/", "/login", "/signup", "/review", "/pricing"]) {
     const html = await (await render(route)).text();
     for (const href of LEGAL_ROUTES) {
       assert.ok(html.includes(`href="${href}"`), `${route} 렌더 결과에 ${href} 링크가 없습니다`);

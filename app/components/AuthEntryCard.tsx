@@ -165,8 +165,7 @@ export function AuthEntryCard({
       </section>
 
       <footer className="login-footer">
-        <span>Clunk, 3D 에셋 품질 게이트</span>
-        <span className="demo-marker">DEMO MODE · 실제 결제 아님</span>
+        <span>Clunk · 게임 에셋 제작과 검사</span>
       </footer>
     </main>
   );

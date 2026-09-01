@@ -108,8 +108,8 @@ export default function PricingPage() {
                   <em>크레딧으로 실행합니다</em>
                 </h1>
                 <p className={styles.heroLede}>
-                  Clunk가 공개한 에셋을 구매하는 카탈로그와 Clunk 기능을 사용하는 Workspace는
-                  다릅니다. 이 페이지는 후자의 실행 크레딧만 설명합니다.
+                  마켓에서 완성된 에셋을 사는 것과, 내 파일로 Clunk 기능을 직접 돌리는 것은
+                  요금이 다릅니다. 이 페이지는 뒤쪽 — 기능을 돌릴 때 쓰는 크레딧을 설명합니다.
                 </p>
                 <div className={styles.actions}>
                   <Link className="cv5-btn cv5-btn-primary" href="/login?return_to=%2Fdashboard">
@@ -131,7 +131,7 @@ export default function PricingPage() {
 
               <div className={styles.ledger} aria-label="Clunk credit usage ledger">
                 <div className={styles.ledgerTopline}>
-                  <span>USAGE LEDGER</span>
+                  <span>사용 내역</span>
                   <span>{RULE_SET.id}</span>
                 </div>
                 <div className={styles.ledgerAmount}>
@@ -163,13 +163,13 @@ export default function PricingPage() {
           >
             <div className="cv5-frame">
               <div className={`${styles.sectionHead} cv5-reveal`}>
-                <span className="cv5-eyebrow">WHAT USES CREDIT</span>
+                <span className="cv5-eyebrow">크레딧을 쓰는 곳</span>
                 <h2 id="operations-title">
-                  만드는 사람과 <em>사용하는 사람의 경계</em>를 분명히 합니다
+                  크레딧은 <em>내가 실행한 작업</em>에만 씁니다
                 </h2>
                 <p>
-                  마스터가 만든 에셋은 공개 카탈로그에 올라가고 사용자는 그것을 구매합니다.
-                  사용자가 credit을 쓰는 곳은 에셋 상품 제작이 아니라 Clunk의 검사, 처리, 생성 기능입니다.
+                  마켓에 올라온 에셋을 사는 것과, 내 파일로 Clunk 기능을 돌리는 것은 별개입니다.
+                  크레딧이 줄어드는 건 아래 네 가지 작업을 실행했을 때뿐입니다.
                 </p>
               </div>
               <div className={`${styles.opGrid} cv5-reveal`} data-delay="1">
@@ -195,13 +195,13 @@ export default function PricingPage() {
           >
             <div className="cv5-frame">
               <div className={`${styles.sectionHead} cv5-reveal`}>
-                <span className="cv5-eyebrow">TRANSACTION RULES</span>
+                <span className="cv5-eyebrow">차감 규칙</span>
                 <h2 id="rules-title">
-                  <em>실행 결과</em>가 기준입니다
+                  <em>성공한 작업</em>에만 차감됩니다
                 </h2>
                 <p>
-                  표시용 숫자나 예정 가격을 만들지 않습니다. 실제 API가 기록하는 ledger 동작과
-                  현재 결제 provider 설정만 공개합니다.
+                  작업이 중간에 실패하면 크레딧은 그대로 남습니다. 같은 요청을 두 번 보내도
+                  한 번만 차감됩니다.
                 </p>
               </div>
               <div className={styles.ruleList}>
@@ -231,13 +231,13 @@ export default function PricingPage() {
           >
             <div className="cv5-frame">
               <div className={`${styles.sectionHead} cv5-reveal`}>
-                <span className="cv5-eyebrow">CREDIT PACKS</span>
+                <span className="cv5-eyebrow">크레딧 팩</span>
                 <h2 id="packs-title">
-                  크레딧 팩은 <em>실제 상태만</em> 보여 줍니다
+                  크레딧 <em>충전</em>
                 </h2>
                 <p>
-                  팩 구성과 판매 상태는 서버 API가 반환한 값 그대로입니다. 가격이 확정되지 않은
-                  팩은 숫자를 지어내는 대신 &ldquo;확정 전&rdquo;으로 표시하고 구매를 열지 않습니다.
+                  아직 가격을 정하지 못한 팩은 &ldquo;확정 전&rdquo;으로 두었습니다. 가격이 정해지기 전까지는
+                  구매 버튼이 열리지 않으니, 잘못된 금액으로 결제될 일은 없습니다.
                 </p>
               </div>
               <div className={styles.packsNote}>
@@ -255,15 +255,15 @@ export default function PricingPage() {
           >
             <div className="cv5-frame">
               <div className={`${styles.sectionHead} cv5-reveal`}>
-                <span className="cv5-eyebrow">NEXT SURFACE</span>
-                <h2 id="next-title">지금 하려는 일로 <em>이동합니다</em></h2>
+                <span className="cv5-eyebrow">다음 단계</span>
+                <h2 id="next-title">어디로 <em>가면 되나요</em></h2>
               </div>
               <div className={`${styles.routeGrid} cv5-reveal`} data-delay="1">
                 <Link className={styles.route} href="/marketplace">
                   <span>
                     <small>BUY</small>
                     <strong>공개 에셋 카탈로그</strong>
-                    <em>실제 공개 listing이 있을 때 구매합니다.</em>
+                    <em>완성된 에셋을 골라 받습니다.</em>
                   </span>
                   <span className={styles.routeArrow} aria-hidden="true">↗</span>
                 </Link>
@@ -271,7 +271,7 @@ export default function PricingPage() {
                   <span>
                     <small>USE</small>
                     <strong>Clunk Game Ready</strong>
-                    <em>인증 후 Workspace에서 credit을 사용합니다.</em>
+                    <em>내 파일을 올려 검사하고 고칩니다.</em>
                   </span>
                   <span className={styles.routeArrow} aria-hidden="true">↗</span>
                 </Link>
@@ -279,7 +279,7 @@ export default function PricingPage() {
                   <span>
                     <small>CONNECT</small>
                     <strong>개발자 문서</strong>
-                    <em>CLI와 MCP로 실제 Clunk 기능을 연결합니다.</em>
+                    <em>쓰던 AI 도구와 터미널에 연결합니다.</em>
                   </span>
                   <span className={styles.routeArrow} aria-hidden="true">↗</span>
                 </Link>

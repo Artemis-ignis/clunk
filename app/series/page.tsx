@@ -35,7 +35,7 @@ export default function SeriesPage() {
             <span className="eyebrow">AUTHOR · INSPECT · PACKAGE · SHIP</span>
             <h1>Clunk가 만든<br /><em>실제 작업면.</em></h1>
             <p>
-              Clunk 제품군은 마스터가 만든 에셋을 실제 바이트에서 시작해 검사, 근거,
+              Clunk 제품군은 파일 자체를 읽는 데서 시작해 검사, 근거,
               패키징 계약으로 연결합니다. 사용자는 공개 에셋을 구매하거나 인증된
               Workspace에서 Clunk 기능을 credit으로 사용합니다.
             </p>

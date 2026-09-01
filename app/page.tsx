@@ -11,7 +11,7 @@ import { MCP_HTTP_TOOL_COUNT, RULE_COUNT } from "./components/product-facts";
 
 export const metadata = createPageMetadata({
   title: "게임 에셋 파운드리",
-  description: "게임 제작의 모든 과정을 CLUNK 하나로 — 에셋 제작·판매, 검사·수정, 게임 제작 에이전트를 크레딧 하나로 사용합니다. 모든 수치는 실제 바이트와 감사 로그의 실측값입니다.",
+  description: "게임 에셋을 만들고, 게임에 넣어도 되는지 검사하고, 마켓에 파는 것까지 Clunk 하나로. 저폴리 3D 모델과 2D 스프라이트를 크레딧으로 바로 사용하세요.",
   path: "/",
 });
 
@@ -79,9 +79,9 @@ export default function Home() {
                 게임 제작의 모든 과정을<br /><em>CLUNK 하나로</em>
               </h1>
               <p className="cv5-hero-lede">
-                에셋 생성과 판매, 품질 검사와 수정, 그리고 에이전트 제작 자동화까지 —
-                게임 제작 워크플로우를 하나의 크레딧으로 연결하세요.
-                모든 결과는 실제 바이트와 검사 근거로 남습니다.
+                에셋을 만들고, 게임에 넣어도 되는지 확인하고, 파는 것까지 —
+                흩어져 있던 과정을 크레딧 하나로 잇습니다.
+                작업마다 결과 파일과 검사 기록이 남아 나중에 근거를 되짚을 수 있습니다.
               </p>
               <div className="cv5-cta-row">
                 <Link className="cv5-btn cv5-btn-primary" href="/studio" prefetch={false}>
@@ -112,7 +112,7 @@ export default function Home() {
                   ))}
                 </div>
                 <div className="cv5-hv-foot">
-                  <span>실게임 납품 GLB 재검사</span>
+                  <span>납품 트랙터 재검사</span>
                   <b>100/100 · 블로커 0</b>
                 </div>
               </div>
@@ -130,14 +130,14 @@ export default function Home() {
               <div className="cv5-sec-kicker"><span className="cv5-num">01</span><small>CLUNK · MAKE &amp; SELL</small></div>
               <h2 id="sec-make">게임 에셋 제작 및 판매</h2>
               <p>
-                프롬프트에서 2D를, 팩토리 레일에서 3D GLB를 실제 파일로 만들고,
-                게시 게이트를 통과한 에셋만 마켓에 올립니다. 파일·해시·라이선스가
-                상품 단위로 따라갑니다.
+                한 줄 설명으로 2D 이미지를, 코드 기반 생성기로 3D 모델(GLB)을 만듭니다.
+                만든 파일은 검사를 통과해야 마켓에 올라가고, 무엇으로 어떻게 만들었는지와
+                라이선스가 상품에 함께 붙습니다.
               </p>
               <ul className="cv5-points">
-                <li><b>luna 이미지 엔진</b> — 프롬프트·모델·해시가 provenance로 기록</li>
-                <li><b>Three.js 팩토리</b> — 저폴리 GLB, 베이크 변환·인스턴싱 대응</li>
-                <li><b>게시 게이트 7조건</b> — 저장·출처·라이선스·검사·검수 전부 PASS여야 공개</li>
+                <li><b>2D 이미지 생성</b> — 사용한 문장과 모델, 파일 지문이 함께 기록됩니다</li>
+                <li><b>3D 모델 생성</b> — 게임에 바로 쓰는 가벼운 GLB로 나옵니다</li>
+                <li><b>판매 전 7가지 확인</b> — 파일·출처·라이선스·검사·검수를 모두 통과해야 공개됩니다</li>
               </ul>
               <div>
                 <Link className="cv5-more" href="/marketplace" prefetch={false}>마켓 보기 <Icon name="arrowRight" size={15} /></Link>
@@ -176,14 +176,14 @@ export default function Home() {
               <div className="cv5-sec-kicker"><span className="cv5-num">02</span><small>CLUNK · INSPECT &amp; REPAIR</small></div>
               <h2 id="sec-inspect">게임 에셋 검사 및 수정</h2>
               <p>
-                에셋을 실제 바이트로 열어 {RULE_COUNT}개 정책 룰로 검사하고 Game-Ready
-                점수를 받습니다. 수리는 허용 목록 연산만, 원본은 불변, 전 과정은
-                Passport digest로 봉인됩니다.
+                파일을 직접 열어 {RULE_COUNT}가지 항목을 검사하고, 게임에 넣어도 되는
+                상태인지 점수로 알려줍니다. 고칠 때는 안전한 작업만 골라 쓰고 원본은
+                그대로 두며, 무엇을 어떻게 고쳤는지가 기록으로 남습니다.
               </p>
               <ul className="cv5-points">
-                <li><b>바이트 실측</b> — 삼각형·드로우콜·텍스처 메모리를 파서가 직접 셉니다</li>
-                <li><b>Sprite · Atlas · Spine</b> — 페이지·리전·본·슬롯 관계를 번들로 검증</li>
-                <li><b>정직한 상태 분리</b> — 구조 점수는 사람 승인과 절대 섞이지 않습니다</li>
+                <li><b>수치를 직접 셉니다</b> — 삼각형 수, 드로우콜, 텍스처 용량을 파일에서 읽어 계산합니다</li>
+                <li><b>2D도 함께</b> — 스프라이트 시트(Sprite·Atlas)와 Spine 애니메이션을 한 묶음으로 검사합니다</li>
+                <li><b>점수와 승인은 별개</b> — 파일 검사를 통과해도 화면에서 어떻게 보이는지는 직접 확인해야 합니다</li>
               </ul>
               <div>
                 <Link className="cv5-more" href="/app" prefetch={false}>검사 시작 <Icon name="arrowRight" size={15} /></Link>
@@ -229,14 +229,14 @@ export default function Home() {
               <div className="cv5-sec-kicker"><span className="cv5-num">03</span><small>CLUNK · GAME AGENT</small></div>
               <h2 id="sec-agent">게임 제작 에이전트</h2>
               <p>
-                Clunk MCP·CLI·플러그인을 붙이면 에이전트가 에셋 생성·검사·패키징을
-                직접 호출합니다. HTTP와 로컬이 같은 {MCP_HTTP_TOOL_COUNT}개 툴 계약이라
-                CI와 로컬이 동일하게 동작합니다.
+                쓰던 AI 코딩 도구에 Clunk를 연결하면 에이전트가 에셋 생성과 검사를
+                직접 실행합니다. 원격으로 붙이든 내 컴퓨터에서 돌리든 같은
+                {" "}{MCP_HTTP_TOOL_COUNT}개 기능이라, 내 작업과 자동 빌드가 같은 결과를 냅니다.
               </p>
               <ul className="cv5-points">
-                <li><b>MCP {MCP_HTTP_TOOL_COUNT}툴</b> — 생성·검사·evidence·리뷰를 에이전트가 직접 실행</li>
-                <li><b>CLI · VS Code · Codex 플러그인</b> — exit code 계약으로 CI에 바로 연결</li>
-                <li><b>실게임 검증 루프</b> — 실제 게임 2종의 납품·감사 데이터로 다듬는 중</li>
+                <li><b>MCP {MCP_HTTP_TOOL_COUNT}개 기능</b> — 생성·검사·기록·검수를 에이전트가 직접 실행합니다</li>
+                <li><b>터미널 · VS Code · Codex</b> — 검사에 실패하면 빌드를 멈추도록 걸어둘 수 있습니다</li>
+                <li><b>실제 게임에서 씁니다</b> — 개발 중인 게임 두 곳의 납품 파일로 검사 기준을 맞춰왔습니다</li>
               </ul>
               <div>
                 <Link className="cv5-more" href="/connect" prefetch={false}>에이전트 연결 가이드 <Icon name="arrowRight" size={15} /></Link>
@@ -264,12 +264,12 @@ export default function Home() {
         {/* STATS — measured only ---------------------------------------- */}
         <section className="cv5-stats" data-snap-section="proof" aria-label="Clunk 실측 지표">
           <div className="cv5-frame">
-            <p className="cv5-stats-note cv5-stats-note-top">NO INVENTED METRICS — 아래 수치는 전부 코드와 감사 로그에서 직접 읽은 실측값입니다</p>
+            <p className="cv5-stats-note cv5-stats-note-top">지금 Clunk가 할 수 있는 것</p>
             <div className="cv5-stats-grid">
-              <div className="cv5-stat"><b>{RULE_COUNT}</b><span>정적 검사 정책 룰 — 코드에서 직접 셉니다</span></div>
-              <div className="cv5-stat"><b>{MCP_HTTP_TOOL_COUNT}</b><span>에이전트용 MCP 툴 — HTTP·로컬 동일 계약</span></div>
-              <div className="cv5-stat"><b>19</b><span>실물 에셋 상품 · 94개 파일 — 게시 대기</span></div>
-              <div className="cv5-stat"><b>100/100</b><span>실게임 납품 GLB 재검사 · HF 프로파일 · 2026-09-01</span></div>
+              <div className="cv5-stat"><b>{RULE_COUNT}</b><span>파일 하나를 검사하는 항목 수</span></div>
+              <div className="cv5-stat"><b>{MCP_HTTP_TOOL_COUNT}</b><span>에이전트가 쓸 수 있는 기능</span></div>
+              <div className="cv5-stat"><b>19</b><span>마켓 1차 상품 · 파일 94개</span></div>
+              <div className="cv5-stat"><b>100/100</b><span>실제 게임에 납품된 트랙터 재검사 점수</span></div>
             </div>
           </div>
         </section>
@@ -279,12 +279,13 @@ export default function Home() {
           <div className="cv5-frame">
             <div className="cv5-showcase-head cv5-reveal">
               <div>
-                <span className="cv5-eyebrow">REAL INVENTORY · WAVE 1</span>
-                <h2 id="showcase-heading">목업이 아니라, 실제 제품 파일입니다</h2>
+                <span className="cv5-eyebrow">마켓 1차 물량</span>
+                <h2 id="showcase-heading">지금 마켓에 올라와 있는 에셋</h2>
               </div>
               <p>
-                아래 12종은 실게임(Harvest Frontier) 납품 라인에서 나온 최적화 GLB의 렌더입니다.
-                삼각형 수는 손으로 적은 값이 아니라 렌더러가 실측한 수치 그대로입니다.
+                개발 중인 농장 게임에 납품하며 다듬은 저폴리 3D 모델입니다.
+                함께 적힌 삼각형 수는 각 파일에서 직접 읽은 값이라, 예산이 빠듯한
+                프로젝트에서도 미리 계산해 보고 넣을 수 있습니다.
               </p>
             </div>
             <ul className="cv5-showcase-grid" aria-label="Wave 1 실제 에셋 12종">
@@ -301,7 +302,7 @@ export default function Home() {
               <Link className="cv5-more" href="/marketplace" prefetch={false}>
                 마켓에서 전체 인벤토리 보기 <Icon name="arrowRight" size={15} />
               </Link>
-              <small>19종 준비 완료 · 판매 개시는 통신판매업 신고 완료 후</small>
+              <small>통신판매업 신고 절차가 끝나는 대로 판매를 시작합니다.</small>
             </div>
           </div>
         </section>
@@ -310,8 +311,8 @@ export default function Home() {
         <section className="cv5-closer" id="start" data-snap-section="start" aria-labelledby="start-heading">
           <div className="cv5-frame">
             <span className="cv5-eyebrow" style={{ justifyContent: "center" }}>START WITH CLUNK</span>
-            <h2 id="start-heading">증거 있는 에셋으로,<br /><em>게임을 만드세요</em></h2>
-            <p>마켓에서 실제 파일을 고르거나, 크레딧으로 직접 만들고 검사하세요. 에이전트 연결은 몇 분이면 끝납니다.</p>
+            <h2 id="start-heading">필요한 에셋부터<br /><em>골라 보세요</em></h2>
+            <p>마켓에서 바로 받아 쓰거나, 직접 만들어 검사까지 돌려보세요. 쓰던 AI 도구에 연결하는 데는 몇 분이면 충분합니다.</p>
             <div className="cv5-cta-row" style={{ marginTop: 34 }}>
               <Link className="cv5-btn cv5-btn-primary" href="/studio" prefetch={false}>
                 Clunk 시작하기 <Icon name="arrowUpRight" size={17} />

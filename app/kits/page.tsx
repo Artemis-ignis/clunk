@@ -39,7 +39,7 @@ function PublicKitsPage() {
               <em>팀 단위로 묶습니다.</em>
             </h1>
             <p>
-              Kit는 마스터가 만든 실제 Workspace 에셋을 여러 파일의 hash-only manifest로
+              Kit는 Workspace에 저장된 에셋을 여러 파일의 hash-only manifest로
               묶는 내부 작업면입니다. 사용자가 상품을 만들어 판매하는 카탈로그가 아닙니다.
             </p>
             <div className={styles.actions}>

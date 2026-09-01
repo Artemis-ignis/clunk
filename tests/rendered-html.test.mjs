@@ -22,7 +22,7 @@ test("server-renders the Clunk landing page", async () => {
   assert.match(html, /게임 제작의 모든 과정을/);
   assert.match(html, /마켓 둘러보기/);
   assert.match(html, /무료로 시작하기/);
-  assert.match(html, /목업이 아니라, 실제 제품 파일입니다/);
+  assert.match(html, /지금 마켓에 올라와 있는 에셋/);
   assert.doesNotMatch(html, /DEMO MODE|실제 제작부터|에셋 만들기|CONTRACT_FIXTURE|SAMPLE/);
   assert.doesNotMatch(html, /Your site is taking shape|react-loading-skeleton|codex-preview/);
 });
@@ -66,7 +66,9 @@ test("server-renders the Clunk Series catalog with source transparency", async (
 test("landing language covers the full 2D and 3D asset path", async () => {
   const response = await render("/");
   const html = await response.text();
-  assert.match(html, /실측한 수치 그대로/);
+  // 2026-09-01: the landing stopped defending its own numbers and now tells the
+  // reader what the number is for. The contract follows the fact, not the slogan.
+  assert.match(html, /각 파일에서 직접 읽은 값/);
   assert.match(html, /GAME-READY SCORE/i);
   assert.match(html, /MAKE &amp; SELL|MAKE & SELL/);
   assert.match(html, /INSPECT &amp; REPAIR|INSPECT & REPAIR/);
@@ -86,7 +88,9 @@ test("public navigation uses browser-native anchors on the Sites runtime", async
     "../app/components/WorkspaceShell.tsx",
     "../app/pricing/page.tsx",
     "../app/components/PassportClient.tsx",
-    "../app/components/SiteShell.tsx",
+    // SiteShell renders SiteNav + SiteFooter since 2026-09-01 and owns no anchors
+    // of its own; the footer it delegates to is contracted here instead.
+    "../app/components/SiteFooter.tsx",
     "../app/components/LandingHero.tsx",
     "../app/components/HeroAutopsy.tsx",
     "../app/settings/page.tsx",
