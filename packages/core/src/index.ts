@@ -1088,7 +1088,7 @@ function buildFindings(
       "ERROR",
       "/materials",
       "Material budget exceeded",
-      "The asset contains more materials than the selected profile allows.",
+      `머티리얼 ${metrics.materialCount}개 — ${policy.profileId} 프로파일 상한은 ${policy.maxMaterials}개입니다.`,
       metrics.materialCount,
       policy.maxMaterials,
       false,

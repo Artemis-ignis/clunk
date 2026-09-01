@@ -47,7 +47,11 @@ const PROFILES: readonly TargetProfile[] = [
       memoryBudgetBytes: 128 * 1024 * 1024,
       compression: ["webgl-compatible"],
     },
-    inspectionPolicy: { maxTriangles: 40000, maxMaterials: 64, maxTextureMemoryBytes: 0, maxTextureDimension: 0 },
+    // resolvePolicy reads these with `?? base`, so a literal 0 is a real budget
+    // of zero, not "unset" — any GLB carrying a texture was auto-BLOCKED under
+    // the profile named after the game whose textures we were meant to check.
+    // The two texture numbers are the ones texturePolicy above already declares.
+    inspectionPolicy: { maxTriangles: 40000, maxMaterials: 64, maxTextureMemoryBytes: 128 * 1024 * 1024, maxTextureDimension: 4096 },
     animationPolicy: { rootMotion: "any" },
     semanticRules: ["harvest-frontier-runtime-v1"],
   },

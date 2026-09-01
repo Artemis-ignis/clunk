@@ -17,6 +17,7 @@ import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import * as THREE from "three";
 import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter.js";
+import { mergeGeometries, mergeVertices, toCreasedNormals } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 
 // GLTFExporter reads its own assembled Blob back through FileReader even in the texture-free
 // path; Node has Blob but not FileReader, so this shim covers exactly the two read modes the
@@ -51,7 +52,15 @@ const create =
     : Object.values(factoryModule).find((value) => typeof value === "function");
 if (!create) throw new Error(`No factory function exported by ${modulePath}`);
 
-const root = create(THREE);
+// A factory written in the user's own project cannot resolve "three" — their
+// node_modules is not ours. THREE was already injected for exactly that reason;
+// the addons every real factory reaches for have to travel with it, or the
+// author is pushed back into a bare import that only resolves inside this repo.
+const root = create(THREE, {
+  mergeGeometries,
+  mergeVertices,
+  toCreasedNormals,
+});
 if (!root || !root.isObject3D) throw new Error("Factory must return a THREE.Object3D.");
 
 const scene = new THREE.Scene();
