@@ -6,13 +6,22 @@ import { gltfClipLabel } from "./gltf-clip-labels";
 import { readPalette, type PaletteEntry } from "./measure-palette";
 
 /**
- * Product-page 3D viewer (polyfork-style, master directive 2026-08-31):
- * the listing's real GLB loads INTO the page — drag to orbit, wheel to zoom,
- * slow auto-rotate, and if the file carries animation clips the first one
- * plays on loop so "움직이는 에셋이 움직이는 채로" 팔린다.
+ * Product-page 3D viewer.
  *
- * Falls back to the poster image if WebGL/loading fails. Exposes the
- * __rvEmbedFrame manual-frame hook (rAF never fires in a hidden pane).
+ * Two shapes, one component:
+ *
+ *   plain (landing page, agent demo) — a stage that loads the real GLB, orbits, and loops
+ *   whatever motion the file carries. Exactly what it always was.
+ *
+ *   workbench (`workbench` prop, marketplace detail) — polyfork's asset bench: the model
+ *   large in the middle, tool rails down either side, and every tool actually driving the
+ *   scene. A buyer can recolour a material, switch to wireframe, mirror the model, measure
+ *   it, change the light, and take a picture of what they set up. Nothing here is a
+ *   decorative button; each one moves pixels, and the colour tool says in words that it is
+ *   a preview and does not change the file being sold.
+ *
+ * Falls back to the poster image if WebGL/loading fails. Exposes the __rvEmbedFrame
+ * manual-frame hook (rAF never fires in a hidden pane).
  */
 export type MeasuredSpec = {
   triangles: number;
@@ -66,14 +75,60 @@ export type ViewerClip = {
  */
 type ClipStatus = { name: string; label: string; kind: "sheet" | "gltf"; missingNode: string | null };
 
+/** One recolourable material, as the file names it. The name is the handle, polyfork-style. */
+type MaterialEntry = { id: number; name: string; original: string };
+
+/**
+ * A named rotation node the file carries, and whether this GLB actually has it.
+ *
+ * `mode` is read from the name: a part called a wheel or a gauge turns continuously, and a
+ * hinge swings back and forth. It is a presentation choice about how to demonstrate the
+ * part, not a claim about the file — the part itself is real either way.
+ */
+type PivotEntry = { name: string; present: boolean; mode: "swing" | "spin" };
+
+/** Parts whose whole point is to keep turning; everything else reads better as a hinge. */
+const SPIN_NAME = /wheel|gauge|axle|blade|spin|roll|rotor|shaft/i;
+
+export type Axis = "x" | "y" | "z";
+export type LightingPreset = "studio" | "outdoor" | "night";
+export type Background = "dark" | "light";
+
 type ViewerHandles = {
   selectClip: (index: number) => void;
   setPlaying: (playing: boolean) => void;
   setSpeed: (speed: number) => void;
   setReference: (visible: boolean) => void;
+  setWireframe: (on: boolean) => void;
+  setMirror: (on: boolean) => void;
+  setDimensions: (on: boolean) => void;
+  setFlatShading: (on: boolean) => void;
+  setBackground: (value: Background) => void;
+  setLighting: (value: LightingPreset) => void;
+  setGrid: (on: boolean) => void;
+  setShadows: (on: boolean) => void;
+  setAutoRotate: (on: boolean) => void;
+  resetCamera: () => void;
+  setMaterialColour: (id: number, hex: string) => void;
+  resetMaterials: () => void;
+  testPivot: (name: string, axis: Axis, on: boolean) => void;
+  clearPivots: () => void;
+  capture: (onBlob: (blob: Blob | null) => void) => void;
 };
 
 const SPEEDS = [0.5, 1, 2] as const;
+const AXES: readonly Axis[] = ["x", "y", "z"];
+/** How far a pivot test swings each way. Small enough to read as a hinge, not a spin. */
+const PIVOT_SWING_DEGREES = 30;
+
+const LIGHTING_LABELS: Record<LightingPreset, string> = {
+  studio: "스튜디오",
+  outdoor: "야외",
+  night: "야간",
+};
+
+/** Clear colours the canvas itself is painted with, so a screenshot carries the background. */
+const BACKGROUND_COLOURS: Record<Background, number> = { dark: 0x0d1017, light: 0xececec };
 
 export function EmbeddedGlbViewer({
   src,
@@ -84,6 +139,11 @@ export function EmbeddedGlbViewer({
   clips,
   scaleReference = false,
   yawDegrees,
+  workbench = false,
+  pivots,
+  fileName,
+  revealProgress,
+  onModelReady,
 }: {
   src: string;
   poster?: string | null;
@@ -101,12 +161,38 @@ export function EmbeddedGlbViewer({
    * that looks the same from either side.
    */
   yawDegrees?: number | null;
+  /** Turn the stage into the full tool bench. Off everywhere but the product page. */
+  workbench?: boolean;
+  /** Named rotation nodes to offer as pivot tests — the listing's own measured animatedParts. */
+  pivots?: string[] | null;
+  /** Used to name a saved screenshot. */
+  fileName?: string;
+  /**
+   * How much of the model to show, 0 to 1, revealed bottom-up as if it were being printed.
+   *
+   * Below 1 the renderer clips everything above the sweep line and a thin cyan band glows at
+   * the cut, so the agent demo can show the asset being built rather than already standing
+   * there. At 1 the clipping is released and what remains is a plain, steady model - no
+   * shimmer, no flicker - and dragging to orbit works the whole way through.
+   *
+   * Undefined means the viewer behaves exactly as it did before this existed.
+   */
+  revealProgress?: number;
+  /** Called once, after the first frame with the model in it has actually been drawn. */
+  onModelReady?: () => void;
 }) {
   const stageRef = useRef<HTMLDivElement | null>(null);
+  const frameRef = useRef<HTMLDivElement | null>(null);
   const [failed, setFailed] = useState(false);
   const [clipName, setClipName] = useState<string | null>(null);
   const measuredRef = useRef(onMeasured);
   measuredRef.current = onMeasured;
+  // Read every frame rather than depended on: the reveal is animated by the parent, and
+  // rebuilding the whole scene sixty times a second would be a slideshow, not a reveal.
+  const revealRef = useRef(revealProgress);
+  revealRef.current = revealProgress;
+  const readyRef = useRef(onModelReady);
+  readyRef.current = onModelReady;
 
   // Which clips this file can actually play, decided after the nodes are looked up rather
   // than promised by the button label.
@@ -117,9 +203,40 @@ export function EmbeddedGlbViewer({
   const [reference, setReference] = useState(false);
   const handlesRef = useRef<ViewerHandles | null>(null);
 
+  // --- workbench tool state ---------------------------------------------------------------
+  // Held in React so the buttons can show what is on, and mirrored into a ref so a reloaded
+  // scene can be put back the way the visitor had it instead of silently resetting.
+  const [materials, setMaterials] = useState<MaterialEntry[]>([]);
+  const [colours, setColours] = useState<Record<number, string>>({});
+  const [pivotList, setPivotList] = useState<PivotEntry[]>([]);
+  const [activePivots, setActivePivots] = useState<readonly string[]>([]);
+  const [pivotAxis, setPivotAxis] = useState<Axis>("y");
+  const [dims, setDims] = useState<{ x: number; y: number; z: number } | null>(null);
+  const [openTool, setOpenTool] = useState<"colour" | null>(null);
+  const [wireframe, setWireframe] = useState(false);
+  const [mirror, setMirror] = useState(false);
+  const [dimensions, setDimensions] = useState(false);
+  const [flatShading, setFlatShading] = useState(false);
+  const [background, setBackground] = useState<Background>("dark");
+  const [lighting, setLighting] = useState<LightingPreset>("studio");
+  const [grid, setGrid] = useState(false);
+  const [shadows, setShadows] = useState(true);
+  const [autoRotate, setAutoRotate] = useState(true);
+  const [fullscreen, setFullscreen] = useState(false);
+
+  const toolsRef = useRef({
+    wireframe, mirror, dimensions, flatShading, background, lighting,
+    grid, shadows, autoRotate, reference, colours, activePivots, pivotAxis,
+  });
+  toolsRef.current = {
+    wireframe, mirror, dimensions, flatShading, background, lighting,
+    grid, shadows, autoRotate, reference, colours, activePivots, pivotAxis,
+  };
+
   // The scene is rebuilt when the file or the clip list changes, not when the parent
   // happens to re-render with a fresh array literal.
   const clipsKey = useMemo(() => JSON.stringify(clips ?? []), [clips]);
+  const pivotsKey = useMemo(() => JSON.stringify(pivots ?? []), [pivots]);
 
   useEffect(() => {
     const stage = stageRef.current;
@@ -127,6 +244,7 @@ export function EmbeddedGlbViewer({
     let disposed = false;
     let cleanup: (() => void) | null = null;
     const requested = JSON.parse(clipsKey) as ViewerClip[];
+    const requestedPivots = JSON.parse(pivotsKey) as string[];
 
     void (async () => {
       try {
@@ -139,7 +257,12 @@ export function EmbeddedGlbViewer({
         const { MeshoptDecoder } = await import("three/examples/jsm/libs/meshopt_decoder.module.js");
         if (disposed) return;
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        const renderer = new THREE.WebGLRenderer({
+          antialias: true,
+          alpha: true,
+          // Only the bench takes screenshots, and keeping the buffer costs frame time.
+          preserveDrawingBuffer: workbench,
+        });
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.setClearColor(0x000000, 0);
         renderer.shadowMap.enabled = true;
@@ -152,7 +275,8 @@ export function EmbeddedGlbViewer({
         // two products photographed a month apart still look like they came from
         // the same catalogue. The rim is a neutral cool, not the brand purple —
         // a shopper is judging the asset's colours, not ours.
-        scene.add(new THREE.HemisphereLight(0xffffff, 0x9a927f, 1.15));
+        const hemi = new THREE.HemisphereLight(0xffffff, 0x9a927f, 1.15);
+        scene.add(hemi);
         const sun = new THREE.DirectionalLight(0xfff2e0, 2.2);
         sun.position.set(4, 7, 5);
         sun.castShadow = true;
@@ -201,6 +325,7 @@ export function EmbeddedGlbViewer({
         // A fixed three-quarter yaw, so the catalogue reads as one set of photos — unless the
         // product carries its own, because a character has a front and a crate does not.
         const yaw = typeof yawDegrees === "number" ? (yawDegrees * Math.PI) / 180 : 0.61;
+        setDims({ x: size.x, y: size.y, z: size.z });
 
         // The same 1.7 m human-height wire frame the review page uses, stood on the ground
         // beside the model. A shopper cannot read "2.40 × 1.71 × 0.52 m" as a size; they can
@@ -218,6 +343,24 @@ export function EmbeddedGlbViewer({
         referenceGroup.position.set(-(size.x / 2 + 0.55), 0, 0);
         referenceGroup.visible = false;
         scene.add(referenceGroup);
+
+        // The measuring box: the model's own extent, drawn where the model stands. Its
+        // numbers are the same metres the specification list states.
+        const measureBox = new THREE.Box3(
+          new THREE.Vector3(-size.x / 2, 0, -size.z / 2),
+          new THREE.Vector3(size.x / 2, size.y, size.z / 2),
+        );
+        const measureHelper = new THREE.Box3Helper(measureBox, 0xa78bfa);
+        measureHelper.visible = false;
+        scene.add(measureHelper);
+
+        // A metre grid on the floor, sized to the model so it reads as a scale rather than
+        // as decoration.
+        const gridHelper = new THREE.GridHelper(Math.max(2, Math.ceil(size.length() * 2)), Math.max(4, Math.ceil(size.length() * 2)), 0x7c5dfa, 0x3a3f57);
+        (gridHelper.material as { transparent?: boolean; opacity?: number }).transparent = true;
+        (gridHelper.material as { opacity?: number }).opacity = 0.5;
+        gridHelper.visible = false;
+        scene.add(gridHelper);
 
         // Framing that fits the model and the person together, so turning the reference on
         // does not push it off the edge of the panel.
@@ -273,6 +416,133 @@ export function EmbeddedGlbViewer({
         model.traverse((node) => {
           if ((node as import("three").Mesh).isMesh) node.castShadow = true;
         });
+
+        // --- the print-in reveal -------------------------------------------------------
+        // One global clipping plane sweeps up through the model, and a cyan additive disc
+        // with a brighter ring sits just under the cut so the edge reads as a light line
+        // rather than a raw section. The model stands with its lowest point on y = 0, so
+        // the sweep runs from 0 to size.y.
+        //
+        // Everything here is inert until the parent passes revealProgress: no plane is
+        // installed, the band is hidden, and the scene is byte-for-byte what it was.
+        const revealPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), size.y);
+        const bandGroup = new THREE.Group();
+        const bandRadius = Math.max(size.x, size.z) * 0.62;
+        const bandFill = new THREE.Mesh(
+          new THREE.CircleGeometry(bandRadius, 56).rotateX(-Math.PI / 2),
+          new THREE.MeshBasicMaterial({
+            color: 0x59d9ff,
+            transparent: true,
+            opacity: 0.24,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            side: THREE.DoubleSide,
+          }),
+        );
+        const bandEdge = new THREE.Mesh(
+          new THREE.RingGeometry(bandRadius * 0.97, bandRadius * 1.03, 56).rotateX(-Math.PI / 2),
+          new THREE.MeshBasicMaterial({
+            color: 0x9ff0ff,
+            transparent: true,
+            opacity: 0.85,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            side: THREE.DoubleSide,
+          }),
+        );
+        bandGroup.add(bandFill, bandEdge);
+        bandGroup.visible = false;
+        scene.add(bandGroup);
+        // A hair below the cut: global clipping applies to every material, the band's
+        // included, and a band sitting exactly on the plane would clip itself away.
+        const bandDrop = Math.max(size.y * 0.002, 1e-4);
+        let clipping = false;
+
+        function applyReveal() {
+          const value = revealRef.current;
+          if (value === undefined || value === null || value >= 1) {
+            // Released, once. Leaving the plane installed at full height would keep every
+            // material in the clipping shader path for no reason and can shimmer on the
+            // top face; taking it out returns the scene to an ordinary, steady render.
+            if (clipping) {
+              renderer.clippingPlanes = [];
+              bandGroup.visible = false;
+              clipping = false;
+            }
+            return;
+          }
+          const t = Math.max(0, Math.min(1, value));
+          const cutY = t * size.y;
+          revealPlane.constant = cutY;
+          if (!clipping) {
+            renderer.clippingPlanes = [revealPlane];
+            clipping = true;
+          }
+          bandGroup.position.y = cutY - bandDrop;
+          bandGroup.visible = t > 0.002;
+          // Brightest mid-print, fading out as the last of the model arrives.
+          const glow = Math.sin(Math.PI * Math.min(1, t * 1.06));
+          (bandFill.material as import("three").MeshBasicMaterial).opacity = 0.1 + 0.26 * glow;
+          (bandEdge.material as import("three").MeshBasicMaterial).opacity = 0.35 + 0.55 * glow;
+        }
+        applyReveal();
+
+        // --- the materials a buyer can recolour ---------------------------------------
+        // One entry per distinct material in the file, named the way the file names it.
+        // A material with no base colour (a shadow catcher, say) is not offered.
+        type BenchMaterial = {
+          entry: MaterialEntry;
+          material: import("three").MeshStandardMaterial;
+          originalSide: import("three").Side;
+          originalFlat: boolean;
+        };
+        const benchMaterials: BenchMaterial[] = [];
+        const seen = new Set<unknown>();
+        model.traverse((node) => {
+          const mesh = node as import("three").Mesh;
+          if (!mesh.isMesh) return;
+          for (const raw of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
+            const material = raw as import("three").MeshStandardMaterial;
+            if (!material || seen.has(material) || !material.color) continue;
+            seen.add(material);
+            benchMaterials.push({
+              entry: {
+                id: benchMaterials.length,
+                name: material.name || mesh.name || `재질 ${benchMaterials.length + 1}`,
+                original: `#${material.color.getHexString()}`,
+              },
+              material,
+              originalSide: material.side,
+              originalFlat: Boolean(material.flatShading),
+            });
+          }
+        });
+        setMaterials(benchMaterials.map((item) => item.entry));
+
+        // --- the named rotation nodes this file actually has --------------------------
+        // The listing hands over the part names its own measurement found; the viewer looks
+        // each one up and reports whether this GLB has it. A button for a node the file does
+        // not carry is disabled rather than mimed.
+        type BoundPivot = {
+          node: import("three").Object3D;
+          rest: { x: number; y: number; z: number };
+          mode: "swing" | "spin";
+        };
+        const boundPivots = new Map<string, BoundPivot>();
+        const pivotStatus: PivotEntry[] = [];
+        for (const partName of requestedPivots) {
+          const node = model.getObjectByName(partName);
+          const mode: "swing" | "spin" = SPIN_NAME.test(partName) ? "spin" : "swing";
+          if (node) {
+            boundPivots.set(partName, {
+              node,
+              rest: { x: node.rotation.x, y: node.rotation.y, z: node.rotation.z },
+              mode,
+            });
+          }
+          pivotStatus.push({ name: partName, present: Boolean(node), mode });
+        }
+        setPivotList(pivotStatus);
 
         // Animations stored in the file. Harvest Frontier's player rig ships six of them
         // (idle, walk, inspect, water, hoe, harvest) as node-transform tracks, so a mixer
@@ -336,6 +606,23 @@ export function EmbeddedGlbViewer({
         let running = true;
         let rate = 1;
 
+        // The parts under test. More than one at a time on purpose: a tractor is not
+        // convincing one wheel at a time, and the whole point of the bench is that a buyer
+        // can drive several of the file's named parts together and see the machine work.
+        const pivotRuns = new Map<string, { pivot: BoundPivot; axis: Axis }>();
+        let pivotSeconds = 0;
+        function releasePivot(name: string) {
+          const run = pivotRuns.get(name);
+          if (!run) return;
+          run.pivot.node.rotation.x = run.pivot.rest.x;
+          run.pivot.node.rotation.y = run.pivot.rest.y;
+          run.pivot.node.rotation.z = run.pivot.rest.z;
+          pivotRuns.delete(name);
+        }
+        function releaseAllPivots() {
+          for (const name of [...pivotRuns.keys()]) releasePivot(name);
+        }
+
         /**
          * Points both playback engines at one entry of the combined list.
          *
@@ -381,7 +668,96 @@ export function EmbeddedGlbViewer({
             referenceGroup.visible = visible;
             frame(visible);
           },
+          setWireframe(on) {
+            for (const item of benchMaterials) item.material.wireframe = on;
+          },
+          setMirror(on) {
+            // Mirroring inverts the winding order, so back faces would be culled and the
+            // model would read as hollow. Both sides are drawn while it is on, and the
+            // material's own setting comes back when it is off.
+            model.scale.x = on ? -1 : 1;
+            for (const item of benchMaterials) {
+              item.material.side = on ? THREE.DoubleSide : item.originalSide;
+              item.material.needsUpdate = true;
+            }
+          },
+          setDimensions(on) {
+            measureHelper.visible = on;
+          },
+          setFlatShading(on) {
+            for (const item of benchMaterials) {
+              item.material.flatShading = on ? true : item.originalFlat;
+              item.material.needsUpdate = true;
+            }
+          },
+          setBackground(value) {
+            // The canvas is painted, not the panel behind it, so a screenshot carries the
+            // background the visitor chose.
+            renderer.setClearColor(BACKGROUND_COLOURS[value], 1);
+          },
+          setLighting(value) {
+            if (value === "outdoor") {
+              hemi.color.setHex(0xcfe6ff); hemi.groundColor.setHex(0x8a7a58); hemi.intensity = 1.5;
+              sun.color.setHex(0xfff4d6); sun.intensity = 3.1; sun.position.set(6, 9, 3);
+              rim.color.setHex(0xbcd8ff); rim.intensity = 0.5;
+            } else if (value === "night") {
+              hemi.color.setHex(0x4a5a86); hemi.groundColor.setHex(0x14161f); hemi.intensity = 0.5;
+              sun.color.setHex(0x9db4ff); sun.intensity = 0.9; sun.position.set(-3, 6, 4);
+              rim.color.setHex(0x7cf0ff); rim.intensity = 1.1;
+            } else {
+              hemi.color.setHex(0xffffff); hemi.groundColor.setHex(0x9a927f); hemi.intensity = 1.15;
+              sun.color.setHex(0xfff2e0); sun.intensity = 2.2; sun.position.set(4, 7, 5);
+              rim.color.setHex(0xdfe8ff); rim.intensity = 0.85;
+            }
+          },
+          setGrid(on) { gridHelper.visible = on; },
+          setShadows(on) {
+            renderer.shadowMap.enabled = on;
+            sun.castShadow = on;
+            ground.visible = on;
+            for (const item of benchMaterials) item.material.needsUpdate = true;
+          },
+          setAutoRotate(on) { controls.autoRotate = on; },
+          resetCamera() { frame(referenceGroup.visible); controls.update(); },
+          setMaterialColour(id, hex) {
+            const item = benchMaterials[id];
+            if (item) item.material.color.set(hex);
+          },
+          resetMaterials() {
+            for (const item of benchMaterials) item.material.color.set(item.entry.original);
+          },
+          testPivot(name, axis, on) {
+            if (!on) { releasePivot(name); return; }
+            const pivot = boundPivots.get(name);
+            if (!pivot) return;
+            pivotRuns.set(name, { pivot, axis });
+          },
+          clearPivots() { releaseAllPivots(); },
+          capture(onBlob) {
+            // Render once immediately before reading, so the picture is the current frame
+            // whether or not the browser kept the drawing buffer.
+            renderer.render(scene, camera);
+            renderer.domElement.toBlob(onBlob, "image/png");
+          },
         };
+
+        // Put the bench back the way the visitor had it. A file swap or a hot reload must
+        // not silently undo a recolour.
+        const initial = toolsRef.current;
+        if (workbench) {
+          handlesRef.current.setBackground(initial.background);
+          handlesRef.current.setLighting(initial.lighting);
+          handlesRef.current.setWireframe(initial.wireframe);
+          handlesRef.current.setMirror(initial.mirror);
+          handlesRef.current.setDimensions(initial.dimensions);
+          handlesRef.current.setFlatShading(initial.flatShading);
+          handlesRef.current.setGrid(initial.grid);
+          handlesRef.current.setShadows(initial.shadows);
+          handlesRef.current.setAutoRotate(initial.autoRotate);
+          handlesRef.current.setReference(initial.reference);
+          for (const [id, hex] of Object.entries(initial.colours)) handlesRef.current.setMaterialColour(Number(id), hex);
+          for (const name of initial.activePivots) handlesRef.current.testPivot(name, initial.pivotAxis, true);
+        }
 
         // Spec measured from the very bytes the buyer downloads — the page
         // never restates a number from metadata.
@@ -457,21 +833,39 @@ export function EmbeddedGlbViewer({
             clipSeconds += delta * rate;
             poseAt(current, clipSeconds);
           }
+          if (pivotRuns.size) {
+            pivotSeconds += delta * rate;
+            const swing = Math.sin(pivotSeconds * 2.2) * (PIVOT_SWING_DEGREES * Math.PI) / 180;
+            for (const run of pivotRuns.values()) {
+              run.pivot.node.rotation[run.axis] = run.pivot.mode === "spin"
+                ? run.pivot.rest[run.axis] + pivotSeconds * 1.9
+                : run.pivot.rest[run.axis] + swing;
+            }
+          }
         }
 
         const clock = new THREE.Clock();
         let frameHandle = 0;
+        let announced = false;
         function tick() {
           frameHandle = requestAnimationFrame(tick);
           advance(clock.getDelta());
+          applyReveal();
           controls.update();
           renderer.render(scene, camera);
+          // After the draw, not before it: "ready" means a frame with the model in it has
+          // actually reached the screen.
+          if (!announced) {
+            announced = true;
+            readyRef.current?.();
+          }
         }
         tick();
 
         (window as unknown as Record<string, unknown>).__rvEmbedFrame = (deltaSeconds = 0.016) => {
           resize();
           advance(deltaSeconds);
+          applyReveal();
           controls.update();
           renderer.render(scene, camera);
           return {
@@ -479,11 +873,14 @@ export function EmbeddedGlbViewer({
             height: renderer.domElement.height,
             clip: current?.name ?? mixerAction?.getClip().name ?? null,
             playing: running,
+            pivots: [...pivotRuns.keys()],
+            reveal: clipping ? revealPlane.constant / Math.max(size.y, 1e-6) : null,
           };
         };
 
         cleanup = () => {
           cancelAnimationFrame(frameHandle);
+          renderer.clippingPlanes = [];
           resizeObserver.disconnect();
           controls.dispose();
           renderer.dispose();
@@ -500,7 +897,36 @@ export function EmbeddedGlbViewer({
       disposed = true;
       cleanup?.();
     };
-  }, [src, clipsKey, yawDegrees]);
+  }, [src, clipsKey, pivotsKey, yawDegrees, workbench]);
+
+  // Fullscreen is a browser state, not ours: listen rather than assume the button worked.
+  useEffect(() => {
+    const onChange = () => setFullscreen(document.fullscreenElement === frameRef.current);
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+
+  function toggleFullscreen() {
+    const node = frameRef.current;
+    if (!node) return;
+    if (document.fullscreenElement === node) void document.exitFullscreen();
+    else void node.requestFullscreen?.();
+  }
+
+  function saveScreenshot() {
+    handlesRef.current?.capture((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `${(fileName ?? alt).replace(/[^\w.-]+/g, "-")}.png`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      // Revoked on the next turn of the loop, once the browser has taken the bytes.
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+    });
+  }
 
   if (failed) {
     return poster ? (
@@ -513,19 +939,233 @@ export function EmbeddedGlbViewer({
 
   const stage = (
     <div className="cv5-embed3d" ref={stageRef} role="img" aria-label={`${alt} — 인터랙티브 3D 미리보기`}>
-      <span className="cv5-embed3d-hint">{hint ?? "드래그 회전 · 휠 줌 · 실제 판매 파일"}</span>
-      {clipName ? <span className="cv5-embed3d-anim">▶ {clipName} 재생 중</span> : null}
+      {workbench ? null : <span className="cv5-embed3d-hint">{hint ?? "드래그 회전 · 휠 줌 · 실제 판매 파일"}</span>}
+      {workbench || !clipName ? null : <span className="cv5-embed3d-anim">▶ {clipName} 재생 중</span>}
     </div>
   );
 
+  const blocked = active >= 0 ? null : clipStatus.find((clip) => clip.missingNode);
+
+  // --- the bench --------------------------------------------------------------------------
+  if (workbench) {
+    const motionBar = clipStatus.length > 0 || pivotList.length > 0;
+    return (
+      <div className="cv5-bench" ref={frameRef} data-background={background}>
+        {stage}
+
+        <div className="cv5-bench-rail cv5-bench-rail-left" role="toolbar" aria-label="에셋 조정 도구" aria-orientation="vertical">
+          <RailButton icon="🎨" label="색 바꾸기" pressed={openTool === "colour"} onClick={() => setOpenTool(openTool === "colour" ? null : "colour")} />
+          <RailButton icon="🖌" label="와이어프레임 보기" pressed={wireframe} onClick={() => { const next = !wireframe; setWireframe(next); handlesRef.current?.setWireframe(next); }} />
+          <RailButton icon="↔" label="좌우 반전" pressed={mirror} onClick={() => { const next = !mirror; setMirror(next); handlesRef.current?.setMirror(next); }} />
+          <RailButton icon="📏" label="치수 상자 보기" pressed={dimensions} onClick={() => { const next = !dimensions; setDimensions(next); handlesRef.current?.setDimensions(next); }} />
+          <RailButton icon="〰" label="면 보기 (플랫 셰이딩)" pressed={flatShading} onClick={() => { const next = !flatShading; setFlatShading(next); handlesRef.current?.setFlatShading(next); }} />
+          <RailButton
+            icon={background === "dark" ? "◐" : "◑"}
+            label={background === "dark" ? "배경 밝게" : "배경 어둡게"}
+            pressed={background === "light"}
+            onClick={() => { const next: Background = background === "dark" ? "light" : "dark"; setBackground(next); handlesRef.current?.setBackground(next); }}
+          />
+          <RailButton icon="↺" label="카메라 초기화" onClick={() => handlesRef.current?.resetCamera()} />
+        </div>
+
+        <div className="cv5-bench-rail cv5-bench-rail-right" role="toolbar" aria-label="화면과 조명 도구" aria-orientation="vertical">
+          <RailButton
+            icon="🔆"
+            label={`조명 바꾸기 · 지금 ${LIGHTING_LABELS[lighting]}`}
+            onClick={() => {
+              const order: LightingPreset[] = ["studio", "outdoor", "night"];
+              const next = order[(order.indexOf(lighting) + 1) % order.length];
+              setLighting(next);
+              handlesRef.current?.setLighting(next);
+            }}
+          >
+            <span className="cv5-bench-tag">{LIGHTING_LABELS[lighting]}</span>
+          </RailButton>
+          <RailButton icon="▦" label="격자 바닥 보기" pressed={grid} onClick={() => { const next = !grid; setGrid(next); handlesRef.current?.setGrid(next); }} />
+          <RailButton icon="◍" label="그림자 켜기" pressed={shadows} onClick={() => { const next = !shadows; setShadows(next); handlesRef.current?.setShadows(next); }} />
+          <RailButton icon="⟳" label="자동 회전" pressed={autoRotate} onClick={() => { const next = !autoRotate; setAutoRotate(next); handlesRef.current?.setAutoRotate(next); }} />
+          <RailButton icon="⛶" label="전체 화면" pressed={fullscreen} onClick={toggleFullscreen} />
+          <RailButton icon="⤓" label="지금 화면 PNG로 저장" onClick={saveScreenshot} />
+        </div>
+
+        {/* The colour panel. It opens over the stage rather than pushing the model around,
+            and it says plainly that nothing here changes the file being sold. */}
+        {openTool === "colour" ? (
+          <div className="cv5-bench-panel" role="group" aria-label="재질 색 바꾸기">
+            <div className="cv5-bench-panel-head">
+              <strong>색 바꾸기</strong>
+              <button type="button" className="cv5-bench-textbtn" onClick={() => { setColours({}); handlesRef.current?.resetMaterials(); }}>원래 색으로</button>
+              <button type="button" className="cv5-bench-textbtn" aria-label="색 바꾸기 닫기" onClick={() => setOpenTool(null)}>✕</button>
+            </div>
+            {materials.length ? (
+              <ul className="cv5-bench-mats">
+                {materials.map((entry) => (
+                  <li key={entry.id}>
+                    <label>
+                      <input
+                        type="color"
+                        value={colours[entry.id] ?? entry.original}
+                        aria-label={`${entry.name} 색`}
+                        onChange={(event) => {
+                          const hex = event.target.value;
+                          setColours((current) => ({ ...current, [entry.id]: hex }));
+                          handlesRef.current?.setMaterialColour(entry.id, hex);
+                        }}
+                      />
+                      <span>{entry.name}</span>
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="cv5-bench-note">이 파일에는 색을 가진 재질이 없습니다.</p>
+            )}
+            <p className="cv5-bench-note">여기서 바꾼 색은 화면 미리보기용입니다. 내려받는 파일은 그대로입니다.</p>
+          </div>
+        ) : null}
+
+        {/* What the measuring box is measuring, in the same metres the specification states. */}
+        {dimensions && dims ? (
+          <div className="cv5-bench-dims" role="status">
+            가로 {dims.x.toFixed(2)} m · 세로 {dims.z.toFixed(2)} m · 높이 {dims.y.toFixed(2)} m
+            {scaleReference ? (
+              <button
+                type="button"
+                className="cv5-bench-textbtn"
+                aria-pressed={reference}
+                onClick={() => { const next = !reference; setReference(next); handlesRef.current?.setReference(next); }}
+              >
+                {reference ? "사람 키 숨기기" : "사람 키 1.7 m 세우기"}
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+
+        <span className="cv5-bench-hint">{hint ?? "드래그 회전 · 휠 줌 · 실제 판매 파일"}</span>
+
+        {motionBar ? (
+          <div className="cv5-bench-motion">
+            {clipStatus.length > 0 ? (
+              <div className="cv5-bench-motion-group" role="group" aria-label="움직임 고르기">
+                {clipStatus.map((clip, index) => (
+                  <button
+                    // A baked clip and a file clip can share a name; the kind keeps the keys apart.
+                    key={`${clip.kind}-${clip.name}`}
+                    type="button"
+                    className="cv5-bench-chip"
+                    disabled={Boolean(clip.missingNode)}
+                    aria-pressed={active === index}
+                    title={clip.kind === "gltf" ? `${clip.name} — 파일 안 애니메이션` : `${clip.name} — 회전축 재생`}
+                    onClick={() => {
+                      setActive(index);
+                      setActivePivots([]);
+                      handlesRef.current?.clearPivots();
+                      handlesRef.current?.selectClip(index);
+                    }}
+                  >
+                    {clip.label}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  className="cv5-bench-chip"
+                  disabled={active < 0 && activePivots.length === 0}
+                  aria-pressed={playing}
+                  onClick={() => { const next = !playing; setPlaying(next); handlesRef.current?.setPlaying(next); }}
+                >
+                  {playing ? "■ 멈춤" : "▶ 재생"}
+                </button>
+                <span className="cv5-bench-motion-group" role="group" aria-label="재생 속도">
+                  {SPEEDS.map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      className="cv5-bench-chip"
+                      aria-pressed={speed === value}
+                      onClick={() => { setSpeed(value); handlesRef.current?.setSpeed(value); }}
+                    >
+                      {value}×
+                    </button>
+                  ))}
+                </span>
+              </div>
+            ) : null}
+
+            {/* Pivot test: press a part the file names and it swings ±30°, so a buyer can
+                check for themselves that it really is a separate, turnable piece. */}
+            {pivotList.length ? (
+              <div className="cv5-bench-motion-group" role="group" aria-label="회전축 시험">
+                <span className="cv5-bench-motion-label">회전축 시험 · 여러 개 동시</span>
+                {AXES.map((axis) => (
+                  <button
+                    key={axis}
+                    type="button"
+                    className="cv5-bench-chip cv5-bench-chip-tiny"
+                    aria-pressed={pivotAxis === axis}
+                    aria-label={`${axis.toUpperCase()} 축 기준으로 돌리기`}
+                    onClick={() => {
+                      setPivotAxis(axis);
+                      for (const name of activePivots) handlesRef.current?.testPivot(name, axis, true);
+                    }}
+                  >
+                    {axis.toUpperCase()}
+                  </button>
+                ))}
+                {activePivots.length ? (
+                  <button
+                    type="button"
+                    className="cv5-bench-chip cv5-bench-chip-tiny"
+                    onClick={() => { setActivePivots([]); handlesRef.current?.clearPivots(); }}
+                  >
+                    전부 멈춤
+                  </button>
+                ) : null}
+                {pivotList.map((pivot) => {
+                  const on = activePivots.includes(pivot.name);
+                  return (
+                    <button
+                      key={pivot.name}
+                      type="button"
+                      className="cv5-bench-chip"
+                      disabled={!pivot.present}
+                      aria-pressed={on}
+                      title={pivot.present
+                        ? `${pivot.name} — ${pivotAxis.toUpperCase()} 축 ${pivot.mode === "spin" ? "연속 회전" : `±${PIVOT_SWING_DEGREES}° 왕복`}`
+                        : `${pivot.name} — 이 파일에 없는 이름입니다`}
+                      onClick={() => {
+                        // Several at once: a tractor reads as a tractor when the wheels turn
+                        // together, not one at a time.
+                        const next = on ? activePivots.filter((name) => name !== pivot.name) : [...activePivots, pivot.name];
+                        setActivePivots(next);
+                        if (!on) { setActive(-1); handlesRef.current?.selectClip(-1); }
+                        handlesRef.current?.testPivot(pivot.name, pivotAxis, !on);
+                      }}
+                    >
+                      {pivot.name}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
+        {blocked ? (
+          <p className="cv5-bench-note cv5-bench-blocked" role="status">
+            이 파일에는 {blocked.missingNode} 부분이 없어 {blocked.label} 움직임을 재생할 수 없습니다.
+          </p>
+        ) : null}
+      </div>
+    );
+  }
+
+  // --- the plain stage --------------------------------------------------------------------
   // A landing-page viewer gets exactly the markup it always had: no bar, no wrapper, no
   // chance of a layout change where nothing was asked for.
   // A file can carry its own animations, which nobody knew about until it was opened, so the
   // bar has to be able to appear after the load rather than only when the parent passed clips.
   const wantsControls = (clips?.length ?? 0) > 0 || clipStatus.length > 0 || scaleReference;
   if (!wantsControls) return stage;
-
-  const blocked = active >= 0 ? null : clipStatus.find((clip) => clip.missingNode);
 
   return (
     <div style={bar.wrap}>
@@ -535,7 +1175,6 @@ export function EmbeddedGlbViewer({
           <div style={bar.group} role="group" aria-label="움직임 고르기">
             {clipStatus.map((clip, index) => (
               <button
-                // A baked clip and a file clip can share a name; the kind keeps the keys apart.
                 key={`${clip.kind}-${clip.name}`}
                 type="button"
                 disabled={Boolean(clip.missingNode)}
@@ -593,9 +1232,45 @@ export function EmbeddedGlbViewer({
 }
 
 /**
- * The bar's styling lives here rather than in the global stylesheet: this component is
- * shared with the landing page, and a style rule it does not own is a rule it cannot keep
- * from drifting. Every colour is a cv5 token, so the bar changes with the rest of the site.
+ * One round tool button.
+ *
+ * The icon is decorative and the Korean label is the accessible name, so a screen reader and
+ * a tooltip say the same sentence. `aria-pressed` is set only for tools that stay on, because
+ * a one-shot action (reset the camera, save a picture) has no pressed state to report.
+ */
+function RailButton({
+  icon,
+  label,
+  pressed,
+  onClick,
+  children,
+}: {
+  icon: string;
+  label: string;
+  pressed?: boolean;
+  onClick: () => void;
+  children?: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      className="cv5-bench-tool"
+      title={label}
+      aria-label={label}
+      {...(pressed === undefined ? {} : { "aria-pressed": pressed })}
+      data-on={pressed ? "true" : undefined}
+      onClick={onClick}
+    >
+      <span aria-hidden="true">{icon}</span>
+      {children}
+    </button>
+  );
+}
+
+/**
+ * The plain stage's bar keeps its inline styling: this component is shared with the landing
+ * page, and a style rule it does not own is a rule it cannot keep from drifting. The bench
+ * has a stylesheet of its own because it is a whole layout, not one row of chips.
  */
 const bar: Record<string, CSSProperties> = {
   wrap: { display: "grid", gap: 10 },

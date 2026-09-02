@@ -161,10 +161,15 @@ export function AgentLiveDemo() {
       <div className="cv5-agent-stage" aria-label="에이전트가 만든 시장 노점 — 드래그해서 돌려보세요" data-building={building ? "true" : undefined}>
         {/* The real file on sale, in the same viewer the shop uses. It is interactive from
             the first frame; the veil only says what the agent is doing. */}
+        {/* The model is "printed" from the ground up while the agent works (a clipping plane
+            the viewer sweeps upward, with a light band at the cut), then stands still and
+            stays interactive — the build is visible again without the old wireframe flicker
+            or the restart every thirteen seconds. */}
         <EmbeddedGlbViewer
           src={GLB_URL}
           alt="에이전트가 만든 시장 노점 — 드래그해서 돌려보세요"
           hint="드래그 회전 · 휠 줌 · 실제 판매 파일"
+          revealProgress={reduced ? 1 : scene.checked > 0 || scene.buildProgress > 0 ? scene.buildProgress : 0}
         />
         <span className="cv5-agent-stage-tag">{building ? "지금 만드는 중 · market-stall.glb" : "만들어진 파일 · market-stall.glb"}</span>
         {building && scene.checked > 0 ? (

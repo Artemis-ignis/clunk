@@ -52,7 +52,10 @@ export default defineConfig(async () => {
       : undefined,
     server: {
       watch: {
-        ignored: ["**/.playwright-cli/**", "**/.clunk-evidence/**", "**/.wrangler/**", "**/dist/**"],
+        // `tmp/` is where the QA harnesses drop screenshots and downloaded
+        // artifacts. Watching it means a Playwright run restarts the server it is
+        // driving, and a half-written download crashes it outright with EBUSY.
+        ignored: ["**/.playwright-cli/**", "**/.clunk-evidence/**", "**/.wrangler/**", "**/dist/**", "**/tmp/**"],
         ...(isCodexSeatbeltSandbox ? { useFsEvents: false, usePolling: true } : {}),
       },
       // Opt-in only: lets a quick-tunnel host through the dev server's host check so the

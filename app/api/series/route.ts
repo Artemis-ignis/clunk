@@ -19,6 +19,18 @@ import {
   createClunkSeriesJob,
   type ClunkSeriesCreationRequest,
 } from "../../../packages/clunk-series/src/native-authoring";
+import { getTemplateStore, hasTemplateStore, loadTemplateLibrary } from "../_lib/templates";
+import {
+  createTemplateAssemblyJob,
+  type TemplateAssemblyJob,
+} from "../../../packages/clunk-series/src/template-assembly";
+import {
+  TEMPLATE_HONESTY_KO,
+  resolveTemplateSelection,
+  templateChoiceList,
+  templateObjectKey,
+  type TemplateKind,
+} from "../../../packages/clunk-series/src/template-library";
 import { createSeriesBundle } from "../../../packages/clunk-series/src/bundle";
 import { getClunkSeries, getClunkSeriesCatalog } from "../../../packages/clunk-series/src/catalog";
 import { verifyStoredArtifactPersistence as verifyStorageEvidence } from "../../../packages/core/src/billing";
@@ -42,11 +54,25 @@ const ASSET_KINDS = new Set<AssetKind>([
   "3d-model",
 ]);
 
+/**
+ * The three kinds that are served from the template library instead of from the procedural
+ * recipe. Everything the recipe used to write for these was a placeholder — an eight-vertex
+ * box for a 3D model, a drawn grid for a sheet — so there is no fallback to it here: a request
+ * this route cannot match to a real template is answered with the catalogue and a 400.
+ */
+const TEMPLATE_KINDS = new Set<AssetKind>(["3d-model", "sprite-atlas", "animation-clip"]);
+/** A single template artifact must stay small enough to edit and return inside a Worker. */
+const MAX_TEMPLATE_BYTES = 3 * 1024 * 1024;
+
 type SeriesPayload = Partial<ClunkSeriesCreationRequest> & {
   operation?: unknown;
   sourceAssetId?: unknown;
   projectId?: unknown;
   idempotencyKey?: unknown;
+  templateId?: unknown;
+  paletteId?: unknown;
+  sizeId?: unknown;
+  scale?: unknown;
 };
 
 export async function GET() {
@@ -143,19 +169,105 @@ export async function POST(request: Request) {
       if (!project) return privateJson({ ok: false, error: "현재 Workspace의 프로젝트만 사용할 수 있습니다." }, { status: 404 });
       projectId = project.id;
     }
-    const job = createClunkSeriesJob({
-      seriesId: seriesId as ClunkSeriesCreationRequest["seriesId"],
-      assetKind: assetKind as AssetKind,
-      label: payload.label,
-      prompt: payload.prompt,
-      targetProfileId,
-      ...(payload.width !== undefined ? { width: payload.width } : {}),
-      ...(payload.height !== undefined ? { height: payload.height } : {}),
-      ...(payload.frames !== undefined ? { frames: payload.frames } : {}),
-      ...(payload.license !== undefined ? { license: payload.license } : {}),
-      ...(sourcePath ? { sourcePath } : payload.sourcePath !== undefined ? { sourcePath: payload.sourcePath } : {}),
-      ...(sourceHash ? { sourceHash } : payload.sourceHash !== undefined ? { sourceHash: payload.sourceHash } : {}),
-    });
+    const templateKind = TEMPLATE_KINDS.has(assetKind as AssetKind);
+    let assembly: TemplateAssemblyJob["assembly"] | null = null;
+    let job: ReturnType<typeof createClunkSeriesJob> | TemplateAssemblyJob;
+
+    if (templateKind) {
+      if (!hasTemplateStore()) {
+        return privateJson({
+          ok: false,
+          schema: "clunk.series-result.v1",
+          status: "TEMPLATE_LIBRARY_UNAVAILABLE",
+          error: "템플릿 보관소(R2 ASSETS)가 연결되어 있지 않습니다. 크레딧은 차감되지 않았습니다.",
+          templates: [],
+        }, { status: 503 });
+      }
+      const store = getTemplateStore();
+      const library = await loadTemplateLibrary(store);
+      if (!library) {
+        return privateJson({
+          ok: false,
+          schema: "clunk.series-result.v1",
+          status: "TEMPLATE_LIBRARY_UNAVAILABLE",
+          error: "템플릿 라이브러리가 아직 업로드되지 않았습니다. 크레딧은 차감되지 않았습니다.",
+          templates: [],
+        }, { status: 503 });
+      }
+      const resolved = resolveTemplateSelection({
+        library,
+        assetKind: assetKind as TemplateKind,
+        templateId: payload.templateId,
+        paletteId: payload.paletteId,
+        sizeId: payload.sizeId,
+        scale: payload.scale,
+        prompt: payload.prompt,
+      });
+      if (!resolved.ok) {
+        // No placeholder is ever written instead. The caller gets the list it needed.
+        return privateJson({
+          ok: false,
+          schema: "clunk.series-result.v1",
+          status: resolved.code,
+          honesty: TEMPLATE_HONESTY_KO,
+          error: resolved.error,
+          templates: templateChoiceList(resolved.templates),
+        }, { status: 400 });
+      }
+      const { selection } = resolved;
+      const wanted = assetKind === "sprite-atlas"
+        ? [selection.palette.sheet!.png, selection.palette.sheet!.json]
+        : [selection.palette.glb];
+      const loaded: Uint8Array[] = [];
+      for (const fileName of wanted) {
+        const bytes = await store.get(templateObjectKey(selection.template.id, fileName));
+        if (!bytes) {
+          return privateJson({
+            ok: false,
+            schema: "clunk.series-result.v1",
+            status: "TEMPLATE_FILE_MISSING",
+            error: `보관소에 ${selection.template.name}/${fileName} 파일이 없습니다. 크레딧은 차감되지 않았습니다.`,
+          }, { status: 503 });
+        }
+        if (bytes.byteLength > MAX_TEMPLATE_BYTES) {
+          return privateJson({
+            ok: false,
+            schema: "clunk.series-result.v1",
+            status: "TEMPLATE_FILE_TOO_LARGE",
+            error: `${fileName} 파일이 3 MB 한도를 넘습니다.`,
+          }, { status: 503 });
+        }
+        loaded.push(bytes);
+      }
+      const assembled = createTemplateAssemblyJob({
+        seriesId: seriesId as ClunkSeriesCreationRequest["seriesId"],
+        assetKind: assetKind as TemplateKind,
+        label: payload.label,
+        prompt: payload.prompt,
+        targetProfileId,
+        ...(payload.license !== undefined ? { license: payload.license } : {}),
+        selection,
+        ...(assetKind === "sprite-atlas"
+          ? { sheet: { png: loaded[0]!, manifest: loaded[1]! } }
+          : { glb: loaded[0]! }),
+      });
+      assembly = assembled.assembly;
+      job = assembled;
+    } else {
+      job = createClunkSeriesJob({
+        seriesId: seriesId as ClunkSeriesCreationRequest["seriesId"],
+        assetKind: assetKind as AssetKind,
+        label: payload.label,
+        prompt: payload.prompt,
+        targetProfileId,
+        ...(payload.width !== undefined ? { width: payload.width } : {}),
+        ...(payload.height !== undefined ? { height: payload.height } : {}),
+        ...(payload.frames !== undefined ? { frames: payload.frames } : {}),
+        ...(payload.license !== undefined ? { license: payload.license } : {}),
+        ...(sourcePath ? { sourcePath } : payload.sourcePath !== undefined ? { sourcePath: payload.sourcePath } : {}),
+        ...(sourceHash ? { sourceHash } : payload.sourceHash !== undefined ? { sourceHash: payload.sourceHash } : {}),
+      });
+    }
     if (job.status === "BLOCKED") {
       const generationId = job.jobId;
       const blockedRecipeJson = JSON.stringify({
@@ -165,6 +277,7 @@ export async function POST(request: Request) {
         ...(projectId ? { projectId } : {}),
         seriesId: job.seriesId,
         requestHash: job.requestHash,
+        ...(assembly ? { assembly } : {}),
         blocked: true,
       });
       await db.prepare(
@@ -194,6 +307,7 @@ export async function POST(request: Request) {
         ...(projectId ? { projectId } : {}),
         status: "BLOCKED",
         provider: "clunk-series-native-v1",
+        ...(assembly ? { assembly, honesty: TEMPLATE_HONESTY_KO } : {}),
         entryFileName: job.entryFileName,
         artifacts: [],
         provenance: job.provenance,
@@ -251,6 +365,7 @@ export async function POST(request: Request) {
       ...(projectId ? { projectId } : {}),
       seriesId: job.seriesId,
       requestHash: job.requestHash,
+      ...(assembly ? { assembly } : {}),
       bundleManifest: bundle.manifest,
     });
     const idempotencyKey = readIdempotencyKey(request, payload.idempotencyKey, job.requestHash);
@@ -354,6 +469,7 @@ export async function POST(request: Request) {
       ...(projectId ? { projectId } : {}),
       status: job.status,
       provider: "clunk-series-native-v1",
+      ...(assembly ? { assembly, honesty: TEMPLATE_HONESTY_KO } : {}),
       entryFileName: job.entryFileName,
       storageStatus,
       artifacts: bundle.files.map((artifact) => ({

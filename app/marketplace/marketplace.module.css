@@ -1751,3 +1751,428 @@
     width: 100%;
   }
 }
+
+/* ============================================================================
+   The viewer workbench (polyfork-style asset bench)
+
+   These rules are :global because the viewer is shared with the landing page and
+   addresses its stage by a global class name; a module hash would never reach it.
+   They still ship only with the marketplace stylesheet, which is the only place the
+   bench is used.
+   ========================================================================= */
+:global(.cv5-bench) {
+  position: relative;
+  border: 1px solid var(--v5-line-strong);
+  border-radius: var(--v5-r-lg);
+  overflow: hidden;
+  background: #0d1017;
+  box-shadow: 0 36px 90px -46px rgba(0, 0, 0, 0.9);
+}
+:global(.cv5-bench[data-background="light"]) { background: #ececec; }
+
+/* The model is the page: 72vh on a desktop screen, clamped so it neither shrinks to a
+   thumbnail on a laptop nor runs past a tall monitor. */
+:global(.cv5-bench .cv5-embed3d) {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  min-height: 0;
+  height: clamp(420px, 72vh, 860px);
+}
+:global(.cv5-bench:fullscreen .cv5-embed3d) { height: 100vh; }
+
+:global(.cv5-bench-rail) {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+:global(.cv5-bench-rail-left) { left: 12px; }
+:global(.cv5-bench-rail-right) { right: 12px; }
+
+:global(.cv5-bench-tool) {
+  position: relative;
+  appearance: none;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--v5-line-strong);
+  background: rgba(8, 10, 18, 0.72);
+  backdrop-filter: blur(8px);
+  color: var(--v5-ink-dim);
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+:global(.cv5-bench-tool:hover) { background: rgba(124, 93, 250, 0.16); color: var(--v5-ink); }
+:global(.cv5-bench-tool:focus-visible) { outline: 2px solid var(--v5-cyan); outline-offset: 2px; }
+:global(.cv5-bench-tool[data-on="true"]) {
+  background: rgba(124, 93, 250, 0.26);
+  border-color: rgba(124, 93, 250, 0.6);
+  color: var(--v5-ink);
+}
+:global(.cv5-bench[data-background="light"] .cv5-bench-tool) {
+  background: rgba(255, 255, 255, 0.86);
+  border-color: rgba(20, 22, 34, 0.2);
+  color: #23263a;
+}
+
+/* The lighting button names the preset it is on, so the tool is readable without pressing it. */
+:global(.cv5-bench-tag) {
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  transform: translateX(-50%);
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(8, 10, 18, 0.9);
+  border: 1px solid var(--v5-line);
+  color: var(--v5-ink-faint);
+  font-family: var(--v5-label);
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+:global(.cv5-bench-panel) {
+  position: absolute;
+  left: 64px;
+  top: 16px;
+  z-index: 4;
+  width: min(280px, calc(100% - 132px));
+  max-height: calc(100% - 120px);
+  overflow: auto;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--v5-line-strong);
+  background: rgba(8, 10, 18, 0.94);
+  backdrop-filter: blur(10px);
+}
+:global(.cv5-bench-panel-head) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--v5-ink);
+  font-size: 0.82rem;
+}
+:global(.cv5-bench-panel-head strong) { margin-right: auto; }
+
+:global(.cv5-bench-textbtn) {
+  appearance: none;
+  border: 1px solid var(--v5-line-strong);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--v5-ink-dim);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+:global(.cv5-bench-textbtn:hover) { color: var(--v5-ink); }
+:global(.cv5-bench-textbtn:focus-visible) { outline: 2px solid var(--v5-cyan); outline-offset: 2px; }
+
+:global(.cv5-bench-mats) { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+:global(.cv5-bench-mats label) {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 0.78rem;
+  color: var(--v5-ink-dim);
+  cursor: pointer;
+}
+:global(.cv5-bench-mats input[type="color"]) {
+  inline-size: 30px;
+  block-size: 24px;
+  padding: 0;
+  border: 1px solid var(--v5-line-strong);
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+}
+:global(.cv5-bench-mats span) { overflow-wrap: anywhere; }
+
+:global(.cv5-bench-note) {
+  margin: 0;
+  color: var(--v5-ink-faint);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+:global(.cv5-bench-blocked) { position: absolute; left: 64px; bottom: 58px; z-index: 3; }
+
+:global(.cv5-bench-dims) {
+  position: absolute;
+  top: 16px;
+  right: 64px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  max-width: calc(100% - 140px);
+  padding: 7px 11px;
+  border-radius: 10px;
+  border: 1px solid rgba(167, 139, 250, 0.45);
+  background: rgba(8, 10, 18, 0.86);
+  color: var(--v5-ink);
+  font-family: var(--v5-label);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+:global(.cv5-bench-hint) {
+  position: absolute;
+  left: 64px;
+  bottom: 14px;
+  z-index: 3;
+  font-family: var(--v5-label);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--v5-ink-dim);
+  background: rgba(6, 7, 15, 0.72);
+  border: 1px solid var(--v5-line);
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+:global(.cv5-bench-motion) {
+  position: absolute;
+  right: 64px;
+  bottom: 14px;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  max-width: calc(100% - 220px);
+}
+:global(.cv5-bench-motion-group) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--v5-line);
+  background: rgba(6, 7, 15, 0.78);
+  backdrop-filter: blur(8px);
+}
+:global(.cv5-bench-motion-group .cv5-bench-motion-group) {
+  padding: 0;
+  border: 0;
+  background: none;
+  backdrop-filter: none;
+}
+:global(.cv5-bench-motion-label) {
+  font-family: var(--v5-label);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--v5-ink-faint);
+}
+:global(.cv5-bench-chip) {
+  appearance: none;
+  min-height: 28px;
+  padding: 0 11px;
+  border-radius: 999px;
+  border: 1px solid var(--v5-line-strong);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--v5-ink-dim);
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+:global(.cv5-bench-chip-tiny) { padding: 0 8px; }
+:global(.cv5-bench-chip[aria-pressed="true"]) {
+  background: rgba(124, 93, 250, 0.22);
+  border-color: rgba(124, 93, 250, 0.6);
+  color: var(--v5-ink);
+}
+:global(.cv5-bench-chip:disabled) { opacity: 0.45; cursor: not-allowed; }
+:global(.cv5-bench-chip:focus-visible) { outline: 2px solid var(--v5-cyan); outline-offset: 2px; }
+
+/* Phones: the rails come out of the picture and become scrollable rows under it, so a
+   thumb can reach every tool and nothing sits on top of the model. */
+@media (max-width: 860px) {
+  :global(.cv5-bench .cv5-embed3d) { height: clamp(320px, 60vh, 560px); }
+  :global(.cv5-bench-rail),
+  :global(.cv5-bench-motion),
+  :global(.cv5-bench-dims),
+  :global(.cv5-bench-blocked) {
+    position: static;
+    transform: none;
+    max-width: none;
+  }
+  :global(.cv5-bench-rail) {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 8px;
+    padding: 10px 12px 4px;
+    scrollbar-width: thin;
+  }
+  :global(.cv5-bench-rail-right) { padding-top: 0; padding-bottom: 10px; }
+  :global(.cv5-bench-tool) { flex: 0 0 auto; }
+  :global(.cv5-bench-tag) { display: none; }
+  :global(.cv5-bench-motion) { justify-content: flex-start; padding: 0 12px 12px; }
+  :global(.cv5-bench-dims) { margin: 0 12px 10px; }
+  :global(.cv5-bench-hint) { position: static; display: block; margin: 0 12px 10px; }
+  :global(.cv5-bench-panel) { position: static; width: auto; max-height: none; margin: 10px 12px 0; }
+}
+
+/* ============================================================================
+   Detail layout: title, then the asset large, then the facts and the buy panel
+   ========================================================================= */
+.detailTopHead {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0 14px;
+}
+.detailTopHead h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+  line-height: 1.2;
+}
+.detailBadges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.detailBadges span {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--v5-line-strong);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--v5-ink-dim);
+  font-family: var(--v5-label);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.detailStage { margin: 0 0 22px; }
+
+.detailUnder {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: clamp(20px, 3vw, 44px);
+  align-items: start;
+}
+.detailFacts { display: grid; gap: 4px; }
+.detailBlurb {
+  margin: 0 0 6px;
+  color: var(--v5-ink-dim);
+  font-size: 0.82rem;
+  line-height: 1.65;
+}
+.detailBuy { display: grid; gap: 14px; }
+
+@media (max-width: 980px) {
+  .detailUnder { grid-template-columns: 1fr; }
+}
+
+/* ============================================================================
+   2D products: the tile bench and the sheet bench
+   ========================================================================= */
+.flatBench {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--v5-line-strong);
+  border-radius: var(--v5-r-lg);
+  background: #0d1017;
+}
+.flatStage {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid var(--v5-line);
+  background: #05060c;
+  height: clamp(320px, 62vh, 720px);
+  display: grid;
+  place-items: center;
+}
+.flatSurface {
+  width: 100%;
+  height: 100%;
+  background-repeat: repeat;
+  background-position: center;
+  image-rendering: auto;
+}
+.flatSheet {
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+.flatBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.flatBar label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--v5-ink-dim);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.flatBar input[type="range"] { inline-size: 140px; }
+.flatNote {
+  margin: 0;
+  color: var(--v5-ink-faint);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 860px) {
+  .flatStage { height: clamp(280px, 56vh, 520px); }
+}
+
+/* the buy column's file list, and the two 2D benches */
+.detailFilesHead {
+  margin-top: 4px;
+  color: var(--v5-ink-dim);
+  font-family: var(--v5-label);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.flatBar strong { color: var(--v5-ink); font-size: 0.78rem; }
+.flatDirections { display: flex; flex-wrap: wrap; gap: 4px; }
+.flatGrid { max-width: 100%; max-height: 100%; object-fit: contain; image-rendering: pixelated; }
+
+/* many named parts wrap into a scrollable block instead of covering the model */
+:global(.cv5-bench-motion) > :global(.cv5-bench-motion-group) { max-height: 108px; overflow-y: auto; }
+
+/* the motion block must never reach across the hint in the opposite corner */
+:global(.cv5-bench-motion) { max-width: min(780px, calc(100% - 260px)); }
+
+/* how many things move, on the card. The generative-AI badge that used to sit beside it
+   is gone: a legal disclosure belongs once on the product page, not on every tile. */
+.motionChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 9px;
+  border: 1px solid rgba(89, 217, 255, 0.4);
+  border-radius: 7px;
+  background: rgba(8, 20, 28, 0.78);
+  color: #bfeeff;
+  font-family: var(--v5-label);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}

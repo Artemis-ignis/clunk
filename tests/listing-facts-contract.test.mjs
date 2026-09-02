@@ -7,6 +7,7 @@ import {
   factRows,
   hasMotion,
   kitLine,
+  motionNote,
   movingRow,
   reconcileMeasured,
 } from "../app/components/listing-facts-rows.ts";
@@ -310,6 +311,86 @@ test("the built facts index carries the listings the pipeline measured", async (
       assert.ok(value > 0 && value < 1000, `${slug} publishes a quantised bound: ${value}`);
     }
   }
+});
+
+test("the card counts what moves instead of stamping a badge on it", async () => {
+  const catalog = await source("app/components/MarketplaceCatalog.tsx");
+  assert.match(catalog, /motionNote\(listing\.facts\)/u);
+  // The generative-AI disclosure is a legal statement, not a feature chip: one sentence on
+  // the product page, never a badge repeated on every card in the grid.
+  assert.doesNotMatch(catalog, /aiChipMini/u);
+  assert.match(catalog, /생성형 AI로 만들었습니다/u);
+});
+
+test("the moving-parts note counts clips first, then named parts, and never guesses", () => {
+  assert.equal(motionNote(emptyFacts({ animations: [{ name: "walk", seconds: 1 }, { name: "idle", seconds: 2 }] })), "동작 2개");
+  assert.equal(motionNote(emptyFacts({ animatedParts: ["a", "b", "c"] })), "움직이는 부품 3개");
+  assert.equal(motionNote(emptyFacts({ triangles: 100 })), null);
+  assert.equal(motionNote(null), null);
+});
+
+test("every workbench tool is wired to something that changes the scene", async () => {
+  const viewer = await source("app/components/review/EmbeddedGlbViewer.tsx");
+  // Each rail button must reach a handle that touches the renderer, the model or a material.
+  // A button with no handle behind it is a fake button, which this catalogue does not ship.
+  for (const [tool, effect] of [
+    ["setWireframe", /material\.wireframe = on/u],
+    ["setMirror", /model\.scale\.x = on \? -1 : 1/u],
+    ["setDimensions", /measureHelper\.visible = on/u],
+    ["setFlatShading", /material\.flatShading/u],
+    ["setBackground", /renderer\.setClearColor\(BACKGROUND_COLOURS\[value\], 1\)/u],
+    ["setLighting", /sun\.intensity =/u],
+    ["setGrid", /gridHelper\.visible = on/u],
+    ["setShadows", /renderer\.shadowMap\.enabled = on/u],
+    ["setAutoRotate", /controls\.autoRotate = on/u],
+    ["resetCamera", /frame\(referenceGroup\.visible\)/u],
+    ["setMaterialColour", /item\.material\.color\.set\(hex\)/u],
+    ["resetMaterials", /color\.set\(item\.entry\.original\)/u],
+    ["capture", /toBlob\(onBlob, "image\/png"\)/u],
+  ]) {
+    assert.match(viewer, new RegExp(`${tool}\\(`, "u"), `${tool} is not a handle`);
+    assert.match(viewer, effect, `${tool} does not change anything`);
+  }
+  // Korean accessible names, so the tooltip and the screen reader say the same sentence.
+  for (const label of ["색 바꾸기", "와이어프레임 보기", "좌우 반전", "치수 상자 보기", "카메라 초기화", "격자 바닥 보기", "그림자 켜기", "자동 회전", "전체 화면", "지금 화면 PNG로 저장"]) {
+    assert.ok(viewer.includes(`label="${label}"`), `no rail button labelled ${label}`);
+  }
+});
+
+test("pivot tests drive the file's own named nodes, several at once", async () => {
+  const viewer = await source("app/components/review/EmbeddedGlbViewer.tsx");
+  // A Map rather than one slot: a tractor is not convincing one wheel at a time.
+  assert.match(viewer, /const pivotRuns = new Map/u);
+  assert.match(viewer, /testPivot\(pivot\.name, pivotAxis, !on\)/u);
+  // Wheels turn, hinges swing — decided by the part's own name.
+  assert.match(viewer, /const SPIN_NAME = /u);
+  assert.match(viewer, /mode === "spin"/u);
+  // A part the file does not carry gets a disabled button, never a mimed motion.
+  assert.match(viewer, /disabled=\{!pivot\.present\}/u);
+  const catalog = await source("app/components/MarketplaceCatalog.tsx");
+  assert.match(catalog, /pivots=\{listing\.facts\?\.animatedParts \?\? null\}/u);
+});
+
+test("the reveal prop clips the model bottom-up and lets go at the end", async () => {
+  const viewer = await source("app/components/review/EmbeddedGlbViewer.tsx");
+  assert.match(viewer, /revealProgress\?: number;/u);
+  assert.match(viewer, /onModelReady\?: \(\) => void;/u);
+  // Read from a ref, never a dependency: re-running the whole scene per frame is a slideshow.
+  assert.match(viewer, /revealRef\.current = revealProgress/u);
+  assert.doesNotMatch(viewer, /\[src, clipsKey, pivotsKey, yawDegrees, workbench, revealProgress\]/u);
+  // At 1 the plane comes out, so nothing shimmers afterwards.
+  assert.match(viewer, /renderer\.clippingPlanes = \[\];/u);
+  assert.match(viewer, /readyRef\.current\?\.\(\)/u);
+});
+
+test("the 2D benches only offer playback when the image really is the grid", async () => {
+  const catalog = await source("app/components/MarketplaceCatalog.tsx");
+  assert.match(catalog, /function TileBench/u);
+  assert.match(catalog, /function SheetBench/u);
+  assert.match(catalog, /natural\.height === sheet\.directions \* sheet\.cell/u);
+  assert.match(catalog, /disabled=\{!playable\}/u);
+  // The operator is taking the watermark off the images, so no screen may assume one.
+  assert.doesNotMatch(catalog, /워터마크/u);
 });
 
 test("the viewer plays a file's own animations beside the baked pivot clips", async () => {

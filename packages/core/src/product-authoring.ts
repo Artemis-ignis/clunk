@@ -3,7 +3,7 @@ import { inspectAssetForTarget } from "./assetops-pipeline";
 import { sha256Hex, stableStringify } from "./index";
 import type { AssetEvidence, AssetKind } from "./assetops-contract";
 
-export type ProductArtifactRole = "entry" | "page" | "atlas" | "texture" | "animation";
+export type ProductArtifactRole = "entry" | "page" | "atlas" | "texture" | "animation" | "manifest";
 
 export type ProductArtifact = {
   fileName: string;
@@ -30,6 +30,15 @@ export type ProceduralAuthoringRequest = {
    * way to keep those two the same.
    */
   entry?: { bytes: Uint8Array; fileName: string; contentType: string };
+  /**
+   * The complete artifact set, supplied by a generator that assembles a whole bundle rather
+   * than one file — the template library hands over a GLB, or a sheet PNG with its atlas and
+   * its frame table, all at once. The recipe's own drawing is skipped entirely, and the
+   * evidence below is produced from these files, so what is inspected is what ships.
+   *
+   * Exactly one artifact must carry the `entry` role.
+   */
+  artifacts?: readonly { bytes: Uint8Array; fileName: string; role: ProductArtifactRole; contentType: string }[];
 };
 
 export type ProceduralAuthoringResult = {
@@ -38,7 +47,7 @@ export type ProceduralAuthoringResult = {
   artifacts: readonly ProductArtifact[];
   provenance: {
     sourceKind: "prompt";
-    provider: "clunk-procedural-v1" | "clunk-image-model-v1";
+    provider: "clunk-procedural-v1" | "clunk-image-model-v1" | "clunk-template-library-v1";
     prompt: string;
     promptHash: string;
     license: string;
@@ -75,7 +84,12 @@ export function createProceduralAuthoring(request: ProceduralAuthoringRequest): 
   const plan = createGenerationPlan(generationRequest);
   if (plan.status !== "READY_TO_RUN") throw new Error(plan.message);
 
-  const artifacts = createArtifacts(request.assetKind, label, width, height, frames);
+  const artifacts = request.artifacts
+    ? request.artifacts.map((artifact) => makeArtifact(artifact.fileName, artifact.role, artifact.contentType, artifact.bytes))
+    : createArtifacts(request.assetKind, label, width, height, frames);
+  if (request.artifacts && artifacts.filter((artifact) => artifact.role === "entry").length !== 1) {
+    throw new Error("A supplied artifact set must carry exactly one entry artifact.");
+  }
   if (request.entry) {
     const index = artifacts.findIndex((artifact) => artifact.role === "entry");
     if (index < 0) throw new Error("Supplied entry bytes have no entry artifact to replace.");
@@ -110,7 +124,7 @@ export function createProceduralAuthoring(request: ProceduralAuthoringRequest): 
     artifacts,
     provenance: {
       sourceKind: "prompt",
-      provider: request.entry ? "clunk-image-model-v1" : "clunk-procedural-v1",
+      provider: request.artifacts ? "clunk-template-library-v1" : request.entry ? "clunk-image-model-v1" : "clunk-procedural-v1",
       prompt,
       promptHash: sha256Hex(new TextEncoder().encode(prompt)),
       license: request.license ?? "review-required",

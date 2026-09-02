@@ -64,8 +64,11 @@ test("workspace surfaces name their real jobs without removing evidence", async 
   const shell = await source("app/components/WorkspaceShell.tsx");
   const marketplace = await source("app/marketplace/page.tsx");
   const marketplaceApi = await source("app/api/marketplace/route.ts");
-  assert.match(studio, /prompt/i);
-  assert.match(studio, /Game Ready|Asset Studio/);
+  // 2026-09-02: /studio is the shell around the making workspace; the prompt and
+  // the job names live in the workbench it renders.
+  assert.match(studio, /AssetCreationWorkbench/);
+  assert.match(studio, /에셋 만들기/);
+  assert.match(await source("app/components/AssetCreationWorkbench.tsx"), /prompt/i);
   assert.match(gameReady, /Game Ready/);
   assert.match(inspector, /NOT_EVALUATED|정적 정책 점수/);
   assert.match(dashboard, /assets|generations/i);

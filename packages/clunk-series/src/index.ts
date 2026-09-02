@@ -6,3 +6,5 @@ export * from "./mesh-lab";
 export * from "./native-authoring";
 export * from "./provider-runtime";
 export * from "./source-manifest";
+export * from "./template-assembly";
+export * from "./template-library";

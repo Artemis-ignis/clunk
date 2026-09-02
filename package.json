@@ -25,7 +25,7 @@
     "assetops:test": "npm run assetops:2d:test && npm run assetops:pipeline:test && npm run assetops:bundle:test && npm run assetops:api:test && npm run assetops:texture:test",
     "collaboration:test": "tsx tests/collaboration-contract.test.ts && tsx tests/collaboration-acceptance.test.ts && tsx tests/harvest-frontier-m123-acceptance.test.ts && tsx tests/collaboration-api-runtime.test.ts && tsx tests/asset-inspection-evidence-api.test.ts && tsx tests/mcp-http-contract.test.ts && tsx tests/mcp-api-key.test.ts && node --test tests/collaboration-api.test.mjs tests/frame-manifest-cli.test.mjs tests/mcp-stdio.test.mjs",
     "product:test": "node --import tsx --test tests/product-commerce-contract.test.mjs tests/product-authoring.test.ts",
-    "series:test": "tsx tests/clunk-series.test.ts && tsx tests/clunk-series-mesh-lab.test.ts && node --test tests/clunk-series-api.test.mjs tests/clunk-series-ui.test.mjs tests/clunk-series-docs.test.mjs tests/clunk-series-cli.test.mjs",
+    "series:test": "tsx tests/clunk-series.test.ts && tsx tests/clunk-series-mesh-lab.test.ts && node --test tests/clunk-series-api.test.mjs tests/clunk-series-ui.test.mjs tests/clunk-series-docs.test.mjs tests/clunk-series-cli.test.mjs && node --import tsx --test tests/template-library.test.mjs",
     "foundry:test": "tsx tests/foundry-lifecycle.test.ts && node --test tests/foundry-full-product-contract.test.mjs",
     "oauth:test": "tsx tests/oauth-contract.test.ts && node --test tests/oauth-route-contract.test.mjs",
     "auth:boundary:test": "node --test tests/auth-boundary-contract.test.mjs",
@@ -65,7 +65,10 @@
     "asset:palette": "tsx scripts/palette-cli.ts",
     "asset:palette:index": "tsx scripts/palette-index-cli.ts",
     "market:verify": "tsx scripts/market-verify-cli.ts",
-    "cf:usage": "node scripts/cf-usage-cli.mjs"
+    "cf:usage": "node scripts/cf-usage-cli.mjs",
+    "templates:build": "node scripts/template-library/build.mjs",
+    "templates:verify": "node scripts/template-library/verify-factories.mjs --json outputs/template-library/factory-hashes.json",
+    "templates:upload": "node scripts/template-library/upload.mjs"
   },
   "dependencies": {
     "@gltf-transform/core": "^4.2.1",

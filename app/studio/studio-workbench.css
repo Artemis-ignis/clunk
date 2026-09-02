@@ -1,0 +1,702 @@
+/* ============================================================================
+   /studio — the making workspace (2026-09-02)
+
+   WHAT CHANGED AND WHY
+   The screen used to open on a headline, a paragraph and four explainer cards;
+   the form that actually makes a file sat below all of it, so "에셋 제작" led to
+   reading rather than making. Meshy's workspace and AetherForge's generate page
+   both open on the input itself, and that is the shape here: a left column you
+   type into, a middle stage the result lands on, a right column of what this
+   workspace already made.
+
+   Layout contract
+   - Desktop: three columns inside one viewport-height frame. Each column
+     scrolls on its own, so the 만들기 button never leaves the first screen.
+   - Under 1080px: one column, natural page scroll, input panel first.
+   - Nothing smaller than 0.72rem anywhere.
+   ========================================================================= */
+
+.studio-workspace-page {
+  max-width: 1560px;
+  margin: 0 auto;
+}
+
+/* Every other workspace body is a scrolling document, so the shell reserves ~112px
+   of bottom padding. This one is a tool that has to fit the screen exactly: with
+   that padding the page scrolls by the same 112px and the sticky toolbar starts
+   covering the kind tabs. */
+.workspace-cv5 .workspace-main:has(> .studio-workspace-page),
+.workspace-main:has(> .studio-workspace-page) {
+  padding-bottom: var(--sp-24);
+}
+
+/* The shell also carries an 80px tail for scrolling bodies (foundry.css). Both
+   have to go, or the page scrolls by exactly that much and the sticky toolbar
+   ends up over the kind tabs. Scoped to this page; every other workspace body
+   keeps its tail. */
+.workspace.foundry-workspace-page:has(.studio-workspace-page) {
+  padding-bottom: 0;
+}
+
+/* The three columns share one viewport-height frame so the first screen holds
+   the whole tool. 68px is the sticky toolbar; the rest is the main padding. */
+.studio-workbench {
+  display: grid;
+  grid-template-columns: minmax(288px, 336px) minmax(0, 1fr) minmax(210px, 254px);
+  gap: 14px;
+  height: calc(100svh - 68px - var(--sp-32) - var(--sp-24));
+  min-height: 520px;
+}
+
+/* <small> inherits by default and the browser then shrinks it to 0.8em, which
+   turned a 0.72rem label into 9.2px. Nothing on this screen goes below 0.72rem,
+   so the element is neutralised here and given a real size where one is wanted. */
+.studio-workbench small { font-size: inherit; }
+
+.studio-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel, 16px);
+  background: color-mix(in srgb, var(--ink-1) 88%, transparent);
+}
+
+.studio-col-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.studio-col-head strong {
+  color: var(--text-strong);
+  font-size: 0.86rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.studio-col-head small {
+  margin-left: auto;
+  color: var(--text-dim);
+  font: 0.72rem var(--font-mono);
+}
+
+.studio-col-body {
+  flex: 1;
+  min-height: 0;
+  padding: 14px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* The 3D viewer sizes its canvas from a ResizeObserver. Without a reserved
+     gutter, content that lands near the scroll threshold makes the scrollbar
+     appear, which narrows the column, which resizes the canvas, which changes
+     the height again — a genuine ResizeObserver loop that the dev overlay
+     surfaces as an unhandled error. A stable gutter removes the oscillation. */
+  scrollbar-gutter: stable;
+}
+
+/* ------------------------------------------------------------- left: input */
+
+.studio-kind-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.studio-kind-tab {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--tint-1);
+  color: var(--text-muted);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .16s ease, background .16s ease, color .16s ease;
+}
+
+.studio-kind-tab:hover { border-color: var(--line-strong); color: var(--text-strong); }
+
+.studio-kind-tab strong {
+  color: inherit;
+  font-size: 0.8rem;
+  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.studio-kind-tab small {
+  color: var(--text-dim);
+  font: 0.72rem var(--font-mono);
+}
+
+.studio-kind-tab.is-selected {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--text-strong);
+}
+
+.studio-kind-tab.is-selected small { color: var(--accent); }
+
+/* What the chosen lane actually does. Two of the four assemble a file in code,
+   and the screen has to say so before the credit is spent. */
+.studio-truth {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--tint-1);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+.studio-templates { margin-top: 12px; }
+
+.studio-templates-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text-dim);
+  font: 0.72rem var(--font-mono);
+  letter-spacing: .04em;
+}
+
+.studio-template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(66px, 1fr));
+  gap: 6px;
+}
+
+.studio-template {
+  display: grid;
+  gap: 3px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--tint-1);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.studio-template.is-selected { border-color: var(--accent); background: var(--accent-soft); }
+
+.studio-template-thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  aspect-ratio: 1;
+  border-radius: 6px;
+  background: var(--ink-3);
+}
+
+.studio-template-thumb img { width: 100%; height: 100%; object-fit: contain; }
+
+.studio-template small {
+  color: inherit;
+  font-size: 0.72rem;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.studio-templates-empty {
+  padding: 8px 10px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 9px;
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  line-height: 1.6;
+}
+
+.studio-field {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  margin-top: 14px;
+}
+
+.studio-field > span {
+  color: var(--text-dim);
+  font: 0.72rem var(--font-mono);
+  letter-spacing: .04em;
+}
+
+.studio-field input,
+.studio-field select,
+.studio-field textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--ink-2);
+  color: var(--text-strong);
+  font: 0.82rem/1.55 var(--font-sans);
+  outline: none;
+  transition: border-color .16s ease, box-shadow .16s ease;
+}
+
+.studio-field textarea { min-height: 96px; resize: vertical; }
+
+.studio-field input:focus-visible,
+.studio-field select:focus-visible,
+.studio-field textarea:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.studio-field-hint {
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.studio-field-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.studio-field-row .studio-field { margin-top: 0; }
+
+.studio-more {
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--tint-1);
+}
+
+.studio-more > summary {
+  padding: 9px 11px;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.studio-more > summary::-webkit-details-marker { display: none; }
+.studio-more > summary::after { content: " ▾"; color: var(--text-dim); }
+.studio-more[open] > summary::after { content: " ▴"; }
+.studio-more > div { padding: 0 11px 12px; }
+.studio-more .studio-field:first-of-type { margin-top: 0; }
+
+/* The make button and its price stay pinned to the bottom of the input column,
+   so they are on the first screen no matter how long the form gets. */
+.studio-make {
+  padding: 12px 14px;
+  border-top: 1px solid var(--line);
+  background: color-mix(in srgb, var(--ink-2) 80%, transparent);
+}
+
+.studio-make-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 11px;
+  background: var(--accent-bright);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter .16s ease;
+}
+
+.studio-make-button:hover:not(:disabled) { filter: brightness(1.12); }
+.studio-make-button:disabled { opacity: .6; cursor: progress; }
+
+.studio-make-price {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-top: 8px;
+  color: var(--text-dim);
+  font: 0.72rem var(--font-mono);
+}
+
+.studio-make-price b { color: var(--text-strong); font-weight: 650; }
+
+.studio-steps {
+  display: grid;
+  gap: 4px;
+  margin-top: 10px;
+}
+
+.studio-step {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-dim);
+  font-size: 0.72rem;
+}
+
+.studio-step i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+
+.studio-step[data-state="running"] { color: var(--accent); }
+.studio-step[data-state="running"] i { background: var(--accent); animation: studio-pulse 1s ease-in-out infinite; }
+.studio-step[data-state="done"] { color: var(--text-muted); }
+.studio-step[data-state="done"] i { background: var(--success); }
+.studio-step[data-state="failed"] { color: var(--danger); }
+.studio-step[data-state="failed"] i { background: var(--danger); }
+
+@keyframes studio-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .studio-step[data-state="running"] i { animation: none; }
+}
+
+.studio-message {
+  margin-top: 10px;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.studio-message[data-tone="error"] { color: var(--danger); }
+.studio-message[data-tone="warn"] { color: var(--warning); }
+
+/* ------------------------------------------------------------ centre: stage */
+
+.studio-stage-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* The stage is a column flex box inside a scroller, so its children shrink below
+   their own content when the sum overflows — which squeezed the viewer to its
+   240px minimum and clipped the clip controls under it. The column scrolls
+   instead. */
+.studio-stage-body > * { flex: none; }
+
+.studio-stage-empty {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px;
+  text-align: center;
+}
+
+.studio-stage-empty h2 {
+  color: var(--text-strong);
+  font-size: clamp(1.1rem, 2.4vw, 1.5rem);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.studio-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 7px;
+  max-width: 620px;
+}
+
+.studio-chip {
+  padding: 7px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--tint-1);
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  cursor: pointer;
+  transition: border-color .16s ease, color .16s ease;
+}
+
+.studio-chip:hover { border-color: var(--accent-line); color: var(--text-strong); }
+
+.studio-view {
+  /* A stray WebGL canvas that lost its sized parent lays out at its drawing
+     buffer height. Nothing in this box may push the fact line and the buttons
+     off the screen, whatever the viewer leaves behind. */
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--ink-2);
+}
+
+.studio-view img {
+  max-width: 100%;
+  max-height: 46vh;
+  height: auto;
+  border-radius: 8px;
+  image-rendering: pixelated;
+  object-fit: contain;
+}
+
+.studio-view-model {
+  --studio-stage-h: clamp(220px, 40vh, 340px);
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+/* The viewer appends its WebGL canvas next to the stage it belongs to rather
+   than inside it whenever the file carries animation clips. Outside
+   `.cv5-embed3d` the shop's `position:absolute; inset:0` rule no longer reaches
+   the canvas; three.js is called with updateStyle=false, so the element lays out
+   at its drawing-buffer height, and the ResizeObserver then sizes the next
+   buffer from the height it just caused — 20,330px and still climbing when this
+   was measured, with the fact line and every button pushed off the screen.
+   Taking any canvas in this stage out of flow ends the loop. */
+/* The canvas is sized by the viewer from whatever node its effect captured, and
+   for a file with clips that node is this wrapper — so the canvas has to be laid
+   over the WHOLE wrapper or the camera's framing lands off the visible box and
+   the model disappears. The stage keeps the hint chips but gives up its own
+   background so the render shows through, and the clip controls are lifted above
+   the canvas so they stay clickable. */
+.studio-view-model > * { position: relative; }
+.studio-view-model canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.studio-view-model .cv5-embed3d { background: none; }
+.studio-view-model > * > div:not(.cv5-embed3d) { position: relative; z-index: 2; }
+.studio-view-model > * { width: 100%; }
+/* The shop viewer reserves 420px; inside a column that shares a screen with the
+   fact line and the buttons it gets a definite height instead. Definite, not
+   `min-height`: the viewer resizes its canvas from a ResizeObserver, and against
+   a height that depends on its own content that observer loops. */
+.studio-view-model .cv5-embed3d {
+  height: var(--studio-stage-h);
+  min-height: 0;
+}
+
+.studio-sheet {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+}
+
+.studio-sheet-cells {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
+  gap: 6px;
+}
+
+.studio-sheet-cell {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--ink-3);
+  background-repeat: no-repeat;
+}
+
+.studio-sheet-cell span {
+  position: absolute;
+  bottom: 2px;
+  left: 3px;
+  color: var(--text-dim);
+  font: 0.72rem var(--font-mono);
+}
+
+.studio-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--tint-1);
+  color: var(--text-muted);
+  font-size: 0.76rem;
+}
+
+.studio-facts b { color: var(--text-strong); font-weight: 650; }
+.studio-facts span { overflow-wrap: anywhere; }
+
+.studio-stage-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.studio-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--tint-1);
+  color: var(--text-strong);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.studio-action:hover { border-color: var(--accent-line); }
+.studio-action-primary { border-color: transparent; background: var(--accent-bright); color: #fff; }
+.studio-action-primary:hover { filter: brightness(1.12); }
+
+.studio-note {
+  padding: 9px 12px;
+  border: 1px solid var(--warning-soft);
+  border-radius: 10px;
+  background: var(--warning-soft);
+  color: var(--text-strong);
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+.studio-files {
+  display: grid;
+  gap: 5px;
+}
+
+.studio-file {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.studio-file strong { color: var(--text-strong); font-weight: 600; overflow-wrap: anywhere; }
+.studio-file small { color: var(--text-dim); font: 0.72rem var(--font-mono); }
+.studio-file a { margin-left: auto; color: var(--accent); font-size: 0.75rem; font-weight: 600; }
+
+/* ---------------------------------------------------------- right: my files */
+
+.studio-mine-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.studio-mine-item {
+  display: grid;
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--tint-1);
+  color: var(--text-muted);
+  text-align: left;
+  cursor: pointer;
+}
+
+.studio-mine-item:hover { border-color: var(--accent-line); }
+.studio-mine-item.is-selected { border-color: var(--accent); background: var(--accent-soft); }
+
+.studio-mine-thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  aspect-ratio: 1;
+  border-radius: 7px;
+  background: var(--ink-3);
+  color: var(--text-dim);
+}
+
+.studio-mine-thumb img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
+
+.studio-mine-item strong {
+  color: var(--text-strong);
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.studio-mine-item small {
+  color: var(--text-dim);
+  font: 0.72rem var(--font-mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.studio-empty-line {
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+/* ------------------------------------------------------------ under the fold */
+
+.studio-extra { display: grid; gap: 8px; }
+
+.studio-extra .studio-more > div { display: grid; gap: 8px; }
+
+.studio-extra-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.studio-lanes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 6px;
+}
+
+.studio-lane {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+}
+
+.studio-lane span { color: var(--text-dim); font: 0.72rem var(--font-mono); }
+.studio-lane strong { color: var(--text-strong); font-size: 0.78rem; font-weight: 650; }
+.studio-lane small { color: var(--text-dim); font-size: 0.72rem; }
+.studio-lane[data-tone="pass"] strong { color: var(--success); }
+.studio-lane[data-tone="fail"] strong { color: var(--danger); }
+
+/* ------------------------------------------------------------------ stacking */
+
+@media (max-width: 1180px) {
+  .studio-workbench { grid-template-columns: minmax(268px, 320px) minmax(0, 1fr); }
+  .studio-col-mine { display: none; }
+  .studio-workbench-has-mine .studio-col-mine { display: flex; }
+}
+
+@media (max-width: 1080px) {
+  .studio-workbench {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+    min-height: 0;
+  }
+  .studio-col { max-height: none; overflow: visible; }
+  .studio-col-body { overflow: visible; }
+  .studio-col-mine { display: flex; }
+  .studio-col-stage { min-height: 380px; }
+  .studio-mine-grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); }
+}
+
+@media (max-width: 460px) {
+  .studio-kind-tabs { grid-template-columns: minmax(0, 1fr); }
+  .studio-field-row { grid-template-columns: minmax(0, 1fr); }
+  .studio-stage-actions .studio-action { flex: 1 1 auto; justify-content: center; }
+}

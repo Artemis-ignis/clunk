@@ -65,3 +65,57 @@ test("series API persists the series identity through the existing generation an
   assert.match(source, /storageVerified/);
   assert.match(source, /if \(creditOperationId\)/);
 });
+
+const templatesRoutePath = new URL("../app/api/series/templates/route.ts", import.meta.url);
+const thumbnailRoutePath = new URL("../app/api/series/templates/[templateId]/thumbnail/route.ts", import.meta.url);
+
+test("the 3D, sheet and animation lanes are served from the template library with no placeholder fallback", async () => {
+  const source = await readFile(routePath, "utf8");
+  assert.match(source, /const TEMPLATE_KINDS = new Set<AssetKind>\(\["3d-model", "sprite-atlas", "animation-clip"\]\)/);
+  assert.match(source, /resolveTemplateSelection/);
+  assert.match(source, /createTemplateAssemblyJob/);
+  assert.match(source, /templateChoiceList/);
+  assert.match(source, /templateObjectKey/);
+  assert.match(source, /TEMPLATE_HONESTY_KO/);
+
+  // A template request that cannot be resolved must answer 400 with the catalogue, and must
+  // never reach createClunkSeriesJob — that function writes the 1.2 KB box this lane replaced.
+  const templateBranch = source.indexOf("if (templateKind) {");
+  const proceduralCall = source.indexOf("job = createClunkSeriesJob({");
+  const resolveCall = source.indexOf("const resolved = resolveTemplateSelection({");
+  const refusal = source.indexOf("templates: templateChoiceList(resolved.templates),");
+  const assembleCall = source.indexOf("const assembled = createTemplateAssemblyJob({");
+  assert.ok(templateBranch > 0 && resolveCall > templateBranch, "the template branch resolves a template first");
+  assert.ok(refusal > resolveCall && refusal < assembleCall, "an unresolved request is refused before anything is assembled");
+  assert.ok(proceduralCall > assembleCall, "the procedural recipe is only the else branch");
+  assert.match(source.slice(templateBranch, proceduralCall), /} else {/);
+
+  // Storage failures inside the template branch must precede any credit reservation.
+  const reservation = source.indexOf("const reservation = await reserveCreditOperation");
+  assert.ok(source.indexOf("TEMPLATE_LIBRARY_UNAVAILABLE") < reservation);
+  assert.ok(source.indexOf("TEMPLATE_FILE_MISSING") < reservation);
+  assert.ok(source.indexOf("TEMPLATE_FILE_TOO_LARGE") < reservation);
+  assert.match(source, /MAX_TEMPLATE_BYTES = 3 \* 1024 \* 1024/);
+
+  // The result has to carry the assembly record and the honesty line into the response and
+  // into the stored recipe, or the user cannot tell a template from a model.
+  assert.equal((source.match(/\.\.\.\(assembly \? \{ assembly \} : \{\}\)/g) ?? []).length, 2, "both recipe rows record the assembly");
+  assert.equal((source.match(/assembly, honesty: TEMPLATE_HONESTY_KO/g) ?? []).length, 2, "both responses say how the file was made");
+});
+
+test("the template catalogue and thumbnail routes are authenticated and cannot be walked", async () => {
+  const catalogue = await readFile(templatesRoutePath, "utf8");
+  assert.match(catalogue, /requireClunkContext/);
+  assert.match(catalogue, /describeTemplateCatalog/);
+  assert.match(catalogue, /schema: "clunk.series-templates.v1"/);
+  assert.match(catalogue, /status: 503/, "an unbuilt library says so rather than answering an empty list as success");
+  assert.doesNotMatch(catalogue, /fetch\(/);
+
+  const thumbnail = await readFile(thumbnailRoutePath, "utf8");
+  assert.match(thumbnail, /requireClunkContext/);
+  // The object key is built from library.json, never from the request.
+  assert.match(thumbnail, /templateObjectKey\(template\.id, palette\.thumbnail\)/);
+  assert.match(thumbnail, /\/\^\[a-z0-9\]\[a-z0-9-\]\{0,63\}\$\//);
+  assert.doesNotMatch(thumbnail, /searchParams\.get\("file"\)/);
+  assert.match(thumbnail, /"cache-control": "private/);
+});
