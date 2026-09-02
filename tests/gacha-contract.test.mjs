@@ -311,7 +311,6 @@ test("카드는 읽지 못한 항목을 빈칸으로 채우지 않고 줄째로 
   assert.deepEqual(tractor, [
     { label: "테마", value: "농장 소품" },
     { label: "폴리곤", value: "1,060개" },
-    { label: "그리기 횟수", value: "18회" },
     { label: "재질", value: "5개" },
     { label: "실제 크기", value: "2.29 × 2.03 × 2.98 m" },
     { label: "파일 크기", value: "74.8 KB" },

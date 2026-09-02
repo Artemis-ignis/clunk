@@ -452,8 +452,6 @@ export function statRowsOf(listing: GachaListing): StatRow[] {
   const rows: StatRow[] = [{ label: "테마", value: themeById(categoryOf(listing)).name }];
   const polygons = polygonsOf(listing);
   if (polygons) rows.push({ label: "폴리곤", value: polygons });
-  const drawCalls = drawCallsOf(listing);
-  if (drawCalls) rows.push({ label: "그리기 횟수", value: drawCalls });
   const materials = materialsOf(listing);
   if (materials) rows.push({ label: "재질", value: materials });
   const bounds = boundsOf(listing);
