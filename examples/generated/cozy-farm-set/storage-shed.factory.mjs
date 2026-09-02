@@ -21,8 +21,25 @@ import { createKit, place, selectMaterials, summarize } from "./farm-kit.mjs";
 // --- Carcass (metres) -------------------------------------------------------------------
 const HALF_W = 1.05; // outer face of the siding, X
 const HALF_D = 0.85; // outer face of the siding, Z
-const SHEATH_W = 1.02; // structural shell the siding is nailed to
-const SHEATH_D = 0.82;
+/*
+ * Structural shell the siding is nailed to.
+ *
+ * These two numbers have to keep the shell *behind* the tilted siding, and the first cut did
+ * not. A board is 0.03 thick, 0.255 tall and leans out by BOARD_TILT, so its inner edge reaches
+ * 0.015*cos(0.11) + 0.1275*sin(0.11) = 0.029 m in from its nominal plane at 0.835 — that is
+ * 0.806 from the centre. The shell panels are 0.04 thick, so their outer face sat at 0.84 and
+ * 1.04: a third of a centimetre *inside* every board. Two nearly parallel surfaces crossing at a
+ * shallow angle is exactly what a depth buffer cannot resolve, and the rear wall came out
+ * carrying a stack of black wedges, one per course. Measured before the fix by
+ * scripts/dogfood-intersections.mjs: wall_sheathing and wall_lap_siding shared 55 crossing
+ * triangles with 49.8% of one surface inside the other.
+ *
+ * 0.975 and 0.775 put the shell's outer face at 0.995 and 0.795, about 11 mm clear of the
+ * boards. Everything else in the shell is derived from them so the clearance cannot be lost by
+ * editing one number and not another.
+ */
+const SHEATH_W = 0.975;
+const SHEATH_D = 0.775;
 const SILL_TOP = 0.26; // siding and door start here; below is pier + sill + skirt
 const PLATE_Y = 2.1; // top of the walls
 
@@ -142,10 +159,10 @@ export function createStorageShed(THREE) {
   root.add(carcass);
 
   const shell = [
-    place(kit.box(2.04, 0.04, 1.64), [0, 0.24, 0]), // floor
-    place(kit.box(2.04, PLATE_Y - SILL_TOP, 0.04), [0, (PLATE_Y + SILL_TOP) / 2, -SHEATH_D]),
-    place(kit.box(0.04, PLATE_Y - SILL_TOP, 1.64), [SHEATH_W, (PLATE_Y + SILL_TOP) / 2, 0]),
-    place(kit.box(0.04, PLATE_Y - SILL_TOP, 1.64), [-SHEATH_W, (PLATE_Y + SILL_TOP) / 2, 0]),
+    place(kit.box(SHEATH_W * 2, 0.04, SHEATH_D * 2), [0, 0.24, 0]), // floor
+    place(kit.box(SHEATH_W * 2, PLATE_Y - SILL_TOP, 0.04), [0, (PLATE_Y + SILL_TOP) / 2, -SHEATH_D]),
+    place(kit.box(0.04, PLATE_Y - SILL_TOP, SHEATH_D * 2), [SHEATH_W, (PLATE_Y + SILL_TOP) / 2, 0]),
+    place(kit.box(0.04, PLATE_Y - SILL_TOP, SHEATH_D * 2), [-SHEATH_W, (PLATE_Y + SILL_TOP) / 2, 0]),
   ];
   // The front wall is interrupted by the doorway, so it is two strips rather than one panel.
   for (const side of [-1, 1]) {
@@ -349,11 +366,20 @@ export function createStorageShed(THREE) {
       place(kit.box(0.13, 0.05, 0.9), [1.1, 0.985, 0.05], [0, 0, -0.12]),
     ]),
   );
-  windowGroup.add(kit.solo("window_glass", mat.glass, kit.box(0.02, 0.6, 0.68), [1.048, 1.34, 0.05]));
+  /*
+   * The pane and its mullions have to sit outboard of the siding, not in it.
+   *
+   * The wall boards reach 1.064 from the centre once their lean is taken into account, and the
+   * glass used to sit at 1.038-1.058 — behind that. The board edges therefore drew *through* the
+   * pane and the window came out with brown bars across the glass from every side angle. The
+   * frame's stiles run 1.04 to 1.10, so there is room to put the glass at 1.068-1.088 and the
+   * mullions at 1.078-1.098: clear of the boards, still inside the frame.
+   */
+  windowGroup.add(kit.solo("window_glass", mat.glass, kit.box(0.02, 0.6, 0.68), [1.078, 1.34, 0.05]));
   windowGroup.add(
     kit.merged("window_mullions", mat.woodFrame, [
-      place(kit.box(0.03, 0.6, 0.05), [1.062, 1.34, 0.05]),
-      place(kit.box(0.03, 0.05, 0.68), [1.062, 1.34, 0.05]),
+      place(kit.box(0.02, 0.6, 0.05), [1.088, 1.34, 0.05]),
+      place(kit.box(0.02, 0.05, 0.68), [1.088, 1.34, 0.05]),
     ]),
   );
 
