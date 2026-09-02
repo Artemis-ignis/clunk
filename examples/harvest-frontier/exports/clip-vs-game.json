@@ -1,0 +1,285 @@
+{
+  "checkedAt": "2026-09-02T07:53:51.384Z",
+  "method": "PlayerMotionController driven at 1/240 s to each phase, against the exported GLB evaluated by AnimationMixer at the same phase. idle/walk compare against the controller verbatim; the four action clips compare against the controller PLUS the documented axis mirror, and also report how far they sit from the unmirrored game pose.",
+  "mirroredNodes": [
+    "leftUpperArmPivot",
+    "leftLowerArmPivot",
+    "rightUpperArmPivot",
+    "rightLowerArmPivot",
+    "toolAnchor"
+  ],
+  "worstDegrees": 2.77,
+  "worstAt": "walk@0.75 spine",
+  "rows": [
+    {
+      "clip": "idle",
+      "phase": 0,
+      "referenceIsMirrored": false,
+      "maxDegVsReference": 0,
+      "worstJoint": "playerRig",
+      "maxPosVsReference": 0,
+      "maxDegVsUnmirroredGame": 0
+    },
+    {
+      "clip": "idle",
+      "phase": 0.25,
+      "referenceIsMirrored": false,
+      "maxDegVsReference": 0.01,
+      "worstJoint": "spine",
+      "maxPosVsReference": 0,
+      "maxDegVsUnmirroredGame": 0.01
+    },
+    {
+      "clip": "idle",
+      "phase": 0.5,
+      "referenceIsMirrored": false,
+      "maxDegVsReference": 0,
+      "worstJoint": "playerRig",
+      "maxPosVsReference": 0,
+      "maxDegVsUnmirroredGame": 0
+    },
+    {
+      "clip": "idle",
+      "phase": 0.75,
+      "referenceIsMirrored": false,
+      "maxDegVsReference": 0.01,
+      "worstJoint": "spine",
+      "maxPosVsReference": 0,
+      "maxDegVsUnmirroredGame": 0.01
+    },
+    {
+      "clip": "idle",
+      "phase": 1,
+      "referenceIsMirrored": false,
+      "maxDegVsReference": 0,
+      "worstJoint": "playerRig",
+      "maxPosVsReference": 0,
+      "maxDegVsUnmirroredGame": 0
+    },
+    {
+      "clip": "walk",
+      "phase": 0,
+      "referenceIsMirrored": false,
+      "maxDegVsReference": 0,
+      "worstJoint": "playerRig",
+      "maxPosVsReference": 0,
+      "maxDegVsUnmirroredGame": 0
+    },
+    {
+      "clip": "walk",
+      "phase": 0.25,
+      "referenceIsMirrored": false,
+      "maxDegVsReference": 0.57,
+      "worstJoint": "spine",
+      "maxPosVsReference": 0.0002,
+      "maxDegVsUnmirroredGame": 0.57
+    },
+    {
+      "clip": "walk",
+      "phase": 0.5,
+      "referenceIsMirrored": false,
+      "maxDegVsReference": 1.37,
+      "worstJoint": "spine",
+      "maxPosVsReference": 0.0045,
+      "maxDegVsUnmirroredGame": 1.37
+    },
+    {
+      "clip": "walk",
+      "phase": 0.75,
+      "referenceIsMirrored": false,
+      "maxDegVsReference": 2.77,
+      "worstJoint": "spine",
+      "maxPosVsReference": 0.0002,
+      "maxDegVsUnmirroredGame": 2.77
+    },
+    {
+      "clip": "walk",
+      "phase": 1,
+      "referenceIsMirrored": false,
+      "maxDegVsReference": 0.78,
+      "worstJoint": "spine",
+      "maxPosVsReference": 0,
+      "maxDegVsUnmirroredGame": 0.78
+    },
+    {
+      "clip": "inspect",
+      "phase": 0,
+      "referenceIsMirrored": true,
+      "maxDegVsReference": 0,
+      "worstJoint": "playerRig",
+      "maxPosVsReference": 0,
+      "maxDegVsUnmirroredGame": 0
+    },
+    {
+      "clip": "inspect",
+      "phase": 0.25,
+      "referenceIsMirrored": true,
+      "maxDegVsReference": 0.56,
+      "worstJoint": "rightUpperArmPivot",
+      "maxPosVsReference": 0.0004,
+      "maxDegVsUnmirroredGame": 62.85
+    },
+    {
+      "clip": "inspect",
+      "phase": 0.5,
+      "referenceIsMirrored": true,
+      "maxDegVsReference": 0.07,
+      "worstJoint": "rightUpperArmPivot",
+      "maxPosVsReference": 0.0001,
+      "maxDegVsUnmirroredGame": 32.51
+    },
+    {
+      "clip": "inspect",
+      "phase": 0.75,
+      "referenceIsMirrored": true,
+      "maxDegVsReference": 0.06,
+      "worstJoint": "rightUpperArmPivot",
+      "maxPosVsReference": 0,
+      "maxDegVsUnmirroredGame": 8.16
+    },
+    {
+      "clip": "inspect",
+      "phase": 1,
+      "referenceIsMirrored": true,
+      "maxDegVsReference": 0,
+      "worstJoint": "playerRig",
+      "maxPosVsReference": 0,
+      "maxDegVsUnmirroredGame": 0
+    },
+    {
+      "clip": "water",
+      "phase": 0,
+      "referenceIsMirrored": true,
+      "maxDegVsReference": 0,
+      "worstJoint": "playerRig",
+      "maxPosVsReference": 0,
+      "maxDegVsUnmirroredGame": 0
+    },
+    {
+      "clip": "water",
+      "phase": 0.25,
+      "referenceIsMirrored": true,
+      "maxDegVsReference": 1.83,
+      "worstJoint": "rightUpperArmPivot",
+      "maxPosVsReference": 0.002,
+      "maxDegVsUnmirroredGame": 92.65
+    },
+    {
+      "clip": "water",
+      "phase": 0.5,
+      "referenceIsMirrored": true,
+      "maxDegVsReference": 0.06,
+      "worstJoint": "rightUpperArmPivot",
+      "maxPosVsReference": 0.0001,
+      "maxDegVsUnmirroredGame": 49.23
+    },
+    {
+      "clip": "water",
+      "phase": 0.75,
+      "referenceIsMirrored": true,
+      "maxDegVsReference": 0.05,
+      "worstJoint": "rightUpperArmPivot",
+      "maxPosVsReference": 0,
+      "maxDegVsUnmirroredGame": 12.34
+    },
+    {
+      "clip": "water",
+      "phase": 1,
+      "referenceIsMirrored": true,
+      "maxDegVsReference": 0,
+      "worstJoint": "playerRig",
+      "maxPosVsReference": 0,
+      "maxDegVsUnmirroredGame": 0
+    },
+    {
+      "clip": "hoe",
+      "phase": 0,
+      "referenceIsMirrored": true,
+      "maxDegVsReference": 0.02,
+      "worstJoint": "rightUpperArmPivot",
+      "maxPosVsReference": 0,
+      "maxDegVsUnmirroredGame": 123.76
+    },
+    {
+      "clip": "hoe",
+      "phase": 0.25,
+      "referenceIsMirrored": true,
+      "maxDegVsReference": 0.72,
+      "worstJoint": "toolAnchor",
+      "maxPosVsReference": 0.001,
+      "maxDegVsUnmirroredGame": 154.1
+    },
+    {
+      "clip": "hoe",
+      "phase": 0.5,
+      "referenceIsMirrored": true,
+      "maxDegVsReference": 0.05,
+      "worstJoint": "toolAnchor",
+      "maxPosVsReference": 0.0001,
+      "maxDegVsUnmirroredGame": 139.48
+    },
+    {
+      "clip": "hoe",
+      "phase": 0.75,
+      "referenceIsMirrored": true,
+      "maxDegVsReference": 0.04,
+      "worstJoint": "toolAnchor",
+      "maxPosVsReference": 0.0001,
+      "maxDegVsUnmirroredGame": 127.7
+    },
+    {
+      "clip": "hoe",
+      "phase": 1,
+      "referenceIsMirrored": true,
+      "maxDegVsReference": 0.02,
+      "worstJoint": "toolAnchor",
+      "maxPosVsReference": 0,
+      "maxDegVsUnmirroredGame": 123.76
+    },
+    {
+      "clip": "harvest",
+      "phase": 0,
+      "referenceIsMirrored": true,
+      "maxDegVsReference": 0,
+      "worstJoint": "playerRig",
+      "maxPosVsReference": 0,
+      "maxDegVsUnmirroredGame": 0
+    },
+    {
+      "clip": "harvest",
+      "phase": 0.25,
+      "referenceIsMirrored": true,
+      "maxDegVsReference": 0.97,
+      "worstJoint": "rightUpperArmPivot",
+      "maxPosVsReference": 0.0024,
+      "maxDegVsUnmirroredGame": 71.43
+    },
+    {
+      "clip": "harvest",
+      "phase": 0.5,
+      "referenceIsMirrored": true,
+      "maxDegVsReference": 0.03,
+      "worstJoint": "rightUpperArmPivot",
+      "maxPosVsReference": 0.0001,
+      "maxDegVsUnmirroredGame": 37.7
+    },
+    {
+      "clip": "harvest",
+      "phase": 0.75,
+      "referenceIsMirrored": true,
+      "maxDegVsReference": 0.04,
+      "worstJoint": "rightUpperArmPivot",
+      "maxPosVsReference": 0.0001,
+      "maxDegVsUnmirroredGame": 9.46
+    },
+    {
+      "clip": "harvest",
+      "phase": 1,
+      "referenceIsMirrored": true,
+      "maxDegVsReference": 0,
+      "worstJoint": "playerRig",
+      "maxPosVsReference": 0,
+      "maxDegVsUnmirroredGame": 0
+    }
+  ]
+}

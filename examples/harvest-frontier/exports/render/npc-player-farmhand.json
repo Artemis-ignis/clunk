@@ -34,40 +34,58 @@
     "left": 369,
     "right": 369
   },
-  "triangles": 6076,
-  "meshes": 14,
-  "vertexColouredMeshes": 14,
+  "triangles": 7040,
+  "meshes": 21,
+  "vertexColouredMeshes": 21,
   "animations": [
     {
       "name": "idle",
       "seconds": 8.976,
-      "tracks": 26
+      "tracks": 29
     },
     {
       "name": "walk",
       "seconds": 0.827,
-      "tracks": 26
+      "tracks": 29
     },
     {
       "name": "inspect",
       "seconds": 0.78,
-      "tracks": 26
+      "tracks": 29
     },
     {
       "name": "water",
       "seconds": 1.24,
-      "tracks": 26
+      "tracks": 29
     },
     {
       "name": "hoe",
       "seconds": 1.02,
-      "tracks": 26
+      "tracks": 29
     },
     {
       "name": "harvest",
       "seconds": 1.12,
-      "tracks": 26
+      "tracks": 29
     }
+  ],
+  "animatedParts": [
+    "playerRig",
+    "pelvis",
+    "spine",
+    "headPivot",
+    "leftUpperArmPivot",
+    "leftLowerArmPivot",
+    "rightUpperArmPivot",
+    "rightLowerArmPivot",
+    "leftThighPivot",
+    "leftShinPivot",
+    "rightThighPivot",
+    "rightShinPivot",
+    "toolAnchor",
+    "toolHoe",
+    "toolWateringCan",
+    "toolHarvestBasket"
   ],
   "boundsMetres": [
     0.817,

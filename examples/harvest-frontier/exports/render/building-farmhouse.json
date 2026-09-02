@@ -23,7 +23,7 @@
     "height": 570.6666666666666
   },
   "subjectFillFraction": 0.7598,
-  "subjectPixelCoverageFraction": 0.2657,
+  "subjectPixelCoverageFraction": 0.2659,
   "clippedTop": false,
   "clippedBottom": false,
   "clippedLeft": false,
@@ -34,9 +34,11 @@
     "left": 123,
     "right": 123
   },
-  "triangles": 11836,
-  "meshes": 15,
-  "vertexColouredMeshes": 15,
+  "triangles": 12364,
+  "meshes": 23,
+  "vertexColouredMeshes": 23,
+  "animations": [],
+  "animatedParts": [],
   "boundsMetres": [
     8.5651,
     6.2559,

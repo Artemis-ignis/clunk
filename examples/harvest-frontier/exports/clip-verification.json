@@ -1,116 +1,146 @@
 {
-  "checkedAt": "2026-09-02T06:32:16.888Z",
-  "method": "GLTFLoader (+MeshoptDecoder) -> PropertyBinding.findNode per track -> AnimationMixer.setTime at 4 phases -> local TRS diff vs rest pose",
+  "checkedAt": "2026-09-02T09:30:18.147Z",
+  "method": "GLTFLoader (+MeshoptDecoder) -> PropertyBinding.findNode per track -> AnimationMixer.setTime at 4 phases -> local TRS diff vs rest pose; loopGap is the largest first-keyframe-to-last-keyframe difference across the clip tracks",
   "failures": 0,
   "assets": {
     "choi-minseo": [
       {
         "clip": "idle",
+        "scaledUpNodes": [],
         "seconds": 7.854,
         "tracks": 2,
         "unbound": [],
         "movedNodes": 1,
-        "maxDelta": 0.01807
+        "maxDelta": 0.01807,
+        "loopGap": 0
       }
     ],
     "han-seojun": [
       {
         "clip": "idle",
+        "scaledUpNodes": [],
         "seconds": 7.854,
         "tracks": 2,
         "unbound": [],
         "movedNodes": 1,
-        "maxDelta": 0.00939
+        "maxDelta": 0.00939,
+        "loopGap": 0
       }
     ],
     "kang-taeho": [
       {
         "clip": "idle",
+        "scaledUpNodes": [],
         "seconds": 7.854,
         "tracks": 2,
         "unbound": [],
         "movedNodes": 1,
-        "maxDelta": 0.01564
+        "maxDelta": 0.01564,
+        "loopGap": 0
       }
     ],
     "lee-eunha": [
       {
         "clip": "idle",
+        "scaledUpNodes": [],
         "seconds": 7.854,
         "tracks": 2,
         "unbound": [],
         "movedNodes": 1,
-        "maxDelta": 0.01807
+        "maxDelta": 0.01807,
+        "loopGap": 0
       }
     ],
     "park-yuna": [
       {
         "clip": "idle",
+        "scaledUpNodes": [],
         "seconds": 7.854,
         "tracks": 2,
         "unbound": [],
         "movedNodes": 1,
-        "maxDelta": 0.01617
+        "maxDelta": 0.01617,
+        "loopGap": 0
       }
     ],
     "player-farmhand": [
       {
         "clip": "idle",
+        "scaledUpNodes": [],
         "seconds": 8.976,
-        "tracks": 26,
+        "tracks": 29,
         "unbound": [],
         "movedNodes": 13,
-        "maxDelta": 0.01186
+        "maxDelta": 0.01186,
+        "loopGap": 0
       },
       {
         "clip": "walk",
+        "scaledUpNodes": [],
         "seconds": 0.827,
-        "tracks": 26,
+        "tracks": 29,
         "unbound": [],
         "movedNodes": 13,
-        "maxDelta": 0.22452
+        "maxDelta": 0.22452,
+        "loopGap": 0
       },
       {
         "clip": "inspect",
+        "scaledUpNodes": [],
         "seconds": 0.78,
-        "tracks": 26,
+        "tracks": 29,
         "unbound": [],
         "movedNodes": 13,
-        "maxDelta": 0.19606
+        "maxDelta": 0.19606,
+        "loopGap": 0
       },
       {
         "clip": "water",
-        "seconds": 1.24,
-        "tracks": 26,
+        "scaledUpNodes": [
+          "toolWateringCan"
+        ],
+        "seconds": 1.6,
+        "tracks": 29,
         "unbound": [],
-        "movedNodes": 13,
-        "maxDelta": 0.29427
+        "movedNodes": 14,
+        "maxDelta": 1.51264,
+        "loopGap": 0
       },
       {
         "clip": "hoe",
-        "seconds": 1.02,
-        "tracks": 26,
+        "scaledUpNodes": [
+          "toolHoe"
+        ],
+        "seconds": 1.1,
+        "tracks": 29,
         "unbound": [],
-        "movedNodes": 13,
-        "maxDelta": 0.59002
+        "movedNodes": 14,
+        "maxDelta": 1.50294,
+        "loopGap": 0
       },
       {
         "clip": "harvest",
-        "seconds": 1.12,
-        "tracks": 26,
+        "scaledUpNodes": [
+          "toolHarvestBasket"
+        ],
+        "seconds": 1.4,
+        "tracks": 29,
         "unbound": [],
-        "movedNodes": 13,
-        "maxDelta": 0.22648
+        "movedNodes": 14,
+        "maxDelta": 1,
+        "loopGap": 0
       }
     ],
     "farm-windmill": [
       {
         "clip": "blades-spin",
+        "scaledUpNodes": [],
         "seconds": 8,
         "tracks": 1,
         "unbound": [],
         "movedNodes": 1,
-        "maxDelta": 1.31379
+        "maxDelta": 1.31379,
+        "loopGap": 0
       }
     ]
   }

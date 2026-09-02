@@ -1,0 +1,362 @@
+{
+  "input": "examples\\harvest-frontier\\runtime-animated\\cultivator.compact.m1.glb",
+  "output": "examples\\harvest-frontier\\runtime-animated\\cultivator.fixed.glb",
+  "deadTracks": {
+    "baked": [
+      {
+        "node": "pivothitchLowerLeft",
+        "property": "quaternion",
+        "clips": [
+          "work"
+        ],
+        "constant": [
+          0,
+          0,
+          -0.144505,
+          0.989502
+        ],
+        "restBefore": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "restAfter": [
+          0,
+          0,
+          -0.144505,
+          0.989504
+        ],
+        "alsoAnimatedLiveIn": []
+      },
+      {
+        "node": "pivothitchLowerRight",
+        "property": "quaternion",
+        "clips": [
+          "work"
+        ],
+        "constant": [
+          0,
+          0,
+          0.144505,
+          0.989502
+        ],
+        "restBefore": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "restAfter": [
+          0,
+          0,
+          0.144505,
+          0.989504
+        ],
+        "alsoAnimatedLiveIn": []
+      },
+      {
+        "node": "pivothitchTopLink",
+        "property": "quaternion",
+        "clips": [
+          "work"
+        ],
+        "constant": [
+          0,
+          0,
+          -0.094852,
+          0.995483
+        ],
+        "restBefore": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "restAfter": [
+          0,
+          0,
+          -0.094852,
+          0.995491
+        ],
+        "alsoAnimatedLiveIn": []
+      },
+      {
+        "node": "pivotdepthAdjust",
+        "property": "quaternion",
+        "clips": [
+          "work"
+        ],
+        "constant": [
+          0,
+          0,
+          -0.119694,
+          0.992798
+        ],
+        "restBefore": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "restAfter": [
+          0,
+          0,
+          -0.119695,
+          0.992811
+        ],
+        "alsoAnimatedLiveIn": []
+      }
+    ],
+    "refused": [],
+    "removedByClip": [
+      {
+        "clip": "work",
+        "removed": [
+          "pivothitchLowerLeft.quaternion",
+          "pivothitchLowerRight.quaternion",
+          "pivothitchTopLink.quaternion",
+          "pivotdepthAdjust.quaternion"
+        ],
+        "tracksBefore": 13,
+        "tracksAfter": 9
+      }
+    ]
+  },
+  "tineMaterialCheck": {
+    "asked": "make the one light-grey tine shank adopt the shade the other six use",
+    "found": {
+      "tine1": {
+        "baseColour": "#29342e",
+        "materialName": null,
+        "vertexColours": false
+      },
+      "tine2": {
+        "baseColour": "#29342e",
+        "materialName": null,
+        "vertexColours": false
+      },
+      "tine3": {
+        "baseColour": "#29342e",
+        "materialName": null,
+        "vertexColours": false
+      },
+      "tine4": {
+        "baseColour": "#29342e",
+        "materialName": null,
+        "vertexColours": false
+      },
+      "tine5": {
+        "baseColour": "#29342e",
+        "materialName": null,
+        "vertexColours": false
+      },
+      "tine6": {
+        "baseColour": "#29342e",
+        "materialName": null,
+        "vertexColours": false
+      },
+      "tine7": {
+        "baseColour": "#29342e",
+        "materialName": null,
+        "vertexColours": false
+      }
+    },
+    "distinctColours": [
+      "#29342e"
+    ],
+    "verdict": "no mismatch exists: all seven shanks already share one colour, so nothing was changed",
+    "theGreyObjectOnTheCentreline": [
+      {
+        "name": "depthAdjuster",
+        "baseColour": "#7a8073"
+      },
+      {
+        "name": "depthAdjusterHandle",
+        "baseColour": "#dcae55"
+      }
+    ],
+    "note": "depthAdjuster hangs at z = 0, directly in front of tine4, which is what reads as \"the centre tine is grey\""
+  },
+  "gaugeWheel": {
+    "movedNodes": [
+      "pivotgaugeWheelLeft",
+      "pivotgaugeWheelRight"
+    ],
+    "upMm": 108,
+    "inboardMm": 0,
+    "shareContactTrianglePairsBefore": 3370,
+    "shareContactPartsBefore": [
+      "pivotgaugeWheelLeft: gaugeWheelLefttire x sweep1",
+      "pivotgaugeWheelLeft: gaugeWheelLeftsidewall x sweep1",
+      "pivotgaugeWheelLeft: gaugeWheelLeftlug05 x sweep1",
+      "pivotgaugeWheelLeft: gaugeWheelLeftlug06 x sweep1",
+      "pivotgaugeWheelLeft: gaugeWheelLeftlug07 x sweep1",
+      "pivotgaugeWheelLeft: gaugeWheelLeftlug08 x sweep1",
+      "pivotgaugeWheelLeft: gaugeWheelLeftlug09 x sweep1",
+      "pivotgaugeWheelLeft: gaugeWheelLeftrim x sweep1",
+      "pivotgaugeWheelRight: gaugeWheelRighttire x sweep7",
+      "pivotgaugeWheelRight: gaugeWheelRightsidewall x sweep7",
+      "pivotgaugeWheelRight: gaugeWheelRightlug05 x sweep7",
+      "pivotgaugeWheelRight: gaugeWheelRightlug06 x sweep7",
+      "pivotgaugeWheelRight: gaugeWheelRightlug07 x sweep7",
+      "pivotgaugeWheelRight: gaugeWheelRightlug08 x sweep7",
+      "pivotgaugeWheelRight: gaugeWheelRightlug09 x sweep7",
+      "pivotgaugeWheelRight: gaugeWheelRightrim x sweep7"
+    ],
+    "shareContactTrianglePairsAfter": 0,
+    "shareContactPartsAfter": [],
+    "everythingElseStillTouchedAfter": [
+      "pivotgaugeWheelLeft: gaugeWheelLefttire x gaugeWheelLeftfork",
+      "pivotgaugeWheelLeft: gaugeWheelLefttire x gaugeWheelLeftsupportRear",
+      "pivotgaugeWheelLeft: gaugeWheelLefttire x gaugeWheelLeftsupportFront",
+      "pivotgaugeWheelLeft: gaugeWheelLeftsidewall x gaugeWheelLeftfork",
+      "pivotgaugeWheelLeft: gaugeWheelLeftsidewall x gaugeWheelLeftsupportRear",
+      "pivotgaugeWheelLeft: gaugeWheelLeftsidewall x gaugeWheelLeftsupportFront",
+      "pivotgaugeWheelLeft: gaugeWheelLeftlug01 x gaugeWheelLeftfork",
+      "pivotgaugeWheelLeft: gaugeWheelLeftlug01 x gaugeWheelLeftsupportRear",
+      "pivotgaugeWheelLeft: gaugeWheelLeftlug02 x gaugeWheelLeftfork",
+      "pivotgaugeWheelLeft: gaugeWheelLeftlug07 x tine1",
+      "pivotgaugeWheelLeft: gaugeWheelLeftlug08 x tine1",
+      "pivotgaugeWheelLeft: gaugeWheelLeftlug09 x tine1",
+      "pivotgaugeWheelLeft: gaugeWheelLeftlug12 x gaugeWheelLeftfork",
+      "pivotgaugeWheelLeft: gaugeWheelLeftlug12 x gaugeWheelLeftsupportFront",
+      "pivotgaugeWheelLeft: gaugeWheelLefthub x gaugeWheelLeftsupportRear",
+      "pivotgaugeWheelLeft: gaugeWheelLefthub x gaugeWheelLeftsupportFront",
+      "pivotgaugeWheelLeft: gaugeWheelLeftrim x gaugeWheelLeftsupportRear",
+      "pivotgaugeWheelLeft: gaugeWheelLeftrim x gaugeWheelLeftsupportFront",
+      "pivotgaugeWheelRight: gaugeWheelRighttire x gaugeWheelRightfork",
+      "pivotgaugeWheelRight: gaugeWheelRighttire x gaugeWheelRightsupportRear",
+      "pivotgaugeWheelRight: gaugeWheelRighttire x gaugeWheelRightsupportFront",
+      "pivotgaugeWheelRight: gaugeWheelRightsidewall x gaugeWheelRightfork",
+      "pivotgaugeWheelRight: gaugeWheelRightsidewall x gaugeWheelRightsupportRear",
+      "pivotgaugeWheelRight: gaugeWheelRightsidewall x gaugeWheelRightsupportFront",
+      "pivotgaugeWheelRight: gaugeWheelRightlug01 x gaugeWheelRightfork",
+      "pivotgaugeWheelRight: gaugeWheelRightlug01 x gaugeWheelRightsupportRear",
+      "pivotgaugeWheelRight: gaugeWheelRightlug02 x gaugeWheelRightfork",
+      "pivotgaugeWheelRight: gaugeWheelRightlug07 x tine7",
+      "pivotgaugeWheelRight: gaugeWheelRightlug08 x tine7",
+      "pivotgaugeWheelRight: gaugeWheelRightlug12 x gaugeWheelRightfork",
+      "pivotgaugeWheelRight: gaugeWheelRightlug12 x gaugeWheelRightsupportFront",
+      "pivotgaugeWheelRight: gaugeWheelRighthub x gaugeWheelRightsupportRear",
+      "pivotgaugeWheelRight: gaugeWheelRighthub x gaugeWheelRightsupportFront",
+      "pivotgaugeWheelRight: gaugeWheelRightrim x gaugeWheelRightsupportRear",
+      "pivotgaugeWheelRight: gaugeWheelRightrim x gaugeWheelRightsupportFront",
+      "pivotgaugeWheelRight: gaugeWheelRightlug09 x tine7",
+      "pivotgaugeWheelRight: gaugeWheelRighttire x tine7",
+      "pivotgaugeWheelLeft: gaugeWheelLefttire x tine1"
+    ],
+    "buriedFractionBefore": "89 mm of a 485 mm wheel inside the share, i.e. 37% of the radius"
+  },
+  "ground": {
+    "movedNode": "cultivatorRoot",
+    "raisedMm": 299.3,
+    "worstMinYmmBefore": -299.3,
+    "worstMinYmmAfter": 0,
+    "restMinYmmBefore": -277,
+    "restMinYmmAfter": 22.3,
+    "perPhaseBefore": [
+      {
+        "pose": "rest",
+        "minYmm": -277
+      },
+      {
+        "pose": "work@0",
+        "minYmm": -299.2
+      },
+      {
+        "pose": "work@0.125",
+        "minYmm": -299.3
+      },
+      {
+        "pose": "work@0.25",
+        "minYmm": -299
+      },
+      {
+        "pose": "work@0.375",
+        "minYmm": -298.7
+      },
+      {
+        "pose": "work@0.5",
+        "minYmm": -298.4
+      },
+      {
+        "pose": "work@0.625",
+        "minYmm": -299
+      },
+      {
+        "pose": "work@0.75",
+        "minYmm": -299.1
+      },
+      {
+        "pose": "work@0.875",
+        "minYmm": -299.1
+      }
+    ],
+    "perPhaseAfter": [
+      {
+        "pose": "rest",
+        "minYmm": 22.3
+      },
+      {
+        "pose": "work@0",
+        "minYmm": 0.1
+      },
+      {
+        "pose": "work@0.125",
+        "minYmm": 0
+      },
+      {
+        "pose": "work@0.25",
+        "minYmm": 0.3
+      },
+      {
+        "pose": "work@0.375",
+        "minYmm": 0.6
+      },
+      {
+        "pose": "work@0.5",
+        "minYmm": 0.9
+      },
+      {
+        "pose": "work@0.625",
+        "minYmm": 0.3
+      },
+      {
+        "pose": "work@0.75",
+        "minYmm": 0.2
+      },
+      {
+        "pose": "work@0.875",
+        "minYmm": 0.2
+      }
+    ]
+  },
+  "duplicateBolts": {
+    "notOnTheBriefsCultivatorList": true,
+    "reason": "the identical seven pairs are in this asset too, and the tractor carries this same geometry, so both files have to agree",
+    "removed": [
+      "tineBolt1-2",
+      "tineBolt2-2",
+      "tineBolt3-2",
+      "tineBolt4-2",
+      "tineBolt5-2",
+      "tineBolt6-2",
+      "tineBolt7-2"
+    ],
+    "trianglesRemoved": 336,
+    "recentred": [
+      "tineBolt1-1",
+      "tineBolt2-1",
+      "tineBolt3-1",
+      "tineBolt4-1",
+      "tineBolt5-1",
+      "tineBolt6-1",
+      "tineBolt7-1"
+    ],
+    "recentredByMm": 70
+  },
+  "triangles": {
+    "after": 27848
+  }
+}

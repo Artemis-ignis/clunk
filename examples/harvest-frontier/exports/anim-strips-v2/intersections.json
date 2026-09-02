@@ -1,0 +1,1230 @@
+{
+  "schema": "clunk.anim-self-intersection.v1",
+  "generatedAt": "2026-09-02T12:45:04.725Z",
+  "file": "examples/harvest-frontier/exports/npc/player-farmhand.m1.glb",
+  "fileByteLength": 244496,
+  "method": "AnimationMixer posed at each phase; area-weighted surface samples classified by 3-direction parity ray casting; penetration depth = distance from an interior sample to the other part's nearest surface triangle. Both directions per pair; the figure is the maximum.",
+  "probeParts": [
+    "leftHandMesh",
+    "rightHandMesh",
+    "the tool the clip scales up (toolHoe / toolWateringCan / toolHarvestBasket)"
+  ],
+  "bodyParts": [
+    "denimJacketTorso",
+    "head",
+    "strawHat",
+    "trouserHips",
+    "leftThigh",
+    "leftShin",
+    "rightThigh",
+    "rightShin"
+  ],
+  "thresholdMetres": 0.01,
+  "samplesPerProbe": 900,
+  "phases": [
+    0,
+    0.2,
+    0.4,
+    0.6,
+    0.8,
+    0.95
+  ],
+  "worst": {
+    "depthMetres": 0
+  },
+  "positiveControl": {
+    "why": "Joints that must interpenetrate, measured by the same narrow phase. If these read zero the checker is broken and every other zero in this file is meaningless.",
+    "pairs": [
+      {
+        "a": "strawHat",
+        "b": "head",
+        "depthMillimetres": 177.41,
+        "detected": true
+      },
+      {
+        "a": "leftHandMesh",
+        "b": "leftLowerArm",
+        "depthMillimetres": 31.05,
+        "detected": true
+      },
+      {
+        "a": "denimJacketTorso",
+        "b": "trouserHips",
+        "depthMillimetres": 77.97,
+        "detected": true
+      },
+      {
+        "a": "leftThigh",
+        "b": "trouserHips",
+        "depthMillimetres": 150.2,
+        "detected": true
+      }
+    ],
+    "allDetected": true
+  },
+  "verdict": "PASS",
+  "clips": [
+    {
+      "clip": "hoe",
+      "durationSeconds": 1.1,
+      "phases": [
+        {
+          "phase": 0,
+          "timeSeconds": 0,
+          "visibleTools": [
+            "toolHoe"
+          ],
+          "toolWorldScale": {
+            "toolHoe": 1,
+            "toolWateringCan": 0,
+            "toolHarvestBasket": 0
+          },
+          "probes": [
+            "leftHandMesh",
+            "rightHandMesh",
+            "mesh_15",
+            "hoeBlade"
+          ],
+          "worst": {
+            "depthMetres": 0,
+            "probe": null,
+            "body": null
+          },
+          "overThresholdCount": 0,
+          "pairs": [
+            {
+              "probe": "rightHandMesh",
+              "probeKind": "hand",
+              "body": "denimJacketTorso",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 60,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "mesh_15",
+              "probeKind": "tool",
+              "body": "head",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 0,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            }
+          ]
+        },
+        {
+          "phase": 0.2,
+          "timeSeconds": 0.22,
+          "visibleTools": [
+            "toolHoe"
+          ],
+          "toolWorldScale": {
+            "toolHoe": 1,
+            "toolWateringCan": 0,
+            "toolHarvestBasket": 0
+          },
+          "probes": [
+            "leftHandMesh",
+            "rightHandMesh",
+            "mesh_15",
+            "hoeBlade"
+          ],
+          "worst": {
+            "depthMetres": 0,
+            "probe": null,
+            "body": null
+          },
+          "overThresholdCount": 0,
+          "pairs": [
+            {
+              "probe": "rightHandMesh",
+              "probeKind": "hand",
+              "body": "denimJacketTorso",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 116,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "mesh_15",
+              "probeKind": "tool",
+              "body": "head",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 0,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            }
+          ]
+        },
+        {
+          "phase": 0.4,
+          "timeSeconds": 0.44,
+          "visibleTools": [
+            "toolHoe"
+          ],
+          "toolWorldScale": {
+            "toolHoe": 1,
+            "toolWateringCan": 0,
+            "toolHarvestBasket": 0
+          },
+          "probes": [
+            "leftHandMesh",
+            "rightHandMesh",
+            "mesh_15",
+            "hoeBlade"
+          ],
+          "worst": {
+            "depthMetres": 0,
+            "probe": null,
+            "body": null
+          },
+          "overThresholdCount": 0,
+          "pairs": [
+            {
+              "probe": "rightHandMesh",
+              "probeKind": "hand",
+              "body": "denimJacketTorso",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 490,
+              "bodySamplesInSharedBox": 5,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "rightHandMesh",
+              "probeKind": "hand",
+              "body": "leftThigh",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 18,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "rightHandMesh",
+              "probeKind": "hand",
+              "body": "rightThigh",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 35,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "mesh_15",
+              "probeKind": "tool",
+              "body": "denimJacketTorso",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 22,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            }
+          ]
+        },
+        {
+          "phase": 0.6,
+          "timeSeconds": 0.66,
+          "visibleTools": [
+            "toolHoe"
+          ],
+          "toolWorldScale": {
+            "toolHoe": 1,
+            "toolWateringCan": 0,
+            "toolHarvestBasket": 0
+          },
+          "probes": [
+            "leftHandMesh",
+            "rightHandMesh",
+            "mesh_15",
+            "hoeBlade"
+          ],
+          "worst": {
+            "depthMetres": 0,
+            "probe": null,
+            "body": null
+          },
+          "overThresholdCount": 0,
+          "pairs": [
+            {
+              "probe": "rightHandMesh",
+              "probeKind": "hand",
+              "body": "denimJacketTorso",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 487,
+              "bodySamplesInSharedBox": 2,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "mesh_15",
+              "probeKind": "tool",
+              "body": "denimJacketTorso",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 67,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            }
+          ]
+        },
+        {
+          "phase": 0.8,
+          "timeSeconds": 0.88,
+          "visibleTools": [
+            "toolHoe"
+          ],
+          "toolWorldScale": {
+            "toolHoe": 1,
+            "toolWateringCan": 0,
+            "toolHarvestBasket": 0
+          },
+          "probes": [
+            "leftHandMesh",
+            "rightHandMesh",
+            "mesh_15",
+            "hoeBlade"
+          ],
+          "worst": {
+            "depthMetres": 0,
+            "probe": null,
+            "body": null
+          },
+          "overThresholdCount": 0,
+          "pairs": [
+            {
+              "probe": "rightHandMesh",
+              "probeKind": "hand",
+              "body": "denimJacketTorso",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 520,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "rightHandMesh",
+              "probeKind": "hand",
+              "body": "leftThigh",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 28,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "rightHandMesh",
+              "probeKind": "hand",
+              "body": "rightThigh",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 6,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "mesh_15",
+              "probeKind": "tool",
+              "body": "denimJacketTorso",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 38,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            }
+          ]
+        },
+        {
+          "phase": 0.95,
+          "timeSeconds": 1.045,
+          "visibleTools": [
+            "toolHoe"
+          ],
+          "toolWorldScale": {
+            "toolHoe": 1,
+            "toolWateringCan": 0,
+            "toolHarvestBasket": 0
+          },
+          "probes": [
+            "leftHandMesh",
+            "rightHandMesh",
+            "mesh_15",
+            "hoeBlade"
+          ],
+          "worst": {
+            "depthMetres": 0,
+            "probe": null,
+            "body": null
+          },
+          "overThresholdCount": 0,
+          "pairs": [
+            {
+              "probe": "rightHandMesh",
+              "probeKind": "hand",
+              "body": "denimJacketTorso",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 133,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "mesh_15",
+              "probeKind": "tool",
+              "body": "head",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 0,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            }
+          ]
+        }
+      ],
+      "worst": {
+        "depthMetres": 0
+      }
+    },
+    {
+      "clip": "water",
+      "durationSeconds": 1.6,
+      "phases": [
+        {
+          "phase": 0,
+          "timeSeconds": 0,
+          "visibleTools": [
+            "toolWateringCan"
+          ],
+          "toolWorldScale": {
+            "toolHoe": 0,
+            "toolWateringCan": 1,
+            "toolHarvestBasket": 0
+          },
+          "probes": [
+            "leftHandMesh",
+            "rightHandMesh",
+            "wateringCanBody",
+            "wateringCanHandle",
+            "wateringCanSpout"
+          ],
+          "worst": {
+            "depthMetres": 0,
+            "probe": null,
+            "body": null
+          },
+          "overThresholdCount": 0,
+          "pairs": [
+            {
+              "probe": "leftHandMesh",
+              "probeKind": "hand",
+              "body": "leftThigh",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 9,
+              "bodySamplesInSharedBox": 43,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "leftHandMesh",
+              "probeKind": "hand",
+              "body": "leftShin",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 0,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            }
+          ]
+        },
+        {
+          "phase": 0.2,
+          "timeSeconds": 0.32,
+          "visibleTools": [
+            "toolWateringCan"
+          ],
+          "toolWorldScale": {
+            "toolHoe": 0,
+            "toolWateringCan": 1,
+            "toolHarvestBasket": 0
+          },
+          "probes": [
+            "leftHandMesh",
+            "rightHandMesh",
+            "wateringCanBody",
+            "wateringCanHandle",
+            "wateringCanSpout"
+          ],
+          "worst": {
+            "depthMetres": 0,
+            "probe": null,
+            "body": null
+          },
+          "overThresholdCount": 0,
+          "pairs": []
+        },
+        {
+          "phase": 0.4,
+          "timeSeconds": 0.64,
+          "visibleTools": [
+            "toolWateringCan"
+          ],
+          "toolWorldScale": {
+            "toolHoe": 0,
+            "toolWateringCan": 1,
+            "toolHarvestBasket": 0
+          },
+          "probes": [
+            "leftHandMesh",
+            "rightHandMesh",
+            "wateringCanBody",
+            "wateringCanHandle",
+            "wateringCanSpout"
+          ],
+          "worst": {
+            "depthMetres": 0,
+            "probe": null,
+            "body": null
+          },
+          "overThresholdCount": 0,
+          "pairs": []
+        },
+        {
+          "phase": 0.6,
+          "timeSeconds": 0.96,
+          "visibleTools": [
+            "toolWateringCan"
+          ],
+          "toolWorldScale": {
+            "toolHoe": 0,
+            "toolWateringCan": 1,
+            "toolHarvestBasket": 0
+          },
+          "probes": [
+            "leftHandMesh",
+            "rightHandMesh",
+            "wateringCanBody",
+            "wateringCanHandle",
+            "wateringCanSpout"
+          ],
+          "worst": {
+            "depthMetres": 0,
+            "probe": null,
+            "body": null
+          },
+          "overThresholdCount": 0,
+          "pairs": [
+            {
+              "probe": "leftHandMesh",
+              "probeKind": "hand",
+              "body": "trouserHips",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 0,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "leftHandMesh",
+              "probeKind": "hand",
+              "body": "leftThigh",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 5,
+              "bodySamplesInSharedBox": 65,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "leftHandMesh",
+              "probeKind": "hand",
+              "body": "leftShin",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 0,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            }
+          ]
+        },
+        {
+          "phase": 0.8,
+          "timeSeconds": 1.28,
+          "visibleTools": [
+            "toolWateringCan"
+          ],
+          "toolWorldScale": {
+            "toolHoe": 0,
+            "toolWateringCan": 1,
+            "toolHarvestBasket": 0
+          },
+          "probes": [
+            "leftHandMesh",
+            "rightHandMesh",
+            "wateringCanBody",
+            "wateringCanHandle",
+            "wateringCanSpout"
+          ],
+          "worst": {
+            "depthMetres": 0,
+            "probe": null,
+            "body": null
+          },
+          "overThresholdCount": 0,
+          "pairs": [
+            {
+              "probe": "leftHandMesh",
+              "probeKind": "hand",
+              "body": "trouserHips",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 0,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "leftHandMesh",
+              "probeKind": "hand",
+              "body": "leftThigh",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 0,
+              "bodySamplesInSharedBox": 39,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "leftHandMesh",
+              "probeKind": "hand",
+              "body": "leftShin",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 0,
+              "bodySamplesInSharedBox": 1,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            }
+          ]
+        },
+        {
+          "phase": 0.95,
+          "timeSeconds": 1.52,
+          "visibleTools": [
+            "toolWateringCan"
+          ],
+          "toolWorldScale": {
+            "toolHoe": 0,
+            "toolWateringCan": 1,
+            "toolHarvestBasket": 0
+          },
+          "probes": [
+            "leftHandMesh",
+            "rightHandMesh",
+            "wateringCanBody",
+            "wateringCanHandle",
+            "wateringCanSpout"
+          ],
+          "worst": {
+            "depthMetres": 0,
+            "probe": null,
+            "body": null
+          },
+          "overThresholdCount": 0,
+          "pairs": [
+            {
+              "probe": "leftHandMesh",
+              "probeKind": "hand",
+              "body": "leftThigh",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 14,
+              "bodySamplesInSharedBox": 81,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "leftHandMesh",
+              "probeKind": "hand",
+              "body": "leftShin",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 0,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            }
+          ]
+        }
+      ],
+      "worst": {
+        "depthMetres": 0
+      }
+    },
+    {
+      "clip": "harvest",
+      "durationSeconds": 1.4,
+      "phases": [
+        {
+          "phase": 0,
+          "timeSeconds": 0,
+          "visibleTools": [
+            "toolHarvestBasket"
+          ],
+          "toolWorldScale": {
+            "toolHoe": 0,
+            "toolWateringCan": 0,
+            "toolHarvestBasket": 1
+          },
+          "probes": [
+            "leftHandMesh",
+            "rightHandMesh",
+            "harvestBasket",
+            "basketHandle"
+          ],
+          "worst": {
+            "depthMetres": 0,
+            "probe": null,
+            "body": null
+          },
+          "overThresholdCount": 0,
+          "pairs": [
+            {
+              "probe": "rightHandMesh",
+              "probeKind": "hand",
+              "body": "denimJacketTorso",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 0,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "harvestBasket",
+              "probeKind": "tool",
+              "body": "denimJacketTorso",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 19,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            }
+          ]
+        },
+        {
+          "phase": 0.2,
+          "timeSeconds": 0.28,
+          "visibleTools": [
+            "toolHarvestBasket"
+          ],
+          "toolWorldScale": {
+            "toolHoe": 0,
+            "toolWateringCan": 0,
+            "toolHarvestBasket": 1
+          },
+          "probes": [
+            "leftHandMesh",
+            "rightHandMesh",
+            "harvestBasket",
+            "basketHandle"
+          ],
+          "worst": {
+            "depthMetres": 0,
+            "probe": null,
+            "body": null
+          },
+          "overThresholdCount": 0,
+          "pairs": [
+            {
+              "probe": "leftHandMesh",
+              "probeKind": "hand",
+              "body": "denimJacketTorso",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 0,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "leftHandMesh",
+              "probeKind": "hand",
+              "body": "leftShin",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 0,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "leftHandMesh",
+              "probeKind": "hand",
+              "body": "rightShin",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 0,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "rightHandMesh",
+              "probeKind": "hand",
+              "body": "denimJacketTorso",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 25,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "harvestBasket",
+              "probeKind": "tool",
+              "body": "denimJacketTorso",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 26,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "harvestBasket",
+              "probeKind": "tool",
+              "body": "rightShin",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 12,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            }
+          ]
+        },
+        {
+          "phase": 0.4,
+          "timeSeconds": 0.56,
+          "visibleTools": [
+            "toolHarvestBasket"
+          ],
+          "toolWorldScale": {
+            "toolHoe": 0,
+            "toolWateringCan": 0,
+            "toolHarvestBasket": 1
+          },
+          "probes": [
+            "leftHandMesh",
+            "rightHandMesh",
+            "harvestBasket",
+            "basketHandle"
+          ],
+          "worst": {
+            "depthMetres": 0,
+            "probe": null,
+            "body": null
+          },
+          "overThresholdCount": 0,
+          "pairs": [
+            {
+              "probe": "leftHandMesh",
+              "probeKind": "hand",
+              "body": "leftShin",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 79,
+              "bodySamplesInSharedBox": 1,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "leftHandMesh",
+              "probeKind": "hand",
+              "body": "rightShin",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 15,
+              "bodySamplesInSharedBox": 3,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "rightHandMesh",
+              "probeKind": "hand",
+              "body": "denimJacketTorso",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 52,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "harvestBasket",
+              "probeKind": "tool",
+              "body": "rightShin",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 75,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "basketHandle",
+              "probeKind": "tool",
+              "body": "denimJacketTorso",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 80,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "basketHandle",
+              "probeKind": "tool",
+              "body": "rightShin",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 30,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            }
+          ]
+        },
+        {
+          "phase": 0.6,
+          "timeSeconds": 0.84,
+          "visibleTools": [
+            "toolHarvestBasket"
+          ],
+          "toolWorldScale": {
+            "toolHoe": 0,
+            "toolWateringCan": 0,
+            "toolHarvestBasket": 1
+          },
+          "probes": [
+            "leftHandMesh",
+            "rightHandMesh",
+            "harvestBasket",
+            "basketHandle"
+          ],
+          "worst": {
+            "depthMetres": 0,
+            "probe": null,
+            "body": null
+          },
+          "overThresholdCount": 0,
+          "pairs": [
+            {
+              "probe": "leftHandMesh",
+              "probeKind": "hand",
+              "body": "denimJacketTorso",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 0,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "leftHandMesh",
+              "probeKind": "hand",
+              "body": "leftShin",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 6,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "leftHandMesh",
+              "probeKind": "hand",
+              "body": "rightShin",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 0,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "rightHandMesh",
+              "probeKind": "hand",
+              "body": "denimJacketTorso",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 25,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "harvestBasket",
+              "probeKind": "tool",
+              "body": "denimJacketTorso",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 21,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "harvestBasket",
+              "probeKind": "tool",
+              "body": "rightShin",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 27,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "basketHandle",
+              "probeKind": "tool",
+              "body": "rightShin",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 0,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            }
+          ]
+        },
+        {
+          "phase": 0.8,
+          "timeSeconds": 1.12,
+          "visibleTools": [
+            "toolHarvestBasket"
+          ],
+          "toolWorldScale": {
+            "toolHoe": 0,
+            "toolWateringCan": 0,
+            "toolHarvestBasket": 1
+          },
+          "probes": [
+            "leftHandMesh",
+            "rightHandMesh",
+            "harvestBasket",
+            "basketHandle"
+          ],
+          "worst": {
+            "depthMetres": 0,
+            "probe": null,
+            "body": null
+          },
+          "overThresholdCount": 0,
+          "pairs": [
+            {
+              "probe": "rightHandMesh",
+              "probeKind": "hand",
+              "body": "denimJacketTorso",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 0,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "harvestBasket",
+              "probeKind": "tool",
+              "body": "denimJacketTorso",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 17,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            }
+          ]
+        },
+        {
+          "phase": 0.95,
+          "timeSeconds": 1.33,
+          "visibleTools": [
+            "toolHarvestBasket"
+          ],
+          "toolWorldScale": {
+            "toolHoe": 0,
+            "toolWateringCan": 0,
+            "toolHarvestBasket": 1
+          },
+          "probes": [
+            "leftHandMesh",
+            "rightHandMesh",
+            "harvestBasket",
+            "basketHandle"
+          ],
+          "worst": {
+            "depthMetres": 0,
+            "probe": null,
+            "body": null
+          },
+          "overThresholdCount": 0,
+          "pairs": [
+            {
+              "probe": "rightHandMesh",
+              "probeKind": "hand",
+              "body": "denimJacketTorso",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 0,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            },
+            {
+              "probe": "harvestBasket",
+              "probeKind": "tool",
+              "body": "denimJacketTorso",
+              "depthMetres": 0,
+              "depthMillimetres": 0,
+              "boxesOverlap": true,
+              "probeSamplesInSharedBox": 15,
+              "bodySamplesInSharedBox": 0,
+              "probePointsInsideBody": 0,
+              "bodyPointsInsideProbe": 0,
+              "overThreshold": false
+            }
+          ]
+        }
+      ],
+      "worst": {
+        "depthMetres": 0
+      }
+    }
+  ]
+}

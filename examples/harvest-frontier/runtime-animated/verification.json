@@ -1,0 +1,221 @@
+{
+  "checkedAt": "2026-09-02T08:26:22.626Z",
+  "parityMethod": "both files loaded through GLTFLoader + MeshoptDecoder and measured identically; triangles/meshes/materials must be equal and the world bounding box must agree within 2 mm",
+  "playbackMethod": "PropertyBinding.findNode per track, then AnimationMixer.setTime at four phases; loopGap is the largest local TRS difference between t=0 and t=duration",
+  "failures": 0,
+  "machines": [
+    {
+      "file": "cultivator.compact.m1.glb",
+      "parityOk": true,
+      "source": {
+        "triangles": 28184,
+        "meshes": 111,
+        "materials": 20,
+        "sizeMeters": {
+          "x": 1.5447,
+          "y": 1.6925,
+          "z": 3.35
+        },
+        "minY": -0.2825
+      },
+      "animated": {
+        "triangles": 28184,
+        "meshes": 111,
+        "materials": 20,
+        "sizeMeters": {
+          "x": 1.5447,
+          "y": 1.6925,
+          "z": 3.35
+        },
+        "minY": -0.2825
+      },
+      "drift": {
+        "triangles": 0,
+        "meshes": 0,
+        "materials": 0,
+        "sizeMeters": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "bytes": {
+        "source": 189912,
+        "animated": 196616
+      },
+      "clips": [
+        {
+          "name": "work",
+          "seconds": 1.627,
+          "tracks": 13,
+          "unbound": [],
+          "nodesMoved": 13,
+          "maxDelta": 0.36812,
+          "loopGap": 0
+        }
+      ]
+    },
+    {
+      "file": "processing.line.m1.glb",
+      "parityOk": true,
+      "source": {
+        "triangles": 50668,
+        "meshes": 145,
+        "materials": 40,
+        "sizeMeters": {
+          "x": 7.3753,
+          "y": 5.2749,
+          "z": 4.2804
+        },
+        "minY": -0.0867
+      },
+      "animated": {
+        "triangles": 50668,
+        "meshes": 145,
+        "materials": 40,
+        "sizeMeters": {
+          "x": 7.3753,
+          "y": 5.2749,
+          "z": 4.2804
+        },
+        "minY": -0.0867
+      },
+      "drift": {
+        "triangles": 0,
+        "meshes": 0,
+        "materials": 0,
+        "sizeMeters": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "bytes": {
+        "source": 435532,
+        "animated": 311164
+      },
+      "clips": [
+        {
+          "name": "run",
+          "seconds": 8.2963,
+          "tracks": 11,
+          "unbound": [],
+          "nodesMoved": 11,
+          "maxDelta": 1.56799,
+          "loopGap": 0
+        }
+      ]
+    },
+    {
+      "file": "seeder.compact.m1.glb",
+      "parityOk": true,
+      "source": {
+        "triangles": 51978,
+        "meshes": 412,
+        "materials": 22,
+        "sizeMeters": {
+          "x": 1.9815,
+          "y": 2.225,
+          "z": 3.8
+        },
+        "minY": -0.115
+      },
+      "animated": {
+        "triangles": 51978,
+        "meshes": 412,
+        "materials": 22,
+        "sizeMeters": {
+          "x": 1.9815,
+          "y": 2.225,
+          "z": 3.8
+        },
+        "minY": -0.115
+      },
+      "drift": {
+        "triangles": 0,
+        "meshes": 0,
+        "materials": 0,
+        "sizeMeters": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "bytes": {
+        "source": 557888,
+        "animated": 318328
+      },
+      "clips": [
+        {
+          "name": "sow",
+          "seconds": 1.747,
+          "tracks": 29,
+          "unbound": [],
+          "nodesMoved": 29,
+          "maxDelta": 1.33873,
+          "loopGap": 0
+        }
+      ]
+    },
+    {
+      "file": "tractor.compact.m1.glb",
+      "parityOk": true,
+      "source": {
+        "triangles": 56392,
+        "meshes": 189,
+        "materials": 9,
+        "sizeMeters": {
+          "x": 5.2396,
+          "y": 2.9175,
+          "z": 3.35
+        },
+        "minY": -0.0025
+      },
+      "animated": {
+        "triangles": 56392,
+        "meshes": 189,
+        "materials": 9,
+        "sizeMeters": {
+          "x": 5.2396,
+          "y": 2.9175,
+          "z": 3.35
+        },
+        "minY": -0.0025
+      },
+      "drift": {
+        "triangles": 0,
+        "meshes": 0,
+        "materials": 0,
+        "sizeMeters": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      },
+      "bytes": {
+        "source": 840136,
+        "animated": 852896
+      },
+      "clips": [
+        {
+          "name": "drive",
+          "seconds": 2.1706,
+          "tracks": 17,
+          "unbound": [],
+          "nodesMoved": 17,
+          "maxDelta": 1.33873,
+          "loopGap": 0
+        },
+        {
+          "name": "steer",
+          "seconds": 4.3411,
+          "tracks": 9,
+          "unbound": [],
+          "nodesMoved": 9,
+          "maxDelta": 1.63741,
+          "loopGap": 0
+        }
+      ]
+    }
+  ]
+}

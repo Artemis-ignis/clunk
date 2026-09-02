@@ -7,7 +7,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { THREE, bakeClip, cropAroundAnchor, crossThree, exportGlb, isolate, measureScene, resolveInstancing, type JointSample } from './lib.mjs';
+import { THREE, bakeClip, cropAroundAnchor, crossThree, exportGlb, isolate, measureScene, resolveInstancing, round3, type JointSample } from './lib.mjs';
+import { addFarmhouseRearWindows, liftDarkVertexColours, ROOF_FLOOR, ROOF_FLOOR_LOW } from './building-postprocess.mjs';
 
 import { createFarmNpcs, updateFarmNpcIdle } from '../../../Harvest Frontier/src/engine/assets/npcs';
 import { createFarmBuildings } from '../../../Harvest Frontier/src/engine/assets/buildings';
@@ -15,6 +16,7 @@ import { createFarmProps, createFarmWindmill, windmillBladeAngle, ROUTE_CART_ANC
 import { createCropField, setCropTileGrowth, setCropVegetationGrowth } from '../../../Harvest Frontier/src/engine/assets/crops';
 import { CROP_DEFINITIONS } from '../../../Harvest Frontier/src/content/core/crops';
 import { createPlayerAvatar, ACTION_DURATION_SECONDS } from '../../../Harvest Frontier/src/engine/animation/playerMotion';
+import { AUTHORED_ACTIONS, AUTHORING_NOTE, bakeAuthoredAction, rigMetrics } from './player-action-clips.mjs';
 import { gaitAngularVelocity, gaitIntensity, GAIT_SPEED_REFERENCE } from '../../../Harvest Frontier/src/engine/animation/gait';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -196,13 +198,65 @@ function npcTargets(): Target[] {
   }));
 }
 
-// ── Player farmhand (full rig: idle / walk / four tool swings) ──────────────
+// ── Player farmhand (full rig: idle / walk / four tool swings) ──────────
+//
+// AXIS FIX (why this exporter does not copy applyAction verbatim).
+//
+// The avatar is authored front = -Z. Harvest Frontier says so itself, twice:
+// `PLAYER_FRONT_Z = -1` with the comment "the watering-can spout and the hoe
+// blade both point that way", and `ACTION_WORK_OFFSET = (0, 0, -1.15)`, the
+// point where the tool is supposed to meet the soil. The tool geometry agrees:
+// the hoe blade sits at z -0.025, the watering-can spout at z -0.2.
+//
+// `applyAction` disagrees with all of it. It drives the arm chain and the tool
+// anchor with NEGATIVE rotation.x, and a negative rotation about +X swings a
+// limb that hangs along -Y toward +Z. Measured on an unmodified
+// `createPlayerAvatar()`: through the whole hoe swing the right hand sits at
+// z = +0.75..+0.77 and the hoe head reaches z = +1.64 — the farmer holds the
+// hoe straight out behind his back and raises it over his shoulder blades.
+// Same for water and harvest.
+//
+// It is a sign error, not a style choice, and the same file gets it right
+// elsewhere: `applyWalk` uses `leftThigh.rotation.x = stride` (positive =
+// forward) against `leftUpperArm.rotation.x = -stride * 0.42`, a correct
+// contralateral swing; and inside `applyAction` itself the BODY is already
+// correct — hoe leans the spine +0.26 and the thighs +0.26, i.e. forward, while
+// the arms reach backward out of the same pose.
+//
+// So the export mirrors the tool chain back through the XY plane: Euler
+// (x, y, z) -> (-x, -y, z), which is exactly conjugation by diag(1, 1, -1), on
+// the four arm pivots and `toolAnchor`, for the four ACTION clips only. Walk
+// and idle are already right and are baked untouched. No magnitude, no timing
+// and no curve is invented — only the sign of an axis HF's own constants say is
+// backwards. HF should fix `applyAction` at source; until it does, the game and
+// this asset differ by this mirror, and that is recorded per clip in the
+// manifest.
+const MIRRORED_TOOL_CHAIN = [
+  'leftUpperArmPivot', 'leftLowerArmPivot', 'rightUpperArmPivot', 'rightLowerArmPivot', 'toolAnchor',
+] as const;
+
+/**
+ * Tools that ride `toolAnchor`: authored HF name -> [exported name, owning clip].
+ *
+ * The nodes are RENAMED on the way out. three's animation PropertyBinding
+ * splits a track name on '.', so a node called `tool.hoe` cannot be addressed by
+ * `tool.hoe.scale`; GLTFExporter also strips the dot when it writes the glTF
+ * name, silently turning the node into `toolhoe`. Naming them deliberately
+ * means the node in the file and the track that drives it agree, and a buyer
+ * reading the manifest sees the name that is really there.
+ */
+const PLAYER_TOOLS: Readonly<Record<string, { readonly node: string; readonly clip: string }>> = {
+  'tool.hoe': { node: 'toolHoe', clip: 'hoe' },
+  'tool.water': { node: 'toolWateringCan', clip: 'water' },
+  'tool.harvest': { node: 'toolHarvestBasket', clip: 'harvest' },
+};
+
 function playerTarget(): Target {
   return {
     group: 'npc',
     slug: 'player-farmhand',
     provenanceId: null,
-    note: 'clips replay PlayerMotionController; walk spine-sway rate 3.1 -> gait omega so the stride loop closes',
+    note: 'idle / walk / inspect replay PlayerMotionController, with two documented deviations: walk spine-sway rate 3.1 -> gait omega so the stride loop closes, and inspect mirrors the arm chain + toolAnchor through the XY plane because applyAction drives them toward +Z while the rig is authored front = -Z. hoe / water / harvest are CLUNK-AUTHORED (see authoring): HF applyAction never puts the hoe blade on the ground, never aims the watering spout and never picks anything, so those three poses were not saleable and were rebuilt from the rig geometry. Tools ride toolAnchor and are switched per clip by constant scale tracks, since glTF has no visibility animation.',
     build: () => {
       const jointNames = [
         'playerRig', 'pelvis', 'spine', 'headPivot',
@@ -210,15 +264,25 @@ function playerTarget(): Target {
         'leftThighPivot', 'leftShinPivot', 'rightThighPivot', 'rightShinPivot', 'toolAnchor',
       ];
 
-      const sample = (duration: number, drive: (avatar: ReturnType<typeof createPlayerAvatar>, dt: number) => void, name: string): THREE.AnimationClip => {
+      const sample = (
+        duration: number,
+        drive: (avatar: ReturnType<typeof createPlayerAvatar>, dt: number) => void,
+        name: string,
+        mirrorToolChain = false,
+      ): THREE.AnimationClip => {
         const avatar = createPlayerAvatar();
         const joints: JointSample[] = jointNames.map((n) => ({ node: crossThree<THREE.Object3D>(avatar.root.getObjectByName(n)), position: true }));
+        const mirrored = mirrorToolChain
+          ? MIRRORED_TOOL_CHAIN.map((n) => crossThree<THREE.Object3D>(avatar.root.getObjectByName(n)))
+          : [];
         const frames = Math.max(2, Math.round(duration * FPS) + 1);
         const dt = duration / (frames - 1);
         let first = true;
         return bakeClip(name, duration, FPS, joints, () => {
           drive(avatar, first ? 0 : dt);
           first = false;
+          // Conjugate by diag(1, 1, -1): Euler (x, y, z) -> (-x, -y, z).
+          for (const node of mirrored) node.rotation.set(-node.rotation.x, -node.rotation.y, node.rotation.z);
         });
       };
 
@@ -238,24 +302,36 @@ function playerTarget(): Target {
         spine.rotation.z = Math.sin(walkTime * omega) * 0.025 * intensity;
       }, 'walk');
 
-      const actions = (Object.keys(ACTION_DURATION_SECONDS) as (keyof typeof ACTION_DURATION_SECONDS)[]).map((action) => {
-        const duration = ACTION_DURATION_SECONDS[action];
-        const frames = Math.round(duration * FPS) + 1;
-        // The last sample must stay a hair inside the action window, or update()
-        // retires the action and the final frame snaps back to the idle pose.
-        const step = (duration - 1e-3) / (frames - 1);
-        let started = false;
-        return sample(duration, (a, dt) => {
-          if (!started) {
-            a.motion.setTool(action === 'hoe' ? 'hoe' : action === 'water' ? 'water' : action === 'harvest' ? 'harvest' : 'inspect');
-            a.motion.trigger(action);
-            a.motion.update(0, false, 0);
-            started = true;
-            return;
-          }
-          a.motion.update(dt > 0 ? step : 0, false, 0);
-        }, action);
-      });
+      // `inspect` still replays HF: the field journal reads correctly as
+      // "checking the crop" and needs no help. `hoe` / `water` / `harvest` are
+      // authored here instead - see player-action-clips.mts for why HF's own
+      // poses could not be shipped.
+      const replayed = (Object.keys(ACTION_DURATION_SECONDS) as (keyof typeof ACTION_DURATION_SECONDS)[])
+        .filter((action) => !(action in AUTHORED_ACTIONS))
+        .map((action) => {
+          const duration = ACTION_DURATION_SECONDS[action];
+          const frames = Math.round(duration * FPS) + 1;
+          // The last sample must stay a hair inside the action window, or update()
+          // retires the action and the final frame snaps back to the idle pose.
+          const step = (duration - 1e-3) / (frames - 1);
+          let started = false;
+          return sample(duration, (a, dt) => {
+            if (!started) {
+              a.motion.setTool(action === 'hoe' ? 'hoe' : action === 'water' ? 'water' : action === 'harvest' ? 'harvest' : 'inspect');
+              a.motion.trigger(action);
+              a.motion.update(0, false, 0);
+              started = true;
+              return;
+            }
+            a.motion.update(dt > 0 ? step : 0, false, 0);
+          }, action, true);
+        });
+
+      const authored = (Object.keys(ACTION_DURATION_SECONDS) as string[])
+        .filter((action) => action in AUTHORED_ACTIONS)
+        .map((action) => bakeAuthoredAction(action, jointNames, FPS));
+
+      const clips = [idle, walk, ...replayed, ...authored.map((a) => a.clip)];
 
       const avatar = createPlayerAvatar();
       avatar.motion.update(0, false, 0);
@@ -264,22 +340,84 @@ function playerTarget(): Target {
       // of it, which would also drop assetRole/collider.
       delete (avatar.root.userData as Record<string, unknown>).motionController;
       // The watering stream is a transient VFX cylinder that hangs below the
-      // spout and below y=0; it is not part of the character and it inflates
-      // the asset's bounding box by ~0.65 m.
+      // spout and below y = 0. The brief asks for the can to tilt and no stream,
+      // and `toolAnchor.rotation.x` already carries that tilt.
       avatar.root.getObjectByName('waterStream')?.removeFromParent();
-      // glTF has no visibility flag, so the four tool groups the rig carries
-      // (only one of which is ever visible in game) would all render at once,
-      // and the hoe shaft hangs through the ground in the rest pose. They ship
-      // as their own asset (prop/farm-tool-kit) instead; the named `toolAnchor`
-      // socket stays on the right hand so a tool can be re-parented back.
-      for (const tool of TOOL_GROUP_NAMES) avatar.root.getObjectByName(tool)?.removeFromParent();
+      // The field journal is the idle-tool prop; the brief ships three tools.
+      avatar.root.getObjectByName('tool.inspect')?.removeFromParent();
+
+      // glTF has no visibility animation, so the three tools ride `toolAnchor`
+      // at scale 0 by default and every clip carries a CONSTANT scale track for
+      // all three - 1 for the tool that clip uses, 0 for the other two. Two
+      // keyframes, same value, so nothing grows or shrinks mid-clip and
+      // switching clips is deterministic rather than leaving a tool behind.
+      const toolScales: Record<string, number> = {};
+      for (const [authored, tool] of Object.entries(PLAYER_TOOLS)) {
+        const node = crossThree<THREE.Object3D | undefined>(avatar.root.getObjectByName(authored));
+        if (!node) continue;
+        node.name = tool.node;
+        node.userData.authoredName = authored;
+        toolScales[tool.node] = node.scale.x;
+        node.scale.setScalar(0);
+      }
+      for (const clip of clips) {
+        for (const tool of Object.values(PLAYER_TOOLS)) {
+          const shown = clip.name === tool.clip ? (toolScales[tool.node] ?? 1) : 0;
+          clip.tracks.push(new THREE.VectorKeyframeTrack(
+            `${tool.node}.scale`,
+            [0, clip.duration],
+            [shown, shown, shown, shown, shown, shown],
+          ));
+        }
+      }
+
       // The authored rig origin sits at ankle height: the boot soles reach
       // y = -0.182. Ground the asset with a node translation on the un-animated
       // root (the clips drive `playerRig` and below, so nothing is disturbed).
       const root = crossThree<THREE.Object3D>(avatar.root);
       root.updateMatrixWorld(true);
       root.position.y = -new THREE.Box3().setFromObject(root).min.y;
-      return { root, clips: [idle, walk, ...actions] };
+      return {
+        root,
+        clips,
+        extra: {
+          authoring: {
+            note: AUTHORING_NOTE,
+            authoredClips: authored.map((a) => a.clip.name),
+            replayedClips: [idle.name, walk.name, ...replayed.map((c) => c.name)],
+            rejectedSource: {
+              file: 'Harvest Frontier src/engine/animation/playerMotion.ts applyAction',
+              hoe: 'held the hoe horizontally at shoulder height and pushed it forward; the blade never reached the ground and only one hand was on the shaft',
+              water: 'the can dangled at the hip and barely moved; the spout pointed at nothing',
+              harvest: 'the farmer stood holding a basket; nothing was picked',
+            },
+            method: 'body = hip hinge + knee bend on periodic cubic curves, root translation cancelling the sole rise/slide; tool pose authored in world space; arms solved by two-link IK onto it; the off hand grips a point ON the tool geometry',
+            shoulderFollow: 'leftUpperArmPivot / rightUpperArmPivot carry POSITION tracks, because HF parents the arm pivots to playerRig rather than to spine - without them a leaning torso leaves the arms behind in the air',
+            offHandGrip: Object.fromEntries(authored.map((a) => [a.clip.name, a.samples.map((s) => (s.gripSeparation === null ? null : Math.round(s.gripSeparation * 1000) / 1000))])),
+            phaseSamples: Object.fromEntries(authored.map((a) => [a.clip.name, a.samples.map((s) => ({
+              phase: s.phase,
+              rightHand: [round3(s.rightHand.x), round3(s.rightHand.y), round3(s.rightHand.z)],
+              leftHand: [round3(s.leftHand.x), round3(s.leftHand.y), round3(s.leftHand.z)],
+              toolTip: [round3(s.toolTip.x), round3(s.toolTip.y), round3(s.toolTip.z)],
+            }))])),
+            notes: authored.flatMap((a) => a.notes),
+            groundLift: round3(rigMetrics().groundLift),
+          },
+          axisFix: {
+            mirroredNodes: [...MIRRORED_TOOL_CHAIN],
+            appliedToClips: ['inspect'],
+            transform: 'Euler (x, y, z) -> (-x, -y, z), i.e. conjugation by diag(1, 1, -1)',
+            reason: 'applyAction drives the tool chain toward +Z while the rig is authored front = -Z (PLAYER_FRONT_Z = -1, ACTION_WORK_OFFSET = (0,0,-1.15), hoe blade z -0.025). Measured unmirrored: right hand z +0.75..+0.77, hoe head z +1.64 through the whole swing. Only `inspect` still needs the mirror; the other three action clips no longer replay applyAction at all.',
+            source: 'Harvest Frontier src/engine/animation/playerMotion.ts applyAction (lines 895-980), PLAYER_FRONT_Z line 269, ACTION_WORK_OFFSET line 300',
+          },
+          toolVisibility: {
+            method: 'constant scale track per clip (glTF has no visibility animation)',
+            defaultScale: 0,
+            nodes: Object.fromEntries(Object.entries(PLAYER_TOOLS).map(([authored, tool]) => [tool.node, { authoredName: authored, shownInClip: tool.clip }])),
+            perClip: Object.fromEntries(clips.map((c) => [c.name, Object.values(PLAYER_TOOLS).filter((t) => t.clip === c.name).map((t) => t.node)])),
+          },
+        },
+      };
     },
   };
 }
@@ -317,21 +455,38 @@ function toolKitTarget(): Target {
   };
 }
 
-// ── Buildings ───────────────────────────────────────────────────────────────
+// ── Buildings ───────────────────────────────────────────────────
+// Both buildings get the dark-tile lift (see building-postprocess.mts); the
+// farmhouse additionally gets its blank rear and left walls glazed with clones
+// of its own window component.
 function buildingTargets(): Target[] {
   return [
     {
       group: 'building', slug: 'farmhouse', provenanceId: 'processing.barn.open-front.m2',
-      note: 'world copy, after createFarmBuildings runs mergeStaticParts. The ledger entry quoted is the one whose runtimeDerivative is src/engine/assets/buildings.ts, the file that authors both buildings; the visual references are ledgered separately as reference.farm-corner.generated.2026-08-19 / reference.processing-barn.generated.2026-08-19 and are not shipped geometry.',
-      build: () => ({ root: isolate(crossThree<THREE.Object3D>(createFarmBuildings().farmhouse), 'farmhouse'), clips: [] }),
+      note: 'world copy, after createFarmBuildings runs mergeStaticParts. The ledger entry quoted is the one whose runtimeDerivative is src/engine/assets/buildings.ts, the file that authors both buildings; the visual references are ledgered separately as reference.farm-corner.generated.2026-08-19 / reference.processing-barn.generated.2026-08-19 and are not shipped geometry. Two export-time repairs, both recorded under postProcess.',
+      build: () => {
+        const farmhouse = crossThree<THREE.Object3D>(createFarmBuildings().farmhouse);
+        const windows = addFarmhouseRearWindows(farmhouse);
+        const lift = liftDarkVertexColours(farmhouse);
+        return {
+          root: isolate(farmhouse, 'farmhouse'),
+          clips: [],
+          extra: { postProcess: { rearWindows: windows, darkTileLift: { floor: ROOF_FLOOR, floorLow: ROOF_FLOOR_LOW, meshes: lift } } },
+        };
+      },
     },
     {
       group: 'building', slug: 'barn', provenanceId: 'processing.barn.open-front.m2',
-      note: 'processing line child removed; HF already ships it as processing.line.m1.glb',
+      note: 'processing line child removed; HF already ships it as processing.line.m1.glb. The rear wall is authored, so only the dark-tile lift is applied.',
       build: () => {
         const barn = crossThree<THREE.Object3D>(createFarmBuildings().barn);
         barn.getObjectByName('processing-root')?.removeFromParent();
-        return { root: isolate(barn, 'barn'), clips: [] };
+        const lift = liftDarkVertexColours(barn);
+        return {
+          root: isolate(barn, 'barn'),
+          clips: [],
+          extra: { postProcess: { darkTileLift: { floor: ROOF_FLOOR, floorLow: ROOF_FLOOR_LOW, meshes: lift } } },
+        };
       },
     },
   ];

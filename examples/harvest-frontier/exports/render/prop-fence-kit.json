@@ -38,6 +38,7 @@
   "meshes": 2,
   "vertexColouredMeshes": 2,
   "animations": [],
+  "animatedParts": [],
   "boundsMetres": [
     1,
     1.2225,

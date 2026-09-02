@@ -1,0 +1,33 @@
+{
+  "builtAt": "2026-09-02T08:16:38.862Z",
+  "phases": [
+    0,
+    0.17,
+    0.34,
+    0.5,
+    0.67,
+    0.84
+  ],
+  "strips": {
+    "cultivator.work": [
+      "anim-strips/cultivator-work-front.png",
+      "anim-strips/cultivator-work-side.png"
+    ],
+    "processing.line.run": [
+      "anim-strips/processing.line-run-front.png",
+      "anim-strips/processing.line-run-side.png"
+    ],
+    "seeder.sow": [
+      "anim-strips/seeder-sow-front.png",
+      "anim-strips/seeder-sow-side.png"
+    ],
+    "tractor.drive": [
+      "anim-strips/tractor-drive-front.png",
+      "anim-strips/tractor-drive-side.png"
+    ],
+    "tractor.steer": [
+      "anim-strips/tractor-steer-front.png",
+      "anim-strips/tractor-steer-side.png"
+    ]
+  }
+}

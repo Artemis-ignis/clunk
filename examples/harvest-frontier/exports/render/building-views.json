@@ -1,0 +1,29 @@
+{
+  "builtAt": "2026-09-02T08:24:52.068Z",
+  "views": [
+    {
+      "name": "3q-front",
+      "dir": "0.78,0.5,0.92",
+      "label": "three-quarter front (the storefront hero angle)"
+    },
+    {
+      "name": "3q-rear",
+      "dir": "-0.78,0.5,-0.92",
+      "label": "three-quarter rear"
+    },
+    {
+      "name": "front-low",
+      "dir": "0.10,0.17,1.0",
+      "label": "front, near eye level"
+    },
+    {
+      "name": "top",
+      "dir": "0.30,1.55,0.36",
+      "label": "from above (the angle the dark tiles read worst at)"
+    }
+  ],
+  "images": {
+    "farmhouse": "render/farmhouse-4views.png",
+    "barn": "render/barn-4views.png"
+  }
+}

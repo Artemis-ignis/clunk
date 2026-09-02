@@ -1,0 +1,78 @@
+{
+  "builtAt": "2026-09-02T17:54:11.515Z",
+  "input": "examples/harvest-frontier/exports/building/farmhouse.glb",
+  "output": "examples/harvest-frontier/exports/building/farmhouse.fixed.glb",
+  "paneInsetMm": 1,
+  "panesMoved": [
+    {
+      "pane": "windowPane",
+      "axis": "z",
+      "beforeMm": 2820,
+      "afterMm": 2819
+    },
+    {
+      "pane": "windowPane_1",
+      "axis": "z",
+      "beforeMm": 2820,
+      "afterMm": 2819
+    },
+    {
+      "pane": "windowPane_2",
+      "axis": "x",
+      "beforeMm": 3620,
+      "afterMm": 3619
+    },
+    {
+      "pane": "windowPane_3",
+      "axis": "z",
+      "beforeMm": 2810,
+      "afterMm": 2809
+    },
+    {
+      "pane": "windowPane_4",
+      "axis": "z",
+      "beforeMm": -2820,
+      "afterMm": -2819
+    },
+    {
+      "pane": "windowPane_5",
+      "axis": "z",
+      "beforeMm": -2820,
+      "afterMm": -2819
+    },
+    {
+      "pane": "windowPane_6",
+      "axis": "z",
+      "beforeMm": -2815.6,
+      "afterMm": -2814.6
+    },
+    {
+      "pane": "windowPane_7",
+      "axis": "x",
+      "beforeMm": -3620,
+      "afterMm": -3619
+    }
+  ],
+  "notChanged": [
+    "farmhouseFoundation stays 75.9 mm below y=0 - that is a foundation, not a fault",
+    "no material, colour or vertex colour touched"
+  ],
+  "before": {
+    "triangles": 12364,
+    "meshes": 23,
+    "boundsMm": [
+      8565.1,
+      6255.9,
+      8088.2
+    ]
+  },
+  "after": {
+    "triangles": 12364,
+    "meshes": 23,
+    "boundsMm": [
+      8565.1,
+      6255.9,
+      8088.2
+    ]
+  }
+}
