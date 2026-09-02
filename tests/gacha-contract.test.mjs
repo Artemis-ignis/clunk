@@ -227,16 +227,16 @@ test("등급은 눈에 보이는 품질로 가르고, 규칙을 그대로 적는
   // 2026-09-02: 검사 점수는 팔리는 것 거의 전부가 100점이라 등급을 가르지 못했다.
   // 이제 등급은 "움직이는 동작이 있는가" 와 "얼마나 복잡한가" 두 가지로만 갈린다.
 
-  // S — 동작 시트가 딸린 모델.
+  // A — 동작 시트가 딸렸지만 작은 모델. 동작은 한 단계 올려 줄 뿐, 520폴리곤 문을 S로 만들지 않는다.
   assert.equal(hasMotionOf(GATE), true, "여닫기 애니메이션 시트를 가진 모델은 움직이는 상품이다");
-  assert.deepEqual(gradeOf(GATE), { letter: "S", basis: "motion" });
+  assert.deepEqual(gradeOf(GATE), { letter: "A", basis: "motion" });
   assert.equal(gradeBasisOf(GATE), "움직이는 동작 포함");
   // 폴리곤은 520개뿐이라 동작이 없었다면 C 였을 것이다.
   assert.equal(polygonCountOf(GATE), 520);
 
-  // S — 동작이 든 스프라이트 시트 그 자체.
+  // A — 동작이 든 스프라이트 시트 그 자체. 폴리곤이 없는 시트는 동작만으로 S가 되지 않는다.
   assert.equal(hasMotionOf(FARMHAND), true);
-  assert.deepEqual(gradeOf(FARMHAND), { letter: "S", basis: "motion" });
+  assert.deepEqual(gradeOf(FARMHAND), { letter: "A", basis: "motion" });
 
   // S — 폴리곤 4,000개 이상.
   assert.equal(polygonCountOf(GREENHOUSE), 5756);

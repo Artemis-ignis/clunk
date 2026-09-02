@@ -206,7 +206,7 @@ export type Grade = { letter: GradeLetter; basis: GradeBasis };
  * 나타나는 물건이다. 그래서 눈에 보이는 두 가지 — 움직이는 동작이 있는지, 얼마나
  * 복잡한지(폴리곤 수와 묶음인지) — 로만 가른다.
  */
-export const GRADE_RULE = "등급 기준: S 움직이는 동작 포함 또는 폴리곤 4,000개 이상 · A 1,500개 이상 또는 묶음 · B 700개 이상 · C 그 외";
+export const GRADE_RULE = "등급 기준: S 움직이는 동작 포함(폴리곤 1,500개 이상) 또는 폴리곤 4,000개 이상 · A 움직이는 동작 포함 또는 1,500개 이상 또는 묶음 · B 700개 이상 · C 그 외";
 
 /** 등급 색. 캡슐 이음 링, 카드 배지, 빛줄기가 모두 이 한 벌을 쓴다. */
 export const GRADE_COLORS: Readonly<Record<GradeLetter, string>> = {
@@ -271,9 +271,13 @@ export function isModelBundleOf(
 export function gradeOf(
   listing: Pick<GachaListing, "title" | "description" | "entryFileName" | "variants" | "clips">,
 ): Grade {
-  if (hasMotionOf(listing)) return { letter: "S", basis: "motion" };
+  // Motion lifts a listing one step, it does not make a 520-polygon gate the top prize:
+  // S needs motion on a model of at least 1,500 polygons, or 4,000 polygons on its own.
+  const motion = hasMotionOf(listing);
   const polygons = polygonCountOf(listing);
+  if (motion && polygons !== null && polygons >= 1500) return { letter: "S", basis: "motion" };
   if (polygons !== null && polygons >= 4000) return { letter: "S", basis: "polygons" };
+  if (motion) return { letter: "A", basis: "motion" };
   if (polygons !== null && polygons >= 1500) return { letter: "A", basis: "polygons" };
   if (isModelBundleOf(listing)) return { letter: "A", basis: "bundle" };
   if (polygons !== null && polygons >= 700) return { letter: "B", basis: "polygons" };
