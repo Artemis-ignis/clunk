@@ -107,7 +107,7 @@ export function specOf(listing: Pick<VendingListing, "description">): string | n
  */
 export function slotFactOf(listing: Pick<VendingListing, "description" | "entryFileName">): string {
   const polygons = polygonsOf(listing);
-  if (polygons) return `${polygons} · 적을수록 가벼움`;
+  if (polygons) return polygons;
   const spec = specOf(listing);
   if (spec) return spec;
   const extension = listing.entryFileName.split(".").pop();

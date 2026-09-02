@@ -327,7 +327,7 @@ export function GlbReviewer({ initialUrl }: { initialUrl?: string | null }) {
           <dl className="rv-stats">
             <div><dt>파일</dt><dd>{stats.fileName}</dd></div>
             <div><dt>파일 크기 (바이트)</dt><dd>{stats.bytes.toLocaleString("ko-KR")}</dd></div>
-            <div><dt>폴리곤 (적을수록 가벼움)</dt><dd>{stats.triangles.toLocaleString("ko-KR")}</dd></div>
+            <div><dt>폴리곤</dt><dd>{stats.triangles.toLocaleString("ko-KR")}</dd></div>
             <div><dt>덩어리 · 재질</dt><dd>{stats.meshes} · {stats.materials}</dd></div>
             <div><dt>텍스처</dt><dd>{stats.textures === 0 ? "0 (색이 모델에 들어 있음)" : stats.textures}</dd></div>
             <div><dt>크기 (m)</dt><dd>{stats.bounds.x.toFixed(2)} × {stats.bounds.y.toFixed(2)} × {stats.bounds.z.toFixed(2)}</dd></div>

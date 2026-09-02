@@ -26,7 +26,7 @@ export const metadata = createPageMetadata({
 
 const BUYER_STEPS = (salesOpen: boolean) =>
   [
-    { index: "01", label: "고르기", detail: "면 수(많을수록 무거움)와 용량을 보고 3D로 돌려 보세요." },
+    { index: "01", label: "고르기", detail: "폴리곤 수와 파일 크기를 보고 3D로 돌려 보세요." },
     { index: "02", label: salesOpen ? "결제하기" : "로그인하기", detail: salesOpen ? "크레딧으로 바로 결제합니다." : "베타 기간에는 로그인만 하면 됩니다. 카드는 묻지 않습니다." },
     { index: "03", label: "받기", detail: salesOpen ? "결제 즉시 파일을 내려받습니다." : "바로 파일을 내려받습니다." },
     { index: "04", label: "넣기", detail: "받은 GLB 파일(3D 모델 파일 형식)을 그대로 게임에 넣으세요." },
@@ -76,7 +76,7 @@ export default function MarketplacePage() {
                 <div className={styles.heroPanel}>
                   <div className={styles.heroPanelHead}>
                     <span>코지 마켓 스톨</span>
-                    <span>GLB · 210 KB</span>
+                    <span>GLB · 215 KB</span>
                   </div>
                   <div className={styles.heroPanelArt}>
                     <Image
@@ -89,7 +89,7 @@ export default function MarketplacePage() {
                     />
                   </div>
                   <div className={styles.heroPanelFoot}>
-                    <span>면 2,456개 · 그리기 31회 · 실제 크기 2.44 m</span>
+                    <span>폴리곤 2,456개 · 그리기 31회 · 실제 크기 2.44 m</span>
                     <b>{salesOpen ? "₩6,900" : "베타 무료"}</b>
                   </div>
                 </div>

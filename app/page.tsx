@@ -115,7 +115,7 @@ export default function Home() {
               </div>
               <p>
                 농장·마을 배경에 바로 쓰는 3D 모델, 2D 스프라이트 시트, 이어 붙여도 이음매가 안 보이는 텍스처입니다.
-                슬롯마다 폴리곤 수(적을수록 가벼움)가 적혀 있고, 베타 기간에는 로그인만 하면 무료로 뽑습니다.
+                슬롯마다 폴리곤 수가 적혀 있고, 베타 기간에는 로그인만 하면 무료로 뽑습니다.
               </p>
             </div>
             <VendingHall />
@@ -158,6 +158,7 @@ export default function Home() {
                       src={INSPECTED_MODEL.src}
                       poster={INSPECTED_MODEL.poster}
                       alt={`Harvest Frontier에 들어간 ${INSPECTED_MODEL.name} — 드래그해서 돌려보세요`}
+                      hint="드래그 회전 · 휠 줌 · 실제 게임에 들어간 파일"
                     />
                     <small>Harvest Frontier에 들어간 파일</small>
                   </div>
@@ -178,11 +179,11 @@ export default function Home() {
                       </div>
                       <div>
                         <b>그리기 횟수</b>
-                        <span><em>{INSPECTED_MODEL.measured.drawCalls}회</em> · 적을수록 빠릅니다</span>
+                        <span><em>{INSPECTED_MODEL.measured.drawCalls}회</em></span>
                       </div>
                       <div>
                         <b>파일 크기</b>
-                        <span><em>{INSPECTED_MODEL.measured.size}</em> · 내려받는 파일 하나</span>
+                        <span><em>{INSPECTED_MODEL.measured.size}</em></span>
                       </div>
                     </div>
                     <div className="cv5-ops">

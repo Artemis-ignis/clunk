@@ -65,6 +65,7 @@ export function EmbeddedGlbViewer({
   src,
   poster,
   alt,
+  hint,
   onMeasured,
   clips,
   scaleReference = false,
@@ -72,6 +73,8 @@ export function EmbeddedGlbViewer({
   src: string;
   poster?: string | null;
   alt: string;
+  /** The one-line caption under the stage. The default names a shop file; a landing sample passes its own. */
+  hint?: string;
   onMeasured?: (spec: MeasuredSpec) => void;
   /** Motions to offer under the stage. Omit for a model nobody baked a clip for. */
   clips?: ViewerClip[] | null;
@@ -419,7 +422,7 @@ export function EmbeddedGlbViewer({
 
   const stage = (
     <div className="cv5-embed3d" ref={stageRef} role="img" aria-label={`${alt} — 인터랙티브 3D 미리보기`}>
-      <span className="cv5-embed3d-hint">드래그 회전 · 휠 줌 · 실제 판매 파일</span>
+      <span className="cv5-embed3d-hint">{hint ?? "드래그 회전 · 휠 줌 · 실제 판매 파일"}</span>
       {clipName ? <span className="cv5-embed3d-anim">▶ {clipName} 재생 중</span> : null}
     </div>
   );

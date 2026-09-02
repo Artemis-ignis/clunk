@@ -71,15 +71,12 @@ html:has(.cv5) body { background: var(--v5-bg0, #06070f); }
 /* ---------------------------------------------------------------- ambient */
 .cv5-stars {
   position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  /* 2026-09-02: the six white 1px "stars" that used to sit here were fixed to the viewport,
+     so they followed the reader down every page and read as dust on the screen. Only the
+     two soft glows remain. */
   background:
     radial-gradient(1200px 700px at 78% -8%, rgba(124, 93, 250, 0.16), transparent 62%),
-    radial-gradient(900px 560px at 12% 8%, rgba(99, 102, 241, 0.1), transparent 60%),
-    radial-gradient(1.2px 1.2px at 21% 33%, rgba(255,255,255,0.5), transparent 100%),
-    radial-gradient(1px 1px at 67% 12%, rgba(255,255,255,0.4), transparent 100%),
-    radial-gradient(1.4px 1.4px at 84% 41%, rgba(255,255,255,0.34), transparent 100%),
-    radial-gradient(1px 1px at 42% 7%, rgba(255,255,255,0.42), transparent 100%),
-    radial-gradient(1px 1px at 9% 64%, rgba(255,255,255,0.25), transparent 100%),
-    radial-gradient(1.3px 1.3px at 55% 79%, rgba(255,255,255,0.2), transparent 100%);
+    radial-gradient(900px 560px at 12% 8%, rgba(99, 102, 241, 0.1), transparent 60%);
 }
 .cv5 > main, .cv5 > footer { position: relative; z-index: 1; }
 
@@ -978,3 +975,13 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
 /* OrbitControls writes touch-action:none as an INLINE style on the canvas, so
    only an !important author rule can take the vertical gesture back. */
 .cv5-snap .cv5-embed3d canvas { touch-action: pan-y !important; }
+
+/* Section 03 renders the built model in the shared interactive viewer; it fills the stage. */
+.cv5-agent-stage .cv5-embed3d { position: absolute; inset: 0; height: 100%; min-height: 0; border: 0; border-radius: inherit; background: transparent; }
+.cv5-agent-stage .cv5-embed3d-hint { bottom: 10px; }
+
+/* Section 03 'making' veil: a progress bar over the interactive viewer. It never blocks the pointer. */
+.cv5-agent-veil { position: absolute; left: 10px; right: 10px; bottom: 44px; z-index: 2; pointer-events: none; height: 4px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); overflow: visible; }
+.cv5-agent-veil > span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--v5-violet), var(--v5-cyan)); transition: width 200ms linear; }
+.cv5-agent-veil > small { position: absolute; right: 0; top: 8px; font-size: 0.72rem; color: var(--v5-ink-dim); }
+.cv5-agent-stage[data-building="true"] .cv5-embed3d { filter: saturate(0.6) brightness(0.85); transition: filter 400ms ease; }

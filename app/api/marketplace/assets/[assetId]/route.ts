@@ -107,7 +107,9 @@ export async function GET(request: Request, context: RouteContext) {
       headers: {
         "content-type": artifact.contentType,
         "cache-control": publicPreview ? "public, max-age=300" : paid ? "private, no-store" : "public, max-age=31536000, immutable",
-        "content-disposition": `inline; filename="${artifact.fileName.replace(/[^a-zA-Z0-9._-]/g, "-")}"`,
+        // A preview is shown in the page; anything else is the product and should save as a
+        // file — a PNG sheet opened inline read as "the download did nothing".
+        "content-disposition": `${publicPreview ? "inline" : "attachment"}; filename="${artifact.fileName.replace(/[^a-zA-Z0-9._-]/g, "-")}"`,
       },
     });
   } catch (error) {
