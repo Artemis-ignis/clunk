@@ -105,7 +105,28 @@ export function hasRuntimeAssets(): boolean {
   return Boolean(getRuntimeBinding<R2Bucket>("ASSETS"));
 }
 
-export async function ensureSchema(db: D1Database): Promise<void> {
+const schemaReadyByDb = new WeakMap<D1Database, Promise<void>>();
+
+/**
+ * The schema check used to run on every request: a batch of CREATE statements, seven
+ * probe SELECTs, an index and a second batch — about a dozen sequential D1 round trips,
+ * two and a half seconds on the catalogue before a single product row was read. It now
+ * runs once per database handle per isolate; a failure clears the memo so the next
+ * request tries again.
+ */
+export function ensureSchema(db: D1Database): Promise<void> {
+  let pending = schemaReadyByDb.get(db);
+  if (!pending) {
+    pending = ensureSchemaUncached(db).catch((error) => {
+      schemaReadyByDb.delete(db);
+      throw error;
+    });
+    schemaReadyByDb.set(db, pending);
+  }
+  return pending;
+}
+
+async function ensureSchemaUncached(db: D1Database): Promise<void> {
   await db.batch(SCHEMA_STATEMENTS.map((statement) => db.prepare(statement)));
   await ensureColumn(db, "clunk_collaboration_threads");
   await ensureColumn(db, "clunk_collaboration_threads", "consumer_project", "TEXT NOT NULL DEFAULT 'harvest-frontier'");
