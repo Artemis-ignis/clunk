@@ -17,13 +17,13 @@
   ],
   "targetFillFraction": 0.76,
   "subjectBoundingBoxPx": {
-    "x": 325,
+    "x": 323.6666666666667,
     "y": 123,
-    "width": 374,
+    "width": 376.6666666666667,
     "height": 778
   },
   "subjectFillFraction": 0.7598,
-  "subjectPixelCoverageFraction": 0.1611,
+  "subjectPixelCoverageFraction": 0.1593,
   "clippedTop": false,
   "clippedBottom": false,
   "clippedLeft": false,
@@ -31,8 +31,8 @@
   "marginPx": {
     "top": 123,
     "bottom": 123,
-    "left": 325,
-    "right": 325
+    "left": 323.6666666666667,
+    "right": 323.6666666666667
   },
   "triangles": 5888,
   "meshes": 14,

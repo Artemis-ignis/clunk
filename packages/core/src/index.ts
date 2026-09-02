@@ -852,8 +852,6 @@ function collectMetrics(parsed: ParsedAsset): AssetMetrics {
   let drawCallCount = 0;
   let missingNormalPrimitiveCount = 0;
   let missingUvPrimitiveCount = 0;
-  let boundsMin: [number, number, number] | null = null;
-  let boundsMax: [number, number, number] | null = null;
 
   for (const mesh of meshes) {
     for (const primitive of mesh.primitives ?? []) {
@@ -865,13 +863,10 @@ function collectMetrics(parsed: ParsedAsset): AssetMetrics {
       triangleCount += primitiveTriangleCount(json, primitive);
       if (attributes.NORMAL === undefined) missingNormalPrimitiveCount += 1;
       if (attributes.TEXCOORD_0 === undefined) missingUvPrimitiveCount += 1;
-      const bounds = accessorBounds(json, attributes.POSITION, parsed);
-      if (bounds) {
-        boundsMin = mergeBounds(boundsMin, bounds.min, "min");
-        boundsMax = mergeBounds(boundsMax, bounds.max, "max");
-      }
     }
   }
+
+  const { min: boundsMin, max: boundsMax } = worldBounds(parsed);
 
   const resourceIssues = collectResourceIssues(parsed);
   const textureDimensions = images.map((image: GltfDocument, index: number) =>
@@ -1361,6 +1356,254 @@ function primitiveTriangleCount(json: GltfDocument, primitive: GltfDocument): nu
   return 0;
 }
 
+/**
+ * Bounding box in the space the engine actually draws in.
+ *
+ * A POSITION accessor's min/max are mesh-local integers or floats. Reporting them straight out
+ * produces two wrong answers on real game files: a part parented under a pivot node does not move
+ * the box (a 2.40 m gate was reported as 2.67 m), and a quantized mesh reports its storage range
+ * (65534) instead of its size in metres. So the scene graph is walked, node transforms are
+ * composed, normalized integer positions are decoded, and EXT_mesh_gpu_instancing instances are
+ * expanded -- the same three steps a glTF loader performs before the first frame.
+ *
+ * If the document has no usable scene graph the result falls back to the union of the mesh-local
+ * accessor boxes, which is what this function replaced.
+ */
+type Matrix4 = Float64Array;
+
+function identityMatrix(): Matrix4 {
+  const matrix = new Float64Array(16);
+  matrix[0] = 1;
+  matrix[5] = 1;
+  matrix[10] = 1;
+  matrix[15] = 1;
+  return matrix;
+}
+
+/** Column-major multiply, matching the glTF `node.matrix` layout. */
+function multiplyMatrices(a: Matrix4, b: Matrix4): Matrix4 {
+  const out = new Float64Array(16);
+  for (let column = 0; column < 4; column += 1) {
+    for (let row = 0; row < 4; row += 1) {
+      let sum = 0;
+      for (let k = 0; k < 4; k += 1) sum += a[k * 4 + row] * b[column * 4 + k];
+      out[column * 4 + row] = sum;
+    }
+  }
+  return out;
+}
+
+function composeMatrix(
+  translation: readonly number[],
+  rotation: readonly number[],
+  scale: readonly number[],
+): Matrix4 {
+  const [x, y, z, w] = rotation;
+  const x2 = x + x;
+  const y2 = y + y;
+  const z2 = z + z;
+  const xx = x * x2;
+  const xy = x * y2;
+  const xz = x * z2;
+  const yy = y * y2;
+  const yz = y * z2;
+  const zz = z * z2;
+  const wx = w * x2;
+  const wy = w * y2;
+  const wz = w * z2;
+  const matrix = new Float64Array(16);
+  matrix[0] = (1 - (yy + zz)) * scale[0];
+  matrix[1] = (xy + wz) * scale[0];
+  matrix[2] = (xz - wy) * scale[0];
+  matrix[4] = (xy - wz) * scale[1];
+  matrix[5] = (1 - (xx + zz)) * scale[1];
+  matrix[6] = (yz + wx) * scale[1];
+  matrix[8] = (xz + wy) * scale[2];
+  matrix[9] = (yz - wx) * scale[2];
+  matrix[10] = (1 - (xx + yy)) * scale[2];
+  matrix[12] = translation[0];
+  matrix[13] = translation[1];
+  matrix[14] = translation[2];
+  matrix[15] = 1;
+  return matrix;
+}
+
+function numberTriple(value: unknown, fallback: [number, number, number]): [number, number, number] {
+  if (!Array.isArray(value) || value.length < 3) return fallback;
+  return [Number(value[0]), Number(value[1]), Number(value[2])];
+}
+
+function nodeMatrix(node: GltfDocument): Matrix4 {
+  if (Array.isArray(node.matrix) && node.matrix.length === 16) {
+    const matrix = new Float64Array(16);
+    for (let index = 0; index < 16; index += 1) matrix[index] = Number(node.matrix[index]);
+    return matrix;
+  }
+  const translation = numberTriple(node.translation, [0, 0, 0]);
+  const scale = numberTriple(node.scale, [1, 1, 1]);
+  const rotation =
+    Array.isArray(node.rotation) && node.rotation.length === 4
+      ? node.rotation.map(Number)
+      : [0, 0, 0, 1];
+  return composeMatrix(translation, rotation, scale);
+}
+
+/** Transform an axis-aligned box by a matrix and return the axis-aligned box that contains it. */
+function transformBox(
+  min: readonly number[],
+  max: readonly number[],
+  matrix: Matrix4,
+): { min: [number, number, number]; max: [number, number, number] } {
+  const outMin: [number, number, number] = [Infinity, Infinity, Infinity];
+  const outMax: [number, number, number] = [-Infinity, -Infinity, -Infinity];
+  for (let corner = 0; corner < 8; corner += 1) {
+    const x = corner & 1 ? max[0] : min[0];
+    const y = corner & 2 ? max[1] : min[1];
+    const z = corner & 4 ? max[2] : min[2];
+    const tx = matrix[0] * x + matrix[4] * y + matrix[8] * z + matrix[12];
+    const ty = matrix[1] * x + matrix[5] * y + matrix[9] * z + matrix[13];
+    const tz = matrix[2] * x + matrix[6] * y + matrix[10] * z + matrix[14];
+    outMin[0] = Math.min(outMin[0], tx);
+    outMin[1] = Math.min(outMin[1], ty);
+    outMin[2] = Math.min(outMin[2], tz);
+    outMax[0] = Math.max(outMax[0], tx);
+    outMax[1] = Math.max(outMax[1], ty);
+    outMax[2] = Math.max(outMax[2], tz);
+  }
+  return { min: outMin, max: outMax };
+}
+
+/**
+ * The scale a renderer applies to a `normalized: true` integer accessor. glTF stores min/max in
+ * the raw component domain, so a quantized position of 32767 is 1.0 to the renderer, not 32767 m.
+ */
+function normalizedScale(componentType: number): number {
+  switch (componentType) {
+    case 5120:
+      return 1 / 127;
+    case 5121:
+      return 1 / 255;
+    case 5122:
+      return 1 / 32767;
+    case 5123:
+      return 1 / 65535;
+    default:
+      return 1;
+  }
+}
+
+/** Mesh-local POSITION box with accessor normalization applied. */
+function primitiveLocalBounds(
+  json: GltfDocument,
+  index: unknown,
+  parsed: ParsedAsset,
+): { min: [number, number, number]; max: [number, number, number] } | null {
+  const bounds = accessorBounds(json, index, parsed);
+  if (!bounds) return null;
+  const accessor = getAccessor(json, index);
+  if (!accessor?.normalized) return bounds;
+  const componentType = Number(accessor.componentType);
+  const scale = normalizedScale(componentType);
+  const signed = componentType === 5120 || componentType === 5122;
+  const decode = (value: number) => (signed ? Math.max(-1, value * scale) : value * scale);
+  return {
+    min: bounds.min.map(decode) as [number, number, number],
+    max: bounds.max.map(decode) as [number, number, number],
+  };
+}
+
+/**
+ * The translation range declared by EXT_mesh_gpu_instancing. Accessor min/max is preferred over
+ * the raw buffer because instanced files are usually meshopt-compressed, where the bytes on disk
+ * are not decodable here. With translation-only instancing this is exact; with per-instance
+ * rotation or scale it is a deliberate over-approximation rather than a silent undercount.
+ */
+function instanceTranslationRange(
+  json: GltfDocument,
+  node: GltfDocument,
+  parsed: ParsedAsset,
+): { min: [number, number, number]; max: [number, number, number] } | null {
+  const instancing = node.extensions?.EXT_mesh_gpu_instancing;
+  const translationIndex = instancing?.attributes?.TRANSLATION;
+  if (translationIndex === undefined) return null;
+  return primitiveLocalBounds(json, translationIndex, parsed);
+}
+
+function worldBounds(parsed: ParsedAsset): {
+  min: [number, number, number] | null;
+  max: [number, number, number] | null;
+} {
+  const json = parsed.json;
+  const nodes: GltfDocument[] = Array.isArray(json.nodes) ? json.nodes : [];
+  const meshes: GltfDocument[] = Array.isArray(json.meshes) ? json.meshes : [];
+  const scenes: GltfDocument[] = Array.isArray(json.scenes) ? json.scenes : [];
+
+  let min: [number, number, number] | null = null;
+  let max: [number, number, number] | null = null;
+  const localCache = new Map<
+    number,
+    { min: [number, number, number]; max: [number, number, number] } | null
+  >();
+
+  const meshLocalBounds = (meshIndex: number) => {
+    const cached = localCache.get(meshIndex);
+    if (cached !== undefined) return cached;
+    const mesh = meshes[meshIndex];
+    let meshMin: [number, number, number] | null = null;
+    let meshMax: [number, number, number] | null = null;
+    for (const primitive of mesh?.primitives ?? []) {
+      const bounds = primitiveLocalBounds(json, primitive.attributes?.POSITION, parsed);
+      if (!bounds) continue;
+      meshMin = mergeBounds(meshMin, bounds.min, "min");
+      meshMax = mergeBounds(meshMax, bounds.max, "max");
+    }
+    const result = meshMin && meshMax ? { min: meshMin, max: meshMax } : null;
+    localCache.set(meshIndex, result);
+    return result;
+  };
+
+  const roots = new Set<number>();
+  for (const scene of scenes) for (const node of scene.nodes ?? []) roots.add(Number(node));
+  if (!roots.size && nodes.length) roots.add(0);
+
+  const visit = (index: number, parent: Matrix4, ancestors: Set<number>) => {
+    const node = nodes[index];
+    if (!node || ancestors.has(index)) return;
+    ancestors.add(index);
+    const world = multiplyMatrices(parent, nodeMatrix(node));
+    if (node.mesh !== undefined) {
+      const local = meshLocalBounds(Number(node.mesh));
+      if (local) {
+        const offsets = instanceTranslationRange(json, node, parsed);
+        const localMin = offsets
+          ? ([0, 1, 2].map((axis) => local.min[axis] + offsets.min[axis]) as [number, number, number])
+          : local.min;
+        const localMax = offsets
+          ? ([0, 1, 2].map((axis) => local.max[axis] + offsets.max[axis]) as [number, number, number])
+          : local.max;
+        const box = transformBox(localMin, localMax, world);
+        min = mergeBounds(min, box.min, "min");
+        max = mergeBounds(max, box.max, "max");
+      }
+    }
+    for (const child of node.children ?? []) visit(Number(child), world, ancestors);
+    ancestors.delete(index);
+  };
+
+  for (const root of [...roots].sort((a, b) => a - b)) visit(root, identityMatrix(), new Set());
+
+  if (min && max) return { min, max };
+
+  // No usable scene graph: fall back to the union of the mesh-local boxes.
+  for (let meshIndex = 0; meshIndex < meshes.length; meshIndex += 1) {
+    const local = meshLocalBounds(meshIndex);
+    if (!local) continue;
+    min = mergeBounds(min, local.min, "min");
+    max = mergeBounds(max, local.max, "max");
+  }
+  return { min, max };
+}
+
 function accessorBounds(
   json: GltfDocument,
   index: unknown,
@@ -1405,6 +1648,9 @@ function accessorBytes(
 ): Uint8Array | null {
   const view = json.bufferViews?.[accessor.bufferView];
   if (!view) return null;
+  // EXT_meshopt_compression stores an encoded stream in the buffer view. Reading it as raw
+  // components produces plausible-looking nonsense, so the honest answer is "cannot read".
+  if (view.extensions?.EXT_meshopt_compression) return null;
   const buffer = getBufferBytes(json, Number(view.buffer ?? 0), parsed);
   if (!buffer) return null;
   const offset = Number(view.byteOffset ?? 0);
@@ -1813,7 +2059,7 @@ export function optimizeAsset(
   if (cleanedMetadata > 0) {
     operations.push({
       id: "clean-metadata",
-      description: "Removed explicitly allowlisted non-runtime metadata: extras, asset.generator, and asset.copyright.",
+      description: "Removed explicitly allowlisted authoring provenance: asset.generator and asset.copyright. Every extras block is preserved because an engine can read it.",
       count: cleanedMetadata,
       safety: "metadata-only",
     });
@@ -1938,6 +2184,26 @@ function pruneEmptyNodes(json: GltfDocument): number {
         .filter((node: number | undefined): node is number => node !== undefined);
     }
   }
+  // Every other place a node index is written down has to move with the array. Skin joints and
+  // animation channel targets are excluded from removal above, but exclusion is not enough: if an
+  // earlier node goes away, a kept node's index still changes, and an un-remapped reference then
+  // silently points at a different node — an animation driving the wrong part, a skin bound to the
+  // wrong joint. That is not a lossless operation.
+  for (const skin of json.skins ?? []) {
+    if (Array.isArray(skin.joints)) {
+      skin.joints = skin.joints.map((joint: unknown) => remap.get(Number(joint)) ?? Number(joint));
+    }
+    if (skin.skeleton !== undefined) {
+      skin.skeleton = remap.get(Number(skin.skeleton)) ?? Number(skin.skeleton);
+    }
+  }
+  for (const animation of json.animations ?? []) {
+    for (const channel of animation.channels ?? []) {
+      if (channel.target?.node !== undefined) {
+        channel.target.node = remap.get(Number(channel.target.node)) ?? Number(channel.target.node);
+      }
+    }
+  }
   json.nodes = nextNodes;
   return remove.filter(Boolean).length;
 }
@@ -1973,27 +2239,28 @@ function dedupeMaterials(json: GltfDocument): number {
   return removed;
 }
 
+/**
+ * Remove authoring noise, and nothing an engine can read back.
+ *
+ * `extras` used to be deleted everywhere this walk reached. That is render-safe and runtime-fatal:
+ * `extras` is exactly where engines keep the contract — Harvest Frontier's tractor stores
+ * `sculptRuntime.assetId`, its sockets and its colliders there (289 KB of it), an NPC stores its
+ * `npcId` and capsule collider, the windmill stores its licence. A "lossless, metadata-only"
+ * operation must not silently take those out, and nothing in this package can tell an engine
+ * contract apart from a leftover exporter note. So only the two glTF fields that are defined as
+ * authoring provenance are removed.
+ */
 function cleanMetadata(json: GltfDocument): number {
   let removed = 0;
-
-  const visit = (value: unknown, isAsset = false) => {
-    if (!value || typeof value !== "object") return;
-    if (Array.isArray(value)) {
-      value.forEach((item) => visit(item));
-      return;
-    }
-    const record = value as GltfDocument;
-    for (const key of Object.keys(record)) {
-      if (key === "extras" || (isAsset && (key === "generator" || key === "copyright"))) {
-        delete record[key];
+  const asset = json.asset as GltfDocument | undefined;
+  if (asset) {
+    for (const key of ["generator", "copyright"]) {
+      if (asset[key] !== undefined) {
+        delete asset[key];
         removed += 1;
-        continue;
       }
-      visit(record[key], isAsset || key === "asset");
     }
-  };
-
-  visit(json);
+  }
   return removed;
 }
 

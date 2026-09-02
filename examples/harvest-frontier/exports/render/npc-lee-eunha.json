@@ -17,13 +17,13 @@
   ],
   "targetFillFraction": 0.76,
   "subjectBoundingBoxPx": {
-    "x": 328.6666666666667,
+    "x": 334,
     "y": 123,
-    "width": 366.6666666666667,
+    "width": 356,
     "height": 778
   },
   "subjectFillFraction": 0.7598,
-  "subjectPixelCoverageFraction": 0.1553,
+  "subjectPixelCoverageFraction": 0.1561,
   "clippedTop": false,
   "clippedBottom": false,
   "clippedLeft": false,
@@ -31,8 +31,8 @@
   "marginPx": {
     "top": 123,
     "bottom": 123,
-    "left": 328.6666666666667,
-    "right": 328.6666666666667
+    "left": 334,
+    "right": 334
   },
   "triangles": 5906,
   "meshes": 15,
@@ -40,7 +40,7 @@
   "boundsMetres": [
     1.1609,
     2.2078,
-    0.7381
+    0.7265
   ],
   "shadow": {
     "kind": "soft contact shadow",

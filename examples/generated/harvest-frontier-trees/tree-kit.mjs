@@ -635,38 +635,145 @@ function stemProfile(spec) {
   return { radiusAt, offsetAt };
 }
 
-function buildBranches(THREE, parts, trunkSpec, branches, rand) {
+/**
+ * Where one branch attaches, which way it points, and how long it ends up.
+ *
+ * Split out of `buildBranches` so the containment diagnostic below measures the branch the
+ * factory actually emits instead of a second copy of the same arithmetic — the two drifted
+ * apart once already on the conifer skirts and that is how a branch ends up hanging in the
+ * open air with nothing around it.
+ *
+ * Consumes exactly one random value, so a caller replaying a fresh RNG in branch order gets
+ * the same lengths `createTree` gets.
+ */
+function branchPlacement(THREE, trunkSpec, branch, rand) {
   const { radiusAt, offsetAt } = stemProfile(trunkSpec);
+  const t = branch.t;
+  const offset = offsetAt(t);
+  const yaw = branch.yaw;
+  const attachRadius = radiusAt(t) * 0.55;
+  const origin = [
+    offset[0] + Math.cos(yaw) * attachRadius,
+    trunkSpec.height * t,
+    offset[1] + Math.sin(yaw) * attachRadius,
+  ];
+  const pitch = branch.pitch;
+  const direction = new THREE.Vector3(
+    Math.cos(yaw) * Math.sin(pitch),
+    Math.cos(pitch),
+    Math.sin(yaw) * Math.sin(pitch),
+  );
+  const length = branch.length * (0.88 + 0.24 * rand());
+  return { origin, direction, length, droop: branch.droop ?? 0 };
+}
+
+/** The matrix `placeDir` would apply, without needing a geometry to apply it to. */
+function branchMatrix(THREE, placement) {
+  const quaternion = new THREE.Quaternion().setFromUnitVectors(
+    new THREE.Vector3(0, 1, 0),
+    placement.direction.clone().normalize(),
+  );
+  return new THREE.Matrix4().compose(
+    new THREE.Vector3(placement.origin[0], placement.origin[1], placement.origin[2]),
+    quaternion,
+    new THREE.Vector3(1, 1, 1),
+  );
+}
+
+/**
+ * A point on the branch axis in world space. `u` runs 0 (attachment) to 1 (tip).
+ * Mirrors the axis `stemGeometry` builds: the lean offset rides `u ** leanPower` with
+ * leanPower 2, and for a branch the lean is `[0, droop]`.
+ */
+function branchAxisPoint(THREE, placement, u) {
+  const bend = Math.pow(u, 2);
+  const local = new THREE.Vector3(0, u * placement.length, placement.droop * bend);
+  return local.applyMatrix4(branchMatrix(THREE, placement));
+}
+
+function buildBranches(THREE, parts, trunkSpec, branches, rand) {
   branches.forEach((branch, index) => {
-    const t = branch.t;
-    const offset = offsetAt(t);
-    const yaw = branch.yaw;
-    const attachRadius = radiusAt(t) * 0.55;
-    const origin = [
-      offset[0] + Math.cos(yaw) * attachRadius,
-      trunkSpec.height * t,
-      offset[1] + Math.sin(yaw) * attachRadius,
-    ];
-    const pitch = branch.pitch;
-    const direction = new THREE.Vector3(
-      Math.cos(yaw) * Math.sin(pitch),
-      Math.cos(pitch),
-      Math.sin(yaw) * Math.sin(pitch),
-    );
-    const length = branch.length * (0.88 + 0.24 * rand());
+    const placement = branchPlacement(THREE, trunkSpec, branch, rand);
     const geometry = stemGeometry(THREE, {
-      height: length,
+      height: placement.length,
       baseRadius: branch.radius,
       topRadius: branch.radius * 0.32,
       radial: branch.radial ?? 6,
       rings: branch.rings ?? 2,
       taper: 0.85,
-      lean: [0, branch.droop ?? 0],
+      lean: [0, placement.droop],
       leanPower: 2,
       wobble: 0.07,
       seed: 40 + index * 7,
     });
-    parts.push(placeDir(THREE, geometry, origin, direction));
+    parts.push(placeDir(THREE, geometry, placement.origin, placement.direction));
+  });
+}
+
+/**
+ * Diagnostic: the world-space axis of every branch a template emits, sampled from `fromU` to
+ * the tip. Used by scripts/dogfood-tree-containment.mjs to ask whether a branch ends inside
+ * the foliage or in the open air.
+ *
+ * The RNG is recreated from the template seed and read in branch order, which is exactly what
+ * `createTree` does — leaders are placed before branches but consume no random values, so the
+ * lengths returned here are the lengths in the GLB.
+ */
+/**
+ * A leaf clump on the end of every branch.
+ *
+ * Without these, a branch is a bare stick that stops in open air short of the crown: the
+ * silhouette reads as foliage floating above a tree rather than foliage growing on it, which is
+ * what a player noticed first. Real boughs carry their leaves at the tip, so that is where the
+ * clump goes.
+ *
+ * The clump is centred just inboard of the tip and sized to swallow the last fifth of the branch,
+ * which is the span scripts/dogfood-tree-containment.mjs checks. `tuft` on a template scales it:
+ * a species with small leaves wants a smaller ball than a broadleaf.
+ */
+function boughTufts(THREE, template) {
+  const tuft = template.tuft ?? {};
+  const scale = tuft.scale ?? 1;
+  const minimum = tuft.minRadius ?? 0.42;
+  return branchAxisSamples(THREE, template, 0.8, 2).map((branch, index) => {
+    const centre = branchAxisSamples(THREE, template, tuft.centreU ?? 0.9, 1)[index].tip;
+    // Reach from the clump centre back to u = 0.8 and forward past the tip, plus a margin so
+    // the clump surface -- not just its centre -- covers the wood.
+    const span = branch.length * Math.max((tuft.centreU ?? 0.9) - 0.8, 1 - (tuft.centreU ?? 0.9));
+    return {
+      position: [centre.x, centre.y, centre.z],
+      radius: Math.max(minimum, span * 2.6) * scale,
+      scale: tuft.squash ? [1.05, tuft.squash, 1.05] : [1.05, 0.9, 1.05],
+      // detail 0 (20 triangles) on purpose: this is a filler clump that sits where a bough meets
+      // the crown, the same job the small canopy clumps already do at detail 0. detail 1 would
+      // quadruple its cost for a shape nobody sees in silhouette.
+      detail: tuft.detail ?? 0,
+      tint: tuft.tint ?? 0.15,
+      jitter: 0.26,
+      yaw: index * 1.1,
+    };
+  });
+}
+
+export function branchAxisSamples(THREE, template, fromU = 0.8, samples = 5) {
+  const rand = seededRandom(template.seed);
+  const trunkSpec = template.trunk;
+  return (template.branches ?? []).map((branch, index) => {
+    const placement = branchPlacement(THREE, trunkSpec, branch, rand);
+    const points = [];
+    for (let step = 0; step < samples; step += 1) {
+      // One sample means "just fromU"; without this guard the divisor is zero and every
+      // coordinate comes back NaN, which silently destroys whatever consumes the points.
+      const u = samples === 1 ? fromU : fromU + ((1 - fromU) * step) / (samples - 1);
+      points.push(branchAxisPoint(THREE, placement, u));
+    }
+    return {
+      index,
+      length: placement.length,
+      radiusAtTip: branch.radius * 0.32,
+      tip: points[points.length - 1],
+      points,
+    };
   });
 }
 
@@ -721,8 +828,9 @@ function buildClusters(THREE, parts, clusters, seedBase) {
  *
  * @param {typeof import("three")} THREE injected by scripts/threejs-to-glb.mjs
  * @param {object} template one of TREE_TEMPLATES
+ * @param {{ boughTufts?: boolean }} [options] diagnostic switches; defaults ship the tufts
  */
-export function createTree(THREE, template) {
+export function createTree(THREE, template, options = {}) {
   const rand = seededRandom(template.seed);
 
   // ---- bark ---------------------------------------------------------------
@@ -775,6 +883,13 @@ export function createTree(THREE, template) {
     });
   }
   buildClusters(THREE, foliageParts, template.canopy(rand, template), template.seed + 500);
+  // Appended after the template's own canopy, and built from a fresh RNG inside boughTufts, so
+  // adding tufts does not shift a single existing lobe. `boughTufts: false` builds the crown
+  // without them, which is how the containment diagnostic asks "does the branch reach the crown
+  // on its own, or only because it carries its own clump?".
+  if (options.boughTufts !== false) {
+    buildClusters(THREE, foliageParts, boughTufts(THREE, template), template.seed + 700);
+  }
 
   const foliageFinished = foliageParts.map((part) => ({
     geometry: finish(part.geometry),
@@ -881,10 +996,15 @@ export const TREE_TEMPLATES = {
       wobble: 0.055,
     },
     roots: { count: 5, length: 0.72, radius: 0.20, dip: 0.16, phase: 0.4 },
+    // Every bough has to end inside the dome. The crown centre sits at y 5.25 with a 2.55 m
+    // radius squashed to 0.80, so its underside is around y 3.2 -- a bough leaving the trunk at
+    // y 2.2 needs roughly 2.5 m of rise, not the 1.1 m the first cut gave it. Pitch is the angle
+    // from straight up, so the smaller numbers below are what turn a sideways stub into a limb
+    // that climbs into the leaves.
     branches: [
-      { t: 0.60, yaw: 0.5, pitch: 0.80, length: 1.5, radius: 0.13 },
-      { t: 0.72, yaw: 2.6, pitch: 0.72, length: 1.7, radius: 0.13 },
-      { t: 0.82, yaw: 4.5, pitch: 0.62, length: 1.6, radius: 0.12 },
+      { t: 0.60, yaw: 0.5, pitch: 0.55, length: 2.9, radius: 0.13 },
+      { t: 0.72, yaw: 2.6, pitch: 0.58, length: 2.5, radius: 0.13 },
+      { t: 0.82, yaw: 4.5, pitch: 0.55, length: 2.1, radius: 0.12 },
       { t: 0.92, yaw: 3.4, pitch: 0.40, length: 1.2, radius: 0.10 },
     ],
     canopy: (rand) =>
@@ -929,9 +1049,12 @@ export const TREE_TEMPLATES = {
       { t: 0.97, yaw: 0.50, pitch: 0.36, height: 3.1, radiusScale: 0.80, radial: 8, rings: 4 },
       { t: 0.97, yaw: 3.75, pitch: 1.00, height: 2.6, radiusScale: 0.66, radial: 7, rings: 3 },
     ],
+    // The two crowns sit at (1.15, 5.00, 0.60) and (-2.25, 3.05, -1.05). The first cut aimed both
+    // boughs at neither of them, so both ended in the gap of sky between the masses. Each yaw
+    // below points at one crown centre and the length is the distance to it.
     branches: [
-      { t: 0.55, yaw: 1.9, pitch: 0.95, length: 1.25, radius: 0.11 },
-      { t: 0.80, yaw: 5.0, pitch: 0.85, length: 1.35, radius: 0.11 },
+      { t: 0.55, yaw: 3.58, pitch: 0.92, length: 2.35, radius: 0.11 },
+      { t: 0.80, yaw: 0.48, pitch: 0.57, length: 2.90, radius: 0.11 },
     ],
     canopy: (rand) => [
       ...roundCrown(
@@ -1005,8 +1128,18 @@ export const TREE_TEMPLATES = {
     seed: 58.7,
     bark: PALE_BARK,
     leaf: COLUMN_LEAF,
+    // CONTAINMENT INVARIANT — do not raise `height` past the top shelf's core.
+    // This form ends in a thin plate, not a mass, so the trunk has very little foliage above it
+    // to hide in. At height 6.5 the trunk top (6.50) stood above the whole canopy (6.44) and a
+    // bare stub showed over the crown from every angle — 1350/1350 escape rays in
+    // scripts/dogfood-tree-containment.mjs.
+    //   top shelf   y 6.05, thickness 0.70, so its central core spans 5.75 .. 6.35 on the axis
+    //               with radius 1.12*0.56*1.05 = 0.66 and up to ~0.10 m of jitter off the top
+    //   trunk reach at top = topRadius*(1+wobble) + |lean| = 0.10*1.05 + 0.10 = 0.205 << 0.66
+    // Ending the trunk at the shelf's own centre height leaves ~0.20 m of foliage above it in
+    // the worst jitter case, and the model's height is now set by the canopy, as it should be.
     trunk: {
-      height: 6.5,
+      height: 6.05,
       baseRadius: 0.34,
       topRadius: 0.10,
       radial: 9,
@@ -1019,11 +1152,16 @@ export const TREE_TEMPLATES = {
       wobble: 0.05,
     },
     roots: { count: 5, length: 0.55, radius: 0.15, dip: 0.15, phase: 1.3 },
+    // This form is four flat shelves with deliberate sky between them, so a bough that stops
+    // between two shelves stops in that sky. Each `t` below leaves the trunk just under a shelf
+    // and each pitch tilts up enough to finish inside it: shelves are at y 2.50 / 3.85 / 5.05 /
+    // 6.05 and the trunk is 6.05 tall, so t 0.36 / 0.55 / 0.79 / 0.93 start at 2.18 / 3.33 /
+    // 4.78 / 5.63.
     branches: [
       { t: 0.36, yaw: 0.4, pitch: 1.34, length: 1.55, radius: 0.075, droop: -0.10 },
       { t: 0.55, yaw: 2.5, pitch: 1.36, length: 1.40, radius: 0.070, droop: -0.10 },
-      { t: 0.73, yaw: 4.6, pitch: 1.38, length: 1.15, radius: 0.062, droop: -0.08 },
-      { t: 0.90, yaw: 1.6, pitch: 1.40, length: 0.90, radius: 0.055, droop: -0.06 },
+      { t: 0.79, yaw: 4.6, pitch: 1.25, length: 1.30, radius: 0.062, droop: -0.08 },
+      { t: 0.93, yaw: 1.13, pitch: 1.20, length: 0.90, radius: 0.055, droop: -0.06 },
     ],
     canopy: (rand) =>
       tieredShelves(
@@ -1117,11 +1255,15 @@ export const TREE_TEMPLATES = {
     roots: { count: 6, length: 0.62, radius: 0.17, dip: 0.15, phase: 0.1 },
     // Kept low and near-horizontal on purpose: at a steeper pitch the tips broke the
     // canopy line and read as antennae rather than as boughs under the plates.
+    // Still low and near-horizontal -- steeper than this and the tips break the plate line and
+    // read as antennae. What changed is where the two lowest boughs start and stop: at t 0.58 /
+    // 0.66 they ended around y 4.3 and 4.6, a good half metre below the bottom plate at y 5.05,
+    // hanging in the open. They now leave the trunk higher and finish just inside that plate.
     branches: [
-      { t: 0.58, yaw: 0.9, pitch: 1.44, length: 1.85, radius: 0.10, droop: -0.20 },
-      { t: 0.66, yaw: 3.7, pitch: 1.42, length: 1.75, radius: 0.10, droop: -0.20 },
-      { t: 0.72, yaw: 2.1, pitch: 1.38, length: 1.45, radius: 0.09, droop: -0.18 },
-      { t: 0.76, yaw: 5.2, pitch: 1.36, length: 1.35, radius: 0.085, droop: -0.18 },
+      { t: 0.66, yaw: 0.9, pitch: 1.26, length: 1.85, radius: 0.10, droop: -0.20 },
+      { t: 0.70, yaw: 3.7, pitch: 1.31, length: 1.75, radius: 0.10, droop: -0.20 },
+      { t: 0.74, yaw: 2.1, pitch: 1.38, length: 1.45, radius: 0.09, droop: -0.18 },
+      { t: 0.78, yaw: 5.2, pitch: 1.36, length: 1.35, radius: 0.085, droop: -0.18 },
     ],
     skirts: [
       { x: 0.42, y: 5.05, z: -0.17, radius: 2.10, height: 0.78, radial: 14, curve: 1.15, jag: 0.20, tint: -0.5 },

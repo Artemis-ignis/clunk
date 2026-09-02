@@ -1,0 +1,589 @@
+[
+  {
+    "slug": "farmer-tomas",
+    "title": "Tomas, the farmhand",
+    "file": "C:\\Users\\50106\\Desktop\\Clunk\\examples\\generated\\characters\\farmer-tomas.glb",
+    "bytes": 694464,
+    "bones": 68,
+    "triangles": 5709,
+    "vertices": 3025,
+    "drawCalls": 4,
+    "materials": 1,
+    "heightMetres": 1.8735,
+    "widthMetres": 1.5801,
+    "depthMetres": 1.334,
+    "clips": [
+      {
+        "name": "idle",
+        "duration": 3.6,
+        "tracks": 54,
+        "groundLiftMetres": 0.00081,
+        "tool": null,
+        "grip": null
+      },
+      {
+        "name": "walk",
+        "duration": 0.92,
+        "tracks": 56,
+        "groundLiftMetres": 0.00131,
+        "tool": null,
+        "grip": null
+      },
+      {
+        "name": "run",
+        "duration": 0.7,
+        "tracks": 56,
+        "groundLiftMetres": 0.00286,
+        "tool": null,
+        "grip": null
+      },
+      {
+        "name": "wave",
+        "duration": 2.4,
+        "tracks": 54,
+        "groundLiftMetres": 0.00299,
+        "tool": null,
+        "grip": null
+      },
+      {
+        "name": "carry_idle",
+        "duration": 3.2,
+        "tracks": 54,
+        "groundLiftMetres": 0.00089,
+        "tool": "carry_idle",
+        "grip": {
+          "worstMissMetres": 0,
+          "worstToolShiftMetres": 0,
+          "maxArmExtension": 0.8714
+        }
+      },
+      {
+        "name": "hoe",
+        "duration": 1.1,
+        "tracks": 55,
+        "groundLiftMetres": 0.00279,
+        "tool": "hoe",
+        "grip": {
+          "worstMissMetres": 0,
+          "worstToolShiftMetres": 0,
+          "maxArmExtension": 0.9841
+        }
+      },
+      {
+        "name": "water",
+        "duration": 1.6,
+        "tracks": 54,
+        "groundLiftMetres": 0.00112,
+        "tool": "water",
+        "grip": {
+          "worstMissMetres": 0,
+          "worstToolShiftMetres": 0,
+          "maxArmExtension": 0.8346
+        }
+      },
+      {
+        "name": "harvest",
+        "duration": 1.4,
+        "tracks": 54,
+        "groundLiftMetres": 0.00126,
+        "tool": "harvest",
+        "grip": {
+          "worstMissMetres": 0,
+          "worstToolShiftMetres": 0,
+          "maxArmExtension": 0.9404
+        }
+      }
+    ]
+  },
+  {
+    "slug": "farmer-ida",
+    "title": "Ida, the grower",
+    "file": "C:\\Users\\50106\\Desktop\\Clunk\\examples\\generated\\characters\\farmer-ida.glb",
+    "bytes": 687584,
+    "bones": 68,
+    "triangles": 5513,
+    "vertices": 2937,
+    "drawCalls": 4,
+    "materials": 1,
+    "heightMetres": 1.7785,
+    "widthMetres": 1.4654,
+    "depthMetres": 1.2099,
+    "clips": [
+      {
+        "name": "idle",
+        "duration": 3.6,
+        "tracks": 54,
+        "groundLiftMetres": 0.00094,
+        "tool": null,
+        "grip": null
+      },
+      {
+        "name": "walk",
+        "duration": 0.92,
+        "tracks": 56,
+        "groundLiftMetres": 0.00128,
+        "tool": null,
+        "grip": null
+      },
+      {
+        "name": "run",
+        "duration": 0.7,
+        "tracks": 56,
+        "groundLiftMetres": 0.00283,
+        "tool": null,
+        "grip": null
+      },
+      {
+        "name": "wave",
+        "duration": 2.4,
+        "tracks": 54,
+        "groundLiftMetres": 0.00309,
+        "tool": null,
+        "grip": null
+      },
+      {
+        "name": "carry_idle",
+        "duration": 3.2,
+        "tracks": 54,
+        "groundLiftMetres": 0.00085,
+        "tool": "carry_idle",
+        "grip": {
+          "worstMissMetres": 0,
+          "worstToolShiftMetres": 0,
+          "maxArmExtension": 0.8665
+        }
+      },
+      {
+        "name": "hoe",
+        "duration": 1.1,
+        "tracks": 55,
+        "groundLiftMetres": 0.00277,
+        "tool": "hoe",
+        "grip": {
+          "worstMissMetres": 0,
+          "worstToolShiftMetres": 0,
+          "maxArmExtension": 0.944
+        }
+      },
+      {
+        "name": "water",
+        "duration": 1.6,
+        "tracks": 54,
+        "groundLiftMetres": 0.00108,
+        "tool": "water",
+        "grip": {
+          "worstMissMetres": 0,
+          "worstToolShiftMetres": 0,
+          "maxArmExtension": 0.8188
+        }
+      },
+      {
+        "name": "harvest",
+        "duration": 1.4,
+        "tracks": 54,
+        "groundLiftMetres": 0.00121,
+        "tool": "harvest",
+        "grip": {
+          "worstMissMetres": 0,
+          "worstToolShiftMetres": 0,
+          "maxArmExtension": 0.9449
+        }
+      }
+    ]
+  },
+  {
+    "slug": "merchant-benno",
+    "title": "Benno, the market trader",
+    "file": "C:\\Users\\50106\\Desktop\\Clunk\\examples\\generated\\characters\\merchant-benno.glb",
+    "bytes": 703976,
+    "bones": 68,
+    "triangles": 5933,
+    "vertices": 3143,
+    "drawCalls": 4,
+    "materials": 1,
+    "heightMetres": 1.7714,
+    "widthMetres": 1.5414,
+    "depthMetres": 1.2263,
+    "clips": [
+      {
+        "name": "idle",
+        "duration": 3.6,
+        "tracks": 54,
+        "groundLiftMetres": 0.00091,
+        "tool": null,
+        "grip": null
+      },
+      {
+        "name": "walk",
+        "duration": 0.92,
+        "tracks": 56,
+        "groundLiftMetres": 0.00122,
+        "tool": null,
+        "grip": null
+      },
+      {
+        "name": "run",
+        "duration": 0.7,
+        "tracks": 56,
+        "groundLiftMetres": 0.00254,
+        "tool": null,
+        "grip": null
+      },
+      {
+        "name": "wave",
+        "duration": 2.4,
+        "tracks": 54,
+        "groundLiftMetres": 0.00321,
+        "tool": null,
+        "grip": null
+      },
+      {
+        "name": "carry_idle",
+        "duration": 3.2,
+        "tracks": 54,
+        "groundLiftMetres": 0.00089,
+        "tool": "carry_idle",
+        "grip": {
+          "worstMissMetres": 0,
+          "worstToolShiftMetres": 0,
+          "maxArmExtension": 0.8696
+        }
+      },
+      {
+        "name": "hoe",
+        "duration": 1.1,
+        "tracks": 55,
+        "groundLiftMetres": 0.00278,
+        "tool": "hoe",
+        "grip": {
+          "worstMissMetres": 0.000016,
+          "worstToolShiftMetres": 0.0045,
+          "maxArmExtension": 1
+        }
+      },
+      {
+        "name": "water",
+        "duration": 1.6,
+        "tracks": 54,
+        "groundLiftMetres": 0.00113,
+        "tool": "water",
+        "grip": {
+          "worstMissMetres": 0,
+          "worstToolShiftMetres": 0,
+          "maxArmExtension": 0.8293
+        }
+      },
+      {
+        "name": "harvest",
+        "duration": 1.4,
+        "tracks": 54,
+        "groundLiftMetres": 0.00124,
+        "tool": "harvest",
+        "grip": {
+          "worstMissMetres": 0,
+          "worstToolShiftMetres": 0,
+          "maxArmExtension": 0.9094
+        }
+      }
+    ]
+  },
+  {
+    "slug": "botanist-mira",
+    "title": "Mira, the field botanist",
+    "file": "C:\\Users\\50106\\Desktop\\Clunk\\examples\\generated\\characters\\botanist-mira.glb",
+    "bytes": 691548,
+    "bones": 68,
+    "triangles": 5585,
+    "vertices": 2990,
+    "drawCalls": 4,
+    "materials": 1,
+    "heightMetres": 1.8431,
+    "widthMetres": 1.4998,
+    "depthMetres": 1.269,
+    "clips": [
+      {
+        "name": "idle",
+        "duration": 3.6,
+        "tracks": 54,
+        "groundLiftMetres": 0.00086,
+        "tool": null,
+        "grip": null
+      },
+      {
+        "name": "walk",
+        "duration": 0.92,
+        "tracks": 56,
+        "groundLiftMetres": 0.00135,
+        "tool": null,
+        "grip": null
+      },
+      {
+        "name": "run",
+        "duration": 0.7,
+        "tracks": 56,
+        "groundLiftMetres": 0.00304,
+        "tool": null,
+        "grip": null
+      },
+      {
+        "name": "wave",
+        "duration": 2.4,
+        "tracks": 54,
+        "groundLiftMetres": 0.00295,
+        "tool": null,
+        "grip": null
+      },
+      {
+        "name": "carry_idle",
+        "duration": 3.2,
+        "tracks": 54,
+        "groundLiftMetres": 0.00086,
+        "tool": "carry_idle",
+        "grip": {
+          "worstMissMetres": 0,
+          "worstToolShiftMetres": 0,
+          "maxArmExtension": 0.8668
+        }
+      },
+      {
+        "name": "hoe",
+        "duration": 1.1,
+        "tracks": 55,
+        "groundLiftMetres": 0.00279,
+        "tool": "hoe",
+        "grip": {
+          "worstMissMetres": 0,
+          "worstToolShiftMetres": 0,
+          "maxArmExtension": 0.9445
+        }
+      },
+      {
+        "name": "water",
+        "duration": 1.6,
+        "tracks": 54,
+        "groundLiftMetres": 0.00109,
+        "tool": "water",
+        "grip": {
+          "worstMissMetres": 0,
+          "worstToolShiftMetres": 0,
+          "maxArmExtension": 0.8201
+        }
+      },
+      {
+        "name": "harvest",
+        "duration": 1.4,
+        "tracks": 54,
+        "groundLiftMetres": 0.00123,
+        "tool": "harvest",
+        "grip": {
+          "worstMissMetres": 0,
+          "worstToolShiftMetres": 0,
+          "maxArmExtension": 0.9846
+        }
+      }
+    ]
+  },
+  {
+    "slug": "kid-pim",
+    "title": "Pim, the farm kid",
+    "file": "C:\\Users\\50106\\Desktop\\Clunk\\examples\\generated\\characters\\kid-pim.glb",
+    "bytes": 697672,
+    "bones": 68,
+    "triangles": 5753,
+    "vertices": 3065,
+    "drawCalls": 4,
+    "materials": 1,
+    "heightMetres": 1.218,
+    "widthMetres": 0.9524,
+    "depthMetres": 0.8527,
+    "clips": [
+      {
+        "name": "idle",
+        "duration": 3.6,
+        "tracks": 54,
+        "groundLiftMetres": 0.00198,
+        "tool": null,
+        "grip": null
+      },
+      {
+        "name": "walk",
+        "duration": 0.92,
+        "tracks": 56,
+        "groundLiftMetres": 0.00075,
+        "tool": null,
+        "grip": null
+      },
+      {
+        "name": "run",
+        "duration": 0.7,
+        "tracks": 56,
+        "groundLiftMetres": 0.00143,
+        "tool": null,
+        "grip": null
+      },
+      {
+        "name": "wave",
+        "duration": 2.4,
+        "tracks": 54,
+        "groundLiftMetres": 0.00343,
+        "tool": null,
+        "grip": null
+      },
+      {
+        "name": "carry_idle",
+        "duration": 3.2,
+        "tracks": 54,
+        "groundLiftMetres": 0.0006,
+        "tool": "carry_idle",
+        "grip": {
+          "worstMissMetres": 0,
+          "worstToolShiftMetres": 0,
+          "maxArmExtension": 0.8636
+        }
+      },
+      {
+        "name": "hoe",
+        "duration": 1.1,
+        "tracks": 55,
+        "groundLiftMetres": 0.00169,
+        "tool": "hoe",
+        "grip": {
+          "worstMissMetres": 0,
+          "worstToolShiftMetres": 0,
+          "maxArmExtension": 0.9915
+        }
+      },
+      {
+        "name": "water",
+        "duration": 1.6,
+        "tracks": 54,
+        "groundLiftMetres": 0.00073,
+        "tool": "water",
+        "grip": {
+          "worstMissMetres": 0,
+          "worstToolShiftMetres": 0,
+          "maxArmExtension": 0.8027
+        }
+      },
+      {
+        "name": "harvest",
+        "duration": 1.4,
+        "tracks": 54,
+        "groundLiftMetres": 0.00082,
+        "tool": "harvest",
+        "grip": {
+          "worstMissMetres": 0,
+          "worstToolShiftMetres": 0,
+          "maxArmExtension": 0.8617
+        }
+      }
+    ]
+  },
+  {
+    "slug": "elder-otto",
+    "title": "Otto, the old hand",
+    "file": "C:\\Users\\50106\\Desktop\\Clunk\\examples\\generated\\characters\\elder-otto.glb",
+    "bytes": 687328,
+    "bones": 68,
+    "triangles": 5537,
+    "vertices": 2929,
+    "drawCalls": 4,
+    "materials": 1,
+    "heightMetres": 1.6177,
+    "widthMetres": 1.4405,
+    "depthMetres": 1.1516,
+    "clips": [
+      {
+        "name": "idle",
+        "duration": 3.6,
+        "tracks": 54,
+        "groundLiftMetres": 0.00109,
+        "tool": null,
+        "grip": null
+      },
+      {
+        "name": "walk",
+        "duration": 0.92,
+        "tracks": 56,
+        "groundLiftMetres": 0.00114,
+        "tool": null,
+        "grip": null
+      },
+      {
+        "name": "run",
+        "duration": 0.7,
+        "tracks": 56,
+        "groundLiftMetres": 0.00239,
+        "tool": null,
+        "grip": null
+      },
+      {
+        "name": "wave",
+        "duration": 2.4,
+        "tracks": 54,
+        "groundLiftMetres": 0.00314,
+        "tool": null,
+        "grip": null
+      },
+      {
+        "name": "carry_idle",
+        "duration": 3.2,
+        "tracks": 54,
+        "groundLiftMetres": 0.00083,
+        "tool": "carry_idle",
+        "grip": {
+          "worstMissMetres": 0,
+          "worstToolShiftMetres": 0,
+          "maxArmExtension": 0.8831
+        }
+      },
+      {
+        "name": "hoe",
+        "duration": 1.1,
+        "tracks": 55,
+        "groundLiftMetres": 0.00251,
+        "tool": "hoe",
+        "grip": {
+          "worstMissMetres": 0,
+          "worstToolShiftMetres": 0,
+          "maxArmExtension": 0.9773
+        }
+      },
+      {
+        "name": "water",
+        "duration": 1.6,
+        "tracks": 54,
+        "groundLiftMetres": 0.00104,
+        "tool": "water",
+        "grip": {
+          "worstMissMetres": 0,
+          "worstToolShiftMetres": 0,
+          "maxArmExtension": 0.8435
+        }
+      },
+      {
+        "name": "harvest",
+        "duration": 1.4,
+        "tracks": 54,
+        "groundLiftMetres": 0.00116,
+        "tool": "harvest",
+        "grip": {
+          "worstMissMetres": 0,
+          "worstToolShiftMetres": 0,
+          "maxArmExtension": 0.9137
+        }
+      }
+    ]
+  },
+  {
+    "slug": "harvest-folk-vol1",
+    "title": "Harvest Folk — rigged low-poly character pack, vol. 1",
+    "file": "C:\\Users\\50106\\Desktop\\Clunk\\examples\\generated\\characters\\harvest-folk-vol1.glb",
+    "bytes": 1034260,
+    "triangles": 34030,
+    "vertices": 18089,
+    "drawCalls": 24,
+    "materials": 6,
+    "clips": 0
+  }
+]

@@ -1,4 +1,5 @@
 import { accessFor } from "../_lib/access";
+import { FACTS_MEASURED_AT, factsFor } from "../_lib/listing-facts";
 import { PALETTE_MEASURED_AT, matchesByColour, paletteFor } from "../_lib/listing-palettes";
 import { clipsFor, parentSlugOf, variantSlugsOf } from "../_lib/listing-variants";
 import {
@@ -29,8 +30,10 @@ const LISTING_STATUSES = new Set(["DRAFT", "PENDING_REVIEW", "PUBLISHED"]);
 
 export async function GET(request: Request) {
   try {
+    const startedAt = Date.now();
     const db = getRuntimeDb();
     await ensureSchema(db);
+    const schemaMs = Date.now() - startedAt;
     const url = new URL(request.url);
     const slug = url.searchParams.get("slug");
     if (slug) {
@@ -54,18 +57,24 @@ export async function GET(request: Request) {
         entryFileName: string; format: string; byteLength: number; sellerName: string | null; previewFileName: string | null;
       }>();
       if (!listing) return Response.json({ ok: false, error: "Published listing not found." }, { status: 404 });
-      const artifacts = await db.prepare(
-        `SELECT file_name AS fileName, role, content_type AS contentType, byte_length AS byteLength, sha256
-         FROM clunk_asset_artifacts WHERE asset_id = ? ORDER BY created_at ASC, file_name ASC`,
-      ).bind(listing.assetId).all<{ fileName: string; role: string; contentType: string; byteLength: number; sha256: string }>();
-      const review = await db.prepare(
-        `SELECT visual_runtime AS visualRuntime, player_facing AS playerFacing, human_decision AS humanDecision
-         FROM clunk_asset_reviews WHERE asset_id = ? ORDER BY created_at DESC LIMIT 1`,
-      ).bind(listing.assetId).first<{ visualRuntime?: string; playerFacing?: string; humanDecision?: string }>();
-      // The sheets baked from this model are download options on this page, not eleven extra
-      // cards in the grid. Read from the listings table, so an unpublished sheet cannot be
-      // offered and a row can never quote a size the asset does not have.
-      const variants = await readVariants(db, String(listing.slug));
+      // The four reads below do not depend on one another, only on the listing row; each is
+      // one D1 round trip (~150 ms measured 2026-09-02), so they go out together rather
+      // than one after the other.
+      const [artifacts, review, variants, colourMatches] = await Promise.all([
+        db.prepare(
+          `SELECT file_name AS fileName, role, content_type AS contentType, byte_length AS byteLength, sha256
+           FROM clunk_asset_artifacts WHERE asset_id = ? ORDER BY created_at ASC, file_name ASC`,
+        ).bind(listing.assetId).all<{ fileName: string; role: string; contentType: string; byteLength: number; sha256: string }>(),
+        db.prepare(
+          `SELECT visual_runtime AS visualRuntime, player_facing AS playerFacing, human_decision AS humanDecision
+           FROM clunk_asset_reviews WHERE asset_id = ? ORDER BY created_at DESC LIMIT 1`,
+        ).bind(listing.assetId).first<{ visualRuntime?: string; playerFacing?: string; humanDecision?: string }>(),
+        // The sheets baked from this model are download options on this page, not eleven extra
+        // cards in the grid. Read from the listings table, so an unpublished sheet cannot be
+        // offered and a row can never quote a size the asset does not have.
+        readVariants(db, String(listing.slug)),
+        matchesByColour(db, String(listing.slug)),
+      ]);
       return Response.json({
         ok: true,
         schema: "clunk.marketplace-listing-detail.v1",
@@ -88,11 +97,15 @@ export async function GET(request: Request) {
           license: listing.licenseStatus,
           aiGenerated: isGenerativeListing(String(listing.slug)),
           palette: paletteFor(String(listing.slug)) ?? null,
+          // Every figure the page shows — polygons, materials, real size, file size, the
+          // named moving parts — measured by the pipeline and served here, so the page never
+          // has to read a number back out of the description it is also displaying.
+          facts: factsFor(String(listing.slug)),
         },
         // "Goes with this" computed from measured colour rather than from a tag someone
         // typed. Titles come from the same query the catalogue uses, so a listing that was
         // unpublished cannot be recommended.
-        matchesByColour: await matchesByColour(db, String(listing.slug)),
+        matchesByColour: colourMatches,
         checkout: checkoutStatus(),
         access: accessFor({ authenticated: false }),
       }, { headers: { "cache-control": "public, max-age=30" } });
@@ -109,6 +122,7 @@ export async function GET(request: Request) {
        LEFT JOIN clunk_users u ON u.id = (SELECT owner_user_id FROM clunk_workspaces WHERE id = l.workspace_id)
        WHERE l.status = 'PUBLISHED' ORDER BY l.published_at DESC, l.created_at DESC LIMIT 50`,
     ).all();
+    const queryMs = Date.now() - startedAt - schemaMs;
     // One product per 3D model. Every row still ships — a variant carries the slug of the
     // model it belongs to so a client can fold it into that product's page, and a model
     // carries the sheets baked from it so its card can say how many come with it.
@@ -133,6 +147,7 @@ export async function GET(request: Request) {
       // Stamped once for the whole response rather than per listing: it is one snapshot,
       // and a reader needs to know how old it is, not to see the same date 33 times.
       paletteMeasuredAt: PALETTE_MEASURED_AT,
+      factsMeasuredAt: FACTS_MEASURED_AT,
       listings: rows.results.map((row) => ({
         ...row,
         variantOf: parentSlugOf(String(row.slug)),
@@ -145,10 +160,17 @@ export async function GET(request: Request) {
         license: row.licenseStatus,
         aiGenerated: isGenerativeListing(String(row.slug)),
         palette: paletteFor(String(row.slug)) ?? null,
+        facts: factsFor(String(row.slug)),
       })),
       checkout: checkoutStatus(),
       access: accessFor({ authenticated: false }),
-    }, { headers: { "cache-control": "public, max-age=30" } });
+    }, {
+      headers: {
+        "cache-control": "public, max-age=30",
+        // Where the time went, readable from curl -D -; the numbers are measured per request.
+        "server-timing": `schema;dur=${schemaMs}, query;dur=${queryMs}, total;dur=${Date.now() - startedAt}`,
+      },
+    });
   } catch (error) {
     return jsonError(error);
   }

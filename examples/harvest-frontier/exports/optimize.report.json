@@ -21,9 +21,9 @@
   },
   {
     "slug": "cherry",
-    "before": 372916,
-    "after": 82544,
-    "ratio": 0.221,
+    "before": 393832,
+    "after": 86596,
+    "ratio": 0.22,
     "materials": {
       "before": 1,
       "after": 1
@@ -31,78 +31,78 @@
   },
   {
     "slug": "grape",
-    "before": 74660,
-    "after": 20984,
-    "ratio": 0.281,
+    "before": 218960,
+    "after": 53524,
+    "ratio": 0.244,
     "materials": {
-      "before": 4,
-      "after": 1
+      "before": 5,
+      "after": 2
     }
   },
   {
     "slug": "potato",
-    "before": 102320,
-    "after": 26904,
-    "ratio": 0.263,
+    "before": 496320,
+    "after": 105784,
+    "ratio": 0.213,
     "materials": {
-      "before": 4,
-      "after": 1
+      "before": 5,
+      "after": 2
     }
   },
   {
     "slug": "rice",
-    "before": 51368,
-    "after": 14968,
-    "ratio": 0.291,
+    "before": 181732,
+    "after": 43856,
+    "ratio": 0.241,
     "materials": {
-      "before": 3,
-      "after": 1
+      "before": 4,
+      "after": 2
     }
   },
   {
     "slug": "strawberry",
-    "before": 40752,
-    "after": 12416,
-    "ratio": 0.305,
+    "before": 178928,
+    "after": 42420,
+    "ratio": 0.237,
     "materials": {
-      "before": 3,
-      "after": 1
+      "before": 4,
+      "after": 2
     }
   },
   {
     "slug": "tomato",
-    "before": 95392,
-    "after": 24560,
-    "ratio": 0.257,
+    "before": 505788,
+    "after": 107884,
+    "ratio": 0.213,
     "materials": {
-      "before": 4,
-      "after": 1
+      "before": 5,
+      "after": 2
     }
   },
   {
     "slug": "choi-minseo",
-    "before": 776928,
-    "after": 181388,
-    "ratio": 0.233,
+    "before": 738124,
+    "after": 173648,
+    "ratio": 0.235,
     "materials": {
-      "before": 18,
+      "before": 14,
       "after": 2
     }
   },
   {
     "slug": "han-seojun",
-    "before": 800056,
-    "after": 186768,
-    "ratio": 0.233,
+    "before": 766448,
+    "after": 181488,
+    "ratio": 0.237,
     "materials": {
-      "before": 18,
+      "before": 15,
       "after": 2
     }
   },
   {
     "slug": "kang-taeho",
-    "before": 754712,
-    "after": 180364,
+    "before": 755036,
+    "after": 180580,
     "ratio": 0.239,
     "materials": {
       "before": 14,
@@ -111,8 +111,8 @@
   },
   {
     "slug": "lee-eunha",
-    "before": 785364,
-    "after": 185360,
+    "before": 785852,
+    "after": 185768,
     "ratio": 0.236,
     "materials": {
       "before": 15,
@@ -121,8 +121,8 @@
   },
   {
     "slug": "park-yuna",
-    "before": 745860,
-    "after": 177188,
+    "before": 746188,
+    "after": 177504,
     "ratio": 0.238,
     "materials": {
       "before": 14,
@@ -131,11 +131,21 @@
   },
   {
     "slug": "player-farmhand",
-    "before": 1167992,
-    "after": 241784,
-    "ratio": 0.207,
+    "before": 1088128,
+    "after": 218244,
+    "ratio": 0.201,
     "materials": {
-      "before": 23,
+      "before": 14,
+      "after": 2
+    }
+  },
+  {
+    "slug": "farm-tool-kit",
+    "before": 80160,
+    "after": 24640,
+    "ratio": 0.307,
+    "materials": {
+      "before": 9,
       "after": 2
     }
   },

@@ -88,7 +88,12 @@ test("the product showroom makes the file-to-decision loop interactive on public
   assert.match(home, /data-snap-section/);
   assert.match(home, /마켓 둘러보기/);
   assert.match(dashboard, /LiveEvidenceShowcase/);
-  assert.match(studio, /LiveEvidenceShowcase/);
+  // 2026-09-02: /studio is a making workspace now, not a page about making. The
+  // showroom belonged to the explainer sections that were deleted; the loop it
+  // demonstrated is the screen itself — a result stage with its own evidence
+  // lanes, fed by the file the user just made.
+  assert.match(studio, /AssetCreationWorkbench/);
+  assert.match(await source("app/components/AssetCreationWorkbench.tsx"), /studio-lanes/);
 });
 
 test("the product showroom has a real responsive and reduced-motion contract", async () => {

@@ -28,6 +28,22 @@ if (typeof (globalThis as Record<string, unknown>).FileReader === 'undefined') {
 export { THREE, GLTFExporter };
 
 /**
+ * Cross the Harvest Frontier type boundary.
+ *
+ * At RUNTIME there is exactly one three in this process — Harvest Frontier's
+ * r185, imported above — so an object handed over by an HF factory is already
+ * the object this pipeline wants. Only the DECLARATION differs: HF is typed
+ * against `@types/three` 0.185 and Clunk against 0.179, and the two are not
+ * mutually assignable (r185's `Matrix4` gained `determinantAffine`, and the
+ * incompatibility cascades through `Object3D`). Every crossing goes through
+ * this one function, so there is a single place to delete when the two
+ * checkouts agree on a three version. It is a re-label, never a conversion.
+ */
+export function crossThree<T>(node: unknown): T {
+  return node as T;
+}
+
+/**
  * three's GLTFExporter has no support for InstancedMesh, so every instanced
  * scatter has to become real geometry before export. Two modes:
  *

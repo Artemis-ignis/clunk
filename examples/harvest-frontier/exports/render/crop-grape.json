@@ -17,30 +17,30 @@
   ],
   "targetFillFraction": 0.76,
   "subjectBoundingBoxPx": {
-    "x": 175,
-    "y": 123,
-    "width": 674,
-    "height": 778
+    "x": 123,
+    "y": 152,
+    "width": 778,
+    "height": 720
   },
   "subjectFillFraction": 0.7598,
-  "subjectPixelCoverageFraction": 0.0989,
+  "subjectPixelCoverageFraction": 0.198,
   "clippedTop": false,
   "clippedBottom": false,
   "clippedLeft": false,
   "clippedRight": false,
   "marginPx": {
-    "top": 123,
-    "bottom": 123,
-    "left": 175,
-    "right": 175
+    "top": 152,
+    "bottom": 152,
+    "left": 123,
+    "right": 123
   },
-  "triangles": 652,
-  "meshes": 4,
-  "vertexColouredMeshes": 4,
+  "triangles": 1886,
+  "meshes": 5,
+  "vertexColouredMeshes": 5,
   "boundsMetres": [
-    1.5917,
-    1.9721,
-    1.4937
+    2.1623,
+    1.5505,
+    1.631
   ],
   "shadow": {
     "kind": "soft contact shadow",

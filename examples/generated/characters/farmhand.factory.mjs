@@ -36,7 +36,6 @@ const PALETTE = {
 };
 
 // Metres. The head is deliberately large: at 64 px it has to survive the grid.
-const GROUND = 0;
 const LEG_TOP = 0.62;
 const HIP_W = 0.13;
 const TORSO_TOP = 1.16;

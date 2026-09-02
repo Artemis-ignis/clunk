@@ -22,13 +22,21 @@
  * Footprint 2.20 W x 2.05 H x 3.10 L including the rear tyres and the roll bar.
  */
 
-const PALETTE = {
+/**
+ * Exported so the template library can bake the same tractor in more than one colourway:
+ * a caller assigns over these fields before calling the factory and restores them after.
+ * The values are the originals, so an untouched call still writes the byte-identical GLB
+ * the marketplace listing ships.
+ */
+export const TRACTOR_PALETTE = {
   paint: { color: 0x3f7f3a, roughness: 0.62, metalness: 0.08 },
   rubber: { color: 0x24262a, roughness: 0.95 },
   rim: { color: 0xd9b23a, roughness: 0.55, metalness: 0.15 },
   steel: { color: 0x8a9096, roughness: 0.5, metalness: 0.45 },
   seat: { color: 0x5c3f2a, roughness: 0.9 },
 };
+
+const PALETTE = TRACTOR_PALETTE;
 
 // Metres.
 const REAR_R = 0.66;

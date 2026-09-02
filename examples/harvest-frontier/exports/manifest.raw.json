@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-09-02T05:58:46.772Z",
+  "generatedAt": "2026-09-02T06:25:59.741Z",
   "source": "Harvest Frontier (read-only)",
   "assets": [
     {
       "group": "npc",
       "slug": "kang-taeho",
       "file": "npc/kang-taeho.glb",
-      "bytes": 754712,
+      "bytes": 755036,
       "triangles": 5888,
       "drawCalls": 14,
       "materials": 14,
@@ -25,19 +25,36 @@
       ],
       "provenanceAssetId": "farm.npcs.m2",
       "license": "Project-original procedural code; no external mesh or texture",
-      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s"
+      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s. Carried kit is re-socketed off the root onto the hand / body nodes (see kit) so it follows the idle instead of hanging in mid air.",
+      "kit": {
+        "held": {
+          "handLeft": [
+            "harvestBasket",
+            "tomatoSample"
+          ]
+        },
+        "worn": [
+          "fieldSatchel",
+          "fieldSatchelStrap"
+        ],
+        "removed": [],
+        "snapMetres": {
+          "handLeft": 0.14
+        },
+        "leftOnRoot": []
+      }
     },
     {
       "group": "npc",
       "slug": "park-yuna",
       "file": "npc/park-yuna.glb",
-      "bytes": 745860,
+      "bytes": 746188,
       "triangles": 5560,
       "drawCalls": 14,
       "materials": 14,
       "meshes": 14,
       "sizeMeters": {
-        "x": 0.966,
+        "x": 0.932,
         "y": 2.11,
         "z": 0.665
       },
@@ -50,21 +67,40 @@
       ],
       "provenanceAssetId": "farm.npcs.m2",
       "license": "Project-original procedural code; no external mesh or texture",
-      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s"
+      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s. Carried kit is re-socketed off the root onto the hand / body nodes (see kit) so it follows the idle instead of hanging in mid air.",
+      "kit": {
+        "held": {
+          "handLeft": [
+            "fieldClipboard",
+            "clipboardClip"
+          ],
+          "handRight": [
+            "soilProbe",
+            "soilProbeTip"
+          ]
+        },
+        "worn": [],
+        "removed": [],
+        "snapMetres": {
+          "handLeft": 0.112,
+          "handRight": 0.104
+        },
+        "leftOnRoot": []
+      }
     },
     {
       "group": "npc",
       "slug": "choi-minseo",
       "file": "npc/choi-minseo.glb",
-      "bytes": 776928,
-      "triangles": 6000,
-      "drawCalls": 18,
-      "materials": 18,
-      "meshes": 18,
+      "bytes": 738124,
+      "triangles": 5536,
+      "drawCalls": 14,
+      "materials": 14,
+      "meshes": 14,
       "sizeMeters": {
-        "x": 1.261,
-        "y": 2.195,
-        "z": 0.777
+        "x": 1.123,
+        "y": 2.131,
+        "z": 0.632
       },
       "clips": [
         {
@@ -75,21 +111,45 @@
       ],
       "provenanceAssetId": "farm.npcs.m2",
       "license": "Project-original procedural code; no external mesh or texture",
-      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s"
+      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s. Carried kit is re-socketed off the root onto the hand / body nodes (see kit) so it follows the idle instead of hanging in mid air.",
+      "kit": {
+        "held": {
+          "handLeft": [
+            "marketLedger",
+            "marketLedgerBand"
+          ],
+          "handRight": [
+            "premiumPriceTag",
+            "premiumPriceTagLine"
+          ]
+        },
+        "worn": [],
+        "removed": [
+          "marketSampleCrate",
+          "marketCrateSlatLeft",
+          "marketCrateSlatRight",
+          "marketGrapeSample"
+        ],
+        "snapMetres": {
+          "handLeft": 0.118,
+          "handRight": 0.181
+        },
+        "leftOnRoot": []
+      }
     },
     {
       "group": "npc",
       "slug": "han-seojun",
       "file": "npc/han-seojun.glb",
-      "bytes": 800056,
-      "triangles": 6274,
-      "drawCalls": 18,
-      "materials": 18,
-      "meshes": 18,
+      "bytes": 766448,
+      "triangles": 5950,
+      "drawCalls": 15,
+      "materials": 15,
+      "meshes": 15,
       "sizeMeters": {
-        "x": 1.292,
-        "y": 2.274,
-        "z": 0.798
+        "x": 1.184,
+        "y": 2.21,
+        "z": 0.673
       },
       "clips": [
         {
@@ -100,13 +160,38 @@
       ],
       "provenanceAssetId": "farm.npcs.m2",
       "license": "Project-original procedural code; no external mesh or texture",
-      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s"
+      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s. Carried kit is re-socketed off the root onto the hand / body nodes (see kit) so it follows the idle instead of hanging in mid air.",
+      "kit": {
+        "held": {
+          "handLeft": [
+            "cooperativeLedger",
+            "cooperativeLedgerClip"
+          ],
+          "handRight": [
+            "qualitySampleRing"
+          ]
+        },
+        "worn": [
+          "sortingApron",
+          "sortingApronPocket"
+        ],
+        "removed": [
+          "cooperativeSampleCrate",
+          "cooperativeCrateSlatLeft",
+          "cooperativeCrateSlatRight"
+        ],
+        "snapMetres": {
+          "handLeft": 0.123,
+          "handRight": 0.055
+        },
+        "leftOnRoot": []
+      }
     },
     {
       "group": "npc",
       "slug": "lee-eunha",
       "file": "npc/lee-eunha.glb",
-      "bytes": 785364,
+      "bytes": 785852,
       "triangles": 5906,
       "drawCalls": 15,
       "materials": 15,
@@ -114,7 +199,7 @@
       "sizeMeters": {
         "x": 1.161,
         "y": 2.208,
-        "z": 0.738
+        "z": 0.727
       },
       "clips": [
         {
@@ -125,21 +210,41 @@
       ],
       "provenanceAssetId": "farm.npcs.m2",
       "license": "Project-original procedural code; no external mesh or texture",
-      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s"
+      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s. Carried kit is re-socketed off the root onto the hand / body nodes (see kit) so it follows the idle instead of hanging in mid air.",
+      "kit": {
+        "held": {
+          "handLeft": [
+            "festivalLedger",
+            "festivalLedgerBinding"
+          ],
+          "handRight": [
+            "festivalBannerPole",
+            "festivalBanner",
+            "festivalBannerMark"
+          ]
+        },
+        "worn": [],
+        "removed": [],
+        "snapMetres": {
+          "handLeft": 0.119,
+          "handRight": 0.072
+        },
+        "leftOnRoot": []
+      }
     },
     {
       "group": "npc",
       "slug": "player-farmhand",
       "file": "npc/player-farmhand.glb",
-      "bytes": 1167992,
-      "triangles": 7256,
-      "drawCalls": 23,
-      "materials": 23,
-      "meshes": 23,
+      "bytes": 1088128,
+      "triangles": 6076,
+      "drawCalls": 14,
+      "materials": 14,
+      "meshes": 14,
       "sizeMeters": {
         "x": 0.817,
-        "y": 2.714,
-        "z": 0.913
+        "y": 2.499,
+        "z": 0.867
       },
       "clips": [
         {
@@ -192,9 +297,9 @@
         "z": 8.088
       },
       "clips": [],
-      "provenanceAssetId": "reference.farm-corner.generated.2026-08-19",
-      "license": "Generated reference for this project; not shipped as runtime geometry",
-      "note": "world copy, after createFarmBuildings runs mergeStaticParts"
+      "provenanceAssetId": "processing.barn.open-front.m2",
+      "license": "Project-original procedural code; accepted reference is not shipped as runtime geometry",
+      "note": "world copy, after createFarmBuildings runs mergeStaticParts. The ledger entry quoted is the one whose runtimeDerivative is src/engine/assets/buildings.ts, the file that authors both buildings; the visual references are ledgered separately as reference.farm-corner.generated.2026-08-19 / reference.processing-barn.generated.2026-08-19 and are not shipped geometry."
     },
     {
       "group": "building",
@@ -219,115 +324,115 @@
       "group": "crop",
       "slug": "rice",
       "file": "crop/rice.glb",
-      "bytes": 51368,
-      "triangles": 444,
-      "drawCalls": 3,
-      "materials": 3,
-      "meshes": 3,
+      "bytes": 181732,
+      "triangles": 1570,
+      "drawCalls": 4,
+      "materials": 4,
+      "meshes": 4,
       "sizeMeters": {
-        "x": 0.763,
-        "y": 1.62,
-        "z": 0.527
+        "x": 1.29,
+        "y": 1.353,
+        "z": 1.16
       },
       "clips": [],
       "provenanceAssetId": null,
       "license": "장부에 없음",
-      "note": "silhouette stalk; mature form (growth is a uniform runtime scale, not distinct geometry)"
+      "note": "silhouette stalk; mature plant from a 1x1 createCropField at growth 1.0 (growth is a uniform runtime scale, not distinct geometry)"
     },
     {
       "group": "crop",
       "slug": "potato",
       "file": "crop/potato.glb",
-      "bytes": 102320,
-      "triangles": 908,
-      "drawCalls": 4,
-      "materials": 4,
-      "meshes": 4,
+      "bytes": 496320,
+      "triangles": 4318,
+      "drawCalls": 5,
+      "materials": 5,
+      "meshes": 5,
       "sizeMeters": {
-        "x": 0.98,
-        "y": 0.923,
-        "z": 0.414
+        "x": 1.795,
+        "y": 1.153,
+        "z": 1.188
       },
       "clips": [],
       "provenanceAssetId": null,
       "license": "장부에 없음",
-      "note": "silhouette tuber; mature form (growth is a uniform runtime scale, not distinct geometry)"
+      "note": "silhouette tuber; mature plant from a 1x1 createCropField at growth 1.0 (growth is a uniform runtime scale, not distinct geometry)"
     },
     {
       "group": "crop",
       "slug": "tomato",
       "file": "crop/tomato.glb",
-      "bytes": 95392,
-      "triangles": 844,
-      "drawCalls": 4,
-      "materials": 4,
-      "meshes": 4,
+      "bytes": 505788,
+      "triangles": 4402,
+      "drawCalls": 5,
+      "materials": 5,
+      "meshes": 5,
       "sizeMeters": {
-        "x": 0.991,
-        "y": 1.603,
-        "z": 0.511
+        "x": 1.659,
+        "y": 1.48,
+        "z": 1.137
       },
       "clips": [],
       "provenanceAssetId": null,
       "license": "장부에 없음",
-      "note": "silhouette bush; mature form (growth is a uniform runtime scale, not distinct geometry)"
+      "note": "silhouette bush; mature plant from a 1x1 createCropField at growth 1.0 (growth is a uniform runtime scale, not distinct geometry)"
     },
     {
       "group": "crop",
       "slug": "strawberry",
       "file": "crop/strawberry.glb",
-      "bytes": 40752,
-      "triangles": 346,
-      "drawCalls": 3,
-      "materials": 3,
-      "meshes": 3,
+      "bytes": 178928,
+      "triangles": 1546,
+      "drawCalls": 4,
+      "materials": 4,
+      "meshes": 4,
       "sizeMeters": {
-        "x": 1.02,
-        "y": 0.604,
-        "z": 0.922
+        "x": 1.5,
+        "y": 0.49,
+        "z": 1.178
       },
       "clips": [],
       "provenanceAssetId": null,
       "license": "장부에 없음",
-      "note": "silhouette bush; mature form (growth is a uniform runtime scale, not distinct geometry)"
+      "note": "silhouette bush; mature plant from a 1x1 createCropField at growth 1.0 (growth is a uniform runtime scale, not distinct geometry)"
     },
     {
       "group": "crop",
       "slug": "grape",
       "file": "crop/grape.glb",
-      "bytes": 74660,
-      "triangles": 652,
-      "drawCalls": 4,
-      "materials": 4,
-      "meshes": 4,
+      "bytes": 218960,
+      "triangles": 1886,
+      "drawCalls": 5,
+      "materials": 5,
+      "meshes": 5,
       "sizeMeters": {
-        "x": 1.592,
-        "y": 1.972,
-        "z": 1.494
+        "x": 2.162,
+        "y": 1.55,
+        "z": 1.631
       },
       "clips": [],
       "provenanceAssetId": null,
       "license": "장부에 없음",
-      "note": "silhouette vine; mature form (growth is a uniform runtime scale, not distinct geometry)"
+      "note": "silhouette vine; mature plant from a 1x1 createCropField at growth 1.0 (growth is a uniform runtime scale, not distinct geometry)"
     },
     {
       "group": "crop",
       "slug": "cherry",
       "file": "crop/cherry.glb",
-      "bytes": 372916,
+      "bytes": 393832,
       "triangles": 3440,
       "drawCalls": 1,
       "materials": 1,
       "meshes": 1,
       "sizeMeters": {
-        "x": 2.293,
-        "y": 2.289,
-        "z": 2.315
+        "x": 2.06,
+        "y": 1.968,
+        "z": 1.931
       },
       "clips": [],
       "provenanceAssetId": null,
       "license": "장부에 없음",
-      "note": "silhouette tree; mature form (growth is a uniform runtime scale, not distinct geometry)"
+      "note": "silhouette tree; mature plant from a 1x1 createCropField at growth 1.0 (growth is a uniform runtime scale, not distinct geometry)"
     },
     {
       "group": "prop",
@@ -448,6 +553,25 @@
       "provenanceAssetId": null,
       "license": "장부에 없음",
       "note": "props.ts pushHandCart is not exported and every cart is merged into ONE world-space mesh, so one cart is cropped out around ROUTE_CART_ANCHORS[0] and re-seated at the origin"
+    },
+    {
+      "group": "prop",
+      "slug": "farm-tool-kit",
+      "file": "prop/farm-tool-kit.glb",
+      "bytes": 80160,
+      "triangles": 1180,
+      "drawCalls": 9,
+      "materials": 9,
+      "meshes": 9,
+      "sizeMeters": {
+        "x": 2.067,
+        "y": 0.894,
+        "z": 0.505
+      },
+      "clips": [],
+      "provenanceAssetId": null,
+      "license": "장부에 없음",
+      "note": "the four tool groups lifted off the player rig (hoe / watering can / harvest basket / field journal), re-seated in a row; each keeps its authored node name"
     }
   ]
 }

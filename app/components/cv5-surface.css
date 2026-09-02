@@ -134,8 +134,17 @@
    deeper (inside SiteShell / the workspace grid), so the lift is re-declared. */
 .cv5-surface > .site-shell,
 .cv5-surface > .workspace-column,
-.cv5-surface > .workspace-rail,
 .cv5-surface > main { position: relative; z-index: 1; }
+
+/* The rail is lifted the same way, but it must NOT be pulled back into flow to
+   do it. `position: relative` here (2026-09-02) beat globals.css's
+   `.workspace-rail { position: fixed }` on specificity, so the 248px rail took
+   248px of the row AND `.workspace-rail-open .workspace-column` went on adding
+   its own 248px of padding — every cv5 workspace page (/dashboard /assets
+   /studio /app /passport /settings) was rendering its body in 944px of a
+   1192px column with a quarter of the screen blank. A fixed element takes the
+   z-index just as well. */
+.cv5-surface > .workspace-rail { z-index: 20; }
 
 /* ------------------------------------------------------------------ typography */
 /* Legacy headings ship a slab of hard tracking tuned for the light v4 layout;

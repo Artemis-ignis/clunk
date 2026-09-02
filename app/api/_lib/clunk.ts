@@ -105,7 +105,70 @@ export function hasRuntimeAssets(): boolean {
   return Boolean(getRuntimeBinding<R2Bucket>("ASSETS"));
 }
 
-export async function ensureSchema(db: D1Database): Promise<void> {
+const schemaReadyByDb = new WeakMap<D1Database, Promise<void>>();
+// The binding object is not guaranteed to be the same instance across requests, so the
+// WeakMap alone can miss; one isolate-wide promise makes the schema check a cold-start cost.
+let schemaReadyForIsolate: Promise<void> | null = null;
+
+/**
+ * The schema check used to run on every request: a batch of CREATE statements, seven
+ * probe SELECTs, an index and a second batch — about a dozen sequential D1 round trips,
+ * two and a half seconds on the catalogue before a single product row was read. It now
+ * runs once per database handle per isolate; a failure clears the memo so the next
+ * request tries again.
+ */
+export function ensureSchema(db: D1Database): Promise<void> {
+  if (schemaReadyForIsolate) return schemaReadyForIsolate;
+  let pending = schemaReadyByDb.get(db);
+  if (!pending) {
+    pending = ensureSchemaProbed(db).catch((error) => {
+      schemaReadyByDb.delete(db);
+      schemaReadyForIsolate = null;
+      throw error;
+    });
+    schemaReadyByDb.set(db, pending);
+  }
+  schemaReadyForIsolate = pending;
+  return pending;
+}
+
+/**
+ * Isolates on a quiet worker are short-lived, so the memo above rarely survives between
+ * two requests and the full bootstrap (a dozen D1 round trips, ~1.5 s measured with
+ * server-timing on 2026-09-02) ran on almost every request. The bootstrap now writes a
+ * fingerprint of itself into clunk_schema_meta; a request first reads that one row and
+ * skips the bootstrap when the fingerprint matches. Any edit to the statements or to the
+ * bootstrap body changes the fingerprint, so a deploy that changes the schema still runs it.
+ */
+function schemaFingerprint(): string {
+  const text = [SCHEMA_STATEMENTS.join(";"), ensureSchemaUncached.toString()].join(";");
+  let hash = 2166136261;
+  for (let index = 0; index < text.length; index += 1) {
+    hash ^= text.charCodeAt(index);
+    hash = Math.imul(hash, 16777619) >>> 0;
+  }
+  return hash.toString(16).padStart(8, "0");
+}
+
+const SCHEMA_META_TABLE = `CREATE TABLE IF NOT EXISTS clunk_schema_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at TEXT NOT NULL)`;
+
+async function ensureSchemaProbed(db: D1Database): Promise<void> {
+  const version = schemaFingerprint();
+  try {
+    const row = await db.prepare(`SELECT value FROM clunk_schema_meta WHERE key = 'version'`).first<{ value: string }>();
+    if (row?.value === version) return;
+  } catch {
+    // No meta table yet: this is the first run against this database.
+  }
+  await ensureSchemaUncached(db);
+  await db.prepare(SCHEMA_META_TABLE).run();
+  await db
+    .prepare(`INSERT OR REPLACE INTO clunk_schema_meta (key, value, updated_at) VALUES ('version', ?, ?)`)
+    .bind(version, new Date().toISOString())
+    .run();
+}
+
+async function ensureSchemaUncached(db: D1Database): Promise<void> {
   await db.batch(SCHEMA_STATEMENTS.map((statement) => db.prepare(statement)));
   await ensureColumn(db, "clunk_collaboration_threads");
   await ensureColumn(db, "clunk_collaboration_threads", "consumer_project", "TEXT NOT NULL DEFAULT 'harvest-frontier'");

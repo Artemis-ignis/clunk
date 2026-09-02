@@ -26,6 +26,14 @@ const STORE_WORKSPACE = "ws-artemis-store";
 /** QA-provisional credit prices by product family (whole credits × 10,000 = price_cents). */
 function creditPriceFor(slug, kind) {
   if (kind === "2d-image" || kind === "2d") return 9;
+  // Harvest Frontier's exported world assets, priced by what the buyer gets rather than by
+  // the family prefix: a rigged character with six motions in the file is not the same
+  // purchase as a rain barrel.
+  if (slug === "hf-player-farmhand") return 129;
+  if (slug === "hf-farmhouse" || slug === "hf-barn") return 99;
+  if (slug === "hf-crop-set") return 69;
+  if (slug === "hf-cherry-tree" || slug === "hf-windmill") return 49;
+  if (/^hf-(water-butt|hand-cart|farmstead-clutter|farm-tool-kit)$/.test(slug)) return 29;
   if (/^hf-(tractor|seeder|processing)/.test(slug)) return 99; // Harvest Frontier runtime machines
   if (/^hf-/.test(slug)) return 69;
   if (/greenhouse|market-stall/.test(slug)) return 69;

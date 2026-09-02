@@ -5,6 +5,15 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "./NativeLink";
 import { Icon } from "./Icon";
 import { EmbeddedGlbViewer, type MeasuredSpec } from "./review/EmbeddedGlbViewer";
+import {
+  cardSpec,
+  factRows,
+  hasMotion,
+  kitLine,
+  motionNote,
+  reconcileMeasured,
+  type ListingFacts,
+} from "./listing-facts-rows";
 import styles from "../marketplace/marketplace.module.css";
 
 type Listing = {
@@ -40,6 +49,11 @@ type Listing = {
   variantOf?: string | null;
   /** The sheets baked from this 3D model, offered on its page. */
   variants?: ListingVariant[];
+  /**
+   * Everything the page states as a number, measured by the pipeline and served with the
+   * row. The page never reads a figure back out of the description.
+   */
+  facts?: ListingFacts | null;
 };
 
 /** A sprite sheet offered on the page of the 3D model it was baked from. */
@@ -356,35 +370,20 @@ export function MarketplaceCatalog() {
 }
 
 /**
- * The one fact a buyer scans a grid for. Every published description opens with
- * the measured head clause the pipeline wrote, so the card re-shows that clause
- * instead of the whole paragraph — and shows nothing at all when the sentence
- * does not match, rather than guessing a number.
+ * The one fact a buyer scans a grid for.
+ *
+ * This used to be a stack of regular expressions run over the Korean description — the card
+ * recovered "폴리곤 2,456개" by matching the sentence the pipeline had written, so rewording a
+ * listing blanked its card and a typo in prose became a wrong number in the grid. The figure
+ * now comes from the listing's measured facts (app/data/listing-facts.json, served by
+ * /api/marketplace); a listing with no facts shows its format instead of a guess.
  */
-function cardSpec(listing: Listing): string | null {
-  const d = listing.description;
-  // "tris" and "드로우콜" are our words, not a buyer's. 면 is what the file is made of and
-  // 그리기 횟수 is how many times the engine has to draw it; both read at a glance.
-  // These patterns mirror the plain-Korean sentences build-manifest.mjs (and the sheet copy in D1) write.
-  const solid = d.match(/잰 값으로 폴리곤 ([\d,]+)개, 그리기 (\d+)회/);
-  if (solid) return `폴리곤 ${solid[1]}개 · 그리기 ${solid[2]}회`;
-  const bundle = d.match(/합쳐 폴리곤 ([\d,]+)개, 그리기 (\d+)회/);
-  if (bundle) return `합계 폴리곤 ${bundle[1]}개 · 그리기 ${bundle[2]}회`;
-  const perTemplate = d.match(/한 그루에 폴리곤 ([\d,]+~[\d,]+)개/);
-  if (perTemplate) return `그루당 폴리곤 ${perTemplate[1]}개`;
-  const sheet = d.match(/(\d+)×(\d+) PNG (\d+)컷/u);
-  if (sheet) return `${sheet[1]}×${sheet[2]} · ${sheet[3]}컷`;
-  const tileSet = d.match(/경계가 안 보이는 것이 (\d+)종, 경계가 약하게 보이는 것이 (\d+)종/);
-  if (tileSet) return `1024×1024 · 완전히 이어짐 ${tileSet[1]}종 · 살짝 티남 ${tileSet[2]}종`;
-  const tile = d.match(/(\d+)x(\d+) 크기의 이음매 없는 타일[\s\S]*?잰 결과는 (이음매 없음|경계 약함)/);
-  if (tile) return `${tile[1]}×${tile[2]} · ${tile[3] === "이음매 없음" ? "이어붙여도 자국 없음" : "살짝 티남"}`;
-  return null;
-}
 
 function ListingCard({ listing, colour, beta }: { listing: Listing; colour?: string; beta?: boolean }) {
   const previewUrl = getPreviewUrl(listing);
   const price = formatPrice(listing.priceCents, listing.currency);
-  const spec = cardSpec(listing);
+  const spec = cardSpec(listing.facts);
+  const motion = motionNote(listing.facts);
   const colourShare = colour ? carriesColour(listing, colour) : null;
 
   // One card, one link. A grid is for choosing what to open, so the card carries
@@ -412,8 +411,14 @@ function ListingCard({ listing, colour, beta }: { listing: Listing; colour?: str
         <span className={styles.cardTitle}>{displayTitle(listing.slug, listing.title)}</span>
         <span className={styles.cardSpec}>
           {spec ?? formatLabel(listing)}
-          {/* AI기본법 제31조② 표시 의무 — 생성형 AI 산출물임을 상품 카드에서 바로 알린다. */}
-          {isAiGenerated(listing) ? <span className={styles.aiChipMini}>✦ AI 생성</span> : null}
+          {/* Only when the file itself carries a clip or a named hinge, and it says how many
+              of each. Never read off a title, so a card cannot promise motion the download
+              does not have.
+
+              The generative-AI label used to sit here too. It is a legal disclosure, not a
+              feature, and every card carrying it made the grid read as a row of stickers;
+              it now appears once on the product page, under the facts. */}
+          {motion ? <span className={styles.motionChip}>{motion}</span> : null}
         </span>
         {/* The 2D sheets baked from this model come with it. Saying so on the card is what
             makes the grid honest after the sheets stopped being cards of their own. */}
@@ -450,6 +455,28 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
   const [snippetTab, setSnippetTab] = useState<"three" | "r3f" | "clunk">("three");
   const [copied, setCopied] = useState(false);
   const [matches, setMatches] = useState<ColourMatch[]>([]);
+  // Whether this visitor is signed in, asked once on mount. null while the answer is still
+  // in flight.
+  //
+  // A signed-out visitor used to press "베타 기간 무료로 받기", wait for a checkout POST to
+  // come back 401, read a sentence, and only then get moved to the login page. For the
+  // length of that round trip the page looked like it had done nothing at all. Knowing the
+  // answer before the click lets the button say what it will do and do it instantly.
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    void fetch("/api/credits", { cache: "no-store" })
+      .then((response) => {
+        if (active) setSignedIn(response.status !== 401);
+      })
+      // A network failure is not proof of being signed out, so the button keeps its normal
+      // wording and the 401 branch in startCheckout stays the safety net.
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -477,6 +504,11 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
     };
   }, [slug]);
 
+  /** Straight to the login page, with the way back to this listing. No server round trip. */
+  function goToLogin() {
+    window.location.assign(`/login?return_to=${encodeURIComponent(window.location.pathname)}`);
+  }
+
   async function startCheckout(
     paymentMethod: "credits" | "card" | "beta",
     // Which listing is being bought. The sheets on this page are separate listings, so a row
@@ -486,6 +518,11 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
     target?: { id: string; label: string; href: string; fileName: string },
   ) {
     if (!listing || buying) return;
+    // Known to be signed out: go now. The checkout call could only answer 401.
+    if (signedIn === false) {
+      goToLogin();
+      return;
+    }
     const purchase = target ?? {
       id: listing.id,
       label: displayTitle(listing.slug, listing.title),
@@ -522,8 +559,9 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
       });
       const payload = await response.json() as CheckoutResponse;
       if (response.status === 401) {
-        setMessage("로그인이 필요합니다. 로그인 후 다시 시도해 주세요.");
-        window.location.assign(`/login?return_to=${encodeURIComponent(window.location.pathname)}`);
+        // Only reachable while the mount probe has not answered yet, or when it failed.
+        setSignedIn(false);
+        goToLogin();
         return;
       }
       if (payload.status === "PAID_WITH_CREDITS" || payload.status === "ALREADY_OWNED" || payload.status === "ALREADY_PAID" || payload.status === "BETA_GRANTED") {
@@ -573,44 +611,65 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
   const isModel = isModelListing(listing);
   const name = displayTitle(listing.slug, listing.title);
   const pictureSpec = describePicture(listing);
+  const rows = listing.facts ? factRows(listing.facts) : [];
+  const kit = listing.facts ? kitLine(listing.facts) : null;
+  const reconciled = reconcileMeasured(
+    listing.facts,
+    measured ? { triangles: measured.triangles, materials: measured.materials, bytes: measured.bytes } : null,
+  );
 
   return (
     <>
       <div className={styles.breadcrumb}><Link href="/marketplace">에셋 마켓</Link><Icon name="chevronRight" size={13} /><span>{name}</span></div>
-      <section className={styles.detailHero}>
-        <div className={styles.preview}>
-          {/* polyfork-style live product view: the shipped GLB itself, orbitable,
-              with its animation playing — not a screenshot of it. */}
-          {isModel ? (
-            <EmbeddedGlbViewer
-              src={`/market/${listing.slug}/${listing.entryFileName}`}
-              poster={previewUrl}
-              alt={`${name} 실제 판매 파일`}
-              onMeasured={setMeasured}
-              // The motions the sprite baker turned this model's pivots with, so the door a
-              // buyer sees opening on the sheet also opens on the model itself.
-              clips={listing.clips ?? null}
-              scaleReference
-            />
-          ) : previewUrl ? (
-            <Image src={previewUrl} alt={`${name} 실제 공개 미리보기`} width={900} height={620} priority unoptimized />
-          ) : (
-            <PreviewUnavailable listing={listing} />
-          )}
+
+      {/* The asset is what the page is for, so the words above it are one line of badges and
+          one line of name. Everything that used to sit beside the picture — price, spec list,
+          palette — now sits under it, where it does not compete with the thing being sold. */}
+      <div className={styles.detailTopHead}>
+        <div className={styles.detailBadges}>
+          <span>{formatLabel(listing)}</span>
+          <span>{formatBytes(listing.byteLength)}</span>
+          <span>{licenseLabel(listing.licenseStatus)}</span>
         </div>
-        <div className={styles.buyPanel}>
-          <div className={styles.metaRow}><span>{formatLabel(listing)}</span><span>{formatBytes(listing.byteLength)}</span><span>{licenseLabel(listing.licenseStatus)}</span></div>
-          <h1>{name}</h1>
-          {/* AI기본법 제31조② 생성물 표시 — 1st-party 상품 상시 노출 라벨.
-              This states the provenance of THIS file, not a feature the buyer
-              gets: the store's inventory was authored with the operator's local
-              Codex luna runner and the Clunk Three.js factory. Naming
-              "luna 이미지 엔진" here read like a service the site runs for a
-              visitor, and the site cannot run it. */}
-          {isAiGenerated(listing) ? (
-            <span className={styles.aiChip}><i>✦</i> 생성형 AI로 제작한 에셋입니다 · 제작 기록 보관</span>
-          ) : null}
-          <p>{shopDescription(listing, measured !== null)}</p>
+        <h1>{name}</h1>
+      </div>
+
+      {/* The bench. A 3D product gets the tool rails; a tile and a sheet get the bench their
+          own format needs, because a texture has nothing to orbit and a sprite sheet is a
+          grid of frames, not a model. */}
+      <section className={styles.detailStage} data-snap-section="listing-stage">
+        {isModel ? (
+          <EmbeddedGlbViewer
+            src={`/market/${listing.slug}/${listing.entryFileName}`}
+            poster={previewUrl}
+            alt={`${name} 실제 판매 파일`}
+            onMeasured={setMeasured}
+            // The motions the sprite baker turned this model's pivots with, so the door a
+            // buyer sees opening on the sheet also opens on the model itself.
+            clips={listing.clips ?? null}
+            // Open on the side this product's photograph was taken from, so the live view
+            // and the thumbnail are the same object seen the same way.
+            yawDegrees={listing.facts?.viewYawDegrees ?? null}
+            // The parts this listing's own measurement found, offered as pivot tests.
+            pivots={listing.facts?.animatedParts ?? null}
+            fileName={listing.entryFileName}
+            scaleReference
+            workbench
+          />
+        ) : listing.facts?.sheet && previewUrl ? (
+          <SheetBench src={previewUrl} alt={`${name} 스프라이트 시트`} sheet={listing.facts.sheet} />
+        ) : previewUrl ? (
+          <TileBench src={previewUrl} alt={`${name} 타일 미리보기`} seamless={listing.facts?.texture?.seamless ?? false} />
+        ) : (
+          <PreviewUnavailable listing={listing} />
+        )}
+      </section>
+
+      <section className={styles.detailUnder}>
+        <div className={styles.detailFacts}>
+          {/* Small, because the numbers underneath say more than the sentence can and the
+              picture above says most of it already. */}
+          <p className={styles.detailBlurb}>{shopDescription(listing, measured !== null)}</p>
           {/* A sheet is no longer a card in the grid, so its page says where it came from
               and takes the visitor to the product it belongs to. */}
           {listing.variantOf ? (
@@ -618,10 +677,37 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
               이 시트를 구운 3D 모델 보기 <Icon name="arrowRight" size={14} />
             </Link>
           ) : null}
-          {/* The price and the button used to sit under the spec list, the palette and the
-              colour rail — below the fold on a desktop screen, so the one thing the page is
-              for was the one thing a visitor had to scroll for. The numbers follow the
-              decision now; they do not stand in front of it. */}
+          {/* The specification, in the order a buyer reads it: what it costs the engine, how
+              big it is in the world, what the file is, what moves, and what they may do with
+              it. Every figure comes from the listing's measured facts — the page does not
+              read a number back out of the description beside it. */}
+          {rows.length ? (
+            <ul className={styles.specList} aria-label="이 상품의 사양">
+              {rows.map((row) => (
+                <li key={row.id}><b>{row.head}</b>{row.tail ? <> · {row.tail}</> : null}</li>
+              ))}
+            </ul>
+          ) : pictureSpec ? (
+            // A listing measured before the facts index existed still gets its picture facts.
+            <ul className={styles.specList} aria-label="이 파일의 사양">
+              {pictureSpec.map((item) => <li key={item.head}><b>{item.head}</b> · {item.tail}</li>)}
+            </ul>
+          ) : null}
+          {/* Which set this belongs to, and how many pieces share its palette and its scale.
+              A buyer furnishing a scene is choosing a family, not a file. */}
+          {kit ? <p className={styles.kitLine}>{kit}</p> : null}
+          {/* The viewer parses the very bytes on sale, so agreeing with the recorded facts is
+              the normal case and gets one quiet line. Disagreeing means the file served is not
+              the file that was measured, and a buyer is entitled to be told that. */}
+          {reconciled ? <p className={styles.kitLine} role="status">{reconciled}</p> : null}
+          {/* AI기본법 제31조② 생성물 표시. One sentence, once, where a buyer is already
+              reading the facts — not a badge repeated on every card in the grid. */}
+          {isAiGenerated(listing) ? (
+            <p className={styles.kitLine}>이 {isModel ? "에셋" : "텍스처"}은 생성형 AI로 만들었습니다.</p>
+          ) : null}
+        </div>
+
+        <div className={styles.detailBuy}>
           <div className={styles.priceRow}><strong>{beta && listing.priceCents > 0 ? <><s className={styles.priceStruck}>{formatPrice(listing.priceCents, listing.currency)}</s> 베타 무료</> : formatPrice(listing.priceCents, listing.currency)}</strong><small>{listing.sellerName ?? "Clunk"} · {formatBytes(listing.byteLength)} · {listing.entryFileName}</small></div>
           {listing.priceCents > 0 && paymentUnavailable ? (
             <p className={styles.payState} data-payment-state={checkout?.status ?? "UNKNOWN"} role="status">
@@ -651,7 +737,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
               // The beta has one action. Consent to a withdrawal limit is a condition of a
               // paid sale, and a card button that can never work is a broken button.
               <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => void startCheckout("beta")} disabled={buying}>
-                {buying ? "받는 중…" : "베타 기간 무료로 받기"} <Icon name="download" size={15} />
+                {signedIn === false ? "로그인하고 받기" : buying ? "받는 중…" : "베타 기간 무료로 받기"} <Icon name={signedIn === false ? "arrowUpRight" : "download"} size={15} />
               </button>
             ) : (
               <>
@@ -667,108 +753,76 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
                 </button>
               </>
             )}
-            {/^\/market\//.test(`/market/${listing.slug}/`) && /\.(glb|gltf)$/i.test(listing.entryFileName) ? (
-              <Link
-                className={`${styles.btn} ${styles.btnGhost}`}
-                href={`/review?glb=${encodeURIComponent(`/market/${listing.slug}/${listing.entryFileName}`)}`}
-                prefetch={false}
-              >
-                3D 뷰어에서 검수 <Icon name="box" size={15} />
-              </Link>
-            ) : null}
           </div>
           {message ? <p className={styles.message} role="status">{message}</p> : null}
-          {/* The 2D sheets baked from this model. They used to be their own cards in the
-              grid, which sold the same crate twice; here they are the formats of one
-              product, each with its own button because each is still its own file. */}
-          {listing.variants?.length ? (
-            <section className={styles.variants} aria-labelledby="detail-variants-heading">
-              <h2 id="detail-variants-heading" className={styles.variantsTitle}>이 모델로 만든 스프라이트 시트</h2>
-              <p className={styles.variantsNote}>같은 모델을 Clunk 렌더러로 구운 PNG입니다. 2D 게임에 그대로 쓸 수 있습니다.</p>
-              <ul className={styles.variantList}>
-                {listing.variants.map((variant) => {
-                  const { kind, facts } = variantFacts(variant);
-                  const has = ownedIds.has(variant.id);
-                  const variantHref = `/api/marketplace/assets/${encodeURIComponent(variant.assetId)}?file=${encodeURIComponent(variant.entryFileName)}`;
-                  const variantTarget = { id: variant.id, label: kind, href: variantHref, fileName: variant.entryFileName };
-                  return (
-                    <li key={variant.id} className={styles.variantRow}>
-                      <div className={styles.variantHead}>
-                        <Icon name="image" size={16} />
-                        <strong>{kind}</strong>
-                      </div>
-                      <span className={styles.variantFacts}>{facts.join(" · ")}</span>
-                      {has || variant.priceCents === 0 ? (
-                        <a
-                          className={`${styles.btn} ${styles.btnGhost} ${styles.variantBtn}`}
-                          href={`/api/marketplace/assets/${encodeURIComponent(variant.assetId)}?file=${encodeURIComponent(variant.entryFileName)}`}
-                          download={variant.entryFileName}
-                        >
-                          내려받기 <Icon name="download" size={14} />
-                        </a>
-                      ) : beta ? (
-                        <button
-                          type="button"
-                          className={`${styles.btn} ${styles.btnGhost} ${styles.variantBtn}`}
-                          disabled={buying}
-                          onClick={() => void startCheckout("beta", variantTarget)}
-                        >
-                          {buying ? "받는 중…" : "베타 무료로 받기"} <Icon name="download" size={14} />
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className={`${styles.btn} ${styles.btnGhost} ${styles.variantBtn}`}
-                          disabled={buying || !withdrawalConsent}
-                          onClick={() => void startCheckout("credits", variantTarget)}
-                        >
-                          {formatPrice(variant.priceCents, variant.currency)} <Icon name="arrowUpRight" size={14} />
-                        </button>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
-          ) : null}
-          {/* Spec measured in this browser from the exact file on sale — the
-              viewer parses it, nothing is restated from metadata. */}
-          {measured ? (
-            <ul className={styles.specList} aria-label="이 파일에서 방금 측정한 사양">
-              {/* 삼각형·드로우콜 are our words. 폴리곤 is the word game people already use,
-                  and the line says which direction is better so the number means something. */}
-              <li><b>폴리곤 {measured.triangles.toLocaleString("ko-KR")}개</b> · 덩어리 {measured.meshes}개 · 재질 {measured.materials}개</li>
-              <li><b>{measured.bounds.x.toFixed(2)} × {measured.bounds.y.toFixed(2)} × {measured.bounds.z.toFixed(2)} m</b> · 실제 크기입니다</li>
-              {/* Only worth a line when it is not zero. A model that rests on the ground
-                  needs no instruction; one that sinks needs the exact number. */}
-              {Math.abs(measured.groundOffset) > 0.005 ? (
-                <li>
-                  <b>{measured.groundOffset > 0 ? "+" : ""}{measured.groundOffset.toFixed(2)} m</b>
-                  {" · 바닥에 딱 맞추려면 "}
-                  <b>{(-measured.groundOffset).toFixed(2)} m</b>
-                  {" 만큼 위로 올리세요"}
-                </li>
-              ) : (
-                <li><b>바닥에 딱 맞음</b> · 높이를 따로 맞추지 않아도 땅 위에 바로 놓입니다</li>
-              )}
-              <li><b>{formatLabel(listing)}</b> {formatBytes(measured.bytes)} · 이 페이지에서 파일을 직접 열어 잰 값입니다</li>
-              <li><b>{licenseLabel(listing.licenseStatus)}</b> · 게임·앱·의뢰 작업에 쓸 수 있고, 원본 재판매만 제외됩니다</li>
-            </ul>
-          ) : null}
-          {/* A PNG has no 면 and no 그리기 횟수. What a buyer of a texture needs is the
-              resolution, whether it tiles without a visible seam, and the file size. */}
-          {pictureSpec ? (
-            <ul className={styles.specList} aria-label="이 파일의 사양">
-              {pictureSpec.map((item) => <li key={item.head}><b>{item.head}</b> · {item.tail}</li>)}
-            </ul>
-          ) : null}
-          {/* The file's own colours, area-weighted, so a buyer can tell before paying
-              whether this asset sits in their game's palette — and can take the hex
-              straight into their own material rather than eyedropping a screenshot. */}
-          {measured?.palette.length ? <PaletteStrip palette={measured.palette} /> : null}
-          {matches.length ? <ColourMatches matches={matches} /> : null}
+
+          {/* The files, beside the button that unlocks them rather than a screen below it.
+              A download link that answers 401 in JSON is not a link, it is a trap: until the
+              visitor holds the entitlement the row says what will open it instead. */}
+          <div className={styles.detailFilesHead}>{beta ? "받으면 열리는 파일" : "결제하면 열리는 파일"}</div>
+          <div className={styles.files}>{listing.artifacts.filter((artifact) => !PAGE_IMAGE_ROLES.has(artifact.role.trim().toLowerCase())).map((artifact) => <article className={styles.fileRow} key={artifact.fileName}><div><Icon name={artifact.contentType === "image/png" ? "image" : artifact.contentType.includes("gltf") ? "box" : "fileJson"} size={17} /><strong>{artifact.fileName}</strong></div><span>{roleLabel(artifact.role)} · {formatBytes(artifact.byteLength)}</span><code>{artifact.sha256.slice(0, 16)}…</code>{owned || listing.priceCents === 0 ? <a href={`/api/marketplace/assets/${encodeURIComponent(listing.assetId)}?file=${encodeURIComponent(artifact.fileName)}`} download={artifact.fileName}>다운로드</a> : <span className={styles.fileLocked}>{beta ? "받기 버튼을 누르면 열립니다" : "결제 후 열립니다"}</span>}</article>)}</div>
         </div>
       </section>
+
+      {/* The 2D sheets baked from this model. They used to be their own cards in the grid,
+          which sold the same crate twice; here they are the formats of one product, each with
+          its own button because each is still its own file. */}
+      {listing.variants?.length ? (
+        <section className={styles.variants} aria-labelledby="detail-variants-heading">
+          <h2 id="detail-variants-heading" className={styles.variantsTitle}>이 모델로 만든 스프라이트 시트</h2>
+          <p className={styles.variantsNote}>같은 모델을 Clunk 렌더러로 구운 PNG입니다. 2D 게임에 그대로 쓸 수 있습니다.</p>
+          <ul className={styles.variantList}>
+            {listing.variants.map((variant) => {
+              const { kind, facts } = variantFacts(variant);
+              const has = ownedIds.has(variant.id);
+              const variantHref = `/api/marketplace/assets/${encodeURIComponent(variant.assetId)}?file=${encodeURIComponent(variant.entryFileName)}`;
+              const variantTarget = { id: variant.id, label: kind, href: variantHref, fileName: variant.entryFileName };
+              return (
+                <li key={variant.id} className={styles.variantRow}>
+                  <div className={styles.variantHead}>
+                    <Icon name="image" size={16} />
+                    <strong>{kind}</strong>
+                  </div>
+                  <span className={styles.variantFacts}>{facts.join(" · ")}</span>
+                  {has || variant.priceCents === 0 ? (
+                    <a
+                      className={`${styles.btn} ${styles.btnGhost} ${styles.variantBtn}`}
+                      href={variantHref}
+                      download={variant.entryFileName}
+                    >
+                      내려받기 <Icon name="download" size={14} />
+                    </a>
+                  ) : beta ? (
+                    <button
+                      type="button"
+                      className={`${styles.btn} ${styles.btnGhost} ${styles.variantBtn}`}
+                      disabled={buying}
+                      onClick={() => void startCheckout("beta", variantTarget)}
+                    >
+                      {signedIn === false ? "로그인하고 받기" : buying ? "받는 중…" : "베타 무료로 받기"} <Icon name={signedIn === false ? "arrowUpRight" : "download"} size={14} />
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className={`${styles.btn} ${styles.btnGhost} ${styles.variantBtn}`}
+                      disabled={buying || !withdrawalConsent}
+                      onClick={() => void startCheckout("credits", variantTarget)}
+                    >
+                      {formatPrice(variant.priceCents, variant.currency)} <Icon name="arrowUpRight" size={14} />
+                    </button>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
+
+      {/* The file's own colours, area-weighted, so a buyer can tell before paying whether
+          this asset sits in their game's palette — and can take the hex straight into their
+          own material rather than eyedropping a screenshot. */}
+      {measured?.palette.length ? <PaletteStrip palette={measured.palette} /> : null}
+      {matches.length ? <ColourMatches matches={matches} /> : null}
 
       {/\.(glb|gltf)$/i.test(listing.entryFileName) ? (
         <section className={styles.detailSection} aria-labelledby="detail-integration-heading">
@@ -816,18 +870,20 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
             pay for. The four internal review lanes are QA vocabulary and stay in
             the workspace; here we publish only what a buyer can act on. */}
         <div className={styles.sectionHead}><span className="cv5-eyebrow">판매 전 확인</span><h2 id="detail-evidence-heading">파일을 열어보고<br /><em>확인한 것</em></h2></div>
-        {/* A PNG texture has no 면 and no 그리기 횟수, and it was never put in a renderer.
-            The card used to promise a buyer of a texture that we had counted its triangles
-            and loaded it into three.js — neither of which happened. */}
-        <div className={styles.evidenceGrid}><EvidenceCard label="파일 규격" value={listing.evidence.static} detail={isModel ? "면 개수·그리기 횟수·구조를 파일에서 직접 읽었습니다" : "해상도·이어짐·파일 크기를 파일에서 직접 읽었습니다"} pending="아직 파일을 읽어 재보지 않았습니다" /><EvidenceCard label={isModel ? "화면에서 확인" : "그림으로 확인"} value={listing.evidence.visualRuntime} detail={isModel ? "실제 게임 렌더러에 띄워 확인했습니다" : "실제 화면에 띄워 눈으로 확인했습니다"} pending={isModel ? "게임 렌더러에 올려 본 기록이 없습니다. 페이지 위의 미리보기는 지금 여러분 브라우저가 그린 것입니다" : "화면에 띄워 확인한 기록이 없습니다"} /><EvidenceCard label="판매자 검토" value={listing.evidence.humanDecision} detail="Clunk(아르테미스)가 직접 만들고 검토했습니다" pending="판매자가 아직 검토하지 않았습니다" /></div>
+        {/* A PNG texture has no 면 and no 재질, and it was never put in a renderer. The card
+            used to promise a buyer of a texture that we had counted its triangles and loaded
+            it into three.js — neither of which happened.
+
+            The draw-call count is gone from every buyer-facing surface: it is an engine word,
+            and a shopper cannot act on it. The inspector still measures it. */}
+        <div className={styles.evidenceGrid}><EvidenceCard label="파일 규격" value={listing.evidence.static} detail={isModel ? "면 개수·재질 수·크기·구조를 파일에서 직접 읽었습니다" : "해상도·이어짐·파일 크기를 파일에서 직접 읽었습니다"} pending="아직 파일을 읽어 재보지 않았습니다" /><EvidenceCard label={isModel ? "화면에서 확인" : "그림으로 확인"} value={listing.evidence.visualRuntime} detail={isModel ? "실제 게임 렌더러에 띄워 확인했습니다" : "실제 화면에 띄워 눈으로 확인했습니다"} pending={isModel ? "게임 렌더러에 올려 본 기록이 없습니다. 페이지 위의 미리보기는 지금 여러분 브라우저가 그린 것입니다" : "화면에 띄워 확인한 기록이 없습니다"} /><EvidenceCard label="판매자 검토" value={listing.evidence.humanDecision} detail="Clunk(아르테미스)가 직접 만들고 검토했습니다" pending="판매자가 아직 검토하지 않았습니다" /></div>
+        {/* The one caveat the inspection raised, moved here out of the description. A listing
+            whose file cleared every budget has nothing to add and shows nothing. */}
+        {listing.facts?.inspection?.note ? (
+          <p className={styles.kitLine}>{listing.facts.inspection.note}</p>
+        ) : null}
       </section>
 
-      <section className={styles.detailSection} aria-labelledby="detail-package-heading">
-        <div className={styles.sectionHead}><span className="cv5-eyebrow">받는 파일</span><h2 id="detail-package-heading">{beta ? "받으면" : "결제하면"}<br /><em>이 파일들이 열립니다</em></h2></div>
-        {/* A download link that answers 401 in JSON is not a link, it is a trap. Until the
-            visitor holds the entitlement the row says what will open it instead. */}
-        <div className={styles.files}>{listing.artifacts.map((artifact) => <article className={styles.fileRow} key={artifact.fileName}><div><Icon name={artifact.contentType === "image/png" ? "image" : artifact.contentType.includes("gltf") ? "box" : "fileJson"} size={17} /><strong>{artifact.fileName}</strong></div><span>{roleLabel(artifact.role)} · {formatBytes(artifact.byteLength)}</span><code>{artifact.sha256.slice(0, 16)}…</code>{owned || listing.priceCents === 0 ? <a href={`/api/marketplace/assets/${encodeURIComponent(listing.assetId)}?file=${encodeURIComponent(artifact.fileName)}`} download={artifact.fileName}>다운로드</a> : <span className={styles.fileLocked}>{beta ? "받기 버튼을 누르면 열립니다" : "결제 후 열립니다"}</span>}</article>)}</div>
-      </section>
     </>
   );
 }
@@ -990,6 +1046,10 @@ function describePicture(listing: DetailListing): Array<{ head: string; tail: st
 }
 
 /** The storage role of a file, said in the words of the person downloading it. */
+// The hero and preview images are how the page shows a product, not what a buyer takes
+// home; listing them as downloadable files made a six-tree pack look like eighteen files.
+const PAGE_IMAGE_ROLES = new Set(["hero", "preview", "page"]);
+
 function roleLabel(role: string): string {
   const labels: Record<string, string> = {
     entry: "본 파일",
@@ -1033,13 +1093,211 @@ function createIdempotencyKey(): string {
 
 function listingFamily(listing: Listing): Exclude<CatalogFilter, "all"> {
   const value = `${listing.entryFileName} ${listing.format ?? ""}`.toLowerCase();
-  // An animated sheet has the same ".sheet.png" file name as a static one; what makes it
-  // Motion is the clip, which lives in the slug and the title. Without this the Motion chip
-  // matched nothing and sat on the page returning "0 assets" to everyone who clicked it.
-  const animated = /-(swing|door|walk)-/.test(listing.slug) || /애니메이션|여닫기|걷기|문 열기/.test(listing.title);
+  // What makes a listing Motion is a clip or a named hinge in the file it sells, which the
+  // measured facts carry. An animated sheet is a ".sheet.png" like any other, so for those
+  // the frame count in the baker's own title is the evidence — the sheet's grid, not a word
+  // someone typed.
+  const animated = hasMotion(listing.facts) || (listing.facts?.sheet?.frames ?? null) !== null;
   if (animated || value.includes("motion") || value.includes("animation")) return "motion";
   if (value.includes("png") || value.includes("sprite") || value.includes("atlas") || value.includes("spine") || value.includes("2d")) return "2d";
   return "3d";
+}
+
+/**
+ * The bench for a tile product.
+ *
+ * A texture has nothing to orbit, and the one question a buyer actually has about a
+ * seamless tile is the one a single still cannot answer: does the join show when it is laid
+ * next to itself? So the stage tiles the image, 1x1 / 2x2 / 3x3, and a magnifier lets the
+ * seam be looked at closely instead of taken on trust.
+ *
+ * What is being tiled is the public preview — the watermarked 512 downscale — because that
+ * is the only image the shop may show before payment. The note says so.
+ */
+function TileBench({ src, alt, seamless }: { src: string; alt: string; seamless: boolean }) {
+  const [repeat, setRepeat] = useState(1);
+  const [zoom, setZoom] = useState(1);
+  return (
+    <div className={styles.flatBench}>
+      <div className={styles.flatStage}>
+        <div
+          className={styles.flatSurface}
+          role="img"
+          aria-label={`${alt} — ${repeat}×${repeat}로 이어붙인 미리보기`}
+          style={{ backgroundImage: `url(${src})`, backgroundSize: `${((100 / repeat) * zoom).toFixed(2)}%` }}
+        />
+      </div>
+      <div className={styles.flatBar}>
+        <strong>이어붙임 미리보기</strong>
+        {[1, 2, 3].map((count) => (
+          <button
+            key={count}
+            type="button"
+            className="cv5-bench-chip"
+            aria-pressed={repeat === count}
+            onClick={() => setRepeat(count)}
+          >
+            {count}×{count}
+          </button>
+        ))}
+        <label>
+          확대 {zoom.toFixed(1)}×
+          <input
+            type="range"
+            min={0.5}
+            max={3}
+            step={0.1}
+            value={zoom}
+            aria-label="확대 배율"
+            onChange={(event) => setZoom(Number(event.target.value))}
+          />
+        </label>
+      </div>
+      <p className={styles.flatNote}>
+        {seamless
+          ? "이어 붙인 경계를 재 봤을 때 자국이 남지 않았습니다. 위에서 직접 이어 붙여 확인해 보세요."
+          : "이어 붙인 경계에 옅은 자국이 남는 것으로 재졌습니다."}
+        {" 여기 보이는 그림은 결제 전 공개용 미리보기이고, 받는 파일은 원본 해상도입니다."}
+      </p>
+    </div>
+  );
+}
+
+/**
+ * The bench for a sprite-sheet product.
+ *
+ * A sheet is a grid of frames, so the useful thing to do with it is play a row. That is only
+ * honest when the image on screen really is the grid: the shop's public preview for some
+ * sheets is a card-shaped contact image, not the sheet itself. The bench measures the image
+ * it was given against the grid the listing states, and offers playback only when the two
+ * agree — otherwise it shows the picture and says why the player is not there.
+ */
+function SheetBench({
+  src,
+  alt,
+  sheet,
+}: {
+  src: string;
+  alt: string;
+  sheet: NonNullable<NonNullable<Listing["facts"]>["sheet"]>;
+}) {
+  const [natural, setNatural] = useState<{ width: number; height: number } | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [fps, setFps] = useState(8);
+  const [row, setRow] = useState(0);
+  const [frame, setFrame] = useState(0);
+  const [zoom, setZoom] = useState(6);
+
+  useEffect(() => {
+    let live = true;
+    const image = new window.Image();
+    image.onload = () => { if (live) setNatural({ width: image.naturalWidth, height: image.naturalHeight }); };
+    image.src = src;
+    return () => { live = false; };
+  }, [src]);
+
+  const frames = sheet.frames;
+  // The public preview for these sheets is the grid with a strip of padding added on the
+  // right — measured, not assumed: the sheet's pixels sit at (0, 0) of the card, identical.
+  // So the rows must line up exactly and the image may be wider, and the frames played are
+  // the real frames rather than a mock-up. An image that does not match the grid the listing
+  // states gets no player at all.
+  const playable = Boolean(
+    frames && natural
+      && natural.height === sheet.directions * sheet.cell
+      && natural.width >= frames * sheet.cell,
+  );
+
+  useEffect(() => {
+    if (!playing || !playable || !frames) return;
+    const timer = window.setInterval(() => setFrame((value) => (value + 1) % frames), Math.round(1000 / fps));
+    return () => window.clearInterval(timer);
+  }, [playing, playable, frames, fps]);
+
+  const cell = sheet.cell * zoom;
+  return (
+    <div className={styles.flatBench}>
+      <div className={styles.flatStage}>
+        {playing && playable && natural ? (
+          <div
+            className={`${styles.flatSurface} ${styles.flatSheet}`}
+            role="img"
+            aria-label={`${alt} — ${row + 1}번째 방향 재생 중`}
+            style={{
+              width: cell,
+              height: cell,
+              flex: "0 0 auto",
+              backgroundImage: `url(${src})`,
+              backgroundSize: `${natural.width * zoom}px ${natural.height * zoom}px`,
+              backgroundPosition: `-${frame * cell}px -${row * cell}px`,
+            }}
+          />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className={styles.flatGrid} src={src} alt={alt} />
+        )}
+      </div>
+      <div className={styles.flatBar}>
+        <strong>프레임 재생</strong>
+        <button
+          type="button"
+          className="cv5-bench-chip"
+          aria-pressed={playing}
+          disabled={!playable}
+          onClick={() => setPlaying((value) => !value)}
+        >
+          {playing ? "■ 격자 보기" : "▶ 재생"}
+        </button>
+        {playable ? (
+          <>
+            <label>
+              초당 {fps}장
+              <input
+                type="range"
+                min={2}
+                max={16}
+                step={1}
+                value={fps}
+                aria-label="초당 프레임 수"
+                onChange={(event) => setFps(Number(event.target.value))}
+              />
+            </label>
+            <label>
+              확대 {zoom}×
+              <input
+                type="range"
+                min={1}
+                max={10}
+                step={1}
+                value={zoom}
+                aria-label="확대 배율"
+                onChange={(event) => setZoom(Number(event.target.value))}
+              />
+            </label>
+            <span className={styles.flatDirections} role="group" aria-label="방향 고르기">
+              {Array.from({ length: sheet.directions }, (_, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  className="cv5-bench-chip cv5-bench-chip-tiny"
+                  aria-pressed={row === index}
+                  aria-label={`${index + 1}번째 방향`}
+                  onClick={() => setRow(index)}
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </span>
+          </>
+        ) : null}
+      </div>
+      <p className={styles.flatNote}>
+        {playable
+          ? `한 칸 ${sheet.cell}×${sheet.cell}, ${sheet.directions}방향 × ${sheet.frames}프레임입니다. 방향 하나가 한 줄이라, 게임에서도 한 줄을 그대로 재생하면 됩니다. 위 재생은 이 시트의 실제 칸을 그대로 넘긴 것입니다.`
+          : `한 칸 ${sheet.cell}×${sheet.cell}, ${sheet.directions}방향${sheet.frames ? ` × ${sheet.frames}프레임` : ""}입니다. 여기 보이는 그림은 결제 전 공개용 미리보기라 격자 그대로가 아니어서 재생은 받은 뒤에 확인할 수 있습니다.`}
+      </p>
+    </div>
+  );
 }
 
 /**

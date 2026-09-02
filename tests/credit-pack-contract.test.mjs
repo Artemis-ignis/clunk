@@ -83,7 +83,7 @@ test("the pricing surface renders pack state from the API and never invents a pr
   // 용어집: 화면에는 "면"과 "그리기 횟수"로 적는다.
   assert.doesNotMatch(pricing, /삼각형|드로우콜/, "내부 용어가 요금 화면에 남아 있으면 안 된다");
   // 2026-09-02: the gloss after the number was removed at the operator's request.
-  assert.match(pricing, /폴리곤 수, 그리기 횟수/);
+  assert.match(pricing, /폴리곤 수, 재질 수/);
 
   // The planned figures on the page are the ones the plan document records.
   const plan = await source("docs/free-beta-plan.ko.md");

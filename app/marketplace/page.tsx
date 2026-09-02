@@ -89,7 +89,10 @@ export default function MarketplacePage() {
                     />
                   </div>
                   <div className={styles.heroPanelFoot}>
-                    <span>폴리곤 2,456개 · 그리기 31회 · 실제 크기 2.44 m</span>
+                    {/* cozy-market-stall, as app/data/listing-facts.json measured it. The draw
+                        call this line used to state is an engine word a shopper cannot act on;
+                        the material count replaced it on every buyer-facing surface. */}
+                    <span>폴리곤 2,456개 · 재질 11개 · 실제 크기 2.44 m</span>
                     <b>{salesOpen ? "₩6,900" : "베타 무료"}</b>
                   </div>
                 </div>
