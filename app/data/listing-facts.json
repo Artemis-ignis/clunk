@@ -1,6 +1,6 @@
 {
   "schema": "clunk.listing-facts.v1",
-  "generatedAt": "2026-09-02T08:38:48.256Z",
+  "generatedAt": "2026-09-02T09:13:26.305Z",
   "sources": [
     "outputs\\market-launch\\wave1\\upload-manifest.json",
     "tmp\\listings-snapshot.json"
@@ -629,9 +629,11 @@
         1.6925,
         3.35
       ],
-      "byteLength": 189912,
+      "byteLength": 196616,
       "format": "GLB",
       "animatedParts": [
+        "gaugeWheelLeft",
+        "gaugeWheelRight",
         "pivottine01",
         "pivottine02",
         "pivottine03",
@@ -646,7 +648,12 @@
         "pivotgaugeWheelLeft",
         "pivotgaugeWheelRight"
       ],
-      "animations": [],
+      "animations": [
+        {
+          "name": "work",
+          "seconds": 1.627
+        }
+      ],
       "kit": "harvest-frontier",
       "kitSize": 9,
       "members": null,
@@ -757,13 +764,27 @@
         5.2749,
         4.2804
       ],
-      "byteLength": 435532,
+      "byteLength": 311164,
       "format": "GLB",
       "animatedParts": [
         "mixerPivot",
-        "pumpPivot"
+        "pumpPivot",
+        "conveyorRollerA",
+        "conveyorRollerB",
+        "beltMark1",
+        "beltMark2",
+        "beltMark3",
+        "beltMark4",
+        "beltMark5",
+        "beltMark6",
+        "beltMark7"
       ],
-      "animations": [],
+      "animations": [
+        {
+          "name": "run",
+          "seconds": 8.296
+        }
+      ],
       "kit": "harvest-frontier",
       "kitSize": 9,
       "members": null,
@@ -785,9 +806,38 @@
         2.225,
         3.8
       ],
-      "byteLength": 557888,
+      "byteLength": 318328,
       "format": "GLB",
       "animatedParts": [
+        "openerDisc01Left",
+        "openerDisc01Right",
+        "gaugeWheel01",
+        "closingWheel01Left",
+        "closingWheel01Right",
+        "openerDisc02Left",
+        "openerDisc02Right",
+        "gaugeWheel02",
+        "closingWheel02Left",
+        "closingWheel02Right",
+        "openerDisc03Left",
+        "openerDisc03Right",
+        "gaugeWheel03",
+        "closingWheel03Left",
+        "closingWheel03Right",
+        "openerDisc04Left",
+        "openerDisc04Right",
+        "gaugeWheel04",
+        "closingWheel04Left",
+        "closingWheel04Right",
+        "pivotseedMeterShaft01",
+        "pivotseedMeterShaft02",
+        "pivotseedMeterShaft03",
+        "pivotseedMeterShaft04",
+        "pivotrowUnit01",
+        "pivotrowUnit02",
+        "pivotrowUnit03",
+        "pivotrowUnit04",
+        "pivotdepthAdjust",
         "pivothopper01",
         "pivothopperLid01",
         "pivothopper02",
@@ -796,36 +846,32 @@
         "pivothopperLid03",
         "pivothopper04",
         "pivothopperLid04",
-        "pivotrowUnit01",
         "pivotseedMeter01",
-        "pivotseedMeterShaft01",
         "pivotgaugeWheel01",
         "pivotclosingWheel01Left",
         "pivotclosingWheel01Right",
-        "pivotrowUnit02",
         "pivotseedMeter02",
-        "pivotseedMeterShaft02",
         "pivotgaugeWheel02",
         "pivotclosingWheel02Left",
         "pivotclosingWheel02Right",
-        "pivotrowUnit03",
         "pivotseedMeter03",
-        "pivotseedMeterShaft03",
         "pivotgaugeWheel03",
         "pivotclosingWheel03Left",
         "pivotclosingWheel03Right",
-        "pivotrowUnit04",
         "pivotseedMeter04",
-        "pivotseedMeterShaft04",
         "pivotgaugeWheel04",
         "pivotclosingWheel04Left",
         "pivotclosingWheel04Right",
         "pivothitchTopLink",
         "pivothitchLowerLeft",
-        "pivothitchLowerRight",
-        "pivotdepthAdjust"
+        "pivothitchLowerRight"
       ],
-      "animations": [],
+      "animations": [
+        {
+          "name": "sow",
+          "seconds": 1.747
+        }
+      ],
       "kit": "harvest-frontier",
       "kitSize": 9,
       "members": null,
@@ -847,13 +893,15 @@
         2.9175,
         3.35
       ],
-      "byteLength": 840136,
+      "byteLength": 852896,
       "format": "GLB",
       "animatedParts": [
-        "frontAxle",
-        "rearAxle",
-        "steeringPivotwheelFrontLeft",
-        "steeringPivotwheelFrontRight",
+        "wheelFrontLeft",
+        "wheelFrontRight",
+        "wheelRearLeft",
+        "wheelRearRight",
+        "gaugeWheelLeft",
+        "gaugeWheelRight",
         "pivottine01",
         "pivottine02",
         "pivottine03",
@@ -865,10 +913,24 @@
         "pivothitchLowerRight",
         "pivothitchTopLink",
         "pivotdepthAdjust",
+        "steeringPivotwheelFrontLeft",
+        "steeringPivotwheelFrontRight",
+        "steeringWheel",
+        "frontAxle",
+        "rearAxle",
         "pivotgaugeWheelLeft",
         "pivotgaugeWheelRight"
       ],
-      "animations": [],
+      "animations": [
+        {
+          "name": "drive",
+          "seconds": 2.171
+        },
+        {
+          "name": "steer",
+          "seconds": 4.341
+        }
+      ],
       "kit": "harvest-frontier",
       "kitSize": 9,
       "members": null,
