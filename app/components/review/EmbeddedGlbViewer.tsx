@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 
+import { gltfClipLabel } from "./gltf-clip-labels";
 import { readPalette, type PaletteEntry } from "./measure-palette";
 
 /**
@@ -31,6 +32,12 @@ export type MeasuredSpec = {
    * reads as the asset's colour while the same colour on forty slivers does not.
    */
   palette: PaletteEntry[];
+  /**
+   * The glTF animation clips inside the file, named and timed by the file itself. A still
+   * picture cannot show a walk cycle, so the page has to say the walk is in there — and it
+   * may only say what this array found.
+   */
+  animations: Array<{ name: string; seconds: number }>;
 };
 
 /**
@@ -49,8 +56,15 @@ export type ViewerClip = {
   tracks: Array<{ node: string; axis: "x" | "y" | "z"; degrees: number[] }>;
 };
 
-/** What the control bar knows about a clip after the file has been opened. */
-type ClipStatus = { name: string; label: string; missingNode: string | null };
+/**
+ * What the control bar knows about one playable motion after the file has been opened.
+ *
+ * Two kinds share the bar. "sheet" clips are the pivot rotations the sprite baker used,
+ * handed to the viewer by the API; "gltf" clips are animations stored inside the file, which
+ * only the file knows about. A buyer does not care which is which — they want the button —
+ * so they are listed together and the viewer remembers which engine to run.
+ */
+type ClipStatus = { name: string; label: string; kind: "sheet" | "gltf"; missingNode: string | null };
 
 type ViewerHandles = {
   selectClip: (index: number) => void;
@@ -69,6 +83,7 @@ export function EmbeddedGlbViewer({
   onMeasured,
   clips,
   scaleReference = false,
+  yawDegrees,
 }: {
   src: string;
   poster?: string | null;
@@ -80,6 +95,12 @@ export function EmbeddedGlbViewer({
   clips?: ViewerClip[] | null;
   /** Offer the 1.7 m human-height reference so a buyer can judge the model's real size. */
   scaleReference?: boolean;
+  /**
+   * Which side to open on, in degrees around Y — the angle this product's own photograph was
+   * taken from. Omit for the catalogue's fixed three-quarter, which is right for anything
+   * that looks the same from either side.
+   */
+  yawDegrees?: number | null;
 }) {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const [failed, setFailed] = useState(false);
@@ -177,8 +198,9 @@ export function EmbeddedGlbViewer({
         // d = r / sin(fov/2), times a small margin so nothing kisses the edge.
         const radius = Math.max(size.length() / 2, 1e-4);
         const distance = (radius / Math.sin((40 * Math.PI) / 360)) * 1.12;
-        // A fixed three-quarter yaw, so the catalogue reads as one set of photos.
-        const yaw = 0.61;
+        // A fixed three-quarter yaw, so the catalogue reads as one set of photos — unless the
+        // product carries its own, because a character has a front and a crate does not.
+        const yaw = typeof yawDegrees === "number" ? (yawDegrees * Math.PI) / 180 : 0.61;
 
         // The same 1.7 m human-height wire frame the review page uses, stood on the ground
         // beside the model. A shopper cannot read "2.40 × 1.71 × 0.52 m" as a size; they can
@@ -252,12 +274,12 @@ export function EmbeddedGlbViewer({
           if ((node as import("three").Mesh).isMesh) node.castShadow = true;
         });
 
-        let mixer: import("three").AnimationMixer | null = null;
-        if (gltf.animations?.length) {
-          mixer = new THREE.AnimationMixer(model);
-          mixer.clipAction(gltf.animations[0]).play();
-          setClipName(gltf.animations[0].name || "animation");
-        }
+        // Animations stored in the file. Harvest Frontier's player rig ships six of them
+        // (idle, walk, inspect, water, hoe, harvest) as node-transform tracks, so a mixer
+        // bound to the model plays them without a skeleton.
+        const fileClips = gltf.animations ?? [];
+        const mixer = fileClips.length ? new THREE.AnimationMixer(model) : null;
+        let mixerAction: import("three").AnimationAction | null = null;
 
         // Look the pivots up in the file. A clip naming a node this GLB does not have is
         // reported as unplayable and its button is disabled — the shop does not mime an
@@ -274,10 +296,23 @@ export function EmbeddedGlbViewer({
             if (!target) { missing = track.node; break; }
             tracks.push({ target, axis: track.axis, rest: target.rotation[track.axis], degrees: track.degrees });
           }
-          status.push({ name: clip.name, label: clip.label, missingNode: missing });
+          status.push({ name: clip.name, label: clip.label, kind: "sheet", missingNode: missing });
           boundClips.push(missing ? null : { name: clip.name, label: clip.label, fps: clip.fps, tracks });
         }
-        const firstPlayable = boundClips.findIndex((clip) => clip !== null);
+
+        // The file's own clips join the same bar, after the baked ones. Their buttons carry
+        // the Korean name where we know it (idle → 대기) and the file's own name where we do
+        // not, because inventing a label for an unrecognised track would be the shop claiming
+        // to know what a motion is.
+        for (const clip of fileClips) {
+          const name = clip.name || "animation";
+          status.push({ name, label: gltfClipLabel(name), kind: "gltf", missingNode: null });
+          boundClips.push(null);
+        }
+
+        const firstPlayable = status.findIndex((entry, index) =>
+          entry.kind === "gltf" ? true : boundClips[index] !== null,
+        );
         setClipStatus(status);
         setActive(firstPlayable);
 
@@ -296,21 +331,52 @@ export function EmbeddedGlbViewer({
           for (const track of clip.tracks) track.target.rotation[track.axis] = track.rest;
         }
 
-        let current: BoundClip | null = firstPlayable >= 0 ? boundClips[firstPlayable] : null;
+        let current: BoundClip | null = null;
         let clipSeconds = 0;
         let running = true;
         let rate = 1;
-        if (current) poseAt(current, 0);
+
+        /**
+         * Points both playback engines at one entry of the combined list.
+         *
+         * Only one motion runs at a time: a baked pivot rotation and a file animation could
+         * both be turning the same node, and two hands on the same hinge is a jitter, not a
+         * preview. Whatever was running is put back to its rest pose first.
+         */
+        function selectClip(index: number) {
+          if (current) restPose(current);
+          current = null;
+          if (mixerAction) { mixerAction.stop(); mixerAction = null; }
+          clipSeconds = 0;
+          const entry = status[index];
+          if (!entry) { setClipName(null); return; }
+          if (entry.kind === "gltf" && mixer) {
+            const clip = fileClips[index - (status.length - fileClips.length)];
+            if (clip) {
+              mixer.stopAllAction();
+              mixerAction = mixer.clipAction(clip);
+              mixerAction.reset();
+              mixerAction.play();
+              setClipName(entry.label);
+            }
+            return;
+          }
+          current = boundClips[index] ?? null;
+          if (current) poseAt(current, 0);
+          setClipName(current ? entry.label : null);
+        }
+        selectClip(firstPlayable);
 
         handlesRef.current = {
-          selectClip(index) {
-            if (current) restPose(current);
-            current = boundClips[index] ?? null;
-            clipSeconds = 0;
-            if (current) poseAt(current, 0);
+          selectClip,
+          setPlaying(next) {
+            running = next;
+            if (mixerAction) mixerAction.paused = !next;
           },
-          setPlaying(next) { running = next; },
-          setSpeed(next) { rate = next; },
+          setSpeed(next) {
+            rate = next;
+            if (mixerAction) mixerAction.timeScale = next;
+          },
           setReference(visible) {
             referenceGroup.visible = visible;
             frame(visible);
@@ -356,6 +422,10 @@ export function EmbeddedGlbViewer({
             triangles,
             meshes,
             materials: materialsCount,
+            animations: fileClips.map((clip) => ({
+              name: clip.name || "animation",
+              seconds: Number(clip.duration.toFixed(3)),
+            })),
             bounds: { x: size.x, y: size.y, z: size.z },
             // Captured from the file's own transform, above, before the viewer moved the
             // model onto the floor for display.
@@ -379,7 +449,10 @@ export function EmbeddedGlbViewer({
         resize();
 
         function advance(delta: number) {
-          mixer?.update(delta);
+          // The mixer carries the rate on the action's timeScale, so the delta it is given is
+          // real time; a paused action consumes it without moving. The baked clips have no
+          // such machinery and are stepped by hand.
+          if (mixer && running) mixer.update(delta);
           if (current && running) {
             clipSeconds += delta * rate;
             poseAt(current, clipSeconds);
@@ -404,7 +477,8 @@ export function EmbeddedGlbViewer({
           return {
             width: renderer.domElement.width,
             height: renderer.domElement.height,
-            clip: current?.name ?? gltf.animations?.[0]?.name ?? null,
+            clip: current?.name ?? mixerAction?.getClip().name ?? null,
+            playing: running,
           };
         };
 
@@ -426,7 +500,7 @@ export function EmbeddedGlbViewer({
       disposed = true;
       cleanup?.();
     };
-  }, [src, clipsKey]);
+  }, [src, clipsKey, yawDegrees]);
 
   if (failed) {
     return poster ? (
@@ -446,7 +520,9 @@ export function EmbeddedGlbViewer({
 
   // A landing-page viewer gets exactly the markup it always had: no bar, no wrapper, no
   // chance of a layout change where nothing was asked for.
-  const wantsControls = (clips?.length ?? 0) > 0 || scaleReference;
+  // A file can carry its own animations, which nobody knew about until it was opened, so the
+  // bar has to be able to appear after the load rather than only when the parent passed clips.
+  const wantsControls = (clips?.length ?? 0) > 0 || clipStatus.length > 0 || scaleReference;
   if (!wantsControls) return stage;
 
   const blocked = active >= 0 ? null : clipStatus.find((clip) => clip.missingNode);
@@ -459,10 +535,12 @@ export function EmbeddedGlbViewer({
           <div style={bar.group} role="group" aria-label="움직임 고르기">
             {clipStatus.map((clip, index) => (
               <button
-                key={clip.name}
+                // A baked clip and a file clip can share a name; the kind keeps the keys apart.
+                key={`${clip.kind}-${clip.name}`}
                 type="button"
                 disabled={Boolean(clip.missingNode)}
                 aria-pressed={active === index}
+                title={clip.kind === "gltf" ? `${clip.name} — 파일 안 애니메이션` : `${clip.name} — 회전축 재생`}
                 style={{ ...bar.chip, ...(active === index ? bar.chipOn : null), ...(clip.missingNode ? bar.chipOff : null) }}
                 onClick={() => { setActive(index); handlesRef.current?.selectClip(index); }}
               >

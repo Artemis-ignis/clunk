@@ -1,4 +1,5 @@
 import { accessFor } from "../_lib/access";
+import { FACTS_MEASURED_AT, factsFor } from "../_lib/listing-facts";
 import { PALETTE_MEASURED_AT, matchesByColour, paletteFor } from "../_lib/listing-palettes";
 import { clipsFor, parentSlugOf, variantSlugsOf } from "../_lib/listing-variants";
 import {
@@ -88,6 +89,10 @@ export async function GET(request: Request) {
           license: listing.licenseStatus,
           aiGenerated: isGenerativeListing(String(listing.slug)),
           palette: paletteFor(String(listing.slug)) ?? null,
+          // Every figure the page shows — polygons, materials, real size, file size, the
+          // named moving parts — measured by the pipeline and served here, so the page never
+          // has to read a number back out of the description it is also displaying.
+          facts: factsFor(String(listing.slug)),
         },
         // "Goes with this" computed from measured colour rather than from a tag someone
         // typed. Titles come from the same query the catalogue uses, so a listing that was
@@ -133,6 +138,7 @@ export async function GET(request: Request) {
       // Stamped once for the whole response rather than per listing: it is one snapshot,
       // and a reader needs to know how old it is, not to see the same date 33 times.
       paletteMeasuredAt: PALETTE_MEASURED_AT,
+      factsMeasuredAt: FACTS_MEASURED_AT,
       listings: rows.results.map((row) => ({
         ...row,
         variantOf: parentSlugOf(String(row.slug)),
@@ -145,6 +151,7 @@ export async function GET(request: Request) {
         license: row.licenseStatus,
         aiGenerated: isGenerativeListing(String(row.slug)),
         palette: paletteFor(String(row.slug)) ?? null,
+        facts: factsFor(String(row.slug)),
       })),
       checkout: checkoutStatus(),
       access: accessFor({ authenticated: false }),

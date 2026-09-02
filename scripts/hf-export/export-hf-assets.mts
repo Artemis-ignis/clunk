@@ -7,12 +7,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { THREE, bakeClip, cropAroundAnchor, exportGlb, isolate, measureScene, resolveInstancing, type JointSample } from './lib.mts';
+import { THREE, bakeClip, cropAroundAnchor, crossThree, exportGlb, isolate, measureScene, resolveInstancing, type JointSample } from './lib.mjs';
 
 import { createFarmNpcs, updateFarmNpcIdle } from '../../../Harvest Frontier/src/engine/assets/npcs';
 import { createFarmBuildings } from '../../../Harvest Frontier/src/engine/assets/buildings';
 import { createFarmProps, createFarmWindmill, windmillBladeAngle, ROUTE_CART_ANCHORS } from '../../../Harvest Frontier/src/engine/assets/props';
-import { createCropPlant } from '../../../Harvest Frontier/src/engine/assets/crops';
+import { createCropField, setCropTileGrowth, setCropVegetationGrowth } from '../../../Harvest Frontier/src/engine/assets/crops';
 import { CROP_DEFINITIONS } from '../../../Harvest Frontier/src/content/core/crops';
 import { createPlayerAvatar, ACTION_DURATION_SECONDS } from '../../../Harvest Frontier/src/engine/animation/playerMotion';
 import { gaitAngularVelocity, gaitIntensity, GAIT_SPEED_REFERENCE } from '../../../Harvest Frontier/src/engine/animation/gait';
@@ -26,10 +26,10 @@ interface Target {
   slug: string;
   provenanceId: string | null;
   note: string;
-  build: () => { root: THREE.Object3D; clips: THREE.AnimationClip[] };
+  build: () => { root: THREE.Object3D; clips: THREE.AnimationClip[]; extra?: Record<string, unknown> };
 }
 
-// ── NPC residents ───────────────────────────────────────────────────────────
+// ── NPC residents ───────────────────────────────────────────────
 // The only motion the engine gives a resident is updateFarmNpcIdle: a vertical
 // bob on `body` at 1.6 rad/s and a roll at 0.72 rad/s. 1.6/0.72 = 20/9, so the
 // authored pair only closes after 78.5 s. The roll is retuned to 0.8 rad/s
@@ -39,16 +39,148 @@ const NPC_IDLE_BOB_RATE = 1.6;
 const NPC_IDLE_ROLL_RATE = 0.8;
 const NPC_IDLE_DURATION = (2 * Math.PI) / NPC_IDLE_ROLL_RATE;
 
+/**
+ * Where each resident's carried kit belongs.
+ *
+ * In Harvest Frontier every one of these props is a DIRECT CHILD OF THE ROOT at
+ * a fixed offset, so it does not inherit the idle bob and it does not touch the
+ * figure. At the game's 19 m chase camera that is invisible; at storefront
+ * framing the basket and the ledger hang in mid air, which is what makes the
+ * export unsellable as authored.
+ *
+ * `hold` clusters are re-parented onto the resident's own hand node
+ * (`handLeft` / `handRight`, the sockets characterKit's gloveParts fill) and
+ * then translated as ONE cluster until the nearest face of their bounding box
+ * meets the palm, so the pose the artist composed survives and only the gap
+ * closes. `wear` clusters (satchel, strap, apron) go onto `body`: they are worn
+ * against the torso and already sit correctly, they only needed to stop being
+ * root-parented so the bob carries them. `drop` clusters are floor set
+ * dressing, not carried kit (two of the crate slats even reach y = -0.06), so
+ * they are removed rather than stuck to a hand they were never held in.
+ */
+interface NpcKitPlan {
+  readonly hold: Readonly<Record<string, readonly string[]>>;
+  readonly wear: readonly string[];
+  readonly drop: readonly string[];
+}
+
+const NPC_KIT: Readonly<Record<string, NpcKitPlan>> = {
+  'npc.kang-taeho': {
+    hold: { handLeft: ['harvestBasket', 'tomatoSample'] },
+    wear: ['fieldSatchel', 'fieldSatchelStrap'],
+    drop: [],
+  },
+  'npc.park-yuna': {
+    hold: { handLeft: ['fieldClipboard', 'clipboardClip'], handRight: ['soilProbe', 'soilProbeTip'] },
+    wear: [],
+    drop: [],
+  },
+  'npc.choi-minseo': {
+    hold: { handLeft: ['marketLedger', 'marketLedgerBand'], handRight: ['premiumPriceTag', 'premiumPriceTagLine'] },
+    wear: [],
+    drop: ['marketSampleCrate', 'marketCrateSlatLeft', 'marketCrateSlatRight', 'marketGrapeSample'],
+  },
+  'npc.han-seojun': {
+    hold: { handLeft: ['cooperativeLedger', 'cooperativeLedgerClip'], handRight: ['qualitySampleRing'] },
+    wear: ['sortingApron', 'sortingApronPocket'],
+    drop: ['cooperativeSampleCrate', 'cooperativeCrateSlatLeft', 'cooperativeCrateSlatRight'],
+  },
+  'npc.lee-eunha': {
+    hold: { handLeft: ['festivalLedger', 'festivalLedgerBinding'], handRight: ['festivalBannerPole', 'festivalBanner', 'festivalBannerMark'] },
+    wear: [],
+    drop: [],
+  },
+};
+
+interface NpcKitResult {
+  held: Record<string, string[]>;
+  worn: string[];
+  removed: string[];
+  snapMetres: Record<string, number>;
+  leftOnRoot: string[];
+}
+
+/**
+ * Apply {@link NPC_KIT} to one resident. Returns what actually happened, so the
+ * exporter records the outcome instead of asserting it.
+ */
+function resocketNpcKit(root: THREE.Object3D, id: string): NpcKitResult {
+  const plan = NPC_KIT[id];
+  if (!plan) throw new Error(`no kit plan for ${id}`);
+  const result: NpcKitResult = { held: {}, worn: [], removed: [], snapMetres: {}, leftOnRoot: [] };
+  root.updateMatrixWorld(true);
+
+  for (const name of plan.drop) {
+    const prop = root.getObjectByName(name);
+    if (!prop) continue;
+    prop.removeFromParent();
+    result.removed.push(name);
+  }
+
+  const body = root.getObjectByName('body');
+  if (body) {
+    for (const name of plan.wear) {
+      const prop = root.getObjectByName(name);
+      if (!prop) continue;
+      // attach() re-parents while preserving the world transform, so a worn item
+      // stays exactly where it was authored and only changes what drives it.
+      body.attach(prop);
+      result.worn.push(name);
+    }
+  }
+
+  for (const [handName, names] of Object.entries(plan.hold)) {
+    const hand = root.getObjectByName(handName);
+    if (!hand) continue;
+    const slot = new THREE.Group();
+    slot.name = `${handName}.carry`;
+    hand.add(slot);
+    hand.updateMatrixWorld(true);
+    const attached: string[] = [];
+    for (const name of names) {
+      const prop = root.getObjectByName(name);
+      if (!prop) continue;
+      slot.attach(prop);
+      attached.push(name);
+    }
+    if (attached.length === 0) {
+      slot.removeFromParent();
+      continue;
+    }
+    root.updateMatrixWorld(true);
+    // Close the gap: move the whole cluster until the nearest point of its
+    // bounding box lands on the palm. clampPoint returns the palm itself when
+    // the palm is already inside the box, which makes this a no-op for kit that
+    // was authored in the hand already.
+    const box = new THREE.Box3().setFromObject(slot);
+    const palm = hand.getWorldPosition(new THREE.Vector3());
+    const nearest = box.clampPoint(palm, new THREE.Vector3());
+    const deltaWorld = palm.clone().sub(nearest);
+    const rotation = hand.getWorldQuaternion(new THREE.Quaternion()).invert();
+    const scale = hand.getWorldScale(new THREE.Vector3());
+    slot.position.copy(deltaWorld.clone().applyQuaternion(rotation).divide(scale));
+    root.updateMatrixWorld(true);
+    result.held[handName] = attached;
+    result.snapMetres[handName] = Math.round(deltaWorld.length() * 1000) / 1000;
+  }
+
+  for (const child of root.children) {
+    if (child.name !== 'body') result.leftOnRoot.push(child.name || child.type);
+  }
+  return result;
+}
+
 function npcTargets(): Target[] {
   return createFarmNpcs().map((npc) => ({
     group: 'npc' as const,
     slug: npc.id.replace('npc.', ''),
     provenanceId: 'farm.npcs.m2',
-    note: 'idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s',
+    note: 'idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s. Carried kit is re-socketed off the root onto the hand / body nodes (see kit) so it follows the idle instead of hanging in mid air.',
     build: () => {
       const fresh = createFarmNpcs().find((n) => n.id === npc.id)!;
-      const root = fresh.root;
-      root.position.set(0, 0, 0);
+      fresh.root.position.set(0, 0, 0);
+      const root = crossThree<THREE.Object3D>(fresh.root);
+      const kit = resocketNpcKit(root, npc.id);
       const body = root.getObjectByName('body')!;
       const phase = Number(root.userData.idlePhase ?? 0);
       const joints: JointSample[] = [{ node: body, position: true }];
@@ -59,7 +191,7 @@ function npcTargets(): Target[] {
       });
       body.position.y = 0;
       body.rotation.z = 0;
-      return { root, clips: [clip] };
+      return { root, clips: [clip], extra: { kit } };
     },
   }));
 }
@@ -80,7 +212,7 @@ function playerTarget(): Target {
 
       const sample = (duration: number, drive: (avatar: ReturnType<typeof createPlayerAvatar>, dt: number) => void, name: string): THREE.AnimationClip => {
         const avatar = createPlayerAvatar();
-        const joints: JointSample[] = jointNames.map((n) => ({ node: avatar.root.getObjectByName(n)!, position: true }));
+        const joints: JointSample[] = jointNames.map((n) => ({ node: crossThree<THREE.Object3D>(avatar.root.getObjectByName(n)), position: true }));
         const frames = Math.max(2, Math.round(duration * FPS) + 1);
         const dt = duration / (frames - 1);
         let first = true;
@@ -135,7 +267,52 @@ function playerTarget(): Target {
       // spout and below y=0; it is not part of the character and it inflates
       // the asset's bounding box by ~0.65 m.
       avatar.root.getObjectByName('waterStream')?.removeFromParent();
-      return { root: avatar.root, clips: [idle, walk, ...actions] };
+      // glTF has no visibility flag, so the four tool groups the rig carries
+      // (only one of which is ever visible in game) would all render at once,
+      // and the hoe shaft hangs through the ground in the rest pose. They ship
+      // as their own asset (prop/farm-tool-kit) instead; the named `toolAnchor`
+      // socket stays on the right hand so a tool can be re-parented back.
+      for (const tool of TOOL_GROUP_NAMES) avatar.root.getObjectByName(tool)?.removeFromParent();
+      // The authored rig origin sits at ankle height: the boot soles reach
+      // y = -0.182. Ground the asset with a node translation on the un-animated
+      // root (the clips drive `playerRig` and below, so nothing is disturbed).
+      const root = crossThree<THREE.Object3D>(avatar.root);
+      root.updateMatrixWorld(true);
+      root.position.y = -new THREE.Box3().setFromObject(root).min.y;
+      return { root, clips: [idle, walk, ...actions] };
+    },
+  };
+}
+
+const TOOL_GROUP_NAMES = ['tool.hoe', 'tool.water', 'tool.harvest', 'tool.inspect'] as const;
+
+/** The four hand tools the player rig carries, laid out side by side at the origin. */
+function toolKitTarget(): Target {
+  return {
+    group: 'prop', slug: 'farm-tool-kit', provenanceId: null,
+    note: 'the four tool groups lifted off the player rig (hoe / watering can / harvest basket / field journal), re-seated in a row; each keeps its authored node name',
+    build: () => {
+      const avatar = createPlayerAvatar();
+      avatar.motion.update(0, false, 0);
+      avatar.root.getObjectByName('waterStream')?.removeFromParent();
+      const kit = new THREE.Group();
+      kit.name = 'farm-tool-kit';
+      TOOL_GROUP_NAMES.forEach((name, index) => {
+        const tool = crossThree<THREE.Object3D | undefined>(avatar.root.getObjectByName(name));
+        if (!tool) return;
+        tool.removeFromParent();
+        tool.visible = true;
+        tool.position.set(0, 0, 0);
+        tool.quaternion.identity();
+        const slot = new THREE.Group();
+        slot.name = `${name}.slot`;
+        slot.add(tool);
+        kit.add(slot);
+        slot.updateMatrixWorld(true);
+        const box = new THREE.Box3().setFromObject(slot);
+        slot.position.set(index * 0.6 - 0.9, -box.min.y, 0);
+      });
+      return { root: kit, clips: [] };
     },
   };
 }
@@ -144,15 +321,15 @@ function playerTarget(): Target {
 function buildingTargets(): Target[] {
   return [
     {
-      group: 'building', slug: 'farmhouse', provenanceId: 'reference.farm-corner.generated.2026-08-19',
-      note: 'world copy, after createFarmBuildings runs mergeStaticParts',
-      build: () => ({ root: isolate(createFarmBuildings().farmhouse, 'farmhouse'), clips: [] }),
+      group: 'building', slug: 'farmhouse', provenanceId: 'processing.barn.open-front.m2',
+      note: 'world copy, after createFarmBuildings runs mergeStaticParts. The ledger entry quoted is the one whose runtimeDerivative is src/engine/assets/buildings.ts, the file that authors both buildings; the visual references are ledgered separately as reference.farm-corner.generated.2026-08-19 / reference.processing-barn.generated.2026-08-19 and are not shipped geometry.',
+      build: () => ({ root: isolate(crossThree<THREE.Object3D>(createFarmBuildings().farmhouse), 'farmhouse'), clips: [] }),
     },
     {
       group: 'building', slug: 'barn', provenanceId: 'processing.barn.open-front.m2',
       note: 'processing line child removed; HF already ships it as processing.line.m1.glb',
       build: () => {
-        const barn = createFarmBuildings().barn;
+        const barn = crossThree<THREE.Object3D>(createFarmBuildings().barn);
         barn.getObjectByName('processing-root')?.removeFromParent();
         return { root: isolate(barn, 'barn'), clips: [] };
       },
@@ -161,16 +338,34 @@ function buildingTargets(): Target[] {
 }
 
 // ── Crops ───────────────────────────────────────────────────────────────────
-// HF has no per-stage crop geometry: growth is a uniform scale applied at
-// runtime (setCropVegetationGrowth), so every stage is the same mesh. What is
-// exported is the mature plant, which is the only authored form.
+// createCropPlant() is the croplab preview path: it adds ONE stem, ONE leaf and
+// ONE fruit template, because the world multiplies those templates per plant
+// through createInstancedPlantField. Exporting it gives a plant with a single
+// leaf lying on the ground. What is exported instead is a real one-plant field
+// (rows 1 x 1) at full growth, with the instances baked into geometry.
+//
+// HF has no per-stage crop geometry at all: growth is a uniform runtime scale
+// (setCropVegetationGrowth / setCropTileGrowth), so every earlier stage is the
+// same mesh scaled down. Variants would be identical files.
 function cropTargets(): Target[] {
   return CROP_DEFINITIONS.map((crop) => ({
     group: 'crop' as const,
     slug: crop.id.replace('crop.', ''),
     provenanceId: null,
-    note: `silhouette ${crop.visual.silhouette}; mature form (growth is a uniform runtime scale, not distinct geometry)`,
-    build: () => ({ root: isolate(createCropPlant(crop, 17), `crop.${crop.id.replace('crop.', '')}`), clips: [] }),
+    note: `silhouette ${crop.visual.silhouette}; mature plant from a 1x1 createCropField at growth 1.0 (growth is a uniform runtime scale, not distinct geometry)`,
+    build: () => {
+      const field = createCropField({ crop, rows: 1, plantsPerRow: 1, rowSpacing: 1, plantSpacing: 1, seed: 17, useInstanceColors: false });
+      setCropTileGrowth(field.userData.vegetation, [1]);
+      setCropVegetationGrowth(field.userData.vegetation, 1);
+      const vegetation = crossThree<THREE.Object3D>(field.userData.vegetation);
+      vegetation.removeFromParent();
+      resolveInstancing(vegetation, 'bake');
+      // The plant is seated on the ridge crest the field surface sampled, so it
+      // arrives a few centimetres above y = 0. Ground it.
+      vegetation.updateMatrixWorld(true);
+      vegetation.position.y -= new THREE.Box3().setFromObject(vegetation).min.y;
+      return { root: isolate(vegetation, `crop.${crop.id.replace('crop.', '')}`), clips: [] };
+    },
   }));
 }
 
@@ -182,12 +377,10 @@ function propTargets(): Target[] {
     group: 'prop', slug, provenanceId, note,
     build: () => {
       const props = createFarmProps(true).root;
-      let found: THREE.Object3D | null = null;
-      props.traverse((n) => { if (!found && n.name === childName) found = n; });
+      const found = crossThree<THREE.Object3D | undefined>(props.getObjectByName(childName));
       if (!found) throw new Error(`prop node not found: ${childName}`);
-      const node = found as THREE.Object3D;
-      resolveInstancing(node, mode);
-      return { root: isolate(node, slug), clips: [] };
+      resolveInstancing(found, mode);
+      return { root: isolate(found, slug), clips: [] };
     },
   });
 
@@ -201,12 +394,12 @@ function propTargets(): Target[] {
         const base = windmillBladeAngle(0);
         const end = windmillBladeAngle(WINDMILL_CLIP_SECONDS);
         const turns = Math.round((end - base) / (2 * Math.PI));
-        const clip = bakeClip('blades-spin', WINDMILL_CLIP_SECONDS, FPS, [{ node: pivot, position: false }], (t) => {
+        const clip = bakeClip('blades-spin', WINDMILL_CLIP_SECONDS, FPS, [{ node: crossThree<THREE.Object3D>(pivot), position: false }], (t) => {
           // Snap the window onto a whole number of turns so the loop closes.
           pivot.rotation.z = base + ((windmillBladeAngle(t) - base) * ((turns * 2 * Math.PI) / (end - base)));
         });
         pivot.rotation.z = base;
-        return { root: isolate(build.group, 'farm-windmill'), clips: [clip] };
+        return { root: isolate(crossThree<THREE.Object3D>(build.group), 'farm-windmill'), clips: [clip] };
       },
     },
     fromProps('farmWaterButt', 'farm-water-butt', 'bake', null, 'project-original props.ts createWaterButt (butt + pump stand)'),
@@ -221,11 +414,11 @@ function propTargets(): Target[] {
       note: 'props.ts pushHandCart is not exported and every cart is merged into ONE world-space mesh, so one cart is cropped out around ROUTE_CART_ANCHORS[0] and re-seated at the origin',
       build: () => {
         const props = createFarmProps(true).root;
-        let found: THREE.Object3D | null = null;
-        props.traverse((n) => { if (!found && n.name === 'routeHandCarts') found = n; });
+        const found = crossThree<THREE.Mesh | undefined>(props.getObjectByName('routeHandCarts'));
+        if (!found) throw new Error('prop node not found: routeHandCarts');
         // ROUTE_CART_ANCHORS entries are [x, z, yaw].
         const [x, z] = ROUTE_CART_ANCHORS[0]!;
-        const cart = cropAroundAnchor(found as THREE.Mesh, x, z, 1.6);
+        const cart = cropAroundAnchor(found, x, z, 1.6);
         return { root: isolate(cart, 'hand-cart'), clips: [] };
       },
     },
@@ -245,13 +438,13 @@ function licenseFor(id: string | null): { assetId: string | null; license: strin
 }
 
 const only = process.argv.slice(2);
-const targets = [...npcTargets(), playerTarget(), ...buildingTargets(), ...cropTargets(), ...propTargets()]
+const targets = [...npcTargets(), playerTarget(), ...buildingTargets(), ...cropTargets(), ...propTargets(), toolKitTarget()]
   .filter((t) => only.length === 0 || only.includes(t.group) || only.includes(t.slug));
 
 const manifest: Record<string, unknown>[] = [];
 
 for (const target of targets) {
-  const { root, clips } = target.build();
+  const { root, clips, extra } = target.build();
   const measurement = measureScene(root);
   const buffer = await exportGlb(root, clips);
   const dir = path.join(OUT, target.group);
@@ -269,6 +462,7 @@ for (const target of targets) {
     provenanceAssetId: provenance.assetId,
     license: provenance.license,
     note: target.note,
+    ...(extra ?? {}),
   });
   process.stdout.write(`${target.group}/${target.slug}.glb  ${measurement.triangles} tris  ${measurement.drawCalls} draws  ${measurement.materials} mats  ${buffer.byteLength} B  clips=${clips.map((c) => c.name).join('/') || '-'}\n`);
 }

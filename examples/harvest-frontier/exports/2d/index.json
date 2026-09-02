@@ -1,0 +1,44 @@
+[
+  {
+    "file": "2d/npc.choi-minseo.png",
+    "bytes": 20379,
+    "width": 128,
+    "height": 128
+  },
+  {
+    "file": "2d/npc.han-seojun.png",
+    "bytes": 20286,
+    "width": 128,
+    "height": 128
+  },
+  {
+    "file": "2d/npc.kang-taeho.png",
+    "bytes": 22408,
+    "width": 128,
+    "height": 128
+  },
+  {
+    "file": "2d/npc.lee-eunha.png",
+    "bytes": 20311,
+    "width": 128,
+    "height": 128
+  },
+  {
+    "file": "2d/npc.park-yuna.png",
+    "bytes": 22524,
+    "width": 128,
+    "height": 128
+  },
+  {
+    "file": "2d/plaster-wall.png",
+    "bytes": 519489,
+    "width": 512,
+    "height": 512
+  },
+  {
+    "file": "2d/ridge-woodland.png",
+    "bytes": 502112,
+    "width": 512,
+    "height": 512
+  }
+]

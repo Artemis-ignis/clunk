@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-02T05:58:46.772Z",
+  "generatedAt": "2026-09-02T06:25:59.741Z",
   "source": "Harvest Frontier (C:/Users/50106/Desktop/Harvest Frontier) — read-only",
   "exporter": "Clunk/scripts/hf-export/export-hf-assets.mts (three r185 GLTFExporter) + optimize-glb.mts (@gltf-transform meshopt, HF optimize-*-glb.ts pattern)",
   "renderer": "Clunk/outputs/market-launch/wave1/tools/hero-render.mjs (flat-shaded software rasteriser, no PBR)",
@@ -12,8 +12,8 @@
         "meshopt": "npc/kang-taeho.m1.glb"
       },
       "bytes": {
-        "raw": 754712,
-        "meshopt": 180364
+        "raw": 755036,
+        "meshopt": 180580
       },
       "measured": {
         "raw": {
@@ -48,7 +48,24 @@
       ],
       "provenanceAssetId": "farm.npcs.m2",
       "license": "Project-original procedural code; no external mesh or texture",
-      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s",
+      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s. Carried kit is re-socketed off the root onto the hand / body nodes (see kit) so it follows the idle instead of hanging in mid air.",
+      "kit": {
+        "held": {
+          "handLeft": [
+            "harvestBasket",
+            "tomatoSample"
+          ]
+        },
+        "worn": [
+          "fieldSatchel",
+          "fieldSatchelStrap"
+        ],
+        "removed": [],
+        "snapMetres": {
+          "handLeft": 0.14
+        },
+        "leftOnRoot": []
+      },
       "render": "render/npc-kang-taeho.png"
     },
     {
@@ -59,8 +76,8 @@
         "meshopt": "npc/park-yuna.m1.glb"
       },
       "bytes": {
-        "raw": 745860,
-        "meshopt": 177188
+        "raw": 746188,
+        "meshopt": 177504
       },
       "measured": {
         "raw": {
@@ -68,7 +85,7 @@
           "drawCalls": 14,
           "materials": 14,
           "sizeMeters": {
-            "x": 0.966,
+            "x": 0.932,
             "y": 2.11,
             "z": 0.665
           },
@@ -79,7 +96,7 @@
           "drawCalls": 14,
           "materials": 3,
           "sizeMeters": {
-            "x": 0.966,
+            "x": 0.932,
             "y": 2.11,
             "z": 0.665
           },
@@ -95,7 +112,26 @@
       ],
       "provenanceAssetId": "farm.npcs.m2",
       "license": "Project-original procedural code; no external mesh or texture",
-      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s",
+      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s. Carried kit is re-socketed off the root onto the hand / body nodes (see kit) so it follows the idle instead of hanging in mid air.",
+      "kit": {
+        "held": {
+          "handLeft": [
+            "fieldClipboard",
+            "clipboardClip"
+          ],
+          "handRight": [
+            "soilProbe",
+            "soilProbeTip"
+          ]
+        },
+        "worn": [],
+        "removed": [],
+        "snapMetres": {
+          "handLeft": 0.112,
+          "handRight": 0.104
+        },
+        "leftOnRoot": []
+      },
       "render": "render/npc-park-yuna.png"
     },
     {
@@ -106,31 +142,31 @@
         "meshopt": "npc/choi-minseo.m1.glb"
       },
       "bytes": {
-        "raw": 776928,
-        "meshopt": 181388
+        "raw": 738124,
+        "meshopt": 173648
       },
       "measured": {
         "raw": {
-          "triangles": 6000,
-          "drawCalls": 18,
-          "materials": 18,
+          "triangles": 5536,
+          "drawCalls": 14,
+          "materials": 14,
           "sizeMeters": {
-            "x": 1.261,
-            "y": 2.195,
-            "z": 0.777
+            "x": 1.123,
+            "y": 2.131,
+            "z": 0.632
           },
-          "groundedAtY": -0.06
+          "groundedAtY": 0.004
         },
         "meshopt": {
-          "triangles": 6000,
-          "drawCalls": 18,
+          "triangles": 5536,
+          "drawCalls": 14,
           "materials": 2,
           "sizeMeters": {
-            "x": 1.261,
-            "y": 2.195,
-            "z": 0.777
+            "x": 1.123,
+            "y": 2.131,
+            "z": 0.632
           },
-          "groundedAtY": -0.06
+          "groundedAtY": 0.004
         }
       },
       "animationClips": [
@@ -142,7 +178,31 @@
       ],
       "provenanceAssetId": "farm.npcs.m2",
       "license": "Project-original procedural code; no external mesh or texture",
-      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s",
+      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s. Carried kit is re-socketed off the root onto the hand / body nodes (see kit) so it follows the idle instead of hanging in mid air.",
+      "kit": {
+        "held": {
+          "handLeft": [
+            "marketLedger",
+            "marketLedgerBand"
+          ],
+          "handRight": [
+            "premiumPriceTag",
+            "premiumPriceTagLine"
+          ]
+        },
+        "worn": [],
+        "removed": [
+          "marketSampleCrate",
+          "marketCrateSlatLeft",
+          "marketCrateSlatRight",
+          "marketGrapeSample"
+        ],
+        "snapMetres": {
+          "handLeft": 0.118,
+          "handRight": 0.181
+        },
+        "leftOnRoot": []
+      },
       "render": "render/npc-choi-minseo.png"
     },
     {
@@ -153,31 +213,31 @@
         "meshopt": "npc/han-seojun.m1.glb"
       },
       "bytes": {
-        "raw": 800056,
-        "meshopt": 186768
+        "raw": 766448,
+        "meshopt": 181488
       },
       "measured": {
         "raw": {
-          "triangles": 6274,
-          "drawCalls": 18,
-          "materials": 18,
+          "triangles": 5950,
+          "drawCalls": 15,
+          "materials": 15,
           "sizeMeters": {
-            "x": 1.292,
-            "y": 2.274,
-            "z": 0.798
+            "x": 1.184,
+            "y": 2.21,
+            "z": 0.673
           },
-          "groundedAtY": -0.06
+          "groundedAtY": 0.004
         },
         "meshopt": {
-          "triangles": 6274,
-          "drawCalls": 18,
+          "triangles": 5950,
+          "drawCalls": 15,
           "materials": 2,
           "sizeMeters": {
-            "x": 1.292,
-            "y": 2.274,
-            "z": 0.798
+            "x": 1.184,
+            "y": 2.21,
+            "z": 0.673
           },
-          "groundedAtY": -0.06
+          "groundedAtY": 0.004
         }
       },
       "animationClips": [
@@ -189,7 +249,32 @@
       ],
       "provenanceAssetId": "farm.npcs.m2",
       "license": "Project-original procedural code; no external mesh or texture",
-      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s",
+      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s. Carried kit is re-socketed off the root onto the hand / body nodes (see kit) so it follows the idle instead of hanging in mid air.",
+      "kit": {
+        "held": {
+          "handLeft": [
+            "cooperativeLedger",
+            "cooperativeLedgerClip"
+          ],
+          "handRight": [
+            "qualitySampleRing"
+          ]
+        },
+        "worn": [
+          "sortingApron",
+          "sortingApronPocket"
+        ],
+        "removed": [
+          "cooperativeSampleCrate",
+          "cooperativeCrateSlatLeft",
+          "cooperativeCrateSlatRight"
+        ],
+        "snapMetres": {
+          "handLeft": 0.123,
+          "handRight": 0.055
+        },
+        "leftOnRoot": []
+      },
       "render": "render/npc-han-seojun.png"
     },
     {
@@ -200,8 +285,8 @@
         "meshopt": "npc/lee-eunha.m1.glb"
       },
       "bytes": {
-        "raw": 785364,
-        "meshopt": 185360
+        "raw": 785852,
+        "meshopt": 185768
       },
       "measured": {
         "raw": {
@@ -211,7 +296,7 @@
           "sizeMeters": {
             "x": 1.161,
             "y": 2.208,
-            "z": 0.738
+            "z": 0.727
           },
           "groundedAtY": 0.004
         },
@@ -222,7 +307,7 @@
           "sizeMeters": {
             "x": 1.161,
             "y": 2.208,
-            "z": 0.738
+            "z": 0.727
           },
           "groundedAtY": 0.004
         }
@@ -236,7 +321,27 @@
       ],
       "provenanceAssetId": "farm.npcs.m2",
       "license": "Project-original procedural code; no external mesh or texture",
-      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s",
+      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s. Carried kit is re-socketed off the root onto the hand / body nodes (see kit) so it follows the idle instead of hanging in mid air.",
+      "kit": {
+        "held": {
+          "handLeft": [
+            "festivalLedger",
+            "festivalLedgerBinding"
+          ],
+          "handRight": [
+            "festivalBannerPole",
+            "festivalBanner",
+            "festivalBannerMark"
+          ]
+        },
+        "worn": [],
+        "removed": [],
+        "snapMetres": {
+          "handLeft": 0.119,
+          "handRight": 0.072
+        },
+        "leftOnRoot": []
+      },
       "render": "render/npc-lee-eunha.png"
     },
     {
@@ -247,31 +352,31 @@
         "meshopt": "npc/player-farmhand.m1.glb"
       },
       "bytes": {
-        "raw": 1167992,
-        "meshopt": 241784
+        "raw": 1088128,
+        "meshopt": 218244
       },
       "measured": {
         "raw": {
-          "triangles": 7256,
-          "drawCalls": 23,
-          "materials": 23,
+          "triangles": 6076,
+          "drawCalls": 14,
+          "materials": 14,
           "sizeMeters": {
             "x": 0.817,
-            "y": 2.714,
-            "z": 0.913
+            "y": 2.499,
+            "z": 0.867
           },
-          "groundedAtY": -0.397
+          "groundedAtY": 0
         },
         "meshopt": {
-          "triangles": 7256,
-          "drawCalls": 23,
+          "triangles": 6076,
+          "drawCalls": 14,
           "materials": 2,
           "sizeMeters": {
             "x": 0.817,
-            "y": 2.714,
-            "z": 0.913
+            "y": 2.499,
+            "z": 0.867
           },
-          "groundedAtY": -0.397
+          "groundedAtY": 0
         }
       },
       "animationClips": [
@@ -347,9 +452,9 @@
         }
       },
       "animationClips": [],
-      "provenanceAssetId": "reference.farm-corner.generated.2026-08-19",
-      "license": "Generated reference for this project; not shipped as runtime geometry",
-      "note": "world copy, after createFarmBuildings runs mergeStaticParts",
+      "provenanceAssetId": "processing.barn.open-front.m2",
+      "license": "Project-original procedural code; accepted reference is not shipped as runtime geometry",
+      "note": "world copy, after createFarmBuildings runs mergeStaticParts. The ledger entry quoted is the one whose runtimeDerivative is src/engine/assets/buildings.ts, the file that authors both buildings; the visual references are ledgered separately as reference.farm-corner.generated.2026-08-19 / reference.processing-barn.generated.2026-08-19 and are not shipped geometry.",
       "render": "render/building-farmhouse.png"
     },
     {
@@ -401,37 +506,37 @@
         "meshopt": "crop/rice.m1.glb"
       },
       "bytes": {
-        "raw": 51368,
-        "meshopt": 14968
+        "raw": 181732,
+        "meshopt": 43856
       },
       "measured": {
         "raw": {
-          "triangles": 444,
-          "drawCalls": 3,
-          "materials": 3,
+          "triangles": 1570,
+          "drawCalls": 4,
+          "materials": 4,
           "sizeMeters": {
-            "x": 0.763,
-            "y": 1.62,
-            "z": 0.527
+            "x": 1.29,
+            "y": 1.353,
+            "z": 1.16
           },
-          "groundedAtY": -0.353
+          "groundedAtY": 0.09
         },
         "meshopt": {
-          "triangles": 444,
-          "drawCalls": 3,
-          "materials": 1,
+          "triangles": 1570,
+          "drawCalls": 4,
+          "materials": 2,
           "sizeMeters": {
-            "x": 0.763,
-            "y": 1.62,
-            "z": 0.527
+            "x": 1.29,
+            "y": 1.353,
+            "z": 1.16
           },
-          "groundedAtY": -0.353
+          "groundedAtY": 0.09
         }
       },
       "animationClips": [],
       "provenanceAssetId": null,
       "license": "장부에 없음",
-      "note": "silhouette stalk; mature form (growth is a uniform runtime scale, not distinct geometry)",
+      "note": "silhouette stalk; mature plant from a 1x1 createCropField at growth 1.0 (growth is a uniform runtime scale, not distinct geometry)",
       "render": "render/crop-rice.png"
     },
     {
@@ -442,37 +547,37 @@
         "meshopt": "crop/potato.m1.glb"
       },
       "bytes": {
-        "raw": 102320,
-        "meshopt": 26904
+        "raw": 496320,
+        "meshopt": 105784
       },
       "measured": {
         "raw": {
-          "triangles": 908,
-          "drawCalls": 4,
-          "materials": 4,
+          "triangles": 4318,
+          "drawCalls": 5,
+          "materials": 5,
           "sizeMeters": {
-            "x": 0.98,
-            "y": 0.923,
-            "z": 0.414
+            "x": 1.795,
+            "y": 1.153,
+            "z": 1.188
           },
-          "groundedAtY": -0.103
+          "groundedAtY": -0.147
         },
         "meshopt": {
-          "triangles": 908,
-          "drawCalls": 4,
-          "materials": 1,
+          "triangles": 4318,
+          "drawCalls": 5,
+          "materials": 2,
           "sizeMeters": {
-            "x": 0.98,
-            "y": 0.923,
-            "z": 0.414
+            "x": 1.795,
+            "y": 1.153,
+            "z": 1.188
           },
-          "groundedAtY": -0.103
+          "groundedAtY": -0.147
         }
       },
       "animationClips": [],
       "provenanceAssetId": null,
       "license": "장부에 없음",
-      "note": "silhouette tuber; mature form (growth is a uniform runtime scale, not distinct geometry)",
+      "note": "silhouette tuber; mature plant from a 1x1 createCropField at growth 1.0 (growth is a uniform runtime scale, not distinct geometry)",
       "render": "render/crop-potato.png"
     },
     {
@@ -483,37 +588,37 @@
         "meshopt": "crop/tomato.m1.glb"
       },
       "bytes": {
-        "raw": 95392,
-        "meshopt": 24560
+        "raw": 505788,
+        "meshopt": 107884
       },
       "measured": {
         "raw": {
-          "triangles": 844,
-          "drawCalls": 4,
-          "materials": 4,
+          "triangles": 4402,
+          "drawCalls": 5,
+          "materials": 5,
           "sizeMeters": {
-            "x": 0.991,
-            "y": 1.603,
-            "z": 0.511
+            "x": 1.659,
+            "y": 1.48,
+            "z": 1.137
           },
-          "groundedAtY": -0.123
+          "groundedAtY": 0.186
         },
         "meshopt": {
-          "triangles": 844,
-          "drawCalls": 4,
-          "materials": 1,
+          "triangles": 4402,
+          "drawCalls": 5,
+          "materials": 2,
           "sizeMeters": {
-            "x": 0.991,
-            "y": 1.603,
-            "z": 0.511
+            "x": 1.659,
+            "y": 1.48,
+            "z": 1.137
           },
-          "groundedAtY": -0.123
+          "groundedAtY": 0.186
         }
       },
       "animationClips": [],
       "provenanceAssetId": null,
       "license": "장부에 없음",
-      "note": "silhouette bush; mature form (growth is a uniform runtime scale, not distinct geometry)",
+      "note": "silhouette bush; mature plant from a 1x1 createCropField at growth 1.0 (growth is a uniform runtime scale, not distinct geometry)",
       "render": "render/crop-tomato.png"
     },
     {
@@ -524,37 +629,37 @@
         "meshopt": "crop/strawberry.m1.glb"
       },
       "bytes": {
-        "raw": 40752,
-        "meshopt": 12416
+        "raw": 178928,
+        "meshopt": 42420
       },
       "measured": {
         "raw": {
-          "triangles": 346,
-          "drawCalls": 3,
-          "materials": 3,
+          "triangles": 1546,
+          "drawCalls": 4,
+          "materials": 4,
           "sizeMeters": {
-            "x": 1.02,
-            "y": 0.604,
-            "z": 0.922
+            "x": 1.5,
+            "y": 0.49,
+            "z": 1.178
           },
-          "groundedAtY": -0.324
+          "groundedAtY": 0.134
         },
         "meshopt": {
-          "triangles": 346,
-          "drawCalls": 3,
-          "materials": 1,
+          "triangles": 1546,
+          "drawCalls": 4,
+          "materials": 2,
           "sizeMeters": {
-            "x": 1.02,
-            "y": 0.604,
-            "z": 0.922
+            "x": 1.5,
+            "y": 0.49,
+            "z": 1.178
           },
-          "groundedAtY": -0.324
+          "groundedAtY": 0.134
         }
       },
       "animationClips": [],
       "provenanceAssetId": null,
       "license": "장부에 없음",
-      "note": "silhouette bush; mature form (growth is a uniform runtime scale, not distinct geometry)",
+      "note": "silhouette bush; mature plant from a 1x1 createCropField at growth 1.0 (growth is a uniform runtime scale, not distinct geometry)",
       "render": "render/crop-strawberry.png"
     },
     {
@@ -565,37 +670,37 @@
         "meshopt": "crop/grape.m1.glb"
       },
       "bytes": {
-        "raw": 74660,
-        "meshopt": 20984
+        "raw": 218960,
+        "meshopt": 53524
       },
       "measured": {
         "raw": {
-          "triangles": 652,
-          "drawCalls": 4,
-          "materials": 4,
+          "triangles": 1886,
+          "drawCalls": 5,
+          "materials": 5,
           "sizeMeters": {
-            "x": 1.592,
-            "y": 1.972,
-            "z": 1.494
+            "x": 2.162,
+            "y": 1.55,
+            "z": 1.631
           },
-          "groundedAtY": -0.422
+          "groundedAtY": 0.186
         },
         "meshopt": {
-          "triangles": 652,
-          "drawCalls": 4,
-          "materials": 1,
+          "triangles": 1886,
+          "drawCalls": 5,
+          "materials": 2,
           "sizeMeters": {
-            "x": 1.592,
-            "y": 1.972,
-            "z": 1.494
+            "x": 2.162,
+            "y": 1.55,
+            "z": 1.631
           },
-          "groundedAtY": -0.422
+          "groundedAtY": 0.186
         }
       },
       "animationClips": [],
       "provenanceAssetId": null,
       "license": "장부에 없음",
-      "note": "silhouette vine; mature form (growth is a uniform runtime scale, not distinct geometry)",
+      "note": "silhouette vine; mature plant from a 1x1 createCropField at growth 1.0 (growth is a uniform runtime scale, not distinct geometry)",
       "render": "render/crop-grape.png"
     },
     {
@@ -606,8 +711,8 @@
         "meshopt": "crop/cherry.m1.glb"
       },
       "bytes": {
-        "raw": 372916,
-        "meshopt": 82544
+        "raw": 393832,
+        "meshopt": 86596
       },
       "measured": {
         "raw": {
@@ -615,28 +720,28 @@
           "drawCalls": 1,
           "materials": 1,
           "sizeMeters": {
-            "x": 2.293,
-            "y": 2.289,
-            "z": 2.315
+            "x": 2.06,
+            "y": 1.968,
+            "z": 1.931
           },
-          "groundedAtY": 0
+          "groundedAtY": 0.186
         },
         "meshopt": {
           "triangles": 3440,
           "drawCalls": 1,
           "materials": 1,
           "sizeMeters": {
-            "x": 2.293,
-            "y": 2.289,
-            "z": 2.315
+            "x": 2.06,
+            "y": 1.969,
+            "z": 1.931
           },
-          "groundedAtY": 0
+          "groundedAtY": 0.186
         }
       },
       "animationClips": [],
       "provenanceAssetId": null,
       "license": "장부에 없음",
-      "note": "silhouette tree; mature form (growth is a uniform runtime scale, not distinct geometry)",
+      "note": "silhouette tree; mature plant from a 1x1 createCropField at growth 1.0 (growth is a uniform runtime scale, not distinct geometry)",
       "render": "render/crop-cherry.png"
     },
     {
@@ -890,6 +995,47 @@
       "license": "장부에 없음",
       "note": "props.ts pushHandCart is not exported and every cart is merged into ONE world-space mesh, so one cart is cropped out around ROUTE_CART_ANCHORS[0] and re-seated at the origin",
       "render": "render/prop-hand-cart.png"
+    },
+    {
+      "group": "prop",
+      "slug": "farm-tool-kit",
+      "files": {
+        "raw": "prop/farm-tool-kit.glb",
+        "meshopt": "prop/farm-tool-kit.m1.glb"
+      },
+      "bytes": {
+        "raw": 80160,
+        "meshopt": 24640
+      },
+      "measured": {
+        "raw": {
+          "triangles": 1180,
+          "drawCalls": 9,
+          "materials": 9,
+          "sizeMeters": {
+            "x": 2.067,
+            "y": 0.894,
+            "z": 0.505
+          },
+          "groundedAtY": 0
+        },
+        "meshopt": {
+          "triangles": 1180,
+          "drawCalls": 9,
+          "materials": 2,
+          "sizeMeters": {
+            "x": 2.067,
+            "y": 0.894,
+            "z": 0.505
+          },
+          "groundedAtY": 0
+        }
+      },
+      "animationClips": [],
+      "provenanceAssetId": null,
+      "license": "장부에 없음",
+      "note": "the four tool groups lifted off the player rig (hoe / watering can / harvest basket / field journal), re-seated in a row; each keeps its authored node name",
+      "render": "render/prop-farm-tool-kit.png"
     }
   ]
 }

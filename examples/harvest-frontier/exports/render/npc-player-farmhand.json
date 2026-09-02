@@ -17,13 +17,13 @@
   ],
   "targetFillFraction": 0.76,
   "subjectBoundingBoxPx": {
-    "x": 376.6666666666667,
+    "x": 369,
     "y": 123,
-    "width": 270.6666666666667,
+    "width": 286,
     "height": 778
   },
   "subjectFillFraction": 0.7598,
-  "subjectPixelCoverageFraction": 0.1197,
+  "subjectPixelCoverageFraction": 0.1261,
   "clippedTop": false,
   "clippedBottom": false,
   "clippedLeft": false,
@@ -31,16 +31,48 @@
   "marginPx": {
     "top": 123,
     "bottom": 123,
-    "left": 376.6666666666667,
-    "right": 376.6666666666667
+    "left": 369,
+    "right": 369
   },
-  "triangles": 7256,
-  "meshes": 23,
-  "vertexColouredMeshes": 23,
+  "triangles": 6076,
+  "meshes": 14,
+  "vertexColouredMeshes": 14,
+  "animations": [
+    {
+      "name": "idle",
+      "seconds": 8.976,
+      "tracks": 26
+    },
+    {
+      "name": "walk",
+      "seconds": 0.827,
+      "tracks": 26
+    },
+    {
+      "name": "inspect",
+      "seconds": 0.78,
+      "tracks": 26
+    },
+    {
+      "name": "water",
+      "seconds": 1.24,
+      "tracks": 26
+    },
+    {
+      "name": "hoe",
+      "seconds": 1.02,
+      "tracks": 26
+    },
+    {
+      "name": "harvest",
+      "seconds": 1.12,
+      "tracks": 26
+    }
+  ],
   "boundsMetres": [
     0.817,
-    2.7141,
-    0.9129
+    2.4992,
+    0.8668
   ],
   "shadow": {
     "kind": "soft contact shadow",

@@ -37,6 +37,7 @@
   "triangles": 24,
   "meshes": 2,
   "vertexColouredMeshes": 2,
+  "animations": [],
   "boundsMetres": [
     1,
     1.2225,

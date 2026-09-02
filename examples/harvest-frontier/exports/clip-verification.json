@@ -1,0 +1,117 @@
+{
+  "checkedAt": "2026-09-02T06:32:16.888Z",
+  "method": "GLTFLoader (+MeshoptDecoder) -> PropertyBinding.findNode per track -> AnimationMixer.setTime at 4 phases -> local TRS diff vs rest pose",
+  "failures": 0,
+  "assets": {
+    "choi-minseo": [
+      {
+        "clip": "idle",
+        "seconds": 7.854,
+        "tracks": 2,
+        "unbound": [],
+        "movedNodes": 1,
+        "maxDelta": 0.01807
+      }
+    ],
+    "han-seojun": [
+      {
+        "clip": "idle",
+        "seconds": 7.854,
+        "tracks": 2,
+        "unbound": [],
+        "movedNodes": 1,
+        "maxDelta": 0.00939
+      }
+    ],
+    "kang-taeho": [
+      {
+        "clip": "idle",
+        "seconds": 7.854,
+        "tracks": 2,
+        "unbound": [],
+        "movedNodes": 1,
+        "maxDelta": 0.01564
+      }
+    ],
+    "lee-eunha": [
+      {
+        "clip": "idle",
+        "seconds": 7.854,
+        "tracks": 2,
+        "unbound": [],
+        "movedNodes": 1,
+        "maxDelta": 0.01807
+      }
+    ],
+    "park-yuna": [
+      {
+        "clip": "idle",
+        "seconds": 7.854,
+        "tracks": 2,
+        "unbound": [],
+        "movedNodes": 1,
+        "maxDelta": 0.01617
+      }
+    ],
+    "player-farmhand": [
+      {
+        "clip": "idle",
+        "seconds": 8.976,
+        "tracks": 26,
+        "unbound": [],
+        "movedNodes": 13,
+        "maxDelta": 0.01186
+      },
+      {
+        "clip": "walk",
+        "seconds": 0.827,
+        "tracks": 26,
+        "unbound": [],
+        "movedNodes": 13,
+        "maxDelta": 0.22452
+      },
+      {
+        "clip": "inspect",
+        "seconds": 0.78,
+        "tracks": 26,
+        "unbound": [],
+        "movedNodes": 13,
+        "maxDelta": 0.19606
+      },
+      {
+        "clip": "water",
+        "seconds": 1.24,
+        "tracks": 26,
+        "unbound": [],
+        "movedNodes": 13,
+        "maxDelta": 0.29427
+      },
+      {
+        "clip": "hoe",
+        "seconds": 1.02,
+        "tracks": 26,
+        "unbound": [],
+        "movedNodes": 13,
+        "maxDelta": 0.59002
+      },
+      {
+        "clip": "harvest",
+        "seconds": 1.12,
+        "tracks": 26,
+        "unbound": [],
+        "movedNodes": 13,
+        "maxDelta": 0.22648
+      }
+    ],
+    "farm-windmill": [
+      {
+        "clip": "blades-spin",
+        "seconds": 8,
+        "tracks": 1,
+        "unbound": [],
+        "movedNodes": 1,
+        "maxDelta": 1.31379
+      }
+    ]
+  }
+}

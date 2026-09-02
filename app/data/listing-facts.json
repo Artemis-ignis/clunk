@@ -1,0 +1,1092 @@
+{
+  "schema": "clunk.listing-facts.v1",
+  "generatedAt": "2026-09-02T07:10:24.024Z",
+  "sources": [
+    "outputs\\market-launch\\wave1\\upload-manifest.json",
+    "tmp\\listings-snapshot.json"
+  ],
+  "facts": {
+    "cozy-crate-closed": {
+      "triangles": 700,
+      "materials": 1,
+      "boundsMetres": [
+        0.57,
+        0.434,
+        0.438
+      ],
+      "byteLength": 78476,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "cozy-crate-closed-sprites": {
+      "triangles": null,
+      "materials": null,
+      "boundsMetres": null,
+      "byteLength": 5522,
+      "format": "PNG",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": {
+        "cell": 64,
+        "directions": 8,
+        "frames": null,
+        "cuts": null
+      },
+      "texture": null,
+      "inspection": null
+    },
+    "cozy-crate-open": {
+      "triangles": 552,
+      "materials": 1,
+      "boundsMetres": [
+        0.56,
+        0.41,
+        0.438
+      ],
+      "byteLength": 62604,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "cozy-crate-open-sprites": {
+      "triangles": null,
+      "materials": null,
+      "boundsMetres": null,
+      "byteLength": 5979,
+      "format": "PNG",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": {
+        "cell": 64,
+        "directions": 8,
+        "frames": null,
+        "cuts": null
+      },
+      "texture": null,
+      "inspection": null
+    },
+    "cozy-crate-produce": {
+      "triangles": 782,
+      "materials": 1,
+      "boundsMetres": [
+        0.56,
+        0.5118,
+        0.438
+      ],
+      "byteLength": 87340,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "cozy-crate-produce-sprites": {
+      "triangles": null,
+      "materials": null,
+      "boundsMetres": null,
+      "byteLength": 5419,
+      "format": "PNG",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": {
+        "cell": 64,
+        "directions": 8,
+        "frames": null,
+        "cuts": null
+      },
+      "texture": null,
+      "inspection": null
+    },
+    "cozy-farm-set-vol1": {
+      "triangles": 4596,
+      "materials": 26,
+      "boundsMetres": null,
+      "byteLength": 214584,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": 3,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "inspection": null
+    },
+    "cozy-farm-set-vol1-sprites": {
+      "triangles": null,
+      "materials": null,
+      "boundsMetres": null,
+      "byteLength": 3091,
+      "format": "PNG",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": {
+        "cell": 64,
+        "directions": 8,
+        "frames": null,
+        "cuts": null
+      },
+      "texture": null,
+      "inspection": null
+    },
+    "cozy-fence-gate": {
+      "triangles": 520,
+      "materials": 6,
+      "boundsMetres": [
+        2.4,
+        1.71,
+        0.52
+      ],
+      "byteLength": 47960,
+      "format": "GLB",
+      "animatedParts": [
+        "post_hinge_pintles",
+        "post_hinge_pins",
+        "gate_pivot",
+        "gate_hinge_straps"
+      ],
+      "animations": [],
+      "kit": "cozy-farm-set",
+      "kitSize": 3,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "cozy-fence-gate-sprites": {
+      "triangles": null,
+      "materials": null,
+      "boundsMetres": null,
+      "byteLength": 3091,
+      "format": "PNG",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": {
+        "cell": 64,
+        "directions": 8,
+        "frames": null,
+        "cuts": null
+      },
+      "texture": null,
+      "inspection": null
+    },
+    "cozy-fence-gate-swing-sprites": {
+      "triangles": null,
+      "materials": null,
+      "boundsMetres": null,
+      "byteLength": 15441,
+      "format": "PNG",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": {
+        "cell": 64,
+        "directions": 8,
+        "frames": 8,
+        "cuts": 64
+      },
+      "texture": null,
+      "inspection": null
+    },
+    "cozy-greenhouse": {
+      "triangles": 5756,
+      "materials": 1,
+      "boundsMetres": [
+        8.4158,
+        4.24,
+        6.5112
+      ],
+      "byteLength": 623728,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "cozy-greenhouse-sprites": {
+      "triangles": null,
+      "materials": null,
+      "boundsMetres": null,
+      "byteLength": 5286,
+      "format": "PNG",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": {
+        "cell": 64,
+        "directions": 8,
+        "frames": null,
+        "cuts": null
+      },
+      "texture": null,
+      "inspection": null
+    },
+    "cozy-haystack-full": {
+      "triangles": 1322,
+      "materials": 1,
+      "boundsMetres": [
+        1.5861,
+        1.4782,
+        1.6796
+      ],
+      "byteLength": 145928,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "cozy-haystack-full-sprites": {
+      "triangles": null,
+      "materials": null,
+      "boundsMetres": null,
+      "byteLength": 6771,
+      "format": "PNG",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": {
+        "cell": 64,
+        "directions": 8,
+        "frames": null,
+        "cuts": null
+      },
+      "texture": null,
+      "inspection": null
+    },
+    "cozy-haystack-used": {
+      "triangles": 1410,
+      "materials": 1,
+      "boundsMetres": [
+        1.4354,
+        1.4706,
+        1.5773
+      ],
+      "byteLength": 155440,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "cozy-haystack-used-sprites": {
+      "triangles": null,
+      "materials": null,
+      "boundsMetres": null,
+      "byteLength": 6172,
+      "format": "PNG",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": {
+        "cell": 64,
+        "directions": 8,
+        "frames": null,
+        "cuts": null
+      },
+      "texture": null,
+      "inspection": null
+    },
+    "cozy-market-stall": {
+      "triangles": 2456,
+      "materials": 11,
+      "boundsMetres": [
+        2.44,
+        2.2563,
+        1.3528
+      ],
+      "byteLength": 214584,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "cozy-farm-set",
+      "kitSize": 3,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "cozy-market-stall-sprites": {
+      "triangles": null,
+      "materials": null,
+      "boundsMetres": null,
+      "byteLength": 4643,
+      "format": "PNG",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": {
+        "cell": 64,
+        "directions": 8,
+        "frames": null,
+        "cuts": null
+      },
+      "texture": null,
+      "inspection": null
+    },
+    "cozy-storage-shed": {
+      "triangles": 1620,
+      "materials": 9,
+      "boundsMetres": [
+        2.595,
+        2.9325,
+        2.23
+      ],
+      "byteLength": 137528,
+      "format": "GLB",
+      "animatedParts": [
+        "door_pivot",
+        "door_strap_hinges"
+      ],
+      "animations": [],
+      "kit": "cozy-farm-set",
+      "kitSize": 3,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "cozy-storage-shed-door-sprites": {
+      "triangles": null,
+      "materials": null,
+      "boundsMetres": null,
+      "byteLength": 10602,
+      "format": "PNG",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": {
+        "cell": 64,
+        "directions": 8,
+        "frames": 8,
+        "cuts": 64
+      },
+      "texture": null,
+      "inspection": null
+    },
+    "cozy-storage-shed-sprites": {
+      "triangles": null,
+      "materials": null,
+      "boundsMetres": null,
+      "byteLength": 3436,
+      "format": "PNG",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": {
+        "cell": 64,
+        "directions": 8,
+        "frames": null,
+        "cuts": null
+      },
+      "texture": null,
+      "inspection": null
+    },
+    "cozy-tractor": {
+      "triangles": 1060,
+      "materials": 5,
+      "boundsMetres": [
+        2.288,
+        2.03,
+        2.985
+      ],
+      "byteLength": 74764,
+      "format": "GLB",
+      "animatedParts": [
+        "wheel_rl_pivot",
+        "wheel_rr_pivot",
+        "wheel_fl_pivot",
+        "wheel_fr_pivot",
+        "axles"
+      ],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "farmhand-walk-sprites": {
+      "triangles": null,
+      "materials": null,
+      "boundsMetres": null,
+      "byteLength": 13952,
+      "format": "PNG",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": {
+        "cell": 64,
+        "directions": 8,
+        "frames": 8,
+        "cuts": 64
+      },
+      "texture": null,
+      "inspection": null
+    },
+    "grove-tree-pack-vol1": {
+      "triangles": 10668,
+      "materials": 12,
+      "boundsMetres": null,
+      "byteLength": 189820,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": 6,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "inspection": null
+    },
+    "grove-tree-pack-vol1-sprites": {
+      "triangles": null,
+      "materials": null,
+      "boundsMetres": null,
+      "byteLength": 4396,
+      "format": "PNG",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": {
+        "cell": 64,
+        "directions": 8,
+        "frames": null,
+        "cuts": null
+      },
+      "texture": null,
+      "inspection": null
+    },
+    "hf-barn": {
+      "triangles": 15646,
+      "materials": 5,
+      "boundsMetres": [
+        11.04,
+        6.39,
+        7.8503
+      ],
+      "byteLength": 270876,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "harvest-frontier",
+      "kitSize": 9,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "hf-cultivator-compact": {
+      "triangles": 16196,
+      "materials": 20,
+      "boundsMetres": [
+        1.5447,
+        1.6925,
+        3.35
+      ],
+      "byteLength": 189912,
+      "format": "GLB",
+      "animatedParts": [
+        "pivottine01",
+        "pivottine02",
+        "pivottine03",
+        "pivottine04",
+        "pivottine05",
+        "pivottine06",
+        "pivottine07",
+        "pivothitchLowerLeft",
+        "pivothitchLowerRight",
+        "pivothitchTopLink",
+        "pivotdepthAdjust",
+        "pivotgaugeWheelLeft",
+        "pivotgaugeWheelRight"
+      ],
+      "animations": [],
+      "kit": "harvest-frontier",
+      "kitSize": 9,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 96,
+        "mobileScore": 96,
+        "hardBlockers": 1,
+        "note": "재질이 일반 웹 기준 상한(12개)보다 많아 주의 1건이 있습니다. 게임 자체 기준(재질 64개까지)으로는 통과한 파일입니다."
+      }
+    },
+    "hf-farmhouse": {
+      "triangles": 11822,
+      "materials": 4,
+      "boundsMetres": [
+        8.5651,
+        6.2559,
+        8.0883
+      ],
+      "byteLength": 241332,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "harvest-frontier",
+      "kitSize": 9,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "hf-player-farmhand": {
+      "triangles": 6076,
+      "materials": 2,
+      "boundsMetres": [
+        0.817,
+        2.4992,
+        0.8668
+      ],
+      "byteLength": 218244,
+      "format": "GLB",
+      "animatedParts": [
+        "playerRig",
+        "pelvis",
+        "spine",
+        "headPivot",
+        "leftUpperArmPivot",
+        "leftLowerArmPivot",
+        "rightUpperArmPivot",
+        "rightLowerArmPivot",
+        "leftThighPivot",
+        "leftShinPivot",
+        "rightThighPivot",
+        "rightShinPivot",
+        "toolAnchor"
+      ],
+      "animations": [
+        {
+          "name": "idle",
+          "seconds": 8.976
+        },
+        {
+          "name": "walk",
+          "seconds": 0.827
+        },
+        {
+          "name": "inspect",
+          "seconds": 0.78
+        },
+        {
+          "name": "water",
+          "seconds": 1.24
+        },
+        {
+          "name": "hoe",
+          "seconds": 1.02
+        },
+        {
+          "name": "harvest",
+          "seconds": 1.12
+        }
+      ],
+      "kit": "harvest-frontier",
+      "kitSize": 9,
+      "members": null,
+      "viewYawDegrees": 139.7,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 99,
+        "mobileScore": 99,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "hf-processing-line": {
+      "triangles": 24936,
+      "materials": 40,
+      "boundsMetres": [
+        7.3753,
+        5.2749,
+        4.2804
+      ],
+      "byteLength": 435532,
+      "format": "GLB",
+      "animatedParts": [
+        "mixerPivot",
+        "pumpPivot"
+      ],
+      "animations": [],
+      "kit": "harvest-frontier",
+      "kitSize": 9,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 96,
+        "mobileScore": 96,
+        "hardBlockers": 1,
+        "note": "재질이 일반 웹 기준 상한(12개)보다 많아 주의 1건이 있습니다. 게임 자체 기준(재질 64개까지)으로는 통과한 파일입니다."
+      }
+    },
+    "hf-seeder-compact": {
+      "triangles": 11318,
+      "materials": 22,
+      "boundsMetres": [
+        1.9815,
+        2.225,
+        3.8
+      ],
+      "byteLength": 557888,
+      "format": "GLB",
+      "animatedParts": [
+        "pivothopper01",
+        "pivothopperLid01",
+        "pivothopper02",
+        "pivothopperLid02",
+        "pivothopper03",
+        "pivothopperLid03",
+        "pivothopper04",
+        "pivothopperLid04",
+        "pivotrowUnit01",
+        "pivotseedMeter01",
+        "pivotseedMeterShaft01",
+        "pivotgaugeWheel01",
+        "pivotclosingWheel01Left",
+        "pivotclosingWheel01Right",
+        "pivotrowUnit02",
+        "pivotseedMeter02",
+        "pivotseedMeterShaft02",
+        "pivotgaugeWheel02",
+        "pivotclosingWheel02Left",
+        "pivotclosingWheel02Right",
+        "pivotrowUnit03",
+        "pivotseedMeter03",
+        "pivotseedMeterShaft03",
+        "pivotgaugeWheel03",
+        "pivotclosingWheel03Left",
+        "pivotclosingWheel03Right",
+        "pivotrowUnit04",
+        "pivotseedMeter04",
+        "pivotseedMeterShaft04",
+        "pivotgaugeWheel04",
+        "pivotclosingWheel04Left",
+        "pivotclosingWheel04Right",
+        "pivothitchTopLink",
+        "pivothitchLowerLeft",
+        "pivothitchLowerRight",
+        "pivotdepthAdjust"
+      ],
+      "animations": [],
+      "kit": "harvest-frontier",
+      "kitSize": 9,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 96,
+        "mobileScore": 96,
+        "hardBlockers": 1,
+        "note": "재질이 일반 웹 기준 상한(12개)보다 많아 주의 1건이 있습니다. 게임 자체 기준(재질 64개까지)으로는 통과한 파일입니다."
+      }
+    },
+    "hf-tractor-compact": {
+      "triangles": 39320,
+      "materials": 9,
+      "boundsMetres": [
+        5.2396,
+        2.9175,
+        3.35
+      ],
+      "byteLength": 840136,
+      "format": "GLB",
+      "animatedParts": [
+        "frontAxle",
+        "rearAxle",
+        "steeringPivotwheelFrontLeft",
+        "steeringPivotwheelFrontRight",
+        "pivottine01",
+        "pivottine02",
+        "pivottine03",
+        "pivottine04",
+        "pivottine05",
+        "pivottine06",
+        "pivottine07",
+        "pivothitchLowerLeft",
+        "pivothitchLowerRight",
+        "pivothitchTopLink",
+        "pivotdepthAdjust",
+        "pivotgaugeWheelLeft",
+        "pivotgaugeWheelRight"
+      ],
+      "animations": [],
+      "kit": "harvest-frontier",
+      "kitSize": 9,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 99,
+        "mobileScore": 99,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "hf-water-butt": {
+      "triangles": 1908,
+      "materials": 2,
+      "boundsMetres": [
+        1.5959,
+        2.3255,
+        2.2704
+      ],
+      "byteLength": 39440,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "harvest-frontier",
+      "kitSize": 9,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "hf-windmill": {
+      "triangles": 1344,
+      "materials": 2,
+      "boundsMetres": [
+        3.3537,
+        5.0204,
+        3.51
+      ],
+      "byteLength": 42424,
+      "format": "GLB",
+      "animatedParts": [
+        "blades_pivot"
+      ],
+      "animations": [
+        {
+          "name": "blades-spin",
+          "seconds": 8
+        }
+      ],
+      "kit": "harvest-frontier",
+      "kitSize": 9,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "tex-dirt-path-v1": {
+      "triangles": null,
+      "materials": null,
+      "boundsMetres": null,
+      "byteLength": 2551409,
+      "format": "PNG",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": {
+        "resolution": "1024×1024",
+        "seamless": true
+      },
+      "inspection": null
+    },
+    "tex-grass-meadow-v1": {
+      "triangles": null,
+      "materials": null,
+      "boundsMetres": null,
+      "byteLength": 3056773,
+      "format": "PNG",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": {
+        "resolution": "1024×1024",
+        "seamless": false
+      },
+      "inspection": null
+    },
+    "tex-roof-tiles-v2": {
+      "triangles": null,
+      "materials": null,
+      "boundsMetres": null,
+      "byteLength": 2871751,
+      "format": "PNG",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": {
+        "resolution": "1024×1024",
+        "seamless": true
+      },
+      "inspection": null
+    },
+    "tex-sand-dry-v1": {
+      "triangles": null,
+      "materials": null,
+      "boundsMetres": null,
+      "byteLength": 2787486,
+      "format": "PNG",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": {
+        "resolution": "1024×1024",
+        "seamless": true
+      },
+      "inspection": null
+    },
+    "tex-soil-tilled-v2": {
+      "triangles": null,
+      "materials": null,
+      "boundsMetres": null,
+      "byteLength": 2884300,
+      "format": "PNG",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": {
+        "resolution": "1024×1024",
+        "seamless": true
+      },
+      "inspection": null
+    },
+    "tex-stone-wall-v1": {
+      "triangles": null,
+      "materials": null,
+      "boundsMetres": null,
+      "byteLength": 2554900,
+      "format": "PNG",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": {
+        "resolution": "1024×1024",
+        "seamless": true
+      },
+      "inspection": null
+    },
+    "tex-wood-planks-v1": {
+      "triangles": null,
+      "materials": null,
+      "boundsMetres": null,
+      "byteLength": 2679667,
+      "format": "PNG",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": {
+        "resolution": "1024×1024",
+        "seamless": false
+      },
+      "inspection": null
+    },
+    "verified-seamless-textures-vol1": {
+      "triangles": null,
+      "materials": null,
+      "boundsMetres": null,
+      "byteLength": 2884300,
+      "format": "PNG",
+      "animatedParts": [],
+      "animations": [],
+      "kit": null,
+      "kitSize": 0,
+      "members": 7,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "inspection": null
+    }
+  }
+}

@@ -37,6 +37,13 @@
   "triangles": 1344,
   "meshes": 3,
   "vertexColouredMeshes": 3,
+  "animations": [
+    {
+      "name": "blades-spin",
+      "seconds": 8,
+      "tracks": 1
+    }
+  ],
   "boundsMetres": [
     3.3537,
     5.0204,
