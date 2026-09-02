@@ -1,6 +1,6 @@
 {
   "schema": "clunk.listing-facts.v1",
-  "generatedAt": "2026-09-02T09:13:26.305Z",
+  "generatedAt": "2026-09-02T12:51:44.641Z",
   "sources": [
     "outputs\\market-launch\\wave1\\upload-manifest.json",
     "tmp\\listings-snapshot.json"
@@ -700,7 +700,7 @@
         2.4992,
         0.8668
       ],
-      "byteLength": 240032,
+      "byteLength": 244496,
       "format": "GLB",
       "animatedParts": [
         "playerRig",
@@ -715,7 +715,10 @@
         "leftShinPivot",
         "rightThighPivot",
         "rightShinPivot",
-        "toolAnchor"
+        "toolAnchor",
+        "toolHoe",
+        "toolWateringCan",
+        "toolHarvestBasket"
       ],
       "animations": [
         {
@@ -732,15 +735,15 @@
         },
         {
           "name": "water",
-          "seconds": 1.24
+          "seconds": 1.6
         },
         {
           "name": "hoe",
-          "seconds": 1.02
+          "seconds": 1.1
         },
         {
           "name": "harvest",
-          "seconds": 1.12
+          "seconds": 1.4
         }
       ],
       "kit": "harvest-frontier",
