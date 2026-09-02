@@ -122,7 +122,7 @@ test("폴리곤이 없는 상품은 설명에 적힌 규격 한 줄을 대신 �
 });
 
 test("슬롯 두 번째 줄은 폴리곤 → 규격 → 확장자 순으로 정직하게 내려간다", () => {
-  assert.equal(slotFactOf(LIVE_SAMPLE[0]), "폴리곤 1,060개 · 적을수록 가벼움");
+  assert.equal(slotFactOf(LIVE_SAMPLE[0]), "폴리곤 1,060개");
   assert.equal(slotFactOf(LIVE_SAMPLE[4]), "1024×1024 이음매 없는 타일 1장");
   assert.equal(
     slotFactOf({ description: "아무 수치도 없습니다.", entryFileName: "thing.glb" }),
@@ -162,7 +162,7 @@ test("자판기와 슬롯 코드는 카탈로그가 준 것만으로 만들어�
   }
 
   const tractor = byId.prop.slots.find((slot) => slot.listing.slug === "cozy-tractor");
-  assert.equal(tractor.fact, "폴리곤 1,060개 · 적을수록 가벼움");
+  assert.equal(tractor.fact, "폴리곤 1,060개");
   assert.deepEqual(tractor.price, { struck: "1,900원", label: "베타 무료" });
   assert.equal(
     tractor.preview,
