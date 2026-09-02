@@ -1,30 +1,29 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { EmbeddedGlbViewer } from "./review/EmbeddedGlbViewer";
 
 /**
- * Landing section-03 live scene: when the snap section lands in view the
- * conversation types itself out, the tool steps check off, and the GLB the
- * agent just "made" streams in triangle by triangle via
- * BufferGeometry.setDrawRange, then an inspection wireframe scan pulses, then
- * the measured verdict lands. Loops.
+ * Landing section-03 live scene: when the section lands in view the conversation
+ * types itself out, the tool steps check off, the model is revealed behind a
+ * "making" veil, an inspection sweep passes over it, and the measured verdict lands.
  *
- * 2026-09-01: this section is called 게임 제작 에이전트, so it has to show the
- * agent MAKING something. It briefly ran an inspect-only script over Harvest
- * Frontier's tractor — a file Clunk did not author — which was off-message.
- * The asset is now the market stall Clunk's own authoring rail produced and
- * ships in the marketplace, so "만들어줘" is both on-message and true.
+ * 2026-09-02: this used to be its own three.js renderer that streamed triangles in,
+ * flashed wireframe at 9 Hz during the "scan", spun on its own, and restarted from
+ * zero every thirteen seconds. The operator read that as a model that flickers and
+ * cannot be touched. The stage is now the same interactive viewer the shop uses —
+ * drag to turn, wheel to zoom, the shadow fixes included — and the timeline plays
+ * once. What the agent made stays made.
  *
- * Every number below is this repository's own
- * `npm run clunk -- inspect --profile web` output for that exact file:
- * 2,456 triangles, 31 draw calls, 214,584 bytes, score 100, hard blockers 0.
- * prefers-reduced-motion renders the finished state statically.
+ * Every number below is this repository's own `npm run clunk -- inspect --profile web`
+ * output for that exact file: 2,456 triangles, 31 draw calls, 214,584 bytes,
+ * score 100, hard blockers 0. prefers-reduced-motion renders the finished state.
  */
 
 const USER_TEXT = "농장 게임에 쓸 시장 노점 하나 만들어줘.";
 const AGENT_TEXT = "게임에 넣어도 가벼운 크기로 만들고, 바로 검사까지 돌리겠습니다.";
 const STEPS = [
-  { tool: "clunk_asset_author", note: "시장 노점 만들기 · 2,456면" },
+  { tool: "clunk_asset_author", note: "시장 노점 만들기 · 폴리곤 2,456개" },
   { tool: "clunk_asset_inspect", note: "그리기 횟수 31회 · 문제 0건" },
   { tool: "clunk_optimize", note: "안전한 정리만, 원본은 그대로" },
   { tool: "clunk_passport", note: "만든 과정을 검사 증명서로 남김" },
@@ -32,8 +31,8 @@ const STEPS = [
 
 const GLB_URL = "/market/cozy-farm-set-vol1/market-stall.m1.clunk-optimized.glb";
 
-// timeline (seconds)
-const T_USER = 0.4; // user typing starts
+// timeline (seconds), played once per visit
+const T_USER = 0.4;
 const USER_CPS = 17;
 const T_AGENT = T_USER + USER_TEXT.length / USER_CPS + 0.5;
 const AGENT_CPS = 20;
@@ -41,10 +40,10 @@ const T_STEP0 = T_AGENT + AGENT_TEXT.length / AGENT_CPS + 0.4;
 const STEP_GAP = 2.3;
 const BUILD_START = T_STEP0;
 const BUILD_SECONDS = 3.4;
-const SCAN_START = T_STEP0 + STEP_GAP; // inspect step
+const SCAN_START = T_STEP0 + STEP_GAP;
 const SCAN_SECONDS = 1.1;
 const T_BADGE = T_STEP0 + STEP_GAP * 3 + 0.5;
-const T_LOOP = T_BADGE + 3.2;
+const T_END = T_BADGE + 0.5;
 
 type SceneState = {
   userChars: number;
@@ -66,9 +65,10 @@ function stateAt(t: number): SceneState {
   };
 }
 
+const FINISHED = stateAt(T_END + 1);
+
 export function AgentLiveDemo() {
   const rootRef = useRef<HTMLDivElement | null>(null);
-  const stageRef = useRef<HTMLDivElement | null>(null);
   const [scene, setScene] = useState<SceneState>(stateAt(0));
   const [reduced, setReduced] = useState(false);
   const sceneRef = useRef(scene);
@@ -78,205 +78,65 @@ export function AgentLiveDemo() {
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReduced) {
       setReduced(true);
-      setScene(stateAt(T_BADGE + 1)); // finished state, no motion
+      setScene(FINISHED);
     }
-
     const root = rootRef.current;
-    const stage = stageRef.current;
-    if (!root || !stage) return;
+    if (!root) return;
 
-    let disposed = false;
-    let running = false;
     let frameHandle = 0;
     let startedAt = 0;
-    let renderer3d: { renderAt: (t: number) => void; dispose: () => void } | null = null;
-
-    void (async () => {
-      const THREE = await import("three");
-      const { GLTFLoader } = await import("three/examples/jsm/loaders/GLTFLoader.js");
-      if (disposed) return;
-
-      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.setClearColor(0x000000, 0);
-      stage.appendChild(renderer.domElement);
-
-      const sceneGraph = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
-      sceneGraph.add(new THREE.HemisphereLight(0xdfe8ff, 0x141008, 1.25));
-      const sun = new THREE.DirectionalLight(0xffffff, 2.1);
-      sun.position.set(4, 7, 5);
-      sceneGraph.add(sun);
-      const rim = new THREE.DirectionalLight(0x8b5cf6, 0.7);
-      rim.position.set(-5, 2, -4);
-      sceneGraph.add(rim);
-
-      const pivot = new THREE.Group();
-      sceneGraph.add(pivot);
-
-      type BuildMesh = { mesh: import("three").Mesh; total: number; from: number };
-      let buildMeshes: BuildMesh[] = [];
-      let totalIndices = 0;
-      let wireframeOn = false;
-
-      try {
-        // The delivered tractor declares EXT_meshopt_compression,
-        // EXT_mesh_gpu_instancing and KHR_mesh_quantization as *required*.
-        // Without the meshopt decoder GLTFLoader throws and the stage silently
-        // renders an empty box — which is exactly what shipped before.
-        const { MeshoptDecoder } = await import("three/examples/jsm/libs/meshopt_decoder.module.js");
-        const loader = new GLTFLoader();
-        loader.setMeshoptDecoder(MeshoptDecoder);
-        const response = await fetch(GLB_URL);
-        if (!response.ok) throw new Error(`GLB ${response.status}`);
-        const buffer = await response.arrayBuffer();
-        const gltf = await loader.parseAsync(buffer, "");
-        if (disposed) return;
-        const model = gltf.scene;
-        const bounds = new THREE.Box3().setFromObject(model);
-        const size = bounds.getSize(new THREE.Vector3());
-        const center = bounds.getCenter(new THREE.Vector3());
-        model.position.set(-center.x, -bounds.min.y, -center.z);
-        pivot.add(model);
-        const radius = Math.max(size.x, size.y, size.z) || 1;
-        camera.position.set(radius * 1.15, radius * 0.72, radius * 1.3);
-        camera.lookAt(0, size.y * 0.42, 0);
-        // The camera frames the model by its own radius, so the clip planes have
-        // to follow it. A fixed far plane of 100 hid every asset authored in
-        // units larger than a few metres — the stage rendered an empty box.
-        camera.near = Math.max(radius / 1000, 0.001);
-        camera.far = radius * 20;
-        camera.updateProjectionMatrix();
-
-        let cursor = 0;
-        model.traverse((node) => {
-          const mesh = node as import("three").Mesh;
-          if (!mesh.isMesh) return;
-          const geometry = mesh.geometry as import("three").BufferGeometry;
-          const count = geometry.getIndex() ? geometry.getIndex()!.count : geometry.getAttribute("position").count;
-          buildMeshes.push({ mesh, total: count, from: cursor });
-          cursor += count;
-        });
-        totalIndices = cursor;
-      } catch {
-        // A failed load must not leave a silent empty box: fall back to the
-        // still render of the same file so the stage always shows the asset.
-        buildMeshes = [];
-        stage.dataset.glbFallback = "true";
-      }
-
-      const surfaceStage = stage as HTMLDivElement;
-      function resize() {
-        const width = surfaceStage.clientWidth;
-        const height = surfaceStage.clientHeight;
-        if (!width || !height) return;
-        renderer.setSize(width, height, false);
-        camera.aspect = width / height;
-        camera.updateProjectionMatrix();
-      }
-      const resizeObserver = new ResizeObserver(resize);
-      resizeObserver.observe(surfaceStage);
-      resize();
-
-      renderer3d = {
-        renderAt(t: number) {
-          resize();
-          const state = stateAt(t);
-          // triangles stream in, mesh by mesh — the "AI is modelling" beat.
-          const visibleIndices = Math.floor(totalIndices * state.buildProgress);
-          for (const entry of buildMeshes) {
-            const local = Math.max(0, Math.min(entry.total, visibleIndices - entry.from));
-            (entry.mesh.geometry as import("three").BufferGeometry).setDrawRange(0, local);
-          }
-          // inspection scan: wireframe flicker at ~9Hz.
-          const wantWire = state.scanning && Math.floor(t * 9) % 2 === 0;
-          if (wantWire !== wireframeOn) {
-            wireframeOn = wantWire;
-            for (const entry of buildMeshes) {
-              const materials = Array.isArray(entry.mesh.material) ? entry.mesh.material : [entry.mesh.material];
-              for (const material of materials) (material as { wireframe?: boolean }).wireframe = wantWire;
-            }
-          }
-          pivot.rotation.y = t * 0.4;
-          renderer.render(sceneGraph, camera);
-        },
-        dispose() {
-          resizeObserver.disconnect();
-          renderer.dispose();
-          renderer.domElement.remove();
-        },
-      };
-
-      // Idle frame: draw the finished state immediately so the stage is never
-      // an empty box before the section scrolls into view (or if rAF is
-      // throttled). The loop restarts from t=0 when the section lands.
-      renderer3d.renderAt(T_BADGE + 1);
-      if (prefersReduced) setScene(stateAt(T_BADGE + 1));
-    })();
+    let played = false;
 
     function frame(now: number) {
-      frameHandle = requestAnimationFrame(frame);
-      const t = ((now - startedAt) / 1000) % T_LOOP;
-      const next = stateAt(t);
+      const t = (now - startedAt) / 1000;
+      const next = t >= T_END ? FINISHED : stateAt(t);
       const previous = sceneRef.current;
       if (
         previous.userChars !== next.userChars ||
         previous.agentChars !== next.agentChars ||
         previous.checked !== next.checked ||
         previous.scanning !== next.scanning ||
-        previous.badge !== next.badge
+        previous.badge !== next.badge ||
+        Math.abs(previous.buildProgress - next.buildProgress) > 0.02
       ) {
         setScene(next);
       }
-      renderer3d?.renderAt(t);
+      if (t < T_END) frameHandle = requestAnimationFrame(frame);
     }
 
-    function start() {
-      if (running || prefersReduced) return;
-      running = true;
-      startedAt = performance.now();
-      setScene(stateAt(0));
-      frameHandle = requestAnimationFrame(frame);
-    }
-    function stop() {
-      if (!running) return;
-      running = false;
-      cancelAnimationFrame(frameHandle);
-    }
-
+    // Plays once, the first time the section is in view. Scrolling away and back does
+    // not rebuild the model — what the agent made stays made.
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting) start();
-          else stop();
+          if (!entry.isIntersecting || played || prefersReduced) continue;
+          played = true;
+          startedAt = performance.now();
+          frameHandle = requestAnimationFrame(frame);
         }
       },
       { threshold: 0.35 },
     );
     observer.observe(root);
 
-    // Hidden-pane QA hook: rAF never fires in an invisible pane, so
-    // automation steps the timeline manually and reads DOM + pixels.
+    // Hidden-pane QA hook: rAF never fires in an invisible pane, so automation steps
+    // the timeline manually and reads the DOM.
     (window as unknown as Record<string, unknown>).__rvAgentStep = (t: number) => {
-      const state = stateAt(t);
+      const state = t >= T_END ? FINISHED : stateAt(t);
       setScene(state);
-      renderer3d?.renderAt(t);
       return state;
     };
 
     return () => {
-      disposed = true;
-      stop();
+      cancelAnimationFrame(frameHandle);
       observer.disconnect();
-      renderer3d?.dispose();
       delete (window as unknown as Record<string, unknown>).__rvAgentStep;
     };
-    // Scene is a self-driving timeline; construction happens once.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const userDone = scene.userChars >= USER_TEXT.length;
   const showAgent = scene.agentChars > 0;
+  const building = scene.buildProgress < 1;
 
   return (
     <div className="cv5-agent-live" ref={rootRef}>
@@ -298,8 +158,21 @@ export function AgentLiveDemo() {
         ) : null}
       </div>
 
-      <div className="cv5-agent-stage" ref={stageRef} aria-label="에이전트가 에셋을 만들고 검사하는 3D 데모">
-        <span className="cv5-agent-stage-tag">지금 만드는 중 · market-stall.glb</span>
+      <div className="cv5-agent-stage" aria-label="에이전트가 만든 시장 노점 — 드래그해서 돌려보세요" data-building={building ? "true" : undefined}>
+        {/* The real file on sale, in the same viewer the shop uses. It is interactive from
+            the first frame; the veil only says what the agent is doing. */}
+        <EmbeddedGlbViewer
+          src={GLB_URL}
+          alt="에이전트가 만든 시장 노점 — 드래그해서 돌려보세요"
+          hint="드래그 회전 · 휠 줌 · 실제 판매 파일"
+        />
+        <span className="cv5-agent-stage-tag">{building ? "지금 만드는 중 · market-stall.glb" : "만들어진 파일 · market-stall.glb"}</span>
+        {building && scene.checked > 0 ? (
+          <div className="cv5-agent-veil" aria-hidden="true">
+            <span style={{ width: `${Math.round(scene.buildProgress * 100)}%` }} />
+            <small>만드는 중 {Math.round(scene.buildProgress * 100)}%</small>
+          </div>
+        ) : null}
         {scene.scanning ? <span className="cv5-agent-scan">검사 중 · 17개 항목</span> : null}
         {scene.badge ? <span className="cv5-agent-badge">100점 · 막는 문제 0건</span> : null}
       </div>
