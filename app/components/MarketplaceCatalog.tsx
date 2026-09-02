@@ -760,7 +760,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
               A download link that answers 401 in JSON is not a link, it is a trap: until the
               visitor holds the entitlement the row says what will open it instead. */}
           <div className={styles.detailFilesHead}>{beta ? "받으면 열리는 파일" : "결제하면 열리는 파일"}</div>
-          <div className={styles.files}>{listing.artifacts.map((artifact) => <article className={styles.fileRow} key={artifact.fileName}><div><Icon name={artifact.contentType === "image/png" ? "image" : artifact.contentType.includes("gltf") ? "box" : "fileJson"} size={17} /><strong>{artifact.fileName}</strong></div><span>{roleLabel(artifact.role)} · {formatBytes(artifact.byteLength)}</span><code>{artifact.sha256.slice(0, 16)}…</code>{owned || listing.priceCents === 0 ? <a href={`/api/marketplace/assets/${encodeURIComponent(listing.assetId)}?file=${encodeURIComponent(artifact.fileName)}`} download={artifact.fileName}>다운로드</a> : <span className={styles.fileLocked}>{beta ? "받기 버튼을 누르면 열립니다" : "결제 후 열립니다"}</span>}</article>)}</div>
+          <div className={styles.files}>{listing.artifacts.filter((artifact) => !PAGE_IMAGE_ROLES.has(artifact.role.trim().toLowerCase())).map((artifact) => <article className={styles.fileRow} key={artifact.fileName}><div><Icon name={artifact.contentType === "image/png" ? "image" : artifact.contentType.includes("gltf") ? "box" : "fileJson"} size={17} /><strong>{artifact.fileName}</strong></div><span>{roleLabel(artifact.role)} · {formatBytes(artifact.byteLength)}</span><code>{artifact.sha256.slice(0, 16)}…</code>{owned || listing.priceCents === 0 ? <a href={`/api/marketplace/assets/${encodeURIComponent(listing.assetId)}?file=${encodeURIComponent(artifact.fileName)}`} download={artifact.fileName}>다운로드</a> : <span className={styles.fileLocked}>{beta ? "받기 버튼을 누르면 열립니다" : "결제 후 열립니다"}</span>}</article>)}</div>
         </div>
       </section>
 
@@ -1046,6 +1046,10 @@ function describePicture(listing: DetailListing): Array<{ head: string; tail: st
 }
 
 /** The storage role of a file, said in the words of the person downloading it. */
+// The hero and preview images are how the page shows a product, not what a buyer takes
+// home; listing them as downloadable files made a six-tree pack look like eighteen files.
+const PAGE_IMAGE_ROLES = new Set(["hero", "preview", "page"]);
+
 function roleLabel(role: string): string {
   const labels: Record<string, string> = {
     entry: "본 파일",

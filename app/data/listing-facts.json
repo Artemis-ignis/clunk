@@ -1,6 +1,6 @@
 {
   "schema": "clunk.listing-facts.v1",
-  "generatedAt": "2026-09-02T07:10:24.024Z",
+  "generatedAt": "2026-09-02T08:38:48.256Z",
   "sources": [
     "outputs\\market-launch\\wave1\\upload-manifest.json",
     "tmp\\listings-snapshot.json"
@@ -445,7 +445,7 @@
         2.9325,
         2.23
       ],
-      "byteLength": 137528,
+      "byteLength": 138020,
       "format": "GLB",
       "animatedParts": [
         "door_pivot",
@@ -560,10 +560,10 @@
       "inspection": null
     },
     "grove-tree-pack-vol1": {
-      "triangles": 10668,
+      "triangles": 11008,
       "materials": 12,
       "boundsMetres": null,
-      "byteLength": 189820,
+      "byteLength": 198464,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -604,7 +604,7 @@
         6.39,
         7.8503
       ],
-      "byteLength": 270876,
+      "byteLength": 270732,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -661,14 +661,14 @@
       }
     },
     "hf-farmhouse": {
-      "triangles": 11822,
+      "triangles": 11954,
       "materials": 4,
       "boundsMetres": [
         8.5651,
         6.2559,
         8.0883
       ],
-      "byteLength": 241332,
+      "byteLength": 247984,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -686,14 +686,14 @@
       }
     },
     "hf-player-farmhand": {
-      "triangles": 6076,
+      "triangles": 7040,
       "materials": 2,
       "boundsMetres": [
         0.817,
         2.4992,
         0.8668
       ],
-      "byteLength": 218244,
+      "byteLength": 240032,
       "format": "GLB",
       "animatedParts": [
         "playerRig",
@@ -743,9 +743,9 @@
       "sheet": null,
       "texture": null,
       "inspection": {
-        "webScore": 99,
-        "mobileScore": 99,
-        "hardBlockers": 0,
+        "webScore": 97,
+        "mobileScore": 97,
+        "hardBlockers": 1,
         "note": null
       }
     },
