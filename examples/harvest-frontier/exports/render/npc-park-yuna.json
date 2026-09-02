@@ -37,6 +37,17 @@
   "triangles": 5560,
   "meshes": 14,
   "vertexColouredMeshes": 14,
+  "animations": [
+    {
+      "name": "idle",
+      "seconds": 7.854,
+      "tracks": 2
+    }
+  ],
+  "animatedParts": [
+    "body",
+    "headPivot"
+  ],
   "boundsMetres": [
     0.9323,
     2.11,

@@ -1,0 +1,43 @@
+{
+  "builtAt": "2026-09-02T08:17:44.065Z",
+  "subject": "npc/player-farmhand.glb",
+  "phases": [
+    0,
+    0.2,
+    0.4,
+    0.6,
+    0.8,
+    0.95
+  ],
+  "views": {
+    "front": "subject yawed so its authored front (-Z) faces the renderer camera",
+    "side": "front view yawed a further -90 deg"
+  },
+  "renderer": "outputs/market-launch/wave1/tools/hero-render.mjs (unmodified)",
+  "strips": {
+    "idle": [
+      "anim-strips/player-idle-front.png",
+      "anim-strips/player-idle-side.png"
+    ],
+    "walk": [
+      "anim-strips/player-walk-front.png",
+      "anim-strips/player-walk-side.png"
+    ],
+    "inspect": [
+      "anim-strips/player-inspect-front.png",
+      "anim-strips/player-inspect-side.png"
+    ],
+    "water": [
+      "anim-strips/player-water-front.png",
+      "anim-strips/player-water-side.png"
+    ],
+    "hoe": [
+      "anim-strips/player-hoe-front.png",
+      "anim-strips/player-hoe-side.png"
+    ],
+    "harvest": [
+      "anim-strips/player-harvest-front.png",
+      "anim-strips/player-harvest-side.png"
+    ]
+  }
+}

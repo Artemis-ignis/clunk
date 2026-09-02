@@ -185,7 +185,11 @@ function bakeMaterialPalette(document: Document, slug: string): { before: number
   return { before, after: palette.size };
 }
 
-const files: string[] = [];
+// Named files may be passed on the command line, so one corrected asset can be
+// packaged without rewriting every .m1.glb in the tree. With no arguments the
+// pass behaves exactly as it always has: the whole exports directory.
+const files: string[] = process.argv.slice(2).map((f) => path.resolve(f));
+if (files.length === 0)
 for (const group of fs.readdirSync(OUT)) {
   const dir = path.join(OUT, group);
   if (!fs.statSync(dir).isDirectory()) continue;
@@ -207,4 +211,8 @@ for (const inputPath of files) {
   report.push({ slug, before, after, ratio: Math.round((after / before) * 1000) / 1000, materials: palette });
   process.stdout.write(`${slug}: ${before} -> ${after} B (${Math.round((1 - after / before) * 100)}% smaller), materials ${palette.before} -> ${palette.after}\n`);
 }
-fs.writeFileSync(path.join(OUT, 'optimize.report.json'), JSON.stringify(report, null, 2));
+// The tree-wide report only belongs to a tree-wide run; a single-file run must
+// not overwrite the record of the last full pass.
+if (process.argv.length <= 2) {
+  fs.writeFileSync(path.join(OUT, 'optimize.report.json'), JSON.stringify(report, null, 2));
+}

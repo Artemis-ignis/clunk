@@ -1,0 +1,36 @@
+{
+  "asset": "hf-windmill",
+  "input": "examples/harvest-frontier/exports/prop/farm-windmill.glb",
+  "output": "examples/harvest-frontier/exports/prop/farm-windmill.fixed.glb",
+  "shaftTiltDeg": 10,
+  "shaftForwardMm": 260,
+  "tiltNode": "blades_tilt (inserted above blades_pivot)",
+  "shaftSleeve": {
+    "radiusMm": 135.8,
+    "lengthMm": 610,
+    "colour": "#4a5852"
+  },
+  "clearanceNote": "verified separately by tmp/audit-hf/mindist.mjs at 24 phases; the hub boss and the sleeve are allowed to meet the roof, which is what a windshaft does",
+  "ground": {
+    "beforeMm": -20.4,
+    "afterMm": 0
+  },
+  "before": {
+    "triangles": 1344,
+    "meshes": 3,
+    "boundsM": [
+      3.3537,
+      5.0204,
+      3.51
+    ]
+  },
+  "after": {
+    "triangles": 1392,
+    "meshes": 4,
+    "boundsM": [
+      3.3537,
+      5.0405,
+      3.51
+    ]
+  }
+}

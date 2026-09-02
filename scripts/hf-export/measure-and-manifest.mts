@@ -83,6 +83,15 @@ for (const entry of raw.assets) {
     note: entry.note,
     // What the re-socketing pass actually did to this NPC's carried kit.
     ...(entry.kit ? { kit: entry.kit } : {}),
+    // The exporter's own account of anything it did NOT copy verbatim from
+    // Harvest Frontier. This used to stop at manifest.raw.json, which meant the
+    // delivered manifest said less about the asset than the working file did -
+    // and the authoring block is exactly what a buyer needs in order to know
+    // which clips are replayed and which were rebuilt.
+    ...(entry.authoring ? { authoring: entry.authoring } : {}),
+    ...(entry.axisFix ? { axisFix: entry.axisFix } : {}),
+    ...(entry.toolVisibility ? { toolVisibility: entry.toolVisibility } : {}),
+    ...(entry.postProcess ? { postProcess: entry.postProcess } : {}),
     render: fs.existsSync(path.join(OUT, 'render', `${renderName}.png`)) ? `render/${renderName}.png` : null,
   });
   process.stdout.write(`${entry.group}/${entry.slug}: raw ${rawMeasured.triangles}t/${rawMeasured.drawCalls}d/${rawMeasured.materials}m -> m1 ${m1Measured?.triangles}t/${m1Measured?.drawCalls}d/${m1Measured?.materials}m | ${m1Measured?.sizeMeters.x}x${m1Measured?.sizeMeters.y}x${m1Measured?.sizeMeters.z} m | clips ${clips.map((c) => `${c.name}:${c.seconds}s`).join(',') || '-'}\n`);

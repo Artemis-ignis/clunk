@@ -25,3 +25,11 @@ declare module '*/Harvest Frontier/node_modules/three/build/three.module.js' {
 declare module '*/Harvest Frontier/node_modules/three/examples/jsm/exporters/GLTFExporter.js' {
   export * from 'three/examples/jsm/exporters/GLTFExporter.js';
 }
+
+declare module '*/Harvest Frontier/node_modules/three/examples/jsm/loaders/GLTFLoader.js' {
+  export * from 'three/examples/jsm/loaders/GLTFLoader.js';
+}
+
+declare module '*/Harvest Frontier/node_modules/three/examples/jsm/libs/meshopt_decoder.module.js' {
+  export * from 'three/examples/jsm/libs/meshopt_decoder.module.js';
+}

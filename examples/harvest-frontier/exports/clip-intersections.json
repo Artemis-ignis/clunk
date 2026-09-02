@@ -1,0 +1,361 @@
+{
+  "checkedAt": "2026-09-02T09:27:14.664Z",
+  "file": "npc/player-farmhand.glb",
+  "method": "GLTFLoader -> AnimationMixer.setTime at 6 phases -> every distinct vertex of the gloves and the three tool groups tested against each body mesh by RAY WINDING COUNT (inside = the ray leaves more surfaces than it enters); depth is the distance from an inside vertex to the nearest triangle of that mesh. Bounding boxes are used only to skip pairs that cannot touch.",
+  "phases": [
+    0,
+    0.2,
+    0.4,
+    0.6,
+    0.8,
+    0.95
+  ],
+  "probes": [
+    "leftHandMesh",
+    "rightHandMesh",
+    "wateringCanBody",
+    "wateringCanHandle",
+    "wateringCanSpout",
+    "harvestBasket",
+    "basketHandle",
+    "mesh_15",
+    "hoeBlade"
+  ],
+  "bodies": [
+    "trouserHips",
+    "denimJacketTorso",
+    "head",
+    "strawHat",
+    "leftUpperArm",
+    "leftLowerArm",
+    "rightUpperArm",
+    "rightLowerArm",
+    "leftThigh",
+    "leftShin",
+    "rightThigh",
+    "rightShin"
+  ],
+  "allowedContacts": [
+    "a glove against its own forearm / upper arm",
+    "any tool against the right arm that grips it",
+    "the straw hat against the head"
+  ],
+  "rows": [
+    {
+      "clip": "idle",
+      "phase": 0,
+      "worst": {
+        "probe": "leftHandMesh",
+        "body": "leftThigh",
+        "depthMm": 97.8
+      },
+      "belowGroundMm": 0,
+      "contacts": 271
+    },
+    {
+      "clip": "idle",
+      "phase": 0.2,
+      "worst": {
+        "probe": "leftHandMesh",
+        "body": "leftThigh",
+        "depthMm": 97.8
+      },
+      "belowGroundMm": 7.1,
+      "contacts": 271
+    },
+    {
+      "clip": "idle",
+      "phase": 0.4,
+      "worst": {
+        "probe": "leftHandMesh",
+        "body": "leftThigh",
+        "depthMm": 97.8
+      },
+      "belowGroundMm": 0,
+      "contacts": 271
+    },
+    {
+      "clip": "idle",
+      "phase": 0.6,
+      "worst": {
+        "probe": "leftHandMesh",
+        "body": "leftThigh",
+        "depthMm": 97.8
+      },
+      "belowGroundMm": 11.4,
+      "contacts": 271
+    },
+    {
+      "clip": "idle",
+      "phase": 0.8,
+      "worst": {
+        "probe": "leftHandMesh",
+        "body": "leftThigh",
+        "depthMm": 97.8
+      },
+      "belowGroundMm": 0,
+      "contacts": 271
+    },
+    {
+      "clip": "idle",
+      "phase": 0.95,
+      "worst": {
+        "probe": "leftHandMesh",
+        "body": "leftThigh",
+        "depthMm": 97.8
+      },
+      "belowGroundMm": 9.7,
+      "contacts": 271
+    },
+    {
+      "clip": "walk",
+      "phase": 0,
+      "worst": {
+        "probe": "leftHandMesh",
+        "body": "leftThigh",
+        "depthMm": 97.8
+      },
+      "belowGroundMm": 0,
+      "contacts": 271
+    },
+    {
+      "clip": "walk",
+      "phase": 0.2,
+      "worst": null,
+      "belowGroundMm": 0,
+      "contacts": 0
+    },
+    {
+      "clip": "walk",
+      "phase": 0.4,
+      "worst": {
+        "probe": "rightHandMesh",
+        "body": "rightThigh",
+        "depthMm": 25.9
+      },
+      "belowGroundMm": 0,
+      "contacts": 8
+    },
+    {
+      "clip": "walk",
+      "phase": 0.6,
+      "worst": {
+        "probe": "rightHandMesh",
+        "body": "rightThigh",
+        "depthMm": 25.9
+      },
+      "belowGroundMm": 0,
+      "contacts": 5
+    },
+    {
+      "clip": "walk",
+      "phase": 0.8,
+      "worst": null,
+      "belowGroundMm": 0,
+      "contacts": 0
+    },
+    {
+      "clip": "walk",
+      "phase": 0.95,
+      "worst": {
+        "probe": "rightHandMesh",
+        "body": "rightThigh",
+        "depthMm": 91.3
+      },
+      "belowGroundMm": 6,
+      "contacts": 108
+    },
+    {
+      "clip": "inspect",
+      "phase": 0,
+      "worst": {
+        "probe": "leftHandMesh",
+        "body": "leftThigh",
+        "depthMm": 97.8
+      },
+      "belowGroundMm": 0,
+      "contacts": 271
+    },
+    {
+      "clip": "inspect",
+      "phase": 0.2,
+      "worst": null,
+      "belowGroundMm": 12.3,
+      "contacts": 0
+    },
+    {
+      "clip": "inspect",
+      "phase": 0.4,
+      "worst": null,
+      "belowGroundMm": 16.5,
+      "contacts": 0
+    },
+    {
+      "clip": "inspect",
+      "phase": 0.6,
+      "worst": {
+        "probe": "leftHandMesh",
+        "body": "leftThigh",
+        "depthMm": 65.2
+      },
+      "belowGroundMm": 7.3,
+      "contacts": 22
+    },
+    {
+      "clip": "inspect",
+      "phase": 0.8,
+      "worst": {
+        "probe": "leftHandMesh",
+        "body": "leftThigh",
+        "depthMm": 105.2
+      },
+      "belowGroundMm": 1.9,
+      "contacts": 178
+    },
+    {
+      "clip": "inspect",
+      "phase": 0.95,
+      "worst": {
+        "probe": "leftHandMesh",
+        "body": "leftThigh",
+        "depthMm": 100.1
+      },
+      "belowGroundMm": 0.1,
+      "contacts": 263
+    },
+    {
+      "clip": "water",
+      "phase": 0,
+      "worst": null,
+      "belowGroundMm": 0,
+      "contacts": 0
+    },
+    {
+      "clip": "water",
+      "phase": 0.2,
+      "worst": null,
+      "belowGroundMm": 0,
+      "contacts": 0
+    },
+    {
+      "clip": "water",
+      "phase": 0.4,
+      "worst": null,
+      "belowGroundMm": 0,
+      "contacts": 0
+    },
+    {
+      "clip": "water",
+      "phase": 0.6,
+      "worst": null,
+      "belowGroundMm": 0,
+      "contacts": 0
+    },
+    {
+      "clip": "water",
+      "phase": 0.8,
+      "worst": null,
+      "belowGroundMm": 0,
+      "contacts": 0
+    },
+    {
+      "clip": "water",
+      "phase": 0.95,
+      "worst": null,
+      "belowGroundMm": 0,
+      "contacts": 0
+    },
+    {
+      "clip": "hoe",
+      "phase": 0,
+      "worst": null,
+      "belowGroundMm": 0,
+      "contacts": 0
+    },
+    {
+      "clip": "hoe",
+      "phase": 0.2,
+      "worst": null,
+      "belowGroundMm": 0,
+      "contacts": 0
+    },
+    {
+      "clip": "hoe",
+      "phase": 0.4,
+      "worst": null,
+      "belowGroundMm": 0.1,
+      "contacts": 0
+    },
+    {
+      "clip": "hoe",
+      "phase": 0.6,
+      "worst": null,
+      "belowGroundMm": 0.1,
+      "contacts": 0
+    },
+    {
+      "clip": "hoe",
+      "phase": 0.8,
+      "worst": {
+        "probe": "rightHandMesh",
+        "body": "leftLowerArm",
+        "depthMm": 10.6
+      },
+      "belowGroundMm": 0.5,
+      "contacts": 4
+    },
+    {
+      "clip": "hoe",
+      "phase": 0.95,
+      "worst": null,
+      "belowGroundMm": 0.1,
+      "contacts": 0
+    },
+    {
+      "clip": "harvest",
+      "phase": 0,
+      "worst": null,
+      "belowGroundMm": 0,
+      "contacts": 0
+    },
+    {
+      "clip": "harvest",
+      "phase": 0.2,
+      "worst": null,
+      "belowGroundMm": 0.2,
+      "contacts": 0
+    },
+    {
+      "clip": "harvest",
+      "phase": 0.4,
+      "worst": null,
+      "belowGroundMm": 0,
+      "contacts": 0
+    },
+    {
+      "clip": "harvest",
+      "phase": 0.6,
+      "worst": null,
+      "belowGroundMm": 0.1,
+      "contacts": 0
+    },
+    {
+      "clip": "harvest",
+      "phase": 0.8,
+      "worst": {
+        "probe": "rightHandMesh",
+        "body": "leftLowerArm",
+        "depthMm": 2.1
+      },
+      "belowGroundMm": 0.1,
+      "contacts": 2
+    },
+    {
+      "clip": "harvest",
+      "phase": 0.95,
+      "worst": null,
+      "belowGroundMm": 0,
+      "contacts": 0
+    }
+  ]
+}

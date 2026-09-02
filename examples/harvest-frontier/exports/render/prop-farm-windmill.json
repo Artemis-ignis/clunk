@@ -44,6 +44,9 @@
       "tracks": 1
     }
   ],
+  "animatedParts": [
+    "blades_pivot"
+  ],
   "boundsMetres": [
     3.3537,
     5.0204,

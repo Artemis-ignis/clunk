@@ -28,11 +28,18 @@ async function load(file: string): Promise<{ scene: THREE.Group; animations: THR
 
 interface ClipReport {
   clip: string;
+  scaledUpNodes?: string[];
   seconds: number;
   tracks: number;
   unbound: string[];
   movedNodes: number;
   maxDelta: number;
+  /**
+   * Largest gap between a track's first and last keyframe. A clip meant to loop
+   * has to close on itself, or it pops once per cycle - and a pop in a walk or
+   * a hoe swing is the kind of thing a buyer notices on the second play.
+   */
+  loopGap: number;
 }
 
 function snapshot(scene: THREE.Object3D): Map<string, number[]> {
@@ -41,6 +48,7 @@ function snapshot(scene: THREE.Object3D): Map<string, number[]> {
     state.set(node.uuid, [
       node.position.x, node.position.y, node.position.z,
       node.quaternion.x, node.quaternion.y, node.quaternion.z, node.quaternion.w,
+      node.scale.x, node.scale.y, node.scale.z,
     ]);
   });
   return state;
@@ -89,6 +97,7 @@ for (const file of files) {
         const now = [
           node.position.x, node.position.y, node.position.z,
           node.quaternion.x, node.quaternion.y, node.quaternion.z, node.quaternion.w,
+          node.scale.x, node.scale.y, node.scale.z,
         ];
         const delta = Math.max(...now.map((v, i) => Math.abs(v - (before[i] ?? 0))));
         if (delta > 1e-5) moved.add(node.uuid);
@@ -104,27 +113,58 @@ for (const file of files) {
       if (!before) return;
       node.position.set(before[0]!, before[1]!, before[2]!);
       node.quaternion.set(before[3]!, before[4]!, before[5]!, before[6]!);
+      node.scale.set(before[7]!, before[8]!, before[9]!);
     });
+
+    // Which nodes this clip scales up from the file's rest scale of 0 - the
+    // glTF-has-no-visibility trick, verified rather than assumed.
+    const shown: string[] = [];
+    {
+      const probe = new THREE.AnimationMixer(scene);
+      probe.clipAction(clip).play();
+      probe.setTime(clip.duration * 0.5);
+      scene.traverse((node) => { if (node.scale.x > 0.5 && (rest.get(node.uuid)?.[7] ?? 1) < 0.5) shown.push(node.name); });
+      probe.stopAllAction();
+      probe.uncacheClip(clip);
+      scene.traverse((node) => {
+        const before = rest.get(node.uuid);
+        if (before) node.scale.set(before[7]!, before[8]!, before[9]!);
+      });
+    }
+
+    // Does the clip close? Compare each track's first sample against its last.
+    const loopGap = Math.max(0, ...clip.tracks.map((track) => {
+      const stride = track.values.length / track.times.length;
+      let gap = 0;
+      for (let i = 0; i < stride; i += 1) {
+        const first = track.values[i] ?? 0;
+        const last = track.values[track.values.length - stride + i] ?? 0;
+        gap = Math.max(gap, Math.abs(first - last));
+      }
+      return gap;
+    }));
 
     const row: ClipReport = {
       clip: clip.name,
+      scaledUpNodes: shown,
       seconds: Math.round(clip.duration * 1000) / 1000,
       tracks: clip.tracks.length,
       unbound,
       movedNodes,
       maxDelta: Math.round(maxDelta * 100000) / 100000,
+      loopGap: Math.round(loopGap * 100000) / 100000,
     };
     rows.push(row);
     const ok = unbound.length === 0 && movedNodes > 0;
     if (!ok) failures += 1;
-    process.stdout.write(`${ok ? 'PASS' : 'FAIL'}  ${slug.padEnd(18)} ${clip.name.padEnd(9)} ${String(row.seconds).padStart(6)}s  tracks=${String(row.tracks).padStart(2)}  unbound=${unbound.length}  nodesMoved=${row.movedNodes}  maxDelta=${row.maxDelta}\n`);
+    process.stdout.write(`${ok ? 'PASS' : 'FAIL'}  ${slug.padEnd(18)} ${clip.name.padEnd(9)} ${String(row.seconds).padStart(6)}s  tracks=${String(row.tracks).padStart(2)}  unbound=${unbound.length}  nodesMoved=${row.movedNodes}  maxDelta=${row.maxDelta}  loopGap=${row.loopGap}\n`);
   }
   report[slug] = rows;
 }
 
 fs.writeFileSync(path.join(OUT, 'clip-verification.json'), JSON.stringify({
   checkedAt: new Date().toISOString(),
-  method: 'GLTFLoader (+MeshoptDecoder) -> PropertyBinding.findNode per track -> AnimationMixer.setTime at 4 phases -> local TRS diff vs rest pose',
+  method: 'GLTFLoader (+MeshoptDecoder) -> PropertyBinding.findNode per track -> AnimationMixer.setTime at 4 phases -> local TRS diff vs rest pose; loopGap is the largest first-keyframe-to-last-keyframe difference across the clip tracks',
   failures,
   assets: report,
 }, null, 2));

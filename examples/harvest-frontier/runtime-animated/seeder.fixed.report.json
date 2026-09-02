@@ -1,0 +1,319 @@
+{
+  "input": "examples\\harvest-frontier\\runtime-animated\\seeder.compact.m1.glb",
+  "output": "examples\\harvest-frontier\\runtime-animated\\seeder.fixed.glb",
+  "deadTracks": {
+    "baked": [
+      {
+        "node": "pivotrowUnit01",
+        "property": "quaternion",
+        "clips": [
+          "sow"
+        ],
+        "constant": [
+          0,
+          0,
+          -0.027497,
+          0.999634
+        ],
+        "restBefore": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "restAfter": [
+          0,
+          0,
+          -0.027497,
+          0.999622
+        ],
+        "alsoAnimatedLiveIn": []
+      },
+      {
+        "node": "pivotrowUnit02",
+        "property": "quaternion",
+        "clips": [
+          "sow"
+        ],
+        "constant": [
+          0,
+          0,
+          -0.027497,
+          0.999634
+        ],
+        "restBefore": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "restAfter": [
+          0,
+          0,
+          -0.027497,
+          0.999622
+        ],
+        "alsoAnimatedLiveIn": []
+      },
+      {
+        "node": "pivotrowUnit03",
+        "property": "quaternion",
+        "clips": [
+          "sow"
+        ],
+        "constant": [
+          0,
+          0,
+          -0.027497,
+          0.999634
+        ],
+        "restBefore": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "restAfter": [
+          0,
+          0,
+          -0.027497,
+          0.999622
+        ],
+        "alsoAnimatedLiveIn": []
+      },
+      {
+        "node": "pivotrowUnit04",
+        "property": "quaternion",
+        "clips": [
+          "sow"
+        ],
+        "constant": [
+          0,
+          0,
+          -0.027497,
+          0.999634
+        ],
+        "restBefore": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "restAfter": [
+          0,
+          0,
+          -0.027497,
+          0.999622
+        ],
+        "alsoAnimatedLiveIn": []
+      },
+      {
+        "node": "pivotdepthAdjust",
+        "property": "quaternion",
+        "clips": [
+          "sow"
+        ],
+        "constant": [
+          0,
+          0,
+          -0.059969,
+          0.998199
+        ],
+        "restBefore": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "restAfter": [
+          0,
+          0,
+          -0.059969,
+          0.9982
+        ],
+        "alsoAnimatedLiveIn": []
+      }
+    ],
+    "refused": [],
+    "removedByClip": [
+      {
+        "clip": "sow",
+        "removed": [
+          "pivotrowUnit01.quaternion",
+          "pivotrowUnit02.quaternion",
+          "pivotrowUnit03.quaternion",
+          "pivotrowUnit04.quaternion",
+          "pivotdepthAdjust.quaternion"
+        ],
+        "tracksBefore": 29,
+        "tracksAfter": 24
+      }
+    ]
+  },
+  "strayPlank": {
+    "decision": "deleted",
+    "removedNode": "depthAdjustment (pivotdepthAdjust -> depthAdjuster + depthAdjusterHandle)",
+    "trianglesRemoved": 376,
+    "parts": [
+      {
+        "name": "depthAdjuster",
+        "colour": "#b4ad8e",
+        "boxMm": {
+          "min": [
+            -5.9,
+            118.7,
+            -770
+          ],
+          "max": [
+            329.6,
+            907.2,
+            -630
+          ]
+        }
+      },
+      {
+        "name": "depthAdjusterHandle",
+        "colour": "#b64a38",
+        "boxMm": {
+          "min": [
+            -33.6,
+            758.2,
+            -823.8
+          ],
+          "max": [
+            223.1,
+            826.5,
+            -576.2
+          ]
+        }
+      }
+    ],
+    "hangsFromYmm": 907.2,
+    "endsAtYmm": 118.7,
+    "atZmm": -700,
+    "rowStationsZmm": [
+      -1200,
+      -400,
+      400,
+      1200
+    ],
+    "itCut": [
+      "toolbarBeam",
+      "toolbarRail",
+      "hitchBraceLeft",
+      "lowerLinkPinLeft"
+    ],
+    "anythingSupportingItsLowerEnd": [],
+    "machineAlreadyHasDepthAdjustment": [
+      "rowDepthLeverStem01",
+      "rowDepthLeverKnob01",
+      "rowDepthLeverStem02",
+      "rowDepthLeverKnob02",
+      "rowDepthLeverStem03",
+      "rowDepthLeverKnob03",
+      "rowDepthLeverStem04",
+      "rowDepthLeverKnob04"
+    ],
+    "whyNotMirrored": "a mirror at z = +700 would be a second plank ending in the same mid air; the seeder adjusts depth per row, and those levers are already modelled"
+  },
+  "ground": {
+    "movedNode": "seederRoot",
+    "raisedMm": 135.6,
+    "worstMinYmmBefore": -135.6,
+    "worstMinYmmAfter": 0,
+    "restMinYmmBefore": -135.4,
+    "restMinYmmAfter": 0.2,
+    "perPhaseBefore": [
+      {
+        "pose": "rest",
+        "minYmm": -135.4
+      },
+      {
+        "pose": "sow@0",
+        "minYmm": -135.4
+      },
+      {
+        "pose": "sow@0.125",
+        "minYmm": -135.6
+      },
+      {
+        "pose": "sow@0.25",
+        "minYmm": -133.9
+      },
+      {
+        "pose": "sow@0.375",
+        "minYmm": -133.2
+      },
+      {
+        "pose": "sow@0.5",
+        "minYmm": -135.4
+      },
+      {
+        "pose": "sow@0.625",
+        "minYmm": -135.6
+      },
+      {
+        "pose": "sow@0.75",
+        "minYmm": -133.9
+      },
+      {
+        "pose": "sow@0.875",
+        "minYmm": -133.2
+      }
+    ],
+    "perPhaseAfter": [
+      {
+        "pose": "rest",
+        "minYmm": 0.2
+      },
+      {
+        "pose": "sow@0",
+        "minYmm": 0.2
+      },
+      {
+        "pose": "sow@0.125",
+        "minYmm": 0
+      },
+      {
+        "pose": "sow@0.25",
+        "minYmm": 1.7
+      },
+      {
+        "pose": "sow@0.375",
+        "minYmm": 2.4
+      },
+      {
+        "pose": "sow@0.5",
+        "minYmm": 0.2
+      },
+      {
+        "pose": "sow@0.625",
+        "minYmm": 0
+      },
+      {
+        "pose": "sow@0.75",
+        "minYmm": 1.7
+      },
+      {
+        "pose": "sow@0.875",
+        "minYmm": 2.4
+      }
+    ]
+  },
+  "hopperDecals": {
+    "left": "untouched, as asked",
+    "meshes": [
+      "hopperInspectionWindow01",
+      "hopperHandle01",
+      "hopperInspectionWindow02",
+      "hopperHandle02",
+      "hopperInspectionWindow03",
+      "hopperHandle03",
+      "hopperInspectionWindow04",
+      "hopperHandle04"
+    ]
+  },
+  "triangles": {
+    "after": 51602
+  }
+}

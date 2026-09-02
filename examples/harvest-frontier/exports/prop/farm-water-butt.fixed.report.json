@@ -1,0 +1,52 @@
+{
+  "asset": "hf-water-butt",
+  "input": "examples/harvest-frontier/exports/prop/farm-water-butt.glb",
+  "output": "examples/harvest-frontier/exports/prop/farm-water-butt.fixed.glb",
+  "puddleLumpsRemoved": 2,
+  "puddleTrianglesRemoved": 60,
+  "puddleSizeMm": [
+    [
+      160,
+      24,
+      40
+    ],
+    [
+      800,
+      56,
+      800
+    ]
+  ],
+  "ladderRailsCut": [
+    {
+      "beforeTopMm": 2248,
+      "afterTopMm": 2048
+    },
+    {
+      "beforeTopMm": 2248,
+      "afterTopMm": 2048
+    }
+  ],
+  "rimYmm": 2048,
+  "notChanged": [
+    "barrel diameter 1.55 m and total height 2.33 m are Harvest Frontier's own scale"
+  ],
+  "groundMinYmm": -3.9,
+  "before": {
+    "triangles": 1908,
+    "meshes": 2,
+    "boundsM": [
+      1.5958,
+      2.3255,
+      2.2704
+    ]
+  },
+  "after": {
+    "triangles": 1848,
+    "meshes": 2,
+    "boundsM": [
+      1.5958,
+      2.3255,
+      1.8744
+    ]
+  }
+}

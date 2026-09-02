@@ -38,6 +38,12 @@
   "meshes": 9,
   "vertexColouredMeshes": 9,
   "animations": [],
+  "animatedParts": [
+    "toolhoeslot",
+    "toolwaterslot",
+    "toolharvestslot",
+    "toolinspectslot"
+  ],
   "boundsMetres": [
     2.0673,
     0.8941,

@@ -1,8 +1,8 @@
 [
   {
     "slug": "barn",
-    "before": 1785016,
-    "after": 270876,
+    "before": 1785072,
+    "after": 270732,
     "ratio": 0.152,
     "materials": {
       "before": 20,
@@ -11,9 +11,9 @@
   },
   {
     "slug": "farmhouse",
-    "before": 1537768,
-    "after": 241332,
-    "ratio": 0.157,
+    "before": 1557720,
+    "after": 247984,
+    "ratio": 0.159,
     "materials": {
       "before": 15,
       "after": 4
@@ -131,11 +131,11 @@
   },
   {
     "slug": "player-farmhand",
-    "before": 1088128,
-    "after": 218244,
-    "ratio": 0.201,
+    "before": 1166260,
+    "after": 244496,
+    "ratio": 0.21,
     "materials": {
-      "before": 14,
+      "before": 21,
       "after": 2
     }
   },

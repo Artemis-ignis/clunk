@@ -1,0 +1,785 @@
+{
+  "generatedAt": "2026-09-02T08:12:53.561Z",
+  "source": "Harvest Frontier (read-only) driver code; every rate cites its file and line",
+  "method": "read the shipped GLB with @gltf-transform (EXT_meshopt_compression decoded), add animation samplers/channels only, re-encode with meshopt - no geometry, material or node transform is edited",
+  "machines": [
+    {
+      "machine": "tractor",
+      "file": "tractor.compact.m1.glb",
+      "source": "examples/harvest-frontier/runtime/tractor.compact.m1.glb",
+      "bytes": {
+        "source": 840136,
+        "animated": 852896
+      },
+      "workSpeedMetresPerSecond": 6.6,
+      "clips": [
+        {
+          "name": "drive",
+          "seconds": 2.17055,
+          "channels": 17,
+          "worstLoopClosureAdjustment": "3.51%",
+          "note": "straight cruise at 6.6 m/s (IMPLEMENT_WORK_MAX_SPEED). the tractor derivative ships with its cultivator attached (tractor.ts:410-422), so the implement works while the tractor drives. No hitch motion: nothing in the game ever writes to socket.attach.implement.",
+          "tracks": [
+            {
+              "node": "wheelFrontLeft",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -11.578947368421053,
+              "loopClosureFactor": 1,
+              "keys": 67,
+              "source": "gameSession.ts:5296-5299 roll; radius 0.57 from tractor.ts:378"
+            },
+            {
+              "node": "wheelFrontRight",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -11.578947368421053,
+              "loopClosureFactor": 1,
+              "keys": 67,
+              "source": "gameSession.ts:5296-5299 roll; radius 0.57 from tractor.ts:379"
+            },
+            {
+              "node": "wheelRearLeft",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -8.68421052631579,
+              "loopClosureFactor": 1,
+              "keys": 67,
+              "source": "gameSession.ts:5296-5299 roll; radius 0.76 from tractor.ts:380"
+            },
+            {
+              "node": "wheelRearRight",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -8.68421052631579,
+              "loopClosureFactor": 1,
+              "keys": 67,
+              "source": "gameSession.ts:5296-5299 roll; radius 0.76 from tractor.ts:381"
+            },
+            {
+              "node": "gaugeWheelLeft",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -30,
+              "loopClosureFactor": 0.96491,
+              "keys": 67,
+              "source": "implements.ts:605-610 roll; radius 0.22 from implements.ts:443"
+            },
+            {
+              "node": "gaugeWheelRight",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -30,
+              "loopClosureFactor": 0.96491,
+              "keys": 67,
+              "source": "implements.ts:605-610 roll; radius 0.22 from implements.ts:451"
+            },
+            {
+              "node": "pivot.tine01",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": 52.8,
+              "loopClosureFactor": 0.98684,
+              "keys": 218,
+              "source": "implements.ts:617-622 (sin(phase * 8 + index * 0.82) * 0.028; phase is metres, implements.ts:603)"
+            },
+            {
+              "node": "pivot.tine02",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": 52.8,
+              "loopClosureFactor": 0.98684,
+              "keys": 218,
+              "source": "implements.ts:617-622 (sin(phase * 8 + index * 0.82) * 0.028; phase is metres, implements.ts:603)"
+            },
+            {
+              "node": "pivot.tine03",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": 52.8,
+              "loopClosureFactor": 0.98684,
+              "keys": 218,
+              "source": "implements.ts:617-622 (sin(phase * 8 + index * 0.82) * 0.028; phase is metres, implements.ts:603)"
+            },
+            {
+              "node": "pivot.tine04",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": 52.8,
+              "loopClosureFactor": 0.98684,
+              "keys": 218,
+              "source": "implements.ts:617-622 (sin(phase * 8 + index * 0.82) * 0.028; phase is metres, implements.ts:603)"
+            },
+            {
+              "node": "pivot.tine05",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": 52.8,
+              "loopClosureFactor": 0.98684,
+              "keys": 218,
+              "source": "implements.ts:617-622 (sin(phase * 8 + index * 0.82) * 0.028; phase is metres, implements.ts:603)"
+            },
+            {
+              "node": "pivot.tine06",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": 52.8,
+              "loopClosureFactor": 0.98684,
+              "keys": 218,
+              "source": "implements.ts:617-622 (sin(phase * 8 + index * 0.82) * 0.028; phase is metres, implements.ts:603)"
+            },
+            {
+              "node": "pivot.tine07",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": 52.8,
+              "loopClosureFactor": 0.98684,
+              "keys": 218,
+              "source": "implements.ts:617-622 (sin(phase * 8 + index * 0.82) * 0.028; phase is metres, implements.ts:603)"
+            },
+            {
+              "node": "pivot.hitchLowerLeft",
+              "path": "rotation",
+              "axis": "z",
+              "radians": -0.29,
+              "keys": 2,
+              "source": "implements.ts:612 working target"
+            },
+            {
+              "node": "pivot.hitchLowerRight",
+              "path": "rotation",
+              "axis": "z",
+              "radians": 0.29,
+              "keys": 2,
+              "source": "implements.ts:613 working target"
+            },
+            {
+              "node": "pivot.hitchTopLink",
+              "path": "rotation",
+              "axis": "z",
+              "radians": -0.19,
+              "keys": 2,
+              "source": "implements.ts:614 working target"
+            },
+            {
+              "node": "pivot.depthAdjust",
+              "path": "rotation",
+              "axis": "z",
+              "radians": -0.24,
+              "keys": 2,
+              "source": "implements.ts:615 working target"
+            }
+          ]
+        },
+        {
+          "name": "steer",
+          "seconds": 4.34111,
+          "channels": 9,
+          "worstLoopClosureAdjustment": "1.32%",
+          "note": "the same cruise with the wheel held hard over each way: target steering alternates between +-0.38 rad and the column slews at 1.8 rad/s, exactly as holding a turn does in game.",
+          "tracks": [
+            {
+              "node": "wheelFrontLeft",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -11.578947368421053,
+              "loopClosureFactor": 1,
+              "keys": 132,
+              "source": "gameSession.ts:5296-5299 roll; radius 0.57 from tractor.ts:378"
+            },
+            {
+              "node": "wheelFrontRight",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -11.578947368421053,
+              "loopClosureFactor": 1,
+              "keys": 132,
+              "source": "gameSession.ts:5296-5299 roll; radius 0.57 from tractor.ts:379"
+            },
+            {
+              "node": "wheelRearLeft",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -8.68421052631579,
+              "loopClosureFactor": 1,
+              "keys": 132,
+              "source": "gameSession.ts:5296-5299 roll; radius 0.76 from tractor.ts:380"
+            },
+            {
+              "node": "wheelRearRight",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -8.68421052631579,
+              "loopClosureFactor": 1,
+              "keys": 132,
+              "source": "gameSession.ts:5296-5299 roll; radius 0.76 from tractor.ts:381"
+            },
+            {
+              "node": "gaugeWheelLeft",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -30,
+              "loopClosureFactor": 1.01316,
+              "keys": 132,
+              "source": "implements.ts:605-610 roll; radius 0.22 from implements.ts:443"
+            },
+            {
+              "node": "gaugeWheelRight",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -30,
+              "loopClosureFactor": 1.01316,
+              "keys": 132,
+              "source": "implements.ts:605-610 roll; radius 0.22 from implements.ts:451"
+            },
+            {
+              "node": "steeringPivot.wheelFrontLeft",
+              "path": "rotation",
+              "axis": "y",
+              "keys": 132,
+              "source": "gameSession.ts:5256-5271 (targetSteering = steering * 0.38, moveTowards at 1.8 rad/s, wheelbase 2.25, track 1.66, steeringPivot.rotation.y = vehicleSteering * 1.8)"
+            },
+            {
+              "node": "steeringPivot.wheelFrontRight",
+              "path": "rotation",
+              "axis": "y",
+              "keys": 132,
+              "source": "gameSession.ts:5256-5271 (targetSteering = steering * 0.38, moveTowards at 1.8 rad/s, wheelbase 2.25, track 1.66, steeringPivot.rotation.y = vehicleSteering * 1.8)"
+            },
+            {
+              "node": "steeringWheel",
+              "path": "rotation",
+              "axis": "y",
+              "keys": 132,
+              "source": "gameSession.ts:5271 (steeringPivot.rotation.y = vehicleSteering * 1.8; addPart registers the node as steeringWheel, tractor.ts:311)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "machine": "cultivator",
+      "file": "cultivator.compact.m1.glb",
+      "source": "examples/harvest-frontier/runtime/cultivator.compact.m1.glb",
+      "bytes": {
+        "source": 189912,
+        "animated": 196616
+      },
+      "workSpeedMetresPerSecond": 6.6,
+      "clips": [
+        {
+          "name": "work",
+          "seconds": 1.627,
+          "channels": 13,
+          "worstLoopClosureAdjustment": "2.98%",
+          "note": "working pass at 6.6 m/s: gauge wheels roll, the seven tines flex on their compliance pivots, and the three-point links and depth link sit at their working angles.",
+          "tracks": [
+            {
+              "node": "gaugeWheelLeft",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -30,
+              "loopClosureFactor": 1.02982,
+              "keys": 50,
+              "source": "implements.ts:605-610 roll; radius 0.22 from implements.ts:443"
+            },
+            {
+              "node": "gaugeWheelRight",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -30,
+              "loopClosureFactor": 1.02982,
+              "keys": 50,
+              "source": "implements.ts:605-610 roll; radius 0.22 from implements.ts:451"
+            },
+            {
+              "node": "pivot.tine01",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": 52.8,
+              "loopClosureFactor": 1.02397,
+              "keys": 170,
+              "source": "implements.ts:617-622 (sin(phase * 8 + index * 0.82) * 0.028; phase is metres, implements.ts:603)"
+            },
+            {
+              "node": "pivot.tine02",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": 52.8,
+              "loopClosureFactor": 1.02397,
+              "keys": 170,
+              "source": "implements.ts:617-622 (sin(phase * 8 + index * 0.82) * 0.028; phase is metres, implements.ts:603)"
+            },
+            {
+              "node": "pivot.tine03",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": 52.8,
+              "loopClosureFactor": 1.02397,
+              "keys": 170,
+              "source": "implements.ts:617-622 (sin(phase * 8 + index * 0.82) * 0.028; phase is metres, implements.ts:603)"
+            },
+            {
+              "node": "pivot.tine04",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": 52.8,
+              "loopClosureFactor": 1.02397,
+              "keys": 170,
+              "source": "implements.ts:617-622 (sin(phase * 8 + index * 0.82) * 0.028; phase is metres, implements.ts:603)"
+            },
+            {
+              "node": "pivot.tine05",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": 52.8,
+              "loopClosureFactor": 1.02397,
+              "keys": 170,
+              "source": "implements.ts:617-622 (sin(phase * 8 + index * 0.82) * 0.028; phase is metres, implements.ts:603)"
+            },
+            {
+              "node": "pivot.tine06",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": 52.8,
+              "loopClosureFactor": 1.02397,
+              "keys": 170,
+              "source": "implements.ts:617-622 (sin(phase * 8 + index * 0.82) * 0.028; phase is metres, implements.ts:603)"
+            },
+            {
+              "node": "pivot.tine07",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": 52.8,
+              "loopClosureFactor": 1.02397,
+              "keys": 170,
+              "source": "implements.ts:617-622 (sin(phase * 8 + index * 0.82) * 0.028; phase is metres, implements.ts:603)"
+            },
+            {
+              "node": "pivot.hitchLowerLeft",
+              "path": "rotation",
+              "axis": "z",
+              "radians": -0.29,
+              "keys": 2,
+              "source": "implements.ts:612 working target"
+            },
+            {
+              "node": "pivot.hitchLowerRight",
+              "path": "rotation",
+              "axis": "z",
+              "radians": 0.29,
+              "keys": 2,
+              "source": "implements.ts:613 working target"
+            },
+            {
+              "node": "pivot.hitchTopLink",
+              "path": "rotation",
+              "axis": "z",
+              "radians": -0.19,
+              "keys": 2,
+              "source": "implements.ts:614 working target"
+            },
+            {
+              "node": "pivot.depthAdjust",
+              "path": "rotation",
+              "axis": "z",
+              "radians": -0.24,
+              "keys": 2,
+              "source": "implements.ts:615 working target"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "machine": "seeder",
+      "file": "seeder.compact.m1.glb",
+      "source": "examples/harvest-frontier/runtime/seeder.compact.m1.glb",
+      "bytes": {
+        "source": 557888,
+        "animated": 318328
+      },
+      "workSpeedMetresPerSecond": 6.6,
+      "clips": [
+        {
+          "name": "sow",
+          "seconds": 1.747,
+          "channels": 29,
+          "worstLoopClosureAdjustment": "2.99%",
+          "note": "sowing pass at 6.6 m/s: opener discs, gauge wheels and closing wheels roll on their own radii, the four seed-meter shafts turn on their ground drive, and the row units and depth link sit at their working angles. The hopper lids do NOT move: seeder.ts authors openAngle -0.72 on pivot.hopperLidNN as metadata and no runtime code ever writes to them.",
+          "tracks": [
+            {
+              "node": "openerDisc01Left",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -25.882352941176467,
+              "loopClosureFactor": 0.97271,
+              "keys": 54,
+              "source": "seeder.ts:1412-1415 roll; radius 0.255 from seeder.ts:879-885 userData.radius"
+            },
+            {
+              "node": "openerDisc01Right",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -25.882352941176467,
+              "loopClosureFactor": 0.97271,
+              "keys": 54,
+              "source": "seeder.ts:1412-1415 roll; radius 0.255 from seeder.ts:879-885 userData.radius"
+            },
+            {
+              "node": "gaugeWheel01",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -31.428571428571427,
+              "loopClosureFactor": 1.02992,
+              "keys": 54,
+              "source": "seeder.ts:1412-1415 roll; radius 0.21 from seeder.ts:896-903 userData.radius"
+            },
+            {
+              "node": "closingWheel01Left",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -36.666666666666664,
+              "loopClosureFactor": 0.98088,
+              "keys": 54,
+              "source": "seeder.ts:1412-1415 roll; radius 0.18 from seeder.ts:914-924 userData.radius"
+            },
+            {
+              "node": "closingWheel01Right",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -36.666666666666664,
+              "loopClosureFactor": 0.98088,
+              "keys": 54,
+              "source": "seeder.ts:1412-1415 roll; radius 0.18 from seeder.ts:914-924 userData.radius"
+            },
+            {
+              "node": "openerDisc02Left",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -25.882352941176467,
+              "loopClosureFactor": 0.97271,
+              "keys": 54,
+              "source": "seeder.ts:1412-1415 roll; radius 0.255 from seeder.ts:879-885 userData.radius"
+            },
+            {
+              "node": "openerDisc02Right",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -25.882352941176467,
+              "loopClosureFactor": 0.97271,
+              "keys": 54,
+              "source": "seeder.ts:1412-1415 roll; radius 0.255 from seeder.ts:879-885 userData.radius"
+            },
+            {
+              "node": "gaugeWheel02",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -31.428571428571427,
+              "loopClosureFactor": 1.02992,
+              "keys": 54,
+              "source": "seeder.ts:1412-1415 roll; radius 0.21 from seeder.ts:896-903 userData.radius"
+            },
+            {
+              "node": "closingWheel02Left",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -36.666666666666664,
+              "loopClosureFactor": 0.98088,
+              "keys": 54,
+              "source": "seeder.ts:1412-1415 roll; radius 0.18 from seeder.ts:914-924 userData.radius"
+            },
+            {
+              "node": "closingWheel02Right",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -36.666666666666664,
+              "loopClosureFactor": 0.98088,
+              "keys": 54,
+              "source": "seeder.ts:1412-1415 roll; radius 0.18 from seeder.ts:914-924 userData.radius"
+            },
+            {
+              "node": "openerDisc03Left",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -25.882352941176467,
+              "loopClosureFactor": 0.97271,
+              "keys": 54,
+              "source": "seeder.ts:1412-1415 roll; radius 0.255 from seeder.ts:879-885 userData.radius"
+            },
+            {
+              "node": "openerDisc03Right",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -25.882352941176467,
+              "loopClosureFactor": 0.97271,
+              "keys": 54,
+              "source": "seeder.ts:1412-1415 roll; radius 0.255 from seeder.ts:879-885 userData.radius"
+            },
+            {
+              "node": "gaugeWheel03",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -31.428571428571427,
+              "loopClosureFactor": 1.02992,
+              "keys": 54,
+              "source": "seeder.ts:1412-1415 roll; radius 0.21 from seeder.ts:896-903 userData.radius"
+            },
+            {
+              "node": "closingWheel03Left",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -36.666666666666664,
+              "loopClosureFactor": 0.98088,
+              "keys": 54,
+              "source": "seeder.ts:1412-1415 roll; radius 0.18 from seeder.ts:914-924 userData.radius"
+            },
+            {
+              "node": "closingWheel03Right",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -36.666666666666664,
+              "loopClosureFactor": 0.98088,
+              "keys": 54,
+              "source": "seeder.ts:1412-1415 roll; radius 0.18 from seeder.ts:914-924 userData.radius"
+            },
+            {
+              "node": "openerDisc04Left",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -25.882352941176467,
+              "loopClosureFactor": 0.97271,
+              "keys": 54,
+              "source": "seeder.ts:1412-1415 roll; radius 0.255 from seeder.ts:879-885 userData.radius"
+            },
+            {
+              "node": "openerDisc04Right",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -25.882352941176467,
+              "loopClosureFactor": 0.97271,
+              "keys": 54,
+              "source": "seeder.ts:1412-1415 roll; radius 0.255 from seeder.ts:879-885 userData.radius"
+            },
+            {
+              "node": "gaugeWheel04",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -31.428571428571427,
+              "loopClosureFactor": 1.02992,
+              "keys": 54,
+              "source": "seeder.ts:1412-1415 roll; radius 0.21 from seeder.ts:896-903 userData.radius"
+            },
+            {
+              "node": "closingWheel04Left",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -36.666666666666664,
+              "loopClosureFactor": 0.98088,
+              "keys": 54,
+              "source": "seeder.ts:1412-1415 roll; radius 0.18 from seeder.ts:914-924 userData.radius"
+            },
+            {
+              "node": "closingWheel04Right",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -36.666666666666664,
+              "loopClosureFactor": 0.98088,
+              "keys": 54,
+              "source": "seeder.ts:1412-1415 roll; radius 0.18 from seeder.ts:914-924 userData.radius"
+            },
+            {
+              "node": "pivot.seedMeterShaft01",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -10.56,
+              "loopClosureFactor": 1.02175,
+              "keys": 54,
+              "source": "seeder.ts:1417-1420; driveRatioRadPerMeter 1.6 from seeder.ts:576 userData"
+            },
+            {
+              "node": "pivot.seedMeterShaft02",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -10.56,
+              "loopClosureFactor": 1.02175,
+              "keys": 54,
+              "source": "seeder.ts:1417-1420; driveRatioRadPerMeter 1.6 from seeder.ts:576 userData"
+            },
+            {
+              "node": "pivot.seedMeterShaft03",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -10.56,
+              "loopClosureFactor": 1.02175,
+              "keys": 54,
+              "source": "seeder.ts:1417-1420; driveRatioRadPerMeter 1.6 from seeder.ts:576 userData"
+            },
+            {
+              "node": "pivot.seedMeterShaft04",
+              "path": "rotation",
+              "axis": "z",
+              "radPerSecond": -10.56,
+              "loopClosureFactor": 1.02175,
+              "keys": 54,
+              "source": "seeder.ts:1417-1420; driveRatioRadPerMeter 1.6 from seeder.ts:576 userData"
+            },
+            {
+              "node": "pivot.rowUnit01",
+              "path": "rotation",
+              "axis": "z",
+              "radians": -0.055,
+              "keys": 2,
+              "source": "seeder.ts:1402 targetRowAngle (also userData.workingAngle, seeder.ts:615)"
+            },
+            {
+              "node": "pivot.rowUnit02",
+              "path": "rotation",
+              "axis": "z",
+              "radians": -0.055,
+              "keys": 2,
+              "source": "seeder.ts:1402 targetRowAngle (also userData.workingAngle, seeder.ts:615)"
+            },
+            {
+              "node": "pivot.rowUnit03",
+              "path": "rotation",
+              "axis": "z",
+              "radians": -0.055,
+              "keys": 2,
+              "source": "seeder.ts:1402 targetRowAngle (also userData.workingAngle, seeder.ts:615)"
+            },
+            {
+              "node": "pivot.rowUnit04",
+              "path": "rotation",
+              "axis": "z",
+              "radians": -0.055,
+              "keys": 2,
+              "source": "seeder.ts:1402 targetRowAngle (also userData.workingAngle, seeder.ts:615)"
+            },
+            {
+              "node": "pivot.depthAdjust",
+              "path": "rotation",
+              "axis": "z",
+              "radians": -0.12,
+              "keys": 2,
+              "source": "seeder.ts:1403 targetDepthAngle"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "machine": "processing-line",
+      "file": "processing.line.m1.glb",
+      "source": "examples/harvest-frontier/runtime/processing.line.m1.glb",
+      "bytes": {
+        "source": 435532,
+        "animated": 311164
+      },
+      "workSpeedMetresPerSecond": 6.6,
+      "clips": [
+        {
+          "name": "run",
+          "seconds": 8.2963,
+          "channels": 11,
+          "worstLoopClosureAdjustment": "5.33%",
+          "note": "the line processing a job: mixer, pump and both conveyor rollers turn and the seven belt stripes travel and wrap. The status lamps are NOT animated - setProcessingMachineActive switches their emissive in one hard step and Harvest Frontier has no blink period to copy, so any pulse would be invented.",
+          "tracks": [
+            {
+              "node": "mixerPivot",
+              "path": "rotation",
+              "axis": "y",
+              "radPerSecond": 2.4,
+              "loopClosureFactor": 0.94669,
+              "keys": 250,
+              "source": "processingMachine.ts:540 (rotation.y += dt * 2.4)"
+            },
+            {
+              "node": "pumpPivot",
+              "path": "rotation",
+              "axis": "x",
+              "radPerSecond": 4.6,
+              "loopClosureFactor": 0.98785,
+              "keys": 250,
+              "source": "processingMachine.ts:541 (rotation.x += dt * 4.6)"
+            },
+            {
+              "node": "conveyorRollerA",
+              "path": "rotation",
+              "axis": "x",
+              "radPerSecond": -3.8,
+              "loopClosureFactor": 0.99651,
+              "keys": 250,
+              "source": "processingMachine.ts:542 (rotation.x -= dt * 3.8)"
+            },
+            {
+              "node": "conveyorRollerB",
+              "path": "rotation",
+              "axis": "x",
+              "radPerSecond": -3.8,
+              "loopClosureFactor": 0.99651,
+              "keys": 250,
+              "source": "processingMachine.ts:543 (rotation.x -= dt * 3.8)"
+            },
+            {
+              "node": "beltMark1",
+              "path": "translation",
+              "axis": "z",
+              "metresPerSecond": 1.35,
+              "keys": 10,
+              "source": "processingMachine.ts:544-546"
+            },
+            {
+              "node": "beltMark2",
+              "path": "translation",
+              "axis": "z",
+              "metresPerSecond": 1.35,
+              "keys": 10,
+              "source": "processingMachine.ts:544-546"
+            },
+            {
+              "node": "beltMark3",
+              "path": "translation",
+              "axis": "z",
+              "metresPerSecond": 1.35,
+              "keys": 10,
+              "source": "processingMachine.ts:544-546"
+            },
+            {
+              "node": "beltMark4",
+              "path": "translation",
+              "axis": "z",
+              "metresPerSecond": 1.35,
+              "keys": 10,
+              "source": "processingMachine.ts:544-546"
+            },
+            {
+              "node": "beltMark5",
+              "path": "translation",
+              "axis": "z",
+              "metresPerSecond": 1.35,
+              "keys": 10,
+              "source": "processingMachine.ts:544-546"
+            },
+            {
+              "node": "beltMark6",
+              "path": "translation",
+              "axis": "z",
+              "metresPerSecond": 1.35,
+              "keys": 10,
+              "source": "processingMachine.ts:544-546"
+            },
+            {
+              "node": "beltMark7",
+              "path": "translation",
+              "axis": "z",
+              "metresPerSecond": 1.35,
+              "keys": 10,
+              "source": "processingMachine.ts:544-546"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

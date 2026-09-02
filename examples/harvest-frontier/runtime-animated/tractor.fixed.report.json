@@ -1,0 +1,264 @@
+{
+  "input": "examples\\harvest-frontier\\runtime-animated\\tractor.compact.m1.glb",
+  "output": "examples\\harvest-frontier\\runtime-animated\\tractor.fixed.glb",
+  "deadTracks": {
+    "baked": [
+      {
+        "node": "pivothitchLowerLeft",
+        "property": "quaternion",
+        "clips": [
+          "drive"
+        ],
+        "constant": [
+          0,
+          0,
+          -0.144505,
+          0.989502
+        ],
+        "restBefore": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "restAfter": [
+          0,
+          0,
+          -0.144505,
+          0.989504
+        ],
+        "alsoAnimatedLiveIn": []
+      },
+      {
+        "node": "pivothitchLowerRight",
+        "property": "quaternion",
+        "clips": [
+          "drive"
+        ],
+        "constant": [
+          0,
+          0,
+          0.144505,
+          0.989502
+        ],
+        "restBefore": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "restAfter": [
+          0,
+          0,
+          0.144505,
+          0.989504
+        ],
+        "alsoAnimatedLiveIn": []
+      },
+      {
+        "node": "pivothitchTopLink",
+        "property": "quaternion",
+        "clips": [
+          "drive"
+        ],
+        "constant": [
+          0,
+          0,
+          -0.094852,
+          0.995483
+        ],
+        "restBefore": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "restAfter": [
+          0,
+          0,
+          -0.094852,
+          0.995491
+        ],
+        "alsoAnimatedLiveIn": []
+      },
+      {
+        "node": "pivotdepthAdjust",
+        "property": "quaternion",
+        "clips": [
+          "drive"
+        ],
+        "constant": [
+          0,
+          0,
+          -0.119694,
+          0.992798
+        ],
+        "restBefore": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "restAfter": [
+          0,
+          0,
+          -0.119695,
+          0.992811
+        ],
+        "alsoAnimatedLiveIn": []
+      }
+    ],
+    "refused": [],
+    "removedByClip": [
+      {
+        "clip": "drive",
+        "removed": [
+          "pivothitchLowerLeft.quaternion",
+          "pivothitchLowerRight.quaternion",
+          "pivothitchTopLink.quaternion",
+          "pivotdepthAdjust.quaternion"
+        ],
+        "tracksBefore": 17,
+        "tracksAfter": 13
+      }
+    ]
+  },
+  "steeringLock": {
+    "criterion": "outboard overshoot of the front tyre past the fender outboard face, inside the fender footprint",
+    "overshootBeforeMm": 74.33,
+    "overshootAfterMm": 0,
+    "scale": 0.4947,
+    "perPivotDeg": {
+      "steeringPivotwheelFrontLeft": {
+        "before": {
+          "maxDeg": 19.19,
+          "minDeg": -25.1
+        },
+        "after": {
+          "maxDeg": 9.49,
+          "minDeg": -12.42
+        }
+      },
+      "steeringPivotwheelFrontRight": {
+        "before": {
+          "maxDeg": 25.1,
+          "minDeg": -19.19
+        },
+        "after": {
+          "maxDeg": 12.42,
+          "minDeg": -9.49
+        }
+      }
+    },
+    "cabSteeringWheelLeftAtDeg": 39.19,
+    "note": "the cab steering wheel keeps its +/-39.19 deg; against a 12.48 deg road-wheel lock that is a 3.1:1 steering ratio, which is closer to a real tractor than the 1.56:1 it had"
+  },
+  "steeringWheel": {
+    "movedNode": "steeringWheel",
+    "backMm": 421.6,
+    "upMm": 315.2,
+    "totalMm": 526.4,
+    "positionBefore": [
+      -180,
+      1570,
+      0
+    ],
+    "positionAfter": [
+      241.6,
+      1885.2,
+      0
+    ],
+    "cutTrianglePairsBefore": 920,
+    "cutPartsBefore": [
+      "chassis",
+      "rearDeck",
+      "hood",
+      "cabWindshield"
+    ],
+    "cutTrianglePairsAfter": 0,
+    "cutPartsAfter": [],
+    "auditDepthBeforeMm": {
+      "tractorMesh3 in hood": 353.82,
+      "tractorMesh2 in hood": 153.45,
+      "tractorMesh2 in chassis": 92.94,
+      "tractorMesh3 in cabWindshield": 44.84
+    }
+  },
+  "seatedFloatingParts": {
+    "rearFenderLeft": {
+      "nearestNeighbour": "tractorStaticDetail",
+      "axis": "z",
+      "movedMm": 37,
+      "gapBeforeMm": 37,
+      "gapAfterMm": 0
+    },
+    "rearFenderRight": {
+      "nearestNeighbour": "tractorStaticDetail",
+      "axis": "z",
+      "movedMm": -37,
+      "gapBeforeMm": 37,
+      "gapAfterMm": 0
+    },
+    "frontBumper": {
+      "nearestNeighbour": "tractorStaticDetail",
+      "axis": "y",
+      "movedMm": 12.5,
+      "gapBeforeMm": 12.5,
+      "gapAfterMm": 0
+    }
+  },
+  "duplicateBolts": {
+    "removed": [
+      "tineBolt1-2",
+      "tineBolt2-2",
+      "tineBolt3-2",
+      "tineBolt4-2",
+      "tineBolt5-2",
+      "tineBolt6-2",
+      "tineBolt7-2"
+    ],
+    "trianglesRemoved": 336,
+    "recentred": [
+      "tineBolt1-1",
+      "tineBolt2-1",
+      "tineBolt3-1",
+      "tineBolt4-1",
+      "tineBolt5-1",
+      "tineBolt6-1",
+      "tineBolt7-1"
+    ],
+    "recentredByMm": 70,
+    "coplanarPairsBefore": "7 x 36 triangle pairs at 0.0000 mm over 26,711 mm2 each"
+  },
+  "ground": {
+    "movedNode": "implementcultivator",
+    "raisedMm": 19.3,
+    "worstMinYmmBefore": {
+      "whole": -19.3,
+      "tractorOnly": 0.7,
+      "implement": -19.3
+    },
+    "worstMinYmmAfter": {
+      "whole": 0,
+      "tractorOnly": 0.7,
+      "implement": 0
+    },
+    "note": "the tractor itself never dips below +0.67 mm; every sub-zero reading in the audit is the cultivator implement on the hitch, so only the implement moves"
+  },
+  "sharedGeometryNote": {
+    "meshes": [
+      "cultivatorFrame",
+      "cultivatorToolbar",
+      "toolbarCrossRail1..4",
+      "cultivatorWingLeft/Right",
+      "tine1..7",
+      "sweep1..7",
+      "gaugeWheelLeft*",
+      "gaugeWheelRight*"
+    ],
+    "statement": "these are present inside tractor.compact.m1.glb under implementcultivator and are the same meshes sold separately as hf-cultivator-compact; their shape is untouched here"
+  },
+  "triangles": {
+    "after": 56056
+  }
+}

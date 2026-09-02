@@ -1,0 +1,68 @@
+{
+  "builtAt": "2026-09-02T17:59:03.167Z",
+  "input": "examples/harvest-frontier/exports/building/barn.glb",
+  "output": "examples/harvest-frontier/exports/building/barn.fixed.glb",
+  "gablesClosed": [
+    {
+      "mesh": "barnFrontGable",
+      "triangles": 192,
+      "boundsMm": [
+        7890,
+        1402.8,
+        260
+      ]
+    },
+    {
+      "mesh": "barnRearGable",
+      "triangles": 192,
+      "boundsMm": [
+        7890,
+        1402.8,
+        260
+      ]
+    }
+  ],
+  "gableGeometry": {
+    "wallTopYmm": 4800,
+    "lapBehindWallMm": 60,
+    "clearanceUnderRoofMm": 30,
+    "note": "top edge stepped in 24 segments, each step taking the LOWER of its two sampled roof-underside heights"
+  },
+  "cornerSkins": {
+    "biteMm": 5,
+    "walls": [
+      {
+        "mesh": "barnRearWall",
+        "beforeWidthMm": 8400,
+        "afterWidthMm": 7890
+      },
+      {
+        "mesh": "barnUpperFront",
+        "beforeWidthMm": 8400,
+        "afterWidthMm": 7890
+      }
+    ]
+  },
+  "duplicateDoorLumpsRemoved": 2,
+  "doorTrianglesRemoved": 1176,
+  "signboardTrianglesRemoved": 4,
+  "coincidentMeshGroupsRemaining": [],
+  "before": {
+    "triangles": 15648,
+    "meshes": 20,
+    "boundsMm": [
+      11039.9,
+      6390,
+      7850
+    ]
+  },
+  "after": {
+    "triangles": 14852,
+    "meshes": 20,
+    "boundsMm": [
+      11039.9,
+      6390,
+      7850
+    ]
+  }
+}

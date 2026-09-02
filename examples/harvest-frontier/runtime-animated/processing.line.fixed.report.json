@@ -1,0 +1,552 @@
+{
+  "builtAt": "2026-09-02T18:11:53.425Z",
+  "input": "examples/harvest-frontier/runtime-animated/processing.line.m1.glb",
+  "output": "examples/harvest-frontier/runtime-animated/processing.line.fixed.glb",
+  "fix1_bottleRail": {
+    "movedNodes": [
+      "bottleRailTop",
+      "bottleRailSupportA",
+      "bottleRailSupportB"
+    ],
+    "movedMm": [
+      0,
+      0,
+      330
+    ],
+    "before": {
+      "rail": [
+        [
+          600,
+          1580,
+          1280
+        ],
+        [
+          3100,
+          1660,
+          1360
+        ]
+      ],
+      "gapToBottle3Mm": 0
+    },
+    "after": {
+      "rail": [
+        [
+          600,
+          1580,
+          1610
+        ],
+        [
+          3100,
+          1660,
+          1690
+        ]
+      ],
+      "gapToBottle3Mm": 140
+    },
+    "perBottleGapMm": [
+      140,
+      90,
+      140,
+      90,
+      140,
+      90
+    ],
+    "postGapsMm": [
+      140,
+      90
+    ]
+  },
+  "fix2_bottleSeating": [
+    {
+      "bottle": "productBottle1",
+      "tableTopMm": 1259.9,
+      "baseBeforeMm": 1275,
+      "floatBeforeMm": 15.1,
+      "droppedMm": 19.1,
+      "baseAfterMm": 1255.9
+    },
+    {
+      "bottle": "productBottle2",
+      "tableTopMm": 1259.9,
+      "baseBeforeMm": 1275,
+      "floatBeforeMm": 15.1,
+      "droppedMm": 19.1,
+      "baseAfterMm": 1255.9
+    },
+    {
+      "bottle": "productBottle3",
+      "tableTopMm": 1259.9,
+      "baseBeforeMm": 1275,
+      "floatBeforeMm": 15.1,
+      "droppedMm": 19.1,
+      "baseAfterMm": 1255.9
+    },
+    {
+      "bottle": "productBottle4",
+      "tableTopMm": 1259.9,
+      "baseBeforeMm": 1275,
+      "floatBeforeMm": 15.1,
+      "droppedMm": 19.1,
+      "baseAfterMm": 1255.9
+    },
+    {
+      "bottle": "productBottle5",
+      "tableTopMm": 1259.9,
+      "baseBeforeMm": 1275,
+      "floatBeforeMm": 15.1,
+      "droppedMm": 19.1,
+      "baseAfterMm": 1255.9
+    },
+    {
+      "bottle": "productBottle6",
+      "tableTopMm": 1259.9,
+      "baseBeforeMm": 1275,
+      "floatBeforeMm": 15.1,
+      "droppedMm": 19.1,
+      "baseAfterMm": 1255.9
+    }
+  ],
+  "fix3_bottleStopper": {
+    "choice": "on the table top",
+    "why": "bottleStopper is a child of the bottleRail group - it is the bottling line end-stop, so it belongs on the line, not on the floor",
+    "before": {
+      "box": [
+        [
+          2690,
+          1300,
+          1070
+        ],
+        [
+          2810,
+          1540,
+          1570
+        ]
+      ],
+      "insideBottle6Mm": 76.2,
+      "floatOverTableMm": 40.1
+    },
+    "after": {
+      "box": [
+        [
+          2800.2,
+          1254.9,
+          1070
+        ],
+        [
+          2920.2,
+          1494.9,
+          1570
+        ]
+      ],
+      "gapToBottle6Mm": 34,
+      "tableTopMm": 1259.9,
+      "baseMm": 1254.9,
+      "insideTableEdgeMm": 54.8
+    }
+  },
+  "fix4_pumpVanes": {
+    "finding": "not orphans: pumpHub sits on pumpCover, the vanes sit on pumpHub; the vanes were cantilevered outboard of the hub",
+    "overhangBeforeMm": 140,
+    "overhangAfterMm": 10,
+    "before": {
+      "pumpVane1": [
+        [
+          610,
+          752.5,
+          1015
+        ],
+        [
+          870,
+          807.5,
+          1085
+        ]
+      ],
+      "pumpVane2": [
+        [
+          610,
+          745,
+          1022.5
+        ],
+        [
+          870,
+          815,
+          1077.5
+        ]
+      ],
+      "hub": [
+        [
+          490,
+          672.8,
+          940
+        ],
+        [
+          730,
+          887.2,
+          1160
+        ]
+      ]
+    },
+    "after": {
+      "pumpVane1": [
+        [
+          480,
+          752.5,
+          1015
+        ],
+        [
+          740,
+          807.5,
+          1085
+        ]
+      ],
+      "pumpVane2": [
+        [
+          484,
+          745,
+          1022.5
+        ],
+        [
+          744,
+          815,
+          1077.5
+        ]
+      ],
+      "hub": [
+        [
+          490,
+          672.8,
+          940
+        ],
+        [
+          730,
+          887.2,
+          1160
+        ]
+      ]
+    }
+  },
+  "fix5_safetyStripe": {
+    "deleted": "foundationSafetyStripe",
+    "trianglesRemoved": 528,
+    "before": {
+      "box": [
+        [
+          -3025,
+          222.6,
+          1750.1
+        ],
+        [
+          3025,
+          257.4,
+          1809.9
+        ]
+      ],
+      "deckTopMm": 209.8
+    }
+  },
+  "fix6_duplicates": {
+    "coincidentGroupsFound": [
+      {
+        "meshes": [
+          "pumpVane1",
+          "pumpVane3"
+        ],
+        "worldBox": [
+          [
+            610,
+            752.5,
+            1015
+          ],
+          [
+            870,
+            807.5,
+            1085
+          ]
+        ],
+        "trianglesEach": [
+          528,
+          528
+        ]
+      },
+      {
+        "meshes": [
+          "pumpVane2",
+          "pumpVane4"
+        ],
+        "worldBox": [
+          [
+            610,
+            745,
+            1022.5
+          ],
+          [
+            870,
+            815,
+            1077.5
+          ]
+        ],
+        "trianglesEach": [
+          528,
+          528
+        ]
+      }
+    ],
+    "deletedNodes": [
+      "pumpVane3",
+      "pumpVane4"
+    ],
+    "trianglesRemoved": 1056,
+    "hopperRim": {
+      "finding": "hopperRimBar1..4 are the four sides of one rim, not four copies; the 718 coplanar pairs are the corners",
+      "action": "hopperRimBar3 / hopperRimBar4 shortened in z, no geometry deleted",
+      "before": {
+        "bar3": [
+          [
+            -3560,
+            3980,
+            -1390
+          ],
+          [
+            -3440,
+            4100,
+            1030
+          ]
+        ],
+        "bar4": [
+          [
+            -1260,
+            3980,
+            -1390
+          ],
+          [
+            -1140,
+            4100,
+            1030
+          ]
+        ]
+      },
+      "after": {
+        "bar3": [
+          [
+            -3560,
+            3980,
+            -1267
+          ],
+          [
+            -3440,
+            4100,
+            907
+          ]
+        ],
+        "bar4": [
+          [
+            -1260,
+            3980,
+            -1267
+          ],
+          [
+            -1140,
+            4100,
+            907
+          ]
+        ]
+      },
+      "cornerGapsMm": [
+        3,
+        3,
+        3,
+        3
+      ]
+    }
+  },
+  "fix7_siloLid": {
+    "coneApexMm": 4769.9,
+    "lid": {
+      "apexBeforeMm": 4975.6,
+      "droppedMm": 189.7,
+      "apexAfterMm": 4785.9,
+      "apexClearanceOverConeMm": 16,
+      "contactRadiusBeforeM": 0.385,
+      "contactRadiusAfterM": 0.57,
+      "slotAtRimBeforeMm": 550,
+      "slotAtRimAfterMm": 360.3,
+      "limit": "the lid is a spheroid of max radius 840 mm and the cone base radius is 820 mm, so no translation can bring the lid rim onto the cone flank; the drop is capped by the cone apex it has to keep covered"
+    },
+    "hatch": {
+      "offsetFromDomeAxisBeforeMm": 169.7,
+      "offsetFromDomeAxisAfterMm": 0,
+      "boxBefore": [
+        [
+          -546.7,
+          4880,
+          -460
+        ],
+        [
+          -113.3,
+          4960,
+          -20
+        ]
+      ],
+      "boxAfter": [
+        [
+          -666.7,
+          4735.9,
+          -340
+        ],
+        [
+          -233.3,
+          4815.9,
+          100
+        ]
+      ],
+      "domeSurfaceAtHatchCornerMm": 4757.6,
+      "burialUnderDomeAtCornerMm": 21.7,
+      "proudOfApexMm": 30
+    }
+  },
+  "fix8_9_crates": {
+    "before": {
+      "crateBody": [
+        [
+          -3501,
+          260,
+          997.6
+        ],
+        [
+          -2499,
+          780,
+          1842.4
+        ]
+      ],
+      "crateBody_1": [
+        [
+          -2908.1,
+          260,
+          1174.4
+        ],
+        [
+          -1931.9,
+          780,
+          1985.6
+        ]
+      ],
+      "crateBody_2": [
+        [
+          -3124.8,
+          777.6,
+          1174.4
+        ],
+        [
+          -2315.2,
+          1235.2,
+          1825.6
+        ]
+      ],
+      "deckTopMm": 209.8,
+      "crateBaseMm": 260,
+      "floatOverDeckMm": 50.1,
+      "rollerBottomMm": 504.3,
+      "headroomUnderRollerMm": 294.5,
+      "crateHeightMm": 520,
+      "overlapCrate1Crate2Mm": [
+        409.1,
+        520,
+        668
+      ],
+      "beltInsideCrate3Mm": [
+        464.8,
+        457.6,
+        651.2
+      ],
+      "rollerInsideCrate2Mm": [
+        898.1,
+        275.7,
+        275.1
+      ]
+    },
+    "after": {
+      "crateBody": [
+        [
+          -2521,
+          205.8,
+          58.9
+        ],
+        [
+          -1519,
+          725.9,
+          903.7
+        ]
+      ],
+      "crateBody_1": [
+        [
+          -2480,
+          205.8,
+          959.5
+        ],
+        [
+          -1560,
+          725.9,
+          1699.5
+        ]
+      ],
+      "crateBody_2": [
+        [
+          -2424.8,
+          729.9,
+          155.7
+        ],
+        [
+          -1615.2,
+          1187.5,
+          806.9
+        ]
+      ],
+      "baseOnDeckMm": [
+        205.8,
+        205.8,
+        209.8
+      ]
+    },
+    "gapsMm": {
+      "frontToBack": 5,
+      "stackToBase": 4,
+      "stackToFront": 110.8,
+      "frontToEndRoller": 0,
+      "frontToBelt": 0,
+      "frontToFootPlateL": 0,
+      "frontToFootPlateR": 0,
+      "frontToFootLegL": 108.4,
+      "frontToFootLegR": 108.4,
+      "stackToBelt": 0,
+      "stackToBrace17": 146.9,
+      "backToTankFootLF": 199
+    },
+    "whyNotUnderTheRoller": "the deck-to-roller headroom is 294 mm and the crate is 520 mm tall; the crate is placed under the last belt run instead, 11 mm short of the roller"
+  },
+  "fix10_ground": {
+    "beforeMm": -79,
+    "afterMm": 0,
+    "lowestMesh": "conveyorFootPlateL"
+  },
+  "before": {
+    "triangles": 50668,
+    "meshes": 145,
+    "boundsM": [
+      7.3753,
+      5.2749,
+      4.2804
+    ],
+    "groundMinYmm": -79
+  },
+  "after": {
+    "triangles": 49084,
+    "meshes": 142,
+    "boundsM": [
+      7.3753,
+      5.2749,
+      4.2804
+    ],
+    "groundMinYmm": 0
+  },
+  "trianglesRemoved": 1584
+}

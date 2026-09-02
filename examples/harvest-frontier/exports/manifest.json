@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-02T06:25:59.741Z",
+  "generatedAt": "2026-09-02T09:29:05.601Z",
   "source": "Harvest Frontier (C:/Users/50106/Desktop/Harvest Frontier) — read-only",
   "exporter": "Clunk/scripts/hf-export/export-hf-assets.mts (three r185 GLTFExporter) + optimize-glb.mts (@gltf-transform meshopt, HF optimize-*-glb.ts pattern)",
   "renderer": "Clunk/outputs/market-launch/wave1/tools/hero-render.mjs (flat-shaded software rasteriser, no PBR)",
@@ -352,14 +352,14 @@
         "meshopt": "npc/player-farmhand.m1.glb"
       },
       "bytes": {
-        "raw": 1088128,
-        "meshopt": 218244
+        "raw": 1166260,
+        "meshopt": 244496
       },
       "measured": {
         "raw": {
-          "triangles": 6076,
-          "drawCalls": 14,
-          "materials": 14,
+          "triangles": 7040,
+          "drawCalls": 21,
+          "materials": 21,
           "sizeMeters": {
             "x": 0.817,
             "y": 2.499,
@@ -368,8 +368,8 @@
           "groundedAtY": 0
         },
         "meshopt": {
-          "triangles": 6076,
-          "drawCalls": 14,
+          "triangles": 7040,
+          "drawCalls": 21,
           "materials": 2,
           "sizeMeters": {
             "x": 0.817,
@@ -383,37 +383,465 @@
         {
           "name": "idle",
           "seconds": 8.976,
-          "tracks": 26
+          "tracks": 29
         },
         {
           "name": "walk",
           "seconds": 0.827,
-          "tracks": 26
+          "tracks": 29
         },
         {
           "name": "inspect",
           "seconds": 0.78,
-          "tracks": 26
+          "tracks": 29
         },
         {
           "name": "water",
-          "seconds": 1.24,
-          "tracks": 26
+          "seconds": 1.6,
+          "tracks": 29
         },
         {
           "name": "hoe",
-          "seconds": 1.02,
-          "tracks": 26
+          "seconds": 1.1,
+          "tracks": 29
         },
         {
           "name": "harvest",
-          "seconds": 1.12,
-          "tracks": 26
+          "seconds": 1.4,
+          "tracks": 29
         }
       ],
       "provenanceAssetId": null,
       "license": "장부에 없음",
-      "note": "clips replay PlayerMotionController; walk spine-sway rate 3.1 -> gait omega so the stride loop closes",
+      "note": "idle / walk / inspect replay PlayerMotionController, with two documented deviations: walk spine-sway rate 3.1 -> gait omega so the stride loop closes, and inspect mirrors the arm chain + toolAnchor through the XY plane because applyAction drives them toward +Z while the rig is authored front = -Z. hoe / water / harvest are CLUNK-AUTHORED (see authoring): HF applyAction never puts the hoe blade on the ground, never aims the watering spout and never picks anything, so those three poses were not saleable and were rebuilt from the rig geometry. Tools ride toolAnchor and are switched per clip by constant scale tracks, since glTF has no visibility animation.",
+      "authoring": {
+        "note": "Clunk-authored action clips; HF's own action poses were not saleable.",
+        "authoredClips": [
+          "water",
+          "hoe",
+          "harvest"
+        ],
+        "replayedClips": [
+          "idle",
+          "walk",
+          "inspect"
+        ],
+        "rejectedSource": {
+          "file": "Harvest Frontier src/engine/animation/playerMotion.ts applyAction",
+          "hoe": "held the hoe horizontally at shoulder height and pushed it forward; the blade never reached the ground and only one hand was on the shaft",
+          "water": "the can dangled at the hip and barely moved; the spout pointed at nothing",
+          "harvest": "the farmer stood holding a basket; nothing was picked"
+        },
+        "method": "body = hip hinge + knee bend on periodic cubic curves, root translation cancelling the sole rise/slide; tool pose authored in world space; arms solved by two-link IK onto it; the off hand grips a point ON the tool geometry",
+        "shoulderFollow": "leftUpperArmPivot / rightUpperArmPivot carry POSITION tracks, because HF parents the arm pivots to playerRig rather than to spine - without them a leaning torso leaves the arms behind in the air",
+        "offHandGrip": {
+          "water": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "hoe": [
+            0.34,
+            0.348,
+            0.356,
+            0.36,
+            0.283,
+            0.339
+          ],
+          "harvest": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "phaseSamples": {
+          "water": [
+            {
+              "phase": 0,
+              "rightHand": [
+                0.226,
+                1.243,
+                -0.569
+              ],
+              "leftHand": [
+                -0.405,
+                0.729,
+                0.014
+              ],
+              "toolTip": [
+                0.258,
+                0.934,
+                -0.818
+              ]
+            },
+            {
+              "phase": 0.2,
+              "rightHand": [
+                0.018,
+                1.253,
+                -0.634
+              ],
+              "leftHand": [
+                -0.422,
+                0.726,
+                0.132
+              ],
+              "toolTip": [
+                -0.004,
+                0.902,
+                -0.85
+              ]
+            },
+            {
+              "phase": 0.4,
+              "rightHand": [
+                0.111,
+                1.227,
+                -0.651
+              ],
+              "leftHand": [
+                -0.42,
+                0.72,
+                0.064
+              ],
+              "toolTip": [
+                0.121,
+                0.869,
+                -0.836
+              ]
+            },
+            {
+              "phase": 0.6,
+              "rightHand": [
+                0.399,
+                1.208,
+                -0.565
+              ],
+              "leftHand": [
+                -0.385,
+                0.72,
+                -0.08
+              ],
+              "toolTip": [
+                0.392,
+                0.87,
+                -0.748
+              ]
+            },
+            {
+              "phase": 0.8,
+              "rightHand": [
+                0.486,
+                1.242,
+                -0.476
+              ],
+              "leftHand": [
+                -0.367,
+                0.726,
+                -0.12
+              ],
+              "toolTip": [
+                0.499,
+                0.902,
+                -0.689
+              ]
+            },
+            {
+              "phase": 0.95,
+              "rightHand": [
+                0.315,
+                1.225,
+                -0.546
+              ],
+              "leftHand": [
+                -0.398,
+                0.729,
+                -0.022
+              ],
+              "toolTip": [
+                0.326,
+                0.929,
+                -0.794
+              ]
+            }
+          ],
+          "hoe": [
+            {
+              "phase": 0,
+              "rightHand": [
+                0.136,
+                1.063,
+                -0.26
+              ],
+              "leftHand": [
+                0.13,
+                1.36,
+                -0.5
+              ],
+              "toolTip": [
+                0.133,
+                1.811,
+                -0.711
+              ]
+            },
+            {
+              "phase": 0.2,
+              "rightHand": [
+                0.123,
+                1.091,
+                -0.239
+              ],
+              "leftHand": [
+                0.114,
+                1.4,
+                -0.48
+              ],
+              "toolTip": [
+                0.117,
+                1.845,
+                -0.686
+              ]
+            },
+            {
+              "phase": 0.4,
+              "rightHand": [
+                0.002,
+                1.026,
+                -0.174
+              ],
+              "leftHand": [
+                -0.006,
+                1.055,
+                -0.603
+              ],
+              "toolTip": [
+                -0.003,
+                1.15,
+                -1.075
+              ]
+            },
+            {
+              "phase": 0.6,
+              "rightHand": [
+                -0.155,
+                0.856,
+                -0.302
+              ],
+              "leftHand": [
+                -0.169,
+                0.454,
+                -0.478
+              ],
+              "toolTip": [
+                -0.165,
+                0.019,
+                -0.677
+              ]
+            },
+            {
+              "phase": 0.8,
+              "rightHand": [
+                -0.046,
+                0.955,
+                -0.194
+              ],
+              "leftHand": [
+                -0.055,
+                0.911,
+                -0.55
+              ],
+              "toolTip": [
+                -0.051,
+                0.908,
+                -1.105
+              ]
+            },
+            {
+              "phase": 0.95,
+              "rightHand": [
+                0.103,
+                1.043,
+                -0.237
+              ],
+              "leftHand": [
+                0.093,
+                1.297,
+                -0.53
+              ],
+              "toolTip": [
+                0.097,
+                1.699,
+                -0.826
+              ]
+            }
+          ],
+          "harvest": [
+            {
+              "phase": 0,
+              "rightHand": [
+                0.368,
+                1.07,
+                -0.254
+              ],
+              "leftHand": [
+                0.156,
+                1.138,
+                -0.38
+              ],
+              "toolTip": [
+                0.37,
+                0.733,
+                -0.301
+              ]
+            },
+            {
+              "phase": 0.2,
+              "rightHand": [
+                0.387,
+                0.899,
+                -0.247
+              ],
+              "leftHand": [
+                -0.045,
+                0.644,
+                -0.36
+              ],
+              "toolTip": [
+                0.389,
+                0.561,
+                -0.294
+              ]
+            },
+            {
+              "phase": 0.4,
+              "rightHand": [
+                0.413,
+                0.591,
+                -0.204
+              ],
+              "leftHand": [
+                -0.064,
+                0.318,
+                -0.353
+              ],
+              "toolTip": [
+                0.415,
+                0.254,
+                -0.25
+              ]
+            },
+            {
+              "phase": 0.6,
+              "rightHand": [
+                0.381,
+                0.859,
+                -0.239
+              ],
+              "leftHand": [
+                -0.012,
+                0.623,
+                -0.345
+              ],
+              "toolTip": [
+                0.383,
+                0.522,
+                -0.286
+              ]
+            },
+            {
+              "phase": 0.8,
+              "rightHand": [
+                0.365,
+                1.053,
+                -0.253
+              ],
+              "leftHand": [
+                0.14,
+                1.097,
+                -0.374
+              ],
+              "toolTip": [
+                0.367,
+                0.716,
+                -0.299
+              ]
+            },
+            {
+              "phase": 0.95,
+              "rightHand": [
+                0.368,
+                1.075,
+                -0.253
+              ],
+              "leftHand": [
+                0.171,
+                1.164,
+                -0.388
+              ],
+              "toolTip": [
+                0.37,
+                0.737,
+                -0.3
+              ]
+            }
+          ]
+        },
+        "notes": [],
+        "groundLift": 0.182
+      },
+      "axisFix": {
+        "mirroredNodes": [
+          "leftUpperArmPivot",
+          "leftLowerArmPivot",
+          "rightUpperArmPivot",
+          "rightLowerArmPivot",
+          "toolAnchor"
+        ],
+        "appliedToClips": [
+          "inspect"
+        ],
+        "transform": "Euler (x, y, z) -> (-x, -y, z), i.e. conjugation by diag(1, 1, -1)",
+        "reason": "applyAction drives the tool chain toward +Z while the rig is authored front = -Z (PLAYER_FRONT_Z = -1, ACTION_WORK_OFFSET = (0,0,-1.15), hoe blade z -0.025). Measured unmirrored: right hand z +0.75..+0.77, hoe head z +1.64 through the whole swing. Only `inspect` still needs the mirror; the other three action clips no longer replay applyAction at all.",
+        "source": "Harvest Frontier src/engine/animation/playerMotion.ts applyAction (lines 895-980), PLAYER_FRONT_Z line 269, ACTION_WORK_OFFSET line 300"
+      },
+      "toolVisibility": {
+        "method": "constant scale track per clip (glTF has no visibility animation)",
+        "defaultScale": 0,
+        "nodes": {
+          "toolHoe": {
+            "authoredName": "tool.hoe",
+            "shownInClip": "hoe"
+          },
+          "toolWateringCan": {
+            "authoredName": "tool.water",
+            "shownInClip": "water"
+          },
+          "toolHarvestBasket": {
+            "authoredName": "tool.harvest",
+            "shownInClip": "harvest"
+          }
+        },
+        "perClip": {
+          "idle": [],
+          "walk": [],
+          "inspect": [],
+          "water": [
+            "toolWateringCan"
+          ],
+          "hoe": [
+            "toolHoe"
+          ],
+          "harvest": [
+            "toolHarvestBasket"
+          ]
+        }
+      },
       "render": "render/npc-player-farmhand.png"
     },
     {
@@ -424,13 +852,13 @@
         "meshopt": "building/farmhouse.m1.glb"
       },
       "bytes": {
-        "raw": 1537768,
-        "meshopt": 241332
+        "raw": 1557720,
+        "meshopt": 247984
       },
       "measured": {
         "raw": {
-          "triangles": 11836,
-          "drawCalls": 15,
+          "triangles": 12364,
+          "drawCalls": 23,
           "materials": 15,
           "sizeMeters": {
             "x": 8.565,
@@ -440,8 +868,8 @@
           "groundedAtY": -0.076
         },
         "meshopt": {
-          "triangles": 11836,
-          "drawCalls": 15,
+          "triangles": 12364,
+          "drawCalls": 23,
           "materials": 4,
           "sizeMeters": {
             "x": 8.565,
@@ -454,7 +882,74 @@
       "animationClips": [],
       "provenanceAssetId": "processing.barn.open-front.m2",
       "license": "Project-original procedural code; accepted reference is not shipped as runtime geometry",
-      "note": "world copy, after createFarmBuildings runs mergeStaticParts. The ledger entry quoted is the one whose runtimeDerivative is src/engine/assets/buildings.ts, the file that authors both buildings; the visual references are ledgered separately as reference.farm-corner.generated.2026-08-19 / reference.processing-barn.generated.2026-08-19 and are not shipped geometry.",
+      "note": "world copy, after createFarmBuildings runs mergeStaticParts. The ledger entry quoted is the one whose runtimeDerivative is src/engine/assets/buildings.ts, the file that authors both buildings; the visual references are ledgered separately as reference.farm-corner.generated.2026-08-19 / reference.processing-barn.generated.2026-08-19 and are not shipped geometry. Two export-time repairs, both recorded under postProcess.",
+      "postProcess": {
+        "rearWindows": {
+          "added": [
+            "windowRearLeft",
+            "windowRearRight",
+            "windowRearAttic",
+            "windowSideLeft"
+          ],
+          "template": "triangles copied out of the farmhouse's own front window (createWindow, buildings.ts:76) after mergeStaticParts absorbed its frame into farmhouse.batch.*",
+          "frameTriangles": 120,
+          "paneMeshes": 1
+        },
+        "darkTileLift": {
+          "floor": 0.045,
+          "floorLow": 0.022,
+          "meshes": [
+            {
+              "mesh": "chimney",
+              "vertices": 3312,
+              "lifted": 36,
+              "neutralised": 0,
+              "before": {
+                "min": 0.018,
+                "p10": 0.1005,
+                "median": 0.1343
+              },
+              "after": {
+                "min": 0.0312,
+                "p10": 0.1005,
+                "median": 0.1343
+              }
+            },
+            {
+              "mesh": "farmhouse.batch.0",
+              "vertices": 11412,
+              "lifted": 5940,
+              "neutralised": 1332,
+              "before": {
+                "min": 0,
+                "p10": 0,
+                "median": 0.0418
+              },
+              "after": {
+                "min": 0.022,
+                "p10": 0.022,
+                "median": 0.0434
+              }
+            },
+            {
+              "mesh": "farmhouse.batch.1",
+              "vertices": 4440,
+              "lifted": 108,
+              "neutralised": 0,
+              "before": {
+                "min": 0.0298,
+                "p10": 0.1112,
+                "median": 0.1214
+              },
+              "after": {
+                "min": 0.0373,
+                "p10": 0.1112,
+                "median": 0.1214
+              }
+            }
+          ]
+        }
+      },
       "render": "render/building-farmhouse.png"
     },
     {
@@ -465,8 +960,8 @@
         "meshopt": "building/barn.m1.glb"
       },
       "bytes": {
-        "raw": 1785016,
-        "meshopt": 270876
+        "raw": 1785072,
+        "meshopt": 270732
       },
       "measured": {
         "raw": {
@@ -495,7 +990,31 @@
       "animationClips": [],
       "provenanceAssetId": "processing.barn.open-front.m2",
       "license": "Project-original procedural code; accepted reference is not shipped as runtime geometry",
-      "note": "processing line child removed; HF already ships it as processing.line.m1.glb",
+      "note": "processing line child removed; HF already ships it as processing.line.m1.glb. The rear wall is authored, so only the dark-tile lift is applied.",
+      "postProcess": {
+        "darkTileLift": {
+          "floor": 0.045,
+          "floorLow": 0.022,
+          "meshes": [
+            {
+              "mesh": "barnRoof",
+              "vertices": 12240,
+              "lifted": 6480,
+              "neutralised": 1044,
+              "before": {
+                "min": 0,
+                "p10": 0.0007,
+                "median": 0.0435
+              },
+              "after": {
+                "min": 0.022,
+                "p10": 0.0223,
+                "median": 0.0442
+              }
+            }
+          ]
+        }
+      },
       "render": "render/building-barn.png"
     },
     {
