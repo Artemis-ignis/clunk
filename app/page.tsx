@@ -9,8 +9,8 @@ import { SiteFooter } from "./components/SiteFooter";
 import { createPageMetadata } from "./components/site-metadata";
 import { RULE_COUNT } from "./components/product-facts";
 import { EmbeddedGlbViewer } from "./components/review/EmbeddedGlbViewer";
-import { VendingHall } from "./components/vending/VendingHall";
-import "./components/vending/vending.css";
+import { CapsuleMachine } from "./components/gacha/CapsuleMachine";
+import "./components/gacha/gacha.css";
 
 export const metadata = createPageMetadata({
   // The title and description are the operator's exact wording (2026-09-02): the three
@@ -21,26 +21,23 @@ export const metadata = createPageMetadata({
 });
 
 /**
- * Public landing — the vending hall (2026-09-02).
+ * Public landing — one capsule machine (2026-09-02).
  *
- * The operator's own picture of the product: "사이트에 자판기가 있고 그 자판기에 크레딧
- * 넣으면 에셋들 뽑는 거지. 각 테마가 들어 있는 자판기들이 있고, 그래서 Clunk임.
- * 자판기에서 물건 떨어질 때 소리가 Clunk잖아."
+ * The operator's own picture of the product: "들어가자마자 자판기가 나와서 레버 당기라고
+ * 되어 있고, 당기면 Clunk! 임팩트 글씨와 함께 드르륵 하면서 … 에셋 하나 떨어지고, 누르면
+ * 캡슐이 흔들흔들 걸렸다가 빛과 함께 에셋을 보여주는 거지. 게임 속 캐릭터 뽑히면 나오는
+ * 가챠 연출처럼."
  *
- * So the landing is a hall of themed vending machines reading the live catalogue
- * (/api/marketplace) rather than a hand-typed grid of cards. What used to be section 01
- * ("에셋 제작", a turning tractor beside three bullets) is gone: the hall below is the
- * market, and the page was showing the same twelve assets twice — once in the hero panel,
- * once in the showcase grid. The inspection and agent sections stay, because neither is
- * visible from a vending machine.
+ * So the first viewport is a single gashapon machine, not a hall of four cabinets: a glass
+ * dome whose capsules are coloured with each listing's own measured palette, a theme dial,
+ * a lever, and a delivery tray. The prize card reads like a character's status sheet, and
+ * every figure on it is parsed out of the catalogue response
+ * (app/components/gacha/gacha-catalog.ts) — nothing is typed by hand here.
  *
- * Every number below is a real measurement — the 2026-08-31 re-inspection record for the
- * Harvest Frontier tractor and the ceiling assetops-profiles.ts declares. Nothing here is
- * estimated, and the machines invent nothing either: their counts, prices and polygon
- * figures all come out of the catalogue response (app/components/vending/vending-catalog.ts).
+ * The inspection and agent sections below stay, because neither is visible from a machine.
+ * Every number in them is a real measurement — the 2026-08-31 re-inspection record for the
+ * Harvest Frontier tractor and the ceiling assetops-profiles.ts declares.
  */
-
-const FLOW = ["생성", "검사", "수정", "게시", "에이전트"] as const;
 
 /**
  * Section 01's inspected file. Numbers come from the 2026-08-31 re-inspection
@@ -69,61 +66,20 @@ export default function Home() {
       <SiteNav active="home" />
 
       <main id="main-content">
-        {/* HERO ------------------------------------------------------- */}
+        {/* HERO — 캡슐 머신 한 대가 첫 화면을 다 차지한다 --------------- */}
         {/* public-hero-frame is the shared first-viewport contract every public hero
             carries (app/globals.css). Under .cv5 its alignment rules are deliberately
             inert, so it changes nothing here and keeps the landing in the same family
             as /agents and /pricing. */}
-        <section className="cv5-hero public-hero-frame" data-snap-section="hero" aria-labelledby="home-heading">
-          <div className="cv5-frame vh-hero">
+        <section className="cv5-hero gc-hero public-hero-frame" data-snap-section="hero" aria-labelledby="home-heading">
+          <div className="cv5-frame gc-hero-frame">
             <span className="cv5-badge">✦ 게임 제작을 위한 <b>단 하나의 AI 슈퍼앱</b></span>
-            <h1 id="home-heading">
-              크레딧을 넣고,<br /><em>에셋을 뽑으세요</em>
-            </h1>
-            <p className="cv5-hero-lede">
-              테마별 자판기에 마켓의 에셋이 그대로 들어 있습니다. 번호를 고르고 뽑기를 누르면 파일이 배출구로 떨어집니다.
-              뽑은 에셋이 게임에서 문제없이 돌아가는지도 바로 확인해 드립니다.
+            <h1 id="home-heading">게임 에셋을 <em>뽑으세요</em></h1>
+            <p className="gc-hero-lede">
+              레버를 당기면 마켓에 올라와 있는 에셋 하나가 캡슐로 떨어집니다.
+              농장·마을 배경에 바로 쓰는 3D 모델, 2D 스프라이트 시트, 이어 붙여도 이음매가 안 보이는 텍스처입니다.
             </p>
-            <p className="vh-why">자판기에서 물건이 떨어질 때 나는 소리, 그게 Clunk 입니다.</p>
-            <div className="cv5-cta-row">
-              <Link className="cv5-btn cv5-btn-primary" href="/studio" prefetch={false}>
-                무료로 시작하기 <Icon name="arrowUpRight" size={17} />
-              </Link>
-              <Link className="cv5-btn cv5-btn-ghost" href="/marketplace" prefetch={false}>
-                마켓 둘러보기
-              </Link>
-            </div>
-            {/* Five steps. On a phone they used to wrap 4 + 1, which reads as
-                a mistake; the mobile rule in site-v5.css lays them out 3 + 2. */}
-            <div className="cv5-flow" aria-label="Clunk 작업 순서">
-              {FLOW.map((step, index) => (
-                <span key={step}>
-                  <b>{String(index + 1).padStart(2, "0")}</b> {step}
-                </span>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* 자판기 홀 --------------------------------------------------- */}
-        <section className="cv5-showcase" id="hall" data-snap-section="hall" aria-labelledby="hall-heading">
-          <div className="cv5-frame">
-            <div className="cv5-showcase-head cv5-reveal">
-              <div>
-                <span className="cv5-eyebrow">자판기 홀</span>
-                <h2 id="hall-heading">마켓에 올라와 있는 에셋</h2>
-              </div>
-              <p>
-                농장·마을 배경에 바로 쓰는 3D 모델, 2D 스프라이트 시트, 이어 붙여도 이음매가 안 보이는 텍스처입니다.
-                슬롯마다 폴리곤 수가 적혀 있고, 베타 기간에는 로그인만 하면 무료로 뽑습니다.
-              </p>
-            </div>
-            <VendingHall />
-            <div className="cv5-showcase-foot cv5-reveal">
-              <Link className="cv5-more" href="/marketplace" prefetch={false}>
-                마켓에서 전체 목록 보기 <Icon name="arrowRight" size={15} />
-              </Link>
-            </div>
+            <CapsuleMachine />
           </div>
         </section>
 

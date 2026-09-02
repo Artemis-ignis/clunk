@@ -23,18 +23,19 @@ test("server-renders the Clunk landing page", async () => {
   assert.match(html, /<title>[^<]*게임 에셋[^<]*\| Clunk<\/title>/i);
   assert.doesNotMatch(html, /파운드리|Foundry/i);
   assert.match(html, /단 하나의 AI 슈퍼앱/);
-  // 2026-09-02: the landing is the vending hall — the operator's own picture of the
-  // product ("크레딧 넣으면 에셋들 뽑는 거지 … 자판기에서 물건 떨어질 때 소리가
-  // Clunk잖아"). The hero says that, and the page explains the brand's name instead of
-  // assuming it. The old headline ("게임 제작의 모든 과정을 CLUNK 하나로") went with the
-  // two-column hero it belonged to.
-  assert.match(html, /크레딧을 넣고/);
-  assert.match(html, /에셋을 뽑으세요/);
-  assert.match(html, /자판기에서 물건이 떨어질 때 나는 소리, 그게 Clunk 입니다/);
-  assert.match(html, /자판기 홀/);
-  assert.match(html, /마켓 둘러보기/);
-  assert.match(html, /무료로 시작하기/);
-  assert.match(html, /마켓에 올라와 있는 에셋/);
+  // 2026-09-02: the first viewport is one capsule machine — the operator's own picture
+  // of the product ("들어가자마자 자판기가 나와서 레버 당기라고 되어 있고 … 게임 속
+  // 캐릭터 뽑히면 나오는 가챠 연출처럼"). The headline says what to do, the line under it
+  // says what happens, and the machine explains the brand's name where the capsule lands.
+  // The old four-cabinet hall ("자판기 홀", "마켓에 올라와 있는 에셋") went with it.
+  assert.match(html, /게임 에셋을/);
+  assert.match(html, /<em>뽑으세요<\/em>/);
+  assert.match(html, /레버를 당기면 마켓에 올라와 있는 에셋 하나가 캡슐로 떨어집니다/);
+  // 서버가 그리는 첫 화면은 카탈로그를 부르기 전이라 머신이 아직 채워지는 중이다.
+  assert.match(html, /머신에 캡슐을 채우는 중입니다/);
+  assert.match(html, /게임 에셋 검사 및 수정/);
+  assert.match(html, /게임 제작 에이전트/);
+  assert.doesNotMatch(html, /자판기 홀|마켓에 올라와 있는 에셋</);
   assert.doesNotMatch(html, /DEMO MODE|실제 제작부터|에셋 만들기|CONTRACT_FIXTURE|SAMPLE/);
   assert.doesNotMatch(html, /Your site is taking shape|react-loading-skeleton|codex-preview/);
 });
