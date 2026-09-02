@@ -81,8 +81,7 @@ test("landing language covers the full 2D and 3D asset path", async () => {
   assert.match(html, /에셋 제작/);
   assert.match(html, /검사와 수정/);
   assert.match(html, /제작 에이전트/);
-  assert.match(html, /Sprite.*Atlas|Atlas.*Sprite/);
-  assert.match(html, /Spine/);
+  assert.match(html, /스프라이트 시트[\s\S]*본 애니메이션/); // 2026-09-02: named in Korean
   assert.match(html, /크레딧/);
 });
 
