@@ -23,7 +23,15 @@ test("server-renders the Clunk landing page", async () => {
   assert.match(html, /<title>[^<]*게임 에셋[^<]*\| Clunk<\/title>/i);
   assert.doesNotMatch(html, /파운드리|Foundry/i);
   assert.match(html, /단 하나의 AI 슈퍼앱/);
-  assert.match(html, /게임 제작의 모든 과정을/);
+  // 2026-09-02: the landing is the vending hall — the operator's own picture of the
+  // product ("크레딧 넣으면 에셋들 뽑는 거지 … 자판기에서 물건 떨어질 때 소리가
+  // Clunk잖아"). The hero says that, and the page explains the brand's name instead of
+  // assuming it. The old headline ("게임 제작의 모든 과정을 CLUNK 하나로") went with the
+  // two-column hero it belonged to.
+  assert.match(html, /크레딧을 넣고/);
+  assert.match(html, /에셋을 뽑으세요/);
+  assert.match(html, /자판기에서 물건이 떨어질 때 나는 소리, 그게 Clunk 입니다/);
+  assert.match(html, /자판기 홀/);
   assert.match(html, /마켓 둘러보기/);
   assert.match(html, /무료로 시작하기/);
   assert.match(html, /마켓에 올라와 있는 에셋/);

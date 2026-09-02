@@ -8,8 +8,9 @@ import { AgentLiveDemo } from "./components/AgentLiveDemo";
 import { SiteFooter } from "./components/SiteFooter";
 import { createPageMetadata } from "./components/site-metadata";
 import { RULE_COUNT } from "./components/product-facts";
-import { LandingMarketShowcase } from "./components/LandingMarketShowcase";
 import { EmbeddedGlbViewer } from "./components/review/EmbeddedGlbViewer";
+import { VendingHall } from "./components/vending/VendingHall";
+import "./components/vending/vending.css";
 
 export const metadata = createPageMetadata({
   // The title and description are the operator's exact wording (2026-09-02): the three
@@ -20,38 +21,29 @@ export const metadata = createPageMetadata({
 });
 
 /**
- * Public landing v5 — master-reference rebuild (2026-08-31). Structure follows
- * the approved reference: hero with a product-panel visual, three numbered
- * product sections each carrying a REAL-data UI mockup, a measured stats band,
- * and the wave-1 real-inventory grid. Every number rendered here is a real
- * measurement (renderer-measured tris, the 2026-08-31 tractor reinspection,
- * counts derived from code) — the reference layout's invented-stat band is
- * deliberately replaced with measured facts.
+ * Public landing — the vending hall (2026-09-02).
+ *
+ * The operator's own picture of the product: "사이트에 자판기가 있고 그 자판기에 크레딧
+ * 넣으면 에셋들 뽑는 거지. 각 테마가 들어 있는 자판기들이 있고, 그래서 Clunk임.
+ * 자판기에서 물건 떨어질 때 소리가 Clunk잖아."
+ *
+ * So the landing is a hall of themed vending machines reading the live catalogue
+ * (/api/marketplace) rather than a hand-typed grid of cards. What used to be section 01
+ * ("에셋 제작", a turning tractor beside three bullets) is gone: the hall below is the
+ * market, and the page was showing the same twelve assets twice — once in the hero panel,
+ * once in the showcase grid. The inspection and agent sections stay, because neither is
+ * visible from a vending machine.
+ *
+ * Every number below is a real measurement — the 2026-08-31 re-inspection record for the
+ * Harvest Frontier tractor and the ceiling assetops-profiles.ts declares. Nothing here is
+ * estimated, and the machines invent nothing either: their counts, prices and polygon
+ * figures all come out of the catalogue response (app/components/vending/vending-catalog.ts).
  */
 
 const FLOW = ["생성", "검사", "수정", "게시", "에이전트"] as const;
 
 /**
- * The one model section 01 shows, in one place. Swap `src` and `name` here and
- * the stage, the caption and the heading text all follow — nothing else in this
- * file names the file.
- *
- * `measured` is not typed by hand: every value is copied from
- * outputs/market-launch/wave1/upload-manifest.json (products[].measured), the record
- * the measurer wrote for this exact GLB — the tractor Clunk authored in
- * examples/generated/vehicles/tractor.factory.mjs
- * (triangleCount 1060, drawCallCount 18, materialCount 5, 74,764 bytes = 75 KB).
- * If the file changes, re-read that record — never estimate.
- */
-const FEATURED_MODEL = {
-  src: "/market/cozy-tractor/tractor.glb",
-  name: "코지 트랙터",
-  fileName: "tractor.glb",
-  measured: { faces: "1,060", drawCalls: "18", size: "75 KB" },
-} as const;
-
-/**
- * Section 02's inspected file. Numbers come from the 2026-08-31 re-inspection
+ * Section 01's inspected file. Numbers come from the 2026-08-31 re-inspection
  * record (.clunk-evidence/.../tractor.compact.m1-pc-inspection.json):
  * triangleCount 39,320 · drawCallCount 98 · 840,136 bytes = 840 KB.
  * The 40,000 ceiling is code: `harvest-frontier-web-three`.inspectionPolicy
@@ -67,37 +59,6 @@ const INSPECTED_MODEL = {
 
 const AGENT_CLIENTS = ["Claude Code", "Codex CLI", "Cursor", "VS Code", "Grok Build", "Antigravity", "DeepSeek", "GLM", "로컬 에이전트"] as const;
 
-/** Renderer-measured triangle counts — outputs/market-launch/wave1/measurements. */
-const SHOWCASE = [
-  { slug: "market-stall", name: "시장 노점", tris: "2,456" },
-  { slug: "greenhouse", name: "온실", tris: "5,756" },
-  { slug: "storage-shed", name: "창고 헛간", tris: "1,620" },
-  { slug: "haystack", name: "건초 더미", tris: "1,322" },
-  { slug: "fence-gate", name: "울타리 게이트", tris: "520" },
-  { slug: "crate-produce", name: "농산물 상자", tris: "782" },
-  { slug: "broadleaf-full", name: "활엽수 · 라운드", tris: "1,730" },
-  { slug: "column-flame", name: "활엽수 · 플레임", tris: "2,120" },
-  { slug: "conifer-spire", name: "침엽수 · 스파이어", tris: "860" },
-  { slug: "broadleaf-forked", name: "활엽수 · 포크", tris: "2,136" },
-  { slug: "conifer-umbrella", name: "침엽수 · 우산", tris: "1,772" },
-  { slug: "crate-closed", name: "뚜껑 상자", tris: "700" },
-] as const;
-
-const HERO_CELLS = SHOWCASE.slice(0, 6);
-const MARKET_CELLS = SHOWCASE.slice(0, 6);
-
-function ShowcaseImg({ slug, name, eager }: { slug: string; name: string; eager?: boolean }) {
-  return (
-    <img
-      src={`/landing/showcase/${slug}.webp`}
-      alt={`${name} 3D 에셋 렌더`}
-      width={560}
-      height={560}
-      loading={eager ? "eager" : "lazy"}
-    />
-  );
-}
-
 export default function Home() {
   return (
     <div className="cv5 cv5-snap">
@@ -109,133 +70,71 @@ export default function Home() {
 
       <main id="main-content">
         {/* HERO ------------------------------------------------------- */}
+        {/* public-hero-frame is the shared first-viewport contract every public hero
+            carries (app/globals.css). Under .cv5 its alignment rules are deliberately
+            inert, so it changes nothing here and keeps the landing in the same family
+            as /agents and /pricing. */}
         <section className="cv5-hero public-hero-frame" data-snap-section="hero" aria-labelledby="home-heading">
-          <div className="cv5-frame cv5-hero-grid">
-            <div>
-              <span className="cv5-badge">✦ 게임 제작을 위한 <b>단 하나의 AI 슈퍼앱</b></span>
-              {/* Korean headlines are broken by hand at each breakpoint, the way
-                  the Korean reference site does it: a browser wrapping Hangul
-                  splits on whatever fits, which lands mid-어절 at narrow widths.
-                  Desktop takes two lines, mobile four. */}
-              <h1 id="home-heading">
-                <span className="cv5-line-wide">
-                  게임 제작의 모든 과정을<br /><em>CLUNK 하나로</em>
-                </span>
-                <span className="cv5-line-narrow">
-                  게임 제작의<br />모든 과정을<br /><em>CLUNK<br />하나로</em>
-                </span>
-              </h1>
-              {/* The operator's own sentence (2026-09-02). It says what the product does in
-                  the words a visitor uses — not how the inspector does it. */}
-              <p className="cv5-hero-lede">
-                2D·3D 게임 에셋을 생성하고, 검사·수정하고, AI 에이전트와 함께 게임까지 제작하세요.
-                만든 에셋이 게임에서 문제없이 돌아가는지도 바로 확인해 드립니다.
-              </p>
-              <div className="cv5-cta-row">
-                <Link className="cv5-btn cv5-btn-primary" href="/studio" prefetch={false}>
-                  무료로 시작하기 <Icon name="arrowUpRight" size={17} />
-                </Link>
-                <Link className="cv5-btn cv5-btn-ghost" href="/marketplace" prefetch={false}>
-                  마켓 둘러보기
-                </Link>
-              </div>
-              {/* Five steps. On a phone they used to wrap 4 + 1, which reads as
-                  a mistake; the mobile rule in site-v5.css lays them out 3 + 2
-                  and centres both rows so the break looks deliberate. */}
-              <div className="cv5-flow" aria-label="Clunk 작업 순서">
-                {FLOW.map((step, index) => (
-                  <span key={step}>
-                    <b>{String(index + 1).padStart(2, "0")}</b> {step}
-                  </span>
-                ))}
-              </div>
+          <div className="cv5-frame vh-hero">
+            <span className="cv5-badge">✦ 게임 제작을 위한 <b>단 하나의 AI 슈퍼앱</b></span>
+            <h1 id="home-heading">
+              크레딧을 넣고,<br /><em>에셋을 뽑으세요</em>
+            </h1>
+            <p className="cv5-hero-lede">
+              테마별 자판기에 마켓의 에셋이 그대로 들어 있습니다. 번호를 고르고 뽑기를 누르면 파일이 배출구로 떨어집니다.
+              뽑은 에셋이 게임에서 문제없이 돌아가는지도 바로 확인해 드립니다.
+            </p>
+            <p className="vh-why">자판기에서 물건이 떨어질 때 나는 소리, 그게 Clunk 입니다.</p>
+            <div className="cv5-cta-row">
+              <Link className="cv5-btn cv5-btn-primary" href="/studio" prefetch={false}>
+                무료로 시작하기 <Icon name="arrowUpRight" size={17} />
+              </Link>
+              <Link className="cv5-btn cv5-btn-ghost" href="/marketplace" prefetch={false}>
+                마켓 둘러보기
+              </Link>
             </div>
-
-            <div className="cv5-hero-visual" aria-hidden="true">
-              <div className="cv5-hv-panel">
-                {/* "TRIS" told a visitor nothing and "면" was our own coinage. 폴리곤 is
-                    the word game people already use; the panel head says once which way
-                    is better so the number under every thumbnail reads without a glossary. */}
-                <div className="cv5-hv-head"><span>마켓에 올라온 <b>에셋</b></span><span>폴리곤 수 · 적을수록 가벼움</span></div>
-                <div className="cv5-hv-grid">
-                  {HERO_CELLS.map((asset) => (
-                    <figure className="cv5-hv-cell" key={asset.slug} style={{ margin: 0 }}>
-                      <ShowcaseImg slug={asset.slug} name={asset.name} eager />
-                      <span>{asset.tris} 폴리곤</span>
-                    </figure>
-                  ))}
-                </div>
-                <div className="cv5-hv-foot">
-                  {/* The authored tractor's own record (upload-manifest.json measured.gameReadyScore:
-                      web 100 / hardBlockerCount 0) — the model section 01 shows, not the
-                      Harvest Frontier file section 02 inspects. */}
-                  <span>코지 트랙터 검사 결과</span>
-                  <b>100점 · 막는 문제 0건</b>
-                </div>
-              </div>
-              <div className="cv5-float cv5-float-a"><img src="/landing/showcase/conifer-spire.webp" alt="" width={240} height={240} loading="eager" /><small>860 폴리곤</small></div>
-              <div className="cv5-float cv5-float-b"><img src="/landing/showcase/crate-produce.webp" alt="" width={200} height={200} loading="eager" /><small>782 폴리곤</small></div>
-              <div className="cv5-float cv5-float-c"><img src="/landing/showcase/haystack.webp" alt="" width={220} height={220} loading="eager" /><small>1,322 폴리곤</small></div>
+            {/* Five steps. On a phone they used to wrap 4 + 1, which reads as
+                a mistake; the mobile rule in site-v5.css lays them out 3 + 2. */}
+            <div className="cv5-flow" aria-label="Clunk 작업 순서">
+              {FLOW.map((step, index) => (
+                <span key={step}>
+                  <b>{String(index + 1).padStart(2, "0")}</b> {step}
+                </span>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* 01 — MAKE & SELL ------------------------------------------- */}
-        <section className="cv5-sec" id="make" data-snap-section="make" aria-labelledby="sec-make">
-          <div className="cv5-frame cv5-sec-grid">
-            <div className="cv5-sec-copy cv5-reveal">
-              <div className="cv5-sec-kicker"><span className="cv5-num">01</span><small>에셋 제작</small></div>
-              <h2 id="sec-make">게임 에셋 제작</h2>
-              <p>
-                한 줄이면 2D가, 몇 초면 3D 모델이 나옵니다. 검사를 통과한 것만 마켓에 올립니다.
-              </p>
-              <ul className="cv5-points">
-                <li><b>2D 이미지</b> — 스프라이트·아이콘·이펙트를 문장으로</li>
-                <li><b>3D 모델</b> — 게임 엔진에 바로 넣는 가벼운 3D 파일(GLB)로</li>
-                <li><b>라이선스 명시</b> — 어디에 써도 되는지 상품마다 표시</li>
-              </ul>
+        {/* 자판기 홀 --------------------------------------------------- */}
+        <section className="cv5-showcase" id="hall" data-snap-section="hall" aria-labelledby="hall-heading">
+          <div className="cv5-frame">
+            <div className="cv5-showcase-head cv5-reveal">
               <div>
-                <Link className="cv5-more" href="/marketplace" prefetch={false}>마켓 보기 <Icon name="arrowRight" size={15} /></Link>
-                <Link className="cv5-more" href="/studio" prefetch={false}>직접 만들기 <Icon name="arrowRight" size={15} /></Link>
+                <span className="cv5-eyebrow">자판기 홀</span>
+                <h2 id="hall-heading">마켓에 올라와 있는 에셋</h2>
               </div>
+              <p>
+                농장·마을 배경에 바로 쓰는 3D 모델, 2D 스프라이트 시트, 이어 붙여도 이음매가 안 보이는 텍스처입니다.
+                슬롯마다 폴리곤 수(적을수록 가벼움)가 적혀 있고, 베타 기간에는 로그인만 하면 무료로 뽑습니다.
+              </p>
             </div>
-            <div className="cv5-sec-visual cv5-reveal" data-delay="1">
-              <div className="cv5-mock">
-                <div className="cv5-mock-bar"><span>Clunk가 <b>만든 모델</b></span><span>{FEATURED_MODEL.fileName}</span></div>
-                {/* This section is about MAKING an asset, so it shows one Clunk
-                    authored, turning, with the numbers its own inspector read off
-                    the file. A grid of things to buy belongs in the market section
-                    below and was showing the same widget twice on one page. */}
-                <div className="cv5-mock-body cv5-make">
-                  <div className="cv5-make-stage">
-                    <EmbeddedGlbViewer
-                      src={FEATURED_MODEL.src}
-                      alt={`Clunk가 만든 ${FEATURED_MODEL.name} — 드래그해서 돌려보세요`}
-                    />
-                  </div>
-                  <div className="cv5-make-facts">
-                    <div className="cv5-make-name">
-                      <b>{FEATURED_MODEL.name}</b>
-                      <span>코드로 만든 모델 · 아래 숫자는 이 파일에서 직접 읽은 값</span>
-                    </div>
-                    <div><span>폴리곤</span><b>{FEATURED_MODEL.measured.faces}개</b><small>적을수록 가볍습니다</small></div>
-                    <div><span>그리기 횟수</span><b>{FEATURED_MODEL.measured.drawCalls}회</b><small>적을수록 빠릅니다</small></div>
-                    <div><span>파일 크기</span><b>{FEATURED_MODEL.measured.size}</b><small>내려받는 파일 하나</small></div>
-                  </div>
-                </div>
-              </div>
+            <VendingHall />
+            <div className="cv5-showcase-foot cv5-reveal">
+              <Link className="cv5-more" href="/marketplace" prefetch={false}>
+                마켓에서 전체 목록 보기 <Icon name="arrowRight" size={15} />
+              </Link>
             </div>
           </div>
         </section>
 
-        {/* 02 — INSPECT & REPAIR --------------------------------------- */}
+        {/* 01 — INSPECT & REPAIR --------------------------------------- */}
         <section className="cv5-sec" id="inspect" data-tone="green" data-snap-section="inspect" aria-labelledby="sec-inspect">
           <div className="cv5-frame cv5-sec-grid" data-flip="true">
             <div className="cv5-sec-copy cv5-reveal">
-              <div className="cv5-sec-kicker"><span className="cv5-num">02</span><small>검사와 수정</small></div>
+              <div className="cv5-sec-kicker"><span className="cv5-num">01</span><small>검사와 수정</small></div>
               <h2 id="sec-inspect">게임 에셋 검사 및 수정</h2>
               <p>
-                올리면 {RULE_COUNT}가지를 검사해 점수로 알려줍니다. 고치는 것도 여기서, 원본은 그대로.
+                뽑은 것이든 직접 만든 것이든, 올리면 {RULE_COUNT}가지를 검사해 점수로 알려줍니다. 고치는 것도 여기서, 원본은 그대로.
               </p>
               <ul className="cv5-points">
                 <li><b>실제 수치</b> — 폴리곤 수, 그리기 횟수, 텍스처 크기를 파일에서 직접 읽습니다</li>
@@ -270,10 +169,8 @@ export default function Home() {
                       <div><span>게임 적합도</span><b>막는 문제 0건 · 주의 2건</b></div>
                     </div>
                     {/* A number with no unit and no ceiling is not information.
-                        Each row now says what the number means, what it is, and
-                        what to compare it against. 39,320 / 98 / 840 KB are the
-                        2026-08-31 re-inspection record; 40,000 is the ceiling
-                        assetops-profiles.ts declares for a web game. */}
+                        39,320 / 98 / 840 KB are the 2026-08-31 re-inspection record;
+                        40,000 is the ceiling assetops-profiles.ts declares for a web game. */}
                     <div className="cv5-find">
                       <div data-tone="warn">
                         <b>폴리곤</b>
@@ -301,11 +198,11 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 03 — GAME AGENT --------------------------------------------- */}
+        {/* 02 — GAME AGENT --------------------------------------------- */}
         <section className="cv5-sec" id="agent" data-snap-section="agent" aria-labelledby="sec-agent">
           <div className="cv5-frame cv5-sec-grid">
             <div className="cv5-sec-copy cv5-reveal">
-              <div className="cv5-sec-kicker"><span className="cv5-num">03</span><small>제작 에이전트</small></div>
+              <div className="cv5-sec-kicker"><span className="cv5-num">02</span><small>제작 에이전트</small></div>
               <h2 id="sec-agent">게임 제작 에이전트</h2>
               <p>
                 Claude Code, Cursor, Codex에 연결하면, 에이전트가 대화만으로 에셋을 만들고 검사까지 끝냅니다.
@@ -338,35 +235,12 @@ export default function Home() {
           </div>
         </section>
 
-        {/* SHOWCASE ------------------------------------------------------ */}
-        <section className="cv5-showcase" id="showcase" data-snap-section="showcase" aria-labelledby="showcase-heading">
-          <div className="cv5-frame">
-            <div className="cv5-showcase-head cv5-reveal">
-              <div>
-                <span className="cv5-eyebrow">마켓</span>
-                <h2 id="showcase-heading">마켓에 올라와 있는 에셋</h2>
-              </div>
-              <p>
-                농장·마을 배경에 바로 쓰는 3D 모델, 2D 스프라이트 시트, 이어 붙여도 이음매가 안 보이는 텍스처입니다.
-                카드마다 폴리곤 수(적을수록 가벼움)가 적혀 있고, 베타 기간에는 로그인만 하면 무료로 받습니다.
-              </p>
-            </div>
-            <LandingMarketShowcase />
-            <div className="cv5-showcase-foot cv5-reveal">
-              <Link className="cv5-more" href="/marketplace" prefetch={false}>
-                마켓에서 전체 목록 보기 <Icon name="arrowRight" size={15} />
-              </Link>
-              
-            </div>
-          </div>
-        </section>
-
         {/* CLOSER -------------------------------------------------------- */}
         <section className="cv5-closer" id="start" data-snap-section="start" aria-labelledby="start-heading">
           <div className="cv5-frame">
             <span className="cv5-eyebrow" style={{ justifyContent: "center" }}>시작하기</span>
             <h2 id="start-heading">필요한 에셋부터<br /><em>골라 보세요</em></h2>
-            <p>마켓에서 바로 받거나, 직접 만들어 보세요.</p>
+            <p>자판기에서 바로 뽑거나, 직접 만들어 보세요.</p>
             <div className="cv5-cta-row" style={{ marginTop: 34 }}>
               <Link className="cv5-btn cv5-btn-primary" href="/studio" prefetch={false}>
                 Clunk 시작하기 <Icon name="arrowUpRight" size={17} />
