@@ -54,9 +54,9 @@ export function toggleGachaMuted(): void {
   for (const listener of muteListeners) listener();
 }
 
-export type SoundName = "lever" | "rumble" | "clunk" | "tap" | "sparkle";
+export type SoundName = "lever" | "ratchet" | "rumble" | "clunk" | "bounce" | "tap" | "sparkle";
 
-const counts: Record<SoundName, number> = { lever: 0, rumble: 0, clunk: 0, tap: 0, sparkle: 0 };
+const counts: Record<SoundName, number> = { lever: 0, ratchet: 0, rumble: 0, clunk: 0, bounce: 0, tap: 0, sparkle: 0 };
 
 /** 어느 합성 함수가 몇 번 불렸는지. 소리를 들을 수 없는 환경의 유일한 증거다. */
 export function soundCallCounts(): Record<SoundName, number> {
@@ -266,4 +266,45 @@ export function playOpenSparkle(): void {
     });
   });
   scheduleNoise(ctx, master, at + 0.02, { length: 0.5, frequency: 5200, q: 0.7, level: 0.06 });
+}
+
+/**
+ * 크랭크 래칫 — 손잡이를 돌릴 때 나는 짧은 딸깍의 연속.
+ *
+ * 반다이 가샤폰의 손잡이는 한 바퀴 도는 동안 톱니를 계속 넘어간다. 그래서 한 번의
+ * 소리가 아니라 ticks 번의 짧은 클릭을 점점 촘촘하게(마지막이 가장 빠르게) 늘어놓는다.
+ */
+export function playCrankRatchet(ticks = 9, seconds = 0.75): void {
+  const started = begin("ratchet", 0.8);
+  if (!started) return;
+  const { ctx, master, at } = started;
+  const steps = Math.max(2, Math.min(24, Math.round(ticks)));
+  for (let index = 0; index < steps; index += 1) {
+    // 앞은 성기고 뒤로 갈수록 촘촘해지도록 제곱으로 자리를 잡는다.
+    const position = (index / steps) ** 1.35;
+    const when = at + position * seconds;
+    scheduleNoise(ctx, master, when, {
+      length: 0.024,
+      frequency: 2400 + index * 55,
+      q: 3.2,
+      level: 0.1 + (index / steps) * 0.12,
+    });
+    scheduleBlip(ctx, master, when + 0.002, {
+      type: "square",
+      frequency: 1500 + index * 40,
+      to: 780,
+      level: 0.045,
+      length: 0.026,
+    });
+  }
+}
+
+/** 캡슐이 배출구 바닥에서 다시 튀어 오르는 소리. Clunk 다음에 두 번 난다. */
+export function playBounce(strength = 1): void {
+  const started = begin("bounce", 0.8);
+  if (!started) return;
+  const { ctx, master, at } = started;
+  const level = Math.max(0.05, Math.min(1, strength));
+  scheduleNoise(ctx, master, at, { length: 0.05, frequency: 1250, q: 1.4, level: 0.16 * level });
+  scheduleBlip(ctx, master, at, { type: "sine", frequency: 190 * level, to: 96, level: 0.13 * level, length: 0.1 });
 }

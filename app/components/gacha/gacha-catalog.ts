@@ -30,7 +30,10 @@ export type GachaListing = {
   licenseStatus?: string | null;
   byteLength?: number | null;
   palette?: readonly PaletteEntry[] | null;
-  variants?: readonly { slug: string }[] | null;
+  /** 이 모델에서 구운 시트들. 제목에 "애니메이션" 이 들어 있으면 그 모델은 움직이는 동작을 가진 것이다. */
+  variants?: readonly { slug: string; title?: string }[] | null;
+  /** 목록 응답에는 아직 없는 자리. 상세 응답(clipsFor)이 실어 주면 그대로 읽는다. */
+  clips?: readonly { name: string; label?: string }[] | null;
 };
 
 /** 다이얼에 걸리는 자리. "전체" 는 갈래가 아니라 거르지 않는다는 뜻이다. */
@@ -180,33 +183,103 @@ export function seamVerdictOf(listing: Pick<GachaListing, "description">): "이�
 }
 
 export type GradeLetter = "S" | "A" | "B" | "C";
-export type Grade = { letter: GradeLetter; basis: "score" | "seam" };
+/** 그 등급이 나온 까닭. 카드에 근거로 한 줄 적히고, 지어낸 말이 아니라 이 넷 중 하나다. */
+export type GradeBasis = "motion" | "polygons" | "bundle" | "plain";
+export type Grade = { letter: GradeLetter; basis: GradeBasis };
 
 /**
  * 등급 규칙. 카드 아래에 이 문장을 그대로 적는다 — 규칙을 숨긴 등급은 지어낸 등급과 같다.
+ *
+ * 2026-09-02 부터 검사 점수를 기준으로 쓰지 않는다. 팔리는 것 거의 전부가 100점이라
+ * 점수는 등급을 가르지 못했고, 무엇보다 사는 사람이 보는 것은 점수가 아니라 화면에
+ * 나타나는 물건이다. 그래서 눈에 보이는 두 가지 — 움직이는 동작이 있는지, 얼마나
+ * 복잡한지(폴리곤 수와 묶음인지) — 로만 가른다.
  */
-export const GRADE_RULE = "등급은 검사 점수 기준 — S: 100점 · A: 95점 이상 · B: 90점 이상 · C: 그 미만. 텍스처는 이음매 판정 기준 — S: 이음매 없음 · A: 경계 약함";
+export const GRADE_RULE = "등급 기준: S 움직이는 동작 포함 또는 폴리곤 4,000개 이상 · A 1,500개 이상 또는 묶음 · B 700개 이상 · C 그 외";
 
-export function gradeOf(listing: Pick<GachaListing, "description">): Grade | null {
-  const score = inspectionScoreOf(listing);
-  if (score !== null) {
-    if (score >= 100) return { letter: "S", basis: "score" };
-    if (score >= 95) return { letter: "A", basis: "score" };
-    if (score >= 90) return { letter: "B", basis: "score" };
-    return { letter: "C", basis: "score" };
+/** 등급 색. 캡슐 이음 링, 카드 배지, 빛줄기가 모두 이 한 벌을 쓴다. */
+export const GRADE_COLORS: Readonly<Record<GradeLetter, string>> = {
+  S: "#f5c451",
+  A: "#a855f7",
+  B: "#5b9cff",
+  C: "#94a3b8",
+};
+
+/**
+ * 폴리곤 수를 숫자로. 문장에서 못 읽으면 null 이다.
+ * 나무 팩처럼 범위로 적힌 것은 그 묶음에서 가장 큰 한 그루의 값을 쓴다 —
+ * "얼마나 복잡해 보이는가" 를 재는 자리라서 가장 무거운 것이 기준이다.
+ */
+export function polygonCountOf(listing: Pick<GachaListing, "description">): number | null {
+  const solid = listing.description.match(SOLID);
+  if (solid) return Number(solid[1].replace(/,/gu, ""));
+  const bundle = listing.description.match(BUNDLE);
+  if (bundle) return Number(bundle[1].replace(/,/gu, ""));
+  const perTree = listing.description.match(PER_TREE);
+  if (perTree) {
+    const parts = perTree[1].split("~").map((value) => Number(value.replace(/,/gu, "")));
+    const largest = Math.max(...parts.filter((value) => Number.isFinite(value)));
+    return Number.isFinite(largest) ? largest : null;
   }
-  const seam = seamVerdictOf(listing);
-  if (seam === "이음매 없음") return { letter: "S", basis: "seam" };
-  if (seam === "경계 약함") return { letter: "A", basis: "seam" };
   return null;
 }
 
-/** 등급 옆에 붙는 근거 한 조각. 점수면 점수를, 이음매 판정이면 판정을 그대로 적는다. */
-export function gradeBasisOf(listing: Pick<GachaListing, "description">): string | null {
-  const score = inspectionScoreOf(listing);
-  if (score !== null) return `검사 ${score}점`;
-  const seam = seamVerdictOf(listing);
-  return seam;
+/**
+ * 움직이는 동작이 든 상품인지.
+ *
+ * 세 자리에서만 읽는다: 상세 응답이 실어 주는 clips, 이 모델에서 구운 시트 중 제목에
+ * "애니메이션" 이 붙은 것(울타리 문 여닫기·헛간 문 열기), 그리고 상품 자신의 제목이
+ * 동작 시트인 경우(팜핸드 걷기). 셋 다 실제 응답에 있는 값이고 여기서 지어내는 것이 없다.
+ */
+export function hasMotionOf(listing: Pick<GachaListing, "title" | "variants" | "clips">): boolean {
+  if ((listing.clips?.length ?? 0) > 0) return true;
+  if (listing.variants?.some((variant) => typeof variant.title === "string" && variant.title.includes("애니메이션"))) {
+    return true;
+  }
+  return listing.title.includes("애니메이션");
+}
+
+/** 묶음 낱말. 상품 제목이 스스로 묶음이라고 적어 둔 것만 센다. */
+const BUNDLE_WORD = /묶음|세트|팩/u;
+
+/**
+ * 여러 모델을 한 번에 주는 묶음인지. 3D 파일을 주는 상품에만 해당한다 —
+ * 텍스처 일곱 장 묶음은 모델 묶음이 아니라 낱장 일곱 장이라 여기서 걸리지 않는다.
+ */
+export function isModelBundleOf(
+  listing: Pick<GachaListing, "title" | "description" | "entryFileName">,
+): boolean {
+  if (!listing.entryFileName.toLowerCase().endsWith(".glb")) return false;
+  if (BUNDLE.test(listing.description)) return true;
+  return BUNDLE_WORD.test(listing.title);
+}
+
+/** 등급. 규칙은 GRADE_RULE 한 줄이 전부이고, 어느 상품에도 등급이 붙는다. */
+export function gradeOf(
+  listing: Pick<GachaListing, "title" | "description" | "entryFileName" | "variants" | "clips">,
+): Grade {
+  if (hasMotionOf(listing)) return { letter: "S", basis: "motion" };
+  const polygons = polygonCountOf(listing);
+  if (polygons !== null && polygons >= 4000) return { letter: "S", basis: "polygons" };
+  if (polygons !== null && polygons >= 1500) return { letter: "A", basis: "polygons" };
+  if (isModelBundleOf(listing)) return { letter: "A", basis: "bundle" };
+  if (polygons !== null && polygons >= 700) return { letter: "B", basis: "polygons" };
+  if (polygons !== null) return { letter: "C", basis: "polygons" };
+  return { letter: "C", basis: "plain" };
+}
+
+/** 등급 옆에 붙는 근거 한 조각. 규칙이 실제로 걸린 그 값을 그대로 적는다. */
+export function gradeBasisOf(
+  listing: Pick<GachaListing, "title" | "description" | "entryFileName" | "variants" | "clips">,
+): string | null {
+  const grade = gradeOf(listing);
+  if (grade.basis === "motion") return "움직이는 동작 포함";
+  if (grade.basis === "bundle") return "여러 모델 묶음";
+  if (grade.basis === "polygons") {
+    const polygons = polygonsOf(listing);
+    return polygons ? `폴리곤 ${polygons}` : null;
+  }
+  return null;
 }
 
 /* ---------------------------------------------------------------------------
@@ -286,18 +359,33 @@ export function capsuleColorOf(listing: Pick<GachaListing, "slug" | "palette">):
   return themeById(categoryOf(listing)).accent;
 }
 
-export type DomeCapsule = { key: string; slug: string; color: string };
+export type DomeCapsule = {
+  key: string;
+  slug: string;
+  /** 위 반구 색 — 그 상품에서 실제로 잰 색. */
+  color: string;
+  /** 가운데 이음 링 색 — 그 상품의 등급 색. 돔 안에서 무엇이 들었는지 미리 읽힌다. */
+  ring: string;
+  letter: GradeLetter;
+};
 
 /**
- * 돔 안에 쌓이는 캡슐. 자리 수(26개)는 그림이 정한 것이고, 색은 지금 다이얼에 걸린
- * 상품들의 실측 색을 차례로 돌려 채운다. 상품이 자리보다 적으면 같은 색이 여러 번 나오는데,
- * 그것이 실제로 그 테마에 있는 상품이 적다는 뜻이다.
+ * 돔 안에 쌓이는 캡슐. 자리 수는 그림(그리고 기기 성능)이 정하고, 색은 지금 다이얼에
+ * 걸린 상품들의 실측 색·등급 색을 차례로 돌려 채운다. 상품이 자리보다 적으면 같은 색이
+ * 여러 번 나오는데, 그것이 실제로 그 테마에 있는 상품이 적다는 뜻이다.
  */
 export function domeCapsules(pool: readonly GachaListing[], slots: number): DomeCapsule[] {
   if (pool.length === 0) return [];
   return Array.from({ length: slots }, (_unused, index) => {
     const listing = pool[index % pool.length];
-    return { key: `${index}-${listing.slug}`, slug: listing.slug, color: capsuleColorOf(listing) };
+    const grade = gradeOf(listing);
+    return {
+      key: `${index}-${listing.slug}`,
+      slug: listing.slug,
+      color: capsuleColorOf(listing),
+      ring: GRADE_COLORS[grade.letter],
+      letter: grade.letter,
+    };
   });
 }
 
@@ -338,6 +426,16 @@ export function drawFrom(
   const listing = bag[pick(bag.length)];
   const kept = drawn.filter((id) => pool.some((row) => row.id === id));
   return { listing, drawn: unseen.length > 0 ? [...kept, listing.id] : [listing.id] };
+}
+
+/**
+ * 이번 바퀴에 아직 안 나온 개수. 한 바퀴가 끝난 직후에는 통을 새로 채우므로 통째의
+ * 개수를 돌려준다 — 화면의 "이번 바퀴 남은 개수" 는 이 값 그대로다.
+ */
+export function remainingInRound(pool: readonly GachaListing[], drawn: readonly string[]): number {
+  if (pool.length === 0) return 0;
+  const unseen = pool.filter((listing) => !drawn.includes(listing.id)).length;
+  return unseen > 0 ? unseen : pool.length;
 }
 
 /* ---------------------------------------------------------------------------

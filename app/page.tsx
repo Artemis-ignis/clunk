@@ -9,7 +9,7 @@ import { SiteFooter } from "./components/SiteFooter";
 import { createPageMetadata } from "./components/site-metadata";
 import { RULE_COUNT } from "./components/product-facts";
 import { EmbeddedGlbViewer } from "./components/review/EmbeddedGlbViewer";
-import { CapsuleMachine } from "./components/gacha/CapsuleMachine";
+import { GachaMachine3D } from "./components/gacha/GachaMachine3D";
 import "./components/gacha/gacha.css";
 
 export const metadata = createPageMetadata({
@@ -76,10 +76,10 @@ export default function Home() {
             <span className="cv5-badge">✦ 게임 제작을 위한 <b>단 하나의 AI 슈퍼앱</b></span>
             <h1 id="home-heading">게임 에셋을 <em>뽑으세요</em></h1>
             <p className="gc-hero-lede">
-              레버를 당기면 마켓에 올라와 있는 에셋 하나가 캡슐로 떨어집니다.
+              손잡이를 돌리면 마켓에 올라와 있는 에셋 하나가 캡슐로 떨어집니다.
               농장·마을 배경에 바로 쓰는 3D 모델, 2D 스프라이트 시트, 이어 붙여도 이음매가 안 보이는 텍스처입니다.
             </p>
-            <CapsuleMachine />
+            <GachaMachine3D />
           </div>
         </section>
 

@@ -36,6 +36,8 @@ export function PrizeCard({
   authenticated,
   claim,
   loginHref,
+  remaining = null,
+  showArt = true,
   onClaim,
   onAgain,
 }: {
@@ -44,6 +46,13 @@ export function PrizeCard({
   authenticated: boolean;
   claim: ClaimState;
   loginHref: string;
+  /** 이번 바퀴에 아직 안 나온 개수. 3D 머신이 실제 값을 넘겨준다. */
+  remaining?: number | null;
+  /**
+   * 왼쪽에 파일을 띄울지. 3D 머신은 캡슐이 갈라진 자리에 같은 파일을 이미 돌리고 있어서
+   * 끄고 쓴다 — 같은 모델을 두 번 여는 뷰어를 나란히 두지 않는다.
+   */
+  showArt?: boolean;
   onClaim: () => void;
   onAgain: () => void;
 }) {
@@ -68,6 +77,7 @@ export function PrizeCard({
     <div className="gc-prize-wrap">
       <div
         className="gc-prize"
+        data-noart={showArt ? undefined : "1"}
         role="dialog"
         aria-modal="false"
         aria-labelledby={headingId}
@@ -75,6 +85,7 @@ export function PrizeCard({
         tabIndex={-1}
         ref={cardRef}
       >
+        {showArt ? (
         <div className="gc-prize-art">
           {model ? (
             <EmbeddedGlbViewer
@@ -90,17 +101,16 @@ export function PrizeCard({
             <div className="gc-prize-noart" role="img" aria-label={`${listing.title} 미리보기 없음`} />
           )}
         </div>
+        ) : null}
 
         <div className="gc-prize-body">
           <p className="gc-prize-eyebrow">뽑았습니다</p>
           <h3 id={headingId}>{listing.title}</h3>
 
-          {grade ? (
-            <div className="gc-grade" data-letter={grade.letter}>
-              <b>{grade.letter}</b>
-              {basis ? <span>{basis}</span> : null}
-            </div>
-          ) : null}
+          <div className="gc-grade" data-letter={grade.letter}>
+            <b>{grade.letter}</b>
+            {basis ? <span>{basis}</span> : null}
+          </div>
 
           <dl className="gc-stats">
             {rows.map((row) => (
@@ -153,7 +163,10 @@ export function PrizeCard({
             <p className="gc-claim" data-failed={claim.kind === "failed"} role="status">{claim.message}</p>
           ) : null}
 
-          {grade ? <p className="gc-rule">{GRADE_RULE}</p> : null}
+          {typeof remaining === "number" ? (
+            <p className="gc-remaining">이번 바퀴 남은 개수 <b>{remaining}</b></p>
+          ) : null}
+          <p className="gc-rule">{GRADE_RULE}</p>
         </div>
       </div>
     </div>

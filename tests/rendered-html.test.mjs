@@ -30,7 +30,7 @@ test("server-renders the Clunk landing page", async () => {
   // The old four-cabinet hall ("자판기 홀", "마켓에 올라와 있는 에셋") went with it.
   assert.match(html, /게임 에셋을/);
   assert.match(html, /<em>뽑으세요<\/em>/);
-  assert.match(html, /레버를 당기면 마켓에 올라와 있는 에셋 하나가 캡슐로 떨어집니다/);
+  assert.match(html, /손잡이를 돌리면 마켓에 올라와 있는 에셋 하나가 캡슐로 떨어집니다/);
   // 서버가 그리는 첫 화면은 카탈로그를 부르기 전이라 머신이 아직 채워지는 중이다.
   assert.match(html, /머신에 캡슐을 채우는 중입니다/);
   assert.match(html, /게임 에셋 검사 및 수정/);
