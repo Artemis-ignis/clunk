@@ -1,21 +1,21 @@
 {
   "schemaVersion": "1.0",
-  "passportId": "passport-5db7a8393814-4852dd43e3e1",
+  "passportId": "passport-dd61bbe37cca-5281ef7f9b55",
   "coreVersion": "0.1.0",
   "ruleSetId": "clunk-game-ready-v1",
   "ruleSetVersion": "1.0.0",
   "profileId": "web",
-  "sourceHash": "5db7a83938143ecb2a853c6af91527b265b3d6375f48fa2ac1f0c7aa6f333678",
-  "outputHash": "4852dd43e3e1a3b2cfb6cb37ec18743221984866dfbb7420a869ae4627949de1",
+  "sourceHash": "dd61bbe37cca1cc01d8e934c2fcec1378084577f85ea0bed276b320fb59f2edf",
+  "outputHash": "5281ef7f9b551ad76edecd74552aae04f70ca864e56d5acd535e5897f348043b",
   "sourceFileName": "market-stall.m1.glb",
   "outputFileName": "market-stall.m1.clunk-optimized.glb",
-  "sourceInspectionDigest": "65af155631aa578605cd7f748625d77a43493463c5fc039905450af5b74740ce",
-  "outputInspectionDigest": "634b509aed864af9d8cebc0488f0af480369ef961f0e618c9c421e4af38e8bb9",
+  "sourceInspectionDigest": "dde97beddaff01c4a215eacebcead94490dbf78202521236996f1fe95c059bd5",
+  "outputInspectionDigest": "bf1c7b79e1dd6adc34184c30a5ae32d0451f20dd68551f53c89364cb6855f05a",
   "operations": [
     {
       "id": "clean-metadata",
-      "description": "Removed explicitly allowlisted non-runtime metadata: extras, asset.generator, and asset.copyright.",
-      "count": 6,
+      "description": "Removed explicitly allowlisted authoring provenance: asset.generator and asset.copyright. Every extras block is preserved because an engine can read it.",
+      "count": 1,
       "safety": "metadata-only"
     }
   ],
@@ -49,18 +49,18 @@
       "bounds": {
         "min": [
           -1.2200000286102295,
-          -0.12999999523162842,
+          -1.7881393032936899e-9,
           -0.5099999904632568
         ],
         "max": [
           1.2200000286102295,
           2.256298542022705,
-          0.8428243398666382
+          0.83315509557724
         ],
         "dimensions": [
           2.440000057220459,
-          2.3862985372543335,
-          1.352824330329895
+          2.2562985438108445,
+          1.3431550860404968
         ]
       }
     },
@@ -111,18 +111,18 @@
       "bounds": {
         "min": [
           -1.2200000286102295,
-          -0.12999999523162842,
+          -1.7881393032936899e-9,
           -0.5099999904632568
         ],
         "max": [
           1.2200000286102295,
           2.256298542022705,
-          0.8428243398666382
+          0.83315509557724
         ],
         "dimensions": [
           2.440000057220459,
-          2.3862985372543335,
-          1.352824330329895
+          2.2562985438108445,
+          1.3431550860404968
         ]
       }
     },

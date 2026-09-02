@@ -128,7 +128,17 @@ export function createStorageShed(THREE) {
     for (const sz of [-1, 1]) {
       piers.push(place(kit.box(0.3, 0.22, 0.3), [sx * 0.92, 0.11, sz * 0.72]));
     }
-    piers.push(place(kit.box(0.26, 0.2, 0.28), [sx * 0.92, 0.1, 0]));
+    /*
+     * 0.252 x 0.196, not 0.26 x 0.2, and 4 mm lower. Both numbers are clearance, not styling:
+     *   - the old top face landed on y = 0.200, which is EXACTLY the base skirt's top face, and
+     *     both point up: 336 cm^2 of stone tied with wood at 0.000 mm;
+     *   - the old outer face landed on x = +-1.05, which is EXACTLY the sill beam's outer face,
+     *     and both point outward: a further 224 cm^2.
+     * Stone against timber is a colour change, so either tie shows as a band that flips tone as
+     * the camera moves. 4 mm of clearance on each settles both and the pier is still buried
+     * 130 mm inside the skirt.
+     */
+    piers.push(place(kit.box(0.252, 0.196, 0.28), [sx * 0.92, 0.098, 0]));
   }
   // Doorstep: the one stone a player actually walks on, so it is wider and lower.
   piers.push(place(kit.box(1.1, 0.14, 0.36), [0, 0.07, 0.98]));

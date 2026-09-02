@@ -1,21 +1,21 @@
 {
   "schemaVersion": "1.0",
-  "passportId": "passport-2e7c9746be7e-27266f163af9",
+  "passportId": "passport-6c5831ca1de4-09d2c8ea9e3c",
   "coreVersion": "0.1.0",
   "ruleSetId": "clunk-game-ready-v1",
   "ruleSetVersion": "1.0.0",
   "profileId": "web",
-  "sourceHash": "2e7c9746be7e9200b54644daf07e19e629439fc3ae42bdf065186888e1eb7825",
-  "outputHash": "27266f163af953e5acb766e1c7e47f08470da47ae44c711f45098b305122adce",
+  "sourceHash": "6c5831ca1de44cc6c39e1b33f117f7eca659b330e9fd6e72f88374c6c03b5e8f",
+  "outputHash": "09d2c8ea9e3c9b27ee11a90a5616d8d7528b0c73096c45c1b8ae364fb00f6d42",
   "sourceFileName": "crate-closed.glb",
   "outputFileName": "crate-closed.clunk-optimized.glb",
-  "sourceInspectionDigest": "af7f2fb76ec19d4af2e53c1c5ca70c1db494da9c9aeafcdacde8c98665f97a25",
-  "outputInspectionDigest": "b46bc116080b83921d764c0cef2b90bbd2cc2c09e83a1a711d71ac5ff0b9fcb5",
+  "sourceInspectionDigest": "1c5e6813b449989a0dadf837313459ca6f9abce1b43d376b2ae1289070335b65",
+  "outputInspectionDigest": "4587890742069efc6f0f988a76cf8aff7b8e3f1c57dd8a981b9505634ac66063",
   "operations": [
     {
       "id": "clean-metadata",
-      "description": "Removed explicitly allowlisted non-runtime metadata: extras, asset.generator, and asset.copyright.",
-      "count": 2,
+      "description": "Removed explicitly allowlisted authoring provenance: asset.generator and asset.copyright. Every extras block is preserved because an engine can read it.",
+      "count": 1,
       "safety": "metadata-only"
     }
   ],
@@ -50,17 +50,17 @@
         "min": [
           -0.2849999964237213,
           0,
-          -0.21899999678134918
+          -0.21699999272823334
         ],
         "max": [
           0.2849999964237213,
           0.4339999854564667,
-          0.21899999678134918
+          0.21699999272823334
         ],
         "dimensions": [
           0.5699999928474426,
           0.4339999854564667,
-          0.43799999356269836
+          0.4339999854564667
         ]
       }
     },
@@ -112,17 +112,17 @@
         "min": [
           -0.2849999964237213,
           0,
-          -0.21899999678134918
+          -0.21699999272823334
         ],
         "max": [
           0.2849999964237213,
           0.4339999854564667,
-          0.21899999678134918
+          0.21699999272823334
         ],
         "dimensions": [
           0.5699999928474426,
           0.4339999854564667,
-          0.43799999356269836
+          0.4339999854564667
         ]
       }
     },

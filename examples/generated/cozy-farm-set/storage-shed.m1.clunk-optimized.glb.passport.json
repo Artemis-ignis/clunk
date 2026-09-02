@@ -1,16 +1,16 @@
 {
   "schemaVersion": "1.0",
-  "passportId": "passport-0680d623f621-f57b47b46dec",
+  "passportId": "passport-c59e7278cdcc-a44b999a9f3c",
   "coreVersion": "0.1.0",
   "ruleSetId": "clunk-game-ready-v1",
   "ruleSetVersion": "1.0.0",
   "profileId": "web",
-  "sourceHash": "0680d623f6213c4a8df355d3bf74226f07f2683374bf3bce8580ef8d206b59dc",
-  "outputHash": "f57b47b46deca53b7f18914e490352f2c5c546a745d43b2fd5603f2fa16e56e5",
+  "sourceHash": "c59e7278cdccdc354c2fd9d8b95d17af7b575449a5f1249129b8f469744e1cf3",
+  "outputHash": "a44b999a9f3c77bc1fb7142b8ce66ba2f1f4b75f6a68e3f8b5af906356f6200a",
   "sourceFileName": "storage-shed.m1.glb",
   "outputFileName": "storage-shed.m1.clunk-optimized.glb",
-  "sourceInspectionDigest": "c2cec2c0eb2449b7d99974e5026514a9a04202200d3a102057fdc612d391b3fd",
-  "outputInspectionDigest": "7d1a448bc3b53d095f341e2c79cb05207f84b63956b01c5e27d6ae89e18fb842",
+  "sourceInspectionDigest": "ac92073739093dac3e1847f9283064c49952f0ab45f50f3488a5fdcd4814d58f",
+  "outputInspectionDigest": "82b736cbefd09e7726b9123c380605b56167712e1392ee02a9f2127c4a9dd364",
   "operations": [
     {
       "id": "clean-metadata",
@@ -49,7 +49,7 @@
       "bounds": {
         "min": [
           -1.2974940538406372,
-          -1.4901161415892261e-9,
+          -2.98023217215615e-10,
           -1.0700000524520874
         ],
         "max": [
@@ -59,7 +59,7 @@
         ],
         "dimensions": [
           2.5949881076812744,
-          2.9325401797890662,
+          2.9325401785969736,
           2.2300000190734863
         ]
       }
@@ -111,7 +111,7 @@
       "bounds": {
         "min": [
           -1.2974940538406372,
-          -1.4901161415892261e-9,
+          -2.98023217215615e-10,
           -1.0700000524520874
         ],
         "max": [
@@ -121,7 +121,7 @@
         ],
         "dimensions": [
           2.5949881076812744,
-          2.9325401797890662,
+          2.9325401785969736,
           2.2300000190734863
         ]
       }

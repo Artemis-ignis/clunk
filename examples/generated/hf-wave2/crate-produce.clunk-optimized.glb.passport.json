@@ -1,21 +1,21 @@
 {
   "schemaVersion": "1.0",
-  "passportId": "passport-360a9d825a21-32ec53959f46",
+  "passportId": "passport-b5a47a3bd4fc-6b9b25803a9c",
   "coreVersion": "0.1.0",
   "ruleSetId": "clunk-game-ready-v1",
   "ruleSetVersion": "1.0.0",
   "profileId": "web",
-  "sourceHash": "360a9d825a215c5b00c44c6148acccf1afed9d86d0a4c71c6f0b31e396f9d120",
-  "outputHash": "32ec53959f46b6c96f0cf77fd9c5a412bf161091c3bbf15a1b687948b4dd32f0",
+  "sourceHash": "b5a47a3bd4fcb726d4b98c21b00e8547f92b919b3b7a9221d9abfa07aba6c3e9",
+  "outputHash": "6b9b25803a9cc7949e19f77466138468da6a77eb610f081d9be53e976192967d",
   "sourceFileName": "crate-produce.glb",
   "outputFileName": "crate-produce.clunk-optimized.glb",
-  "sourceInspectionDigest": "957cd3c89268b3e302520dad11e7bd99982df84fffbacb097a590fb08eda3cac",
-  "outputInspectionDigest": "e193925e34d6d97f5a7c3be6a418c823609dcbf368804f388502dd4d6a2ef38f",
+  "sourceInspectionDigest": "a04edae417f7a1cb298066a18aedd664a5a158816771388724a8b7e1fd4622be",
+  "outputInspectionDigest": "ac41fc333d7e161107441edd98145830b3998de43659de7f5679aa9239d13d26",
   "operations": [
     {
       "id": "clean-metadata",
-      "description": "Removed explicitly allowlisted non-runtime metadata: extras, asset.generator, and asset.copyright.",
-      "count": 2,
+      "description": "Removed explicitly allowlisted authoring provenance: asset.generator and asset.copyright. Every extras block is preserved because an engine can read it.",
+      "count": 1,
       "safety": "metadata-only"
     }
   ],
@@ -27,8 +27,8 @@
       "emptyNodeCount": 0,
       "meshCount": 3,
       "primitiveCount": 3,
-      "vertexCount": 2346,
-      "triangleCount": 782,
+      "vertexCount": 2646,
+      "triangleCount": 882,
       "drawCallCount": 3,
       "materialCount": 1,
       "duplicateMaterialCount": 0,
@@ -50,17 +50,17 @@
         "min": [
           -0.2800000011920929,
           0,
-          -0.21899999678134918
+          -0.21699999272823334
         ],
         "max": [
           0.2800000011920929,
-          0.5118463039398193,
-          0.21899999678134918
+          0.5308462977409363,
+          0.21699999272823334
         ],
         "dimensions": [
           0.5600000023841858,
-          0.5118463039398193,
-          0.43799999356269836
+          0.5308462977409363,
+          0.4339999854564667
         ]
       }
     },
@@ -89,8 +89,8 @@
       "emptyNodeCount": 0,
       "meshCount": 3,
       "primitiveCount": 3,
-      "vertexCount": 2346,
-      "triangleCount": 782,
+      "vertexCount": 2646,
+      "triangleCount": 882,
       "drawCallCount": 3,
       "materialCount": 1,
       "duplicateMaterialCount": 0,
@@ -112,17 +112,17 @@
         "min": [
           -0.2800000011920929,
           0,
-          -0.21899999678134918
+          -0.21699999272823334
         ],
         "max": [
           0.2800000011920929,
-          0.5118463039398193,
-          0.21899999678134918
+          0.5308462977409363,
+          0.21699999272823334
         ],
         "dimensions": [
           0.5600000023841858,
-          0.5118463039398193,
-          0.43799999356269836
+          0.5308462977409363,
+          0.4339999854564667
         ]
       }
     },

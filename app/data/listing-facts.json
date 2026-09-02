@@ -1,6 +1,6 @@
 {
   "schema": "clunk.listing-facts.v1",
-  "generatedAt": "2026-09-02T12:51:44.641Z",
+  "generatedAt": "2026-09-02T17:55:19.180Z",
   "sources": [
     "outputs\\market-launch\\wave1\\upload-manifest.json",
     "tmp\\listings-snapshot.json"
@@ -12,9 +12,9 @@
       "boundsMetres": [
         0.57,
         0.434,
-        0.438
+        0.434
       ],
-      "byteLength": 78476,
+      "byteLength": 79472,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -53,14 +53,14 @@
       "inspection": null
     },
     "cozy-crate-open": {
-      "triangles": 552,
+      "triangles": 516,
       "materials": 1,
       "boundsMetres": [
         0.56,
         0.41,
-        0.438
+        0.434
       ],
-      "byteLength": 62604,
+      "byteLength": 58772,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -99,14 +99,14 @@
       "inspection": null
     },
     "cozy-crate-produce": {
-      "triangles": 782,
+      "triangles": 882,
       "materials": 1,
       "boundsMetres": [
         0.56,
-        0.5118,
-        0.438
+        0.5308,
+        0.434
       ],
-      "byteLength": 87340,
+      "byteLength": 99156,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -148,7 +148,7 @@
       "triangles": 4596,
       "materials": 26,
       "boundsMetres": null,
-      "byteLength": 214584,
+      "byteLength": 215248,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -397,9 +397,9 @@
       "boundsMetres": [
         2.44,
         2.2563,
-        1.3528
+        1.3432
       ],
-      "byteLength": 214584,
+      "byteLength": 215248,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
