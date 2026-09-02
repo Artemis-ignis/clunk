@@ -12,6 +12,10 @@ import { createPageMetadata } from "../components/site-metadata";
 import { MCP_HTTP_TOOL_CATALOG, MCP_HTTP_TOOL_COUNT, MCP_SERVER, MCP_TOOLS, RULE_SET, TARGET_PROFILES } from "../components/product-facts";
 import "./agents-v5.css";
 
+// Rendered per request: the page reads the session, and a prerendered copy told signed-in
+// visitors to sign in.
+export const dynamic = "force-dynamic";
+
 export const metadata = createPageMetadata({ title: "에이전트 연결", description: "Claude Code, Codex, Cursor, GitHub Copilot, Claude Desktop, VS Code에서 Clunk를 연결하는 작업 가이드입니다.", path: "/agents" });
 
 const setupSteps = [

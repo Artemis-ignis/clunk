@@ -183,10 +183,11 @@ export function WorkspaceShell({
           <div className="workspace-toolbar-end">
             {status}
             <ThemeToggle />
-            <span className="workspace-avatar" title={userLabel}>
+            <Link className="workspace-avatar" href="/settings" prefetch={false} title={`${userLabel} · 설정`}>
               {userLabel.slice(0, 1).toUpperCase()}
-              <span className="sr-only">{userLabel}</span>
-            </span>
+              <span className="sr-only">{userLabel} · 설정</span>
+            </Link>
+            <a className="workspace-signout" href="/signout-with-chatgpt?return_to=%2F">로그아웃</a>
           </div>
         </header>
         <main className="workspace-main">{children}</main>

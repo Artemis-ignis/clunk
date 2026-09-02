@@ -67,8 +67,10 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
     }
   }, []);
 
+  // Always ask the server. The page's own idea of the session can be stale (a prerendered
+  // shell said 'signed out' to people who were signed in), and /api/mcp/keys answers 401
+  // honestly when they are not.
   useEffect(() => {
-    if (!initiallyAuthenticated) return;
     const timer = window.setTimeout(() => void loadKeys(), 0);
     return () => window.clearTimeout(timer);
   }, [initiallyAuthenticated, loadKeys]);
