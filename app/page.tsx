@@ -70,10 +70,10 @@ const AGENT_CLIENTS = ["Claude Code", "Codex CLI", "Cursor", "VS Code", "Grok Bu
 
 /** Renderer-measured triangle counts — outputs/market-launch/wave1/measurements. */
 const SHOWCASE = [
+  // 2026-09-02: the greenhouse and both haystacks left the shop (the operator judged them
+  // unsellable), so they left this panel too — it shows only what is on sale.
   { slug: "market-stall", name: "시장 노점", tris: "2,456" },
-  { slug: "greenhouse", name: "온실", tris: "5,756" },
   { slug: "storage-shed", name: "창고 헛간", tris: "1,620" },
-  { slug: "haystack", name: "건초 더미", tris: "1,322" },
   { slug: "fence-gate", name: "울타리 게이트", tris: "520" },
   { slug: "crate-produce", name: "농산물 상자", tris: "782" },
   { slug: "broadleaf-full", name: "활엽수 · 라운드", tris: "1,730" },
@@ -175,7 +175,7 @@ export default function Home() {
               </div>
               <div className="cv5-float cv5-float-a"><img src="/landing/showcase/conifer-spire.webp" alt="" width={240} height={240} loading="eager" /><small>폴리곤 860개</small></div>
               <div className="cv5-float cv5-float-b"><img src="/landing/showcase/crate-produce.webp" alt="" width={200} height={200} loading="eager" /><small>폴리곤 782개</small></div>
-              <div className="cv5-float cv5-float-c"><img src="/landing/showcase/haystack.webp" alt="" width={220} height={220} loading="eager" /><small>폴리곤 1,322개</small></div>
+              <div className="cv5-float cv5-float-c"><img src="/landing/showcase/crate-closed.webp" alt="" width={220} height={220} loading="eager" /><small>폴리곤 700개</small></div>
             </div>
           </div>
         </section>
