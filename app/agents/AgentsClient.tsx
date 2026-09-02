@@ -205,6 +205,10 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
             <button className="button button-quiet button-sm" type="button" onClick={() => void verifyConnection()} disabled={busy !== null}>
               {busy === "check" ? "확인 중…" : "연결 확인"}
             </button>
+          ) : connectionState === "ready" ? (
+            // Signed in, no key issued yet: the check needs a key, not a login. The old link
+            // told signed-in people to log in.
+            <span className="button button-quiet button-sm" aria-disabled="true">키를 만들면 연결 확인</span>
           ) : (
             <a className="button button-quiet button-sm" href={AGENT_CONNECT_LOGIN_HREF}>
               로그인 후 연결 확인
