@@ -162,7 +162,7 @@ export default function Home() {
                   {HERO_CELLS.map((asset) => (
                     <figure className="cv5-hv-cell" key={asset.slug} style={{ margin: 0 }}>
                       <ShowcaseImg slug={asset.slug} name={asset.name} eager />
-                      <span>{asset.tris} 폴리곤</span>
+                      <span>폴리곤 {asset.tris}개</span>
                     </figure>
                   ))}
                 </div>
@@ -173,9 +173,9 @@ export default function Home() {
                   <b>99점 · 막는 문제 0건</b>
                 </div>
               </div>
-              <div className="cv5-float cv5-float-a"><img src="/landing/showcase/conifer-spire.webp" alt="" width={240} height={240} loading="eager" /><small>860 폴리곤</small></div>
-              <div className="cv5-float cv5-float-b"><img src="/landing/showcase/crate-produce.webp" alt="" width={200} height={200} loading="eager" /><small>782 폴리곤</small></div>
-              <div className="cv5-float cv5-float-c"><img src="/landing/showcase/haystack.webp" alt="" width={220} height={220} loading="eager" /><small>1,322 폴리곤</small></div>
+              <div className="cv5-float cv5-float-a"><img src="/landing/showcase/conifer-spire.webp" alt="" width={240} height={240} loading="eager" /><small>폴리곤 860개</small></div>
+              <div className="cv5-float cv5-float-b"><img src="/landing/showcase/crate-produce.webp" alt="" width={200} height={200} loading="eager" /><small>폴리곤 782개</small></div>
+              <div className="cv5-float cv5-float-c"><img src="/landing/showcase/haystack.webp" alt="" width={220} height={220} loading="eager" /><small>폴리곤 1,322개</small></div>
             </div>
           </div>
         </section>
@@ -241,7 +241,7 @@ export default function Home() {
               </p>
               <ul className="cv5-points">
                 <li><b>실제 수치</b> — 폴리곤 수, 그리기 횟수, 텍스처 크기를 파일에서 직접 읽습니다</li>
-                <li><b>2D도 함께</b> — 스프라이트 시트(Sprite·Atlas)와 Spine까지</li>
+                <li><b>2D도 함께</b> — 스프라이트 시트와 본 애니메이션까지</li>
                 <li><b>눈으로 확인</b> — 3D 뷰어로 돌려 보고 판단하세요</li>
               </ul>
               <div>

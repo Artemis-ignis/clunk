@@ -334,7 +334,7 @@ body:has(.foundry-page) .sitenav-scrolled {
 .foundry-stage-footer small {
   margin-top: 5px;
   color: #9ba89d;
-  font-size: 0.65rem;
+  font-size: 0.72rem;
 }
 
 .foundry-stage-verdict {
@@ -436,7 +436,7 @@ body:has(.foundry-page) .sitenav-scrolled {
   display: block;
   margin-top: 8px;
   color: var(--foundry-ink-faint);
-  font-size: 0.71rem;
+  font-size: 0.72rem;
   line-height: 1.5;
 }
 
@@ -494,7 +494,7 @@ body:has(.foundry-page) .sitenav-scrolled {
 .foundry-evidence-strip small {
   margin-top: 5px;
   color: var(--foundry-ink-faint);
-  font-size: 0.66rem;
+  font-size: 0.72rem;
 }
 
 .foundry-evidence-strip > div:first-child small {
@@ -554,7 +554,7 @@ body:has(.foundry-page) .sitenav-scrolled {
 .foundry-showcase-console span,
 .foundry-showcase-console small {
   color: #9ba89d;
-  font-size: 0.58rem;
+  font-size: 0.72rem;
 }
 
 .foundry-showcase-console strong {
@@ -567,7 +567,7 @@ body:has(.foundry-page) .sitenav-scrolled {
   padding-top: 7px;
   border-top: 1px solid #46504a;
   color: #b5d5c0;
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   font-style: normal;
 }
 
@@ -666,7 +666,7 @@ body:has(.foundry-page) .sitenav-scrolled {
 
 .foundry-footer span {
   color: var(--foundry-ink-faint);
-  font-size: 0.68rem;
+  font-size: 0.72rem;
 }
 
 .foundry-footer nav {
@@ -803,7 +803,7 @@ body:has(.foundry-page) .sitenav-scrolled {
   margin: 0;
   padding: 0 14px 15px;
   color: #aeb8ad;
-  font-size: 0.67rem;
+  font-size: 0.72rem;
   line-height: 1.55;
 }
 
@@ -961,7 +961,7 @@ body:has(.foundry-page) .sitenav-scrolled {
 }
 
 .foundry-workspace-page .studio-engine-note {
-  font-size: 0.68rem;
+  font-size: 0.72rem;
 }
 
 .foundry-workspace-page .studio-game-ready-summary {
@@ -1008,7 +1008,7 @@ body:has(.foundry-page) .sitenav-scrolled {
 .studio-game-ready-summary dd {
   margin: 0;
   color: #f1eee6;
-  font-size: 0.64rem;
+  font-size: 0.72rem;
   overflow-wrap: anywhere;
   text-align: right;
 }
@@ -1016,7 +1016,7 @@ body:has(.foundry-page) .sitenav-scrolled {
 .studio-game-ready-summary > p {
   margin: 12px 0 0;
   color: #aeb8ad;
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   line-height: 1.55;
 }
 
@@ -1368,7 +1368,7 @@ body:has(.foundry-page) .sitenav-scrolled {
 .series-board-note { display: grid; gap: 5px; margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(198, 219, 203, .18); }
 .series-board-note span { color: #83b9b2; font: .58rem var(--font-geist-mono), monospace; letter-spacing: .08em; }
 .series-board-note b { color: #f0eee7; font-size: .85rem; font-weight: 600; }
-.series-board-note small { color: #98a9a0; font-size: .68rem; }
+.series-board-note small { color: #98a9a0; font-size: 0.72rem; }
 
 .series-catalog-section,
 .series-source-section { padding-top: 46px; }
@@ -1392,7 +1392,7 @@ body:has(.foundry-page) .sitenav-scrolled {
 .series-card-footer { display: grid; gap: 14px; margin-top: 24px; padding-top: 13px; border-top: 1px solid var(--foundry-line); }
 .series-source-chips { display: flex; flex-wrap: wrap; gap: 5px; min-height: 23px; }
 .series-source-chip { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; padding: 4px 6px; border: 1px solid var(--foundry-cyan); color: var(--foundry-cyan); font: .54rem var(--font-geist-mono), monospace; overflow-wrap: anywhere; }
-.series-source-chip small { color: var(--foundry-ink-faint); font-size: .5rem; }
+.series-source-chip small { color: var(--foundry-ink-faint); font-size: 0.72rem; }
 .series-source-chip-native { border-color: var(--foundry-line-strong); color: var(--foundry-ink-faint); }
 .series-card-footer .text-link { width: fit-content; color: var(--foundry-amber-deep); font-size: .72rem; }
 
@@ -1409,8 +1409,8 @@ body:has(.foundry-page) .sitenav-scrolled {
 .series-source-repository span { color: var(--foundry-ink-faint); }
 .series-source-license { display: grid; gap: 5px; }
 .series-source-license span { color: var(--foundry-ink-faint); font: .54rem var(--font-geist-mono), monospace; }
-.series-source-license strong { color: var(--foundry-ink); font-size: .68rem; font-weight: 600; overflow-wrap: anywhere; }
-.series-source-row > p { color: var(--foundry-ink-soft); font-size: .69rem; line-height: 1.55; }
+.series-source-license strong { color: var(--foundry-ink); font-size: 0.72rem; font-weight: 600; overflow-wrap: anywhere; }
+.series-source-row > p { color: var(--foundry-ink-soft); font-size: 0.72rem; line-height: 1.55; }
 .series-source-callout { display: grid; gap: 7px; margin-top: 18px; padding: 18px; border-left: 3px solid var(--foundry-amber); background: var(--foundry-paper-deep); }
 .series-source-callout .mono-label { color: var(--foundry-amber-deep); }
 .series-source-callout strong { color: var(--foundry-ink); font-size: .92rem; font-weight: 650; }
@@ -1430,7 +1430,7 @@ body:has(.foundry-page) .sitenav-scrolled {
   .series-hero { padding-top: 108px; padding-bottom: 52px; }
   .series-hero h1 { font-size: clamp(3rem, 13vw, 5.3rem); }
   .series-hero-board { min-height: 360px; padding: 18px; }
-  .series-board-flow { gap: 7px; margin-top: 53px; font-size: .56rem; }
+  .series-board-flow { gap: 7px; margin-top: 53px; font-size: 0.72rem; }
   .series-board-output { min-height: 175px; }
   .series-section-heading { display: block; }
   .series-section-heading > p { margin-top: 18px; }

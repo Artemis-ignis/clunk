@@ -156,7 +156,7 @@
 .agents-cv5 .agents-v4-statuses article:nth-child(2) strong { color: var(--v5-amber); }
 .agents-cv5 .agents-v4-statuses article:nth-child(3) strong,
 .agents-cv5 .agents-v4-statuses article:nth-child(4) strong { color: var(--v5-ink-dim); }
-.agents-cv5 .agents-v4-statuses small { color: var(--v5-ink-faint); font-size: 0.7rem; }
+.agents-cv5 .agents-v4-statuses small { color: var(--v5-ink-faint); font-size: 0.72rem; }
 
 .agents-cv5 .agents-v4-profile-strip span {
   padding: 7px 12px;
