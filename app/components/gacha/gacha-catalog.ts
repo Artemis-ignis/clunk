@@ -34,6 +34,13 @@ export type GachaListing = {
   variants?: readonly { slug: string; title?: string }[] | null;
   /** 목록 응답에는 아직 없는 자리. 상세 응답(clipsFor)이 실어 주면 그대로 읽는다. */
   clips?: readonly { name: string; label?: string }[] | null;
+  /** 2026-09-02: the catalogue's measured facts (app/data/listing-facts.json). Descriptions no
+   *  longer carry numbers, so these are the source for polygons, materials, size and motion. */
+  facts?: {
+    triangles?: number | null; materials?: number | null; boundsMetres?: readonly number[] | null;
+    byteLength?: number | null; format?: string | null; animatedParts?: readonly string[] | null;
+    animations?: readonly { name: string; seconds?: number }[] | null; kit?: string | null;
+  } | null;
 };
 
 /** 다이얼에 걸리는 자리. "전체" 는 갈래가 아니라 거르지 않는다는 뜻이다. */
@@ -120,7 +127,8 @@ const PER_TREE = /한 그루에 폴리곤 ([\d,]+~[\d,]+)개/u;
 /** "그루마다 재질 2개·그리기 2회" — 나무 묶음이 한 그루 기준으로 적어 둔 값. */
 const PER_TREE_PARTS = /그루마다 재질 ([\d,]+)개·그리기 ([\d,]+)회/u;
 
-export function polygonsOf(listing: Pick<GachaListing, "description">): string | null {
+export function polygonsOf(listing: Pick<GachaListing, "description" | "facts">): string | null {
+  if (typeof listing.facts?.triangles === "number" && listing.facts.triangles > 0) return `${listing.facts.triangles.toLocaleString("ko-KR")}개`;
   const solid = listing.description.match(SOLID);
   if (solid) return `${solid[1]}개`;
   const bundle = listing.description.match(BUNDLE);
@@ -140,7 +148,8 @@ export function drawCallsOf(listing: Pick<GachaListing, "description">): string 
   return null;
 }
 
-export function materialsOf(listing: Pick<GachaListing, "description">): string | null {
+export function materialsOf(listing: Pick<GachaListing, "description" | "facts">): string | null {
+  if (typeof listing.facts?.materials === "number" && listing.facts.materials > 0) return `${listing.facts.materials}개`;
   const solid = listing.description.match(SOLID);
   if (solid) return `${solid[3]}개`;
   const bundle = listing.description.match(BUNDLE);
@@ -151,7 +160,9 @@ export function materialsOf(listing: Pick<GachaListing, "description">): string 
 }
 
 /** "실제 크기는 2.29x2.03x2.98 m" — 셋 다 있을 때만 한 줄로 만든다. */
-export function boundsOf(listing: Pick<GachaListing, "description">): string | null {
+export function boundsOf(listing: Pick<GachaListing, "description" | "facts">): string | null {
+  const fb = listing.facts?.boundsMetres;
+  if (fb && fb.length === 3 && fb.every((v) => typeof v === "number" && v > 0 && v < 1000)) return `${fb.map((v) => v.toFixed(2)).join(" × ")} m`;
   const match = listing.description.match(/실제 크기는 ([\d.]+)x([\d.]+)x([\d.]+) m/u);
   if (!match) return null;
   return `${match[1]} × ${match[2]} × ${match[3]} m`;
@@ -210,7 +221,8 @@ export const GRADE_COLORS: Readonly<Record<GradeLetter, string>> = {
  * 나무 팩처럼 범위로 적힌 것은 그 묶음에서 가장 큰 한 그루의 값을 쓴다 —
  * "얼마나 복잡해 보이는가" 를 재는 자리라서 가장 무거운 것이 기준이다.
  */
-export function polygonCountOf(listing: Pick<GachaListing, "description">): number | null {
+export function polygonCountOf(listing: Pick<GachaListing, "description" | "facts">): number | null {
+  if (typeof listing.facts?.triangles === "number" && listing.facts.triangles > 0) return listing.facts.triangles;
   const solid = listing.description.match(SOLID);
   if (solid) return Number(solid[1].replace(/,/gu, ""));
   const bundle = listing.description.match(BUNDLE);
@@ -231,7 +243,8 @@ export function polygonCountOf(listing: Pick<GachaListing, "description">): numb
  * "애니메이션" 이 붙은 것(울타리 문 여닫기·헛간 문 열기), 그리고 상품 자신의 제목이
  * 동작 시트인 경우(팜핸드 걷기). 셋 다 실제 응답에 있는 값이고 여기서 지어내는 것이 없다.
  */
-export function hasMotionOf(listing: Pick<GachaListing, "title" | "variants" | "clips">): boolean {
+export function hasMotionOf(listing: Pick<GachaListing, "title" | "variants" | "clips" | "facts">): boolean {
+  if ((listing.facts?.animations?.length ?? 0) > 0 || (listing.facts?.animatedParts?.length ?? 0) > 0) return true;
   if ((listing.clips?.length ?? 0) > 0) return true;
   if (listing.variants?.some((variant) => typeof variant.title === "string" && variant.title.includes("애니메이션"))) {
     return true;
