@@ -23,7 +23,7 @@ test("server-renders the client connection guide", async () => {
   assert.match(html, /Claude Desktop/);
   assert.match(html, /VS Code/);
   assert.match(html, /GitHub Copilot/);
-  assert.match(html, /clunk_inspect/);
+  assert.match(html, /clunk_asset_inspect/); // the HTTP tool the page lists; clunk_inspect is the local stdio tool (2026-09-02)
   assert.match(html, /Clunk가 직접 운영하는 HTTP MCP/);
   assert.match(html, /HTTP 원격 도구\s*<!-- -->\d+<!-- -->개/);
   assert.match(html, /로컬 stdio 도구/);

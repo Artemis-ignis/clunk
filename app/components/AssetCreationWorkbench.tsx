@@ -57,11 +57,11 @@ type ReviewResult = {
 
 
 const ASSET_OPTIONS: readonly { id: AssetKind; label: string; target: string; hint: string }[] = [
-  { id: "2d-image", label: "2D Sprite", target: "yeongheo-pixi-2d", hint: "PNG frame" },
-  { id: "sprite-atlas", label: "Sprite Atlas", target: "yeongheo-pixi-2d", hint: "Atlas + RGBA page" },
-  { id: "spine-project", label: "Spine Project", target: "yeongheo-pixi-2d", hint: "JSON + Atlas + PNG" },
-  { id: "animation-clip", label: "Animation Clip", target: "web-three-mobile", hint: "Animated GLB" },
-  { id: "3d-model", label: "3D Model", target: "web-three-mobile", hint: "GLB mesh" },
+  { id: "2d-image", label: "2D 이미지", target: "yeongheo-pixi-2d", hint: "PNG 한 장" },
+  { id: "sprite-atlas", label: "스프라이트 시트", target: "yeongheo-pixi-2d", hint: "시트 PNG + 좌표 파일" },
+  { id: "spine-project", label: "본 애니메이션(Spine)", target: "yeongheo-pixi-2d", hint: "JSON + 시트 + PNG" },
+  { id: "animation-clip", label: "애니메이션 클립", target: "web-three-mobile", hint: "움직임이 든 GLB" },
+  { id: "3d-model", label: "3D 모델", target: "web-three-mobile", hint: "GLB 파일" },
 ];
 
 const REVIEW_OPTIONS: readonly ReviewStatus[] = ["NOT_EVALUATED", "PASS", "GAP", "NO_GO", "UNAVAILABLE"];
@@ -118,11 +118,11 @@ export function AssetCreationWorkbench({
     else setInternalAssetKind(nextAssetKind);
   };
   const selectedOption = useMemo(() => ASSET_OPTIONS.find((option) => option.id === assetKind) ?? ASSET_OPTIONS[0], [assetKind]);
-  const [label, setLabel] = useState("Clunk Sprite Starter");
-  const [prompt, setPrompt] = useState("a readable teal courier character with a bright silhouette");
+  const [label, setLabel] = useState("새 에셋");
+  const [prompt, setPrompt] = useState("");
   const [license, setLicense] = useState<"creator-owned" | "review-required">("review-required");
   const [phase, setPhase] = useState<WorkbenchPhase>("idle");
-  const [message, setMessage] = useState("프롬프트를 입력하고 실제 artifact를 생성하세요.");
+  const [message, setMessage] = useState("어떤 것을 만들지 한 문장으로 적고 만들기를 누르세요.");
   const [result, setResult] = useState<GenerationResult | null>(null);
   const [reviewStatus, setReviewStatus] = useState<{ visualRuntime: ReviewStatus; playerFacing: ReviewStatus; humanDecision: ReviewStatus }>({
     visualRuntime: "NOT_EVALUATED",
@@ -133,7 +133,7 @@ export function AssetCreationWorkbench({
   const [reviewNote, setReviewNote] = useState("");
   const [reviewMessage, setReviewMessage] = useState("");
   const [busyAction, setBusyAction] = useState<"review" | "remix" | null>(null);
-  const [remixPrompt, setRemixPrompt] = useState("same silhouette, darker utility jacket, clear player-facing colors");
+  const [remixPrompt, setRemixPrompt] = useState("같은 실루엣, 더 어두운 작업복, 또렷한 색");
   const [remixMessage, setRemixMessage] = useState("");
 
   useEffect(() => {
@@ -154,7 +154,7 @@ export function AssetCreationWorkbench({
 
   async function generate() {
     setPhase("generating");
-    setMessage("CREATE → INSPECT → HASH → 저장 상태를 확인하는 중입니다…");
+    setMessage("만들고, 검사하고, 지문을 남기고, 저장 상태를 확인하는 중입니다…");
     setResult(null);
     setReviewMessage("");
     setRemixMessage("");
@@ -179,7 +179,7 @@ export function AssetCreationWorkbench({
       if (!response.ok || !payload.ok) throw new Error(payload.error ?? (response.status === 401 ? "로그인이 필요합니다." : "생성 요청을 처리하지 못했습니다."));
       setResult(payload);
       setPhase("ready");
-      setMessage(`${payload.storageStatus} · ${payload.artifacts.length}개 artifact와 fresh inspection evidence를 받았습니다.${typeof payload.credits === "number" ? ` 남은 크레딧 ${payload.credits}개.` : " 저장되지 않아 크레딧은 차감되지 않았습니다."}`);
+      setMessage(`${payload.storageStatus} · 파일 ${payload.artifacts.length}개와 새 검사 기록을 받았습니다.${typeof payload.credits === "number" ? ` 남은 크레딧 ${payload.credits}개.` : " 저장되지 않아 크레딧은 차감되지 않았습니다."}`);
     } catch (error) {
       setPhase("error");
       setMessage(error instanceof Error ? error.message : "생성 요청을 처리하지 못했습니다.");
@@ -190,7 +190,7 @@ export function AssetCreationWorkbench({
     const sourceId = result?.assetId ?? remixSourceAssetId;
     if (!sourceId) return;
     setBusyAction("remix");
-    setRemixMessage("원본 asset을 확인하고 새 source-linked artifact를 작성하는 중입니다…");
+    setRemixMessage("원본을 확인하고 새 버전을 만드는 중입니다…");
     try {
       const response = await fetch("/api/series", {
         method: "POST",
@@ -215,9 +215,9 @@ export function AssetCreationWorkbench({
       setResult(payload);
       const nextLabel = `${label.replace(/\s+Remix$/, "")} Remix`;
       setLabel(nextLabel);
-      setMessage(`${payload.storageStatus} · source-linked remix의 ${payload.artifacts.length}개 artifact를 받았습니다.`);
+      setMessage(`${payload.storageStatus} · 원본에 연결된 새 버전 파일 ${payload.artifacts.length}개를 받았습니다.`);
       setRemixSourceAssetId(sourceId);
-      setRemixMessage(`완료됨 · 원본 ${sourceId.slice(0, 14)}...에서 새 asset ${payload.assetId.slice(0, 14)}...로 분기했습니다.`);
+      setRemixMessage(`완료됨 · 원본 ${sourceId.slice(0, 14)}...에서 새 파일 ${payload.assetId.slice(0, 14)}...로 갈라져 나왔습니다.`);
     } catch (error) {
       setRemixMessage(error instanceof Error ? error.message : "Remix 요청을 처리하지 못했습니다.");
     } finally {
@@ -267,11 +267,11 @@ export function AssetCreationWorkbench({
         <div>
           <span className="mono-label">작업 종류</span>
           <h3 id="creation-workbench-heading">실제 에셋을 만들고, 결과를 닫습니다.</h3>
-          <p>{selectedSeries.label}가 선택한 종류에 맞는 별도 bytes를 만들고, 같은 target profile로 fresh inspection을 실행합니다. 마켓 상품을 만드는 것이 아니라, 내 작업공간에서 Clunk 기능을 크레딧으로 쓰는 것입니다.</p>
+          <p>고른 종류에 맞는 새 파일을 만들고, 같은 엔진 기준으로 그 자리에서 검사합니다. 마켓 상품을 만드는 것이 아니라 내 작업 목록에 저장됩니다.</p>
         </div>
         <div className={`creation-phase creation-phase-${phase}`} role="status" aria-live="polite">
           <span className="creation-phase-dot" />
-          <strong>{phase === "generating" ? "GENERATING" : phase === "ready" ? "INSPECTED" : phase === "error" ? "FAILED" : "READY"}</strong>
+          <strong>{phase === "generating" ? "만드는 중" : phase === "ready" ? "검사 완료" : phase === "error" ? "실패" : "대기"}</strong>
           <small>{phase === "ready" ? result?.storageStatus : "실제 호출 대기"}</small>
         </div>
       </div>
@@ -279,14 +279,14 @@ export function AssetCreationWorkbench({
       <div className="creation-workbench-grid">
         <form className="creation-form" onSubmit={(event) => { event.preventDefault(); void generate(); }}>
           <label className="creation-field">
-            <span>Clunk Series</span>
+            <span>만들 종류</span>
             <select value={seriesId} onChange={(event) => setSeriesId(event.target.value as StudioSeriesId)}>
               {STUDIO_SERIES_OPTIONS.map((option) => <option value={option.id} key={option.id}>{option.label}</option>)}
             </select>
             <small className="creation-field-hint">{selectedSeries.description}</small>
           </label>
           <label className="creation-field">
-            <span>에셋 타입</span>
+            <span>파일 형식</span>
             <select value={assetKind} onChange={(event) => setAssetKind(event.target.value as AssetKind)}>
               {ASSET_OPTIONS.map((option) => <option value={option.id} key={option.id}>{option.label} · {option.hint}</option>)}
             </select>
@@ -298,15 +298,15 @@ export function AssetCreationWorkbench({
           <label className="creation-field">
             <span>프로젝트 연결 <small>(선택)</small></span>
             <select value={selectedProjectId} onChange={(event) => setSelectedProjectId(event.target.value)} disabled={projectLoadState === "loading"}>
-              <option value="">개인 Workspace에 저장</option>
+              <option value="">내 작업 목록에 저장</option>
               {projects.map((project) => <option value={project.id} key={project.id}>{project.name}</option>)}
             </select>
             <small className="creation-field-hint">
-              {projectLoadState === "unavailable" ? "프로젝트 API를 사용할 수 없어 Workspace 기본 위치에 저장합니다. Kits에서 프로젝트를 만들 수 있습니다." : "선택하면 생성·Remix 이력에 projectId가 함께 보존됩니다."}
+              {projectLoadState === "unavailable" ? "프로젝트 목록을 불러오지 못해 내 작업 목록에 저장합니다." : "선택하면 만든 기록에 그 프로젝트가 함께 적힙니다."}
             </small>
           </label>
-          <label className="creation-field"><span>제작 프롬프트</span><textarea value={prompt} onChange={(event) => setPrompt(event.target.value)} rows={4} maxLength={2_000} /></label>
-          <div className="creation-form-foot"><span>target · <code>{selectedOption.target}</code>{selectedProjectId ? ` · project ${selectedProjectId.slice(0, 12)}…` : ""} · 저장에 성공하면 크레딧 1개</span><button type="submit" className="button button-primary button-sm" disabled={phase === "generating"}>{phase === "generating" ? "만드는 중…" : "에셋 만들기"}<Icon name="arrowRight" size={14} /></button></div>
+          <label className="creation-field"><span>제작 프롬프트</span><textarea value={prompt} onChange={(event) => setPrompt(event.target.value)} rows={4} maxLength={2_000} placeholder="예: 밝은 청록색 배달부 캐릭터, 실루엣이 뚜렷하게" /></label>
+          <div className="creation-form-foot"><span>검사 기준 · <code>{selectedOption.target}</code>{selectedProjectId ? ` · 프로젝트 ${selectedProjectId.slice(0, 12)}…` : ""} · 저장에 성공하면 크레딧 1개</span><button type="submit" className="button button-primary button-sm" disabled={phase === "generating"}>{phase === "generating" ? "만드는 중…" : "에셋 만들기"}<Icon name="arrowRight" size={14} /></button></div>
           <p className={`creation-message creation-message-${phase}`}>{message}</p>
         </form>
 
@@ -316,7 +316,7 @@ export function AssetCreationWorkbench({
           {!imageArtifact && !modelArtifact ? <div className="creation-result-empty">
             <Icon name="box" size={24} />
             <strong>아직 생성 결과가 없습니다</strong>
-            <span>생성 실행이 성공하면 이 자리에 실제 artifact bytes, hash와 저장 상태를 표시합니다.</span>
+            <span>만들기에 성공하면 여기에 만들어진 파일과 파일 지문, 저장 상태가 표시됩니다.</span>
           </div> : null}
           {result ? <div className="creation-artifact-list"><div className="creation-artifact-heading"><span>생성된 파일</span><strong>{result.artifacts.length}개 · {result.entryFileName}</strong></div>{result.artifacts.map((artifact) => <div className="creation-artifact-row" key={artifact.fileName}><span><Icon name={artifact.contentType === "image/png" ? "download" : artifact.contentType === "model/gltf-binary" ? "box" : "fileJson"} size={14} />{artifact.fileName}</span><small>{formatBytes(artifact.byteLength)} · {artifact.sha256.slice(0, 12)}…</small>{result.storageStatus === "STORED" ? <a className="text-link" href={`/api/assets/${encodeURIComponent(result.assetId)}?file=${encodeURIComponent(artifact.fileName)}&download=1`} download={artifact.fileName}>받기 <Icon name="download" size={12} /></a> : <small>저장 확인 중이라 아직 받을 수 없습니다</small>}</div>)}<div className="creation-artifact-links"><Link className="text-link" href={`/assets/${encodeURIComponent(result.assetId)}`}>자세히 보기 <Icon name="arrowUpRight" size={13} /></Link><Link className="text-link" href="/kits">모음집에 담기 <Icon name="boxes" size={13} /></Link></div></div> : null}
         </div>
@@ -324,10 +324,10 @@ export function AssetCreationWorkbench({
 
       {!result && remixSourceAssetId ? <section className="creation-remix-card creation-remix-card-standalone" aria-labelledby="creation-source-remix-heading">
         <div className="creation-card-heading"><div><span className="mono-label">기존 에셋 다듬기</span><h4 id="creation-source-remix-heading">기존 에셋에서 새 버전 만들기</h4></div><Icon name="reset" size={18} /></div>
-        <p>Workspace에서 선택한 원본을 보존한 채 현재 Clunk Series와 프롬프트로 새 artifact를 만듭니다.</p>
-        <div className="creation-source-reference"><span>SOURCE ASSET</span><code>{remixSourceAssetId}</code><Link className="text-link" href={`/assets/${encodeURIComponent(remixSourceAssetId)}`}>원본 보기 <Icon name="arrowUpRight" size={12} /></Link></div>
+        <p>선택한 원본은 그대로 두고, 지금 고른 종류와 프롬프트로 새 파일을 만듭니다.</p>
+        <div className="creation-source-reference"><span>원본 파일</span><code>{remixSourceAssetId}</code><Link className="text-link" href={`/assets/${encodeURIComponent(remixSourceAssetId)}`}>원본 보기 <Icon name="arrowUpRight" size={12} /></Link></div>
         <label className="creation-field"><span>변경 프롬프트</span><textarea value={remixPrompt} onChange={(event) => setRemixPrompt(event.target.value)} rows={3} maxLength={2_000} /></label>
-        <button type="button" className="button button-primary button-sm" onClick={() => void remix()} disabled={busyAction !== null}>{busyAction === "remix" ? "Remix 작성 중…" : "이 원본으로 Remix"}<Icon name="reset" size={14} /></button>
+        <button type="button" className="button button-primary button-sm" onClick={() => void remix()} disabled={busyAction !== null}>{busyAction === "remix" ? "새 버전 만드는 중…" : "이 원본으로 새 버전 만들기"}<Icon name="reset" size={14} /></button>
         {remixMessage ? <p className="creation-inline-message" role="status">{remixMessage}</p> : null}
       </section> : null}
 
@@ -338,14 +338,14 @@ export function AssetCreationWorkbench({
           <EvidenceLane label="게임 화면" value="NOT_EVALUATED" detail="실제 게임 화면 필요" tone="pending" />
           <EvidenceLane label="사람 검토" value="NOT_EVALUATED" detail="직접 보고 판단" tone="pending" />
         </div>
-        <div className="creation-provenance-row"><span><b>PROVENANCE</b> {result.provenance.provider} · prompt {result.provenance.promptHash.slice(0, 12)}…</span><span><b>PRODUCTION READY</b> false</span><span><b>ASSET ID</b> {result.assetId.slice(0, 18)}…</span><span><b>CREDITS</b> {typeof result.credits === "number" ? `잔액 ${result.credits}` : "차감 없음"}</span>{result.projectId ? <span><b>PROJECT</b> {result.projectId.slice(0, 18)}…</span> : null}{result.sourceAssetId ? <span><b>SOURCE ASSET</b> {result.sourceAssetId.slice(0, 18)}…</span> : null}</div>
+        <div className="creation-provenance-row"><span><b>만든 기록</b> {result.provenance.provider} · 프롬프트 지문 {result.provenance.promptHash.slice(0, 12)}…</span><span><b>게임 투입 승인</b> 아직 아님</span><span><b>파일 번호</b> {result.assetId.slice(0, 18)}…</span><span><b>크레딧</b> {typeof result.credits === "number" ? `잔액 ${result.credits}` : "차감 없음"}</span>{result.projectId ? <span><b>프로젝트</b> {result.projectId.slice(0, 18)}…</span> : null}{result.sourceAssetId ? <span><b>원본 파일</b> {result.sourceAssetId.slice(0, 18)}…</span> : null}</div>
 
         <div className="creation-actions-grid">
           <section className="creation-remix-card" aria-labelledby="creation-remix-heading">
             <div className="creation-card-heading"><div><span className="mono-label">새 버전 만들기</span><h4 id="creation-remix-heading">원본을 보존하고 새 버전 만들기</h4></div><Icon name="reset" size={18} /></div>
-            <p>Remix는 현재 Workspace의 asset id와 hash를 원본으로 기록하고, 새 output asset을 만듭니다. 원본 bytes는 덮어쓰지 않습니다.</p>
+            <p>새 버전은 지금 파일의 번호와 지문을 원본으로 기록하고 새 파일을 만듭니다. 원본은 덮어쓰지 않습니다.</p>
             <label className="creation-field"><span>변경 프롬프트</span><textarea value={remixPrompt} onChange={(event) => setRemixPrompt(event.target.value)} rows={3} maxLength={2_000} /></label>
-            <div className="creation-remix-actions"><button type="button" className="button button-quiet button-sm" onClick={() => void remix()} disabled={busyAction !== null}>{busyAction === "remix" ? "Remix 작성 중…" : "source-linked Remix"}<Icon name="reset" size={14} /></button><Link className="button button-quiet button-sm" href="/kits">Kit 만들기 <Icon name="boxes" size={14} /></Link></div>
+            <div className="creation-remix-actions"><button type="button" className="button button-quiet button-sm" onClick={() => void remix()} disabled={busyAction !== null}>{busyAction === "remix" ? "새 버전 만드는 중…" : "새 버전 만들기"}<Icon name="reset" size={14} /></button><Link className="button button-quiet button-sm" href="/kits">묶음 만들기 <Icon name="boxes" size={14} /></Link></div>
             {remixMessage ? <p className="creation-inline-message" role="status">{remixMessage}</p> : null}
           </section>
           <section className="creation-review-card" aria-labelledby="creation-review-heading">

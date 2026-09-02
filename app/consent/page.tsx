@@ -58,23 +58,23 @@ export default async function ConsentPage({
               <br />
               <em>먼저 말씀드립니다.</em>
             </h1>
+            {/* 아래 세 줄은 개인정보처리방침의 문장을 그대로 옮긴 것입니다. 동의 화면과
+                방침이 다른 말을 하면 어느 쪽도 믿을 수 없게 됩니다. */}
             <p className="cv5-auth-lede">
-              {user.displayName}님, 반갑습니다. Clunk는 로그인 제공자가 준 이메일과 표시 이름, 그리고
-              여기서 만드는 에셋과 크레딧 기록만 보관합니다. 원본 파일은 브라우저에만 열리고
-              서버에 올라가지 않습니다. 비밀번호는 만들지도 보관하지도 않습니다.
+              {`${user.displayName}님, 반갑습니다. Clunk는 로그인 제공자가 준 이메일과 표시 이름, 그리고 여기서 만드는 에셋과 크레딧 기록만 보관합니다. 원본 파일은 브라우저에서 열리고 서버에 올라가지 않습니다. 비밀번호는 만들지도 보관하지도 않습니다.`}
             </p>
             <div className="cv5-auth-facts">
               <div className="cv5-auth-fact">
-                <span>수집</span>
-                <strong>이메일 · 표시 이름 · 제공자 식별자</strong>
+                <span>수집하는 것</span>
+                <strong>이메일 · 표시 이름 · 로그인 제공자 식별자</strong>
               </div>
               <div className="cv5-auth-fact">
-                <span>보관</span>
+                <span>보관하는 곳</span>
                 <strong>Cloudflare D1 · R2 (미국)</strong>
               </div>
               <div className="cv5-auth-fact">
-                <span>삭제</span>
-                <strong>요청 시 30일 이내</strong>
+                <span>지우고 싶을 때</span>
+                <strong>계정 삭제 요청 시 30일 이내</strong>
               </div>
             </div>
           </div>

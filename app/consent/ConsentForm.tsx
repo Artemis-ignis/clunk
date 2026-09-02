@@ -72,7 +72,9 @@ export function ConsentForm({ returnTo }: { returnTo: string }) {
           <label>
             <input type="checkbox" checked={marketing} onChange={(event) => setMarketing(event.target.checked)} />
             <span>
-              <b>(선택)</b> 새 에셋·기능 소식과 유료 전환 안내를 이메일로 받겠습니다. 언제든 설정에서 끌 수 있습니다.
+              <b>(선택)</b> 새 에셋·기능 소식과 유료 전환 안내를 이메일로 받겠습니다. 체크하지 않아도
+              서비스 이용에는 아무 영향이 없고, 나중에{" "}
+              <Link href="/settings" target="_blank" rel="noreferrer">설정 화면</Link>에서 켜고 끌 수 있습니다.
             </span>
           </label>
         </li>

@@ -41,7 +41,7 @@ export default function NotFound() {
           <div className="cv5-nf-links">
             <Link href="/app" prefetch={false}>에셋 검사</Link>
             <Link href="/review" prefetch={false}>검수 뷰어</Link>
-            <Link href="/connect" prefetch={false}>제작 에이전트</Link>
+            <Link href="/agents" prefetch={false}>제작 에이전트</Link>
             <Link href="/docs" prefetch={false}>문서</Link>
             <Link href="/pricing" prefetch={false}>요금 · 크레딧</Link>
           </div>

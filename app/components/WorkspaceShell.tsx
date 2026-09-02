@@ -20,11 +20,13 @@ import "./workspace-v5.css";
 
 export type WorkspaceSection = "overview" | "assets" | "studio" | "inspector" | "passports" | "kits" | "pricing" | "docs" | "settings";
 
+/* 2026-09-02: "모음집"(/kits)은 해시 목록으로 파일을 묶는 내부 작업면이라, 베타로
+   처음 들어온 사람에게는 눌러도 할 일이 없는 칸이었습니다. 사이드바에서 뺐습니다.
+   경로와 `kits` 섹션 값은 그대로 살아 있어 /kits 를 직접 열면 여전히 동작합니다. */
 const PRIMARY_NAV: { section: WorkspaceSection; label: string; href: string; icon: IconName }[] = [
   { section: "overview", label: "홈", href: "/dashboard", icon: "layout" },
-  { section: "assets", label: "내 에셋", href: "/assets", icon: "folder" },
+  { section: "assets", label: "내 파일", href: "/assets", icon: "folder" },
   { section: "studio", label: "만들기", href: "/studio", icon: "boxes" },
-  { section: "kits", label: "모음집", href: "/kits", icon: "folder" },
   { section: "inspector", label: "검사", href: "/app", icon: "scan" },
   { section: "passports", label: "검사 증명서", href: "/passport", icon: "badge" },
 ];
@@ -64,8 +66,8 @@ export function WorkspaceShell({
         </span>
       </Link>
 
-      <nav className="rail-nav" aria-label="워크스페이스 메뉴">
-        <span className="rail-group">워크스페이스</span>
+      <nav className="rail-nav" aria-label="작업실 메뉴">
+        <span className="rail-group">작업실</span>
         {PRIMARY_NAV.map((item) => (
           <Link
             key={item.href}
@@ -107,9 +109,9 @@ export function WorkspaceShell({
           설정
         </Link>
         <div className="rail-plan">
-          <span className="mono-label">내 워크스페이스</span>
-          <strong>크레딧 사용량</strong>
-          <small>검사와 생성에 사용됩니다</small>
+          <span className="mono-label">지금 요금</span>
+          <strong>무료 베타</strong>
+          <small>결제를 받지 않습니다</small>
         </div>
       </div>
     </div>
@@ -128,7 +130,7 @@ export function WorkspaceShell({
       <div className="cv5-stars" aria-hidden="true" />
       <div className="workspace-aurora" aria-hidden="true" />
 
-      <aside className="workspace-rail" aria-label="워크스페이스 사이드바">
+      <aside className="workspace-rail" aria-label="작업실 사이드바">
         {rail("side")}
       </aside>
 
@@ -176,7 +178,7 @@ export function WorkspaceShell({
           <h1 className="workspace-title">{title}</h1>
           <Link className="workspace-quick-action" href="/app" prefetch={false}>
             <Icon name="scan" size={14} />
-            <span>에셋 검사하기</span>
+            <span>내 파일 검사</span>
           </Link>
           <div className="workspace-toolbar-end">
             {status}

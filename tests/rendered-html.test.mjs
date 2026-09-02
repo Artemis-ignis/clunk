@@ -57,14 +57,13 @@ test("server-renders the Clunk Series catalog with source transparency", async (
   const response = await render("/series");
   assert.equal(response.status, 200);
   const html = await response.text();
-  for (const name of ["Clunk Asset Forge", "Clunk Sprite Lab", "Clunk Material Lab", "Clunk Motion Lab", "Clunk Game Ready", "Clunk Market"]) {
+  // 2026-09-02: the page names what each series makes, not an internal brand.
+  for (const name of ["3D 모델 만들기", "스프라이트 시트 만들기", "2D 이미지 만들기", "애니메이션 클립 만들기"]) {
     assert.match(html, new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }
-  assert.match(html, /CLUNK SERIES/);
-  assert.match(html, /clunk-series-native-v1/);
+  assert.match(html, /Clunk 내부 시리즈/);
   assert.match(html, /gltf-transform/);
   assert.match(html, /MIT/);
-  assert.match(html, /RESEARCH ONLY/);
   assert.match(html, /사용 제외/);
   assert.match(html, /\/studio/);
 });
@@ -74,7 +73,7 @@ test("landing language covers the full 2D and 3D asset path", async () => {
   const html = await response.text();
   // 2026-09-01: the landing stopped defending its own numbers and now tells the
   // reader what the number is for. The contract follows the fact, not the slogan.
-  assert.match(html, /농장·마을 배경에 바로 쓰는 저폴리 모델/);
+  assert.match(html, /농장·마을 배경에 바로 쓰는 3D 모델/);
   assert.match(html, /게임 적합도/);
   // 2026-09-01: the three section labels are Korean now — the Korean reference
   // sites the master gave (meshy.ai/ko, aetherforgeai.com/ko) use no English
@@ -101,7 +100,6 @@ test("public navigation uses browser-native anchors on the Sites runtime", async
     // of its own; the footer it delegates to is contracted here instead.
     "../app/components/SiteFooter.tsx",
     "../app/components/LandingHero.tsx",
-    "../app/components/HeroAutopsy.tsx",
     "../app/settings/page.tsx",
     // signin-with-chatgpt is a pure server redirect since 2026-08-31 — no anchors to contract.
     "../app/not-found.tsx",

@@ -247,7 +247,7 @@ function PassportDetail({ row }: { row: ParsedPassport }) {
           after={`${passport.after.score.hardBlockerCount}`}
         />
         <Compare
-          label="머티리얼"
+          label="재질"
           before={`${passport.before.metrics.materialCount}`}
           after={`${passport.after.metrics.materialCount}`}
         />

@@ -55,7 +55,16 @@ test("법적 문서 3종이 200으로 렌더되고 시행 중임을 배지로 �
     assert.ok(html.includes("시행일 2026-09-02"), `${pathname} 시행일이 없습니다`);
     assert.ok(html.includes("최종 수정일 2026-09-02"), `${pathname} 최종 수정일이 없습니다`);
     assert.ok(html.includes("초안 작성일 2026-08-31"), `${pathname} 초안 작성일이 없습니다`);
-    for (const stale of ["초안 · 시행 전", "시행일 미정", "이 문서도 시행 전 초안입니다"]) {
+    for (const stale of [
+      "초안 · 시행 전",
+      "시행일 미정",
+      "이 문서도 시행 전 초안입니다",
+      // 2026-09-02 감사: 시행 중이라고 배지에 적어 두고 본문에서는 "아직 시행되지 않는다"고
+      // 말하던 문장들. 둘 중 하나는 반드시 거짓말이라 본문 쪽을 고쳤다.
+      "이 약관은 시행되지 않으며",
+      "최초 시행일은 사업자 표시사항 확정 시점",
+      "그때까지 이 정책도 시행 전 초안입니다",
+    ]) {
       assert.ok(!html.includes(stale), `${pathname}에 옛 문구가 남아 있습니다: ${stale}`);
     }
   }
@@ -124,7 +133,13 @@ test("취소·환불정책이 청약철회 제한과 결제 전 동의 구조를
   assert.ok(html.includes("제17조 제2항 제5호"), "디지털 콘텐츠 특칙 근거 조문이 없습니다");
   assert.ok(html.includes("결제 전 고지·동의 구조"), "결제 전 동의 구조 설명이 없습니다");
   assert.ok(html.includes("동의 체크"), "동의 획득 방식이 명시되지 않았습니다");
-  assert.ok(html.includes("REFUNDED") && html.includes("REVOKED"), "환불 반영 결과 상태가 없습니다");
+  // 2026-09-02: 화면에는 한국어로 적는다. REFUNDED·REVOKED는 데이터베이스의 사정이지
+  // 구매자가 읽어야 할 말이 아니다.
+  assert.ok(html.includes("환불 완료") && html.includes("회수됨"), "환불 반영 결과가 한국어로 적혀 있지 않습니다");
+  assert.ok(!html.includes("REFUNDED") && !html.includes("REVOKED"), "영문 상태값이 화면에 남아 있습니다");
+  // 전자상거래법상 절차는 번호가 붙어야 "제2단계"라고 가리킬 수 있다. 전역 리셋이
+  // 목록 표식을 지워 버려서 법정 문서의 절차가 그냥 문장 나열로 보였다.
+  assert.ok(html.includes("<ol>"), "번호 있는 절차 목록이 없습니다");
   assert.ok(html.includes("차감하지 않습니다"), "실패 실행 크레딧 규칙이 없습니다");
 });
 
@@ -270,4 +285,126 @@ test("결제 미개시 안내는 결제 provider 미설정 상태에서만 렌�
   assert.ok(html.includes("지금은 무료 베타 기간입니다. 모든 기능을 결제 없이 쓸 수 있습니다."), "결제 미설정 상태에서 베타 안내가 없습니다");
   assert.ok(!html.includes("아직 유료 결제를 받지 않습니다"), "옛 결제 미개시 문구가 남아 있습니다");
   assert.ok(!html.includes("통신판매업 신고 절차 진행 중"), "옛 신고 절차 문구가 남아 있습니다");
+});
+test("법적 본문의 목록이 표식을 되찾고, 쿠키 이름은 대문자로 바뀌지 않는다", async () => {
+  // 전역 리셋(ul,ol{list-style:none})이 법정 문서의 조항 번호까지 지웠다.
+  const css = await source("app/components/legal-v5.css");
+  assert.match(css, /\.cv5-legal-body ul \{ list-style: disc outside; \}/);
+  assert.match(css, /\.cv5-legal-body ol \{ list-style: decimal outside; \}/);
+  // 표의 라벨은 대문자로 바뀐다. 쿠키 이름에 그걸 적용하면 존재하지 않는 이름이 찍힌다.
+  assert.match(css, /\.cv5-legal-table dt\.is-code \{[^}]*text-transform: none;/);
+
+  const shell = await source("app/components/LegalShell.tsx");
+  assert.match(shell, /row\.code \? "is-code" : undefined/);
+  const privacy = await source("app/privacy/page.tsx");
+  assert.match(privacy, /label: "clunk_auth_session", code: true/);
+  assert.match(privacy, /label: "clunk_oauth_tx_\*", code: true/);
+});
+
+test("연락처가 없는 자리를 가리키지 않고, 지금 할 수 있는 일을 알려 준다", async () => {
+  // [ ]는 그대로 둔다(운영자가 아직 주지 않은 값을 지어내지 않는다). 다만 "아래 문의 창구로
+  // 보내 주세요"는 아무 데도 가리키지 못하는 문장이었다.
+  for (const pathname of ["/privacy", "/refunds"]) {
+    const html = await (await render(pathname)).text();
+    assert.ok(html.includes("확정되는 대로 이 자리에"), `${pathname}에 연락처 확정 안내가 없습니다`);
+    assert.ok(!html.includes("아래 문의 창구"), `${pathname}에 가리킬 곳 없는 안내가 남아 있습니다`);
+  }
+  const privacy = await (await render("/privacy")).text();
+  assert.ok(privacy.includes("계정 삭제 요청 시 30일 이내"), "삭제 기한 문장이 없습니다");
+  assert.ok(privacy.includes('href="/settings"'), "지금 바로 할 수 있는 로그아웃 경로 안내가 없습니다");
+});
+
+test("동의 화면의 사실이 개인정보처리방침과 같은 문장이다", async () => {
+  const consent = await source("app/consent/page.tsx");
+  const privacy = await source("app/privacy/page.tsx");
+  const form = await source("app/consent/ConsentForm.tsx");
+
+  assert.ok(consent.includes("계정 삭제 요청 시 30일 이내"), "동의 화면의 삭제 기한이 방침과 다릅니다");
+  assert.ok(privacy.includes("계정 삭제 요청 시 30일 이내"), "방침의 삭제 기한 문장이 없습니다");
+  assert.ok(consent.includes("Cloudflare D1 · R2 (미국)"), "동의 화면의 보관 장소가 없습니다");
+  assert.ok(privacy.includes("Cloudflare D1"), "방침의 D1 보관 장소가 없습니다");
+  assert.ok(privacy.includes("두 곳 모두 미국에 있습니다"), "방침의 보관 국가가 없습니다");
+  assert.ok(consent.includes("이메일 · 표시 이름 · 로그인 제공자 식별자"), "동의 화면의 수집 항목이 다릅니다");
+  assert.ok(form.includes("이메일·표시 이름·로그인 제공자 식별자"), "동의 체크박스의 수집 항목이 다릅니다");
+  // 선택 동의는 나중에 끌 수 있다고 말한다. 그 말을 하려면 끄는 화면이 실제로 있어야 한다.
+  assert.ok(form.includes("설정 화면"), "마케팅 수신을 끄는 곳을 알려 주지 않습니다");
+  assert.match(form, /href="\/settings"/, "동의 화면이 설정 화면을 가리키지 않습니다");
+  const settings = await source("app/settings/page.tsx");
+  assert.match(settings, /MarketingConsentToggle/, "설정 화면에 수신 스위치가 없는데 있다고 말하고 있습니다");
+});
+
+test("이용약관과 개인정보처리방침이 호스팅과 구독 여부에 같은 답을 한다", async () => {
+  const terms = await (await render("/terms")).text();
+  const privacy = await (await render("/privacy")).text();
+  const refunds = await (await render("/refunds")).text();
+
+  for (const [name, html] of [["/terms", terms], ["/privacy", privacy]]) {
+    assert.ok(html.includes("Cloudflare, Inc. (미국)"), `${name}의 호스팅 제공자 표기가 다릅니다`);
+  }
+  const noSubscription = "정기 결제(구독) 상품은 제공하지 않습니다";
+  assert.ok(terms.includes(noSubscription), "약관이 구독 없음을 말하지 않습니다");
+  assert.ok(refunds.includes(noSubscription), "환불정책이 구독 없음을 말하지 않습니다");
+});
+
+test("/login과 /signup은 서로 다른 문이고, 영문 라벨이 남아 있지 않다", async () => {
+  const login = await (await render("/login?return_to=%2Fdashboard")).text();
+  const signup = await (await render("/signup")).text();
+
+  // 돌아오는 사람의 문
+  assert.ok(login.includes("작업하던 화면으로"), "로그인 화면의 머리말이 다릅니다");
+  assert.ok(login.includes("Clunk 작업공간에"), "로그인 카드 제목이 다릅니다");
+  assert.ok(login.includes('href="/signup"'), "로그인 화면에 가입 문이 없습니다");
+  assert.ok(login.includes("가입하고 시작하기"), "로그인 화면의 가입 안내 문구가 다릅니다");
+
+  // 처음 오는 사람의 문 — 받는 것이 머리말이다
+  assert.ok(signup.includes("계정 하나로"), "가입 카드 제목이 다릅니다");
+  assert.ok(signup.includes("작업공간을 만듭니다."), "가입 카드 제목이 다릅니다");
+  assert.ok(signup.includes('href="/login"'), "가입 화면에 로그인 문이 없습니다");
+
+  // 화면의 숫자는 전부 코드가 강제하는 상수에서 온다. 페이지에 직접 타이핑하면 원장과
+  // 어긋난 약속이 되고, 그건 지어낸 숫자와 같다.
+  const clunk = await source("app/api/_lib/clunk.ts");
+  const budget = await source("app/api/_lib/ai-budget.ts");
+  const signupGrant = clunk.match(/export const SIGNUP_GRANT_CREDITS = (\d+);/)?.[1];
+  const monthlyGrant = clunk.match(/export const BETA_MONTHLY_GRANT_CREDITS = (\d+);/)?.[1];
+  const imagesPerDay = budget.match(/export const WORKSPACE_IMAGES_PER_DAY = (\d+);/)?.[1];
+  assert.ok(signupGrant && monthlyGrant && imagesPerDay, "지급 상수를 읽지 못했습니다");
+  assert.ok(signup.includes(`가입하면 ${signupGrant}크레딧,`), "가입 즉시 지급 크레딧이 화면에 없습니다");
+  assert.ok(signup.includes(`매달 ${monthlyGrant}크레딧 더.`), "매월 지급 크레딧이 화면에 없습니다");
+  assert.ok(signup.includes(`${imagesPerDay}장까지`), "하루 이미지 한도가 화면에 없습니다");
+
+  const signupSource = await source("app/signup/page.tsx");
+  assert.match(signupSource, /SIGNUP_GRANT_CREDITS/);
+  assert.match(signupSource, /BETA_MONTHLY_GRANT_CREDITS/);
+  assert.match(signupSource, /WORKSPACE_IMAGES_PER_DAY/);
+
+  // 영문 눈썹 라벨과 푸터 띠는 사라졌다.
+  for (const [name, html] of [["/login", login], ["/signup", signup]]) {
+    for (const english of [
+      "SIGN IN",
+      "GET STARTED",
+      "AUTHENTICATED",
+      "CLUNK · AUTHENTICATED WORKSPACE",
+      "SITES HOST",
+      "OAUTH 앱 등록 대기",
+      "Workspace 시작",
+      "요청한 Workspace 열기",
+    ]) {
+      assert.ok(!html.includes(english), `${name}에 영문 라벨이 남아 있습니다: ${english}`);
+    }
+  }
+  for (const file of ["app/login/page.tsx", "app/signup/page.tsx"]) {
+    const page = await source(file);
+    assert.ok(!page.includes("cv5-auth-foot"), `${file}에 옛 푸터 띠가 남아 있습니다`);
+  }
+});
+
+test("요금 화면이 베타 이후의 계정 처리를 한 문장으로 답한다", async () => {
+  const html = await (await render("/pricing")).text();
+  assert.ok(html.includes("베타가 끝나면 지금 계정은 어떻게 되나요?"), "베타 종료 후 질문이 없습니다");
+  assert.ok(html.includes("Free 조건을 그대로"), "베타 계정 유지 답이 없습니다");
+  assert.ok(html.includes("최소 30일 전에"), "사전 공지 약속이 없습니다");
+  // 용어집: 삼각형·드로우콜은 화면에 쓰지 않는다.
+  const pricing = await source("app/pricing/page.tsx");
+  assert.doesNotMatch(pricing, /삼각형|드로우콜/, "내부 용어가 요금 화면에 남아 있습니다");
 });

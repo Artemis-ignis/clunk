@@ -29,7 +29,12 @@ export const LEGAL_EFFECTIVE_DATE = "2026-09-02";
 export const LEGAL_DRAFT_NOTICE =
   "이 문서는 2026-09-02부터 시행 중입니다. 지금은 무료 베타라 결제가 없고, 유상 판매에 관한 조항은 유료 전환을 미리 공지한 뒤부터 적용됩니다. 남은 [ ] 항목은 확정되는 대로 채웁니다.";
 
-export type LegalRow = { label: string; value: string; placeholder?: boolean };
+/**
+ * `code: true` marks a label that is a literal string the machine stores (a cookie name).
+ * The table uppercases labels; a cookie name that has been uppercased is a cookie that
+ * does not exist, so those rows opt out.
+ */
+export type LegalRow = { label: string; value: string; placeholder?: boolean; code?: boolean };
 
 /**
  * 전자상거래법 제10조가 요구하는 사업자 표시사항.
@@ -41,8 +46,8 @@ export const LEGAL_OPERATOR_ROWS: LegalRow[] = [
   { label: "사업자등록번호", value: "361-02-03814" },
   { label: "통신판매업 신고번호", value: "[유료 판매를 시작할 때 신고 후 기재 — 무료 베타 중에는 해당 없음]", placeholder: true },
   { label: "사업장 주소", value: "인천광역시 제물포구 화도진로 16, 109동 1604호(송림동, 동인천역 파크푸르지오)" },
-  { label: "연락처", value: "[대표 전화번호 — 확정 후 기재]", placeholder: true },
-  { label: "전자우편", value: "[고객문의 이메일 — 운영 계정 확정 후 기재]", placeholder: true },
+  { label: "연락처", value: "[대표 전화번호 — 확정되는 대로 이 자리에 기재합니다]", placeholder: true },
+  { label: "전자우편", value: "[고객문의 이메일 — 확정되는 대로 이 자리에 기재합니다]", placeholder: true },
   // Stated, not placeholder: the privacy policy already names D1 and R2, and this is where
   // the site runs.
   { label: "호스팅 제공자", value: "Cloudflare, Inc. (미국) — Workers · D1 · R2" },
@@ -53,7 +58,7 @@ export function LegalRows({ rows }: { rows: LegalRow[] }) {
     <dl className="cv5-legal-table">
       {rows.map((row) => (
         <div key={row.label}>
-          <dt>{row.label}</dt>
+          <dt className={row.code ? "is-code" : undefined}>{row.label}</dt>
           <dd className={row.placeholder ? "is-placeholder" : undefined}>{row.value}</dd>
         </div>
       ))}

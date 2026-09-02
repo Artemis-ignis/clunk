@@ -4,8 +4,8 @@ import { createPageMetadata } from "../components/site-metadata";
 
 export const dynamic = "force-dynamic";
 export const metadata = createPageMetadata({
-  title: "Passport",
-  description: "원본과 출력 해시를 연결한 Passport 기록을 확인하고 내려받습니다.",
+  title: "검사 증명서",
+  description: "원본 파일과 정리한 파일을 이어 놓은 검사 기록을 확인하고 내려받습니다.",
   path: "/passport",
 });
 

@@ -44,5 +44,9 @@ test("the public MCP status card exposes a live WebMCP state", async () => {
   assert.match(sourceText, /data-webmcp-status/);
   assert.match(sourceText, /dataset\.webmcpStatus/);
   assert.match(sourceText, /syncTimer/);
-  assert.match(sourceText, /initialize.*tools\/list|tools\/list.*initialize/);
+  // 2026-09-02: the card used to print JSON-RPC method names (initialize, tools/list) to
+  // visitors. It now says in Korean what the address can do; the method names belong
+  // in the agent guide, not on a status card.
+  assert.match(sourceText, /카탈로그를 읽고[\s\S]*검사/);
+  assert.doesNotMatch(sourceText, /<code>[^<]*(initialize|tools\/list)[^<]*<\/code>/);
 });

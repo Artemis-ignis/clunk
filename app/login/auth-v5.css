@@ -68,7 +68,8 @@
 
 .cv5-auth-fact span {
   font-family: var(--v5-label);
-  font-size: 0.6rem;
+  /* 11.5px 아래로는 내려가지 않는다 — 375px 화면에서 읽히지 않는다. */
+  font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   color: var(--v5-ink-faint);
@@ -105,7 +106,7 @@
   border-radius: 999px;
   background: var(--v5-grad-soft);
   font-family: var(--v5-label);
-  font-size: 0.62rem;
+  font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   color: var(--v5-ink);
@@ -184,7 +185,7 @@ a.cv5-auth-provider:hover {
 
 .cv5-auth-provider small {
   font-family: var(--v5-label);
-  font-size: 0.62rem;
+  font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   color: var(--v5-ink-faint);
@@ -306,7 +307,7 @@ a.cv5-auth-provider:hover {
   display: grid;
   gap: 7px;
   font-family: var(--v5-label);
-  font-size: 0.64rem;
+  font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   color: var(--v5-ink-faint);
@@ -364,19 +365,8 @@ a.cv5-auth-provider:hover {
 
 .cv5-qa-note {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   line-height: 1.6;
-  color: var(--v5-ink-faint);
-}
-
-/* ---------------------------------------------------------------- foot */
-.cv5-auth-foot {
-  border-top: 1px solid var(--v5-line);
-  padding: 18px 0 26px;
-  font-family: var(--v5-label);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
   color: var(--v5-ink-faint);
 }
 
@@ -397,6 +387,16 @@ a.cv5-auth-provider:hover {
   .cv5-auth { padding-top: 108px; }
   .cv5-auth-facts { grid-template-columns: 1fr; gap: 14px; margin-top: 30px; }
   .cv5-auth-card { padding: 24px 18px; }
+  /* 375px: the provider label and its hint stop fighting for one line. */
+  .cv5-auth-provider {
+    flex-wrap: wrap;
+    gap: 2px 12px;
+    padding: 12px 14px;
+    line-height: 1.4;
+  }
+  .cv5-auth-provider small { white-space: normal; }
+  .cv5-auth-primary,
+  .cv5-auth-secondary { padding: 0 14px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -427,3 +427,15 @@ a.cv5-auth-provider:hover {
 .cv5-consent-list b { color: var(--v5-ink); font-weight: 700; margin-right: 2px; }
 .cv5-consent-list a { color: var(--v5-ink); text-decoration: underline; text-underline-offset: 3px; }
 .cv5-consent .cv5-auth-primary[disabled] { opacity: 0.45; cursor: not-allowed; }
+/* The consent button is a real <button>, not the anchor .cv5-auth-primary was written for. */
+.cv5-consent button.cv5-auth-primary { width: 100%; border: 0; font-family: inherit; cursor: pointer; }
+.cv5-consent button.cv5-auth-primary:focus-visible {
+  outline: 3px solid rgba(139, 92, 246, 0.55);
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  /* 375px: the checkbox column stays put and the sentence wraps under itself. */
+  .cv5-consent-list label { padding: 12px; gap: 10px; font-size: 0.86rem; }
+  .cv5-consent .cv5-auth-primary { padding: 14px; min-height: 56px; text-align: left; }
+}

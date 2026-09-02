@@ -179,7 +179,7 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
     <div className="agent-connect-ui">
       <div className="agent-connection-toolbar" aria-label="Clunk 연결 도구">
         <div>
-          <span className="mono-label">CLUNK-OWNED CONNECTION</span>
+          <span className="mono-label">Clunk가 운영하는 연결</span>
           <strong>
             {connectionState === "signed-out"
               ? "로그인 후 연결 키를 발급하세요"
@@ -187,7 +187,7 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
                 ? "연결 상태를 확인하는 중입니다"
                 : "한 번 발급하고 모든 클라이언트에서 사용"}
           </strong>
-          <small>endpoint <code>{endpoint}</code> · local file inspection은 stdio fallback · remote evidence는 HTTPS</small>
+          <small>연결 주소 <code>{endpoint}</code> · 내 컴퓨터 파일 검사는 로컬 서버가 맡고, 기록은 HTTPS로 오갑니다</small>
         </div>
         <div className="agent-connection-actions">
           {connectionState !== "ready" ? (
@@ -225,17 +225,17 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
 
       <div className="agent-handshake-cards" aria-live="polite" aria-label="MCP 실제 연결 확인 단계">
         <article className="agent-handshake-card">
-          <span className="mono-label">01 · INITIALIZE</span>
+          <span className="mono-label">01 · 연결 시작</span>
           <strong>{handshake.initialize}</strong>
           <p>서버 이름과 MCP protocol 응답을 확인합니다.</p>
         </article>
         <article className="agent-handshake-card">
-          <span className="mono-label">02 · TOOLS/LIST</span>
+          <span className="mono-label">02 · 도구 목록</span>
           <strong>{handshake.tools}</strong>
           <p>{handshake.toolCount ? `${handshake.toolCount}개 도구가 실제 응답했습니다.` : "키 발급 후 실제 도구 목록을 요청합니다."}</p>
         </article>
         <article className="agent-handshake-card agent-handshake-card-boundary">
-          <span className="mono-label">03 · BOUNDARY</span>
+          <span className="mono-label">03 · 경계</span>
           <strong>분리 유지</strong>
           <p>이 핸드셰이크 PASS는 구조/연결 확인이며 player-facing 승인이 아닙니다.</p>
         </article>

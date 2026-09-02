@@ -39,7 +39,7 @@ const PLANS = [
     annual: 0,
     credits: BETA_MONTHLY_GRANT_CREDITS,
     images: WORKSPACE_IMAGES_PER_DAY,
-    lines: ["마켓 에셋 미리보기·3D 뷰어·팔레트", "파일 검사와 스프라이트 감사", "MCP·API 연결 (에이전트 무료)", "상업 이용 가능"],
+    lines: ["마켓 에셋 미리보기·3D 뷰어·색 팔레트", "파일 검사와 스프라이트 시트 검사", "AI 도구 연결(MCP)과 API — 추가 요금 없음", "상업적으로 써도 됩니다"],
     note: "지금 모든 계정이 이 조건 이상으로 무료입니다.",
   },
   {
@@ -49,7 +49,7 @@ const PLANS = [
     annual: 99_000,
     credits: 300,
     images: 30,
-    lines: ["Free의 전부", "마켓 다운로드 무제한", "우선 처리", "개인 상업 라이선스 명시"],
+    lines: ["Free에 있는 것 전부", "마켓 에셋 내려받기 제한 없음", "작업 순서 우선 처리", "1인 상업 라이선스 명시"],
     featured: true,
   },
   {
@@ -59,7 +59,7 @@ const PLANS = [
     annual: 290_000,
     credits: 1_200,
     images: 100,
-    lines: ["Maker의 전부", "팀 좌석 3", "팀 공용 크레딧", "상업 라이선스 서면 발급"],
+    lines: ["Maker에 있는 것 전부", "팀 자리 3개", "팀이 함께 쓰는 크레딧", "상업 라이선스 서면 발급"],
   },
 ] as const;
 
@@ -70,9 +70,9 @@ const PACKS = [
 ] as const;
 
 const OPERATIONS = [
-  { label: "에셋 검사", detail: "올린 GLB·PNG를 파일 단위로 읽어 삼각형·드로우콜·규격을 확인합니다." },
+  { label: "에셋 검사", detail: "올린 GLB·PNG 파일을 열어 면 수(많을수록 무거움)와 그리기 횟수(적을수록 빠름), 규격을 확인합니다." },
   { label: "안전 최적화", detail: "원본은 그대로 두고 정리한 새 파일을 만들어 다시 검사합니다." },
-  { label: "에셋 생성", detail: "문장으로 2D 이미지를, 코드로 3D 모델과 스프라이트 시트를 만듭니다." },
+  { label: "에셋 만들기", detail: "문장으로 2D 이미지를, 코드로 3D 모델과 스프라이트 시트를 만듭니다." },
   { label: "외부 결과 재검사", detail: "다른 도구로 만든 파일도 같은 기준으로 다시 검사합니다." },
 ] as const;
 
@@ -98,15 +98,16 @@ export default function PricingPage() {
           <section className={styles.hero} data-snap-section="pricing-intro" aria-labelledby="pricing-title">
             <div className={`cv5-frame ${styles.heroGrid}`}>
               <div>
-                <span className="cv5-badge">✦ {salesOpen ? "1 크레딧 = ₩100" : "무료 베타 · 결제 없음"}</span>
+                <span className="cv5-badge">✦ {salesOpen ? "1 크레딧 = 100원" : "무료 베타 진행 중"}</span>
                 <h1 id="pricing-title">
-                  지금은 전부 무료,
+                  요금은 단순합니다.
                   <br />
-                  <em>나중에도 ₩100부터</em>
+                  <em>쓴 만큼, 크레딧으로.</em>
                 </h1>
                 <p className={styles.heroLede}>
-                  가입하면 {SIGNUP_GRANT_CREDITS}크레딧, 매월 {BETA_MONTHLY_GRANT_CREDITS}크레딧이 더 들어옵니다.
-                  검사·생성은 작업당 1크레딧, 마켓 에셋은 로그인만 하면 받습니다. 카드는 묻지 않습니다.
+                  {salesOpen
+                    ? `크레딧 하나가 100원입니다. 검사·생성은 성공한 작업당 1크레딧이고, 실패한 작업은 세지 않습니다.`
+                    : `무료 베타 기간에는 가입만 하면 ${SIGNUP_GRANT_CREDITS}크레딧을 드리고, 매달 ${BETA_MONTHLY_GRANT_CREDITS}크레딧을 더 드립니다. 검사·생성은 성공한 작업당 1크레딧, 마켓 에셋은 로그인만 하면 받습니다. 결제 정보는 받지 않습니다.`}
                 </p>
                 <div className={styles.actions}>
                   <Link className="cv5-btn cv5-btn-primary" href="/signup">
@@ -162,7 +163,14 @@ export default function PricingPage() {
                 </h2>
                 <p>
                   베타가 끝나면 이 표대로 받습니다. 바뀌면 최소 30일 전에 이 페이지와 이메일로 알립니다.
-                  베타 계정은 전환 후에도 Free 조건을 그대로 유지합니다.
+                </p>
+              </div>
+              <div className={`${styles.betaAnswer} cv5-reveal`}>
+                <strong>베타가 끝나면 지금 계정은 어떻게 되나요?</strong>
+                <p>
+                  그대로 남습니다. 지금 만든 계정은 유료 전환 뒤에도 Free 조건을 그대로 씁니다.
+                  받은 크레딧과 내려받은 파일은 그대로 두고, 갑자기 결제를 요구하지 않습니다.
+                  유료 전환은 최소 30일 전에 이 페이지와 이메일로 미리 알립니다.
                 </p>
               </div>
               <div className={`${styles.planGrid} cv5-reveal`} data-delay="1">

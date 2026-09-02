@@ -44,8 +44,8 @@ export const POLICY_RULE_IDS = [
 export const FINDING_CATEGORIES = [
   { id: "format", label: "포맷" },
   { id: "scene", label: "씬" },
-  { id: "geometry", label: "지오메트리" },
-  { id: "materials", label: "머티리얼" },
+  { id: "geometry", label: "형태(지오메트리)" },
+  { id: "materials", label: "재질" },
   { id: "textures", label: "텍스처" },
   { id: "runtime", label: "런타임" },
 ] as const;
@@ -53,9 +53,9 @@ export const FINDING_CATEGORIES = [
 /** `RepairOperationId` union, with the safety class each operation reports. */
 export const REPAIR_OPERATIONS = [
   { id: "prune-empty-nodes", label: "빈 노드 정리", safety: "lossless" },
-  { id: "dedupe-materials", label: "중복 머티리얼 병합", safety: "lossless" },
+  { id: "dedupe-materials", label: "똑같은 재질 합치기", safety: "lossless" },
   { id: "clean-metadata", label: "메타데이터 정리", safety: "metadata-only" },
-  { id: "repack", label: "새 파일로 재패킹", safety: "lossless" },
+  { id: "repack", label: "새 파일로 다시 묶기", safety: "lossless" },
 ] as const;
 
 /** Fields written into every Passport by `createPassport`. */

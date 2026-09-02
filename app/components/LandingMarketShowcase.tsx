@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "./NativeLink";
+import { isVariantSlug } from "../api/_lib/listing-variants";
 
 /**
  * The landing used to carry a hand-written copy of the catalogue: twelve slugs,
@@ -47,19 +48,27 @@ function categoryOf(listing: Listing): Exclude<ShowcaseCategory, "all"> {
   return "prop";
 }
 
-/** The measured head clause the pipeline wrote, or nothing. Never a guess. */
+/**
+ * The measured head clause the pipeline wrote, or nothing. Never a guess.
+ * The patterns mirror the plain-Korean sentences build-manifest.mjs writes; 폴리곤 is
+ * the word game people already use, and the hero panel says once "적을수록 가벼움".
+ */
 function trisOf(listing: Listing): string | null {
-  const solid = listing.description.match(/실측 ([\d,]+) tris/u);
-  if (solid) return `${solid[1]} 삼각형`;
-  const bundle = listing.description.match(/합계 ([\d,]+) tris/u);
-  if (bundle) return `합계 ${bundle[1]} 삼각형`;
-  const perTemplate = listing.description.match(/템플릿당 ([\d,]+~[\d,]+) tris/u);
-  if (perTemplate) return `템플릿당 ${perTemplate[1]} 삼각형`;
-  if (listing.description.includes("심리스")) return "1024² 심리스 타일";
+  const solid = listing.description.match(/잰 값으로 폴리곤 ([\d,]+)개/u);
+  if (solid) return `폴리곤 ${solid[1]}개`;
+  const bundle = listing.description.match(/합쳐 폴리곤 ([\d,]+)개/u);
+  if (bundle) return `모두 합쳐 폴리곤 ${bundle[1]}개`;
+  const perTemplate = listing.description.match(/한 그루에 폴리곤 ([\d,]+~[\d,]+)개/u);
+  if (perTemplate) return `한 그루당 폴리곤 ${perTemplate[1]}개`;
+  if (listing.description.includes("이음매 없는")) return "1024×1024 이음매 없는 타일";
+  const sheet = listing.description.match(/(\d+)×(\d+) PNG (\d+)컷/u);
+  if (sheet) return `스프라이트 시트 ${sheet[1]}×${sheet[2]} · ${sheet[3]}컷`;
   return null;
 }
 
-function priceOf(listing: Listing): string {
+function priceOf(listing: Listing, beta: boolean): string {
+  // During the free beta a signed-in visitor is given the file; a price here would be a lie.
+  if (beta) return "베타 무료";
   if (listing.priceCents === 0) return "무료";
   try {
     return new Intl.NumberFormat("ko-KR", { style: "currency", currency: /^[A-Z]{3}$/u.test(listing.currency) ? listing.currency : "KRW" })
@@ -77,6 +86,7 @@ function previewOf(listing: Listing): string | null {
 
 export function LandingMarketShowcase({ limit = 12 }: { limit?: number }) {
   const [listings, setListings] = useState<Listing[]>([]);
+  const [beta, setBeta] = useState(false);
   const [category, setCategory] = useState<ShowcaseCategory>("all");
   const [failed, setFailed] = useState(false);
 
@@ -84,9 +94,13 @@ export function LandingMarketShowcase({ limit = 12 }: { limit?: number }) {
     let active = true;
     void fetch("/api/marketplace", { cache: "no-store" })
       .then(async (response) => {
-        const payload = await response.json() as { ok?: boolean; listings?: Listing[] };
+        const payload = await response.json() as { ok?: boolean; listings?: Listing[]; checkout?: { status?: string } };
         if (!response.ok || payload.ok !== true || !Array.isArray(payload.listings)) throw new Error("catalogue unavailable");
-        if (active) setListings(payload.listings.filter((row) => row.status === "PUBLISHED"));
+        if (!active) return;
+        // A sprite sheet baked from a 3D model is a download option on that model's page,
+        // not a second card — the same rule the shop grid applies (listing-variants.ts).
+        setListings(payload.listings.filter((row) => row.status === "PUBLISHED" && !isVariantSlug(row.slug)));
+        setBeta(payload.checkout?.status === "PAYMENT_PROVIDER_NOT_CONFIGURED");
       })
       .catch(() => { if (active) setFailed(true); });
     return () => { active = false; };
@@ -153,7 +167,7 @@ export function LandingMarketShowcase({ limit = 12 }: { limit?: number }) {
                 <span className="cv5-showcase-meta">
                   <b>{listing.title}</b>
                   <span>{tris ?? listing.entryFileName.split(".").pop()?.toUpperCase()}</span>
-                  <i>{priceOf(listing)}</i>
+                  <i>{priceOf(listing, beta)}</i>
                 </span>
               </Link>
             </li>

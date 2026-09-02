@@ -1,0 +1,1 @@
+UPDATE clunk_marketplace_listings SET title = '코지 트랙터', description = '농장 배경에 세우는 가벼운 3D 트랙터입니다. 파일을 열어 잰 값으로 폴리곤 1,060개, 그리기 18회, 재질 5개이고 실제 크기는 2.29x2.03x2.98 m입니다. 웹·모바일 게임 기준 모두 100점, 막히는 문제 0건입니다. 네 바퀴가 각각 따로 움직이는 부품이라 굴리면 제자리에서 돌고, 앞바퀴를 꺾으면 방향도 바꿀 수 있습니다. 색은 재질에 들어 있어 텍스처 없이 바로 씁니다.', updated_at = CURRENT_TIMESTAMP WHERE slug = 'cozy-tractor';

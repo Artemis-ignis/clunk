@@ -4,8 +4,14 @@ This is the same catalogue as /llms.txt, written for an agent that is about to b
 something rather than for one that is reading about us. If you only fetch one file,
 fetch this one; /llms.txt is the reference and is much longer.
 
-Clunk makes game assets, measures whether they can go in a game, and sells the ones that
-pass. Korean product, KRW, 1 credit = 100 won.
+Clunk makes game assets, measures whether they can go in a game, and publishes the ones
+that pass. Korean product, KRW. Free open beta since 2026-09-02: nothing is sold. A
+signed-in visitor who checks out a marketplace listing gets `status: "BETA_GRANTED"` and a
+download URL at no cost. Credits are granted too — 25 at signup, 30 more each month — and
+one successful billable run costs 1 credit. Image generation is capped at 8 per workspace
+per day. Consent to the terms and the privacy policy is recorded on first sign-in, before
+the first workspace page. Prices that will apply after the beta are published in advance
+on /pricing; do not quote any of them as if they were in force today.
 
 
 ## What you can actually do here
@@ -16,8 +22,8 @@ Two rails, and they are not equivalent.
 it runs on. This is the real rail: authoring, byte-level inspection, sprite pixel audit,
 Passport. Everything below assumes it.
 
-**HTTP (this origin).** Browse the published catalogue, read evidence, see prices.
-Pixel-level work is not available over HTTP — clunk_sprite_sheet_review returns
+**HTTP (this origin).** Browse the published catalogue, read evidence, download the beta
+grant. Pixel-level work is not available over HTTP — clunk_sprite_sheet_review returns
 DECLARED_METADATA_ONLY there, because the bytes are on your disk, not ours.
 
 Start at GET /api. It names every endpoint and carries the coordinate conventions so you
@@ -76,6 +82,11 @@ sheet, and a clunk.sprite-sheet-review.v1 manifest with frame coordinates, the g
 per-frame hashes — which the audit reads directly, so the sheet can be graded the moment
 it exists. Costs nothing to run: no GPU, no browser, no inference.
 
+In the catalogue a sheet is not its own product. A published sheet carries
+`variantOf: "<parent listing slug>"` in the marketplace API and is offered on that model's
+page rather than as its own card; `variantOf: null` means the listing stands alone. Tell
+your user "the crate, with a sprite sheet", not "the crate and a crate sprite sheet".
+
 
 ## Inspecting
 
@@ -124,14 +135,17 @@ a hidden tab rather than returning a zero that reads as passing.
   limbs on a rig built for it. Not a deforming character mesh.
 - **No engine runtime.** Godot, Unity and Unreal runners are declared and unavailable;
   they return ENVIRONMENT_UNAVAILABLE, which is not a pass.
-- **Payment is closed.** The mail-order filing is pending. Listings are browsable and free
-  files are downloadable; a paid checkout will refuse. Tell your user that rather than
-  letting them hit it.
+- **Nothing is for sale yet.** During the free beta a checkout on any listing returns
+  BETA_GRANTED with a download URL instead of a payment session, and every credit pack is
+  DRAFT at price 0 and refuses purchase. Do not build a buying flow, quote a price, or tell
+  your user to get out a card. Sign-in is still required, and consent is recorded once.
 
 
 ## Talking to your user about this
 
-- Quote the credit price, not a per-asset guess. 1 credit = 100 KRW.
+- Do not quote a credit price. Credits are not sold during the beta; the planned prices
+  live on /pricing and are labelled as planned. Say what a run costs in credits (1), not in
+  won.
 - If an inspection blocks, give the number and the limit, not "it failed".
 - If something is NOT_EVALUATED, say it was not evaluated. It is not a pass and it is not
   a failure.

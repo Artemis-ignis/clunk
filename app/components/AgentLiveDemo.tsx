@@ -22,12 +22,12 @@ import { useEffect, useRef, useState } from "react";
  */
 
 const USER_TEXT = "농장 게임에 쓸 시장 노점 하나 만들어줘.";
-const AGENT_TEXT = "저폴리로 만들고 바로 검사까지 돌리겠습니다.";
+const AGENT_TEXT = "게임에 넣어도 가벼운 크기로 만들고, 바로 검사까지 돌리겠습니다.";
 const STEPS = [
-  { tool: "clunk_asset_author", note: "시장 노점 생성 · 2,456 tris" },
-  { tool: "clunk_asset_inspect", note: "드로우콜 31 · 문제 0건" },
+  { tool: "clunk_asset_author", note: "시장 노점 만들기 · 2,456면" },
+  { tool: "clunk_asset_inspect", note: "그리기 횟수 31회 · 문제 0건" },
   { tool: "clunk_optimize", note: "안전한 정리만, 원본은 그대로" },
-  { tool: "clunk_passport", note: "만든 과정을 기록으로 봉인" },
+  { tool: "clunk_passport", note: "만든 과정을 검사 증명서로 남김" },
 ] as const;
 
 const GLB_URL = "/market/cozy-farm-set-vol1/market-stall.m1.clunk-optimized.glb";
@@ -299,9 +299,9 @@ export function AgentLiveDemo() {
       </div>
 
       <div className="cv5-agent-stage" ref={stageRef} aria-label="에이전트가 에셋을 만들고 검사하는 3D 데모">
-        <span className="cv5-agent-stage-tag">LIVE · market-stall.glb</span>
+        <span className="cv5-agent-stage-tag">지금 만드는 중 · market-stall.glb</span>
         {scene.scanning ? <span className="cv5-agent-scan">검사 중 · 17개 항목</span> : null}
-        {scene.badge ? <span className="cv5-agent-badge">100점 · 문제 0건</span> : null}
+        {scene.badge ? <span className="cv5-agent-badge">100점 · 막는 문제 0건</span> : null}
       </div>
     </div>
   );

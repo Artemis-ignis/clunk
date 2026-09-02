@@ -44,7 +44,8 @@ test("native lifecycle keeps remix source links and hash-only kits", async () =>
   assert.match(studioPage, /source_asset_id/);
   assert.match(assetDetail, /source_asset_id/);
   assert.match(dashboard, /generation-history|생성 이력/i);
-  assert.match(dashboard, /\/api\/projects/);
+  // 2026-09-02: the dashboard no longer lists projects itself; the kits page owns that call.
+  assert.match(await source("app/components/KitsClient.tsx"), /\/api\/projects/);
   assert.match(assetDetail, /WorkspaceAssetLibrary|\/api\/generation/);
   assert.doesNotMatch(workbench, /판매 Draft 저장|DEMO MODE/);
 });

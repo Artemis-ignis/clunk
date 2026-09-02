@@ -58,7 +58,7 @@ export function accessFor(options: {
     as: "workspace",
     credits,
     credit_price_krw: CREDIT_KRW,
-    costs: { generate: 1, inspect: 0, marketplace_asset: "the listing's own price" },
+    costs: { generate: 1, inspect: 1, marketplace_asset: "the listing's own price" },
     // Division, not a promise: it is how many generate calls the current balance covers,
     // and it goes stale the moment one is spent.
     generates_remaining: credits,

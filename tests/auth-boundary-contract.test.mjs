@@ -41,7 +41,7 @@ test("forged Sites identity headers cannot authenticate a deployment that did no
   assert.equal(login.status, 200);
   const html = await login.text();
   // The authenticated affordance must be absent: no session was ever proven.
-  assert.doesNotMatch(html, /요청한 Workspace 열기/);
+  assert.doesNotMatch(html, /요청한 화면 열기/);
   assert.doesNotMatch(html, /forged@example\.test/);
   // An untrusted deployment must not advertise the Sites host sign-in it
   // cannot honor; the truthful provider inventory renders instead.
@@ -63,7 +63,7 @@ test("the Sites trust flag restores host identity for the proxied deployment", a
   });
   assert.equal(login.status, 200);
   const html = await login.text();
-  assert.match(html, /요청한 Workspace 열기/);
+  assert.match(html, /요청한 화면 열기/);
   assert.match(html, /href="\/dashboard/);
 });
 
@@ -74,7 +74,7 @@ test("only the exact flag value \"1\" enables header trust", async () => {
       env: { CLUNK_TRUST_SIWC_HEADERS: value },
     });
     const html = await response.text();
-    assert.doesNotMatch(html, /요청한 Workspace 열기/, `flag value ${JSON.stringify(value)} must not grant trust`);
+    assert.doesNotMatch(html, /요청한 화면 열기/, `flag value ${JSON.stringify(value)} must not grant trust`);
   }
 });
 

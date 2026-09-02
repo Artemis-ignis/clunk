@@ -817,3 +817,164 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
 .cv5-make-facts b { color: var(--v5-ink); font-size: 0.86rem; font-variant-numeric: tabular-nums; }
 .cv5-make-facts span { font-family: var(--v5-label); font-size: 0.56rem; letter-spacing: 0.07em; color: var(--v5-ink-faint); }
 @media (max-width: 640px) { .cv5-make-facts { grid-template-columns: 1fr 1fr; } }
+
+/* ============================================================================
+   2026-09-02 master landing review
+
+   Four things a visitor could see were wrong: the inspector mock left a tall
+   empty column under the tractor, the flipped section stayed two-up on a phone
+   and crushed that same mock past the screen edge, the hero step pills wrapped
+   4 + 1, and roughly eighty label strings rendered between 9 and 11px.
+   ========================================================================= */
+
+/* 1. FLIPPED ROWS ON SMALL SCREENS.
+      `.cv5-sec-grid[data-flip="true"]` re-declares its two tracks AFTER the
+      1080px stacking rule and outranks it, so section 02 stayed two columns all
+      the way down: at 375px the visual column was 138px wide and the inspector
+      panel inside it overflowed the viewport by 11px. Stacking has to win. */
+@media (max-width: 1080px) {
+  .cv5-sec-grid[data-flip="true"] { grid-template-columns: 1fr; }
+}
+
+/* 2. THE INSPECTOR STAGE FILLS ITS ROW.
+      The stage was locked to a 900/610 box while the panel beside it ran 383px
+      tall, so about 180px of empty section sat under the tractor, and the
+      viewer's own 240px minimum overflowed the 206px frame and clipped the
+      model's wheels. Let the stage take the row's height and let the canvas
+      fill the stage. */
+.cv5-inspect { align-items: stretch; }
+.cv5-inspect-preview {
+  aspect-ratio: auto;
+  min-height: 0;
+  display: grid;
+  align-items: stretch;
+}
+.cv5-inspect-preview > div {
+  width: 100%;
+  height: 100%;
+  min-height: clamp(280px, 30vw, 360px);
+}
+/* The viewer stamps "실제 판매 파일" on itself. True in section 01, false of the
+   tractor — it is Harvest Frontier's file, not a listing — and the frame already
+   carries its own caption. */
+.cv5-inspect-preview .cv5-embed3d-hint { display: none; }
+
+/* 3. EACH INSPECTION ROW READS AS A SENTENCE: meaning, number, comparison. */
+.cv5-find div {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 12px;
+  row-gap: 2px;
+  align-items: baseline;
+  justify-content: initial;
+}
+.cv5-find div > span { text-align: right; word-break: keep-all; }
+.cv5-find div > span em {
+  font-style: normal; font-weight: 700; color: var(--v5-ink);
+  font-variant-numeric: tabular-nums;
+}
+.cv5-find div[data-tone="warn"] > span em { color: var(--v5-amber); }
+@media (max-width: 760px) {
+  .cv5-find div { grid-template-columns: minmax(0, 1fr); }
+  .cv5-find div > span { text-align: left; }
+}
+
+/* 4. THE SAME SHAPE UNDER THE MODEL CLUNK MADE. */
+.cv5-make-facts div { display: grid; gap: 2px; align-content: center; }
+.cv5-make-facts div > span {
+  font-family: var(--v5-label); font-size: 0.72rem; letter-spacing: 0.02em; color: var(--v5-ink-faint);
+}
+.cv5-make-facts div > b { color: var(--v5-ink); font-size: 0.95rem; font-variant-numeric: tabular-nums; }
+.cv5-make-facts div > small { font-size: 0.72rem; line-height: 1.45; color: var(--v5-ink-faint); }
+.cv5-make-name > b { font-size: 0.95rem; }
+.cv5-make-name > span {
+  font-family: var(--v5-font); font-size: 0.76rem; letter-spacing: 0; line-height: 1.5;
+  color: var(--v5-ink-dim);
+}
+@media (max-width: 640px) {
+  .cv5-make-facts { grid-template-columns: 1fr 1fr; }
+  .cv5-make-name { grid-column: 1 / -1; }
+}
+
+/* 5. FIVE STEP PILLS, LAID OUT 3 + 2 AND CENTRED, INSTEAD OF WRAPPING 4 + 1. */
+@media (max-width: 640px) {
+  .cv5-hero .cv5-flow { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+  .cv5-hero .cv5-flow span { grid-column: span 2; justify-content: center; padding: 0 8px; }
+  .cv5-hero .cv5-flow span:nth-child(4) { grid-column: 2 / span 2; }
+  .cv5-hero .cv5-flow span:nth-child(5) { grid-column: 4 / span 2; }
+}
+
+/* 6. NOTHING A VISITOR READS IS SMALLER THAN 11.5px.
+      Every selector below rendered between 8.96px and 11.2px. 0.72rem = 11.52px
+      is the floor for real content; nothing here is decoration. */
+.cv5-flow span,
+.cv5-mock-bar span,
+.cv5-hv-head span,
+.cv5-hv-cell span,
+.cv5-sec-kicker small,
+.cv5-score div span,
+.cv5-steps span,
+.cv5-steps span code,
+.cv5-showcase-meta span,
+.cv5-showcase-meta i,
+.cv5-showcase-tab i,
+.cv5-showcase-foot small,
+.cv5-float small,
+.cv5-inspect-preview small,
+.cv5-agent-stage-tag,
+.cv5-agent-scan,
+.cv5-embed3d-hint,
+.cv5-embed3d-anim,
+.cv5-footer-col header,
+.cv5 .landing-mcp-tabs button,
+.cv5 .landing-terminal-head,
+.cv5 .landing-mcp-code pre,
+.cv5 .landing-mcp-note {
+  font-size: 0.72rem;
+}
+
+/* 7. THE FOOTER'S STATUTORY LINE IS A SENTENCE, NOT A WATERMARK.
+      12.5px at 72% opacity, and the two lines stack instead of fighting for one
+      row on a phone. */
+.cv5-footer-legal {
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: rgba(233, 236, 248, 0.72);
+  justify-content: flex-start;
+}
+.cv5-footer-beta { color: var(--v5-ink-dim); }
+@media (max-width: 860px) {
+  .cv5-footer-legal { flex-direction: column; gap: 8px; }
+}
+
+/* <code> and <pre> inherit the UA monospace size quirk (x0.944), so an inherited
+   0.72rem lands back at 10.9px. Set them outright. */
+.cv5 .landing-terminal-head code,
+.cv5 .landing-mcp-code pre,
+.cv5 .landing-mcp-code pre code,
+.cv5-steps span code {
+  font-size: 0.72rem;
+  font-family: var(--v5-label);
+}
+
+/* 8. BULLET ROWS FLOW AS ONE SENTENCE.
+      Each row is a check, a bold noun and a Korean clause. As flex items the
+      bold noun and the clause were two independent columns, so on a phone the
+      noun wrapped to two lines beside a clause that wrapped to two more and the
+      row read as a broken table. Float the check and let the sentence flow. */
+.cv5-points li { display: block; position: relative; padding-left: 30px; }
+.cv5-points li::before { position: absolute; left: 0; top: 3px; margin-top: 0; }
+.cv5-points li b { font-weight: 700; }
+
+/* The provenance chip must never grow into a two-line banner across the model. */
+.cv5-inspect-preview small { max-width: calc(100% - 24px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* 9. THE PAGE MUST STILL SCROLL PAST A 3D VIEWER ON A PHONE.
+      The viewer sets touch-action:none on its canvas so a drag orbits the
+      model. On a product page that is one canvas on a page you have already
+      reached; on the landing it is three canvases stacked down a scroll-snap
+      page, and a thumb that lands on one cannot scroll past it. pan-y gives the
+      vertical gesture back to the page and keeps the horizontal drag orbiting. */
+/* OrbitControls writes touch-action:none as an INLINE style on the canvas, so
+   only an !important author rule can take the vertical gesture back. */
+.cv5-snap .cv5-embed3d canvas { touch-action: pan-y !important; }

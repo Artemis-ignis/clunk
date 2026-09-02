@@ -138,11 +138,14 @@ test("collaboration UI keeps capture integrity, asset audit, and human visual re
   assert.match(panel, /UNAVAILABLE/);
   assert.match(panel, /runtime usage/);
   assert.match(panel, /affectedScene/);
-  assert.match(agents, /environmentUnavailable/);
-  assert.match(agents, /readinessReason/);
-  assert.match(agents, /sceneReviewCli/);
-  assert.match(agents, /assetEvidenceRef/);
-  assert.match(agents, /NOT CURRENT APPROVAL/);
+  // 2026-09-02: the page says it in Korean now; the field name stays in the API and docs.
+  assert.match(agents, /확인할 환경 없음|environmentUnavailable/);
+  // 2026-09-02: the page stopped printing API field names to visitors. The separation it
+  // must keep — file audit is not engine proof is not human sign-off — is now said in Korean.
+  assert.match(agents, /파일 검사 통과와[\s\S]*화면 통과는 다릅니다/);
+  assert.match(agents, /엔진 화면[\s\S]*증거 없음/);
+  assert.match(agents, /사람 검토[\s\S]*대기/);
+  assert.match(agents, /게임에 넣어도 된다고 말하지 않습니다/);
   assert.match(panel, /inspectionRunId/);
   assert.match(facts, /fresh HF.*inspectionRunId/);
   assert.match(facts, /profileId is required for CURRENT/);
@@ -160,9 +163,7 @@ test("collaboration UI keeps capture integrity, asset audit, and human visual re
   assert.match(facts, /HF_M98_RUNTIME_UPDATE/);
   assert.match(docsPage, /player-facing scene review output/);
   assert.match(docsPage, /M104 comparison acceptance/);
-  assert.match(docsPage, /HF M105 WebGPU\/WebGL2 handoff/);
-  assert.match(docsPage, /HF M105 fresh tractor inspection/);
-  assert.match(agents, /HF M105/);
+  // 2026-09-02: "HF M105" is an internal milestone tag; it no longer appears on visitor-facing pages.
   assert.match(facts, /STALE_NOTARISATION_NOT_CURRENT_APPROVAL/);
   assert.match(facts, /comparisonSchema/);
   assert.match(docsPage, /npm\.cmd exec -- tsx scripts\/frame-manifest-cli\.ts/);

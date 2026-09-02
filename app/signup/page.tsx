@@ -13,58 +13,59 @@ import { ForceDarkTheme } from "../components/ForceDarkTheme";
 import Link from "../components/NativeLink";
 import { createPageMetadata } from "../components/site-metadata";
 import { BETA_MONTHLY_GRANT_CREDITS, SIGNUP_GRANT_CREDITS } from "../api/_lib/clunk";
+import { WORKSPACE_IMAGES_PER_DAY } from "../api/_lib/ai-budget";
 import "../login/auth-v5.css";
 
 export const dynamic = "force-dynamic";
 
-/** The eyebrow used to print the raw route ("/app"). People do not go to routes. */
-function returnLabel(path: string): string {
-  if (path.startsWith("/dashboard")) return "내 작업실";
-  if (path.startsWith("/app")) return "에셋 검사";
-  if (path.startsWith("/studio")) return "에셋 만들기";
-  if (path.startsWith("/marketplace")) return "에셋 마켓";
-  if (path.startsWith("/review")) return "검수 뷰어";
-  return "이전 화면";
-}
+/**
+ * /signup is the door for someone who has never been here; /login is the door for someone
+ * who has. The card is the same markup as /login — only the intro column, the badge and
+ * the two sentences inside the card differ.
+ *
+ * Every figure in the intro is imported from the module that enforces it, so this page
+ * cannot promise a grant the ledger does not make.
+ */
 
 export const metadata = createPageMetadata({
-  title: "Workspace 시작",
-  description: "Google·GitHub OAuth로 Clunk Workspace를 시작하고 요청한 작업면으로 돌아갑니다.",
+  title: "가입",
+  description:
+    "Google이나 GitHub 계정으로 가입하면 크레딧이 바로 들어옵니다. 무료 베타라 결제 수단은 묻지 않습니다.",
   path: "/signup",
 });
 
 const AUTH_ERROR_COPY: Record<string, string> = {
-  config_required: "외부 OAuth provider 설정이 완료되지 않아 해당 방식으로 인증할 수 없습니다.",
-  provider_denied: "OAuth provider에서 인증이 취소되었거나 거부되었습니다.",
-  provider_exchange_failed: "OAuth provider와 인증 코드를 교환하지 못했습니다. 잠시 후 다시 시도해 주세요.",
-  invalid_oauth_state: "인증 요청의 보안 상태가 일치하지 않습니다. 처음부터 다시 시작해 주세요.",
-  missing_callback_fields: "인증 응답에 필요한 값이 없어 Workspace 시작을 완료하지 못했습니다.",
-  unknown_provider: "요청한 인증 provider를 확인할 수 없습니다.",
-  oauth_callback_failed: "인증 완료 후 Clunk 세션을 만들지 못했습니다. 다시 시도해 주세요.",
+  config_required: "이 가입 방법은 아직 연결 준비 중입니다. 다른 방법으로 시도해 주세요.",
+  provider_denied: "로그인 화면에서 취소되었거나 권한이 거부되었습니다.",
+  provider_exchange_failed: "계정 확인을 마치지 못했습니다. 잠시 후 다시 시도해 주세요.",
+  invalid_oauth_state: "보안 확인값이 맞지 않습니다. 처음부터 다시 시작해 주세요.",
+  missing_callback_fields: "응답에 필요한 값이 없어 가입을 끝내지 못했습니다.",
+  unknown_provider: "요청한 가입 방법을 찾을 수 없습니다.",
+  oauth_callback_failed: "계정 확인은 됐지만 접속 상태를 만들지 못했습니다. 다시 시도해 주세요.",
 };
 
 function getAuthErrorMessage(code?: string): string | null {
   if (!code) return null;
-  return AUTH_ERROR_COPY[code] ?? "인증을 완료하지 못했습니다. 다시 시도해 주세요.";
+  return AUTH_ERROR_COPY[code] ?? "가입을 끝내지 못했습니다. 다시 시도해 주세요.";
 }
 
 function providerLabel(provider: "google" | "github" | "qa"): string {
-  if (provider === "qa") return "QA"; // never listed: qa is not an OAuth provider
+  if (provider === "qa") return "QA"; // never listed: qa is not a public sign-in method
   return provider === "google" ? "Google" : "GitHub";
 }
 
 function sessionProviderLabel(provider: string): string {
-  if (provider === "chatgpt-sites") return "ChatGPT SIWC";
-  if (provider === "google") return "Google OAuth";
-  if (provider === "github") return "GitHub OAuth";
+  if (provider === "chatgpt-sites") return "ChatGPT 계정";
+  if (provider === "google") return "Google 계정";
+  if (provider === "github") return "GitHub 계정";
   if (provider === "qa") return "QA 키 (운영자 전용)";
   return provider;
 }
 
 /**
- * Truthful provider inventory: every OAuth provider is listed, but only the
- * ones with a complete registration render as live links. The rest render as
- * visible "준비 중" rows — nothing is invented, nothing configured is hidden.
+ * Truthful inventory: every sign-in method is listed, but only the ones with a complete
+ * registration render as live links. The rest render as visible "준비 중" rows — nothing
+ * is invented, nothing configured is hidden.
  */
 function getOAuthProviderRows() {
   const environment = getOAuthEnvironment(getRuntimeEnvironment());
@@ -80,7 +81,7 @@ function getOAuthProviderRows() {
   }));
 }
 
-/** ChatGPT SIWC only exists on deployments behind the Sites identity proxy. */
+/** ChatGPT sign-in only exists on deployments behind the host identity proxy. */
 function isHostSiwcAvailable(): boolean {
   return trustsUpstreamIdentityHeaders(getOAuthEnvironment(getRuntimeEnvironment()));
 }
@@ -110,40 +111,41 @@ function AuthJourney({
       <main id="main-content" className="cv5-auth">
         <div className="cv5-frame cv5-auth-grid">
           <div className="cv5-auth-intro">
-            <span className="cv5-badge">✦ CLUNK <b>WORKSPACE</b></span>
+            <span className="cv5-badge">✦ CLUNK <b>무료 베타</b></span>
+            {/* 숫자는 전부 상수에서 옵니다. 한 개의 문자열로 렌더해야 숫자 앞뒤에 RSC
+                텍스트 분리 주석이 끼지 않습니다. */}
             <h1>
-              계정 하나로
+              {`가입하면 ${SIGNUP_GRANT_CREDITS}크레딧,`}
               <br />
-              <em>바로 시작합니다.</em>
+              <em>{`매달 ${BETA_MONTHLY_GRANT_CREDITS}크레딧 더.`}</em>
             </h1>
             <p className="cv5-auth-lede">
-              따로 가입 폼을 채울 필요가 없습니다. Google이나 GitHub 계정으로 한 번
-              로그인하면 내 작업공간이 만들어지고, 그 자리에서 바로 쓸 수 있습니다.
+              {`카드도 비밀번호도 묻지 않습니다. Google이나 GitHub 계정으로 한 번 들어오면 내 작업공간이 만들어지고, 크레딧 ${SIGNUP_GRANT_CREDITS}개가 그 자리에서 들어옵니다. 이미지 만들기는 하루 ${WORKSPACE_IMAGES_PER_DAY}장까지, 마켓 에셋은 로그인만 하면 무료로 받습니다.`}
             </p>
             <div className="cv5-auth-facts">
               <div className="cv5-auth-fact">
-                <span>로그인</span>
-                <strong>Google · GitHub OAuth</strong>
+                <span>가입 즉시</span>
+                <strong>{`${SIGNUP_GRANT_CREDITS}크레딧`}</strong>
               </div>
               <div className="cv5-auth-fact">
-                <span>돌아갈 화면</span>
-                <strong>{returnLabel(returnTo)}</strong>
+                <span>매달</span>
+                <strong>{`+${BETA_MONTHLY_GRANT_CREDITS}크레딧`}</strong>
               </div>
               <div className="cv5-auth-fact">
-                <span>베타 혜택</span>
-                <strong>{`가입 ${SIGNUP_GRANT_CREDITS} · 매월 ${BETA_MONTHLY_GRANT_CREDITS} 크레딧 · 결제 없음`}</strong>
+                <span>이미지 · 하루</span>
+                <strong>{`${WORKSPACE_IMAGES_PER_DAY}장까지`}</strong>
               </div>
             </div>
           </div>
 
           <section className="cv5-auth-card" aria-labelledby="signup-title">
             <span className="cv5-auth-status" data-state={signedIn ? "on" : "off"}>
-              {signedIn ? "AUTHENTICATED" : "GET STARTED"}
+              {signedIn ? "로그인됨" : "가입"}
             </span>
-            <h2 id="signup-title">Clunk Workspace를<br />시작합니다.</h2>
+            <h2 id="signup-title">계정 하나로<br />작업공간을 만듭니다.</h2>
             <p className="cv5-auth-copy">
               {signedIn
-                ? "현재 브라우저의 인증 상태를 확인했습니다. 계속하면 요청한 작업면으로 이동합니다."
+                ? "이 브라우저는 이미 로그인되어 있습니다. 계속하면 요청한 화면으로 이동합니다."
                 : "쓰시는 계정을 고르면 첫 로그인에서 내 작업공간이 만들어집니다."}
             </p>
 
@@ -154,10 +156,10 @@ function AuthJourney({
                 <div className="cv5-auth-signedin-user">
                   <strong>{user.displayName}</strong>
                   <span>{user.email}</span>
-                  <span>인증 방식: {sessionProviderLabel(user.provider)}</span>
+                  <span>{`로그인 방법: ${sessionProviderLabel(user.provider)}`}</span>
                 </div>
                 <Link className="cv5-auth-primary" href={returnTo}>
-                  요청한 Workspace 열기
+                  요청한 화면 열기
                   <span aria-hidden="true">↗</span>
                 </Link>
                 <Link className="cv5-auth-secondary" href={chatGPTSignOutPath(returnTo)}>
@@ -167,7 +169,7 @@ function AuthJourney({
               </div>
             ) : (
               <>
-                <div className="cv5-auth-providers" aria-label="Workspace 시작 수단">
+                <div className="cv5-auth-providers" aria-label="가입 수단">
                   {providers.map((status) =>
                     status.ready ? (
                       <Link
@@ -183,44 +185,39 @@ function AuthJourney({
                     ) : (
                       <div className="cv5-auth-provider" data-ready="false" key={status.provider}>
                         {`${providerLabel(status.provider)}로 계속하기`}
-                        <small>준비 중 · OAUTH 앱 등록 대기</small>
+                        <small>준비 중 · 연결 대기</small>
                       </div>
                     ),
                   )}
                   {hostSiwc ? (
                     <Link className="cv5-auth-provider" data-ready="true" href={chatGPTSignInPath(returnTo)}>
-                      ChatGPT로 Workspace 시작
-                      <small>SITES HOST ↗</small>
+                      ChatGPT 계정으로 시작하기
+                      <small>계정으로 시작 ↗</small>
                     </Link>
                   ) : null}
                 </div>
                 {readyCount === 0 && !hostSiwc ? (
                   <p className="cv5-auth-hint">
-                    OAuth 앱 등록이 완료되면 위 버튼이 자동으로 활성화됩니다. 그 전까지 유상
-                    판매와 일반 가입은 열리지 않습니다.
+                    가입 연결을 준비하는 중입니다. 준비가 끝나면 위 버튼이 켜집니다.
                   </p>
                 ) : null}
               </>
             )}
 
-            {/* OAuth 흐름에는 별도 가입 폼이 없으므로 체크박스 대신 고지+링크로 동의를 표시합니다. */}
+            {/* 가입 흐름에는 별도 가입 폼이 없으므로 체크박스 대신 고지+링크로 동의를 표시합니다. */}
             <p className="cv5-auth-switch">
               계속하면 다음 화면에서 이용약관과 개인정보 수집·이용 동의를 한 번 확인합니다. 미리 읽어 두셔도 됩니다:{" "}
               <Link href="/terms">이용약관</Link> · <Link href="/privacy">개인정보처리방침</Link>
             </p>
 
             <p className="cv5-auth-switch">
-              이미 Workspace를 사용 중이신가요?{" "}
+              이미 계정이 있으신가요?{" "}
               <Link href="/login">로그인하기</Link>
             </p>
           </section>
         </div>
       </main>
       <SiteFooter />
-
-      <footer className="cv5-auth-foot">
-        <div className="cv5-frame">CLUNK · AUTHENTICATED WORKSPACE</div>
-      </footer>
     </div>
   );
 }

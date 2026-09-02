@@ -35,15 +35,15 @@ export function ReviewSurface({ initialGlb }: { initialGlb: string | null }) {
   return (
     <div className="rv-surface">
       <div className="rv-tabs" role="tablist" aria-label="검수 대상 종류">
-        <button type="button" role="tab" aria-selected={tab === "3d"} className={tab === "3d" ? "on" : ""} onClick={() => setTab("3d")}>3D · GLB</button>
-        <button type="button" role="tab" aria-selected={tab === "2d"} className={tab === "2d" ? "on" : ""} onClick={() => setTab("2d")}>2D · Sprite</button>
+        <button type="button" role="tab" aria-selected={tab === "3d"} className={tab === "3d" ? "on" : ""} onClick={() => setTab("3d")}>3D 모델</button>
+        <button type="button" role="tab" aria-selected={tab === "2d"} className={tab === "2d" ? "on" : ""} onClick={() => setTab("2d")}>2D 스프라이트</button>
       </div>
 
       <div hidden={tab !== "3d"}>
         <GlbReviewer initialUrl={initialGlb} />
         {inventory.length > 0 ? (
-          <div className="rv-inventory" aria-label="게시된 실물 인벤토리 — 클릭하면 뷰어에 로드">
-            <header className="rv-panel-head">PUBLISHED INVENTORY · 클릭해서 검수</header>
+          <div className="rv-inventory" aria-label="게시된 에셋 목록 — 누르면 화면에 불러옵니다">
+            <header className="rv-panel-head">게시된 에셋 {inventory.length}개 · 눌러서 확인</header>
             <div className="rv-inventory-row">
               {inventory.map((listing) => (
                 <button type="button" key={listing.slug} onClick={() => loadInventoryGlb(listing)}>

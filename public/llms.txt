@@ -4,9 +4,26 @@
 > It keeps structural evidence, engine import/runtime evidence, and player-facing review separate.
 > 한국어: 실제 2D·Sprite·Spine·애니메이션·3D 에셋을 목표 엔진에 대조하되 화면 판정과 분리하는 품질 게이트입니다.
 
-Status: Korea first. One credit pays for everything — 1 credit = KRW 100 — and the same credit
-buys a marketplace asset or runs an inspection. Paid checkout opens once the Korean mail-order
-business filing completes.
+Status: Korea first, free open beta since 2026-09-02. Nothing is sold right now.
+
+- **Marketplace files are granted, not sold.** A signed-in visitor who checks out any listing
+  gets `status: "BETA_GRANTED"` and a download URL. No price, no card, no consent-to-waive-
+  withdrawal step, because there is no sale. An unauthenticated caller still has to sign in.
+- **Credits are granted, not bought.** A new account receives 25 credits at signup and 30 more
+  each month. There is no credit pack for sale; every pack row is `DRAFT` at price 0 and the
+  checkout refuses it. One successful billable run costs 1 credit; a failed or refused run
+  costs nothing; the same request sent twice is recorded once.
+- **Image generation is capped per day.** 8 images per workspace per day. Over the cap the API
+  answers with the Korea-time reset, and no credit is taken.
+- **Consent is recorded on first sign-in.** After OAuth, before the first workspace page, the
+  visitor confirms the terms and the privacy policy on /consent; the answer is written to the
+  user row with a timestamp. Every workspace route is gated on that row.
+- **A sprite sheet is a download option on its 3D model, not a second product.** A sheet baked
+  from a model carries `variantOf: "<parent listing slug>"` in the marketplace API and is kept
+  out of the catalogue grid; the parent listing's page is where it is offered. A listing with
+  `variantOf: null` is a product of its own. Do not present a sheet as another asset to get.
+- Prices that will apply after the beta are published in advance on https://clunk.games/pricing.
+  Do not quote a per-credit price as if it were in force today.
 
 ## Public surfaces
 
@@ -16,7 +33,7 @@ business filing completes.
 - [Kits](https://clunk.games/kits): authenticated projects and hash-only Clunk Kit manifests.
 - [Asset detail](https://clunk.games/assets/:assetId): authenticated artifact hashes, provenance, evidence, and downloads.
 - [Connect](https://clunk.games/connect): official HTTP MCP setup and handshake entry point.
-- [Documentation](https://clunk.games/docs): contracts, asset families, and runtime boundaries.
+- [Documentation](https://clunk.gitbook.io/docs): contracts, asset families, and runtime boundaries. https://clunk.games/docs redirects here.
 
 Clunk HTTP MCP: shipped at `/api/mcp`. The official setup surfaces are `/connect` and
 `/agents#connect`; `/mcp` is not a public website connection route. It is Clunk's own streamable
@@ -883,5 +900,5 @@ it. Use local CLI/MCP stdio for `LOCAL_CLI_BYTE_REHASH`; keep `visualRuntime`, `
 - Asset Studio: /studio
 - Marketplace: /marketplace
 - Workspace: /dashboard
-- Scope and integration guide: /docs
-- Credits and demo ledger: /pricing
+- Scope and integration guide: https://clunk.gitbook.io/docs
+- Credits, beta grants and planned prices: /pricing

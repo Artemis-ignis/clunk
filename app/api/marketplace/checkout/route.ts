@@ -56,7 +56,7 @@ export async function POST(request: Request) {
       status: string;
       sellerUserId: string;
     }>();
-    if (!listing) throw new ClunkHttpError("공개된 listing을 찾을 수 없습니다.", 404);
+    if (!listing) throw new ClunkHttpError("공개된 상품을 찾을 수 없습니다.", 404);
     if (listing.priceCents === 0) {
       return privateJson({
         ok: true,

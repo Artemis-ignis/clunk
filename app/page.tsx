@@ -12,13 +12,10 @@ import { LandingMarketShowcase } from "./components/LandingMarketShowcase";
 import { EmbeddedGlbViewer } from "./components/review/EmbeddedGlbViewer";
 
 export const metadata = createPageMetadata({
-  // Category, then what you make — the shape a search title takes ("AI 3D 모델 생성기:
-  // 텍스트와 이미지로 3D 만들기"), because it is what people type and what a link card
-  // has room to show. Not "AI 3D 생성기": our 3D is authored in code, not from a sentence,
-  // and a visitor who arrives expecting prompt-to-mesh leaves. The mission line belongs in
-  // the hero, where it has room.
-  title: "게임 에셋 생성기: 저폴리 3D와 스프라이트 시트 만들기",
-  description: "저폴리 3D 모델과 스프라이트 시트를 만들고, 게임에 넣어도 되는지 파일 단위로 검사하고, 검사를 통과한 에셋을 마켓에서 바로 받습니다. 게임 에셋의 모든 과정을 Clunk 하나로.",
+  // The title and description are the operator's exact wording (2026-09-02): the three
+  // products in one line, no internal vocabulary. Do not "improve" them.
+  title: "AI 게임 에셋 생성 & 게임 제작 에이전트",
+  description: "2D·3D 게임 에셋을 생성하고, 검사·수정하고, AI 에이전트와 함께 게임까지 제작하세요.",
   path: "/",
 });
 
@@ -33,6 +30,40 @@ export const metadata = createPageMetadata({
  */
 
 const FLOW = ["생성", "검사", "수정", "게시", "에이전트"] as const;
+
+/**
+ * The one model section 01 shows, in one place. Swap `src` and `name` here and
+ * the stage, the caption and the heading text all follow — nothing else in this
+ * file names the file.
+ *
+ * `measured` is not typed by hand: every value is copied from
+ * outputs/market-launch/wave1/upload-manifest.json (products[].measured), the record
+ * the measurer wrote for this exact GLB — the tractor Clunk authored in
+ * examples/generated/vehicles/tractor.factory.mjs
+ * (triangleCount 1060, drawCallCount 18, materialCount 5, 74,764 bytes = 75 KB).
+ * If the file changes, re-read that record — never estimate.
+ */
+const FEATURED_MODEL = {
+  src: "/market/cozy-tractor/tractor.glb",
+  name: "코지 트랙터",
+  fileName: "tractor.glb",
+  measured: { faces: "1,060", drawCalls: "18", size: "75 KB" },
+} as const;
+
+/**
+ * Section 02's inspected file. Numbers come from the 2026-08-31 re-inspection
+ * record (.clunk-evidence/.../tractor.compact.m1-pc-inspection.json):
+ * triangleCount 39,320 · drawCallCount 98 · 840,136 bytes = 840 KB.
+ * The 40,000 ceiling is code: `harvest-frontier-web-three`.inspectionPolicy
+ * .maxTriangles in packages/core/src/assetops-profiles.ts.
+ */
+const INSPECTED_MODEL = {
+  src: "/landing/tractor.compact.m1.glb",
+  poster: "/landing/tractor-hero.png",
+  name: "트랙터",
+  fileName: "tractor.glb",
+  measured: { faces: "39,320", drawCalls: "98", size: "840 KB", faceLimit: "40,000", limitPercent: "98" },
+} as const;
 
 const AGENT_CLIENTS = ["Claude Code", "Codex CLI", "Cursor", "VS Code", "Grok Build", "Antigravity", "DeepSeek", "GLM", "로컬 에이전트"] as const;
 
@@ -59,7 +90,7 @@ function ShowcaseImg({ slug, name, eager }: { slug: string; name: string; eager?
   return (
     <img
       src={`/landing/showcase/${slug}.webp`}
-      alt={`${name} 저폴리 3D 에셋 렌더`}
+      alt={`${name} 3D 에셋 렌더`}
       width={560}
       height={560}
       loading={eager ? "eager" : "lazy"}
@@ -94,9 +125,11 @@ export default function Home() {
                   게임 제작의<br />모든 과정을<br /><em>CLUNK<br />하나로</em>
                 </span>
               </h1>
+              {/* The operator's own sentence (2026-09-02). It says what the product does in
+                  the words a visitor uses — not how the inspector does it. */}
               <p className="cv5-hero-lede">
-                에셋을 만들고, 게임에 넣어도 되는지 바로 확인하세요.
-                삼각형 수부터 드로우콜까지, 엔진 예산에 맞는지 파일을 열어 확인해 드립니다.
+                2D·3D 게임 에셋을 생성하고, 검사·수정하고, AI 에이전트와 함께 게임까지 제작하세요.
+                만든 에셋이 게임에서 문제없이 돌아가는지도 바로 확인해 드립니다.
               </p>
               <div className="cv5-cta-row">
                 <Link className="cv5-btn cv5-btn-primary" href="/studio" prefetch={false}>
@@ -106,7 +139,10 @@ export default function Home() {
                   마켓 둘러보기
                 </Link>
               </div>
-              <div className="cv5-flow" aria-label="Clunk 워크플로우">
+              {/* Five steps. On a phone they used to wrap 4 + 1, which reads as
+                  a mistake; the mobile rule in site-v5.css lays them out 3 + 2
+                  and centres both rows so the break looks deliberate. */}
+              <div className="cv5-flow" aria-label="Clunk 작업 순서">
                 {FLOW.map((step, index) => (
                   <span key={step}>
                     <b>{String(index + 1).padStart(2, "0")}</b> {step}
@@ -117,23 +153,29 @@ export default function Home() {
 
             <div className="cv5-hero-visual" aria-hidden="true">
               <div className="cv5-hv-panel">
-                <div className="cv5-hv-head"><span>CLUNK <b>MARKET</b></span><span>GLB 파일</span></div>
+                {/* "TRIS" told a visitor nothing and "면" was our own coinage. 폴리곤 is
+                    the word game people already use; the panel head says once which way
+                    is better so the number under every thumbnail reads without a glossary. */}
+                <div className="cv5-hv-head"><span>마켓에 올라온 <b>에셋</b></span><span>폴리곤 수 · 적을수록 가벼움</span></div>
                 <div className="cv5-hv-grid">
                   {HERO_CELLS.map((asset) => (
                     <figure className="cv5-hv-cell" key={asset.slug} style={{ margin: 0 }}>
                       <ShowcaseImg slug={asset.slug} name={asset.name} eager />
-                      <span>{asset.tris} TRIS</span>
+                      <span>{asset.tris} 폴리곤</span>
                     </figure>
                   ))}
                 </div>
                 <div className="cv5-hv-foot">
-                  <span>트랙터 검사 결과</span>
-                  <b>100/100 · 블로커 0</b>
+                  {/* The authored tractor's own record (upload-manifest.json measured.gameReadyScore:
+                      web 100 / hardBlockerCount 0) — the model section 01 shows, not the
+                      Harvest Frontier file section 02 inspects. */}
+                  <span>코지 트랙터 검사 결과</span>
+                  <b>100점 · 막는 문제 0건</b>
                 </div>
               </div>
-              <div className="cv5-float cv5-float-a"><img src="/landing/showcase/conifer-spire.webp" alt="" width={240} height={240} loading="eager" /><small>860 TRIS</small></div>
-              <div className="cv5-float cv5-float-b"><img src="/landing/showcase/crate-produce.webp" alt="" width={200} height={200} loading="eager" /><small>782 TRIS</small></div>
-              <div className="cv5-float cv5-float-c"><img src="/landing/showcase/haystack.webp" alt="" width={220} height={220} loading="eager" /><small>1,322 TRIS</small></div>
+              <div className="cv5-float cv5-float-a"><img src="/landing/showcase/conifer-spire.webp" alt="" width={240} height={240} loading="eager" /><small>860 폴리곤</small></div>
+              <div className="cv5-float cv5-float-b"><img src="/landing/showcase/crate-produce.webp" alt="" width={200} height={200} loading="eager" /><small>782 폴리곤</small></div>
+              <div className="cv5-float cv5-float-c"><img src="/landing/showcase/haystack.webp" alt="" width={220} height={220} loading="eager" /><small>1,322 폴리곤</small></div>
             </div>
           </div>
         </section>
@@ -149,7 +191,7 @@ export default function Home() {
               </p>
               <ul className="cv5-points">
                 <li><b>2D 이미지</b> — 스프라이트·아이콘·이펙트를 문장으로</li>
-                <li><b>3D 모델</b> — 게임에 바로 넣는 저폴리 GLB로</li>
+                <li><b>3D 모델</b> — 게임 엔진에 바로 넣는 가벼운 3D 파일(GLB)로</li>
                 <li><b>라이선스 명시</b> — 어디에 써도 되는지 상품마다 표시</li>
               </ul>
               <div>
@@ -159,7 +201,7 @@ export default function Home() {
             </div>
             <div className="cv5-sec-visual cv5-reveal" data-delay="1">
               <div className="cv5-mock">
-                <div className="cv5-mock-bar"><span>CLUNK <b>MARKET</b></span><span>공개 카탈로그</span></div>
+                <div className="cv5-mock-bar"><span>Clunk가 <b>만든 모델</b></span><span>{FEATURED_MODEL.fileName}</span></div>
                 {/* This section is about MAKING an asset, so it shows one Clunk
                     authored, turning, with the numbers its own inspector read off
                     the file. A grid of things to buy belongs in the market section
@@ -167,15 +209,18 @@ export default function Home() {
                 <div className="cv5-mock-body cv5-make">
                   <div className="cv5-make-stage">
                     <EmbeddedGlbViewer
-                      src="/market/cozy-market-stall/market-stall.m1.clunk-optimized.glb"
-                      alt="Clunk가 만든 코지 마켓 스톨 — 드래그해서 돌려보세요"
+                      src={FEATURED_MODEL.src}
+                      alt={`Clunk가 만든 ${FEATURED_MODEL.name} — 드래그해서 돌려보세요`}
                     />
                   </div>
                   <div className="cv5-make-facts">
-                    <div><b>코지 마켓 스톨</b><span>Clunk Three.js 팩토리로 제작</span></div>
-                    <div><b>2,456</b><span>삼각형</span></div>
-                    <div><b>31</b><span>드로우콜</span></div>
-                    <div><b>210 KB</b><span>GLB</span></div>
+                    <div className="cv5-make-name">
+                      <b>{FEATURED_MODEL.name}</b>
+                      <span>코드로 만든 모델 · 아래 숫자는 이 파일에서 직접 읽은 값</span>
+                    </div>
+                    <div><span>폴리곤</span><b>{FEATURED_MODEL.measured.faces}개</b><small>적을수록 가볍습니다</small></div>
+                    <div><span>그리기 횟수</span><b>{FEATURED_MODEL.measured.drawCalls}회</b><small>적을수록 빠릅니다</small></div>
+                    <div><span>파일 크기</span><b>{FEATURED_MODEL.measured.size}</b><small>내려받는 파일 하나</small></div>
                   </div>
                 </div>
               </div>
@@ -193,7 +238,7 @@ export default function Home() {
                 올리면 {RULE_COUNT}가지를 검사해 점수로 알려줍니다. 고치는 것도 여기서, 원본은 그대로.
               </p>
               <ul className="cv5-points">
-                <li><b>실제 수치</b> — 삼각형·드로우콜·텍스처 용량을 파일에서 직접</li>
+                <li><b>실제 수치</b> — 폴리곤 수, 그리기 횟수, 텍스처 크기를 파일에서 직접 읽습니다</li>
                 <li><b>2D도 함께</b> — 스프라이트 시트(Sprite·Atlas)와 Spine까지</li>
                 <li><b>눈으로 확인</b> — 3D 뷰어로 돌려 보고 판단하세요</li>
               </ul>
@@ -204,38 +249,50 @@ export default function Home() {
             </div>
             <div className="cv5-sec-visual cv5-reveal" data-delay="1">
               <div className="cv5-mock">
-                <div className="cv5-mock-bar"><span>에셋 <b>검사</b></span><span>tractor.glb</span></div>
+                <div className="cv5-mock-bar"><span>에셋 <b>검사</b></span><span>{INSPECTED_MODEL.fileName}</span></div>
                 <div className="cv5-mock-body cv5-inspect">
                   {/* A picture of a 3D asset proves nothing about a 3D asset.
                       This is the tractor's own GLB, loaded and turning, so the
                       section about inspecting files shows a real file. */}
                   <div className="cv5-inspect-preview">
                     <EmbeddedGlbViewer
-                      src="/landing/tractor.compact.m1.glb"
-                      poster="/landing/tractor-hero.png"
-                      alt="Harvest Frontier에 들어간 저폴리 트랙터 — 드래그해서 돌려보세요"
+                      src={INSPECTED_MODEL.src}
+                      poster={INSPECTED_MODEL.poster}
+                      alt={`Harvest Frontier에 들어간 ${INSPECTED_MODEL.name} — 드래그해서 돌려보세요`}
                     />
-                    <small>드래그해서 돌려보세요 · Harvest Frontier에 들어간 파일</small>
+                    <small>Harvest Frontier에 들어간 파일</small>
                   </div>
                   <div className="cv5-inspect-panel">
                     <div className="cv5-score">
-                      <span className="cv5-score-ring"><i>100</i></span>
-                      <div><span>게임 적합도</span><b>바로 넣어도 됩니다</b></div>
+                      {/* The 2026-08-31 record for this exact file (tractor.compact.m1-pc-inspection.json):
+                          score 99 of 100, hardBlockerCount 0, two warnings. It has never scored 100. */}
+                      <span className="cv5-score-ring"><i>99</i></span>
+                      <div><span>게임 적합도</span><b>막는 문제 0건 · 주의 2건</b></div>
                     </div>
-                    {/* Two rows used to say the same thing, and neither said what
-                        "예산" was. It is the ceiling the chosen target profile sets
-                        — so the row names the target instead of the jargon. */}
+                    {/* A number with no unit and no ceiling is not information.
+                        Each row now says what the number means, what it is, and
+                        what to compare it against. 39,320 / 98 / 840 KB are the
+                        2026-08-31 re-inspection record; 40,000 is the ceiling
+                        assetops-profiles.ts declares for a web game. */}
                     <div className="cv5-find">
-                      <div><b>삼각형</b><span>39,320개</span></div>
-                      <div><b>드로우콜</b><span>98회</span></div>
-                      <div><b>용량</b><span>840 KB</span></div>
-                      <div data-tone="warn"><b>웹 게임 기준</b><span>상한 40,000개 중 39,320개 — 680개 남음</span></div>
+                      <div data-tone="warn">
+                        <b>폴리곤</b>
+                        <span><em>{INSPECTED_MODEL.measured.faces}개</em> · 웹 게임 권장 상한 {INSPECTED_MODEL.measured.faceLimit}개의 {INSPECTED_MODEL.measured.limitPercent}%</span>
+                      </div>
+                      <div>
+                        <b>그리기 횟수</b>
+                        <span><em>{INSPECTED_MODEL.measured.drawCalls}회</em> · 적을수록 빠릅니다</span>
+                      </div>
+                      <div>
+                        <b>파일 크기</b>
+                        <span><em>{INSPECTED_MODEL.measured.size}</em> · 내려받는 파일 하나</span>
+                      </div>
                     </div>
                     <div className="cv5-ops">
-                      <span><b>✓</b>빈 노드 정리</span>
-                      <span><b>✓</b>중복 머티리얼 병합</span>
-                      <span><b>✓</b>메타데이터 정리</span>
-                      <span><b>✓</b>재패킹</span>
+                      <span><b>✓</b>빈 덩어리 정리</span>
+                      <span><b>✓</b>중복 재질 합치기</span>
+                      <span><b>✓</b>파일 정보 정리</span>
+                      <span><b>✓</b>새 파일로 저장</span>
                     </div>
                   </div>
                 </div>
@@ -259,9 +316,9 @@ export default function Home() {
                 <li><b>어디서든 그대로</b> — Unity, Godot, Three.js에 바로 넣어 씁니다</li>
               </ul>
               <div>
-                <Link className="cv5-more" href="/connect" prefetch={false}>에이전트 연결 가이드 <Icon name="arrowRight" size={15} /></Link>
+                <Link className="cv5-more" href="/agents" prefetch={false}>에이전트 연결 가이드 <Icon name="arrowRight" size={15} /></Link>
               </div>
-              <div className="cv5-flow" aria-label="Clunk를 연결할 수 있는 MCP 클라이언트" style={{ marginTop: 26 }}>
+              <div className="cv5-flow" aria-label="Clunk를 연결할 수 있는 AI 도구" style={{ marginTop: 26 }}>
                 {AGENT_CLIENTS.map((client) => (
                   <span key={client}>{client}</span>
                 ))}
@@ -269,7 +326,7 @@ export default function Home() {
             </div>
             <div className="cv5-sec-visual cv5-reveal" data-delay="1">
               <div className="cv5-mock">
-                <div className="cv5-mock-bar"><span>AGENT <b>WORKSPACE</b></span><span>LIVE · MCP REAL ENDPOINT</span></div>
+                <div className="cv5-mock-bar"><span>에이전트 <b>작업 화면</b></span><span>실제로 연결된 상태</span></div>
                 <div className="cv5-mock-body cv5-agent-mock">
                   <AgentLiveDemo />
                   <div className="cv5-mcp-demo">
@@ -290,13 +347,14 @@ export default function Home() {
                 <h2 id="showcase-heading">마켓에 올라와 있는 에셋</h2>
               </div>
               <p>
-                농장·마을 배경에 바로 쓰는 저폴리 모델과 스프라이트 시트, 심리스 텍스처입니다. 삼각형 수와 프레임 수를 보고 고르세요.
+                농장·마을 배경에 바로 쓰는 3D 모델, 2D 스프라이트 시트, 이어 붙여도 이음매가 안 보이는 텍스처입니다.
+                카드마다 폴리곤 수(적을수록 가벼움)가 적혀 있고, 베타 기간에는 로그인만 하면 무료로 받습니다.
               </p>
             </div>
             <LandingMarketShowcase />
             <div className="cv5-showcase-foot cv5-reveal">
               <Link className="cv5-more" href="/marketplace" prefetch={false}>
-                마켓에서 전체 인벤토리 보기 <Icon name="arrowRight" size={15} />
+                마켓에서 전체 목록 보기 <Icon name="arrowRight" size={15} />
               </Link>
               
             </div>
@@ -313,7 +371,7 @@ export default function Home() {
               <Link className="cv5-btn cv5-btn-primary" href="/studio" prefetch={false}>
                 Clunk 시작하기 <Icon name="arrowUpRight" size={17} />
               </Link>
-              <Link className="cv5-btn cv5-btn-ghost" href="/connect" prefetch={false}>
+              <Link className="cv5-btn cv5-btn-ghost" href="/agents" prefetch={false}>
                 에이전트 연결
               </Link>
             </div>

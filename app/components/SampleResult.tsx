@@ -37,7 +37,7 @@ export function SampleResult() {
           </dd>
         </div>
         <div>
-          <dt>삼각형</dt>
+          <dt>면 수</dt>
           <dd>{report ? report.metrics.triangleCount.toLocaleString() : "-"}</dd>
         </div>
         <div>

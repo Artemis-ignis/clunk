@@ -1,5 +1,6 @@
 import { accessFor } from "../_lib/access";
 import { PALETTE_MEASURED_AT, matchesByColour, paletteFor } from "../_lib/listing-palettes";
+import { clipsFor, parentSlugOf, variantSlugsOf } from "../_lib/listing-variants";
 import {
   assertSameOrigin,
   ClunkHttpError,
@@ -61,11 +62,21 @@ export async function GET(request: Request) {
         `SELECT visual_runtime AS visualRuntime, player_facing AS playerFacing, human_decision AS humanDecision
          FROM clunk_asset_reviews WHERE asset_id = ? ORDER BY created_at DESC LIMIT 1`,
       ).bind(listing.assetId).first<{ visualRuntime?: string; playerFacing?: string; humanDecision?: string }>();
+      // The sheets baked from this model are download options on this page, not eleven extra
+      // cards in the grid. Read from the listings table, so an unpublished sheet cannot be
+      // offered and a row can never quote a size the asset does not have.
+      const variants = await readVariants(db, String(listing.slug));
       return Response.json({
         ok: true,
         schema: "clunk.marketplace-listing-detail.v1",
         listing: {
           ...listing,
+          variantOf: parentSlugOf(String(listing.slug)),
+          variants,
+          // The clips the sprite baker turned this model's pivots with, so the viewer can
+          // play the same motion the animated sheet shows. A model nobody baked a clip for
+          // gets an empty array rather than an invented animation.
+          clips: clipsFor(String(listing.slug)),
           artifact: { entryFileName: listing.entryFileName, previewFileName: listing.previewFileName ?? listing.entryFileName, assetId: listing.assetId },
           artifacts: artifacts.results.map(({ fileName, role, contentType, byteLength, sha256 }) => ({ fileName, role, contentType, byteLength, sha256 })),
           evidence: {
@@ -97,6 +108,24 @@ export async function GET(request: Request) {
        LEFT JOIN clunk_users u ON u.id = (SELECT owner_user_id FROM clunk_workspaces WHERE id = l.workspace_id)
        WHERE l.status = 'PUBLISHED' ORDER BY l.published_at DESC, l.created_at DESC LIMIT 50`,
     ).all();
+    // One product per 3D model. Every row still ships — a variant carries the slug of the
+    // model it belongs to so a client can fold it into that product's page, and a model
+    // carries the sheets baked from it so its card can say how many come with it.
+    const bySlug = new Map(rows.results.map((row) => [String(row.slug), row]));
+    const variantSummary = (parentSlug: string) => variantSlugsOf(parentSlug)
+      .map((slug) => bySlug.get(slug))
+      .filter((row): row is NonNullable<typeof row> => Boolean(row))
+      .map((row) => ({
+        id: row.id,
+        slug: row.slug,
+        title: row.title,
+        priceCents: row.priceCents,
+        currency: row.currency,
+        assetId: row.assetId,
+        entryFileName: row.entryFileName,
+        byteLength: row.byteLength,
+        format: row.format,
+      }));
     return Response.json({
       ok: true,
       schema: "clunk.marketplace-catalog.v1",
@@ -105,6 +134,8 @@ export async function GET(request: Request) {
       paletteMeasuredAt: PALETTE_MEASURED_AT,
       listings: rows.results.map((row) => ({
         ...row,
+        variantOf: parentSlugOf(String(row.slug)),
+        variants: variantSummary(String(row.slug)),
         artifact: {
           entryFileName: row.entryFileName,
           previewFileName: row.previewFileName ?? row.entryFileName,
@@ -197,6 +228,34 @@ export async function POST(request: Request) {
   } catch (error) {
     return jsonError(error);
   }
+}
+
+/**
+ * The published sprite sheets baked from one 3D listing, in the order the table names them.
+ *
+ * A variant is a listing of its own — it has its own id, its own price and its own file — so
+ * the row on the product page can hand the checkout that id and the buyer receives the sheet
+ * rather than the model. Nothing here is computed: every number is the row's own column.
+ */
+async function readVariants(db: D1Database, parentSlug: string): Promise<Array<{
+  id: string; slug: string; title: string; priceCents: number; currency: string;
+  assetId: string; entryFileName: string; format: string; byteLength: number;
+}>> {
+  const slugs = variantSlugsOf(parentSlug);
+  if (!slugs.length) return [];
+  const placeholders = slugs.map(() => "?").join(", ");
+  const rows = await db.prepare(
+    `SELECT l.id, l.slug, l.title, l.price_cents AS priceCents, l.currency, l.asset_id AS assetId,
+       a.file_name AS entryFileName, a.format, a.byte_length AS byteLength
+     FROM clunk_marketplace_listings l
+     JOIN clunk_assets a ON a.id = l.asset_id
+     WHERE l.status = 'PUBLISHED' AND l.slug IN (${placeholders})`,
+  ).bind(...slugs).all<{
+    id: string; slug: string; title: string; priceCents: number; currency: string;
+    assetId: string; entryFileName: string; format: string; byteLength: number;
+  }>();
+  const order = new Map(slugs.map((slug, index) => [slug, index]));
+  return (rows.results ?? []).sort((a, b) => (order.get(a.slug) ?? 0) - (order.get(b.slug) ?? 0));
 }
 
 function text(value: unknown, name: string, maxLength: number): string {

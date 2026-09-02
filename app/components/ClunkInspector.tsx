@@ -538,7 +538,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
                     <strong>{choice.label}</strong>
                     <span>{choice.blurb}</span>
                     <small className="num">
-                      △ {budget.maxTriangles.toLocaleString()} · 머티리얼 {budget.maxMaterials} · 텍스처{" "}
+                      면 {budget.maxTriangles.toLocaleString()}개 · 재질 {budget.maxMaterials}개 · 텍스처{" "}
                       {formatMegabytes(budget.maxTextureMemoryBytes)}
                     </small>
                   </button>
@@ -670,8 +670,8 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
               <Metric label="장면 / 오브젝트" value={report ? `${report.metrics.sceneCount} / ${report.metrics.nodeCount}` : "—"} />
               <Metric label="메시 / 조각" value={report ? `${report.metrics.meshCount} / ${report.metrics.primitiveCount}` : "—"} />
               <Metric label="정점" value={report ? report.metrics.vertexCount.toLocaleString() : "대기"} />
-              <Metric label="삼각형" value={report ? report.metrics.triangleCount.toLocaleString() : "대기"} />
-              <Metric label="머티리얼" value={report ? `${report.metrics.materialCount}` : "대기"} />
+              <Metric label="면 (많을수록 무거움)" value={report ? report.metrics.triangleCount.toLocaleString() : "대기"} />
+              <Metric label="재질" value={report ? `${report.metrics.materialCount}` : "대기"} />
               <Metric label="텍스처 / 메모리" value={report ? `${report.metrics.textureCount} / ${formatBytes(report.metrics.textureMemoryBytes)}` : "대기"} />
             </dl>
           </div>
@@ -764,7 +764,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
               <Icon name="arrowUpRight" size={15} />
             </button>
             <p>
-              허용 목록만 적용합니다. identity 노드 제거, 머티리얼 dedupe, 메타데이터 정리, 새 파일 재패킹. 손실이 있는
+              정해진 안전한 손질만 합니다. 아무것도 없는 빈 노드 제거, 똑같은 재질 합치기, 메타데이터 정리, 새 파일로 다시 묶기. 모양이나 그림이 바뀌는
               geometry나 texture 변환은 하지 않습니다.
             </p>
           </div>
@@ -789,7 +789,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
           </div>
           <dl className="compare-grid">
             <Compare label="점수" before={`${optimization.before.score.score}`} after={`${optimization.after.score.score}`} />
-            <Compare label="머티리얼" before={`${optimization.before.metrics.materialCount}`} after={`${optimization.after.metrics.materialCount}`} />
+            <Compare label="재질" before={`${optimization.before.metrics.materialCount}`} after={`${optimization.after.metrics.materialCount}`} />
             <Compare label="빈 노드" before={`${optimization.before.metrics.emptyNodeCount}`} after={`${optimization.after.metrics.emptyNodeCount}`} />
             <Compare label="해시" before={shortHash(optimization.inputHash)} after={shortHash(optimization.outputHash)} />
           </dl>

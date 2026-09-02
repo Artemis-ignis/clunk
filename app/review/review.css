@@ -23,17 +23,23 @@
 .rv-canvas { position: relative; min-height: 520px; border: 1px solid var(--v5-line); border-radius: 14px; overflow: hidden; background: #0a0c16; }
 .rv-canvas canvas { display: block; width: 100% !important; height: 100% !important; position: absolute; inset: 0; }
 
+/* 2026-09-02: this hint was pinned to the bottom of a 520px stage, which on a
+   laptop sits below the fold — the one sentence telling a first-time visitor
+   how to load a file was the part they could not see. It sits in the middle of
+   the stage now, where the empty canvas is. */
 .rv-status {
-  position: absolute; inset: auto 12px 12px 12px; z-index: 2;
-  padding: 10px 14px; border-radius: 10px; border: 1px solid var(--v5-line-strong);
-  background: rgba(6, 7, 15, 0.82); color: var(--v5-ink-dim); font-size: 0.82rem;
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2;
+  max-width: min(420px, 84%);
+  padding: 12px 16px; border-radius: 12px; border: 1px solid var(--v5-line-strong);
+  background: rgba(6, 7, 15, 0.86); color: var(--v5-ink-dim); font-size: 0.86rem;
+  line-height: 1.6; text-align: center;
 }
 
 .rv-panel { display: grid; gap: 14px; align-content: start; border-left: 1px solid var(--v5-line); padding-left: 14px; }
-.rv-panel-head { font-family: var(--v5-label); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em; color: var(--v5-ink-faint); }
+.rv-panel-head { font-family: var(--v5-label); font-size: 0.74rem; font-weight: 700; letter-spacing: 0.14em; color: var(--v5-ink-faint); }
 .rv-stats { margin: 0; display: grid; gap: 6px; }
 .rv-stats div { display: flex; justify-content: space-between; gap: 10px; border: 1px solid var(--v5-line); border-radius: 9px; padding: 8px 11px; font-size: 0.76rem; }
-.rv-stats dt { font-family: var(--v5-label); font-size: 0.6rem; letter-spacing: 0.08em; color: var(--v5-ink-faint); }
+.rv-stats dt { font-family: var(--v5-label); font-size: 0.73rem; letter-spacing: 0.08em; color: var(--v5-ink-faint); }
 .rv-stats dd { margin: 0; color: var(--v5-ink); font-variant-numeric: tabular-nums; text-align: right; overflow-wrap: anywhere; }
 .rv-empty { margin: 0; font-size: 0.8rem; color: var(--v5-ink-faint); line-height: 1.6; }
 
@@ -73,10 +79,20 @@
 .rv-inventory-row button {
   flex: 0 0 auto; display: grid; gap: 6px; justify-items: center; width: 96px;
   border: 1px solid var(--v5-line); border-radius: 11px; padding: 8px 6px;
-  background: rgba(255, 255, 255, 0.02); color: var(--v5-ink-dim); font-size: 0.66rem; cursor: pointer;
+  background: rgba(255, 255, 255, 0.02); color: var(--v5-ink-dim); font-size: 0.74rem; cursor: pointer;
 }
 .rv-inventory-row button:hover { border-color: rgba(139, 92, 246, 0.5); color: var(--v5-ink); }
 .rv-inventory-row img { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; }
+
+/* the published-asset rail: a sideways scroll on a phone hides everything past
+   the second card with nothing saying it is there. Two columns, all visible. */
+@media (max-width: 640px) {
+  .rv-inventory-row {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px; overflow-x: visible;
+  }
+  .rv-inventory-row button { width: auto; }
+}
 
 @media (max-width: 880px) {
   .rv-glb, .rv-sprite { grid-template-columns: 1fr; }
@@ -97,3 +113,13 @@
 .rv-open:focus-within { outline: 2px solid var(--v5-ink); outline-offset: 2px; }
 .rv-open input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .rv-canvas, .rv-sprite-stage { position: relative; }
+
+/* Caption for the 1.7 m reference box. The toggle is called "기준 스케일" in the
+   panel, which does not say what the box IS — on the stage it should. Ready for
+   GlbReviewer to render `<span className="rv-reference-caption">1.7 m 기준 사람
+   키</span>` inside .rv-canvas while the reference is on. */
+.rv-reference-caption {
+  position: absolute; left: 12px; bottom: 12px; z-index: 2;
+  padding: 6px 10px; border-radius: 9px; border: 1px solid var(--v5-line-strong);
+  background: rgba(6, 7, 15, 0.82); color: var(--v5-ink-dim); font-size: 0.76rem;
+}

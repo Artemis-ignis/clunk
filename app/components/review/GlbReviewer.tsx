@@ -325,12 +325,12 @@ export function GlbReviewer({ initialUrl }: { initialUrl?: string | null }) {
         <header className="rv-panel-head">파일에서 읽은 값</header>
         {stats ? (
           <dl className="rv-stats">
-            <div><dt>FILE</dt><dd>{stats.fileName}</dd></div>
-            <div><dt>BYTES</dt><dd>{stats.bytes.toLocaleString("ko-KR")}</dd></div>
-            <div><dt>TRIANGLES</dt><dd>{stats.triangles.toLocaleString("ko-KR")}</dd></div>
-            <div><dt>MESHES · MATERIALS</dt><dd>{stats.meshes} · {stats.materials}</dd></div>
-            <div><dt>TEXTURES</dt><dd>{stats.textures}</dd></div>
-            <div><dt>BOUNDS (m)</dt><dd>{stats.bounds.x.toFixed(2)} × {stats.bounds.y.toFixed(2)} × {stats.bounds.z.toFixed(2)}</dd></div>
+            <div><dt>파일</dt><dd>{stats.fileName}</dd></div>
+            <div><dt>파일 크기 (바이트)</dt><dd>{stats.bytes.toLocaleString("ko-KR")}</dd></div>
+            <div><dt>폴리곤 (적을수록 가벼움)</dt><dd>{stats.triangles.toLocaleString("ko-KR")}</dd></div>
+            <div><dt>덩어리 · 재질</dt><dd>{stats.meshes} · {stats.materials}</dd></div>
+            <div><dt>텍스처</dt><dd>{stats.textures === 0 ? "0 (색이 모델에 들어 있음)" : stats.textures}</dd></div>
+            <div><dt>크기 (m)</dt><dd>{stats.bounds.x.toFixed(2)} × {stats.bounds.y.toFixed(2)} × {stats.bounds.z.toFixed(2)}</dd></div>
           </dl>
         ) : (
           <p className="rv-empty">파일을 불러오면 파서가 직접 센 수치가 표시됩니다.</p>
@@ -344,7 +344,7 @@ export function GlbReviewer({ initialUrl }: { initialUrl?: string | null }) {
 
         {stats && stats.clips.length > 0 ? (
           <div className="rv-clips">
-            <header className="rv-panel-head">ANIMATION CLIPS</header>
+            <header className="rv-panel-head">애니메이션 동작</header>
             <button type="button" className={activeClip === null ? "on" : ""} onClick={() => { setActiveClip(null); handlesRef.current?.playClip(null); }}>정지</button>
             {stats.clips.map((clip) => (
               <button type="button" key={clip} className={activeClip === clip ? "on" : ""} onClick={() => { setActiveClip(clip); handlesRef.current?.playClip(clip); }}>{clip}</button>

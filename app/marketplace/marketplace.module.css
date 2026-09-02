@@ -1642,3 +1642,103 @@
 
 /* A file row before the visitor holds the entitlement: the same slot the link uses, muted. */
 .fileLocked { font-size: 0.78rem; color: var(--v5-ink-faint); white-space: nowrap; }
+
+/* ── 하나의 상품, 그 안의 형식들 ─────────────────────────────────────────────
+   The sprite sheets baked from a 3D model used to be cards of their own, so the
+   grid sold the same crate twice. They belong to the model now: the card says how
+   many come with it, and the product page lists them as rows with their own
+   button — each is still its own file, and still its own listing. */
+.cardIncluded {
+  font-family: var(--v5-label);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--v5-cyan);
+}
+
+.variants {
+  display: grid;
+  gap: 10px;
+  margin: 2px 0 0;
+  padding: 14px 16px;
+  border: 1px solid var(--v5-line);
+  border-radius: var(--v5-r);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.variantsTitle {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--v5-ink);
+}
+
+.variantsNote {
+  margin: -5px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--v5-ink-faint);
+}
+
+.variantList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.variantRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--v5-line);
+  border-radius: 12px;
+  background: rgba(9, 11, 20, 0.6);
+}
+
+.variantHead {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--v5-ink);
+}
+
+.variantHead strong {
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.variantHead svg {
+  flex: none;
+  color: var(--v5-ink-faint);
+}
+
+.variantFacts {
+  flex: 1 1 120px;
+  font-family: var(--v5-label);
+  font-size: 0.74rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--v5-ink-faint);
+  overflow-wrap: anywhere;
+}
+
+.variantBtn {
+  flex: none;
+  height: 34px;
+  padding: 0 13px;
+  font-size: 0.78rem;
+}
+
+/* 375px: a row that cannot fit its three parts side by side stacks rather than
+   pushing the button off the panel. */
+@media (max-width: 560px) {
+  .variantRow {
+    align-items: flex-start;
+  }
+  .variantBtn {
+    width: 100%;
+  }
+}

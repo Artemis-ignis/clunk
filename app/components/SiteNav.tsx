@@ -18,7 +18,7 @@ const NAV_LINKS: { label: string; href: string; section: ShellSection }[] = [
   { label: "에셋 제작", href: "/studio", section: "studio" },
   { label: "에셋 마켓", href: "/marketplace", section: "marketplace" },
   { label: "에셋 검사", href: "/app", section: "app" },
-  { label: "제작 에이전트", href: "/connect", section: "agents" },
+  { label: "제작 에이전트", href: "/agents", section: "agents" },
   { label: "요금", href: "/pricing", section: "pricing" },
 ];
 
@@ -27,7 +27,7 @@ const UTILITY_NAV_LINKS: { label: string; href: string; section: ShellSection }[
   // the master asked for was reachable only by typing the URL.
   { label: "검수 뷰어", href: "/review", section: "review" },
   // Docs live on GitBook since 2026-09-01; /docs redirects there too.
-  { label: "Docs", href: "https://clunk.gitbook.io/docs", section: "docs" },
+  { label: "문서", href: "https://clunk.gitbook.io/docs", section: "docs" },
   { label: "내 작업공간", href: "/dashboard", section: "dashboard" },
 ];
 

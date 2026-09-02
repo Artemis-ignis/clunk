@@ -3,15 +3,16 @@ import { chatGPTSignOutPath, requireChatGPTUser } from "../chatgpt-auth";
 import { Icon } from "../components/Icon";
 import { WorkspaceShell } from "../components/WorkspaceShell";
 import { createPageMetadata } from "../components/site-metadata";
+import { MarketingConsentToggle } from "./MarketingConsentToggle";
 
 export const dynamic = "force-dynamic";
 export const metadata = createPageMetadata({
   title: "설정",
-  description: "계정과 워크스페이스 저장 경계를 확인합니다.",
+  description: "내 계정과, Clunk가 무엇을 저장하고 무엇을 저장하지 않는지 확인합니다.",
   path: "/settings",
 });
 
-/** Truthful copy for whichever identity the current session actually used. */
+/** 이번 로그인이 실제로 쓴 방식만 그대로 적습니다. */
 function authDescription(provider: string): {
   label: string;
   lede: string;
@@ -21,47 +22,55 @@ function authDescription(provider: string): {
   if (provider === "google" || provider === "github") {
     const name = provider === "google" ? "Google" : "GitHub";
     return {
-      label: `${name} OAuth`,
-      lede: `${name} 계정 로그인으로 워크스페이스를 보호합니다.`,
-      accountNote: `${name} OAuth가 반환한 프로필에서 확인합니다.`,
-      passwordNote: `인증은 ${name}가 처리하며 Clunk는 자격 증명을 보관하지 않습니다.`,
+      label: `${name} 계정으로 로그인`,
+      lede: `${name} 계정으로 들어온 작업실입니다.`,
+      accountNote: `${name} 계정에서 받은 정보입니다.`,
+      passwordNote: `로그인은 ${name}에서 처리하고, Clunk는 비밀번호를 받지도 보관하지도 않습니다.`,
     };
   }
   if (provider === "qa") {
     return {
-      label: "임시 접속 세션",
+      label: "임시 접속",
       lede: "임시 접속으로 열린 작업실입니다.",
-      accountNote: "접속할 때 발급된 세션에서 확인합니다.",
+      accountNote: "접속할 때 발급된 임시 정보에서 가져왔습니다.",
       passwordNote: "Clunk는 비밀번호를 저장하지 않습니다.",
     };
   }
   return {
     label: "ChatGPT 로그인",
-    lede: "ChatGPT 로그인으로 워크스페이스를 보호합니다.",
-    accountNote: "ChatGPT가 전달한 인증 헤더에서 확인합니다.",
-    passwordNote: "인증은 ChatGPT가 전달한 헤더로만 처리하고, 자체 자격 증명을 만들지 않습니다.",
+    lede: "ChatGPT 로그인으로 들어온 작업실입니다.",
+    accountNote: "ChatGPT가 전달한 로그인 정보에서 가져왔습니다.",
+    passwordNote: "로그인은 ChatGPT가 처리하고, Clunk는 따로 아이디와 비밀번호를 만들지 않습니다.",
   };
 }
 
 export default async function SettingsPage() {
   const user = await requireChatGPTUser("/settings");
 
-  // The page used to state "ChatGPT SIWC" for every session, which is false on
-  // a QA-key or OAuth login (2026-08-31 review). Name the real provider.
+  // 예전에는 어떤 로그인이든 "ChatGPT SIWC"라고 적었는데, Google·GitHub·임시 접속에서는
+  // 사실이 아니었습니다(2026-08-31 점검). 지금은 실제로 쓴 방식만 적습니다.
   const auth = authDescription(user.provider);
 
   const rows = [
     { label: "계정", value: user.email, note: auth.accountNote },
-    { label: "워크스페이스", value: `${user.displayName}님의 워크스페이스`, note: "인증된 API를 처음 호출할 때 생성됩니다." },
-    { label: "인증", value: auth.label, note: "Clunk는 자체 이메일·비밀번호 데이터베이스를 만들지 않습니다." },
-    { label: "저장", value: "D1 메타데이터와 비공개 R2 artifact", note: "인증된 워크스페이스에 결과 bundle을 보관하고, 입력 원본은 덮어쓰지 않습니다." },
+    {
+      label: "내 작업실",
+      value: `${user.displayName}님의 작업실`,
+      note: "처음 로그인할 때 자동으로 만들어졌습니다. 여기에 만든 파일과 검사 결과가 쌓입니다.",
+    },
+    { label: "로그인 방식", value: auth.label, note: "Clunk는 따로 아이디와 비밀번호를 만들지 않습니다." },
+    {
+      label: "저장하는 것",
+      value: "검사 결과와 내가 만든 파일",
+      note: "만든 파일은 나만 볼 수 있는 저장소에 보관합니다. 검사에 올린 원본은 그대로 두고 덮어쓰지 않습니다.",
+    },
   ];
 
   const notStored = [
-    { label: "원본 에셋 바이트", note: "GLB와 GLTF는 브라우저에서만 열립니다. 서버로 업로드하지 않습니다." },
+    { label: "검사에 올린 원본 파일", note: "GLB와 GLTF는 브라우저 안에서만 열립니다. 서버로 올라가지 않습니다." },
     { label: "비밀번호", note: auth.passwordNote },
-    { label: "결제 수단", note: "카드 정보는 Clunk 서버에 저장하지 않습니다." },
-    { label: "원본 덮어쓰기", note: "검사와 최적화는 새 파일을 만들 뿐 원본을 바꾸지 않습니다." },
+    { label: "결제 수단", note: "카드 정보는 Clunk 서버에 저장하지 않습니다. 무료 베타 기간에는 결제 자체를 받지 않습니다." },
+    { label: "원본 덮어쓰기", note: "검사와 정리는 새 파일을 만들 뿐 원본을 바꾸지 않습니다." },
   ];
 
   return (
@@ -69,13 +78,13 @@ export default async function SettingsPage() {
       <section className="ws-welcome settings-welcome">
         <div>
           <h2>
-            경계를
+            무엇을 저장하는지
             <br />
-            <em>명확하게 유지합니다.</em>
+            <em>숨기지 않습니다.</em>
           </h2>
-          <p>{auth.lede} 무엇이 저장되고 무엇이 저장되지 않는지 아래에 정리했습니다.</p>
+          <p>{auth.lede} 무엇이 저장되고 무엇이 저장되지 않는지 아래에 그대로 적었습니다.</p>
         </div>
-        <div className="settings-boundary-visual" aria-label="Clunk 저장 경계 시각 안내">
+        <div className="settings-boundary-visual" aria-label="Clunk가 저장하는 범위">
           <div className="settings-boundary-topline"><span><i /> 저장 범위</span><strong>내 파일만 저장</strong></div>
           <div className="settings-boundary-stage">
             <div className="settings-boundary-file"><span>01</span><strong>내 GLB 파일</strong><small>브라우저에서만 열림</small></div>
@@ -84,7 +93,7 @@ export default async function SettingsPage() {
             <b>→</b>
             <div className="settings-boundary-file is-safe"><span>03</span><strong>내 저장소</strong><small>나만 볼 수 있음</small></div>
           </div>
-          <p>원본 파일은 서버에 올라가지 않습니다.</p>
+          <p>검사에 올린 원본 파일은 서버로 올라가지 않습니다.</p>
         </div>
       </section>
 
@@ -101,13 +110,14 @@ export default async function SettingsPage() {
               </div>
             ))}
           </dl>
+          <MarketingConsentToggle />
         </div>
 
         <aside className="panel settings-aside">
           <div className="panel-head">
             <div>
-              <span className="mono-label">저장 경계</span>
-              <h3>보관하지 않는 것</h3>
+              <span className="mono-label">저장하지 않는 것</span>
+              <h3>보관하지 않습니다</h3>
             </div>
           </div>
           <ul className="settings-negative">
@@ -122,14 +132,14 @@ export default async function SettingsPage() {
             ))}
           </ul>
           <p className="muted-note">
-            파일 이름, 크기, 검사 점수, 발견된 문제만 저장합니다.
+            파일 이름, 파일 크기, 검사 점수, 발견된 문제만 저장합니다.
           </p>
         </aside>
       </div>
 
       <div className="settings-actions">
         <Link href="/app" className="button button-primary">
-          에셋 검사하러 가기
+          내 파일 검사하러 가기
           <Icon name="arrowUpRight" size={15} />
         </Link>
         <Link href="/docs" className="button button-quiet">

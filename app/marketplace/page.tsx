@@ -6,11 +6,15 @@ import { ForceDarkTheme } from "../components/ForceDarkTheme";
 import { RevealObserver } from "../components/Reveal";
 import { createPageMetadata } from "../components/site-metadata";
 import { MarketplaceCatalog } from "../components/MarketplaceCatalog";
+import { areSalesOpen } from "../api/_lib/sales-lock";
 import styles from "./marketplace.module.css";
+
+// The sales lock is read from the runtime environment at request time, as on /pricing.
+export const dynamic = "force-dynamic";
 
 export const metadata = createPageMetadata({
   title: "에셋 마켓",
-  description: "Clunk가 직접 만들어 파는 저폴리 3D 에셋. 삼각형 수와 용량을 확인하고 3D로 돌려 본 뒤 크레딧으로 받으세요.",
+  description: "Clunk가 직접 만든 가벼운 3D 게임 에셋. 얼마나 무거운지 잰 값을 보고, 3D로 돌려 본 뒤 받으세요. 베타 기간에는 로그인만 하면 무료입니다.",
   path: "/marketplace",
 });
 
@@ -20,14 +24,16 @@ export const metadata = createPageMetadata({
  * the master-approved cv5 system: deep-navy ground, glass cards, gradient CTAs.
  */
 
-const BUYER_STEPS = [
-  { index: "01", label: "고르기", detail: "삼각형 수와 용량을 보고 3D로 돌려 보세요." },
-  { index: "02", label: "결제하기", detail: "크레딧으로 바로 결제합니다." },
-  { index: "03", label: "받기", detail: "결제 즉시 파일을 내려받습니다." },
-  { index: "04", label: "넣기", detail: "받은 GLB를 그대로 게임에 넣으세요." },
-] as const;
+const BUYER_STEPS = (salesOpen: boolean) =>
+  [
+    { index: "01", label: "고르기", detail: "면 수(많을수록 무거움)와 용량을 보고 3D로 돌려 보세요." },
+    { index: "02", label: salesOpen ? "결제하기" : "로그인하기", detail: salesOpen ? "크레딧으로 바로 결제합니다." : "베타 기간에는 로그인만 하면 됩니다. 카드는 묻지 않습니다." },
+    { index: "03", label: "받기", detail: salesOpen ? "결제 즉시 파일을 내려받습니다." : "바로 파일을 내려받습니다." },
+    { index: "04", label: "넣기", detail: "받은 GLB 파일(3D 모델 파일 형식)을 그대로 게임에 넣으세요." },
+  ] as const;
 
 export default function MarketplacePage() {
+  const salesOpen = areSalesOpen();
   return (
     <div className="cv5">
       <ForceDarkTheme />
@@ -42,10 +48,11 @@ export default function MarketplacePage() {
                 <h1>
                   게임에 바로 넣는
                   <br />
-                  <em>저폴리 3D 에셋</em>
+                  <em>가벼운 3D 에셋</em>
                 </h1>
                 <p className={styles.heroLede}>
-                  삼각형 수와 용량을 보고, 3D로 돌려 본 뒤 받으세요.
+                  얼마나 무거운지 잰 값과 용량을 보고, 3D로 돌려 본 뒤 받으세요.
+                  {salesOpen ? "" : " 베타 기간에는 로그인만 하면 무료입니다."}
                 </p>
                 <div className={styles.heroActions}>
                   <Link className="cv5-btn cv5-btn-primary" href="#catalog">
@@ -58,7 +65,7 @@ export default function MarketplacePage() {
                 <div className="cv5-flow" aria-label="공개 마켓 원칙">
                   <span><b>GLB</b> 즉시 사용</span>
                   <span><b>3D</b> 미리보기</span>
-                  <span><b>크레딧</b> 결제</span>
+                  <span>{salesOpen ? <><b>크레딧</b> 결제</> : <><b>베타</b> 무료</>}</span>
                 </div>
               </div>
 
@@ -82,8 +89,8 @@ export default function MarketplacePage() {
                     />
                   </div>
                   <div className={styles.heroPanelFoot}>
-                    <span>2,456 삼각형 · 드로우콜 31</span>
-                    <b>₩6,900</b>
+                    <span>면 2,456개 · 그리기 31회 · 실제 크기 2.44 m</span>
+                    <b>{salesOpen ? "₩6,900" : "베타 무료"}</b>
                   </div>
                 </div>
               </div>
@@ -97,7 +104,7 @@ export default function MarketplacePage() {
                 <h2 id="marketplace-catalog-heading">
                   지금 받을 수 있는 <em>에셋</em>
                 </h2>
-                <p>삼각형 수, 용량, 라이선스를 상품마다 확인하세요.</p>
+                <p>얼마나 무거운지, 파일 크기는 얼마인지, 라이선스(어디까지 써도 되는지)를 상품마다 적어 두었습니다.</p>
               </div>
               <MarketplaceCatalog />
             </div>
@@ -113,7 +120,7 @@ export default function MarketplacePage() {
                     <br />
                     <em>크레딧 하나로</em>
                   </h2>
-                  <p>결제하면 바로 받습니다. 1 크레딧 = ₩100.</p>
+                  <p>{salesOpen ? "결제하면 바로 받습니다. 1 크레딧 = ₩100." : "베타 기간에는 로그인만 하면 바로 받습니다. 결제는 없습니다."}</p>
                 </div>
                 <div className={styles.buyerActions}>
                   <Link className="cv5-btn cv5-btn-primary" href="/app" prefetch={false}>
@@ -125,7 +132,7 @@ export default function MarketplacePage() {
                 </div>
               </div>
               <div className={`${styles.stepGrid} cv5-reveal`} data-delay="1">
-                {BUYER_STEPS.map((step) => (
+                {BUYER_STEPS(salesOpen).map((step) => (
                   <article className={styles.step} key={step.index}>
                     <span>{step.index}</span>
                     <strong>{step.label}</strong>

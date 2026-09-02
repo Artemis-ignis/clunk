@@ -76,6 +76,14 @@ test("the pricing surface renders pack state from the API and never invents a pr
   assert.match(pricing, /예정 가격/);
   assert.match(pricing, /30일 전/);
   assert.doesNotMatch(pricing, /충전하기|구매하기/, "베타 중에는 살 수 있는 것처럼 보이는 버튼이 없어야 한다");
+  // 2026-09-02: 베타 계정을 만든 사람이 가장 먼저 묻는 것은 "베타가 끝나면 내 계정은
+  // 어떻게 되나"다. 표만 보여 주고 답하지 않으면 예정 가격표가 곧 청구서로 읽힌다.
+  assert.match(pricing, /베타가 끝나면 지금 계정은 어떻게 되나요\?/);
+  assert.match(pricing, /Free 조건을 그대로 씁니다/);
+  // 용어집: 화면에는 "면"과 "그리기 횟수"로 적는다.
+  assert.doesNotMatch(pricing, /삼각형|드로우콜/, "내부 용어가 요금 화면에 남아 있으면 안 된다");
+  assert.match(pricing, /면 수\(많을수록 무거움\)/);
+  assert.match(pricing, /그리기 횟수\(적을수록 빠름\)/);
 
   // The planned figures on the page are the ones the plan document records.
   const plan = await source("docs/free-beta-plan.ko.md");

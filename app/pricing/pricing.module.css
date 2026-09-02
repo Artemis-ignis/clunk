@@ -445,6 +445,31 @@
   font-weight: 700;
 }
 
+/* The one question a beta account actually has, answered where the future prices are. */
+.betaAnswer {
+  display: grid;
+  gap: 8px;
+  margin: clamp(20px, 3vw, 28px) 0 0;
+  padding: 18px 20px;
+  border: 1px solid var(--v5-line-strong);
+  border-radius: var(--v5-r);
+  background: rgba(124, 93, 250, 0.06);
+}
+
+.betaAnswer strong {
+  color: var(--v5-ink);
+  font-size: 0.98rem;
+  font-weight: 740;
+  letter-spacing: -0.015em;
+}
+
+.betaAnswer p {
+  margin: 0;
+  color: var(--v5-ink-dim);
+  font-size: 0.9rem;
+  line-height: 1.72;
+}
+
 .packs {
   display: grid;
   gap: 16px;
@@ -654,7 +679,7 @@
 .route small {
   color: var(--v5-ink-faint);
   font-family: var(--v5-label);
-  font-size: 0.6rem;
+  font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.14em;
 }
@@ -769,7 +794,8 @@
 .plan header { display: grid; gap: 6px; }
 .planName {
   font-family: var(--v5-label);
-  font-size: 0.7rem;
+  /* 11.5px 아래로는 내려가지 않는다 — 375px 화면에서 읽히지 않는다. */
+  font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;

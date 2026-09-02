@@ -1,98 +1,17 @@
-import Link from "../components/NativeLink";
-import { getChatGPTUser } from "../chatgpt-auth";
-import { Icon } from "../components/Icon";
-import { McpEndpointStatus } from "../components/McpEndpointStatus";
-import { SampleRunWorkbench } from "../components/SampleRunWorkbench";
-import { SiteShell } from "../components/SiteShell";
-import { ForceDarkTheme } from "../components/ForceDarkTheme";
-import { AgentsClient } from "../agents/AgentsClient";
-import { createPageMetadata } from "../components/site-metadata";
-import { MCP_HTTP_TOOL_COUNT, MCP_SERVER } from "../components/product-facts";
-import { ProviderStatusPanel } from "../components/ProviderStatusPanel";
-import "./connect-v5.css";
+import { redirect } from "next/navigation";
 
-export const metadata = createPageMetadata({
-  title: "Clunk 연결",
-  description: "공개 샘플을 먼저 확인하고, workspace 키와 MCP handshake를 실제로 연결하는 Clunk 진입점입니다.",
-  path: "/connect",
-});
-
-export default async function ConnectPage() {
-  const user = await getChatGPTUser();
-  return (
-    /* cv5 chrome: the wrapper has to sit ABOVE SiteShell so the `.cv5 .sitenav-*`
-       rules in site-v5.css reach the nav — the legacy nav pill was half of what
-       made this page read as a different site in the 2026-08-31 live review. */
-    <div className="cv5 cv5-surface connect-cv5">
-      <ForceDarkTheme />
-      <div className="cv5-stars" aria-hidden="true" />
-      <SiteShell active="agents">
-      <main className="connect-page">
-        <header className="connect-hero public-hero-frame public-hero-connect">
-          <div className="connect-hero-copy">
-            <div className="hero-status-line"><span className="status-dot status-dot-on" /><span>공식 연결 페이지</span><code>v{MCP_SERVER.version}</code></div>
-            <span className="eyebrow">먼저 보고, 그다음 연결</span>
-            <h1>
-              <span>결과를 먼저 보고,</span>
-              <em>에이전트를 연결하세요.</em>
-            </h1>
-            <p>아래 샘플은 로그인 없이 바로 눌러 볼 수 있습니다. 내 파일과 작업 기록은 로그인한 뒤부터 쌓입니다. 원격 연결은 내 컴퓨터의 파일 경로를 읽지 않고, 직접 올린 파일만 받습니다.</p>
-            <div className="connect-hero-actions">
-              <a className="button button-primary" href="#connect">연결 설정 시작 <Icon name="chevronDown" size={15} /></a>
-              <Link className="button button-quiet" href="/agents#connect">전체 에이전트 가이드 <Icon name="arrowRight" size={15} /></Link>
-            </div>
-            <div className="connect-proof"><span><b>{MCP_HTTP_TOOL_COUNT}</b> HTTP tools</span><span><b>initialize</b> → tools/list</span><span><b>0</b> local path reads</span></div>
-          </div>
-          <div className="connect-hero-console">
-            <div className="connect-console-head"><span><i /> CLUNK ENDPOINT</span><code>/api/mcp</code></div>
-            <McpEndpointStatus />
-          </div>
-        </header>
-
-        <section className="connect-sample-section" aria-labelledby="connect-sample-heading">
-          <div className="connect-section-heading">
-            <div><span className="eyebrow">01 · SEE THE PRODUCT</span><h2 id="connect-sample-heading">파일 하나가<br /><em>근거 있는 결과가 되는 과정</em></h2></div>
-            <p>아래는 미리 준비된 예시 파일이라 크레딧이 들지 않습니다. 파일 검사를 통과했다고 해서 게임 화면에서도 괜찮다는 뜻은 아니라는 점을, 직접 눌러 보며 확인해 보세요.</p>
-          </div>
-          <SampleRunWorkbench compact />
-        </section>
-
-        <section className="connect-section" id="connect" aria-labelledby="connect-setup-heading">
-          <div className="connect-section-heading">
-            <div><span className="eyebrow">02 · CONNECT THE CLIENT</span><h2 id="connect-setup-heading">선택하고, 발급하고,<br /><em>실제 응답을 확인합니다.</em></h2></div>
-            <p>클라이언트를 고른 뒤 키를 발급하고 설정을 복사합니다. 마지막 단계에서 <code>initialize</code>와 <code>tools/list</code>를 실제 호출해 성공·실패를 화면에 남깁니다.</p>
-          </div>
-          <AgentsClient initiallyAuthenticated={Boolean(user)} />
-        </section>
-
-        <ProviderStatusPanel />
-
-        <section className="connect-boundary" aria-label="연결과 검토의 경계">
-          <div><span className="eyebrow">03 · KEEP THE REVIEW SEPARATE</span><h2>연결 PASS는<br /><em>게임 투입 승인이 아닙니다.</em></h2><p>연결은 서버가 응답했다는 증거입니다. 에셋의 구조·정책, shipped runtime, player-facing 화면, 사람의 결정은 각각 별도 상태로 유지합니다.</p></div>
-          <div className="connect-boundary-grid"><div><span>STATIC</span><strong>PASS</strong><small>bytes · hash · policy</small></div><div><span>RUNTIME</span><strong>GAP</strong><small>shipped frame 필요</small></div><div><span>PLAYER</span><strong>NOT_EVALUATED</strong><small>실제 게임 화면 전</small></div><div><span>HUMAN</span><strong>PENDING</strong><small>사람 검토 대기</small></div></div>
-        </section>
-
-        {/* /agents and /mcp had zero inbound links (2026-08-31 crawl): the two
-            deeper connection surfaces were unreachable from the site. */}
-        <section className="connect-deeper" aria-label="더 깊은 연결 문서">
-          <span className="eyebrow">GO DEEPER</span>
-          <div className="connect-deeper-grid">
-            <Link className="connect-deeper-card" href="/agents" prefetch={false}>
-              <strong>에이전트 결과 화면</strong>
-              <span>생성 직후 검사 결과를 에이전트가 읽는 방식과 evidence 뷰어</span>
-            </Link>
-            <Link className="connect-deeper-card" href="/mcp" prefetch={false}>
-              <strong>MCP 엔드포인트 상세</strong>
-              <span>/api/mcp 계약, 인증 키, 도구 목록과 전송 방식</span>
-            </Link>
-            <Link className="connect-deeper-card" href="/review" prefetch={false}>
-              <strong>검수 뷰어</strong>
-              <span>3D 회전·와이어프레임과 2D 상태 재생으로 직접 판정</span>
-            </Link>
-          </div>
-        </section>
-      </main>
-      </SiteShell>
-    </div>
-  );
+/**
+ * 2026-09-02: /connect, /mcp and /agents were three near-identical pages
+ * explaining the same Clunk connection. A visitor who found two of them could not
+ * tell which one was current, and each had its own half-translated copy.
+ *
+ * /agents is the one page now. Everything that used to render here — the
+ * sample run (SampleRunWorkbench), the client setup (AgentsClient), the live
+ * endpoint panel — is there, in one order, under one set of words.
+ *
+ * The redirect keeps the anchor: anyone holding a /connect or /connect#connect
+ * link lands on the client-setup section of /agents.
+ */
+export default function ConnectPage(): never {
+  redirect("/agents#connect");
 }

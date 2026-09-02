@@ -1928,3 +1928,534 @@ html[data-snap-motion="reduced"] [data-snap-section] {
     scroll-snap-stop: normal;
   }
 }
+
+/* ==========================================================================
+   /dashboard — 로그인한 사람이 처음 보는 화면 (2026-09-02)
+
+   예전 대시보드는 빈 상태 카드와 예시 패널이 먼저 보여서 내부 관리 화면처럼
+   읽혔습니다. 지금은 (1) 내 잔여량 (2) 지금 할 수 있는 세 가지 (3) 내 파일
+   (4) AI 도구 연결 순서로만 그립니다. 토큰은 cv5(--v5-*)를 그대로 씁니다.
+   ========================================================================== */
+
+.workspace-cv5 .home-hello {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+  gap: clamp(20px, 3vw, 40px);
+  align-items: center;
+  padding: clamp(22px, 3vw, 34px);
+  border: 1px solid var(--v5-line);
+  border-radius: var(--v5-r-lg, 20px);
+  background:
+    radial-gradient(120% 140% at 8% 0%, rgba(99, 102, 241, 0.16), transparent 58%),
+    var(--v5-panel);
+}
+
+.workspace-cv5 .home-hello-greeting {
+  margin: 0 0 10px;
+  color: var(--v5-ink-faint);
+  font-family: var(--v5-label);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+}
+
+.workspace-cv5 .home-hello h2 {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  line-height: 1.28;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.workspace-cv5 .home-hello h2 em {
+  font-style: normal;
+  background: var(--v5-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.workspace-cv5 .home-hello-lede {
+  margin: 14px 0 0;
+  max-width: 46ch;
+  color: var(--v5-ink-dim);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+/* 세 칸을 가로로 늘어놓으면 사이드바가 열린 1280px 화면에서 폭이 280px밖에 남지
+   않아 글자가 네 줄씩 접혔습니다. 한 줄에 하나씩, 이름 왼쪽 · 숫자 오른쪽으로 둡니다. */
+.workspace-cv5 .home-meter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--v5-line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.workspace-cv5 .home-meter-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px 12px;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.workspace-cv5 .home-meter-item > span {
+  flex: 1 1 auto;
+  color: var(--v5-ink-faint);
+  font-size: 0.8rem;
+  letter-spacing: 0.01em;
+}
+
+.workspace-cv5 .home-meter-item > strong {
+  flex: 0 0 auto;
+  color: var(--v5-ink);
+  font-family: var(--v5-label);
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.workspace-cv5 .home-meter-item > small {
+  flex: 1 0 100%;
+  color: var(--v5-ink-faint);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.workspace-cv5 .home-meter-beta > strong {
+  background: var(--v5-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.workspace-cv5 .home-meter-link {
+  grid-column: 1 / -1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 12px 0;
+  color: var(--v5-ink-dim);
+  font-size: 0.8rem;
+  text-decoration: none;
+}
+
+.workspace-cv5 .home-meter-link:hover { color: var(--v5-ink); text-decoration: underline; }
+
+/* --- 지금 할 수 있는 세 가지 -------------------------------------------- */
+
+.workspace-cv5 .home-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.workspace-cv5 .home-action {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: clamp(18px, 2vw, 24px);
+  border: 1px solid var(--v5-line);
+  border-radius: 18px;
+  background: var(--v5-panel);
+  color: var(--v5-ink);
+  text-decoration: none;
+  transition: border-color .18s, transform .18s, background .18s;
+}
+
+.workspace-cv5 .home-action:hover {
+  border-color: rgba(168, 85, 247, 0.45);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+}
+
+.workspace-cv5 .home-action-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--v5-grad-soft);
+  color: #c4b5fd;
+}
+
+.workspace-cv5 .home-action h3 {
+  margin: 0;
+  font-size: 1.06rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.workspace-cv5 .home-action p {
+  margin: 0;
+  flex: 1 1 auto;
+  color: var(--v5-ink-dim);
+  font-size: 0.87rem;
+  line-height: 1.65;
+}
+
+.workspace-cv5 .home-action-foot {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--v5-line);
+}
+
+.workspace-cv5 .home-action-foot b {
+  color: var(--v5-ink);
+  font-family: var(--v5-label);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.workspace-cv5 .home-action-foot small {
+  flex: 1 1 auto;
+  color: var(--v5-ink-faint);
+  font-size: 0.75rem;
+}
+
+.workspace-cv5 .home-action-foot svg { flex: 0 0 auto; color: var(--v5-ink-faint); align-self: center; }
+
+/* --- 내 파일 / 최근 검사 ------------------------------------------------- */
+
+.workspace-cv5 .home-files,
+.workspace-cv5 .home-latest {
+  margin-top: 18px;
+  padding: clamp(18px, 2vw, 24px);
+  border: 1px solid var(--v5-line);
+  border-radius: 18px;
+  background: var(--v5-panel);
+}
+
+.workspace-cv5 .home-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.workspace-cv5 .home-section-head h3 {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 700;
+}
+
+.workspace-cv5 .home-file-list { display: grid; gap: 8px; }
+
+.workspace-cv5 .home-file-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--v5-line);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--v5-ink);
+  text-decoration: none;
+  transition: border-color .16s, background .16s;
+}
+
+.workspace-cv5 a.home-file-row:hover {
+  border-color: var(--v5-line-strong);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.workspace-cv5 .home-file-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--v5-ink-dim);
+}
+
+.workspace-cv5 .home-file-main { flex: 1 1 auto; min-width: 0; display: grid; gap: 3px; }
+
+.workspace-cv5 .home-file-main strong {
+  display: block;
+  overflow: hidden;
+  color: var(--v5-ink);
+  font-size: 0.92rem;
+  font-weight: 620;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workspace-cv5 .home-file-main small { color: var(--v5-ink-faint); font-size: 0.76rem; }
+
+.workspace-cv5 .home-file-score {
+  display: grid;
+  flex: 0 0 auto;
+  gap: 2px;
+  justify-items: end;
+  text-align: right;
+}
+
+.workspace-cv5 .home-file-score b { color: var(--v5-ink); font-family: var(--v5-label); font-size: 0.88rem; }
+.workspace-cv5 .home-file-score small { color: var(--v5-ink-faint); font-size: 0.75rem; }
+
+.workspace-cv5 .home-empty {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  padding: 18px;
+  border: 1px dashed var(--v5-line-strong);
+  border-radius: 14px;
+}
+
+.workspace-cv5 .home-empty p,
+.workspace-cv5 .home-empty-line {
+  margin: 0;
+  color: var(--v5-ink-dim);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.workspace-cv5 .home-latest-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--v5-line);
+}
+
+.workspace-cv5 .home-latest-file { min-width: 0; display: grid; gap: 4px; }
+.workspace-cv5 .home-latest-file strong { color: var(--v5-ink); font-size: 0.98rem; overflow-wrap: anywhere; }
+.workspace-cv5 .home-latest-file small { color: var(--v5-ink-faint); font-size: 0.8rem; }
+
+.workspace-cv5 .home-readiness {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 11px;
+  border: 1px solid var(--v5-line-strong);
+  border-radius: 999px;
+  font-family: var(--v5-label);
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.workspace-cv5 .home-readiness-ready { border-color: rgba(52, 211, 153, 0.4); color: var(--v5-green); }
+.workspace-cv5 .home-readiness-conditional { border-color: rgba(251, 191, 36, 0.4); color: var(--v5-amber); }
+.workspace-cv5 .home-readiness-blocked { border-color: rgba(248, 113, 113, 0.4); color: var(--v5-red); }
+
+.workspace-cv5 .home-lanes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.workspace-cv5 .home-lane {
+  display: grid;
+  gap: 4px;
+  padding: 12px 13px;
+  border: 1px solid var(--v5-line);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.workspace-cv5 .home-lane > span { color: var(--v5-ink-faint); font-size: 0.76rem; }
+.workspace-cv5 .home-lane > strong { color: var(--v5-ink-dim); font-family: var(--v5-label); font-size: 0.94rem; font-weight: 700; }
+.workspace-cv5 .home-lane > small { color: var(--v5-ink-faint); font-size: 0.75rem; line-height: 1.5; }
+.workspace-cv5 .home-lane-pass { border-color: rgba(52, 211, 153, 0.32); }
+.workspace-cv5 .home-lane-pass > strong { color: var(--v5-green); }
+
+.workspace-cv5 .home-latest-note {
+  margin: 14px 0 0;
+  color: var(--v5-ink-dim);
+  font-size: 0.85rem;
+  line-height: 1.7;
+}
+
+.workspace-cv5 .home-latest-record {
+  margin: 8px 0 0;
+  color: var(--v5-ink-faint);
+  font-family: var(--v5-label);
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+/* --- AI 도구 연결 --------------------------------------------------------- */
+
+.workspace-cv5 .home-mcp {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 18px;
+  padding: clamp(18px, 2vw, 24px);
+  border: 1px solid var(--v5-line);
+  border-radius: 18px;
+  background:
+    radial-gradient(90% 160% at 100% 0%, rgba(89, 217, 255, 0.1), transparent 60%),
+    var(--v5-panel);
+}
+
+.workspace-cv5 .home-mcp-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: rgba(89, 217, 255, 0.12);
+  color: var(--v5-cyan);
+}
+
+.workspace-cv5 .home-mcp > div { flex: 1 1 auto; min-width: 0; }
+.workspace-cv5 .home-mcp h3 { margin: 0 0 6px; font-size: 1.02rem; font-weight: 700; }
+.workspace-cv5 .home-mcp p { margin: 0; color: var(--v5-ink-dim); font-size: 0.88rem; line-height: 1.7; }
+.workspace-cv5 .home-mcp > .button { flex: 0 0 auto; }
+
+/* --- 좁은 화면 ------------------------------------------------------------ */
+
+@media (max-width: 1080px) {
+  .workspace-cv5 .home-hello { grid-template-columns: minmax(0, 1fr); }
+  .workspace-cv5 .home-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .workspace-cv5 .home-lanes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 720px) {
+  .workspace-cv5 .home-actions,
+  .workspace-cv5 .home-meter { grid-template-columns: minmax(0, 1fr); }
+  .workspace-cv5 .home-lanes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .workspace-cv5 .home-mcp { flex-wrap: wrap; }
+  .workspace-cv5 .home-mcp > .button { width: 100%; justify-content: center; }
+  .workspace-cv5 .home-file-row { flex-wrap: wrap; }
+  .workspace-cv5 .home-file-score { flex: 1 0 100%; justify-items: start; text-align: left; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace-cv5 .home-action { transition: none; }
+  .workspace-cv5 .home-action:hover { transform: none; }
+}
+
+/* --- /settings 메일 수신 스위치 (2026-09-02) ------------------------------ */
+
+.workspace-cv5 .settings-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-top: 14px;
+  padding: 16px;
+  border: 1px solid var(--v5-line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.workspace-cv5 .settings-toggle-copy { flex: 1 1 240px; min-width: 0; display: grid; gap: 5px; }
+.workspace-cv5 .settings-toggle-copy strong { color: var(--v5-ink); font-size: 0.92rem; font-weight: 650; }
+.workspace-cv5 .settings-toggle-copy small { color: var(--v5-ink-faint); font-size: 0.78rem; line-height: 1.6; }
+
+.workspace-cv5 .settings-toggle-note {
+  flex: 1 0 100%;
+  margin: 0;
+  color: var(--v5-ink-dim);
+  font-size: 0.78rem;
+}
+
+.workspace-cv5 .settings-switch {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px 6px 6px;
+  border: 1px solid var(--v5-line-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--v5-ink-dim);
+  font-family: var(--v5-label);
+  font-size: 0.8rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: border-color .16s, color .16s;
+}
+
+.workspace-cv5 .settings-switch:disabled { cursor: progress; opacity: 0.6; }
+.workspace-cv5 .settings-switch:hover:not(:disabled) { border-color: rgba(255, 255, 255, 0.32); color: var(--v5-ink); }
+
+.workspace-cv5 .settings-switch-track {
+  display: inline-flex;
+  align-items: center;
+  width: 42px;
+  height: 24px;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  transition: background .16s;
+}
+
+.workspace-cv5 .settings-switch-knob {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--v5-ink-dim);
+  transition: transform .16s, background .16s;
+}
+
+.workspace-cv5 .settings-switch-on .settings-switch-track { background: var(--v5-grad); }
+.workspace-cv5 .settings-switch-on .settings-switch-knob { transform: translateX(18px); background: #fff; }
+.workspace-cv5 .settings-switch-on { color: var(--v5-ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace-cv5 .settings-switch,
+  .workspace-cv5 .settings-switch-track,
+  .workspace-cv5 .settings-switch-knob { transition: none; }
+}
+
+/* --- 작업실 최소 글자 크기 (2026-09-02) ---------------------------------
+   설정 화면의 저장-경계 그림과 표 제목, 그리고 작업실 전체의 작은 라벨이
+   8~10px까지 내려가 있어 모바일에서 읽히지 않았습니다. 11.5px 아래로는
+   내려가지 않게 올립니다. */
+
+/* cv5-surface.css / workspace-v5.css 는 컴포넌트에서 불러와 이 파일보다 뒤에 오므로,
+   같은 강도로는 이깁니다. 한 단계 더 좁혀서 크기만 되돌립니다. */
+.workspace.workspace-cv5 .mono-label { font-size: 0.72rem; }
+.workspace.workspace-cv5 .settings-row dt { font-size: 0.75rem; }
+.workspace-cv5 .settings-boundary-topline,
+.workspace-cv5 .settings-boundary-topline span,
+.workspace-cv5 .settings-boundary-topline strong { font-size: 0.72rem; }
+.workspace-cv5 .settings-boundary-file span,
+.workspace-cv5 .settings-boundary-file small { font-size: 0.72rem; }
+.workspace-cv5 .settings-boundary-file strong { font-size: 0.82rem; }
+
+/* /assets 목록의 필터 라벨과 줄 설명이 10.2~10.6px였습니다. 같은 이유로 한 단계 좁혀서 올립니다. */
+.workspace.workspace-cv5 .creation-field > span { font-size: 0.72rem; }
+.workspace.workspace-cv5 .project-row strong { font-size: 0.85rem; }
+.workspace.workspace-cv5 .project-row small { font-size: 0.75rem; }
+
+/* /passport 상단 흐름 그림의 글자도 8.8~9.9px였습니다. */
+.workspace.workspace-cv5 .passport-trace-head strong,
+.workspace.workspace-cv5 .passport-trace-node span,
+.workspace.workspace-cv5 .passport-trace-node small { font-size: 0.72rem; }
+
+/* /assets/[id] 의 빵부스러기·요약 칸·판정 칸도 9~10px였습니다. */
+.workspace.workspace-cv5 .workspace-asset-breadcrumb,
+.workspace.workspace-cv5 .workspace-asset-breadcrumb a,
+.workspace.workspace-cv5 .workspace-asset-breadcrumb span,
+.workspace.workspace-cv5 .workspace-asset-metric span,
+.workspace.workspace-cv5 .workspace-asset-metric small,
+.workspace.workspace-cv5 .workspace-asset-lane span,
+.workspace.workspace-cv5 .workspace-asset-lane small { font-size: 0.72rem; }
+.workspace.workspace-cv5 .workspace-asset-lane strong { font-size: 0.8rem; }
+
+.workspace.workspace-cv5 .status-text,
+.workspace.workspace-cv5 .workspace-asset-definition dt { font-size: 0.72rem; }

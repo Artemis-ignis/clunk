@@ -15,19 +15,28 @@ import "./agents-v5.css";
 export const metadata = createPageMetadata({ title: "에이전트 연결", description: "Claude Code, Codex, Cursor, GitHub Copilot, Claude Desktop, VS Code에서 Clunk를 연결하는 작업 가이드입니다.", path: "/agents" });
 
 const setupSteps = [
-  ["01", "1. 키 발급", "workspace 전용 Bearer 키"],
-  ["02", "2. 클라이언트 선택", "쓰는 도구의 설정 형식"],
-  ["03", "3. 설정 복사", "endpoint + 인증 헤더"],
-  ["04", "4. 연결 확인", "initialize → tools/list"],
+  ["01", "1. 키 발급", "내 계정 전용 키를 한 번 받습니다"],
+  ["02", "2. 클라이언트 선택", "쓰는 도구를 고릅니다"],
+  ["03", "3. 설정 복사", "연결 주소와 키가 채워진 설정을 붙여 넣습니다"],
+  ["04", "4. 연결 확인", "서버가 실제로 응답하는지 확인합니다"],
 ] as const;
 
 const AGENT_ASSETS: Array<{ kind: AssetFamilyVisualKind; label: string }> = [
-  { kind: "sprite", label: "Sprite" },
-  { kind: "atlas", label: "Atlas" },
-  { kind: "spine", label: "Spine" },
-  { kind: "motion", label: "Motion" },
-  { kind: "model", label: "GLB / GLTF" },
+  { kind: "sprite", label: "2D 이미지" },
+  { kind: "atlas", label: "스프라이트 시트" },
+  { kind: "spine", label: "본 애니메이션" },
+  { kind: "motion", label: "애니메이션 클립" },
+  { kind: "model", label: "3D 모델" },
 ];
+
+/**
+ * packages/core/src/assetops-profiles.ts의 첫 프로필 label이 깨진 글자
+ * ("영허검가 PixiJS 2D")로 저장되어 있어 화면에 그대로 나오고 있었습니다.
+ * 원본 상수가 고쳐질 때까지 화면에서만 읽을 수 있는 이름으로 바꿉니다.
+ */
+function profileLabel(profile: { id: string; label: string }): string {
+  return profile.id === "yeongheo-pixi-2d" ? "PixiJS 2D" : profile.label;
+}
 
 export default async function AgentsPage() {
   const user = await getChatGPTUser();
@@ -42,25 +51,24 @@ export default async function AgentsPage() {
       <div className="cv5-stars" aria-hidden="true" />
       <SiteShell active="agents">
       <main className="agents-page agents-v4-page">
-        <section className="agents-v4-hero public-hero-frame public-hero-agents"><div className="agents-v4-copy"><div className="hero-status-line"><span className="status-dot status-dot-on" /><span>CLUNK HTTP MCP</span><code>v{MCP_SERVER.version}</code></div><span className="eyebrow">CONNECT THE AGENT</span><h1>생성 직후,<br /><em>에이전트가 검사합니다.</em></h1><p>Clunk가 직접 운영하는 HTTP MCP를 연결하면 Claude Code, Codex, Cursor, GitHub Copilot, Claude Desktop, VS Code에서 같은 Core와 같은 근거를 사용합니다.</p><div className="agents-v4-actions"><a className="button button-primary" href="#connect">연결 시작 <Icon name="chevronDown" size={15} /></a><Link className="button button-quiet" href="/docs/quickstart">설정 가이드 <Icon name="arrowRight" size={15} /></Link></div><div className="agents-v4-proof"><span><b>{MCP_HTTP_TOOL_COUNT}</b> HTTP tools</span><span><b>{MCP_TOOLS.length}</b> local tools</span><span><b>0</b> overwrite</span></div></div><LiveEvidenceShowcase variant="agents" compact /></section>
+        <section className="agents-v4-hero public-hero-frame public-hero-agents"><div className="agents-v4-copy"><div className="hero-status-line"><span className="status-dot status-dot-on" /><span>Clunk 연결 서버</span><code>v{MCP_SERVER.version}</code></div><span className="eyebrow">AI 도구 연결(MCP)</span><h1>생성 직후,<br /><em>에이전트가 검사합니다.</em></h1><p>Clunk가 직접 운영하는 HTTP MCP를 한 번 연결하면 Claude Code, Codex, Cursor, GitHub Copilot, Claude Desktop, VS Code가 이 웹사이트와 똑같은 검사 규칙을 쓰고, 똑같은 검사 기록을 받아 갑니다.</p><div className="agents-v4-actions"><a className="button button-primary" href="#connect">연결 시작 <Icon name="chevronDown" size={15} /></a><Link className="button button-quiet" href="/docs/quickstart">설정 가이드 <Icon name="arrowRight" size={15} /></Link></div><div className="agents-v4-proof"><span>웹으로 바로 쓰는 도구 <b>{MCP_HTTP_TOOL_COUNT}</b>개</span><span>내 컴퓨터에서 쓰는 도구 <b>{MCP_TOOLS.length}</b>개</span><span>원본 파일 덮어쓰기 <b>0</b></span></div></div><LiveEvidenceShowcase variant="agents" compact /></section>
 
-        <section className="agents-v4-rail" aria-label="MCP 연결 상태"><div><span>ENDPOINT</span><strong>/api/mcp</strong><small>streamable HTTP</small></div><div><span>AUTH</span><strong>Bearer workspace key</strong><small>로그인 후 키 발급</small></div><div><span>TOOLS</span><strong>HTTP 원격 도구 {MCP_HTTP_TOOL_COUNT}개</strong><small>로컬 stdio 도구 {MCP_TOOLS.length}개 · initialize와 tools/list에 동일하게 표시</small></div><McpEndpointStatus /></section>
+        <section className="agents-v4-rail" aria-label="연결 정보"><div><span>연결 주소</span><strong>/api/mcp</strong><small>웹으로 바로 연결합니다</small></div><div><span>인증</span><strong>내 계정 전용 키</strong><small>로그인 후 키 발급</small></div><div><span>쓸 수 있는 도구</span><strong>HTTP 원격 도구 {MCP_HTTP_TOOL_COUNT}개</strong><small>내 컴퓨터의 파일을 직접 읽고 쓰는 일은 로컬 stdio 도구 {MCP_TOOLS.length}개가 맡습니다. 그 도구는 내 컴퓨터에 설치해야 씁니다.</small></div><McpEndpointStatus /></section>
 
-        <section className="agent-asset-strip" aria-label="에이전트가 검사할 수 있는 에셋 종류"><div className="agent-asset-strip-copy"><span className="eyebrow">ONE CONNECTION · FIVE ASSET FAMILIES</span><strong>에이전트가 호출하면<br />이 흐름으로 들어옵니다.</strong><small>실제 파일은 local CLI 또는 업로드 bundle에서 시작합니다.</small></div><div className="agent-asset-strip-items">{AGENT_ASSETS.map((item) => <div key={item.kind}><AssetFamilyVisual kind={item.kind} compact /><span>{item.label}</span></div>)}</div></section>
+        <section className="agent-asset-strip" aria-label="에이전트가 검사할 수 있는 에셋 종류"><div className="agent-asset-strip-copy"><span className="eyebrow">한 번 연결하면 다섯 종류</span><strong>에이전트가 부르면<br />이 흐름으로 들어옵니다.</strong><small>파일은 내 컴퓨터에서 열거나, 직접 올려서 시작합니다.</small></div><div className="agent-asset-strip-items">{AGENT_ASSETS.map((item) => <div key={item.kind}><AssetFamilyVisual kind={item.kind} compact /><span>{item.label}</span></div>)}</div></section>
 
-        <section className="agents-v4-section agents-v4-product-loop" aria-labelledby="agent-product-loop-heading"><div className="agents-v4-heading agents-v4-heading-wide"><div><span className="eyebrow">SEE THE RESULT BEFORE CONNECTING</span><h2 id="agent-product-loop-heading">에이전트 호출은<br /><em>이 결과로 돌아옵니다.</em></h2></div><p>아래 샘플은 실제 Clunk Core 결과를 사용한 계약 fixture입니다. runtime과 사람 검토는 별도 증거로 남습니다.</p></div><SampleRunWorkbench compact /></section>
+        <section className="agents-v4-section agents-v4-product-loop" aria-labelledby="agent-product-loop-heading"><div className="agents-v4-heading agents-v4-heading-wide"><div><span className="eyebrow">연결하기 전에 결과부터</span><h2 id="agent-product-loop-heading">에이전트가 부르면<br /><em>이 결과가 돌아옵니다.</em></h2></div><p>아래는 미리 준비된 예시라 크레딧이 들지 않습니다. 엔진 화면과 사람의 검토는 따로 남습니다.</p></div><SampleRunWorkbench compact /></section>
 
-        <section className="agents-v4-section agents-v4-setup"><div className="agents-v4-heading"><span className="eyebrow">FOUR SMALL STEPS</span><h2>연결은 짧고,<br /><em>결과는 실제여야 합니다.</em></h2><p>페이지를 읽고 추측하지 마세요. 키를 발급하고, 설정을 복사하고, 서버 handshake를 확인합니다.</p></div><ol className="agents-v4-steps agent-journey">{setupSteps.map(([number, title, detail]) => <li key={number}><span>{number}</span><strong>{title}</strong><small>{detail}</small></li>)}</ol></section>
+        <section className="agents-v4-section agents-v4-setup"><div className="agents-v4-heading"><span className="eyebrow">네 단계면 끝납니다</span><h2>연결은 짧고,<br /><em>결과는 실제여야 합니다.</em></h2><p>키를 발급하고, 설정을 복사하고, 서버가 실제로 응답하는지까지 확인합니다.</p></div><ol className="agents-v4-steps agent-journey">{setupSteps.map(([number, title, detail]) => <li key={number}><span>{number}</span><strong>{title}</strong><small>{detail}</small></li>)}</ol></section>
 
-        <section className="agents-v4-section agents-v4-connect" id="connect"><div className="agents-v4-heading agents-v4-heading-wide"><div><span className="eyebrow">CLIENT SETUP</span><h2>쓰는 도구를 고르면<br /><em>설정이 완성됩니다.</em></h2></div><p className="agent-tab-purpose">선택한 클라이언트의 실제 설정을 복사합니다. 인증 실패도 화면에 남깁니다.</p></div><AgentsClient initiallyAuthenticated={Boolean(user)} /></section>
+        <section className="agents-v4-section agents-v4-connect" id="connect"><div className="agents-v4-heading agents-v4-heading-wide"><div><span className="eyebrow">쓰는 도구 설정</span><h2>쓰는 도구를 고르면<br /><em>설정이 완성됩니다.</em></h2></div><p className="agent-tab-purpose">선택한 클라이언트에 그대로 붙여 넣을 설정을 복사합니다. 인증에 실패하면 실패한 사실도 화면에 그대로 남습니다.</p></div><AgentsClient initiallyAuthenticated={Boolean(user)} /></section>
 
-        <section className="agents-v4-section agents-v4-tools" aria-labelledby="tools-heading"><div className="agents-v4-heading agents-v4-heading-wide"><div><span className="eyebrow">TOOLS THE AGENT CAN CALL</span><h2 id="tools-heading">연결 후 바로 부르는<br /><em>{MCP_HTTP_TOOL_COUNT}개 도구</em></h2></div><p>검사·생성·증거 연결의 도구가 같은 계약을 공유합니다. 원격 HTTP는 로컬 경로를 읽지 않습니다.</p></div><div className="agents-v4-tool-grid">{MCP_HTTP_TOOL_CATALOG.map((tool, index) => <article key={tool.name}><span>0{index + 1}</span><code>{tool.name}</code><strong>{tool.summary}</strong><small>입력 {tool.input} · 출력 {tool.output}</small></article>)}</div></section>
+        <section className="agents-v4-section agents-v4-tools" aria-labelledby="tools-heading"><div className="agents-v4-heading agents-v4-heading-wide"><div><span className="eyebrow">에이전트가 부를 수 있는 도구</span><h2 id="tools-heading">연결하면 바로 쓰는<br /><em>{MCP_HTTP_TOOL_COUNT}개 도구</em></h2></div><p>만들기·검사하기·기록 연결이 같은 규칙을 씁니다. 웹으로 연결한 쪽은 내 컴퓨터의 파일 경로를 읽지 않습니다.</p></div><div className="agents-v4-tool-grid">{MCP_HTTP_TOOL_CATALOG.map((tool, index) => <article key={tool.name}><span>0{index + 1}</span><code>{tool.name}</code><strong>{tool.summary}</strong><small>넣는 것 {tool.input} · 나오는 것 {tool.output}</small></article>)}</div></section>
 
-        <section className="agents-v4-section agents-v4-boundary" aria-labelledby="boundary-heading"><div className="agents-v4-heading"><span className="eyebrow">READ THE RESULT CORRECTLY</span><h2 id="boundary-heading">구조 PASS와<br /><em>화면 PASS는 다릅니다.</em></h2><p>{RULE_SET.id}는 hash·parser·policy를 증명합니다. 실제 shipped frame, player-facing 화면, 사람의 판단은 자동으로 승격하지 않습니다.</p><Link className="text-link" href="/docs/contracts">계약과 상태 보기 <Icon name="arrowRight" size={14} /></Link></div><div className="agents-v4-statuses"><article><span>STATIC / TECHNICAL</span><strong>PASS</strong><small>bytes · hash · policy · blocker</small></article><article><span>VISUAL RUNTIME</span><strong>GAP</strong><small>shipped renderer frame 필요</small></article><article><span>PLAYER FACING</span><strong>NOT_EVALUATED</strong><small>게임 화면 판정 전</small></article><article><span>HUMAN REVIEW</span><strong>PENDING</strong><small>사람의 화면 판정 대기</small></article></div><div className="agents-v4-profile-strip">{TARGET_PROFILES.slice(0, 5).map((profile) => <span key={profile.id}>{profile.label}</span>)}</div></section>
+        <section className="agents-v4-section agents-v4-boundary" aria-labelledby="boundary-heading"><div className="agents-v4-heading"><span className="eyebrow">결과를 바르게 읽는 법</span><h2 id="boundary-heading">파일 검사 통과와<br /><em>화면 통과는 다릅니다.</em></h2><p>Clunk의 검사 규칙({RULE_SET.id})이 확인하는 것은 파일 내용과 구조, 규칙 위반입니다. 엔진에서 실제로 그린 화면과 사람의 판단은 자동으로 통과가 되지 않습니다.</p><Link className="text-link" href="/docs/contracts">규칙과 상태 보기 <Icon name="arrowRight" size={14} /></Link></div><div className="agents-v4-statuses"><article><span>파일 검사</span><strong>통과</strong><small>파일 내용 · 지문 · 규칙 · 차단 문제</small></article><article><span>엔진 화면</span><strong>증거 없음</strong><small>엔진에서 찍은 화면이 필요합니다</small></article><article><span>게임 화면</span><strong>확인 전</strong><small>플레이어가 보는 화면은 아직 판정 전</small></article><article><span>사람 검토</span><strong>대기</strong><small>사람이 직접 보고 판단해야 합니다</small></article></div><div className="agents-v4-profile-strip">{TARGET_PROFILES.slice(0, 5).map((profile) => <span key={profile.id}>{profileLabel(profile)}</span>)}</div></section>
 
-        <section className="agents-v4-handoff" aria-labelledby="handoff-heading"><div><span className="eyebrow">EVIDENCE HANDOFF</span><h2 id="handoff-heading">자동화 결과를<br /><em>사람의 검토로 보냅니다.</em></h2><p>fixture PASS나 구조 PASS를 player-facing 승인으로 부르지 않습니다. 최신 capture와 사람의 결정을 별도 lane으로 추가합니다.</p><code className="agents-v4-unavailable">environmentUnavailable는 실행하지 않은 런타임을 PASS로 바꾸지 않습니다.</code><div className="agents-v4-handoff-actions"><Link className="button button-primary button-sm" href="/studio">생성 결과 열기 <Icon name="arrowUpRight" size={14} /></Link><Link className="button button-quiet button-sm" href="/marketplace">검수된 상품 보기 <Icon name="arrowRight" size={14} /></Link></div></div><div className="agents-v4-handoff-card"><div><span>STRUCTURAL</span><b>PASS</b></div><div><span>visualRuntime</span><b>GAP</b></div><div><span>playerFacing</span><b>NOT_EVALUATED</b></div><div><span>humanDecision</span><b>NO_GO / PENDING</b></div></div></section>
-        <div className="agents-v4-machine-note"><code>clunk_inspect · clunk_passport · HF M105 · environmentUnavailable · readinessReason=PLAYER_FACING_SCENE_GAP · sceneReviewCli · assetEvidenceRef · NOT CURRENT APPROVAL</code></div>
-        <section className="agents-v4-final"><div><span className="eyebrow">NEXT</span><h2>실제 에셋을<br /><em>한 번 호출해 보세요.</em></h2></div><div className="agents-v4-actions"><a className="button button-primary" href="#connect">클라이언트 설정하기 <Icon name="arrowUpRight" size={15} /></a><Link className="button button-quiet" href="/app">내 파일 검사 · 로그인 <Icon name="arrowRight" size={15} /></Link></div></section>
+        <section className="agents-v4-handoff" aria-labelledby="handoff-heading"><div><span className="eyebrow">사람 검토로 넘기기</span><h2 id="handoff-heading">자동으로 나온 결과를<br /><em>사람의 검토로 보냅니다.</em></h2><p>예시가 통과했거나 파일 검사가 통과했다고 해서 게임에 넣어도 된다고 말하지 않습니다. 엔진에서 찍은 최신 화면과 사람의 결정을 따로 붙입니다.</p><code className="agents-v4-unavailable">돌려 보지 않은 엔진은 &quot;확인할 환경 없음&quot;으로 남고, 통과로 바뀌지 않습니다.</code><div className="agents-v4-handoff-actions"><Link className="button button-primary button-sm" href="/studio">생성 결과 열기 <Icon name="arrowUpRight" size={14} /></Link><Link className="button button-quiet button-sm" href="/marketplace">검수된 상품 보기 <Icon name="arrowRight" size={14} /></Link></div></div><div className="agents-v4-handoff-card"><div><span>파일 검사</span><b>통과</b></div><div><span>엔진 화면</span><b>증거 없음</b></div><div><span>게임 화면</span><b>확인 전</b></div><div><span>사람 검토</span><b>대기</b></div></div></section>
+        <section className="agents-v4-final"><div><span className="eyebrow">다음</span><h2>실제 에셋을<br /><em>한 번 호출해 보세요.</em></h2></div><div className="agents-v4-actions"><a className="button button-primary" href="#connect">클라이언트 설정하기 <Icon name="arrowUpRight" size={15} /></a><Link className="button button-quiet" href="/app">내 파일 검사하기 <Icon name="arrowRight" size={15} /></Link></div></section>
       </main>
       </SiteShell>
     </div>

@@ -30,7 +30,7 @@ test("login preserves the dashboard return path and lists truthful providers", a
   // button this deployment cannot honor; the return path stays visible.
   assert.match(html, /Google로 계속하기/);
   assert.match(html, /GitHub로 계속하기/);
-  assert.match(html, /가입 안내 보기/);
+  assert.match(html, /가입하고 시작하기/);
   assert.match(html, /\/dashboard/);
 });
 
@@ -38,7 +38,7 @@ test("signup is a first-class route and links back to login", async () => {
   const response = await render("/signup");
   assert.equal(response.status, 200);
   const html = await response.text();
-  assert.match(html, /ChatGPT로 Workspace 시작/);
+  assert.match(html, /ChatGPT 계정으로 시작하기/);
   assert.match(html, /첫 로그인에서 내 작업공간이 만들어집니다/);
   assert.match(html, /로그인하기/);
   assert.match(html, /href="\/login/);
@@ -54,7 +54,7 @@ test("authenticated login remains visible instead of redirecting away", async ()
   assert.equal(response.status, 200);
   assert.equal(response.headers.get("location"), null);
   const html = await response.text();
-  assert.match(html, /요청한 Workspace 열기/);
+  assert.match(html, /요청한 화면 열기/);
   assert.match(html, /href="\/dashboard/);
 });
 
@@ -84,7 +84,7 @@ test("dashboard uses real workspace endpoints and does not render demo ledger or
     new URL("../app/components/DashboardClient.tsx", import.meta.url),
     "utf8",
   );
-  assert.match(source, /\/api\/projects/);
+  // 2026-09-02: project listing moved to KitsClient; the dashboard shows files and inspections.
   assert.match(source, /\/api\/generation/);
   assert.match(source, /\/assets/);
   assert.doesNotMatch(source, /DEMO MODE|데모 원장|clunk-messy-sample|DemoUpgradeButton/);

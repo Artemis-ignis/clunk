@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 
 import { readPalette, type PaletteEntry } from "./measure-palette";
 
@@ -33,16 +33,50 @@ export type MeasuredSpec = {
   palette: PaletteEntry[];
 };
 
+/**
+ * A motion the sprite baker turned this model's pivots with.
+ *
+ * Our models carry no glTF animation track — the gate's leaf is a node called `gate_pivot`
+ * and the sheet baker rotated it frame by frame. Handing the same numbers to the viewer is
+ * what lets the shop show the door opening on the model itself rather than only on the PNG
+ * strip baked from it. The degrees are added to whatever rotation the file already gives the
+ * node, exactly as scripts/sprite-sheet-from-glb.mjs does it.
+ */
+export type ViewerClip = {
+  name: string;
+  label: string;
+  fps: number;
+  tracks: Array<{ node: string; axis: "x" | "y" | "z"; degrees: number[] }>;
+};
+
+/** What the control bar knows about a clip after the file has been opened. */
+type ClipStatus = { name: string; label: string; missingNode: string | null };
+
+type ViewerHandles = {
+  selectClip: (index: number) => void;
+  setPlaying: (playing: boolean) => void;
+  setSpeed: (speed: number) => void;
+  setReference: (visible: boolean) => void;
+};
+
+const SPEEDS = [0.5, 1, 2] as const;
+
 export function EmbeddedGlbViewer({
   src,
   poster,
   alt,
   onMeasured,
+  clips,
+  scaleReference = false,
 }: {
   src: string;
   poster?: string | null;
   alt: string;
   onMeasured?: (spec: MeasuredSpec) => void;
+  /** Motions to offer under the stage. Omit for a model nobody baked a clip for. */
+  clips?: ViewerClip[] | null;
+  /** Offer the 1.7 m human-height reference so a buyer can judge the model's real size. */
+  scaleReference?: boolean;
 }) {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const [failed, setFailed] = useState(false);
@@ -50,11 +84,25 @@ export function EmbeddedGlbViewer({
   const measuredRef = useRef(onMeasured);
   measuredRef.current = onMeasured;
 
+  // Which clips this file can actually play, decided after the nodes are looked up rather
+  // than promised by the button label.
+  const [clipStatus, setClipStatus] = useState<ClipStatus[]>([]);
+  const [active, setActive] = useState(-1);
+  const [playing, setPlaying] = useState(true);
+  const [speed, setSpeed] = useState<number>(1);
+  const [reference, setReference] = useState(false);
+  const handlesRef = useRef<ViewerHandles | null>(null);
+
+  // The scene is rebuilt when the file or the clip list changes, not when the parent
+  // happens to re-render with a fresh array literal.
+  const clipsKey = useMemo(() => JSON.stringify(clips ?? []), [clips]);
+
   useEffect(() => {
     const stage = stageRef.current;
     if (!stage) return;
     let disposed = false;
     let cleanup: (() => void) | null = null;
+    const requested = JSON.parse(clipsKey) as ViewerClip[];
 
     void (async () => {
       try {
@@ -126,20 +174,61 @@ export function EmbeddedGlbViewer({
         // d = r / sin(fov/2), times a small margin so nothing kisses the edge.
         const radius = Math.max(size.length() / 2, 1e-4);
         const distance = (radius / Math.sin((40 * Math.PI) / 360)) * 1.12;
-        const targetY = size.y * 0.45;
-        controls.target.set(0, targetY, 0);
         // A fixed three-quarter yaw, so the catalogue reads as one set of photos.
         const yaw = 0.61;
-        camera.position.set(
-          Math.sin(yaw) * distance * 0.82,
-          targetY + distance * 0.42,
-          Math.cos(yaw) * distance * 0.82,
+
+        // The same 1.7 m human-height wire frame the review page uses, stood on the ground
+        // beside the model. A shopper cannot read "2.40 × 1.71 × 0.52 m" as a size; they can
+        // read a person standing next to a gate. It is hidden until asked for, because it is
+        // a measuring tool and not part of the product photograph.
+        const referenceGroup = new THREE.Group();
+        const referenceBox = new THREE.Box3(
+          new THREE.Vector3(-0.25, 0, -0.18),
+          new THREE.Vector3(0.25, 1.7, 0.18),
         );
-        controls.minDistance = distance * 0.35;
-        controls.maxDistance = distance * 2.5;
-        camera.near = Math.max(radius * 0.012, 0.001);
-        camera.far = Math.max(distance * 20, 50);
-        camera.updateProjectionMatrix();
+        const referenceHelper = new THREE.Box3Helper(referenceBox, 0x59d9ff);
+        (referenceHelper.material as { transparent?: boolean; opacity?: number }).transparent = true;
+        (referenceHelper.material as { opacity?: number }).opacity = 0.7;
+        referenceGroup.add(referenceHelper);
+        referenceGroup.position.set(-(size.x / 2 + 0.55), 0, 0);
+        referenceGroup.visible = false;
+        scene.add(referenceGroup);
+
+        // Framing that fits the model and the person together, so turning the reference on
+        // does not push it off the edge of the panel.
+        const modelBox = new THREE.Box3(
+          new THREE.Vector3(-size.x / 2, 0, -size.z / 2),
+          new THREE.Vector3(size.x / 2, size.y, size.z / 2),
+        );
+        const withReferenceBox = modelBox.clone().union(
+          new THREE.Box3(
+            new THREE.Vector3(referenceGroup.position.x - 0.25, 0, -0.18),
+            new THREE.Vector3(referenceGroup.position.x + 0.25, 1.7, 0.18),
+          ),
+        );
+        const wideSize = withReferenceBox.getSize(new THREE.Vector3());
+        const wideCenter = withReferenceBox.getCenter(new THREE.Vector3());
+        const wideRadius = Math.max(wideSize.length() / 2, 1e-4);
+        const wideDistance = (wideRadius / Math.sin((40 * Math.PI) / 360)) * 1.12;
+
+        function frame(withReference: boolean) {
+          const r = withReference ? wideRadius : radius;
+          const d = withReference ? wideDistance : distance;
+          const cx = withReference ? wideCenter.x : 0;
+          const ty = withReference ? wideCenter.y : size.y * 0.45;
+          controls.target.set(cx, ty, 0);
+          camera.position.set(
+            cx + Math.sin(yaw) * d * 0.82,
+            ty + d * 0.42,
+            Math.cos(yaw) * d * 0.82,
+          );
+          controls.minDistance = d * 0.35;
+          controls.maxDistance = d * 2.5;
+          camera.near = Math.max(r * 0.012, 0.001);
+          camera.far = Math.max(d * 20, 50);
+          camera.updateProjectionMatrix();
+        }
+        frame(false);
         // In world units, so it scales with the model: ~2% of the bounding radius.
         sun.shadow.normalBias = radius * 0.02;
         sun.shadow.needsUpdate = true;
@@ -166,6 +255,64 @@ export function EmbeddedGlbViewer({
           mixer.clipAction(gltf.animations[0]).play();
           setClipName(gltf.animations[0].name || "animation");
         }
+
+        // Look the pivots up in the file. A clip naming a node this GLB does not have is
+        // reported as unplayable and its button is disabled — the shop does not mime an
+        // animation it cannot run.
+        type BoundTrack = { target: import("three").Object3D; axis: "x" | "y" | "z"; rest: number; degrees: number[] };
+        type BoundClip = { name: string; label: string; fps: number; tracks: BoundTrack[] };
+        const boundClips: Array<BoundClip | null> = [];
+        const status: ClipStatus[] = [];
+        for (const clip of requested) {
+          const tracks: BoundTrack[] = [];
+          let missing: string | null = null;
+          for (const track of clip.tracks) {
+            const target = model.getObjectByName(track.node);
+            if (!target) { missing = track.node; break; }
+            tracks.push({ target, axis: track.axis, rest: target.rotation[track.axis], degrees: track.degrees });
+          }
+          status.push({ name: clip.name, label: clip.label, missingNode: missing });
+          boundClips.push(missing ? null : { name: clip.name, label: clip.label, fps: clip.fps, tracks });
+        }
+        const firstPlayable = boundClips.findIndex((clip) => clip !== null);
+        setClipStatus(status);
+        setActive(firstPlayable);
+
+        function poseAt(clip: BoundClip, seconds: number) {
+          for (const track of clip.tracks) {
+            const keys = track.degrees.length;
+            const position = keys > 1 ? ((seconds * clip.fps) % keys + keys) % keys : 0;
+            const from = Math.floor(position);
+            const to = (from + 1) % keys;
+            const blend = position - from;
+            const degrees = track.degrees[from] + (track.degrees[to] - track.degrees[from]) * blend;
+            track.target.rotation[track.axis] = track.rest + (degrees * Math.PI) / 180;
+          }
+        }
+        function restPose(clip: BoundClip) {
+          for (const track of clip.tracks) track.target.rotation[track.axis] = track.rest;
+        }
+
+        let current: BoundClip | null = firstPlayable >= 0 ? boundClips[firstPlayable] : null;
+        let clipSeconds = 0;
+        let running = true;
+        let rate = 1;
+        if (current) poseAt(current, 0);
+
+        handlesRef.current = {
+          selectClip(index) {
+            if (current) restPose(current);
+            current = boundClips[index] ?? null;
+            clipSeconds = 0;
+            if (current) poseAt(current, 0);
+          },
+          setPlaying(next) { running = next; },
+          setSpeed(next) { rate = next; },
+          setReference(visible) {
+            referenceGroup.visible = visible;
+            frame(visible);
+          },
+        };
 
         // Spec measured from the very bytes the buyer downloads — the page
         // never restates a number from metadata.
@@ -211,11 +358,19 @@ export function EmbeddedGlbViewer({
         resizeObserver.observe(surfaceStage);
         resize();
 
+        function advance(delta: number) {
+          mixer?.update(delta);
+          if (current && running) {
+            clipSeconds += delta * rate;
+            poseAt(current, clipSeconds);
+          }
+        }
+
         const clock = new THREE.Clock();
         let frameHandle = 0;
         function tick() {
           frameHandle = requestAnimationFrame(tick);
-          mixer?.update(clock.getDelta());
+          advance(clock.getDelta());
           controls.update();
           renderer.render(scene, camera);
         }
@@ -223,10 +378,14 @@ export function EmbeddedGlbViewer({
 
         (window as unknown as Record<string, unknown>).__rvEmbedFrame = (deltaSeconds = 0.016) => {
           resize();
-          mixer?.update(deltaSeconds);
+          advance(deltaSeconds);
           controls.update();
           renderer.render(scene, camera);
-          return { width: renderer.domElement.width, height: renderer.domElement.height, clip: gltf.animations?.[0]?.name ?? null };
+          return {
+            width: renderer.domElement.width,
+            height: renderer.domElement.height,
+            clip: current?.name ?? gltf.animations?.[0]?.name ?? null,
+          };
         };
 
         cleanup = () => {
@@ -235,6 +394,7 @@ export function EmbeddedGlbViewer({
           controls.dispose();
           renderer.dispose();
           renderer.domElement.remove();
+          handlesRef.current = null;
           delete (window as unknown as Record<string, unknown>).__rvEmbedFrame;
         };
       } catch {
@@ -246,7 +406,7 @@ export function EmbeddedGlbViewer({
       disposed = true;
       cleanup?.();
     };
-  }, [src]);
+  }, [src, clipsKey]);
 
   if (failed) {
     return poster ? (
@@ -257,10 +417,115 @@ export function EmbeddedGlbViewer({
     );
   }
 
-  return (
+  const stage = (
     <div className="cv5-embed3d" ref={stageRef} role="img" aria-label={`${alt} — 인터랙티브 3D 미리보기`}>
       <span className="cv5-embed3d-hint">드래그 회전 · 휠 줌 · 실제 판매 파일</span>
       {clipName ? <span className="cv5-embed3d-anim">▶ {clipName} 재생 중</span> : null}
     </div>
   );
+
+  // A landing-page viewer gets exactly the markup it always had: no bar, no wrapper, no
+  // chance of a layout change where nothing was asked for.
+  const wantsControls = (clips?.length ?? 0) > 0 || scaleReference;
+  if (!wantsControls) return stage;
+
+  const blocked = active >= 0 ? null : clipStatus.find((clip) => clip.missingNode);
+
+  return (
+    <div style={bar.wrap}>
+      {stage}
+      <div style={bar.row}>
+        {clipStatus.length > 0 ? (
+          <div style={bar.group} role="group" aria-label="움직임 고르기">
+            {clipStatus.map((clip, index) => (
+              <button
+                key={clip.name}
+                type="button"
+                disabled={Boolean(clip.missingNode)}
+                aria-pressed={active === index}
+                style={{ ...bar.chip, ...(active === index ? bar.chipOn : null), ...(clip.missingNode ? bar.chipOff : null) }}
+                onClick={() => { setActive(index); handlesRef.current?.selectClip(index); }}
+              >
+                {clip.label}
+              </button>
+            ))}
+            <button
+              type="button"
+              style={{ ...bar.chip, ...(playing ? bar.chipOn : null) }}
+              disabled={active < 0}
+              aria-pressed={playing}
+              onClick={() => { const next = !playing; setPlaying(next); handlesRef.current?.setPlaying(next); }}
+            >
+              {playing ? "■ 멈춤" : "▶ 재생"}
+            </button>
+            <div style={bar.group} role="group" aria-label="재생 속도">
+              {SPEEDS.map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  disabled={active < 0}
+                  aria-pressed={speed === value}
+                  style={{ ...bar.chip, ...(speed === value ? bar.chipOn : null) }}
+                  onClick={() => { setSpeed(value); handlesRef.current?.setSpeed(value); }}
+                >
+                  {value}×
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+        {scaleReference ? (
+          <button
+            type="button"
+            aria-pressed={reference}
+            style={{ ...bar.chip, ...(reference ? bar.chipOn : null) }}
+            onClick={() => { const next = !reference; setReference(next); handlesRef.current?.setReference(next); }}
+          >
+            실제 크기 · 사람 키 1.7 m
+          </button>
+        ) : null}
+      </div>
+      {blocked ? (
+        <p style={bar.note} role="status">
+          이 파일에는 {blocked.missingNode} 부분이 없어 {blocked.label} 움직임을 재생할 수 없습니다.
+        </p>
+      ) : null}
+    </div>
+  );
 }
+
+/**
+ * The bar's styling lives here rather than in the global stylesheet: this component is
+ * shared with the landing page, and a style rule it does not own is a rule it cannot keep
+ * from drifting. Every colour is a cv5 token, so the bar changes with the rest of the site.
+ */
+const bar: Record<string, CSSProperties> = {
+  wrap: { display: "grid", gap: 10 },
+  row: { display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" },
+  group: { display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" },
+  chip: {
+    appearance: "none",
+    minHeight: 32,
+    padding: "0 12px",
+    borderRadius: 999,
+    // Long-hand rather than the `border` shorthand: the pressed state overrides only the
+    // colour, and React warns (correctly) about mixing the two on one element.
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: "var(--v5-line-strong)",
+    background: "rgba(255, 255, 255, 0.04)",
+    color: "var(--v5-ink-dim)",
+    fontFamily: "inherit",
+    fontSize: "0.78rem",
+    fontWeight: 700,
+    lineHeight: "30px",
+    cursor: "pointer",
+  },
+  chipOn: {
+    background: "rgba(124, 93, 250, 0.18)",
+    borderColor: "rgba(124, 93, 250, 0.55)",
+    color: "var(--v5-ink)",
+  },
+  chipOff: { opacity: 0.45, cursor: "not-allowed" },
+  note: { margin: 0, color: "var(--v5-ink-faint)", fontSize: "0.78rem", lineHeight: 1.5 },
+};

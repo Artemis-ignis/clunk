@@ -81,7 +81,7 @@ const background = `
   <text x="72" y="378" font-family="${KO}" font-size="25" fill="#a8adc4">에셋을 만들고, 게임에 넣어도 되는지 확인하고,</text>
   <text x="72" y="414" font-family="${KO}" font-size="25" fill="#a8adc4">바로 받아서 씁니다.</text>
 
-  <text x="72" y="522" font-family="${KO}" font-size="19" font-weight="600" fill="#7c8199">저폴리 3D 모델 · 스프라이트 시트 · 심리스 텍스처</text>
+  <text x="72" y="522" font-family="${KO}" font-size="19" font-weight="600" fill="#7c8199">가벼운 3D 모델 · 스프라이트 시트 · 이음매 없는 텍스처</text>
   <line x1="72" y1="552" x2="1128" y2="552" stroke="#ffffff" stroke-opacity="0.10" stroke-width="1"/>
   <text x="72" y="588" font-family="${KO}" font-size="18" fill="#6b7089">clunk.games</text>
 </svg>`;

@@ -19,21 +19,21 @@ export function SiteFooter() {
       <div className="cv5-frame cv5-footer-inner">
         <div className="cv5-footer-brand">
           <strong>CLUNK</strong>
-          <p>게임 에셋을 만들고, 검사하고, 판매하는 곳입니다.</p>
+          <p>게임에 넣을 3D 모델과 2D 이미지를 만들고, 게임에 넣어도 되는지 검사하고, 마켓에서 주고받는 곳입니다.</p>
         </div>
         <nav className="cv5-footer-col" aria-label="제품">
           <header>제품</header>
           <Link href="/marketplace" prefetch={false}>에셋 마켓</Link>
           <Link href="/studio" prefetch={false}>에셋 제작</Link>
           <Link href="/app" prefetch={false}>에셋 검사</Link>
-          <Link href="/connect" prefetch={false}>제작 에이전트</Link>
+          <Link href="/agents" prefetch={false}>제작 에이전트</Link>
           <Link href="/pricing" prefetch={false}>요금 · 크레딧</Link>
         </nav>
         <nav className="cv5-footer-col" aria-label="리소스">
           <header>자료</header>
-          <Link href="https://clunk.gitbook.io/docs" prefetch={false}>Docs</Link>
+          <Link href="https://clunk.gitbook.io/docs" prefetch={false}>문서</Link>
           <Link href="/review" prefetch={false}>검수 뷰어</Link>
-          <Link href="/connect" prefetch={false}>MCP 연결</Link>
+          <Link href="/agents" prefetch={false}>AI 도구 연결</Link>
           <Link href="/dashboard" prefetch={false}>내 작업공간</Link>
         </nav>
         <nav className="cv5-footer-col" aria-label="법적 고지">
