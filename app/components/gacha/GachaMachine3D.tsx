@@ -15,7 +15,7 @@ import Image from "next/image";
 
 import Link from "../NativeLink";
 import { CapsuleMachine } from "./CapsuleMachine";
-import { GachaPoster } from "./GachaPoster";
+import { GachaPoster, POSTER_POINTS } from "./GachaPoster";
 import { SCROLL_PULL } from "./gacha-scroll";
 import { PrizeCard, type ClaimState } from "./PrizeCard";
 import {
@@ -292,6 +292,32 @@ export function GachaMachine3D() {
   const turnLive = useRef<() => void>(() => {});
   /** 스크롤 계산을 한 번 더 돌리는 손잡이 — 단계가 바뀌면 글줄도 바로 따라 바뀐다. */
   const refreshFilm = useRef<() => void>(() => {});
+  /** 3D 가 첫 프레임을 냈는지. 그 전에는 포스터 위에 단추를 놓는다. */
+  const liveRef = useRef(false);
+  /** ?diag=1 — 실기기에서 무엇이 언제 됐는지 화면 구석에 적는다. */
+  const [diag, setDiag] = useState<string[] | null>(null);
+  const diagStart = useRef(0);
+  const diagOn = useRef(false);
+  const diagLines = useRef<string[]>([]);
+  const note = useCallback((line: string) => {
+    // 언제나 적어 두고, 진단이 켜져 있을 때만 화면에 흘린다(켜기 전 줄도 남는다).
+    const stamp = diagStart.current ? `${((performance.now() - diagStart.current) / 1000).toFixed(2)}s ` : "";
+    diagLines.current.push(`${stamp}${line}`);
+    if (diagOn.current) setDiag([...diagLines.current]);
+  }, []);
+  useEffect(() => {
+    if (typeof window === "undefined" || !/[?&]diag=1/.test(window.location.search)) return;
+    diagStart.current = performance.now();
+    const gl = (() => { try { const c = document.createElement("canvas"); return Boolean(c.getContext("webgl2") ?? c.getContext("webgl")); } catch { return false; } })();
+    // 서버가 그린 첫 화면과 어긋나지 않도록 한 틱 뒤에 켠다.
+    diagLines.current.unshift(`ua ${navigator.userAgent.slice(0, 90)}`, `webgl ${gl} · dpr ${window.devicePixelRatio} · ${window.innerWidth}×${window.innerHeight}`);
+    const boot = window.setTimeout(() => { diagOn.current = true; setDiag([...diagLines.current]); }, 0);
+    const onError = (event: ErrorEvent) => note(`ERROR ${String(event.message).slice(0, 160)}`);
+    const onReject = (event: PromiseRejectionEvent) => note(`REJECT ${String(event.reason).slice(0, 160)}`);
+    window.addEventListener("error", onError);
+    window.addEventListener("unhandledrejection", onReject);
+    return () => { window.clearTimeout(boot); window.removeEventListener("error", onError); window.removeEventListener("unhandledrejection", onReject); };
+  }, [note]);
   const markIntroChrome = useCallback((playing: boolean) => {
     const node = rootRef.current;
     if (!node) return;
@@ -307,7 +333,10 @@ export function GachaMachine3D() {
   // WebGL 이 되는지는 이 브라우저에서 변하지 않으므로 구독할 것이 없다. 서버에서는
   // 언제나 "된다" 로 두어, 서버가 그리는 첫 화면과 브라우저의 첫 화면이 같게 한다.
   const webglSupported = useSyncExternalStore(subscribeNothing, canUseWebGL, () => true);
-  const webgl = webglSupported && !sceneFailed;
+  // 장면이 실패해도 옛 SVG 기계로 갈아타지 않는다 — 포스터가 그대로 서 있고, 그 위의 단추로
+  // 뽑기는 계속 된다(2026-09-03). 옛 SVG 는 WebGL 자체가 없는 브라우저에만 남는다.
+  const webgl = webglSupported;
+  void sceneFailed;
 
   const hostRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -417,14 +446,17 @@ export function GachaMachine3D() {
     let observer: IntersectionObserver | null = null;
     let onResize: (() => void) | null = null;
 
+    note("scene module loading");
     void (async () => {
       try {
         const sceneModule = await import("./gacha-scene");
+        note("scene module loaded");
         if (disposed) return;
         const quality = window.matchMedia("(max-width: 720px)").matches
           ? sceneModule.MOBILE_QUALITY
           : sceneModule.DESKTOP_QUALITY;
         const scene = sceneModule.createGachaScene(host, { quality, reducedMotion });
+        note(`scene created · ${quality === sceneModule.MOBILE_QUALITY ? "mobile" : "desktop"} quality`);
         if (disposed) { scene.dispose(); return; }
         sceneRef.current = scene;
 
@@ -462,6 +494,8 @@ export function GachaMachine3D() {
         const markPainted = () => {
           if (painted) return;
           painted = true;
+          liveRef.current = true;
+          note("first frame painted");
           rootRef.current?.setAttribute("data-live", "1");
         };
 
@@ -518,7 +552,8 @@ export function GachaMachine3D() {
         // 장면이 섰다고 알린다. 아래의 "값 넣기" 훅들이 이 신호에 한 번 더 돌아,
         // 장면을 불러오는 동안 이미 정해져 있던 캡슐 색·단계가 빠짐없이 들어간다.
         setSceneReady((count) => count + 1);
-      } catch {
+      } catch (error) {
+        note(`scene FAILED ${String(error).slice(0, 160)}`);
         if (!disposed) setSceneFailed(true);
       }
     })();
@@ -540,7 +575,7 @@ export function GachaMachine3D() {
       sceneRef.current = null;
     };
     // 장면은 한 번만 짓는다. 테마·단계·캡슐은 아래 훅들이 살아 있는 장면에 넣어 준다.
-  }, [webgl, reducedMotion]);
+  }, [webgl, reducedMotion, note]);
 
   /* 등장 연출 — 세션당 한 번 ------------------------------------------------
      어두운 가게에 스포트라이트가 딸깍 켜지고, 기계가 내려와 쿵 착지하고, 네온이
@@ -852,6 +887,49 @@ export function GachaMachine3D() {
     };
   }, [clearTimers, markIntroChrome, pickPrize]);
 
+  /* 3D 가 오기 전의 단추 자리 --------------------------------------------------
+     포스터(SVG)는 viewBox 를 세로에 맞춰(meet) 가운데 선다. 그 규칙을 그대로 계산해
+     레버·캡슐·돔 단추를 포스터의 손잡이 위에 놓는다. 첫 프레임이 그려지면 장면의
+     placeOverlays 가 이어받는다. */
+  useEffect(() => {
+    if (!webgl) return;
+    const place = () => {
+      if (liveRef.current) return;
+      const stage = stageRef.current;
+      // 가로·세로 포스터 중 지금 보이는 쪽.
+      const poster = stage
+        ? Array.from(stage.querySelectorAll<SVGSVGElement>(".gc3-poster")).find((node) => node.getClientRects().length > 0)
+        : undefined;
+      if (!stage || !poster) return;
+      const [vbX, vbY, vbW, vbH] = (poster.dataset.viewbox ?? "0 12 660 646").split(" ").map(Number);
+      const box = poster.getBoundingClientRect();
+      const stageBox = stage.getBoundingClientRect();
+      const scale = Math.min(box.width / vbW, box.height / vbH);
+      const offsetX = box.left - stageBox.left + (box.width - vbW * scale) / 2;
+      const offsetY = box.top - stageBox.top + (box.height - vbH * scale) / 2;
+      const put = (node: HTMLElement | null, point: { x: number; y: number; radius: number }, minimum: number) => {
+        if (!node) return;
+        const size = Math.max(minimum, point.radius * 2 * scale);
+        const x = offsetX + (point.x - vbX) * scale;
+        const y = offsetY + (point.y - vbY) * scale;
+        node.style.left = `${x - size / 2}px`;
+        node.style.top = `${y - size / 2}px`;
+        node.style.width = `${size}px`;
+        node.style.height = `${size}px`;
+      };
+      put(leverRef.current, POSTER_POINTS.lever, 56);
+      put(capsuleRef.current, POSTER_POINTS.capsule, 48);
+      put(domeRef.current, POSTER_POINTS.dome, 80);
+      if (hintRef.current) {
+        hintRef.current.style.left = `${offsetX + (POSTER_POINTS.lever.x - vbX) * scale - POSTER_POINTS.lever.radius * scale - 10}px`;
+        hintRef.current.style.top = `${offsetY + (POSTER_POINTS.lever.y - vbY) * scale}px`;
+      }
+    };
+    place();
+    window.addEventListener("resize", place);
+    return () => window.removeEventListener("resize", place);
+  }, [webgl]);
+
   /* 스크롤이 곧 연출이다 -----------------------------------------------------
      긴 트랙을 내려가는 동안 무대는 화면에 붙어 있고, 진행도(0~1)가 카메라를 옮긴다.
      0.5~0.6 사이에서는 스크롤이 레버를 당기고 끝에 닿으면 뽑힌다. 글줄은 장면마다
@@ -901,14 +979,14 @@ export function GachaMachine3D() {
       if (p < SCROLL_PULL.from) {
         if (scrollFired.current) scrollFired.current = false;
         if (idle && scene && scene.leverPull() > 0 && !leverDrag.current.active) scene.setLeverPull(0);
-      } else if (idle && !scrollFired.current && scene && !leverDrag.current.active) {
+      } else if (idle && !scrollFired.current && !leverDrag.current.active) {
         const k = (p - SCROLL_PULL.from) / (SCROLL_PULL.to - SCROLL_PULL.from);
         if (k >= 1) {
           scrollFired.current = true;
-          scene.setLeverPull(1);
+          scene?.setLeverPull(1);
           turnLive.current();
         } else {
-          scene.setLeverPull(k);
+          scene?.setLeverPull(k);
         }
       }
     };
@@ -961,6 +1039,7 @@ export function GachaMachine3D() {
             {/* 서버가 그려 둔 기계. 3D 가 첫 프레임을 낸 뒤 그 위로 캔버스가 겹쳐 켜지고,
                 WebGL 이 실패하면 이 그림이 그대로 남는다. */}
             <GachaPoster />
+            <GachaPoster tall />
             <div className="gc3-canvas" ref={hostRef} aria-hidden="true" />
 
             {/* 유리 돔 위의 손 닿는 자리. 보이지 않고, 눌러도 뽑히지 않는다. */}
@@ -1046,6 +1125,8 @@ export function GachaMachine3D() {
           </div>
         </div>
       </div>
+
+      {diag ? <pre className="gc-diag" aria-hidden="true">{diag.join("\n")}</pre> : null}
 
       <div className="gc3-below">
         <div className="gc3-side">
