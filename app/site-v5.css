@@ -490,7 +490,8 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
 .cv5-agent-badge {
   /* 2026-09-03: 아래 오른쪽에 두면 왼쪽 아래의 "드래그 회전" 안내와 좁은 화면에서 겹친다
      (운영자 실기기). 검사 표시가 사라진 뒤에 뜨므로 그 자리(위 오른쪽)를 이어받는다. */
-  position: absolute; right: 10px; top: 10px; z-index: 2;
+  /* 좁은 무대에서는 위 왼쪽의 파일 이름표와도 부딪힌다 — 아래 오른쪽, 안내 알약 한 줄 위. */
+  position: absolute; right: 10px; bottom: 54px; z-index: 2;
   font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em;
   color: var(--v5-green); background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.45);
   border-radius: 9px; padding: 7px 11px;
