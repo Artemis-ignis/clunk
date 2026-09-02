@@ -53,9 +53,10 @@
  *       door_window_l
  *     door_right_slide / door_window_r
  *     door_rear_left / door_rear_right   (clamshells, origin ON the hinge, animated .quaternion)
+ *     cabin_aft_window_l/r + _seal_l/r   (fixed pane behind each sliding door)
  *     main_rotor_mast, swashplate
  *     main_rotor_hub          (Group pivot at the mast head, spins about +Y)
- *       rotor_hub_plate, rotor_head_grips, rotor_control_rods, rotor_head_cap
+ *       rotor_hub_plate, rotor_head_grips, rotor_blade_sleeves, rotor_control_rods, rotor_head_cap
  *       main_rotor_blade_1 .. main_rotor_blade_5
  *     tail_boom, tail_fin, h_stab, endplate_l/r
  *     fenestron_duct, fenestron_stator
@@ -76,9 +77,30 @@ export const H145_PALETTE = {
   liveryBlue: 0x1b2c55,
   liveryRed: 0xc02430,
   liveryGrey: 0x33383e,
+  liveryRadome: 0x5c646e,
   paint: { color: 0xffffff, roughness: 0.52, metalness: 0.0, clearcoat: 0.30, clearcoatRoughness: 0.22 },
-  glass: { color: 0x0b1220, roughness: 0.045, metalness: 0.0, clearcoat: 1.0, clearcoatRoughness: 0.02, ior: 1.52, reflectivity: 0.62 },
-  rubber: { color: 0x121316, roughness: 0.93, metalness: 0.0, clearcoat: 0.06, clearcoatRoughness: 0.5 },
+  /*
+   * Round 11. The glazing photographed as a black mirror because a near-black tint had a black
+   * rubber sheet directly behind it: nothing to transmit and nothing to reflect. The pane is now
+   * a light blue-grey with a full clearcoat and a real transmission term, and the sheet behind it
+   * is a painted CABIN INTERIOR instead of a gasket — so the windscreen reads as glass with a
+   * dashboard behind it rather than as a hole cut in the nose.
+   */
+  /*
+   * Round 12 retune. Round 11 over-corrected: a 0x93a6b8 pane at 55% transmission over a mid-grey
+   * cabin came back BRIGHTER than the white paint beside it, so the windscreen read as a chrome
+   * helmet instead of glass. Half the tint and two thirds of the transmission put it back to a
+   * dark slate that still shows the cabin behind it, and the clearcoat carries the highlight.
+   *
+   * No `thickness`, deliberately: a windscreen IS a thin shell, and KHR_materials_volume's
+   * thicknessFactor is a LOCAL-space length, so the meshopt quantisation pass has to clone the
+   * material once per mesh scale to keep it correct — four identical h145_glass materials in the
+   * .m1. Thin-walled transmission needs no volume extension, and the clone goes away.
+   */
+  glass: { color: 0x59646f, roughness: 0.030, metalness: 0.0, clearcoat: 1.0, clearcoatRoughness: 0.02, ior: 1.52, reflectivity: 0.90, transmission: 0.40 },
+  /* Vertex-coloured: near-black where it shows round the pane as a gasket, cabin grey where it
+   * shows THROUGH the pane, with a darker band for the glareshield and the seat backs. */
+  interior: { color: 0xffffff, roughness: 0.74, metalness: 0.04, clearcoat: 0.10, clearcoatRoughness: 0.5 },
   metal: { color: 0xa8aeb5, roughness: 0.34, metalness: 0.92, clearcoat: 0.1, clearcoatRoughness: 0.3 },
   gear: { color: 0x2f343a, roughness: 0.42, metalness: 0.82, clearcoat: 0.1, clearcoatRoughness: 0.3 },
   exhaust: { color: 0x6d6259, roughness: 0.5, metalness: 1.0, clearcoat: 0.0, clearcoatRoughness: 0.5 },
@@ -253,20 +275,30 @@ const REDLINE = pchip(
     [-4.00, 2.280],
     [-3.20, 2.230],
     [-2.564, 2.180],
-    [-2.10, 1.900],
-    [-1.40, 1.620],
+    [-2.10, 1.860],
+    [-1.40, 1.500],
     /*
-     * Forward of the cabin the sweep is nearly LEVEL. It used to climb to 1.92 m at the nose,
-     * which put the dark blue over the whole lower nose; against a near-black windscreen the two
-     * merged and the front of the aircraft photographed as one dark blob. The band now stops well
-     * under the chin windows and leaves a white nose between the glazing and the stripe.
+     * Round 11. Forward of the cabin the sweep DIVES and then rides the keel.
+     *
+     * It used to climb — 1.585 m at z = 2.30, 1.720 m at the tip — while the underside of the
+     * nose falls away to 1.05 m, so the dark band under the stripe grew to half a metre deep
+     * exactly where the nose is narrowest. Against near-black glazing that painted the whole
+     * front of the aircraft dark: the checker called it a black helmet, and he was right.
+     *
+     * From z = 2.30 forward every value is the station's own KEEL height plus 130 mm, so the
+     * band is a constant hand's width of belly paint that follows the nose up to the tip and
+     * never climbs onto the nose's face. The nose reads white, which is what the real one is.
      */
-    [-0.60, 1.505],
-    [0.20, 1.500],
-    [1.40, 1.535],
-    [2.30, 1.585],
-    [3.00, 1.645],
-    [3.56, 1.720],
+    [-0.60, 1.455],
+    [0.20, 1.450],
+    [1.40, 1.470],
+    [1.90, 1.395],
+    [2.30, 1.240],
+    [2.68, 1.258],
+    [3.00, 1.352],
+    [3.26, 1.520],
+    [3.44, 1.700],
+    [3.56, 1.889],
   ],
 );
 const RED_H = 0.046; // pinstripe height, metres
@@ -434,6 +466,18 @@ function boomNormal(z, theta) {
 
 // ---------------------------------------------------------------------------- key stations
 
+/**
+ * The dark nose cap. Forward of this station the fuselage paints in the livery's dark grey — a
+ * radome, not a livery band — and it starts 70 mm ahead of the windscreen seal's forward rim so
+ * the paint break is never under the glass. Everything aft of it is white to the stripe.
+ *
+ * Round 12 pulled it forward from 3.390 and lifted the grey: at 170 mm in a near-black grey it
+ * merged with the chin fairing below it and the nose grew a second black mask, which is the
+ * fault this whole round exists to remove. 110 mm of mid-grey reads as the small sensor fairing
+ * it is meant to be.
+ */
+const RADOME_Z = 3.450;
+
 const MAST_TOP_Y = 3.694;         // main rotor plane
 const HEAD_TOP_Y = 3.950;         // top of the rotor head = the aircraft's quoted height
 const ROTOR_R = 5.500;            // 11.00 m diameter
@@ -537,7 +581,7 @@ export default function createH145(THREE, addons, options = {}) {
   const M = {
     paint: material("paint", P.paint, { vertexColors: true }),
     glass: material("glass", P.glass),
-    rubber: material("rubber", P.rubber),
+    interior: material("interior", P.interior, { vertexColors: true }),
     metal: material("metal", P.metal),
     gear: material("gear", P.gear),
     exhaust: material("exhaust", P.exhaust),
@@ -558,6 +602,11 @@ export default function createH145(THREE, addons, options = {}) {
     red: rgb(P.liveryRed),
     grey: rgb(P.liveryGrey),
     plain: [1, 1, 1],
+    // The glazing backing: gasket, cabin, and the dark band that reads as a glareshield/seat.
+    gasket: rgb(0x101114),
+    cabin: rgb(0x2f363e),
+    cabinDark: rgb(0x14171b),
+    radome: rgb(P.liveryRadome),
   };
 
   // ------------------------------------------------------------------ raw geometry assembly
@@ -790,25 +839,38 @@ export default function createH145(THREE, addons, options = {}) {
       const eased = 1 - Math.pow(1 - t, 1.35);
       return lerp(NOSE_Z, POD_TAIL_Z, eased);
     };
-    const cache = [];
-    for (let i = 0; i < rows; i += 1) cache.push(liveryColumns(zAt(i), 0, Math.PI, counts));
+    /*
+     * The radome joint is a DUPLICATED ROW at RADOME_Z, for the same reason the livery seams are
+     * duplicated columns: the paint then breaks on a real edge loop instead of being smeared
+     * across whatever band of quads the row easing happened to put there. The pair carries the
+     * dark colour on the forward copy and the white on the aft one, and the zero-area quad
+     * between them is dropped by `tri()` before it reaches the buffer.
+     */
+    const zList = [];
+    for (let i = 0; i < rows; i += 1) zList.push(zAt(i));
+    let seam = zList.findIndex((z) => z < RADOME_Z);
+    if (seam < 1) seam = 1;
+    zList.splice(seam, 0, RADOME_Z, RADOME_Z);
+    const nRows = zList.length;
+    const cache = zList.map((z) => liveryColumns(z, 0, Math.PI, counts));
+    const rowColour = (i, j) => (i <= seam ? COL.radome : cache[i].colours[j]);
 
     for (const side of [1, -1]) {
       grid(
         b,
-        rows,
+        nRows,
         cols,
         (i, j) => {
-          const p = fusePoint(zAt(i), cache[i].thetas[j]);
+          const p = fusePoint(zList[i], cache[i].thetas[j]);
           return [p[0] * side, p[1], p[2]];
         },
         {
           normalAt: (i, j) => {
-            const n = fuseNormal(zAt(i), cache[i].thetas[j]);
+            const n = fuseNormal(zList[i], cache[i].thetas[j]);
             return [n[0] * side, n[1], n[2]];
           },
-          colourAt: (i, j) => cache[i].colours[j],
-          outwardFrom: (i) => [0, fuseCy(zAt(i)), zAt(i)],
+          colourAt: rowColour,
+          outwardFrom: (i) => [0, fuseCy(zList[i]), zList[i]],
         },
       );
     }
@@ -827,8 +889,9 @@ export default function createH145(THREE, addons, options = {}) {
       return loop;
     };
     const noseLoop = edgeLoop(0, NOSE_Z);
-    const rearLoop = edgeLoop(rows - 1, POD_TAIL_Z);
-    cap(b, noseLoop, [0, fuseCy(NOSE_Z), NOSE_Z], [0, 0, 1], COL.blue);
+    const rearLoop = edgeLoop(nRows - 1, POD_TAIL_Z);
+    // The nose cap is the tip of the radome, so it takes the radome's colour, not the livery's.
+    cap(b, noseLoop, [0, fuseCy(NOSE_Z), NOSE_Z], [0, 0, 1], COL.radome);
     // The bulkhead is what you see when the clamshells are open, and what shows in the notch
     // around the tail-boom root when they are shut: it is a cabin interior, so it is dark.
     cap(b, rearLoop, [0, fuseCy(POD_TAIL_Z), POD_TAIL_Z], [0, 0, -1], COL.grey);
@@ -848,7 +911,8 @@ export default function createH145(THREE, addons, options = {}) {
     const counts = Array.isArray(cols) ? cols : [cols, 1, Math.max(1, Math.round(cols * 0.5)), Math.max(1, Math.round(cols * 0.4))];
     const total = counts[0] + counts[1] + counts[2] + counts[3] + 4;
     const cache = zs.map((z, i) => liveryColumns(z, thetaLo(z, i), thetaHi(z, i), counts, plain, liveryOffset));
-    const colourAt = (i, j) => colourOverride ?? cache[i].colours[j];
+    const colourAt = (i, j) =>
+      (typeof colourOverride === "function" ? colourOverride(i, j, rows, total) : (colourOverride ?? cache[i].colours[j]));
 
     /*
      * The offset callback is handed the column's REAL angle, not j/(total-1).
@@ -903,9 +967,29 @@ export default function createH145(THREE, addons, options = {}) {
    * covers the paint the glass does not, so nothing white shows through, and the fuselage stays
    * a single watertight solid that the audit passes can reason about.
    */
-  function buildGlazing(dLo, dHi, colour, insetZ, insetT) {
+  function buildGlazing(dLo, dHi, colour, insetZ, insetT, backing = false) {
     const parts = [];
     const rows = LOD.glassRows;
+    /*
+     * The sheet BEHIND the glass is not a gasket, it is a cabin.
+     *
+     * It used to be one black rubber pane covering the whole glazed area, which is why the
+     * windscreen photographed as a black mirror: a 55% transmissive pane over pure black
+     * transmits nothing. The same pane now carries three vertex colours — near-black round the
+     * rim, where it shows past the glass as the gasket it always was; cabin grey in the middle,
+     * which is what the glass transmits; and a darker band along the lower edge, which reads as
+     * the glareshield under the windscreen and as a seat back behind the door windows.
+     *
+     * `bz`/`bt` are the glass's own inset expressed as a fraction of the pane, so the gasket
+     * ring is exactly as wide as the border the glass actually leaves uncovered.
+     */
+    const paint = (bz, bt, darkFrom) => (i, j, nRows, nCols) => {
+      if (!backing) return colour;
+      const fz = i / (nRows - 1);
+      const ft = j / (nCols - 1);
+      if (fz < bz || fz > 1 - bz || ft < bt || ft > 1 - bt) return COL.gasket;
+      return ft > darkFrom ? COL.cabinDark : COL.cabin;
+    };
     for (const side of [1, -1]) {
       /*
        * The WINDSCREEN, one pane per side of a real centre pillar.
@@ -931,7 +1015,7 @@ export default function createH145(THREE, addons, options = {}) {
           dOut: dHi,
           plain: true,
           side,
-          colourOverride: colour,
+          colourOverride: paint(0.027, 0.027, 0.60),
         }),
       );
       // Chin window, under the pilot's feet: it wraps the nose's lower corner, forward of the
@@ -946,7 +1030,8 @@ export default function createH145(THREE, addons, options = {}) {
           dOut: dHi,
           plain: true,
           side,
-          colourOverride: colour,
+          // A chin window looks at the ground: there is no lit cabin behind it, only footwell.
+          colourOverride: paint(0.049, 0.080, -1),
         }),
       );
       // The cockpit door window: the upper half of the pilots' own doors, aft of the windscreen.
@@ -960,7 +1045,7 @@ export default function createH145(THREE, addons, options = {}) {
           dOut: dHi,
           plain: true,
           side,
-          colourOverride: colour,
+          colourOverride: paint(0.044, 0.070, 0.58),
         }),
       );
     }
@@ -1261,7 +1346,7 @@ export default function createH145(THREE, addons, options = {}) {
    * nothing is coincident, while the glazing still reads as let INTO the nose rather than blown
    * over it. (The old numbers stood the glass 29 mm proud: a bubble canopy, not an H145.)
    */
-  root.add(part("cockpit_seal", buildGlazing(0.0050, 0.0090, COL.plain, 0, 0), M.rubber));
+  root.add(part("cockpit_seal", buildGlazing(0.0050, 0.0090, COL.plain, 0, 0, true), M.interior));
   root.add(part("cockpit_glass", buildGlazing(0.0135, 0.0190, COL.plain, 0.028, 0.040), M.glass));
 
   // ---------------------------------------------------------------- 2. cabin doors
@@ -1311,16 +1396,21 @@ export default function createH145(THREE, addons, options = {}) {
     const win = part(
       `door_window_${tag === "left" ? "l" : "r"}`,
       hugShell({
-        zs: linspace(DOOR_Z0 + 0.185, DOOR_Z1 - 0.150, Math.max(5, LOD.doorRows - 8)),
+        zs: linspace(DOOR_Z0 + 0.160, DOOR_Z1 - 0.150, Math.max(5, LOD.doorRows - 8)),
         /*
          * Bounded by HEIGHT, not by angle. A window edge held at a constant angle wanders up and
          * down as the section changes shape along the cabin, which produced a rectangle with a
          * curved bite taken out of its lower corner. The lower edge also stops above the
          * pinstripe: a window crossing the livery break cuts the one line that runs the length
          * of the aircraft, and the eye reads that as a mistake immediately.
+         *
+         * Round 11: 1.310 m by 0.705 m, which is 81% of the door's length and a little over
+         * three fifths of its height — the checker read the old 1.285 x 0.663 pane as a small
+         * black rectangle on a big white door. It grows UPWARD, to 55 mm under the door's own
+         * top edge, because the pinstripe fixes the bottom.
          */
-        thetaLo: (z) => Math.max(doorTheta.lo(z) + 0.10, thetaAtHeightOffset(z, 2.312, DOOR_D_OUT + 0.0125)),
-        thetaHi: (z) => Math.min(doorTheta.hi(z) - 0.10, thetaAtHeightOffset(z, 1.568, DOOR_D_OUT + 0.0125)),
+        thetaLo: (z) => Math.max(doorTheta.lo(z) + 0.040, thetaAtHeightOffset(z, 2.250, DOOR_D_OUT + 0.0125)),
+        thetaHi: (z) => Math.min(doorTheta.hi(z) - 0.10, thetaAtHeightOffset(z, 1.545, DOOR_D_OUT + 0.0125)),
         cols: [4, 1, 1, 1],
         // Clear OF THE SEAL, not of the skin: the seal's outer face is at +4.5 mm, so glass at
         // +3.5 mm was inside it — half the window's sample points fell in the gasket.
@@ -1342,17 +1432,23 @@ export default function createH145(THREE, addons, options = {}) {
     const seal = part(
       `door_window_seal_${tag === "left" ? "l" : "r"}`,
       hugShell({
-        zs: linspace(DOOR_Z0 + 0.165, DOOR_Z1 - 0.130, Math.max(5, LOD.doorRows - 8)),
-        thetaLo: (z) => Math.max(doorTheta.lo(z) + 0.075, thetaAtHeightOffset(z, 2.334, DOOR_D_OUT + 0.0045)),
-        thetaHi: (z) => Math.min(doorTheta.hi(z) - 0.075, thetaAtHeightOffset(z, 1.546, DOOR_D_OUT + 0.0045)),
+        zs: linspace(DOOR_Z0 + 0.140, DOOR_Z1 - 0.130, Math.max(5, LOD.doorRows - 8)),
+        thetaLo: (z) => Math.max(doorTheta.lo(z) + 0.020, thetaAtHeightOffset(z, 2.272, DOOR_D_OUT + 0.0045)),
+        thetaHi: (z) => Math.min(doorTheta.hi(z) - 0.075, thetaAtHeightOffset(z, 1.523, DOOR_D_OUT + 0.0045)),
         cols: [4, 1, 1, 1],
         dIn: DOOR_D_OUT + 0.0012,
         dOut: DOOR_D_OUT + 0.0045,
         plain: true,
         side,
-        colourOverride: COL.plain,
+        // Gasket round the rim, cabin behind the pane, seat backs along the bottom.
+        colourOverride: (i, j, nRows, nCols) => {
+          const fz = i / (nRows - 1);
+          const ft = j / (nCols - 1);
+          if (fz < 0.016 || fz > 0.984 || ft < 0.031 || ft > 0.969) return COL.gasket;
+          return ft > 0.55 ? COL.cabinDark : COL.cabin;
+        },
       }),
-      M.rubber,
+      M.interior,
       doorOrigin,
     );
     // The window and its seal are parented to the door so one track moves all three; their
@@ -1381,6 +1477,60 @@ export default function createH145(THREE, addons, options = {}) {
     door.add(win);
     door.add(handle);
     root.add(door);
+  }
+
+  /*
+   * The aft cabin window, behind the sliding door.
+   *
+   * A real H145 has one on each side, between the door's rear rail and the bulkhead, and its
+   * absence is why the aft third of the cabin photographed as a blank white slab. It is on the
+   * FUSELAGE, not on the door, so the door slides past it: by the time the door reaches this
+   * station it has already popped its 85 mm outboard, which leaves 84 mm over the glass.
+   *
+   * Same three-layer stack as the cockpit glazing — skin, painted interior at 5-9 mm, glass at
+   * 13.5-19 mm — so the gasket, the transmission and the clearances all behave identically.
+   */
+  const AFT_WIN = { z0: -2.040, z1: -1.640, yTop: 2.250, yBot: 1.900 };
+  for (const [side, tag] of [[1, "r"], [-1, "l"]]) {
+    root.add(
+      part(
+        `cabin_aft_window_seal_${tag}`,
+        hugShell({
+          zs: linspace(AFT_WIN.z0 - 0.022, AFT_WIN.z1 + 0.022, 10),
+          thetaLo: (z) => thetaAtHeightOffset(z, AFT_WIN.yTop + 0.022, 0.0045),
+          thetaHi: (z) => thetaAtHeightOffset(z, AFT_WIN.yBot - 0.022, 0.0045),
+          cols: [4, 1, 1, 1],
+          dIn: 0.0050,
+          dOut: 0.0090,
+          plain: true,
+          side,
+          colourOverride: (i, j, nRows, nCols) => {
+            const fz = i / (nRows - 1);
+            const ft = j / (nCols - 1);
+            if (fz < 0.050 || fz > 0.950 || ft < 0.060 || ft > 0.940) return COL.gasket;
+            return ft > 0.55 ? COL.cabinDark : COL.cabin;
+          },
+        }),
+        M.interior,
+      ),
+    );
+    root.add(
+      part(
+        `cabin_aft_window_${tag}`,
+        hugShell({
+          zs: linspace(AFT_WIN.z0, AFT_WIN.z1, 10),
+          thetaLo: (z) => thetaAtHeightOffset(z, AFT_WIN.yTop, 0.0165),
+          thetaHi: (z) => thetaAtHeightOffset(z, AFT_WIN.yBot, 0.0165),
+          cols: [4, 1, 1, 1],
+          dIn: 0.0135,
+          dOut: 0.0190,
+          plain: true,
+          side,
+          colourOverride: COL.plain,
+        }),
+        M.glass,
+      ),
+    );
   }
 
   // ---------------------------------------------------------------- 2b. panel lines
@@ -1741,19 +1891,25 @@ export default function createH145(THREE, addons, options = {}) {
    *  13.64 m overall length rather than whatever an arbitrary azimuth happened to give. */
   const BLADE_ANGLES = [0, 1, 2, 3, 4].map((i) => (i * Math.PI * 2) / 5 - Math.PI / 2);
 
-  hub.add(
-    part(
-      "rotor_head_grips",
-      build((b) => {
-        for (const a of BLADE_ANGLES) {
-          const dir = [Math.cos(a), 0, -Math.sin(a)];
-          const p = (r, dy) => [dir[0] * r, dy, dir[2] * r];
-          tube(b, [p(0.356, 0.017), p(0.486, 0.019), p(GRIP_TIP_R, 0.021)], (t) => 0.086 - 0.022 * t, 14, COL.plain);
-        }
-      }),
-      M.metal,
-    ),
-  );
+  /*
+   * The grip is in two pieces, butt-jointed at r = 0.480 like everything else on this model:
+   * the bare titanium pitch housing inboard, and the BLACK COMPOSITE SLEEVE outboard. Every
+   * photograph of an H145 head shows that sleeve, and without it the five blades appear to grow
+   * straight out of a bright metal star, which is the one thing that made the rotor head read as
+   * a toy part rather than as a bearingless hub.
+   */
+  const gripRadius = (r) => 0.086 - 0.022 * ((r - 0.356) / (GRIP_TIP_R - 0.356));
+  const gripY = (r) => 0.017 + 0.004 * ((r - 0.356) / (GRIP_TIP_R - 0.356));
+  const gripRun = (b, rFrom, rTo) => {
+    for (const a of BLADE_ANGLES) {
+      const dir = [Math.cos(a), 0, -Math.sin(a)];
+      const mid = (rFrom + rTo) / 2;
+      const p = (r) => [dir[0] * r, gripY(r), dir[2] * r];
+      tube(b, [p(rFrom), p(mid), p(rTo)], (t) => gripRadius(lerp(rFrom, rTo, t)), 14, COL.plain);
+    }
+  };
+  hub.add(part("rotor_head_grips", build((b) => gripRun(b, 0.356, 0.476)), M.metal));
+  hub.add(part("rotor_blade_sleeves", build((b) => gripRun(b, 0.480, GRIP_TIP_R)), M.blade));
 
   hub.add(
     part(
