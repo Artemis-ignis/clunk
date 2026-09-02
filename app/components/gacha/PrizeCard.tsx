@@ -105,12 +105,14 @@ export function PrizeCard({
 
         <div className="gc-prize-body">
           <p className="gc-prize-eyebrow">뽑았습니다</p>
-          <h3 id={headingId}>{listing.title}</h3>
 
+          {/* 게임 보상 창처럼 등급 배지가 먼저 쾅 찍히고, 이름이 그 뒤에 붙는다. */}
           <div className="gc-grade" data-letter={grade.letter}>
             <b>{grade.letter}</b>
             {basis ? <span>{basis}</span> : null}
           </div>
+
+          <h3 id={headingId}>{listing.title}</h3>
 
           <dl className="gc-stats">
             {rows.map((row) => (

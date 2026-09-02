@@ -38,6 +38,8 @@ import {
   playCapsuleTap,
   playClunk,
   playCrankRatchet,
+  playLeverClick,
+  playNeonBuzz,
   playOpenSparkle,
   playRumble,
   primeGachaSound,
@@ -52,10 +54,14 @@ import type { GachaScene, SceneStage } from "./gacha-scene";
 /**
  * 실시간 3D 가챠 머신 한 대.
  *
- * 그림이 아니라 장면이다 — 돔·몸통·크랭크·배출구는 three.js 로 지은 물건이고(gacha-scene.ts),
- * 돔 안의 캡슐은 대기 중에도 계속 움직인다. 손잡이를 잡고 돌리면 캡슐이 튀어 오르고,
+ * 그림이 아니라 장면이다 — 돔·몸통·레버·배출구는 three.js 로 지은 물건이고(gacha-scene.ts),
+ * 돔 안의 캡슐은 대기 중에도 계속 움직인다. 옆면의 레버를 아래로 당기면 캡슐이 튀어 오르고,
  * 하나가 배출구로 떨어져 Clunk 소리를 내고, 누르면 갈라지면서 그 안에서 실제 판매 파일이
  * 나온다.
+ *
+ * 기계는 카탈로그를 기다리지 않는다. 첫 페인트에 빈 기계가 이미 서 있고, /api/marketplace
+ * 가 도착하면 돔 위 투입구로 캡슐이 쏟아져 들어온다. 응답이 실패해도 기계는 그대로 있고
+ * 옆 판에 안내 한 줄만 붙는다.
  *
  * 화면에 뜨는 값은 전부 /api/marketplace 응답에서 읽은 것이고(gacha-catalog.ts), 받기는
  * 상점이 이미 쓰는 흐름을 그대로 부른다. WebGL 이 없는 브라우저는 SVG 머신으로 되돌아간다.
@@ -70,8 +76,8 @@ type LoadState = "loading" | "ready" | "failed";
 
 /**
  * 연출 단계.
- *  idle    손잡이 대기 — 캡슐이 숨 쉬듯 미세하게 움직인다
- *  crank   크랭크가 스스로 한 바퀴 더 돌며 래칫 소리
+ *  idle    레버 대기 — 캡슐이 숨 쉬듯 미세하게 움직인다
+ *  pull    레버가 끝까지 내려갔다 스프링처럼 튕겨 올라온다 (래칫 소리)
  *  shake   돔 안 캡슐 전체가 튀어 오르며 부딪힌다 (드르륵)
  *  impact  한 알이 구멍으로 빨려 내려가 배출구로 툭 (Clunk, 두 번 튕김)
  *  capsule 배출구의 캡슐이 빛나며 누르기를 기다린다
@@ -81,7 +87,7 @@ type LoadState = "loading" | "ready" | "failed";
  */
 type Stage = SceneStage;
 
-const STAGES: readonly Stage[] = ["idle", "crank", "shake", "impact", "capsule", "wobble", "burst", "result"];
+const STAGES: readonly Stage[] = ["idle", "pull", "shake", "impact", "capsule", "wobble", "burst", "result"];
 
 /**
  * 연출 시간표(밀리초, 손잡이를 돌린 순간 기준). gacha-scene.ts 의 STAGE_SECONDS 와 같은 값이다.
@@ -112,10 +118,21 @@ const TIMING = {
   },
 } as const;
 
+/**
+ * 등장 연출의 시간표(밀리초). gacha-scene.ts 의 INTRO_SECONDS 와 같은 값이다 —
+ * 장면 파일은 WebGL 이 있어야 불러올 수 있어서 여기에 같은 표를 둔다.
+ * 소리는 이 순간에 얹고, 첫 제스처 전이면 브라우저가 막아 조용히 지나간다.
+ */
+const INTRO_MS = { spotlight: 180, land: 860, neon: 1020, pour: 1280, total: 2400 } as const;
+
 const LOGIN_HREF = "/login?return_to=%2F";
 const DRAWN_KEY = "clunk.gacha.drawn";
-/** 손잡이를 이만큼 돌리면 발동한다. 반다이 손잡이가 한 바퀴 도는 것의 사분의 삼쯤이다. */
-const CRANK_TRIGGER_DEGREES = 270;
+/** 등장 연출은 이 브라우저 세션에 한 번만 본다. */
+const INTRO_KEY = "clunk.gacha.intro";
+/** 레버를 이만큼(px) 아래로 끌면 발동한다. 엄지로 한 번 훑는 거리다. */
+const LEVER_TRIGGER_PIXELS = 60;
+/** 손잡이가 끝까지 내려가는 거리(px). 끌어내린 만큼 레버가 따라 내려간다. */
+const LEVER_TRAVEL_PIXELS = 96;
 
 function createIdempotencyKey(): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") return crypto.randomUUID();
@@ -146,6 +163,23 @@ function readDrawn(theme: ThemeId): string[] {
     return Array.isArray(parsed) ? parsed.filter((value): value is string => typeof value === "string") : [];
   } catch {
     return [];
+  }
+}
+
+/** 이 세션에 등장 연출을 이미 봤는지. 저장이 막힌 브라우저에서는 늘 새로 본다. */
+function introAlreadySeen(): boolean {
+  try {
+    return sessionStorage.getItem(INTRO_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markIntroSeen(): void {
+  try {
+    sessionStorage.setItem(INTRO_KEY, "1");
+  } catch {
+    /* 저장이 막혀도 연출은 이미 지나갔다. */
   }
 }
 
@@ -183,6 +217,20 @@ export function GachaMachine3D() {
   const [drawn, setDrawn] = useState<string[]>(() => readDrawn("all"));
   /** 장면을 짓다 실패하면 SVG 머신으로 간다. */
   const [sceneFailed, setSceneFailed] = useState(false);
+  /**
+   * 등장 연출이 도는 동안에는 안내 한 줄과 라벨을 띄우지 않는다.
+   *
+   * 이것만은 리액트 상태가 아니라 뿌리 요소의 data-intro 속성을 직접 켰다 끈다 —
+   * 연출은 화면을 다시 그릴 일이 없는 순수한 표시이고, 효과 안에서 상태를 세우면
+   * 렌더가 한 번 더 도는 데다 서버가 그린 첫 화면과 어긋난다.
+   */
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const markIntroChrome = useCallback((playing: boolean) => {
+    const node = rootRef.current;
+    if (!node) return;
+    if (playing) node.dataset.intro = "1";
+    else delete node.dataset.intro;
+  }, []);
   /** 장면이 설 때마다 오르는 수. 아래의 "값 넣기" 훅들이 이것을 보고 한 번 더 돈다. */
   const [sceneReady, setSceneReady] = useState(0);
 
@@ -196,13 +244,15 @@ export function GachaMachine3D() {
 
   const hostRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
-  const crankRef = useRef<HTMLButtonElement | null>(null);
+  const leverRef = useRef<HTMLButtonElement | null>(null);
   const capsuleRef = useRef<HTMLButtonElement | null>(null);
   const coinRef = useRef<HTMLSpanElement | null>(null);
   const sceneRef = useRef<GachaScene | null>(null);
   const timers = useRef<number[]>([]);
-  const crankDrag = useRef({ active: false, last: 0, total: 0, moved: false });
+  const leverDrag = useRef({ active: false, startY: 0 });
   const stats = useRef({ frames: 0, totalMs: 0 });
+  /** 캡슐을 이미 쏟아 부었는지. 카탈로그가 오는 그 한 번만 붓는다. */
+  const poured = useRef(false);
 
   const clearTimers = useCallback(() => {
     for (const id of timers.current) window.clearTimeout(id);
@@ -258,7 +308,7 @@ export function GachaMachine3D() {
 
   /** 돔에 채울 캡슐. 자리 수는 최대치이고, 장면이 기기에 맞게 앞에서부터 잘라 쓴다. */
   const capsuleSpecs = useMemo(
-    () => domeCapsules(pool, 30).map((capsule) => ({ color: capsule.color, ring: capsule.ring })),
+    () => domeCapsules(pool, 40).map((capsule) => ({ color: capsule.color, ring: capsule.ring })),
     [pool],
   );
 
@@ -268,9 +318,10 @@ export function GachaMachine3D() {
       : `크레딧 ${credits.toLocaleString("ko-KR")}개 · 베타 기간에는 차감되지 않습니다`
     : "베타 기간 무료 · 동전 필요 없음";
 
-  /* 장면 만들기 ------------------------------------------------------------- */
+  /* 장면 만들기 -------------------------------------------------------------
+     카탈로그를 기다리지 않는다. 캔버스와 기계가 먼저 서고, 캡슐은 나중에 들어온다. */
   useEffect(() => {
-    if (!webgl || load !== "ready") return;
+    if (!webgl) return;
     const host = hostRef.current;
     if (!host) return;
     let disposed = false;
@@ -294,6 +345,14 @@ export function GachaMachine3D() {
         if (disposed) { scene.dispose(); return; }
         sceneRef.current = scene;
 
+        // 그래픽 문맥이 날아가면(기기가 메모리를 회수하거나 드라이버가 멈추면) 캔버스는
+        // 흰 사각형으로 남는다. 그럴 때는 SVG 머신으로 갈아탄다 — 빈 상자를 보여 주지 않는다.
+        host.querySelector("canvas")?.addEventListener(
+          "webglcontextlost",
+          () => { if (!disposed) setSceneFailed(true); },
+          { once: true },
+        );
+
         const placeOverlays = () => {
           const points = scene.points();
           const put = (node: HTMLElement | null, point: { x: number; y: number; radius: number }, minimum: number) => {
@@ -304,7 +363,7 @@ export function GachaMachine3D() {
             node.style.width = `${size}px`;
             node.style.height = `${size}px`;
           };
-          put(crankRef.current, points.crank, 56);
+          put(leverRef.current, points.lever, 56);
           put(capsuleRef.current, points.capsule, 48);
           if (coinRef.current) {
             coinRef.current.style.left = `${points.coin.x}px`;
@@ -368,6 +427,7 @@ export function GachaMachine3D() {
 
     return () => {
       disposed = true;
+      poured.current = false;
       window.cancelAnimationFrame(raf);
       observer?.disconnect();
       if (onResize) window.removeEventListener("resize", onResize);
@@ -381,10 +441,57 @@ export function GachaMachine3D() {
       sceneRef.current = null;
     };
     // 장면은 한 번만 짓는다. 테마·단계·캡슐은 아래 훅들이 살아 있는 장면에 넣어 준다.
-  }, [webgl, load, reducedMotion]);
+  }, [webgl, reducedMotion]);
 
-  /* 살아 있는 장면에 지금 값 넣기 ------------------------------------------- */
-  useEffect(() => { sceneRef.current?.setCapsules(capsuleSpecs); }, [capsuleSpecs, sceneReady]);
+  /* 등장 연출 — 세션당 한 번 ------------------------------------------------
+     어두운 가게에 스포트라이트가 딸깍 켜지고, 기계가 내려와 쿵 착지하고, 네온이
+     지직거리며 붙고, 캡슐이 쏟아지고, 레버가 반짝인다. 아무 데나 누르거나 아무 키나
+     치면 그 자리에서 완성 상태가 된다. */
+  useEffect(() => {
+    const scene = sceneRef.current;
+    if (!scene || sceneReady === 0) return;
+    if (reducedMotion || introAlreadySeen()) {
+      // 이미 본 사람과 움직임을 줄여 달라는 설정에는 연출을 돌리지 않는다 — 완성된
+      // 기계가 그 자리에 선다. data-intro 는 처음부터 없어 건드릴 것이 없다.
+      scene.skipIntro();
+      return;
+    }
+    markIntroSeen();
+    scene.startIntro();
+    markIntroChrome(true);
+
+    const ids: number[] = [];
+    const at = (delay: number, run: () => void) => { ids.push(window.setTimeout(run, delay)); };
+    at(INTRO_MS.spotlight, () => playLeverClick());
+    at(INTRO_MS.land, () => playClunk());
+    at(INTRO_MS.neon, () => playNeonBuzz());
+    at(INTRO_MS.pour, () => playRumble(0.9));
+    at(INTRO_MS.total, () => markIntroChrome(false));
+
+    const skip = () => {
+      for (const id of ids) window.clearTimeout(id);
+      ids.length = 0;
+      scene.skipIntro();
+      markIntroChrome(false);
+    };
+    window.addEventListener("pointerdown", skip, true);
+    window.addEventListener("keydown", skip, true);
+    return () => {
+      for (const id of ids) window.clearTimeout(id);
+      window.removeEventListener("pointerdown", skip, true);
+      window.removeEventListener("keydown", skip, true);
+    };
+  }, [markIntroChrome, reducedMotion, sceneReady]);
+
+  /* 살아 있는 장면에 지금 값 넣기 -------------------------------------------
+     캡슐이 처음 들어오는 순간만 쏟아 붓는다. 테마를 바꾼 뒤에는 통을 그냥 바꿔 끼운다. */
+  useEffect(() => {
+    const scene = sceneRef.current;
+    if (!scene) return;
+    const pour = capsuleSpecs.length > 0 && !poured.current;
+    if (pour) poured.current = true;
+    scene.setCapsules(capsuleSpecs, { pour });
+  }, [capsuleSpecs, sceneReady]);
   useEffect(() => { sceneRef.current?.setAccent(accent); }, [accent, sceneReady]);
   useEffect(() => { sceneRef.current?.setPrizeCapsule({ color: prizeColor, ring: prizeRing }); }, [prizeColor, prizeRing, sceneReady]);
   useEffect(() => { sceneRef.current?.setStage(stage); }, [stage, sceneReady]);
@@ -434,9 +541,10 @@ export function GachaMachine3D() {
     setPrize(drawnPrize);
     setClaim({ kind: "idle" });
     setClunked(false);
-    setStage("crank");
+    setStage("pull");
     const t = reducedMotion ? TIMING.reduced : TIMING.full;
-    if (!reducedMotion) playCrankRatchet(10, 0.72);
+    // 레버가 내려갔다 튕겨 올라오는 동안의 래칫.
+    if (!reducedMotion) playCrankRatchet(10, 0.62);
     later(t.shake, () => { setStage("shake"); if (!reducedMotion) playRumble(t.rumbleSeconds); });
     later(t.impact, () => setStage("impact"));
     later(t.clunk, () => { setClunked(true); if (!reducedMotion) playClunk(); });
@@ -460,8 +568,8 @@ export function GachaMachine3D() {
     setPrize(null);
     setClaim({ kind: "idle" });
     setClunked(false);
-    sceneRef.current?.setCrankAngle(0);
-    crankDrag.current = { active: false, last: 0, total: 0, moved: false };
+    sceneRef.current?.setLeverPull(0);
+    leverDrag.current = { active: false, startY: 0 };
   }, [clearTimers]);
 
   const chooseTheme = useCallback((next: ThemeId) => {
@@ -472,7 +580,7 @@ export function GachaMachine3D() {
     setPrize(null);
     setClaim({ kind: "idle" });
     setClunked(false);
-    sceneRef.current?.setCrankAngle(0);
+    sceneRef.current?.setLeverPull(0);
   }, [clearTimers]);
 
   /* 받기 -------------------------------------------------------------------- */
@@ -517,52 +625,39 @@ export function GachaMachine3D() {
     }
   }, [prize]);
 
-  /* 크랭크 돌리기 ----------------------------------------------------------- */
-  const angleFrom = useCallback((event: ReactPointerEvent<HTMLButtonElement>): number => {
-    const box = event.currentTarget.getBoundingClientRect();
-    const cx = box.left + box.width / 2;
-    const cy = box.top + box.height / 2;
-    return Math.atan2(event.clientY - cy, event.clientX - cx) * (180 / Math.PI);
-  }, []);
-
-  const onCrankDown = useCallback((event: ReactPointerEvent<HTMLButtonElement>) => {
+  /* 레버 당기기 -------------------------------------------------------------
+     아래로 끌면 손잡이가 손을 따라 내려오고, 60px 을 넘기는 순간 발동한다.
+     그냥 누르거나 엔터·스페이스를 쳐도 같은 것이 일어난다. */
+  const onLeverDown = useCallback((event: ReactPointerEvent<HTMLButtonElement>) => {
     if (stage !== "idle") return;
-    crankDrag.current = { active: true, last: angleFrom(event), total: 0, moved: false };
+    leverDrag.current = { active: true, startY: event.clientY };
     event.currentTarget.setPointerCapture(event.pointerId);
-  }, [angleFrom, stage]);
+  }, [stage]);
 
-  const onCrankMove = useCallback((event: ReactPointerEvent<HTMLButtonElement>) => {
-    const drag = crankDrag.current;
+  const onLeverMove = useCallback((event: ReactPointerEvent<HTMLButtonElement>) => {
+    const drag = leverDrag.current;
     if (!drag.active || stage !== "idle") return;
-    const angle = angleFrom(event);
-    // -180/180 을 넘어갈 때 한 바퀴가 통째로 더해지지 않도록 가까운 쪽으로 접는다.
-    let delta = angle - drag.last;
-    if (delta > 180) delta -= 360;
-    if (delta < -180) delta += 360;
-    drag.last = angle;
-    drag.total += delta;
-    if (Math.abs(drag.total) > 8) drag.moved = true;
-    sceneRef.current?.setCrankAngle(drag.total);
-    if (Math.abs(drag.total) >= CRANK_TRIGGER_DEGREES) {
+    const pulled = event.clientY - drag.startY;
+    sceneRef.current?.setLeverPull(Math.max(0, pulled) / LEVER_TRAVEL_PIXELS);
+    if (pulled >= LEVER_TRIGGER_PIXELS) {
       drag.active = false;
       if (event.currentTarget.hasPointerCapture(event.pointerId)) {
         event.currentTarget.releasePointerCapture(event.pointerId);
       }
       turn();
     }
-  }, [angleFrom, stage, turn]);
+  }, [stage, turn]);
 
-  const onCrankUp = useCallback((event: ReactPointerEvent<HTMLButtonElement>) => {
+  const onLeverUp = useCallback((event: ReactPointerEvent<HTMLButtonElement>) => {
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
-    crankDrag.current.active = false;
-    if (stage === "idle") sceneRef.current?.setCrankAngle(0);
+    leverDrag.current.active = false;
+    // 끝까지 당기지 못했으면 손잡이가 스스로 올라간다.
+    if (stage === "idle") sceneRef.current?.setLeverPull(0);
   }, [stage]);
 
-  const onCrankClick = useCallback(() => {
-    // 끌어서 돌린 경우에는 이미 발동했다. 같은 동작으로 두 번 뽑지 않는다.
-    if (crankDrag.current.moved) { crankDrag.current.moved = false; return; }
-    turn();
-  }, [turn]);
+  // 끌어서 당겨 이미 발동했으면 단계가 "pull" 이라 turn 이 스스로 물러난다 —
+  // 같은 동작으로 두 번 뽑히지 않는다. 끝까지 못 당기고 놓은 뒤의 클릭은 그냥 뽑기다.
+  const onLeverClick = useCallback(() => { turn(); }, [turn]);
 
   /* 화면 없이 단계를 넘기는 손잡이 ------------------------------------------ */
   useEffect(() => {
@@ -575,7 +670,7 @@ export function GachaMachine3D() {
         setPrize(null);
         setStage("idle");
         setClunked(false);
-        sceneRef.current?.setCrankAngle(0);
+        sceneRef.current?.setLeverPull(0);
         return true;
       }
       setPrize((current) => (current && !slug ? current : pickPrize(slug)));
@@ -584,33 +679,34 @@ export function GachaMachine3D() {
       return true;
     };
     scope.__gachaSoundCounts = () => soundCallCounts();
+    // 등장 연출을 처음부터 다시. 검증이 그 네 프레임을 찍으려면 시작점을 잡을 수 있어야 한다.
+    scope.__gachaIntro = () => {
+      const scene = sceneRef.current;
+      if (!scene) return false;
+      scene.startIntro();
+      markIntroChrome(scene.introRunning());
+      // 다시 돌린 연출도 제 시간에 끝나야 안내 한 줄이 원래처럼 돌아온다.
+      window.setTimeout(() => markIntroChrome(false), INTRO_MS.total);
+      return true;
+    };
     return () => {
       delete scope.__gachaStep;
       delete scope.__gachaSoundCounts;
+      delete scope.__gachaIntro;
     };
-  }, [clearTimers, pickPrize]);
+  }, [clearTimers, markIntroChrome, pickPrize]);
 
   /* 그리기 ------------------------------------------------------------------ */
 
   if (!webgl) return <CapsuleMachine />;
 
-  if (load === "failed") {
-    return (
-      <p className="gc-empty" role="status">
-        지금은 머신 안을 불러오지 못했습니다. <Link href="/marketplace" prefetch={false}>마켓에서 직접 확인하기</Link>
-      </p>
-    );
-  }
-  if (load === "loading") {
-    return <p className="gc-empty" role="status">머신에 캡슐을 채우는 중입니다…</p>;
-  }
-  if (drawableListings(listings).length === 0) {
-    return (
-      <p className="gc-empty" role="status">
-        지금 머신에 들어 있는 에셋이 없습니다. <Link href="/marketplace" prefetch={false}>마켓에서 직접 확인하기</Link>
-      </p>
-    );
-  }
+  // 기계는 언제나 서 있다. 카탈로그가 아직이거나 실패했으면 옆 판에 한 줄만 붙는다.
+  const stocked = drawableListings(listings).length > 0;
+  const notice = load === "failed"
+    ? "지금은 머신 안을 불러오지 못했습니다."
+    : load === "ready" && !stocked
+      ? "지금 머신에 들어 있는 에셋이 없습니다."
+      : null;
 
   const canOpen = stage === "capsule";
   const capsuleShown = stage === "impact" || stage === "capsule" || stage === "wobble" || stage === "burst";
@@ -618,6 +714,7 @@ export function GachaMachine3D() {
   return (
     <div
       className="gc gc3"
+      ref={rootRef}
       data-stage={stage}
       data-reduced={reducedMotion || undefined}
       style={{ "--gc-accent": accent, "--gc-prize": prizeColor, "--gc-grade": prizeRing } as CSSProperties}
@@ -632,22 +729,22 @@ export function GachaMachine3D() {
         >
           <div className="gc3-canvas" ref={hostRef} aria-hidden="true" />
 
-          {/* 크랭크 위에 투명하게 얹힌 진짜 단추 — 끌어서 돌려도 되고 그냥 눌러도 된다. */}
+          {/* 레버 손잡이 위에 투명하게 얹힌 진짜 단추 — 끌어내려도 되고 그냥 눌러도 된다. */}
           <button
             type="button"
-            className="gc3-crank"
-            ref={crankRef}
-            onPointerDown={onCrankDown}
-            onPointerMove={onCrankMove}
-            onPointerUp={onCrankUp}
-            onPointerCancel={onCrankUp}
+            className="gc3-lever"
+            ref={leverRef}
+            onPointerDown={onLeverDown}
+            onPointerMove={onLeverMove}
+            onPointerUp={onLeverUp}
+            onPointerCancel={onLeverUp}
             onFocus={() => sceneRef.current?.setHovered(true)}
             onBlur={() => sceneRef.current?.setHovered(false)}
             onMouseEnter={() => sceneRef.current?.setHovered(true)}
             onMouseLeave={() => sceneRef.current?.setHovered(false)}
-            onClick={onCrankClick}
-            disabled={stage !== "idle"}
-            aria-label="손잡이를 돌려 에셋 뽑기"
+            onClick={onLeverClick}
+            disabled={stage !== "idle" || !stocked}
+            aria-label="레버를 당겨 에셋 뽑기"
           />
 
           {/* 배출구에 떨어진 캡슐 — 눌러서 연다. */}
@@ -664,7 +761,7 @@ export function GachaMachine3D() {
           <span className="gc3-coin" ref={coinRef}>베타 무료</span>
 
           {stage === "idle" ? (
-            <p className="gc3-hint" aria-hidden="true"><b>손잡이를 돌리세요</b><i>↻</i></p>
+            <p className="gc3-hint" aria-hidden="true"><b>레버를 당기세요</b><i>↓</i></p>
           ) : null}
           {stage === "capsule" ? <p className="gc3-hint gc3-hint-low" aria-hidden="true"><b>눌러서 열기</b></p> : null}
 
@@ -692,21 +789,30 @@ export function GachaMachine3D() {
           ) : (
             <div className="gc3-panel">
               <p className="gc3-coin-line">{creditLine}</p>
-              <div className="gc3-dial" role="group" aria-label="테마 다이얼">
-                {GACHA_THEMES.map((row) => (
-                  <button
-                    type="button"
-                    key={row.id}
-                    className="gc-dial-option"
-                    aria-pressed={row.id === theme}
-                    onClick={() => chooseTheme(row.id)}
-                    style={{ "--gc-accent": row.accent } as CSSProperties}
-                  >
-                    {row.name}<i>{counts[row.id]}</i>
-                  </button>
-                ))}
-              </div>
-              <p className="gc3-remaining">이번 바퀴 남은 개수 <b>{remaining}</b></p>
+              {notice ? (
+                <p className="gc3-notice" role="status">
+                  {notice} <Link href="/marketplace" prefetch={false}>마켓에서 직접 확인하기</Link>
+                </p>
+              ) : null}
+              {stocked ? (
+                <>
+                  <div className="gc3-dial" role="group" aria-label="테마 다이얼">
+                    {GACHA_THEMES.map((row) => (
+                      <button
+                        type="button"
+                        key={row.id}
+                        className="gc-dial-option"
+                        aria-pressed={row.id === theme}
+                        onClick={() => chooseTheme(row.id)}
+                        style={{ "--gc-accent": row.accent } as CSSProperties}
+                      >
+                        {row.name}<i>{counts[row.id]}</i>
+                      </button>
+                    ))}
+                  </div>
+                  <p className="gc3-remaining">이번 바퀴 남은 개수 <b>{remaining}</b></p>
+                </>
+              ) : null}
               <ul className="gc3-legend">
                 {(["S", "A", "B", "C"] as const).map((letter) => (
                   <li key={letter}><i style={{ background: GRADE_COLORS[letter] }} />{letter}</li>

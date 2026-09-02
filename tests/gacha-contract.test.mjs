@@ -445,11 +445,13 @@ test("로그아웃이어도 뽑기와 연출은 되고, 받기만 로그인을 �
   assert.match(card, /이번 바퀴 남은 개수/u);
 });
 
-test("연출은 크랭크 → 흔들림 → Clunk → 캡슐 → 흔들흔들 → 빛 → 카드 순서다", async () => {
+test("연출은 레버 당김 → 흔들림 → Clunk → 캡슐 → 흔들흔들 → 빛 → 카드 순서다", async () => {
   const machine = await readFile(new URL("../app/components/gacha/GachaMachine3D.tsx", import.meta.url), "utf8");
-  for (const stage of ["idle", "crank", "shake", "impact", "capsule", "wobble", "burst", "result"]) {
+  for (const stage of ["idle", "pull", "shake", "impact", "capsule", "wobble", "burst", "result"]) {
     assert.match(machine, new RegExp(`"${stage}"`, "u"), `${stage} 단계가 없다`);
   }
+  // 크랭크(돌리기)는 남아 있지 않다 — 운영자가 당기는 레버를 요구했다.
+  assert.doesNotMatch(machine, /setStage\("crank"\)|CRANK_TRIGGER_DEGREES/u);
   // 시간표는 코드에 그대로 적혀 있다: 흔들림 0.75초부터, 떨어지는 것이 1.95초, Clunk 이 2.73초.
   assert.match(machine, /shake: 750/u);
   assert.match(machine, /impact: 1950/u);
@@ -457,10 +459,11 @@ test("연출은 크랭크 → 흔들림 → Clunk → 캡슐 → 흔들흔들 �
   assert.match(machine, /capsule: 3200/u);
   // 움직임을 줄여 달라는 설정에서는 짧은 시간표를 쓴다.
   assert.match(machine, /reducedMotion \? TIMING\.reduced : TIMING\.full/u);
-  // 손잡이는 270° 이상 돌리면 발동하고, 키보드로도 눌린다(button + onClick).
-  assert.match(machine, /const CRANK_TRIGGER_DEGREES = 270/u);
-  assert.match(machine, /Math\.abs\(drag\.total\) >= CRANK_TRIGGER_DEGREES/u);
-  assert.match(machine, /aria-label="손잡이를 돌려 에셋 뽑기"/u);
+  // 레버는 60px 이상 아래로 끌면 발동하고, 키보드로도 눌린다(button + onClick).
+  assert.match(machine, /const LEVER_TRIGGER_PIXELS = 60/u);
+  assert.match(machine, /const LEVER_TRAVEL_PIXELS = 96/u);
+  assert.match(machine, /pulled >= LEVER_TRIGGER_PIXELS/u);
+  assert.match(machine, /aria-label="레버를 당겨 에셋 뽑기"/u);
   // 화면 없이 단계를 세우고 프레임을 돌리는 두 손잡이.
   assert.match(machine, /__gachaStep/u);
   assert.match(machine, /__gachaFrame/u);
@@ -469,6 +472,55 @@ test("연출은 크랭크 → 흔들림 → Clunk → 캡슐 → 흔들흔들 �
   assert.match(machine, /document\.visibilityState === "hidden"/u);
   // WebGL 이 없으면 SVG 머신으로 되돌아간다.
   assert.match(machine, /if \(!webgl\) return <CapsuleMachine \/>;/u);
+});
+
+test("첫 페인트에 기계가 있고, 카탈로그는 나중에 쏟아져 들어온다", async () => {
+  const machine = await readFile(new URL("../app/components/gacha/GachaMachine3D.tsx", import.meta.url), "utf8");
+
+  // 2026-09-02: 운영자가 처음 본 것은 "머신에 캡슐을 채우는 중입니다…" 글자만 있는 빈
+  // 화면이었다. 그 자리를 대신하는 것은 아직 비어 있는 진짜 기계다.
+  assert.doesNotMatch(machine, /머신에 캡슐을 채우는 중/u, "기다리는 동안 글자만 띄우지 않는다");
+  // 장면은 카탈로그가 아니라 WebGL 만 보고 선다.
+  assert.match(machine, /if \(!webgl\) return;\s*const host = hostRef\.current;/u);
+  assert.doesNotMatch(machine, /if \(!webgl \|\| load !== "ready"\) return;/u);
+  // 카탈로그가 실패하거나 비어 있어도 기계는 남고 안내 한 줄만 붙는다.
+  assert.match(machine, /const notice = load === "failed"/u);
+  assert.match(machine, /className="gc3-notice"/u);
+  // 캡슐이 처음 들어오는 그 한 번만 쏟아 붓는다.
+  assert.match(machine, /scene\.setCapsules\(capsuleSpecs, \{ pour \}\)/u);
+  assert.match(machine, /const pour = capsuleSpecs\.length > 0 && !poured\.current/u);
+});
+
+test("등장 연출은 세션당 한 번, 2.4초 안에 끝나고, 누르면 건너뛴다", async () => {
+  const machine = await readFile(new URL("../app/components/gacha/GachaMachine3D.tsx", import.meta.url), "utf8");
+  const scene = await readFile(new URL("../app/components/gacha/gacha-scene.ts", import.meta.url), "utf8");
+
+  // 리액트가 소리를 얹는 시간표와 장면이 그림을 움직이는 시간표는 같은 값이어야 한다.
+  assert.match(
+    machine,
+    /const INTRO_MS = \{ spotlight: 180, land: 860, neon: 1020, pour: 1280, total: 2400 \}/u,
+  );
+  assert.match(scene, /spotlight: 0\.18/u);
+  assert.match(scene, /land: 0\.86/u);
+  assert.match(scene, /neon: 1\.02/u);
+  assert.match(scene, /pour: 1\.28/u);
+  assert.match(scene, /total: 2\.4/u);
+
+  // 네 가지 소리가 그 자리에 얹힌다.
+  for (const call of ["playLeverClick()", "playClunk()", "playNeonBuzz()", "playRumble(0.9)"]) {
+    assert.ok(machine.includes(call), `${call} 이 등장 연출에 없다`);
+  }
+  // 세션당 한 번, 그리고 누르거나 키를 치면 건너뛴다.
+  assert.match(machine, /const INTRO_KEY = "clunk\.gacha\.intro"/u);
+  assert.match(machine, /if \(reducedMotion \|\| introAlreadySeen\(\)\)/u);
+  assert.match(machine, /scene\.skipIntro\(\)/u);
+  assert.match(machine, /window\.addEventListener\("pointerdown", skip, true\)/u);
+  // 연출 표시는 리액트 상태가 아니라 뿌리 요소의 속성이다 — 서버가 그린 첫 화면과
+  // 어긋나지 않고, 효과 안에서 렌더를 한 번 더 돌리지도 않는다.
+  assert.match(machine, /node\.dataset\.intro = "1"/u);
+  assert.match(machine, /window\.addEventListener\("keydown", skip, true\)/u);
+  // 움직임을 줄여 달라는 설정이면 장면도 그 자리에서 완성 상태가 된다.
+  assert.match(scene, /startIntro\(\) \{\s*if \(reduced\) \{ finishIntro\(\); return; \}/u);
 });
 
 test("3D 장면은 외부 모델 파일 없이 코드로만 짓는다", async () => {
@@ -483,8 +535,8 @@ test("3D 장면은 외부 모델 파일 없이 코드로만 짓는다", async ()
   assert.doesNotMatch(scene, /\.glb"|\.gltf"|\.hdr|\.exr/u);
 
   // 데스크톱과 모바일 두 벌의 씀씀이.
-  assert.match(scene, /DESKTOP_QUALITY: Quality = \{ capsules: 30, dpr: 2, shadowMap: 1024/u);
-  assert.match(scene, /MOBILE_QUALITY: Quality = \{ capsules: 18, dpr: 1\.5, shadowMap: 512/u);
+  assert.match(scene, /DESKTOP_QUALITY: Quality = \{ capsules: 40, dpr: 2, shadowMap: 1024/u);
+  assert.match(scene, /MOBILE_QUALITY: Quality = \{ capsules: 24, dpr: 1\.5, shadowMap: 512/u);
   // 그림자 설정은 상품 뷰어와 같은 규칙(bias 0 + normalBias).
   assert.match(scene, /shadow\.bias = 0/u);
   assert.match(scene, /shadow\.normalBias/u);
@@ -497,6 +549,69 @@ test("3D 장면은 외부 모델 파일 없이 코드로만 짓는다", async ()
   assert.match(scene, /capsuleGeometryRing/u);
   // 캔버스에 실제로 그려졌는지 셀 수 있어야 한다.
   assert.match(scene, /countDrawnPixels/u);
+});
+
+test("레버는 돌리는 것이 아니라 당기는 것이고, 통은 비어 있는 채로 선다", async () => {
+  const scene = await readFile(new URL("../app/components/gacha/gacha-scene.ts", import.meta.url), "utf8");
+
+  // 세로 레버 세 조각 — 받침, 축, 둥근 손잡이.
+  for (const piece of ["leverMount", "leverArm", "leverKnob"]) {
+    assert.match(scene, new RegExp(piece, "u"), `${piece} 가 없다`);
+  }
+  // 당긴 만큼 축이 앞으로 넘어간다(회전축은 x). 돌리던 크랭크는 남아 있지 않다.
+  assert.match(scene, /lever\.rotation\.x = leverValue \* 1\.26/u);
+  assert.doesNotMatch(scene, /crank\.rotation\.z|setCrankAngle/u);
+  // 끝까지 내려갔다 스프링처럼 튕겨 올라온다.
+  assert.match(scene, /Math\.cos\(spring \* 7\.4\) \* \(1 - spring\)/u);
+
+  // 첫 프레임에 통은 비어 있다 — 캡슐은 카탈로그가 올 때 투입구로 들어온다.
+  assert.match(scene, /ensureCapsules\(0\)/u);
+  assert.match(scene, /function stackAboveHatch/u);
+  assert.match(scene, /if \(options\?\.pour && !reduced && count > 0\)/u);
+  // 돔 꼭대기에 실제로 구멍이 뚫려 있고 깔때기가 얹혀 있다.
+  assert.match(scene, /HATCH_PHI, Math\.PI \* 0\.76 - HATCH_PHI/u);
+  assert.match(scene, /const funnel =/u);
+});
+
+test("공개 화면은 기계가 통째로 숨어도 남는다", async () => {
+  const scene = await readFile(new URL("../app/components/gacha/gacha-scene.ts", import.meta.url), "utf8");
+
+  // 2026-09-02: 기계를 통째로 숨기기 시작한 뒤로 공개 화면이 까맣게 나왔다 —
+  // 상품과 빛 터짐이 기계의 자식이라 같이 사라졌다. 이제 따로 산다.
+  assert.match(scene, /const reveal = new THREE\.Group\(\);\s*scene\.add\(reveal\);/u);
+  for (const line of ["reveal.add(prize.group)", "reveal.add(burstGroup)", "reveal.add(prizeArt)"]) {
+    assert.ok(scene.includes(line), `${line} 이 없다`);
+  }
+  assert.ok(!scene.includes("machine.add(prizeArt)"), "상품은 기계의 자식이 아니다");
+  assert.ok(!scene.includes("machine.add(prize.group)"));
+  // 가려 놓는 막(z 2.6)은 상품(z 4.5)보다 뒤, 기계 앞면(z 0.71)보다 앞에 서 있어야 한다.
+  assert.match(scene, /backdrop\.position\.set\(0, 1\.9, 2\.6\)/u);
+  assert.match(scene, /STAGE_FRONT = new THREE\.Vector3\(0, 2\.1, 4\.5\)/u);
+  // 카메라가 한 걸음 물러나 받침이 바닥에 닿는 곳까지 담는다 — 잘린 기계는 떠 보인다.
+  assert.match(scene, /const CAMERA_DISTANCE = 6\.8/u);
+  assert.match(scene, /const CAMERA_TARGET = 1\.6/u);
+
+  const machine = await readFile(new URL("../app/components/gacha/GachaMachine3D.tsx", import.meta.url), "utf8");
+  // 그래픽 문맥이 날아가면 흰 상자 대신 SVG 머신을 보여 준다.
+  assert.match(machine, /"webglcontextlost"/u);
+});
+
+test("가게 한 칸 — 바닥·뒷벽·전구·빛기둥·먼지가 있고 먼지는 60개를 넘지 않는다", async () => {
+  const scene = await readFile(new URL("../app/components/gacha/gacha-scene.ts", import.meta.url), "utf8");
+  for (const piece of ["const floor =", "const wall =", "const wallGlow =", "bulbGeometry", "const cone =", "dustGeometry"]) {
+    assert.ok(scene.includes(piece), `${piece} 가 없다`);
+  }
+  // 대기 중 파티클 예산: 떠다니는 먼지(데스크톱 34) + 착지 먼지(24) = 58개.
+  const desktopDust = Number(/DESKTOP_QUALITY[^;]*dust: (\d+)/u.exec(scene)?.[1]);
+  const mobileDust = Number(/MOBILE_QUALITY[^;]*dust: (\d+)/u.exec(scene)?.[1]);
+  const puff = Number(/const PUFF_COUNT = (\d+)/u.exec(scene)?.[1]);
+  assert.ok(Number.isInteger(desktopDust) && Number.isInteger(mobileDust) && Number.isInteger(puff));
+  assert.ok(desktopDust + puff <= 60, `파티클 ${desktopDust + puff}개는 예산(60)을 넘는다`);
+  assert.ok(mobileDust <= desktopDust);
+  // 등장 연출을 다시 돌리면 통을 비웠다가 투입구에서 다시 붓는다.
+  assert.match(scene, /pile\.visible = !machineHidden && !pileHeld/u);
+  // 상품이 뜨는 동안에는 가게도 같이 물러난다.
+  assert.match(scene, /shop\.visible = !machineHidden/u);
 });
 
 test("소리는 외부 파일 없이 그 자리에서 합성한다", async () => {
@@ -512,6 +627,7 @@ test("소리는 외부 파일 없이 그 자리에서 합성한다", async () =>
     "playBounce",
     "playCapsuleTap",
     "playOpenSparkle",
+    "playNeonBuzz",
   ]) {
     assert.match(source, new RegExp(`export function ${name}`, "u"), `${name} 이 없다`);
   }
@@ -531,7 +647,7 @@ test("머신 글자는 0.72rem 밑으로 내려가지 않는다", async () => {
   assert.match(css, /\.gc-hero \{[^}]*min-height: 100svh/u);
   // 엄지로 당길 크기 — SVG 폴백의 레버와 3D 머신의 손잡이 둘 다.
   assert.match(css, /\.gc-lever-grip \{[\s\S]*?min-height: 48px/u);
-  assert.match(css, /\.gc3-crank \{[\s\S]*?min-height: 56px/u);
+  assert.match(css, /\.gc3-lever \{[\s\S]*?min-height: 56px/u);
   assert.match(css, /\.gc3-capsule \{[\s\S]*?min-height: 48px/u);
   // 움직임을 줄여 달라는 설정에서는 흔들림과 파티클을 아예 만들지 않는다.
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/u);
@@ -540,7 +656,10 @@ test("머신 글자는 0.72rem 밑으로 내려가지 않는다", async () => {
 test("랜딩은 캡슐 머신 한 대를 렌더한다", async () => {
   const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   assert.match(source, /<GachaMachine3D \/>/u);
-  assert.match(source, /게임 에셋을 <em>뽑으세요<\/em>/u);
+  // 2026-09-02: 헤드라인은 게임 UI 처럼 짧고 크게, 그 아래는 한 줄짜리 부제뿐이다.
+  assert.match(source, /게임 에셋 <em>뽑기<\/em>/u);
+  assert.match(source, /레버를 당기면 마켓의 에셋이 캡슐로 떨어집니다/u);
+  assert.doesNotMatch(source, /손잡이를 돌리면/u);
   // 자판기 넉 대 짜리 홀은 더 이상 없다.
   assert.doesNotMatch(source, /VendingHall|VendingMachine/u);
   // 손으로 적은 카탈로그 복사본이 다시 생기지 않았는지.

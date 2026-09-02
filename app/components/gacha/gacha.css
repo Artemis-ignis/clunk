@@ -2,14 +2,22 @@
    머신 한 대가 첫 뷰포트를 다 차지한다. 헤드라인은 한 줄, 그 아래가 바로 머신이다. */
 .cv5 .gc-hero { min-height: 100svh; display: grid; align-items: center; padding: 60px 0 12px; }
 .gc-hero-frame { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+/* 게임 UI 처럼 짧고 크게. 긴 설명문 대신 한 줄짜리 부제만 그 아래에 둔다. */
 .cv5 .gc-hero h1 {
   margin: 0;
-  font-size: clamp(1.7rem, 4.2vw, 2.5rem);
-  font-weight: 860;
-  line-height: 1.16;
-  letter-spacing: -0.04em;
+  font-size: clamp(2rem, 5.6vw, 3.3rem);
+  font-weight: 880;
+  line-height: 1.08;
+  letter-spacing: -0.045em;
 }
-.gc-hero-lede { margin: 0 0 2px; max-width: 580px; font-size: 0.85rem; line-height: 1.58; color: var(--v5-ink-dim); }
+.gc-hero-lede { margin: 0 0 2px; max-width: 580px; font-size: 0.86rem; line-height: 1.5; color: var(--v5-ink-dim); }
+/* 기계에 붙은 명판 한 줄 — 통에 무엇이 들었는지. */
+.gc-hero-kinds {
+  margin: 0 0 2px;
+  font-family: var(--v5-label);
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+  color: var(--v5-ink-faint);
+}
 .cv5 .gc-hero .cv5-badge { height: 26px; font-size: 0.72rem; }
 
 /* ============================================================================
@@ -543,8 +551,9 @@
 .gc3-canvas { position: absolute; inset: 0; }
 .gc3-canvas canvas { border-radius: 18px; }
 
-/* 크랭크 위에 얹힌 투명한 진짜 단추. 끌면 돌아가고, 눌러도(엔터·스페이스 포함) 돌아간다. */
-.gc3-crank {
+/* 레버 손잡이 위에 얹힌 투명한 진짜 단추. 아래로 끌면 당겨지고, 눌러도(엔터·스페이스
+   포함) 당겨진다. 엄지로 잡을 크기를 지켜 56px 밑으로 내려가지 않는다. */
+.gc3-lever {
   position: absolute;
   left: 0; top: 0;
   min-width: 56px; min-height: 56px;
@@ -555,9 +564,9 @@
   touch-action: none;
   z-index: 3;
 }
-.gc3-crank:active { cursor: grabbing; }
-.gc3-crank:disabled { cursor: default; }
-.gc3-crank:focus-visible { outline: 2px solid var(--gc-accent); outline-offset: 4px; }
+.gc3-lever:active { cursor: grabbing; }
+.gc3-lever:disabled { cursor: default; }
+.gc3-lever:focus-visible { outline: 2px solid var(--gc-accent); outline-offset: 4px; }
 
 .gc3-capsule {
   position: absolute;
@@ -595,13 +604,21 @@
   border: 1px solid var(--v5-line-strong); border-radius: 999px;
   background: rgba(10, 13, 24, 0.82);
   pointer-events: none;
+  opacity: 1;
+  transition: opacity 260ms ease;
   z-index: 2;
 }
 .gc3-hint b { font-size: 0.78rem; font-weight: 700; color: var(--v5-ink); }
 .gc3-hint i {
   font-style: normal; font-size: 0.86rem; color: var(--gc-accent);
-  animation: gc3-turn 1.5s ease-in-out infinite;
+  animation: gc3-pull 1.4s ease-in-out infinite;
 }
+/* 등장 연출이 도는 동안에는 안내를 띄우지 않는다 — 기계가 아직 내려오는 중이다. */
+.gc3[data-intro] .gc3-hint, .gc3[data-intro] .gc3-coin { opacity: 0; }
+/* 상품이 앞으로 나오면 기계가 통째로 숨는다. 기계에 붙어 있던 라벨도 같이 사라져야 한다. */
+.gc3[data-stage="wobble"] .gc3-coin,
+.gc3[data-stage="burst"] .gc3-coin,
+.gc3[data-stage="result"] .gc3-coin { opacity: 0; }
 .gc3-hint-low b { color: var(--gc-grade, var(--v5-ink)); }
 
 /* 옆 판 — 다이얼, 남은 개수, 등급 색 표, 등급 규칙 */
@@ -615,6 +632,9 @@
   text-align: left;
 }
 .gc3-coin-line { margin: 0; font-size: 0.78rem; line-height: 1.45; color: var(--v5-ink-dim); }
+/* 카탈로그를 못 불러왔을 때의 한 줄. 기계는 그대로 서 있고 이 줄만 붙는다. */
+.gc3-notice { margin: 0; font-size: 0.78rem; line-height: 1.5; color: var(--v5-ink-dim); }
+.gc3-notice a { color: var(--v5-cyan); text-decoration: underline; }
 .gc3-dial { display: flex; flex-wrap: wrap; gap: 5px; min-width: 0; }
 .gc3-remaining { margin: 0; font-size: 0.78rem; color: var(--v5-ink-dim); }
 .gc3-remaining b { color: var(--v5-ink); font-weight: 800; }
@@ -640,14 +660,17 @@
 }
 .gc-prize[data-noart] { grid-template-columns: minmax(0, 1fr); }
 .gc3 .gc-prize { animation: gc3-card 420ms cubic-bezier(.2, 1.3, .35, 1) both; }
-.gc3 .gc-grade { animation: gc3-slam 420ms cubic-bezier(.2, 1.8, .3, 1) 520ms both; }
+/* 게임 보상 창처럼 — 등급 배지가 먼저 쾅, 이름이 그 다음에 붙는다. */
+.gc3 .gc-grade { animation: gc3-slam 380ms cubic-bezier(.2, 1.8, .3, 1) 120ms both; }
+.gc3 .gc-prize-body h3 { animation: gc3-name 320ms ease-out 400ms both; }
 
 /* Clunk! 임팩트는 캔버스 위 한가운데에 뜬다. */
 .gc3-stage .gc-flash, .gc3-stage .gc-impact { position: absolute; }
 
-@keyframes gc3-turn {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(180deg); }
+/* 아래로 당기라는 화살표 — 내려갔다 올라온다. */
+@keyframes gc3-pull {
+  0%, 100% { transform: translateY(-2px); }
+  50% { transform: translateY(3px); }
 }
 @keyframes gc3-card {
   from { opacity: 0; transform: translateY(14px) scale(0.97); }
@@ -658,6 +681,10 @@
   70% { opacity: 1; transform: scale(0.92); }
   100% { opacity: 1; transform: scale(1); }
 }
+@keyframes gc3-name {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
 
 @media (max-width: 880px) {
   .gc3-row { grid-template-columns: minmax(0, 1fr); gap: 10px; }
@@ -667,7 +694,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .gc3-hint i, .gc3 .gc-prize, .gc3 .gc-grade { animation: none; }
+  .gc3-hint i, .gc3 .gc-prize, .gc3 .gc-grade, .gc3 .gc-prize-body h3 { animation: none; }
+  .gc3-hint { transition: none; }
 }
 
 .gc3-side { width: min(860px, 94vw); }

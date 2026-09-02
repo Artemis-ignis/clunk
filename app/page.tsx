@@ -74,11 +74,11 @@ export default function Home() {
         <section className="cv5-hero gc-hero public-hero-frame" data-snap-section="hero" aria-labelledby="home-heading">
           <div className="cv5-frame gc-hero-frame">
             <span className="cv5-badge">✦ 게임 제작을 위한 <b>단 하나의 AI 슈퍼앱</b></span>
-            <h1 id="home-heading">게임 에셋을 <em>뽑으세요</em></h1>
-            <p className="gc-hero-lede">
-              손잡이를 돌리면 마켓에 올라와 있는 에셋 하나가 캡슐로 떨어집니다.
-              농장·마을 배경에 바로 쓰는 3D 모델, 2D 스프라이트 시트, 이어 붙여도 이음매가 안 보이는 텍스처입니다.
-            </p>
+            {/* 2026-09-02: 게임 UI 처럼 짧고 크게. 긴 설명문은 뽑기 화면에서 읽히지 않는다. */}
+            <h1 id="home-heading">게임 에셋 <em>뽑기</em></h1>
+            <p className="gc-hero-lede">레버를 당기면 마켓의 에셋이 캡슐로 떨어집니다</p>
+            {/* 통에 무엇이 들었는지 — 기계에 붙은 명판처럼 짧게. */}
+            <p className="gc-hero-kinds">3D 모델 · 스프라이트 시트 · 이어붙는 텍스처</p>
             <GachaMachine3D />
           </div>
         </section>

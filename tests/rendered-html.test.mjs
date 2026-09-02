@@ -28,11 +28,16 @@ test("server-renders the Clunk landing page", async () => {
   // 캐릭터 뽑히면 나오는 가챠 연출처럼"). The headline says what to do, the line under it
   // says what happens, and the machine explains the brand's name where the capsule lands.
   // The old four-cabinet hall ("자판기 홀", "마켓에 올라와 있는 에셋") went with it.
-  assert.match(html, /게임 에셋을/);
-  assert.match(html, /<em>뽑으세요<\/em>/);
-  assert.match(html, /손잡이를 돌리면 마켓에 올라와 있는 에셋 하나가 캡슐로 떨어집니다/);
-  // 서버가 그리는 첫 화면은 카탈로그를 부르기 전이라 머신이 아직 채워지는 중이다.
-  assert.match(html, /머신에 캡슐을 채우는 중입니다/);
+  // 2026-09-02 (2): the headline reads like a game's own UI — short and big — and the
+  // handle is one you pull, not one you turn.
+  assert.match(html, /게임 에셋 <em>뽑기<\/em>/);
+  assert.match(html, /레버를 당기면 마켓의 에셋이 캡슐로 떨어집니다/);
+  // The machine is already standing in the server's first paint: the canvas host and the
+  // lever's own line ship in the HTML, and nothing says the machine is still filling up.
+  assert.match(html, /gc3-canvas/);
+  assert.match(html, /레버를 당기세요/);
+  assert.doesNotMatch(html, /머신에 캡슐을 채우는 중/);
+  assert.doesNotMatch(html, /손잡이를 돌리/);
   assert.match(html, /게임 에셋 검사 및 수정/);
   assert.match(html, /게임 제작 에이전트/);
   assert.doesNotMatch(html, /자판기 홀|마켓에 올라와 있는 에셋</);
@@ -82,7 +87,9 @@ test("landing language covers the full 2D and 3D asset path", async () => {
   const html = await response.text();
   // 2026-09-01: the landing stopped defending its own numbers and now tells the
   // reader what the number is for. The contract follows the fact, not the slogan.
-  assert.match(html, /농장·마을 배경에 바로 쓰는 3D 모델/);
+  // 2026-09-02 (2): the long hero paragraph became a machine's own name plate. The
+  // contract is still that the landing names all three kinds it actually sells.
+  assert.match(html, /3D 모델 · 스프라이트 시트 · 이어붙는 텍스처/);
   assert.match(html, /게임 적합도/);
   // 2026-09-01: the three section labels are Korean now — the Korean reference
   // sites the master gave (meshy.ai/ko, aetherforgeai.com/ko) use no English

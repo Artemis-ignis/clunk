@@ -54,9 +54,11 @@ export function toggleGachaMuted(): void {
   for (const listener of muteListeners) listener();
 }
 
-export type SoundName = "lever" | "ratchet" | "rumble" | "clunk" | "bounce" | "tap" | "sparkle";
+export type SoundName = "lever" | "ratchet" | "rumble" | "clunk" | "bounce" | "tap" | "sparkle" | "neon";
 
-const counts: Record<SoundName, number> = { lever: 0, ratchet: 0, rumble: 0, clunk: 0, bounce: 0, tap: 0, sparkle: 0 };
+const counts: Record<SoundName, number> = {
+  lever: 0, ratchet: 0, rumble: 0, clunk: 0, bounce: 0, tap: 0, sparkle: 0, neon: 0,
+};
 
 /** 어느 합성 함수가 몇 번 불렸는지. 소리를 들을 수 없는 환경의 유일한 증거다. */
 export function soundCallCounts(): Record<SoundName, number> {
@@ -297,6 +299,32 @@ export function playCrankRatchet(ticks = 9, seconds = 0.75): void {
       length: 0.026,
     });
   }
+}
+
+/**
+ * 네온 사인이 켜지는 지직. 형광등처럼 몇 번 튀었다 붙는다.
+ *
+ * 짧은 잡음 세 번(관이 튀는 소리)에, 붙고 나서 낮게 깔리는 60 Hz 톱니 허밍을 얹는다.
+ * 켜지는 순간의 시간표는 장면의 등장 연출(INTRO_SECONDS.neon)과 같은 자리다.
+ */
+export function playNeonBuzz(): void {
+  const started = begin("neon", 0.55);
+  if (!started) return;
+  const { ctx, master, at } = started;
+  for (const [offset, level] of [[0, 0.2], [0.11, 0.16], [0.26, 0.24]] as const) {
+    scheduleNoise(ctx, master, at + offset, { length: 0.05, frequency: 3200, q: 0.8, level });
+    scheduleBlip(ctx, master, at + offset, { type: "sawtooth", frequency: 240, to: 120, level: 0.06, length: 0.05 });
+  }
+  const hum = ctx.createOscillator();
+  hum.type = "sawtooth";
+  hum.frequency.setValueAtTime(60, at + 0.3);
+  const humGain = ctx.createGain();
+  humGain.gain.setValueAtTime(0.0001, at + 0.3);
+  humGain.gain.exponentialRampToValueAtTime(0.045, at + 0.36);
+  humGain.gain.exponentialRampToValueAtTime(0.0001, at + 1.1);
+  hum.connect(humGain).connect(master);
+  hum.start(at + 0.3);
+  hum.stop(at + 1.15);
 }
 
 /** 캡슐이 배출구 바닥에서 다시 튀어 오르는 소리. Clunk 다음에 두 번 난다. */
