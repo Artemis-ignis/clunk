@@ -2176,3 +2176,50 @@
   letter-spacing: 0.06em;
   white-space: nowrap;
 }
+
+
+/* ============================================================================
+   뽑기 가게 테마 (2026-09-03) — 카드는 캐비닛, 칩은 캡슐
+   ========================================================================= */
+.card {
+  border-color: rgba(206, 190, 255, 0.2);
+  border-radius: 18px;
+  background: linear-gradient(180deg, #19122e 0%, #100c1f 60%, #0c091a 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 26px 60px -36px rgba(0, 0, 0, 0.95);
+  transform-style: preserve-3d;
+}
+.card:hover {
+  transform: perspective(900px) rotateX(2deg) translateY(-6px);
+  border-color: rgba(233, 213, 255, 0.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 30px 64px -26px rgba(0, 0, 0, 0.95), 0 0 36px -8px rgba(168, 85, 247, 0.55);
+}
+.cardArt { background: radial-gradient(80% 70% at 50% 30%, #241b46, #140f26 70%); }
+.cardBody { border-top-color: rgba(206, 190, 255, 0.14); }
+.formatBadge { border-radius: 999px; border-color: rgba(214, 220, 236, 0.3); background: linear-gradient(180deg, rgba(40, 32, 70, 0.9), rgba(12, 9, 26, 0.9)); }
+.priceBadge { border-radius: 999px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 0 1px rgba(216, 180, 254, 0.22), 0 8px 24px -8px rgba(168, 85, 247, 0.75); }
+.priceBadgeFree { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08); }
+
+/* 등급 캡슐 — 위 반구는 등급색, 아래는 크림, 가운데 크롬 이음선. 뽑기 화면의 칩과 같다. */
+.gradeBadge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 50%;
+  font-family: var(--v5-label); font-size: 0.78rem; font-weight: 800; color: #1a0f2e;
+  background: linear-gradient(180deg, var(--gc-grade, #f4ead6) 0 47%, rgba(255, 255, 255, 0.85) 47% 53%, #f4ead6 53% 100%);
+  box-shadow: inset -2px -3px 5px rgba(0, 0, 0, 0.28), inset 2px 3px 5px rgba(255, 255, 255, 0.35), 0 4px 12px rgba(0, 0, 0, 0.45), 0 0 14px -2px var(--gc-grade, transparent);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.gradeBadge[data-grade="S"] { --gc-grade: #f5c542; }
+.gradeBadge[data-grade="A"] { --gc-grade: #c084fc; }
+.gradeBadge[data-grade="B"] { --gc-grade: #5eead4; }
+.gradeBadge[data-grade="C"] { --gc-grade: #e6dcc6; }
+@media (prefers-reduced-motion: reduce) { .card:hover { transform: none; } }
+
+/* 카드 위 값 칩 — 좁은 칩 안의 취소선 값은 읽히지 않는다. 카드에서는 "베타 무료"만, 값은 상세에서. */
+.cardBadges .priceStruck { display: none; }
+.cardBadges .priceBadge { white-space: nowrap; }
+/* 마켓 첫 화면의 진열 판과 상세의 판들도 같은 캐비닛이다. */
+.heroPanel, .detailSection, .detailBuy, .evidenceCard, .variantRow {
+  border-color: rgba(206, 190, 255, 0.2);
+  background: linear-gradient(180deg, #19122e 0%, #100c1f 60%, #0c091a 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 30px 70px -40px rgba(0, 0, 0, 0.95), 0 0 40px -18px rgba(168, 85, 247, 0.3);
+}

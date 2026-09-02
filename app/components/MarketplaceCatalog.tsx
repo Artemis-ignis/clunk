@@ -15,6 +15,8 @@ import {
   type ListingFacts,
 } from "./listing-facts-rows";
 import styles from "../marketplace/marketplace.module.css";
+// 뽑기 화면과 같은 등급(S/A/B/C) — 같은 규칙, 같은 색. 가게 안의 진열대와 기계가 한 가게다.
+import { gradeOf } from "./gacha/gacha-catalog";
 
 type Listing = {
   id: string;
@@ -403,6 +405,7 @@ function ListingCard({ listing, colour, beta }: { listing: Listing; colour?: str
           {colourShare !== null ? (
             <span className={styles.colourBadge}>이 색 {Math.round(colourShare * 100)}%</span>
           ) : null}
+          <span className={styles.gradeBadge} data-grade={cardGrade(listing)}>{cardGrade(listing)}</span>
           <span className={styles.formatBadge}>{formatLabel(listing)}</span>
           <span className={`${styles.priceBadge}${listing.priceCents === 0 || beta ? ` ${styles.priceBadgeFree}` : ""}`}>{beta && listing.priceCents > 0 ? <><s className={styles.priceStruck}>{price}</s> 베타 무료</> : price}</span>
         </span>
@@ -985,6 +988,18 @@ function getPreviewUrl(listing: Pick<Listing, "assetId" | "previewFileName">): s
  * not the way the HTTP layer does. "MODEL/GLTF-BINARY" is a content-type header
  * and nobody shops by content-type header.
  */
+/** 카드 위 캡슐 칩의 등급. 뽑기 화면의 gradeOf 와 같은 규칙을 같은 사실(facts)로 돌린다. */
+function cardGrade(listing: { title: string; description: string; entryFileName: string; variants?: unknown; facts?: unknown }): "S" | "A" | "B" | "C" {
+  return gradeOf({
+    title: listing.title,
+    description: listing.description ?? "",
+    entryFileName: listing.entryFileName ?? "",
+    variants: (listing.variants ?? null) as never,
+    clips: null,
+    facts: (listing.facts ?? null) as never,
+  } as never).letter;
+}
+
 function formatLabel(listing: Listing): string {
   const extension = listing.entryFileName.split(".").pop()?.toUpperCase();
   if (extension && extension.length <= 5) return extension;

@@ -71,7 +71,7 @@ export default function Home() {
             carries (app/globals.css). Under .cv5 its alignment rules are deliberately
             inert, so it changes nothing here and keeps the landing in the same family
             as /agents and /pricing. */}
-        <section className="cv5-hero gc-hero public-hero-frame" aria-labelledby="home-heading">
+        <section className="cv5-hero gc-hero public-hero-frame" data-snap-section="hero" aria-labelledby="home-heading">
           {/* 2026-09-02 밤: 첫 화면은 한 편의 짧은 영상이다 — 제목·부제도 무대 위 글줄로
               들어가 스크롤 진행도가 띄우고 거둔다. 스냅 구간에서 빼서 스크롤이 카메라를
               움직이는 동안 끊기지 않게 한다. */}
@@ -192,7 +192,7 @@ export default function Home() {
           <div className="cv5-frame">
             <span className="cv5-eyebrow" style={{ justifyContent: "center" }}>시작하기</span>
             <h2 id="start-heading">필요한 에셋부터<br /><em>골라 보세요</em></h2>
-            <p>자판기에서 바로 뽑거나, 직접 만들어 보세요.</p>
+            <p>뽑기 기계에서 바로 뽑거나, 마켓에서 고르거나, 직접 만들어 보세요.</p>
             <div className="cv5-cta-row" style={{ marginTop: 34 }}>
               <Link className="cv5-btn cv5-btn-primary" href="/studio" prefetch={false}>
                 Clunk 시작하기 <Icon name="arrowUpRight" size={17} />

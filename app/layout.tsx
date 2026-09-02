@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "./foundry.css";
 import "./site-v5.css";
+// 뽑기 가게 테마 — cv5 위에 마지막으로 얹히는 한 겹(색·모양·빛만).
+import "./gacha-theme.css";
 import { WebMcpBridge } from "./components/WebMcpBridge";
 import { SITE_ORIGIN } from "./components/site-metadata";
 
