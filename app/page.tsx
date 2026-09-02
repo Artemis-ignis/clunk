@@ -29,7 +29,9 @@ export const metadata = createPageMetadata({
  * deliberately replaced with measured facts.
  */
 
-const FLOW = ["생성", "검사", "수정", "게시", "에이전트"] as const;
+// Only the operator publishes and sells; a visitor makes, inspects, repairs, buys (receives,
+// during the beta) and hands work to an agent. "게시" implied a step visitors do not have.
+const FLOW = ["생성", "검사", "수정", "구매", "에이전트"] as const;
 
 /**
  * The one model section 01 shows, in one place. Swap `src` and `name` here and
