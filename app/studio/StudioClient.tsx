@@ -124,7 +124,7 @@ const ASSET_COPY: Record<AssetKind, { label: string; short: string; formats: str
     label: "3D 모델",
     short: "면 · 재질 · 관절",
     formats: "GLB · glTF",
-    description: "면(많을수록 무거움), 재질 수, 크기, 관절 구조를 재서 무거운 곳을 먼저 알려 줍니다.",
+    description: "폴리곤 수, 재질 수, 크기, 관절 구조를 재서 무거운 곳을 먼저 알려 줍니다.",
     limit: "검사 100점이 게임 화면에서 좋아 보인다는 뜻은 아닙니다.",
   },
 };

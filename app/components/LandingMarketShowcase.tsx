@@ -51,7 +51,7 @@ function categoryOf(listing: Listing): Exclude<ShowcaseCategory, "all"> {
 /**
  * The measured head clause the pipeline wrote, or nothing. Never a guess.
  * The patterns mirror the plain-Korean sentences build-manifest.mjs writes; 폴리곤 is
- * the word game people already use, and the hero panel says once "적을수록 가벼움".
+ * the word game people already use; no gloss after it (the operator asked for none).
  */
 function trisOf(listing: Listing): string | null {
   const solid = listing.description.match(/잰 값으로 폴리곤 ([\d,]+)개/u);

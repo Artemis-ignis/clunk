@@ -157,7 +157,7 @@ export default function Home() {
                 {/* "TRIS" told a visitor nothing and "면" was our own coinage. 폴리곤 is
                     the word game people already use; the panel head says once which way
                     is better so the number under every thumbnail reads without a glossary. */}
-                <div className="cv5-hv-head"><span>마켓에 올라온 <b>에셋</b></span><span>폴리곤 수 · 적을수록 가벼움</span></div>
+                <div className="cv5-hv-head"><span>마켓에 올라온 <b>에셋</b></span><span>폴리곤 수</span></div>
                 <div className="cv5-hv-grid">
                   {HERO_CELLS.map((asset) => (
                     <figure className="cv5-hv-cell" key={asset.slug} style={{ margin: 0 }}>
@@ -220,9 +220,9 @@ export default function Home() {
                       <b>{FEATURED_MODEL.name}</b>
                       <span>Harvest Frontier에서 실제로 쓰는 파일 · 아래 숫자는 이 파일에서 직접 읽은 값</span>
                     </div>
-                    <div><span>폴리곤</span><b>{FEATURED_MODEL.measured.faces}개</b><small>적을수록 가볍습니다</small></div>
-                    <div><span>그리기 횟수</span><b>{FEATURED_MODEL.measured.drawCalls}회</b><small>적을수록 빠릅니다</small></div>
-                    <div><span>파일 크기</span><b>{FEATURED_MODEL.measured.size}</b><small>내려받는 파일 하나</small></div>
+                    <div><span>폴리곤</span><b>{FEATURED_MODEL.measured.faces}개</b></div>
+                    <div><span>그리기 횟수</span><b>{FEATURED_MODEL.measured.drawCalls}회</b></div>
+                    <div><span>파일 크기</span><b>{FEATURED_MODEL.measured.size}</b></div>
                   </div>
                 </div>
               </div>
@@ -284,11 +284,11 @@ export default function Home() {
                       </div>
                       <div>
                         <b>그리기 횟수</b>
-                        <span><em>{INSPECTED_MODEL.measured.drawCalls}회</em> · 적을수록 빠릅니다</span>
+                        <span><em>{INSPECTED_MODEL.measured.drawCalls}회</em></span>
                       </div>
                       <div>
                         <b>파일 크기</b>
-                        <span><em>{INSPECTED_MODEL.measured.size}</em> · 내려받는 파일 하나</span>
+                        <span><em>{INSPECTED_MODEL.measured.size}</em></span>
                       </div>
                     </div>
                     <div className="cv5-ops">
@@ -351,7 +351,7 @@ export default function Home() {
               </div>
               <p>
                 농장·마을 배경에 바로 쓰는 3D 모델, 2D 스프라이트 시트, 이어 붙여도 이음매가 안 보이는 텍스처입니다.
-                카드마다 폴리곤 수(적을수록 가벼움)가 적혀 있고, 베타 기간에는 로그인만 하면 무료로 받습니다.
+                카드마다 폴리곤 수가 적혀 있고, 베타 기간에는 로그인만 하면 무료로 받습니다.
               </p>
             </div>
             <LandingMarketShowcase />

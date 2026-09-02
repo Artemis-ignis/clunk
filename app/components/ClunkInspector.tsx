@@ -670,7 +670,7 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
               <Metric label="장면 / 오브젝트" value={report ? `${report.metrics.sceneCount} / ${report.metrics.nodeCount}` : "—"} />
               <Metric label="메시 / 조각" value={report ? `${report.metrics.meshCount} / ${report.metrics.primitiveCount}` : "—"} />
               <Metric label="정점" value={report ? report.metrics.vertexCount.toLocaleString() : "대기"} />
-              <Metric label="면 (많을수록 무거움)" value={report ? report.metrics.triangleCount.toLocaleString() : "대기"} />
+              <Metric label="폴리곤" value={report ? report.metrics.triangleCount.toLocaleString() : "대기"} />
               <Metric label="재질" value={report ? `${report.metrics.materialCount}` : "대기"} />
               <Metric label="텍스처 / 메모리" value={report ? `${report.metrics.textureCount} / ${formatBytes(report.metrics.textureMemoryBytes)}` : "대기"} />
             </dl>

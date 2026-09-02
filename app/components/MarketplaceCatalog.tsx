@@ -118,6 +118,21 @@ function buildSnippet(tab: "three" | "r3f" | "clunk", fileName: string): string 
   ].join("\n");
 }
 
+/**
+ * Start a same-origin file download the way the download buttons do, without waiting for
+ * the buyer to find one. Same-origin, so the `download` attribute is honoured.
+ */
+function triggerDownload(href: string, fileName: string): void {
+  if (typeof document === "undefined") return;
+  const anchor = document.createElement("a");
+  anchor.href = href;
+  anchor.download = fileName;
+  anchor.rel = "noopener";
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+}
+
 /** 생성형 AI 표시 대상 여부 — 1st-party 상품은 항상 표시(보수적 기본값). */
 function isAiGenerated(listing: Pick<Listing, "aiGenerated">): boolean {
   return listing.aiGenerated !== false;
@@ -465,11 +480,18 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
   async function startCheckout(
     paymentMethod: "credits" | "card" | "beta",
     // Which listing is being bought. The sheets on this page are separate listings, so a row
-    // has to hand the checkout its own id or the buyer receives the model again.
-    target?: { id: string; label: string },
+    // has to hand the checkout its own id or the buyer receives the model again. The href is
+    // the file itself: once the grant lands the download starts, instead of a button quietly
+    // changing its label and leaving the buyer to notice.
+    target?: { id: string; label: string; href: string; fileName: string },
   ) {
     if (!listing || buying) return;
-    const purchase = target ?? { id: listing.id, label: displayTitle(listing.slug, listing.title) };
+    const purchase = target ?? {
+      id: listing.id,
+      label: displayTitle(listing.slug, listing.title),
+      href: `/api/marketplace/assets/${encodeURIComponent(listing.assetId)}?file=${encodeURIComponent(listing.entryFileName)}`,
+      fileName: listing.entryFileName,
+    };
     // Withdrawal-limit consent is a condition of a paid digital sale. The beta grant is not a
     // sale, and its panel does not show the checkbox — so this guard, left as it was, made
     // the beta button return silently on every click.
@@ -508,11 +530,12 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
         setOwnedIds((current) => new Set(current).add(purchase.id));
         setMessage(
           payload.status === "BETA_GRANTED"
-              ? `${purchase.label} — 받았습니다. 베타 기간이라 결제 없이 드립니다. 아래에서 파일을 받으세요.`
+              ? `${purchase.label} — 받았습니다. 베타 기간이라 결제 없이 드립니다. 내려받기가 시작됩니다. 시작되지 않으면 내려받기 버튼을 누르세요.`
               : payload.status === "PAID_WITH_CREDITS"
-            ? `구매 완료 — ${payload.creditsCharged?.toLocaleString("ko-KR") ?? "?"} 크레딧 차감, 잔액 ${payload.balance?.toLocaleString("ko-KR") ?? "?"} 크레딧. 아래에서 파일을 받으세요.`
-            : `${purchase.label} — 이미 보유한 상품입니다. 아래에서 파일을 받으세요.`,
+            ? `구매 완료 — ${payload.creditsCharged?.toLocaleString("ko-KR") ?? "?"} 크레딧 차감, 잔액 ${payload.balance?.toLocaleString("ko-KR") ?? "?"} 크레딧. 내려받기가 시작됩니다.`
+            : `${purchase.label} — 이미 받은 상품입니다. 내려받기가 시작됩니다.`,
         );
+        triggerDownload(purchase.href, purchase.fileName);
         return;
       }
       if (payload.status === "INSUFFICIENT_CREDITS") {
@@ -666,6 +689,8 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
                 {listing.variants.map((variant) => {
                   const { kind, facts } = variantFacts(variant);
                   const has = ownedIds.has(variant.id);
+                  const variantHref = `/api/marketplace/assets/${encodeURIComponent(variant.assetId)}?file=${encodeURIComponent(variant.entryFileName)}`;
+                  const variantTarget = { id: variant.id, label: kind, href: variantHref, fileName: variant.entryFileName };
                   return (
                     <li key={variant.id} className={styles.variantRow}>
                       <div className={styles.variantHead}>
@@ -686,7 +711,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
                           type="button"
                           className={`${styles.btn} ${styles.btnGhost} ${styles.variantBtn}`}
                           disabled={buying}
-                          onClick={() => void startCheckout("beta", { id: variant.id, label: kind })}
+                          onClick={() => void startCheckout("beta", variantTarget)}
                         >
                           {buying ? "받는 중…" : "베타 무료로 받기"} <Icon name="download" size={14} />
                         </button>
@@ -695,7 +720,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
                           type="button"
                           className={`${styles.btn} ${styles.btnGhost} ${styles.variantBtn}`}
                           disabled={buying || !withdrawalConsent}
-                          onClick={() => void startCheckout("credits", { id: variant.id, label: kind })}
+                          onClick={() => void startCheckout("credits", variantTarget)}
                         >
                           {formatPrice(variant.priceCents, variant.currency)} <Icon name="arrowUpRight" size={14} />
                         </button>
@@ -712,7 +737,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
             <ul className={styles.specList} aria-label="이 파일에서 방금 측정한 사양">
               {/* 삼각형·드로우콜 are our words. 폴리곤 is the word game people already use,
                   and the line says which direction is better so the number means something. */}
-              <li><b>폴리곤 {measured.triangles.toLocaleString("ko-KR")}개</b> · 적을수록 가볍습니다 (덩어리 {measured.meshes}개 · 재질 {measured.materials}개)</li>
+              <li><b>폴리곤 {measured.triangles.toLocaleString("ko-KR")}개</b> · 덩어리 {measured.meshes}개 · 재질 {measured.materials}개</li>
               <li><b>{measured.bounds.x.toFixed(2)} × {measured.bounds.y.toFixed(2)} × {measured.bounds.z.toFixed(2)} m</b> · 실제 크기입니다</li>
               {/* Only worth a line when it is not zero. A model that rests on the ground
                   needs no instruction; one that sinks needs the exact number. */}

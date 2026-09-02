@@ -55,7 +55,7 @@ const SERIES_CARDS: ReadonlyArray<{ id: string; title: string; description: stri
   {
     id: "game-ready",
     title: "게임에 넣어도 되는지 검사",
-    description: "파일 하나를 열어 파일 크기, 면(많을수록 무거움), 그리기 횟수(적을수록 빠름), 규칙 위반을 한 번에 잽니다. 결과는 숫자와 기준을 함께 보여 줍니다.",
+    description: "파일 하나를 열어 파일 크기, 폴리곤 수, 그리기 횟수, 규칙 위반을 한 번에 잽니다. 결과는 숫자와 기준을 함께 보여 줍니다.",
     href: "/app",
     action: "검사기 열기",
   },
