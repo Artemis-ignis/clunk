@@ -197,6 +197,9 @@ export function EmbeddedGlbViewer({
   // Which clips this file can actually play, decided after the nodes are looked up rather
   // than promised by the button label.
   const [clipStatus, setClipStatus] = useState<ClipStatus[]>([]);
+  // How many animations the file itself carries. When it has real motion, the pivot
+  // test (a stand-in that wobbles named nodes) is noise next to it and is not offered.
+  const [fileClipCount, setFileClipCount] = useState(0);
   const [active, setActive] = useState(-1);
   const [playing, setPlaying] = useState(true);
   const [speed, setSpeed] = useState<number>(1);
@@ -548,6 +551,7 @@ export function EmbeddedGlbViewer({
         // (idle, walk, inspect, water, hoe, harvest) as node-transform tracks, so a mixer
         // bound to the model plays them without a skeleton.
         const fileClips = gltf.animations ?? [];
+        setFileClipCount(fileClips.length);
         const mixer = fileClips.length ? new THREE.AnimationMixer(model) : null;
         let mixerAction: import("three").AnimationAction | null = null;
 
@@ -1093,7 +1097,7 @@ export function EmbeddedGlbViewer({
 
             {/* Pivot test: press a part the file names and it swings ±30°, so a buyer can
                 check for themselves that it really is a separate, turnable piece. */}
-            {pivotList.length ? (
+            {pivotList.length && !fileClipCount ? (
               <div className="cv5-bench-motion-group" role="group" aria-label="회전축 시험">
                 <span className="cv5-bench-motion-label">회전축 시험 · 여러 개 동시</span>
                 {AXES.map((axis) => (
