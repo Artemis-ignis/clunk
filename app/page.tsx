@@ -36,18 +36,19 @@ const FLOW = ["생성", "검사", "수정", "게시", "에이전트"] as const;
  * the stage, the caption and the heading text all follow — nothing else in this
  * file names the file.
  *
- * `measured` is not typed by hand: every value is copied from
- * outputs/market-launch/wave1/upload-manifest.json (products[].measured), the record
- * the measurer wrote for this exact GLB — the tractor Clunk authored in
- * examples/generated/vehicles/tractor.factory.mjs
- * (triangleCount 1060, drawCallCount 18, materialCount 5, 74,764 bytes = 75 KB).
- * If the file changes, re-read that record — never estimate.
+ * This is the tractor Harvest Frontier actually ships — the operator's own game, the
+ * file players see — not a stand-in authored for the page (2026-09-02: a code-built
+ * tractor stood here for a day and read as a toy next to the real one).
+ * `measured` is not typed by hand: every value is the 2026-08-31 re-inspection record
+ * (.clunk-evidence/.../tractor.compact.m1-pc-inspection.json): triangleCount 39,320 ·
+ * drawCallCount 98 · 840,136 bytes = 840 KB. If the file changes, re-read the record.
  */
 const FEATURED_MODEL = {
-  src: "/market/cozy-tractor/tractor.glb",
-  name: "코지 트랙터",
-  fileName: "tractor.glb",
-  measured: { faces: "1,060", drawCalls: "18", size: "75 KB" },
+  src: "/landing/tractor.compact.m1.glb",
+  poster: "/landing/tractor-hero.png",
+  name: "트랙터",
+  fileName: "tractor.compact.m1.glb",
+  measured: { faces: "39,320", drawCalls: "98", size: "840 KB" },
 } as const;
 
 /**
@@ -166,11 +167,10 @@ export default function Home() {
                   ))}
                 </div>
                 <div className="cv5-hv-foot">
-                  {/* The authored tractor's own record (upload-manifest.json measured.gameReadyScore:
-                      web 100 / hardBlockerCount 0) — the model section 01 shows, not the
-                      Harvest Frontier file section 02 inspects. */}
-                  <span>코지 트랙터 검사 결과</span>
-                  <b>100점 · 막는 문제 0건</b>
+                  {/* The Harvest Frontier tractor's own record (tractor.compact.m1-pc-inspection.json):
+                      score 99, hardBlockerCount 0, two warnings. It has never scored 100. */}
+                  <span>트랙터 검사 결과</span>
+                  <b>99점 · 막는 문제 0건</b>
                 </div>
               </div>
               <div className="cv5-float cv5-float-a"><img src="/landing/showcase/conifer-spire.webp" alt="" width={240} height={240} loading="eager" /><small>860 폴리곤</small></div>
@@ -201,7 +201,7 @@ export default function Home() {
             </div>
             <div className="cv5-sec-visual cv5-reveal" data-delay="1">
               <div className="cv5-mock">
-                <div className="cv5-mock-bar"><span>Clunk가 <b>만든 모델</b></span><span>{FEATURED_MODEL.fileName}</span></div>
+                <div className="cv5-mock-bar"><span>실제 게임에 <b>들어간 모델</b></span><span>{FEATURED_MODEL.fileName}</span></div>
                 {/* This section is about MAKING an asset, so it shows one Clunk
                     authored, turning, with the numbers its own inspector read off
                     the file. A grid of things to buy belongs in the market section
@@ -210,13 +210,15 @@ export default function Home() {
                   <div className="cv5-make-stage">
                     <EmbeddedGlbViewer
                       src={FEATURED_MODEL.src}
-                      alt={`Clunk가 만든 ${FEATURED_MODEL.name} — 드래그해서 돌려보세요`}
+                      poster={FEATURED_MODEL.poster}
+                      alt={`Harvest Frontier에 들어간 ${FEATURED_MODEL.name} — 드래그해서 돌려보세요`}
+                      hint="드래그 회전 · 휠 줌 · 실제 게임에 들어간 파일"
                     />
                   </div>
                   <div className="cv5-make-facts">
                     <div className="cv5-make-name">
                       <b>{FEATURED_MODEL.name}</b>
-                      <span>코드로 만든 모델 · 아래 숫자는 이 파일에서 직접 읽은 값</span>
+                      <span>Harvest Frontier에서 실제로 쓰는 파일 · 아래 숫자는 이 파일에서 직접 읽은 값</span>
                     </div>
                     <div><span>폴리곤</span><b>{FEATURED_MODEL.measured.faces}개</b><small>적을수록 가볍습니다</small></div>
                     <div><span>그리기 횟수</span><b>{FEATURED_MODEL.measured.drawCalls}회</b><small>적을수록 빠릅니다</small></div>
@@ -259,6 +261,7 @@ export default function Home() {
                       src={INSPECTED_MODEL.src}
                       poster={INSPECTED_MODEL.poster}
                       alt={`Harvest Frontier에 들어간 ${INSPECTED_MODEL.name} — 드래그해서 돌려보세요`}
+                      hint="드래그 회전 · 휠 줌 · 실제 게임에 들어간 파일"
                     />
                     <small>Harvest Frontier에 들어간 파일</small>
                   </div>
