@@ -24,7 +24,7 @@ Clunk는 출시 전부터 실제 게임 두 프로젝트의 납품 라인으로 
 
 "산 에셋을 엔진에 넣고 기도하던 시간이 사라졌어요. 상품 페이지의 드로우콜 수치가 곧 계약서니까요." — 인디 개발자 ○○○. *(가상 인용)*
 
-Clunk는 https://clunk.artemis-clunk.workers.dev 에서 시작할 수 있다.
+Clunk는 https://clunk.games 에서 시작할 수 있다.
 
 ---
 

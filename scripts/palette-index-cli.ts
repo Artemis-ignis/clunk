@@ -22,7 +22,7 @@ import { readImagePalette, readPalette, type PaletteEntry } from "../app/compone
 
 const originArg = process.argv.indexOf("--origin");
 const ORIGIN =
-  originArg > -1 ? process.argv[originArg + 1] : "https://clunk.artemis-clunk.workers.dev";
+  originArg > -1 ? process.argv[originArg + 1] : "https://clunk.games";
 const OUT = "app/data/listing-palettes.json";
 
 /**

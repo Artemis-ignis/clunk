@@ -12,9 +12,20 @@ import { SiteFooter } from "../components/SiteFooter";
 import { ForceDarkTheme } from "../components/ForceDarkTheme";
 import Link from "../components/NativeLink";
 import { createPageMetadata } from "../components/site-metadata";
+import { BETA_MONTHLY_GRANT_CREDITS, SIGNUP_GRANT_CREDITS } from "../api/_lib/clunk";
 import "../login/auth-v5.css";
 
 export const dynamic = "force-dynamic";
+
+/** The eyebrow used to print the raw route ("/app"). People do not go to routes. */
+function returnLabel(path: string): string {
+  if (path.startsWith("/dashboard")) return "내 작업실";
+  if (path.startsWith("/app")) return "에셋 검사";
+  if (path.startsWith("/studio")) return "에셋 만들기";
+  if (path.startsWith("/marketplace")) return "에셋 마켓";
+  if (path.startsWith("/review")) return "검수 뷰어";
+  return "이전 화면";
+}
 
 export const metadata = createPageMetadata({
   title: "Workspace 시작",
@@ -111,16 +122,16 @@ function AuthJourney({
             </p>
             <div className="cv5-auth-facts">
               <div className="cv5-auth-fact">
-                <span>IDENTITY</span>
+                <span>로그인</span>
                 <strong>Google · GitHub OAuth</strong>
               </div>
               <div className="cv5-auth-fact">
-                <span>RETURN</span>
-                <strong>{returnTo}</strong>
+                <span>돌아갈 화면</span>
+                <strong>{returnLabel(returnTo)}</strong>
               </div>
               <div className="cv5-auth-fact">
-                <span>DATA</span>
-                <strong>개인 Workspace</strong>
+                <span>베타 혜택</span>
+                <strong>{`가입 ${SIGNUP_GRANT_CREDITS} · 매월 ${BETA_MONTHLY_GRANT_CREDITS} 크레딧 · 결제 없음`}</strong>
               </div>
             </div>
           </div>
@@ -194,7 +205,7 @@ function AuthJourney({
 
             {/* OAuth 흐름에는 별도 가입 폼이 없으므로 체크박스 대신 고지+링크로 동의를 표시합니다. */}
             <p className="cv5-auth-switch">
-              계속하면 이용약관과 개인정보처리방침에 동의하는 것으로 간주됩니다.{" "}
+              계속하면 다음 화면에서 이용약관과 개인정보 수집·이용 동의를 한 번 확인합니다. 미리 읽어 두셔도 됩니다:{" "}
               <Link href="/terms">이용약관</Link> · <Link href="/privacy">개인정보처리방침</Link>
             </p>
 

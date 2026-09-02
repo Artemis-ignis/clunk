@@ -4,7 +4,7 @@ import { useMemo, useState, useSyncExternalStore } from "react";
 import { buildAgentGuides, type AgentGuideKey } from "./agent-guides";
 import { Icon } from "./Icon";
 
-const FALLBACK_ENDPOINT = "https://clunk.artemis-clunk.workers.dev/api/mcp";
+const FALLBACK_ENDPOINT = "https://clunk.games/api/mcp";
 const subscribeToOrigin = () => () => {};
 const getClientEndpoint = () => `${window.location.origin}/api/mcp`;
 const getServerEndpoint = () => FALLBACK_ENDPOINT;

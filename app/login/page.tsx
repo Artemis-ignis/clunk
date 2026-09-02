@@ -17,6 +17,16 @@ import "./auth-v5.css";
 
 export const dynamic = "force-dynamic";
 
+/** The eyebrow used to print the raw route ("/app"). People do not go to routes. */
+function returnLabel(path: string): string {
+  if (path.startsWith("/dashboard")) return "내 작업실";
+  if (path.startsWith("/app")) return "에셋 검사";
+  if (path.startsWith("/studio")) return "에셋 만들기";
+  if (path.startsWith("/marketplace")) return "에셋 마켓";
+  if (path.startsWith("/review")) return "검수 뷰어";
+  return "이전 화면";
+}
+
 export const metadata = createPageMetadata({
   title: "로그인",
   description: "Google 또는 GitHub 계정으로 Clunk에 로그인하고, 보던 작업 화면으로 그대로 돌아갑니다.",
@@ -126,16 +136,16 @@ function AuthJourney({
             </p>
             <div className="cv5-auth-facts">
               <div className="cv5-auth-fact">
-                <span>IDENTITY</span>
+                <span>로그인</span>
                 <strong>Google · GitHub OAuth</strong>
               </div>
               <div className="cv5-auth-fact">
-                <span>RETURN</span>
-                <strong>{returnTo}</strong>
+                <span>돌아갈 화면</span>
+                <strong>{returnLabel(returnTo)}</strong>
               </div>
               <div className="cv5-auth-fact">
-                <span>DATA</span>
-                <strong>개인 Workspace</strong>
+                <span>데이터</span>
+                <strong>내 작업공간에만</strong>
               </div>
             </div>
           </div>
@@ -209,7 +219,7 @@ function AuthJourney({
 
             {/* OAuth/QA 흐름에는 별도 가입 폼이 없으므로 체크박스 대신 고지+링크로 동의를 표시합니다. */}
             <p className="cv5-auth-switch">
-              계속하면 이용약관과 개인정보처리방침에 동의하는 것으로 간주됩니다.{" "}
+              계속하면 다음 화면에서 이용약관과 개인정보 수집·이용 동의를 한 번 확인합니다. 미리 읽어 두셔도 됩니다:{" "}
               <Link href="/terms">이용약관</Link> · <Link href="/privacy">개인정보처리방침</Link>
             </p>
 
@@ -236,7 +246,7 @@ export default async function LoginPage({
 }) {
   const params = await searchParams;
   const user = await getChatGPTUser();
-  const returnTo = safeOAuthReturnPath(params.return_to ?? "/app");
+  const returnTo = safeOAuthReturnPath(params.return_to ?? "/dashboard");
 
   return <AuthJourney user={user} returnTo={returnTo} authError={params.auth_error} />;
 }

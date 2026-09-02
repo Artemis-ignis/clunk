@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-const DEFAULT_SITE_ORIGIN = "https://clunk.artemis-clunk.workers.dev";
+const DEFAULT_SITE_ORIGIN = "https://clunk.games";
 
 function resolveSiteOrigin() {
   const configured = process.env.CLUNK_SITE_ORIGIN?.trim().replace(/\/$/, "");

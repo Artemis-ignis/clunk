@@ -31,4 +31,4 @@ description: 입력 종류별로 검증 가능한 범위와 target profile 목�
 
 지원 surface: 웹 검사기 · Asset Studio · CLI · MCP 서버 · VS Code 확장.
 
-[에이전트용 요약 보기](https://clunk.artemis-clunk.workers.dev/llms.txt)
+[에이전트용 요약 보기](https://clunk.games/llms.txt)

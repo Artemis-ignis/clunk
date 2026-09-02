@@ -112,6 +112,9 @@ export async function ensureSchema(db: D1Database): Promise<void> {
   await ensureColumn(db, "clunk_collaboration_messages");
   await ensureColumn(db, "clunk_generation_jobs", "project_id");
   await ensureColumn(db, "clunk_marketplace_orders", "checkout_url");
+  // Recorded consent (2026-09-02). Null until the person ticks the boxes on /consent.
+  await ensureColumn(db, "clunk_users", "consented_at");
+  await ensureColumn(db, "clunk_users", "marketing_opt_in", "INTEGER NOT NULL DEFAULT 0");
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_clunk_generation_project_created ON clunk_generation_jobs(project_id, created_at DESC)`).run();
   await db.batch([
     db.prepare(
@@ -137,7 +140,7 @@ export async function ensureSchema(db: D1Database): Promise<void> {
 
 async function ensureColumn(
   db: D1Database,
-  table: "clunk_collaboration_threads" | "clunk_collaboration_messages" | "clunk_generation_jobs" | "clunk_marketplace_orders",
+  table: "clunk_collaboration_threads" | "clunk_collaboration_messages" | "clunk_generation_jobs" | "clunk_marketplace_orders" | "clunk_users",
   column = "evidence_json",
   definition = "TEXT",
 ): Promise<void> {

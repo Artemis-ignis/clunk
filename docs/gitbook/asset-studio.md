@@ -8,7 +8,7 @@ description: 2D와 3D 모두 provenance를 남기고 검사합니다
 
 ## Clunk Series · Native
 
-GitHub 자료는 감사된 source material로만 기록하고, 실제 실행은 Clunk 내부 코드와 Core 계약으로 수행합니다. [여섯 시리즈와 소스 장부](https://clunk.artemis-clunk.workers.dev/series)
+GitHub 자료는 감사된 source material로만 기록하고, 실제 실행은 Clunk 내부 코드와 Core 계약으로 수행합니다. [여섯 시리즈와 소스 장부](https://clunk.games/series)
 
 ```bash
 # Clunk Series: 내부 코드로 실행하는 Game Ready mesh pass

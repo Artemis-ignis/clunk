@@ -149,22 +149,40 @@ test("랜딩과 SiteShell 푸터가 세 법적 문서를 모두 링크한다", a
   }
 });
 
-test("가입·로그인 화면이 약관·개인정보 동의 고지문과 링크를 노출한다", async () => {
-  const notice = "계속하면 이용약관과 개인정보처리방침에 동의하는 것으로 간주됩니다.";
+test("가입·로그인 화면은 동의를 간주하지 않고, 다음 화면에서 기록한다", async () => {
+  // 2026-09-02: "계속하면 동의하는 것으로 간주됩니다"는 기록이 없는 동의였다. 이제 로그인 뒤
+  // 첫 작업 화면 전에 /consent 가 한 번 묻고, 그 답을 사용자 행에 시각과 함께 적는다.
+  const notice = "다음 화면에서 이용약관과 개인정보 수집·이용 동의를 한 번 확인합니다";
 
   for (const file of ["app/login/page.tsx", "app/signup/page.tsx"]) {
     const page = await source(file);
-    assert.ok(page.includes(notice), `${file}에 동의 고지문이 없습니다`);
+    assert.ok(page.includes(notice), `${file}에 동의 안내문이 없습니다`);
+    assert.ok(!page.includes("동의하는 것으로 간주"), `${file}에 간주 동의 문구가 남아 있습니다`);
     assert.match(page, /href="\/terms"/, `${file}에 이용약관 링크가 없습니다`);
     assert.match(page, /href="\/privacy"/, `${file}에 개인정보처리방침 링크가 없습니다`);
   }
 
   for (const pathname of ["/login", "/signup"]) {
     const html = await (await render(pathname)).text();
-    assert.ok(html.includes(notice), `${pathname} 렌더 결과에 동의 고지문이 없습니다`);
+    assert.ok(html.includes(notice), `${pathname} 렌더 결과에 동의 안내문이 없습니다`);
     assert.ok(html.includes('href="/terms"'), `${pathname}에 이용약관 링크가 없습니다`);
     assert.ok(html.includes('href="/privacy"'), `${pathname}에 개인정보처리방침 링크가 없습니다`);
   }
+
+  // The gate: every workspace page passes through requireChatGPTUser, which sends a person
+  // without a recorded consent to /consent and never treats a missing row as consent.
+  const gate = await source("app/chatgpt-auth.ts");
+  assert.match(gate, /await requireConsent\(user\.id, returnTo\)/);
+  assert.match(gate, /if \(row\?\.consentedAt\) return;/);
+  assert.match(gate, /redirect\(`\/consent\?return_to=/);
+
+  // The record: both required consents or nothing; marketing is a separate optional flag.
+  const api = await source("app/api/consent/route.ts");
+  assert.match(api, /body\.terms !== true \|\| body\.privacy !== true/);
+  assert.match(api, /consented_at = COALESCE\(consented_at, CURRENT_TIMESTAMP\)/);
+  const form = await source("app/consent/ConsentForm.tsx");
+  assert.equal((form.match(/type="checkbox"/g) ?? []).length, 3, "동의 화면은 필수 2 + 선택 1 체크박스다");
+  assert.match(form, /disabled=\{!terms \|\| !privacy \|\| busy\}/, "필수 두 개 전에는 버튼이 꺼져 있어야 한다");
 });
 
 test("요금 화면이 환불정책을 링크한다", async () => {

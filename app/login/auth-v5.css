@@ -405,3 +405,25 @@ a.cv5-auth-provider:hover {
   .cv5-auth-secondary,
   .cv5-qa-submit { transition: none; }
 }
+
+/* /consent — the same card as the login page, with the boxes that make the consent real. */
+.cv5-consent { display: grid; gap: 16px; }
+.cv5-consent-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.cv5-consent-list label {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 12px 14px;
+  border: 1px solid var(--v5-line);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--v5-ink-dim);
+}
+.cv5-consent-list label:hover { border-color: var(--v5-line-strong); }
+.cv5-consent-list input { width: 18px; height: 18px; margin-top: 2px; accent-color: #8b5cf6; }
+.cv5-consent-list b { color: var(--v5-ink); font-weight: 700; margin-right: 2px; }
+.cv5-consent-list a { color: var(--v5-ink); text-decoration: underline; text-underline-offset: 3px; }
+.cv5-consent .cv5-auth-primary[disabled] { opacity: 0.45; cursor: not-allowed; }

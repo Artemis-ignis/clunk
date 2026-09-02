@@ -2,7 +2,7 @@
 
 Clunk는 게임 에셋의 **생성 · 검사 · 판매 · 에이전트 연동**을 하나의 증거 체인으로 묶는 파운드리입니다. 이 문서는 읽는 순서가 곧 실행 순서가 되도록 구성했습니다.
 
-제품 사이트: [clunk.artemis-clunk.workers.dev](https://clunk.artemis-clunk.workers.dev)
+제품 사이트: [clunk.games](https://clunk.games)
 
 ## 판정을 읽는 법
 
@@ -29,6 +29,6 @@ Clunk는 게임 에셋의 **생성 · 검사 · 판매 · 에이전트 연동**�
 
 ## 바로 실행하기
 
-* [에이전트 연결 화면](https://clunk.artemis-clunk.workers.dev/connect) — 키 발급과 설정 블록 복사
-* [내 파일 검사](https://clunk.artemis-clunk.workers.dev/app) — 실제 바이트로 Game Ready 점수 확인
-* [검수 뷰어](https://clunk.artemis-clunk.workers.dev/review) — 3D 회전·2D 재생으로 직접 판정
+* [에이전트 연결 화면](https://clunk.games/connect) — 키 발급과 설정 블록 복사
+* [내 파일 검사](https://clunk.games/app) — 실제 바이트로 Game Ready 점수 확인
+* [검수 뷰어](https://clunk.games/review) — 3D 회전·2D 재생으로 직접 판정

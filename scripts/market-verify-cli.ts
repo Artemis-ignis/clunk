@@ -20,7 +20,7 @@ const arg = (name: string, fallback: string) => {
   const at = argv.indexOf(`--${name}`);
   return at > -1 && argv[at + 1] ? argv[at + 1] : fallback;
 };
-const ORIGIN = arg("origin", "https://clunk.artemis-clunk.workers.dev");
+const ORIGIN = arg("origin", "https://clunk.games");
 const ATTEMPTS = Math.max(1, Number(arg("attempts", "3")));
 
 type Listing = {
