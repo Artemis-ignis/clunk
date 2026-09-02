@@ -962,3 +962,28 @@ html:has(.gc-film) .sitenav-dock::before { opacity: 0 !important; }
   .gc3-poster-wide { display: none; }
   .gc3-poster-tall { display: block; }
 }
+
+/* 뽑는 동안과 공개 무대에서는 장면 글줄이 물러난다(인라인 값보다 우선). */
+.gc3:not([data-stage="idle"]) .gc-beat { opacity: 0 !important; visibility: hidden !important; }
+/* 세로 화면의 결과 카드 — 상품이 위에 보이도록 짧게. 표는 상품 페이지에 있다. */
+@media (max-width: 720px) {
+  .gc-film-prize { max-height: 46svh; bottom: 8px; }
+  .gc-film-prize .gc-stats, .gc-film-prize .gc-palette, .gc-film-prize .gc-rule, .gc-film-prize .gc-prize-note { display: none; }
+  .gc-film-prize .gc-prize-body { padding: 14px 14px 12px; gap: 8px; }
+  .gc-film-prize .gc-prize-body h3 { font-size: 1.2rem; }
+  .gc-film-prize .gc-prize-actions { gap: 8px; }
+  .gc-film-prize .gc-btn { min-height: 44px; padding: 0 14px; font-size: 0.9rem; }
+}
+.gc-diag { left: 8px; right: auto; bottom: auto; top: 76px; max-height: 30vh; opacity: 0.9; }
+
+/* 포스터는 사진이다 — 무대를 꽉 채우고(cover) 3D 와 같은 자리에 기계가 선다. 살짝 숨 쉬듯
+   확대되다가 3D 가 켜지면 사라진다. */
+.gc-film .gc3-poster {
+  object-fit: cover; object-position: 50% 50%;
+  width: 100%; height: 100%;
+  transform-origin: 50% 60%;
+  animation: gc3-poster-breathe 9s ease-in-out infinite;
+}
+@keyframes gc3-poster-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.025); } }
+.gc3[data-live] .gc3-poster { animation: none; }
+@media (prefers-reduced-motion: reduce) { .gc-film .gc3-poster { animation: none; } }

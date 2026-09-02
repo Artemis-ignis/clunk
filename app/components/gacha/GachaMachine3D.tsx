@@ -15,7 +15,7 @@ import Image from "next/image";
 
 import Link from "../NativeLink";
 import { CapsuleMachine } from "./CapsuleMachine";
-import { GachaPoster, POSTER_POINTS } from "./GachaPoster";
+import { GachaPoster, POSTER_IMAGES, type PosterVariant } from "./GachaPoster";
 import { SCROLL_PULL } from "./gacha-scroll";
 import { PrizeCard, type ClaimState } from "./PrizeCard";
 import {
@@ -294,6 +294,10 @@ export function GachaMachine3D() {
   const refreshFilm = useRef<() => void>(() => {});
   /** 3D 가 첫 프레임을 냈는지. 그 전에는 포스터 위에 단추를 놓는다. */
   const liveRef = useRef(false);
+  /** 포스터가 얼마나 오래 보였는지(ms). 오래 보였으면 등장 연출을 건너뛴다 — 서 있던 기계가
+      갑자기 위에서 떨어지면 "다른 것이 먼저 나왔다" 로 읽힌다(운영자 실기기 2026-09-03). */
+  const posterShownMs = useRef(0);
+  const mountedAt = useRef(0);
   /** ?diag=1 — 실기기에서 무엇이 언제 됐는지 화면 구석에 적는다. */
   const [diag, setDiag] = useState<string[] | null>(null);
   const diagStart = useRef(0);
@@ -447,6 +451,7 @@ export function GachaMachine3D() {
     let onResize: (() => void) | null = null;
 
     note("scene module loading");
+    mountedAt.current = performance.now();
     void (async () => {
       try {
         const sceneModule = await import("./gacha-scene");
@@ -495,6 +500,7 @@ export function GachaMachine3D() {
           if (painted) return;
           painted = true;
           liveRef.current = true;
+          posterShownMs.current = performance.now() - mountedAt.current;
           note("first frame painted");
           rootRef.current?.setAttribute("data-live", "1");
         };
@@ -584,7 +590,8 @@ export function GachaMachine3D() {
   useEffect(() => {
     const scene = sceneRef.current;
     if (!scene || sceneReady === 0) return;
-    if (reducedMotion || introAlreadySeen()) {
+    if (reducedMotion || introAlreadySeen() || posterShownMs.current > 700) {
+      if (posterShownMs.current > 700) note(`intro skipped · poster stood ${Math.round(posterShownMs.current)}ms`);
       // 이미 본 사람과 움직임을 줄여 달라는 설정에는 연출을 돌리지 않는다 — 완성된
       // 기계가 그 자리에 선다. data-intro 는 처음부터 없어 건드릴 것이 없다.
       scene.skipIntro();
@@ -896,33 +903,34 @@ export function GachaMachine3D() {
     const place = () => {
       if (liveRef.current) return;
       const stage = stageRef.current;
-      // 가로·세로 포스터 중 지금 보이는 쪽.
+      // 가로·세로 사진 중 지금 보이는 쪽. 사진은 object-fit: cover 로 무대를 채우므로
+      // 같은 규칙(긴 쪽에 맞추고 가운데 정렬)으로 사진 안의 자리를 무대 좌표로 옮긴다.
       const poster = stage
-        ? Array.from(stage.querySelectorAll<SVGSVGElement>(".gc3-poster")).find((node) => node.getClientRects().length > 0)
+        ? Array.from(stage.querySelectorAll<HTMLImageElement>(".gc3-poster")).find((node) => node.getClientRects().length > 0)
         : undefined;
       if (!stage || !poster) return;
-      const [vbX, vbY, vbW, vbH] = (poster.dataset.viewbox ?? "0 12 660 646").split(" ").map(Number);
+      const spec = POSTER_IMAGES[(poster.dataset.variant as PosterVariant | undefined) ?? "wide"];
       const box = poster.getBoundingClientRect();
       const stageBox = stage.getBoundingClientRect();
-      const scale = Math.min(box.width / vbW, box.height / vbH);
-      const offsetX = box.left - stageBox.left + (box.width - vbW * scale) / 2;
-      const offsetY = box.top - stageBox.top + (box.height - vbH * scale) / 2;
-      const put = (node: HTMLElement | null, point: { x: number; y: number; radius: number }, minimum: number) => {
+      const scale = Math.max(box.width / spec.width, box.height / spec.height);
+      const offsetX = box.left - stageBox.left + (box.width - spec.width * scale) / 2;
+      const offsetY = box.top - stageBox.top + (box.height - spec.height * scale) / 2;
+      const put = (node: HTMLElement | null, point: { x: number; y: number; r: number }, minimum: number) => {
         if (!node) return;
-        const size = Math.max(minimum, point.radius * 2 * scale);
-        const x = offsetX + (point.x - vbX) * scale;
-        const y = offsetY + (point.y - vbY) * scale;
+        const size = Math.max(minimum, point.r * 2 * spec.width * scale);
+        const x = offsetX + point.x * spec.width * scale;
+        const y = offsetY + point.y * spec.height * scale;
         node.style.left = `${x - size / 2}px`;
         node.style.top = `${y - size / 2}px`;
         node.style.width = `${size}px`;
         node.style.height = `${size}px`;
       };
-      put(leverRef.current, POSTER_POINTS.lever, 56);
-      put(capsuleRef.current, POSTER_POINTS.capsule, 48);
-      put(domeRef.current, POSTER_POINTS.dome, 80);
+      put(leverRef.current, spec.lever, 56);
+      put(capsuleRef.current, spec.capsule, 48);
+      put(domeRef.current, spec.dome, 80);
       if (hintRef.current) {
-        hintRef.current.style.left = `${offsetX + (POSTER_POINTS.lever.x - vbX) * scale - POSTER_POINTS.lever.radius * scale - 10}px`;
-        hintRef.current.style.top = `${offsetY + (POSTER_POINTS.lever.y - vbY) * scale}px`;
+        hintRef.current.style.left = `${offsetX + (spec.lever.x - spec.lever.r) * spec.width * scale - 10}px`;
+        hintRef.current.style.top = `${offsetY + spec.lever.y * spec.height * scale}px`;
       }
     };
     place();

@@ -1441,6 +1441,9 @@ export function createGachaScene(
   let scrollEased = 0;
   const shotPosition = new THREE.Vector3();
   const shotTarget = new THREE.Vector3();
+  const prizeForward = new THREE.Vector3();
+  const prizeRight = new THREE.Vector3();
+  const prizeUp = new THREE.Vector3();
   let cameraShake = 0;
   let width = 1;
   let height = 1;
@@ -2038,8 +2041,16 @@ export function createGachaScene(
         prizeArt.visible = true;
         // 넓은 화면에서는 카드가 오른쪽에 뜨므로 상품이 조금 왼쪽에 선다. 세로 화면은 카드가
         // 아래에 뜨니 가운데 그대로, 조금 위로.
+        // 상품은 카메라 앞 1.9 m 에 선다 — 세로 화면에서 카메라가 물러서도 크기가 같다.
+        // 넓은 화면은 카드가 오른쪽이라 왼쪽으로, 세로 화면은 카드가 아래라 위로 비킨다.
         const wide = camera.aspect >= 0.9;
-        prizeArt.position.set(STAGE_FRONT.x - (wide ? 0.3 : 0), STAGE_FRONT.y + (wide ? 0 : 0.22), STAGE_FRONT.z);
+        camera.getWorldDirection(prizeForward);
+        prizeRight.crossVectors(prizeForward, camera.up).normalize();
+        prizeUp.crossVectors(prizeRight, prizeForward).normalize();
+        prizeArt.position.copy(camera.position)
+          .addScaledVector(prizeForward, 1.9)
+          .addScaledVector(prizeRight, wide ? -0.3 : 0)
+          .addScaledVector(prizeUp, wide ? -0.05 : 0.34);
         prizeArt.scale.setScalar(1);
         if (!reduced) prizeArt.rotation.y += dt * 0.55;
       }
