@@ -320,25 +320,42 @@ export function EmbeddedGlbViewer({
         // Spec measured from the very bytes the buyer downloads — the page
         // never restates a number from metadata.
         if (measuredRef.current) {
+          // Counted the way the inspector counts — what the file stores. A mesh the file
+          // places four times (Harvest Frontier's wheels) counts once here, as it does in the
+          // listing's description; a traversal counted it four times and the same page then
+          // showed two different polygon numbers for one file.
+          type GltfJson = { meshes?: Array<{ primitives: Array<{ indices?: number; attributes: Record<string, number> }> }>; accessors?: Array<{ count: number }>; materials?: unknown[] };
+          const json = (gltf as unknown as { parser?: { json?: GltfJson } }).parser?.json;
           let triangles = 0;
           let meshes = 0;
-          const materialSet = new Set<unknown>();
-          model.traverse((node) => {
-            const mesh = node as import("three").Mesh;
-            if (!mesh.isMesh) return;
-            meshes += 1;
-            const geometry = mesh.geometry as import("three").BufferGeometry;
-            const index = geometry.getIndex();
-            const position = geometry.getAttribute("position");
-            triangles += Math.floor((index ? index.count : position?.count ?? 0) / 3);
-            for (const material of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
-              materialSet.add(material);
+          let materialsCount = 0;
+          if (json?.meshes && json.accessors) {
+            meshes = json.meshes.length;
+            materialsCount = json.materials?.length ?? 0;
+            for (const gltfMesh of json.meshes) {
+              for (const primitive of gltfMesh.primitives) {
+                const accessor = primitive.indices !== undefined ? json.accessors[primitive.indices] : json.accessors[primitive.attributes.POSITION];
+                triangles += Math.floor((accessor?.count ?? 0) / 3);
+              }
             }
-          });
+          } else {
+            const materialSet = new Set<unknown>();
+            model.traverse((node) => {
+              const mesh = node as import("three").Mesh;
+              if (!mesh.isMesh) return;
+              meshes += 1;
+              const geometry = mesh.geometry as import("three").BufferGeometry;
+              const index = geometry.getIndex();
+              const position = geometry.getAttribute("position");
+              triangles += Math.floor((index ? index.count : position?.count ?? 0) / 3);
+              for (const material of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) materialSet.add(material);
+            });
+            materialsCount = materialSet.size;
+          }
           measuredRef.current({
             triangles,
             meshes,
-            materials: materialSet.size,
+            materials: materialsCount,
             bounds: { x: size.x, y: size.y, z: size.z },
             // Captured from the file's own transform, above, before the viewer moved the
             // model onto the floor for display.

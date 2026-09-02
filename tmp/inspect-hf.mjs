@@ -1,0 +1,23 @@
+import { readFileSync } from "node:fs";
+import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
+const file = process.argv[2];
+const buf = readFileSync(file);
+const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
+const gltf = await new Promise((ok, fail) => loader.parse(ab, "", ok, fail));
+console.log("extensionsUsed:", JSON.stringify(gltf.parser.json.extensionsUsed), "| animations:", gltf.animations.map(a => a.name + ":" + a.duration.toFixed(2)).join(",") || "none");
+const rows = [];
+gltf.scene.updateMatrixWorld(true);
+gltf.scene.traverse((o) => {
+  if (!o.isMesh) return;
+  const g = o.geometry; const idx = g.getIndex(); const tri = Math.floor((idx ? idx.count : g.getAttribute("position").count) / 3);
+  const box = new THREE.Box3().setFromObject(o); const s = box.getSize(new THREE.Vector3());
+  const mats = Array.isArray(o.material) ? o.material : [o.material];
+  const m = mats[0];
+  rows.push({ name: o.name || "(unnamed)", parent: o.parent?.name, tri, size: `${s.x.toFixed(2)}x${s.y.toFixed(2)}x${s.z.toFixed(2)}`, visible: o.visible, mat: `${m.type} col=${m.color?.getHexString?.()} op=${m.opacity} tr=${m.transparent} vc=${m.vertexColors} trans=${m.transmission ?? "-"} depthWrite=${m.depthWrite} side=${m.side}`, userData: JSON.stringify(o.userData).slice(0, 60), hasColor: !!g.getAttribute("color") });
+});
+rows.sort((a, b) => (parseFloat(b.size.split("x")[0]) * parseFloat(b.size.split("x")[2])) - (parseFloat(a.size.split("x")[0]) * parseFloat(a.size.split("x")[2])));
+console.log("meshes:", rows.length, "| with COLOR_0:", rows.filter(r => r.hasColor).length);
+for (const r of rows.slice(0, 14)) console.log(`${r.tri.toString().padStart(6)} tri  ${r.size.padEnd(18)} vis=${r.visible} color=${r.hasColor}  ${r.name} < ${r.parent}  ${r.mat}  ${r.userData}`);

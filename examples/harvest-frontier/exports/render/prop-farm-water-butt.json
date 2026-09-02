@@ -1,0 +1,50 @@
+{
+  "glb": "examples/harvest-frontier/exports/prop/farm-water-butt.m1.glb",
+  "output": "examples/harvest-frontier/exports/render/prop-farm-water-butt.png",
+  "width": 1024,
+  "height": 1024,
+  "supersample": 3,
+  "backgroundHex": "#ececec",
+  "cornerPixel": [
+    236,
+    236,
+    236
+  ],
+  "viewDir": [
+    0.78,
+    0.5,
+    0.92
+  ],
+  "targetFillFraction": 0.76,
+  "subjectBoundingBoxPx": {
+    "x": 251.66666666666666,
+    "y": 123,
+    "width": 520.6666666666666,
+    "height": 778
+  },
+  "subjectFillFraction": 0.7598,
+  "subjectPixelCoverageFraction": 0.247,
+  "clippedTop": false,
+  "clippedBottom": false,
+  "clippedLeft": false,
+  "clippedRight": false,
+  "marginPx": {
+    "top": 123,
+    "bottom": 123,
+    "left": 251.66666666666666,
+    "right": 251.66666666666666
+  },
+  "triangles": 1908,
+  "meshes": 2,
+  "vertexColouredMeshes": 2,
+  "boundsMetres": [
+    1.5959,
+    2.3255,
+    2.2704
+  ],
+  "shadow": {
+    "kind": "soft contact shadow",
+    "strength": 0.3,
+    "blurRadiusPx": 22.666666666666668
+  }
+}

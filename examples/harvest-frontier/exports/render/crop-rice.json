@@ -1,0 +1,50 @@
+{
+  "glb": "examples/harvest-frontier/exports/crop/rice.m1.glb",
+  "output": "examples/harvest-frontier/exports/render/crop-rice.png",
+  "width": 1024,
+  "height": 1024,
+  "supersample": 3,
+  "backgroundHex": "#ececec",
+  "cornerPixel": [
+    236,
+    236,
+    236
+  ],
+  "viewDir": [
+    0.78,
+    0.5,
+    0.92
+  ],
+  "targetFillFraction": 0.76,
+  "subjectBoundingBoxPx": {
+    "x": 331.3333333333333,
+    "y": 123,
+    "width": 361.3333333333333,
+    "height": 778
+  },
+  "subjectFillFraction": 0.7598,
+  "subjectPixelCoverageFraction": 0.0596,
+  "clippedTop": false,
+  "clippedBottom": false,
+  "clippedLeft": false,
+  "clippedRight": false,
+  "marginPx": {
+    "top": 123,
+    "bottom": 123,
+    "left": 331.3333333333333,
+    "right": 331.3333333333333
+  },
+  "triangles": 444,
+  "meshes": 3,
+  "vertexColouredMeshes": 3,
+  "boundsMetres": [
+    0.7633,
+    1.6204,
+    0.527
+  ],
+  "shadow": {
+    "kind": "soft contact shadow",
+    "strength": 0.3,
+    "blurRadiusPx": 22.666666666666668
+  }
+}

@@ -162,7 +162,7 @@
 
 .cv5-surface .eyebrow {
   font-family: var(--v5-label);
-  font-size: 0.66rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.16em;
   color: var(--v5-ink-faint);
@@ -171,7 +171,7 @@
 
 .cv5-surface .mono-label {
   font-family: var(--v5-label);
-  font-size: 0.62rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   color: var(--v5-ink-faint);
@@ -231,7 +231,7 @@
    partition (settings, passport, asset detail): a bare dt/dd pair inherits no
    layout at all. Give every one of them the cv5 row treatment. */
 .cv5-surface dl { margin: 0; }
-.cv5-surface dt { font-family: var(--v5-label); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; color: var(--v5-ink-faint); }
+.cv5-surface dt { font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; color: var(--v5-ink-faint); }
 .cv5-surface dd { margin: 0; color: var(--v5-ink-dim); }
 
 /* ----------------------------------------------------------------- footer */
@@ -254,7 +254,7 @@
   background: rgba(251, 191, 36, 0.08);
   color: var(--v5-amber);
   font-family: var(--v5-label);
-  font-size: 0.6rem;
+  font-size: 0.72rem;
   letter-spacing: 0.12em;
 }
 

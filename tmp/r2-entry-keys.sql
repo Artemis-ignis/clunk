@@ -1,2 +1,12 @@
-UPDATE clunk_asset_artifacts SET object_key = 'market/cozy-tractor/preview-cozy-tractor.webp' WHERE id = 'artifact-w1-cozy-tractor-preview-cozy-tractor.webp';
-UPDATE clunk_asset_artifacts SET object_key = 'market/cozy-tractor/tractor.glb' WHERE id = 'artifact-w1-cozy-tractor-tractor.glb';
+UPDATE clunk_asset_artifacts SET object_key = 'market/hf-cultivator-compact/cultivator.compact.m1.glb' WHERE id = 'artifact-w1-hf-cultivator-compact-cultivator.compact.m1.glb';
+UPDATE clunk_asset_artifacts SET object_key = 'market/hf-cultivator-compact/hero-hf-cultivator-compact.png' WHERE id = 'artifact-w1-hf-cultivator-compact-hero-hf-cultivator-compact.png';
+UPDATE clunk_asset_artifacts SET object_key = 'market/hf-cultivator-compact/preview-hf-cultivator-compact.webp' WHERE id = 'artifact-w1-hf-cultivator-compact-preview-hf-cultivator-compact.webp';
+UPDATE clunk_asset_artifacts SET object_key = 'market/hf-processing-line/hero-hf-processing-line.png' WHERE id = 'artifact-w1-hf-processing-line-hero-hf-processing-line.png';
+UPDATE clunk_asset_artifacts SET object_key = 'market/hf-processing-line/preview-hf-processing-line.webp' WHERE id = 'artifact-w1-hf-processing-line-preview-hf-processing-line.webp';
+UPDATE clunk_asset_artifacts SET object_key = 'market/hf-processing-line/processing.line.m1.glb' WHERE id = 'artifact-w1-hf-processing-line-processing.line.m1.glb';
+UPDATE clunk_asset_artifacts SET object_key = 'market/hf-seeder-compact/hero-hf-seeder-compact.png' WHERE id = 'artifact-w1-hf-seeder-compact-hero-hf-seeder-compact.png';
+UPDATE clunk_asset_artifacts SET object_key = 'market/hf-seeder-compact/preview-hf-seeder-compact.webp' WHERE id = 'artifact-w1-hf-seeder-compact-preview-hf-seeder-compact.webp';
+UPDATE clunk_asset_artifacts SET object_key = 'market/hf-seeder-compact/seeder.compact.m1.glb' WHERE id = 'artifact-w1-hf-seeder-compact-seeder.compact.m1.glb';
+UPDATE clunk_asset_artifacts SET object_key = 'market/hf-tractor-compact/hero-hf-tractor-compact.png' WHERE id = 'artifact-w1-hf-tractor-compact-hero-hf-tractor-compact.png';
+UPDATE clunk_asset_artifacts SET object_key = 'market/hf-tractor-compact/preview-hf-tractor-compact.webp' WHERE id = 'artifact-w1-hf-tractor-compact-preview-hf-tractor-compact.webp';
+UPDATE clunk_asset_artifacts SET object_key = 'market/hf-tractor-compact/tractor.compact.m1.glb' WHERE id = 'artifact-w1-hf-tractor-compact-tractor.compact.m1.glb';

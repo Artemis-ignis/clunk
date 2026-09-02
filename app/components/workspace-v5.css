@@ -204,7 +204,7 @@
 .workspace-cv5 .settings-row + .settings-row { margin-top: 8px; }
 .workspace-cv5 .settings-row dt {
   font-family: var(--v5-label);
-  font-size: 0.6rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   color: var(--v5-ink-faint);
@@ -278,3 +278,6 @@
 /* Workspace headings never need landing-scale type. */
 .workspace-cv5 .studio-section-head h3,
 .workspace-cv5 .studio-section-head h2 { font-size: clamp(1.05rem, 1.5vw, 1.4rem); line-height: 1.3; text-wrap: balance; }
+
+.workspace-cv5 .workspace-signout { margin-left: 8px; font-size: 0.78rem; color: var(--v5-ink-dim); text-decoration: none; padding: 6px 10px; border: 1px solid var(--v5-line); border-radius: 8px; white-space: nowrap; }
+.workspace-cv5 .workspace-signout:hover { color: var(--v5-ink); border-color: var(--v5-line-strong); }

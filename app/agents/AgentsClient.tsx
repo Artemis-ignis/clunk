@@ -16,6 +16,8 @@ type ApiKeySummary = {
 
 type ConnectionState = "loading" | "signed-out" | "ready" | "error";
 type HandshakeStep = "idle" | "checking" | "PASS" | "FAIL";
+/** What a visitor reads for each step; the constant stays internal. */
+const HANDSHAKE_LABEL: Record<HandshakeStep, string> = { idle: "대기", checking: "확인 중", PASS: "통과", FAIL: "실패" };
 
 const AGENT_CONNECT_LOGIN_HREF = "/login?return_to=%2Fagents%23connect";
 
@@ -43,7 +45,7 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
   const activeKeys = keys.filter((key) => !key.revokedAt);
   const needsRemoteKey = selected.key !== "stdio" && !issuedSecret;
   const selectedCode = needsRemoteKey
-    ? "‘Clunk 연결 키 만들기’를 누르면 이 설정에 실제 endpoint와 Bearer 키가 자동으로 채워집니다."
+    ? "‘Clunk 연결 키 만들기’를 누르면 이 설정에 실제 연결 주소와 내 계정 키가 자동으로 채워집니다."
     : selected.code;
 
   const loadKeys = useCallback(async () => {
@@ -65,8 +67,10 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
     }
   }, []);
 
+  // Always ask the server. The page's own idea of the session can be stale (a prerendered
+  // shell said 'signed out' to people who were signed in), and /api/mcp/keys answers 401
+  // honestly when they are not.
   useEffect(() => {
-    if (!initiallyAuthenticated) return;
     const timer = window.setTimeout(() => void loadKeys(), 0);
     return () => window.clearTimeout(timer);
   }, [initiallyAuthenticated, loadKeys]);
@@ -134,7 +138,7 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
       }
       setHandshake({ initialize: "PASS", tools: "PASS", toolCount: tools.result.tools.length });
       setCheckResult("PASS");
-      setMessage(`연결 확인 PASS · ${tools.result.tools.length}개 원격 도구가 응답했습니다.`);
+      setMessage(`연결 확인 통과 · ${tools.result.tools.length}개 원격 도구가 응답했습니다.`);
     } catch (error) {
       setHandshake((current) => ({ ...current, [stage]: "FAIL" }));
       setCheckResult("FAIL");
@@ -201,6 +205,10 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
             <button className="button button-quiet button-sm" type="button" onClick={() => void verifyConnection()} disabled={busy !== null}>
               {busy === "check" ? "확인 중…" : "연결 확인"}
             </button>
+          ) : connectionState === "ready" ? (
+            // Signed in, no key issued yet: the check needs a key, not a login. The old link
+            // told signed-in people to log in.
+            <span className="button button-quiet button-sm" aria-disabled="true">키를 만들면 연결 확인</span>
           ) : (
             <a className="button button-quiet button-sm" href={AGENT_CONNECT_LOGIN_HREF}>
               로그인 후 연결 확인
@@ -226,18 +234,18 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
       <div className="agent-handshake-cards" aria-live="polite" aria-label="MCP 실제 연결 확인 단계">
         <article className="agent-handshake-card">
           <span className="mono-label">01 · 연결 시작</span>
-          <strong>{handshake.initialize}</strong>
-          <p>서버 이름과 MCP protocol 응답을 확인합니다.</p>
+          <strong>{HANDSHAKE_LABEL[handshake.initialize]}</strong>
+          <p>서버 이름과 응답 형식을 확인합니다.</p>
         </article>
         <article className="agent-handshake-card">
           <span className="mono-label">02 · 도구 목록</span>
-          <strong>{handshake.tools}</strong>
+          <strong>{HANDSHAKE_LABEL[handshake.tools]}</strong>
           <p>{handshake.toolCount ? `${handshake.toolCount}개 도구가 실제 응답했습니다.` : "키 발급 후 실제 도구 목록을 요청합니다."}</p>
         </article>
         <article className="agent-handshake-card agent-handshake-card-boundary">
           <span className="mono-label">03 · 경계</span>
           <strong>분리 유지</strong>
-          <p>이 핸드셰이크 PASS는 구조/연결 확인이며 player-facing 승인이 아닙니다.</p>
+          <p>이 확인은 서버가 제대로 응답한다는 뜻이지, 게임 화면까지 괜찮다는 승인은 아닙니다.</p>
         </article>
       </div>
 
@@ -323,9 +331,9 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
       </div>
 
       <div className="agent-guide-footer">
-        <span><Icon name="shield" size={15} />연결 키는 workspace별로 폐기할 수 있습니다.</span>
+        <span><Icon name="shield" size={15} />연결 키는 작업공간별로 폐기할 수 있습니다.</span>
         <span><Icon name="fingerprint" size={15} />HTTP는 bytesBase64 업로드 또는 검증된 evidence만 받습니다.</span>
-        <span><Icon name="circleCheck" size={15} />구조 PASS와 visual/player review는 끝까지 분리합니다.</span>
+        <span><Icon name="circleCheck" size={15} />파일 검사 통과와 화면 검토는 끝까지 분리합니다.</span>
       </div>
     </div>
   );

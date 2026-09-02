@@ -402,7 +402,7 @@ test("/login과 /signup은 서로 다른 문이고, 영문 라벨이 남아 있�
 test("요금 화면이 베타 이후의 계정 처리를 한 문장으로 답한다", async () => {
   const html = await (await render("/pricing")).text();
   assert.ok(html.includes("베타가 끝나면 지금 계정은 어떻게 되나요?"), "베타 종료 후 질문이 없습니다");
-  assert.ok(html.includes("Free 조건을 그대로"), "베타 계정 유지 답이 없습니다");
+  assert.ok(html.includes("무료 요금제 조건을 그대로"), "베타 계정 유지 답이 없습니다");
   assert.ok(html.includes("최소 30일 전에"), "사전 공지 약속이 없습니다");
   // 용어집: 삼각형·드로우콜은 화면에 쓰지 않는다.
   const pricing = await source("app/pricing/page.tsx");

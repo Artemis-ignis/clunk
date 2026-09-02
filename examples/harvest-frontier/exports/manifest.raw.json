@@ -1,0 +1,453 @@
+{
+  "generatedAt": "2026-09-02T05:58:46.772Z",
+  "source": "Harvest Frontier (read-only)",
+  "assets": [
+    {
+      "group": "npc",
+      "slug": "kang-taeho",
+      "file": "npc/kang-taeho.glb",
+      "bytes": 754712,
+      "triangles": 5888,
+      "drawCalls": 14,
+      "materials": 14,
+      "meshes": 14,
+      "sizeMeters": {
+        "x": 1.14,
+        "y": 2.303,
+        "z": 0.932
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "seconds": 7.854,
+          "tracks": 2
+        }
+      ],
+      "provenanceAssetId": "farm.npcs.m2",
+      "license": "Project-original procedural code; no external mesh or texture",
+      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s"
+    },
+    {
+      "group": "npc",
+      "slug": "park-yuna",
+      "file": "npc/park-yuna.glb",
+      "bytes": 745860,
+      "triangles": 5560,
+      "drawCalls": 14,
+      "materials": 14,
+      "meshes": 14,
+      "sizeMeters": {
+        "x": 0.966,
+        "y": 2.11,
+        "z": 0.665
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "seconds": 7.854,
+          "tracks": 2
+        }
+      ],
+      "provenanceAssetId": "farm.npcs.m2",
+      "license": "Project-original procedural code; no external mesh or texture",
+      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s"
+    },
+    {
+      "group": "npc",
+      "slug": "choi-minseo",
+      "file": "npc/choi-minseo.glb",
+      "bytes": 776928,
+      "triangles": 6000,
+      "drawCalls": 18,
+      "materials": 18,
+      "meshes": 18,
+      "sizeMeters": {
+        "x": 1.261,
+        "y": 2.195,
+        "z": 0.777
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "seconds": 7.854,
+          "tracks": 2
+        }
+      ],
+      "provenanceAssetId": "farm.npcs.m2",
+      "license": "Project-original procedural code; no external mesh or texture",
+      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s"
+    },
+    {
+      "group": "npc",
+      "slug": "han-seojun",
+      "file": "npc/han-seojun.glb",
+      "bytes": 800056,
+      "triangles": 6274,
+      "drawCalls": 18,
+      "materials": 18,
+      "meshes": 18,
+      "sizeMeters": {
+        "x": 1.292,
+        "y": 2.274,
+        "z": 0.798
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "seconds": 7.854,
+          "tracks": 2
+        }
+      ],
+      "provenanceAssetId": "farm.npcs.m2",
+      "license": "Project-original procedural code; no external mesh or texture",
+      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s"
+    },
+    {
+      "group": "npc",
+      "slug": "lee-eunha",
+      "file": "npc/lee-eunha.glb",
+      "bytes": 785364,
+      "triangles": 5906,
+      "drawCalls": 15,
+      "materials": 15,
+      "meshes": 15,
+      "sizeMeters": {
+        "x": 1.161,
+        "y": 2.208,
+        "z": 0.738
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "seconds": 7.854,
+          "tracks": 2
+        }
+      ],
+      "provenanceAssetId": "farm.npcs.m2",
+      "license": "Project-original procedural code; no external mesh or texture",
+      "note": "idle clip replays updateFarmNpcIdle; roll rate 0.72 -> 0.8 rad/s so the loop closes at 7.854 s"
+    },
+    {
+      "group": "npc",
+      "slug": "player-farmhand",
+      "file": "npc/player-farmhand.glb",
+      "bytes": 1167992,
+      "triangles": 7256,
+      "drawCalls": 23,
+      "materials": 23,
+      "meshes": 23,
+      "sizeMeters": {
+        "x": 0.817,
+        "y": 2.714,
+        "z": 0.913
+      },
+      "clips": [
+        {
+          "name": "idle",
+          "seconds": 8.976,
+          "tracks": 26
+        },
+        {
+          "name": "walk",
+          "seconds": 0.827,
+          "tracks": 26
+        },
+        {
+          "name": "inspect",
+          "seconds": 0.78,
+          "tracks": 26
+        },
+        {
+          "name": "water",
+          "seconds": 1.24,
+          "tracks": 26
+        },
+        {
+          "name": "hoe",
+          "seconds": 1.02,
+          "tracks": 26
+        },
+        {
+          "name": "harvest",
+          "seconds": 1.12,
+          "tracks": 26
+        }
+      ],
+      "provenanceAssetId": null,
+      "license": "장부에 없음",
+      "note": "clips replay PlayerMotionController; walk spine-sway rate 3.1 -> gait omega so the stride loop closes"
+    },
+    {
+      "group": "building",
+      "slug": "farmhouse",
+      "file": "building/farmhouse.glb",
+      "bytes": 1537768,
+      "triangles": 11836,
+      "drawCalls": 15,
+      "materials": 15,
+      "meshes": 15,
+      "sizeMeters": {
+        "x": 8.565,
+        "y": 6.256,
+        "z": 8.088
+      },
+      "clips": [],
+      "provenanceAssetId": "reference.farm-corner.generated.2026-08-19",
+      "license": "Generated reference for this project; not shipped as runtime geometry",
+      "note": "world copy, after createFarmBuildings runs mergeStaticParts"
+    },
+    {
+      "group": "building",
+      "slug": "barn",
+      "file": "building/barn.glb",
+      "bytes": 1785016,
+      "triangles": 15648,
+      "drawCalls": 20,
+      "materials": 20,
+      "meshes": 20,
+      "sizeMeters": {
+        "x": 11.04,
+        "y": 6.39,
+        "z": 7.85
+      },
+      "clips": [],
+      "provenanceAssetId": "processing.barn.open-front.m2",
+      "license": "Project-original procedural code; accepted reference is not shipped as runtime geometry",
+      "note": "processing line child removed; HF already ships it as processing.line.m1.glb"
+    },
+    {
+      "group": "crop",
+      "slug": "rice",
+      "file": "crop/rice.glb",
+      "bytes": 51368,
+      "triangles": 444,
+      "drawCalls": 3,
+      "materials": 3,
+      "meshes": 3,
+      "sizeMeters": {
+        "x": 0.763,
+        "y": 1.62,
+        "z": 0.527
+      },
+      "clips": [],
+      "provenanceAssetId": null,
+      "license": "장부에 없음",
+      "note": "silhouette stalk; mature form (growth is a uniform runtime scale, not distinct geometry)"
+    },
+    {
+      "group": "crop",
+      "slug": "potato",
+      "file": "crop/potato.glb",
+      "bytes": 102320,
+      "triangles": 908,
+      "drawCalls": 4,
+      "materials": 4,
+      "meshes": 4,
+      "sizeMeters": {
+        "x": 0.98,
+        "y": 0.923,
+        "z": 0.414
+      },
+      "clips": [],
+      "provenanceAssetId": null,
+      "license": "장부에 없음",
+      "note": "silhouette tuber; mature form (growth is a uniform runtime scale, not distinct geometry)"
+    },
+    {
+      "group": "crop",
+      "slug": "tomato",
+      "file": "crop/tomato.glb",
+      "bytes": 95392,
+      "triangles": 844,
+      "drawCalls": 4,
+      "materials": 4,
+      "meshes": 4,
+      "sizeMeters": {
+        "x": 0.991,
+        "y": 1.603,
+        "z": 0.511
+      },
+      "clips": [],
+      "provenanceAssetId": null,
+      "license": "장부에 없음",
+      "note": "silhouette bush; mature form (growth is a uniform runtime scale, not distinct geometry)"
+    },
+    {
+      "group": "crop",
+      "slug": "strawberry",
+      "file": "crop/strawberry.glb",
+      "bytes": 40752,
+      "triangles": 346,
+      "drawCalls": 3,
+      "materials": 3,
+      "meshes": 3,
+      "sizeMeters": {
+        "x": 1.02,
+        "y": 0.604,
+        "z": 0.922
+      },
+      "clips": [],
+      "provenanceAssetId": null,
+      "license": "장부에 없음",
+      "note": "silhouette bush; mature form (growth is a uniform runtime scale, not distinct geometry)"
+    },
+    {
+      "group": "crop",
+      "slug": "grape",
+      "file": "crop/grape.glb",
+      "bytes": 74660,
+      "triangles": 652,
+      "drawCalls": 4,
+      "materials": 4,
+      "meshes": 4,
+      "sizeMeters": {
+        "x": 1.592,
+        "y": 1.972,
+        "z": 1.494
+      },
+      "clips": [],
+      "provenanceAssetId": null,
+      "license": "장부에 없음",
+      "note": "silhouette vine; mature form (growth is a uniform runtime scale, not distinct geometry)"
+    },
+    {
+      "group": "crop",
+      "slug": "cherry",
+      "file": "crop/cherry.glb",
+      "bytes": 372916,
+      "triangles": 3440,
+      "drawCalls": 1,
+      "materials": 1,
+      "meshes": 1,
+      "sizeMeters": {
+        "x": 2.293,
+        "y": 2.289,
+        "z": 2.315
+      },
+      "clips": [],
+      "provenanceAssetId": null,
+      "license": "장부에 없음",
+      "note": "silhouette tree; mature form (growth is a uniform runtime scale, not distinct geometry)"
+    },
+    {
+      "group": "prop",
+      "slug": "farm-windmill",
+      "file": "prop/farm-windmill.glb",
+      "bytes": 184428,
+      "triangles": 1344,
+      "drawCalls": 3,
+      "materials": 3,
+      "meshes": 3,
+      "sizeMeters": {
+        "x": 3.354,
+        "y": 5.02,
+        "z": 3.51
+      },
+      "clips": [
+        {
+          "name": "blades-spin",
+          "seconds": 8,
+          "tracks": 1
+        }
+      ],
+      "provenanceAssetId": "windmill.landmark.m1",
+      "license": "Apache-2.0 (upstream code adaptation, explicitly approved M67-B exception to the no-external-assets rule); the re-authored derivative is project code under the same attribution",
+      "note": "blades_pivot spin baked from windmillBladeAngle; 8 s loop is an arbitrary window on a continuously advancing angle"
+    },
+    {
+      "group": "prop",
+      "slug": "farm-water-butt",
+      "file": "prop/farm-water-butt.glb",
+      "bytes": 248420,
+      "triangles": 1908,
+      "drawCalls": 2,
+      "materials": 2,
+      "meshes": 2,
+      "sizeMeters": {
+        "x": 1.596,
+        "y": 2.326,
+        "z": 2.27
+      },
+      "clips": [],
+      "provenanceAssetId": null,
+      "license": "장부에 없음",
+      "note": "project-original props.ts createWaterButt (butt + pump stand)"
+    },
+    {
+      "group": "prop",
+      "slug": "fence-kit",
+      "file": "prop/fence-kit.glb",
+      "bytes": 5136,
+      "triangles": 24,
+      "drawCalls": 2,
+      "materials": 2,
+      "meshes": 2,
+      "sizeMeters": {
+        "x": 1,
+        "y": 1.222,
+        "z": 0.15
+      },
+      "clips": [],
+      "provenanceAssetId": "texture.wood-planks-weathered.runtime.2026-08-21",
+      "license": "Project-original generated material source and runtime derivative; no external asset pack",
+      "note": "one post + one rail module out of the 77/140 instanced run; the wood albedo map is NOT embedded (Node build has no texture loader, applyAlbedoMap no-ops)"
+    },
+    {
+      "group": "prop",
+      "slug": "meadow-kit",
+      "file": "prop/meadow-kit.glb",
+      "bytes": 8364,
+      "triangles": 56,
+      "drawCalls": 4,
+      "materials": 4,
+      "meshes": 4,
+      "sizeMeters": {
+        "x": 0.197,
+        "y": 0.37,
+        "z": 0.215
+      },
+      "clips": [],
+      "provenanceAssetId": null,
+      "license": "장부에 없음",
+      "note": "one grass tuft + three wildflower modules out of the instanced meadow scatter"
+    },
+    {
+      "group": "prop",
+      "slug": "farmstead-clutter",
+      "file": "prop/farmstead-clutter.glb",
+      "bytes": 253172,
+      "triangles": 1950,
+      "drawCalls": 4,
+      "materials": 4,
+      "meshes": 4,
+      "sizeMeters": {
+        "x": 2.695,
+        "y": 4.604,
+        "z": 3.301
+      },
+      "clips": [],
+      "provenanceAssetId": null,
+      "license": "장부에 없음",
+      "note": "water butt + banner sign + yard clutter as authored, world layout preserved"
+    },
+    {
+      "group": "prop",
+      "slug": "hand-cart",
+      "file": "prop/hand-cart.glb",
+      "bytes": 74708,
+      "triangles": 555,
+      "drawCalls": 1,
+      "materials": 1,
+      "meshes": 1,
+      "sizeMeters": {
+        "x": 2.574,
+        "y": 0.95,
+        "z": 2.476
+      },
+      "clips": [],
+      "provenanceAssetId": null,
+      "license": "장부에 없음",
+      "note": "props.ts pushHandCart is not exported and every cart is merged into ONE world-space mesh, so one cart is cropped out around ROUTE_CART_ANCHORS[0] and re-seated at the origin"
+    }
+  ]
+}

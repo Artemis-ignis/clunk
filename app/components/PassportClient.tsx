@@ -32,7 +32,7 @@ export function PassportClient({ userLabel }: { userLabel: string }) {
   const [rows, setRows] = useState<ParsedPassport[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
-  const [message, setMessage] = useState("Passport를 불러오는 중...");
+  const [message, setMessage] = useState("검사 증명서를 불러오는 중...");
 
   useEffect(() => {
     let cancelled = false;
@@ -41,7 +41,7 @@ export function PassportClient({ userLabel }: { userLabel: string }) {
         if (cancelled) return;
         if (!response.ok) {
           setState("error");
-          setMessage("ChatGPT로 로그인하면 이 워크스페이스의 Passport를 불러옵니다.");
+          setMessage("로그인하면 이 작업공간의 검사 증명서를 불러옵니다.");
           return;
         }
         const body = (await response.json()) as { passports?: PassportRow[] };
@@ -58,7 +58,7 @@ export function PassportClient({ userLabel }: { userLabel: string }) {
       .catch(() => {
         if (cancelled) return;
         setState("error");
-        setMessage("Passport 데이터를 불러오지 못했습니다.");
+        setMessage("검사 증명서를 불러오지 못했습니다.");
       });
     return () => {
       cancelled = true;
@@ -78,7 +78,7 @@ export function PassportClient({ userLabel }: { userLabel: string }) {
   );
 
   return (
-    <WorkspaceShell active="passports" title="Passport 보관함" userLabel={userLabel} status={countChip}>
+    <WorkspaceShell active="passports" title="검사 증명서 보관함" userLabel={userLabel} status={countChip}>
       <section className="ws-welcome">
         <div>
           <h2>

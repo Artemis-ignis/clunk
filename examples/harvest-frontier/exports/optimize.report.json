@@ -1,0 +1,202 @@
+[
+  {
+    "slug": "barn",
+    "before": 1785016,
+    "after": 270876,
+    "ratio": 0.152,
+    "materials": {
+      "before": 20,
+      "after": 5
+    }
+  },
+  {
+    "slug": "farmhouse",
+    "before": 1537768,
+    "after": 241332,
+    "ratio": 0.157,
+    "materials": {
+      "before": 15,
+      "after": 4
+    }
+  },
+  {
+    "slug": "cherry",
+    "before": 372916,
+    "after": 82544,
+    "ratio": 0.221,
+    "materials": {
+      "before": 1,
+      "after": 1
+    }
+  },
+  {
+    "slug": "grape",
+    "before": 74660,
+    "after": 20984,
+    "ratio": 0.281,
+    "materials": {
+      "before": 4,
+      "after": 1
+    }
+  },
+  {
+    "slug": "potato",
+    "before": 102320,
+    "after": 26904,
+    "ratio": 0.263,
+    "materials": {
+      "before": 4,
+      "after": 1
+    }
+  },
+  {
+    "slug": "rice",
+    "before": 51368,
+    "after": 14968,
+    "ratio": 0.291,
+    "materials": {
+      "before": 3,
+      "after": 1
+    }
+  },
+  {
+    "slug": "strawberry",
+    "before": 40752,
+    "after": 12416,
+    "ratio": 0.305,
+    "materials": {
+      "before": 3,
+      "after": 1
+    }
+  },
+  {
+    "slug": "tomato",
+    "before": 95392,
+    "after": 24560,
+    "ratio": 0.257,
+    "materials": {
+      "before": 4,
+      "after": 1
+    }
+  },
+  {
+    "slug": "choi-minseo",
+    "before": 776928,
+    "after": 181388,
+    "ratio": 0.233,
+    "materials": {
+      "before": 18,
+      "after": 2
+    }
+  },
+  {
+    "slug": "han-seojun",
+    "before": 800056,
+    "after": 186768,
+    "ratio": 0.233,
+    "materials": {
+      "before": 18,
+      "after": 2
+    }
+  },
+  {
+    "slug": "kang-taeho",
+    "before": 754712,
+    "after": 180364,
+    "ratio": 0.239,
+    "materials": {
+      "before": 14,
+      "after": 2
+    }
+  },
+  {
+    "slug": "lee-eunha",
+    "before": 785364,
+    "after": 185360,
+    "ratio": 0.236,
+    "materials": {
+      "before": 15,
+      "after": 2
+    }
+  },
+  {
+    "slug": "park-yuna",
+    "before": 745860,
+    "after": 177188,
+    "ratio": 0.238,
+    "materials": {
+      "before": 14,
+      "after": 3
+    }
+  },
+  {
+    "slug": "player-farmhand",
+    "before": 1167992,
+    "after": 241784,
+    "ratio": 0.207,
+    "materials": {
+      "before": 23,
+      "after": 2
+    }
+  },
+  {
+    "slug": "farm-water-butt",
+    "before": 248420,
+    "after": 39440,
+    "ratio": 0.159,
+    "materials": {
+      "before": 2,
+      "after": 2
+    }
+  },
+  {
+    "slug": "farm-windmill",
+    "before": 184428,
+    "after": 42424,
+    "ratio": 0.23,
+    "materials": {
+      "before": 3,
+      "after": 2
+    }
+  },
+  {
+    "slug": "farmstead-clutter",
+    "before": 253172,
+    "after": 42808,
+    "ratio": 0.169,
+    "materials": {
+      "before": 4,
+      "after": 2
+    }
+  },
+  {
+    "slug": "fence-kit",
+    "before": 5136,
+    "after": 3724,
+    "ratio": 0.725,
+    "materials": {
+      "before": 2,
+      "after": 1
+    }
+  },
+  {
+    "slug": "hand-cart",
+    "before": 74708,
+    "after": 14140,
+    "ratio": 0.189,
+    "materials": {
+      "before": 1,
+      "after": 1
+    }
+  },
+  {
+    "slug": "meadow-kit",
+    "before": 8364,
+    "after": 6756,
+    "ratio": 0.808,
+    "materials": {
+      "before": 4,
+      "after": 2
+    }
+  }
+]

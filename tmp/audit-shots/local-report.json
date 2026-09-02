@@ -1,0 +1,2047 @@
+[
+ {
+  "name": "dashboard",
+  "url": "/dashboard",
+  "sizes": {
+   "d": {
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/dashboard",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failed": [],
+    "smallCount": 0,
+    "small": [],
+    "overflow": 0,
+    "wide": [],
+    "title": "내 작업실 | Clunk",
+    "bodyText": "Clunk\n내 작업실\n작업실\n홈\n내 파일\n만들기\n검사\n검사 증명서\n제품\n크레딧·요금제\n도움말\n설정\n지금 요금\n무료 베타\n결제를 받지 않습니다\n내 작업실\n내 파일 검사\n연결됨\nA\nAudit QA\n\nAudit QA님, 안녕하세요.\n\n오늘은 무엇을\n만들어 볼까요?\n\nClunk는 게임에 넣을 파일을 만들고, 그 파일을 게임에 넣어도 되는지 검사합니다.\n\n남은 크레딧\n55\n검사 1회, 만들기 1회에 각각 1크레딧\n오늘 만들 수 있는 이미지\n8/8장\n한국 시간 오전 9시에 다시 채워집니다\n지금 요금\n무료 베타\n결제를 받지 않습니다\n이 숫자가 무슨 뜻인지 보기\n에셋 만들기\n\n문장으로 2D 이미지를, 코드로 3D 모델과 스프라이트 시트를 만듭니다.\n\n1크레딧\n성공했을 때만 차감\n내 파일 검사하기\n\nGLB·PNG를 올리면 게임에 넣어도 되는지 알려 줍니다. 원본은 그대로 둡니다.\n\n1크레딧\n결과를 저장할 때 차감\n마켓에서 받기\n\n다른 사람이 올린 에셋을 받습니다. 검사 기록이 붙어 있는 파일만 올라옵니다.\n\n무료\n베타 기간 동안\n내 파일\n\n아직 저장된 에셋이 없습니다. 위에서 하나 만들거나 파일을 검사하면 여기에 쌓입니다.\n\n샘플 파일로 검사 흐름 먼저 보기\nAI 도구 연결\n\nClaude Code, Cursor 같은 코딩 도구에서 Clunk를 바로 부를 수 있습니다. 도구에 연결해 두면 채팅창에서 “이 GLB 검사해 줘” 라고 말하는 것만으로 여기와 같은 검사가 돌아가고, 결과도 이 작업실에 함께 쌓입니다.\n\n연결 방법 보기"
+   },
+   "m": {
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/dashboard",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failed": [],
+    "smallCount": 0,
+    "small": [],
+    "overflow": 0,
+    "wide": [],
+    "title": "내 작업실 | Clunk"
+   }
+  }
+ },
+ {
+  "name": "assets",
+  "url": "/assets",
+  "sizes": {
+   "d": {
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/assets",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failed": [],
+    "smallCount": 0,
+    "small": [],
+    "overflow": 0,
+    "wide": [],
+    "title": "내 파일 | Clunk",
+    "bodyText": "Clunk\n내 작업실\n작업실\n홈\n내 파일\n만들기\n검사\n검사 증명서\n제품\n크레딧·요금제\n도움말\n설정\n지금 요금\n무료 베타\n결제를 받지 않습니다\n내 파일\n내 파일 검사\nA\nAudit QA\nPRIVATE ASSET INDEX · /api/generation + /api/runs\n내 에셋을\n실제 기록으로 찾습니다.\n\n생성 작업과 검사 API가 반환한 assetId만 모읍니다. 저장된 artifact·검수·Passport 상태는 각 상세 화면에서 다시 확인합니다.\n\n내 Workspace에서 생성\n\n생성 작업과 실제 검사 API에 저장된 에셋만 표시합니다.\n\nASSET LIBRARY\n저장된 에셋 0건\n실제 응답만\n검색\n종류\n전체 종류\n0건 표시\n아직 저장된 에셋이 없습니다\n\nStudio에서 실제 생성 작업을 실행하거나 검사기에서 에셋을 검사하면 이곳에 표시됩니다.\n\n첫 생성 실행"
+   },
+   "m": {
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/assets",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failed": [],
+    "smallCount": 0,
+    "small": [],
+    "overflow": 0,
+    "wide": [],
+    "title": "내 파일 | Clunk"
+   }
+  }
+ },
+ {
+  "name": "settings",
+  "url": "/settings",
+  "sizes": {
+   "d": {
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/settings",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failed": [],
+    "smallCount": 0,
+    "small": [],
+    "overflow": 0,
+    "wide": [],
+    "title": "설정 | Clunk",
+    "bodyText": "Clunk\n내 작업실\n작업실\n홈\n내 파일\n만들기\n검사\n검사 증명서\n제품\n크레딧·요금제\n도움말\n설정\n지금 요금\n무료 베타\n결제를 받지 않습니다\n설정\n내 파일 검사\nA\nAudit QA\n무엇을 저장하는지\n숨기지 않습니다.\n\nChatGPT 로그인으로 들어온 작업실입니다. 무엇이 저장되고 무엇이 저장되지 않는지 아래에 그대로 적었습니다.\n\n 저장 범위\n내 파일만 저장\n01\n내 GLB 파일\n브라우저에서만 열림\n→\n02\n검사 결과\n점수와 발견된 문제\n→\n03\n내 저장소\n나만 볼 수 있음\n\n검사에 올린 원본 파일은 서버로 올라가지 않습니다.\n\n계정\naudit-qa@example.test\nChatGPT가 전달한 로그인 정보에서 가져왔습니다.\n내 작업실\nAudit QA님의 작업실\n처음 로그인할 때 자동으로 만들어졌습니다. 여기에 만든 파일과 검사 결과가 쌓입니다.\n로그인 방식\nChatGPT 로그인\nClunk는 따로 아이디와 비밀번호를 만들지 않습니다.\n저장하는 것\n검사 결과와 내가 만든 파일\n만든 파일은 나만 볼 수 있는 저장소에 보관합니다. 검사에 올린 원본은 그대로 두고 덮어쓰지 않습니다.\n마케팅 이메일 수신\n새 기능과 무료 베타 소식만 가끔 보냅니다. 받지 않아도 Clunk를 쓰는 데에는 아무 차이가 없고, 언제든 여기서 다시 끌 수 있습니다.\n받는 중\n저장하지 않는 것\n보관하지 않습니다\n검사에 올린 원본 파일\nGLB와 GLTF는 브라우저 안에서만 열립니다. 서버로 올라가지 않습니다.\n비밀번호\n로그인은 ChatGPT가 처리하고, Clunk는 따로 아이디와 비밀번호를 만들지 않습니다.\n결제 수단\n카드 정보는 Clunk 서버에 저장하지 않습니다. 무료 베타 기간에는 결제 자체를 받지 않습니다.\n원본 덮어쓰기\n검사와 정리는 새 파일을 만들 뿐 원본을 바꾸지 않습니다.\n\n파일 이름, 파일 크기, 검사 점수, 발견된 문제만 저장합니다.\n\n내 파일 검사하러 가기\n도움말 보기\n이 브라우저에서 로그아웃\n\n이 브라우저에서만 로그아웃됩니다. Google·GitHub 계정 로그인은 그대로 유지됩니다."
+   },
+   "m": {
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/settings",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failed": [],
+    "smallCount": 0,
+    "small": [],
+    "overflow": 0,
+    "wide": [],
+    "title": "설정 | Clunk"
+   }
+  }
+ },
+ {
+  "name": "studio",
+  "url": "/studio",
+  "sizes": {
+   "d": {
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/studio",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failed": [],
+    "smallCount": 123,
+    "small": [
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.92,
+      "text": "내려받을 수 있는 진짜 파일"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.92,
+      "text": "만든 뒤 다시 열어 확인"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.92,
+      "text": "내 프로젝트에 연결"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.12,
+      "text": "SCENE"
+     },
+     {
+      "tag": "STRONG",
+      "cls": "",
+      "fs": 9.12,
+      "text": "GLB"
+     },
+     {
+      "tag": "I",
+      "cls": "",
+      "fs": 7.68,
+      "text": "UI PREVIEW"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.8,
+      "text": "mesh · material · bounds"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.64,
+      "text": "현재 선택"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 8.64,
+      "text": "결과"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 8.64,
+      "text": "GLB 파일"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "studio-series-option-index",
+      "fs": 10.4,
+      "text": "PNG"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "원하는 그림을 문장으로 적습니다"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "· 결과는"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "PNG 한 장"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "크레딧"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "1"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "개 ·"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "적어 준 문장이 실제 그림에 반영되는 것은 이 한 장짜리 이미지뿐입니다."
+     },
+     {
+      "tag": "SPAN",
+      "cls": "studio-series-option-index",
+      "fs": 10.4,
+      "text": "GLB"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "모양을 만드는 코드 파일을 올립니다"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "GLB 파일"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "문장만으로 3D 모양을 만들지는 못합니다. 모양은 코드가 정합니다."
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "3D 모델을 여러 방향에서 찍어 한 장으로 굽습니다"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "PNG 한 장 + 칸 좌표 파일"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "문장은 기록만 되고 그림에는 닿지 않습니다. 그림은 정해진 방식으로 나옵니다."
+     }
+    ],
+    "overflow": 0,
+    "wide": [],
+    "title": "에셋 만들기 | Clunk",
+    "bodyText": "Clunk\n내 작업실\n작업실\n홈\n내 파일\n만들기\n검사\n검사 증명서\n제품\n크레딧·요금제\n도움말\n설정\n지금 요금\n무료 베타\n결제를 받지 않습니다\n에셋 만들기\n내 파일 검사\nA\nAudit QA\n2D · 3D 에셋 만들기\n무엇을 만들지 고르면, 파일까지 나옵니다.\n\n만들기 한 번에 크레딧 1개가 듭니다. 만든 파일은 그 자리에서 검사하고 자신의 프로젝트에 저장합니다. 문장대로 그려지는 것은 2D 이미지 한 장뿐이고, 3D 모델·스프라이트 시트·애니메이션은 정해진 방식으로 만들어집니다.\n\n내려받을 수 있는 진짜 파일\n만든 뒤 다시 열어 확인\n내 프로젝트에 연결\n검사기로 보내기\nSCENE\nGLB\nUI PREVIEW\nmesh · material · bounds\n현재 선택\n3D 모델\n결과 GLB 파일\n1단계 · 만들 것 고르기\n네 가지를 만들 수 있습니다.\n\n어떤 것을 골라도 만들기 한 번에 크레딧 1개입니다. 아래 카드에 무엇을 넣어야 하고 무엇이 나오는지, 아직 안 되는 것이 무엇인지 그대로 적어 두었습니다.\n\nPNG\n2D 이미지\n원하는 그림을 문장으로 적습니다 · 결과는 PNG 한 장\n크레딧 1개 · 적어 준 문장이 실제 그림에 반영되는 것은 이 한 장짜리 이미지뿐입니다.\nGLB\n3D 모델\n모양을 만드는 코드 파일을 올립니다 · 결과는 GLB 파일\n크레딧 1개 · 문장만으로 3D 모양을 만들지는 못합니다. 모양은 코드가 정합니다.\nPNG\n스프라이트 시트\n3D 모델을 여러 방향에서 찍어 한 장으로 굽습니다 · 결과는 PNG 한 장 + 칸 좌표 파일\n크레딧 1개 · 문장은 기록만 되고 그림에는 닿지 않습니다. 그림은 정해진 방식으로 나옵니다.\nGLB\n애니메이션 클립\n이름 붙인 관절을 각도만큼 돌립니다 · 결과는 GLB 파일\n크레딧 1개 · 문·바퀴·팔다리처럼 돌아가는 움직임만 됩니다. 살이 접히는 캐릭터 변형은 아직 안 됩니다.\n2단계 · 여기서 만듭니다\n3D 모델 만들기 · 크레딧 1개\n작업 종류\n실제 에셋을 만들고, 결과를 닫습니다.\n\n고른 종류에 맞는 새 파일을 만들고, 같은 엔진 기준으로 그 자리에서 검사합니다. 마켓 상품을 만드는 것이 아니라 내 작업 목록에 저장됩니다.\n\n대기\n실제 호출 대기\n만들 종류\nClunk Asset Forge\nClunk Sprite Lab\nClunk Material Lab\nClunk Motion Lab\n3D reference·prompt authoring과 GLB handoff\n파일 형식\n2D 이미지 · PNG 한 장\n스프라이트 시트 · 시트 PNG + 좌표 파일\n본 애니메이션(Spine) · JSON + 시트 + PNG\n애니메이션 클립 · 움직임이 든 GLB\n3D 모델 · GLB 파일\n이름\n라이선스 선언\n검토 필요\n내가 소유\n프로젝트 연결 (선택)\n내 작업 목록에 저장\n선택하면 만든 기록에 그 프로젝트가 함께 적힙니다.\n제작 프롬프트\n검사 기준 · web-three-mobile · 저장에 성공하면 크레딧 1개\n에셋 만들기\n\n어떤 것을 만들지 한 문장으로 적고 만들기를 누르세요.\n\n아직 생성 결과가 없습니다\n만들기에 성공하면 여기에 만들어진 파일과 파일 지문, 저장 상태가 표시됩니다.\n01\n만들기\n고른 종류로 파일을 씁니다\n02\n검사\n파일 내용과 규칙을 잽니다\n03\n엔진 연결\n쓸 엔진 기준을 붙입니다\n04\n검토\n엔진 화면과 사람 확인\n3단계 · 종류별로 자세히\n2D와 3D를 같은 화면에서\n5가지 파일 종류\n2D 이미지\n그림 한 장\n스프라이트 시트\n여러 칸 + 좌표\n본 애니메이션(Spine)\n뼈대 · 슬롯 · 동작\n애니메이션 클립\n움직임 · 반복\n3D 모델\n면 · 재질 · 관절\n3D · GLB · glTF\n사용 가능\nSCENE\nGLB\nUI PREVIEW\nmesh · material · bounds\n3D 모델\n\n폴리곤 수, 재질 수, 크기, 관절 구조를 재서 무거운 곳을 먼저 알려 줍니다.\n\n만들기\n사용 가능\n원본을 건드리지 않고 새 파일을 씁니다\n검사\n사용 가능\n파일 내용과 구조, 규칙을 잽니다\n엔진 연결\n사용 가능\n쓸 엔진의 기준을 붙입니다\n검사 100점이 게임 화면에서 좋아 보인다는 뜻은 아닙니다.\n4단계 · 사용할 엔진 고르기\n어느 엔진에 넣을지 정합니다\n사용 가능\nWeb / Three.js\n연결 가능\nGodot 4\n지금은 연결할 수 없습니다\nUnity\n지금은 연결할 수 없습니다\nUnreal\n지금은 연결할 수 없습니다\nMobile\n지금은 연결할 수 없습니다\n\n구조 contract와 WebGL/WebGPU frame evidence를 연결할 수 있습니다. 파일 검사를 통과했다고 해서 이 상태가 자동으로 바뀌지는 않습니다.\n\n지금 고른 설정\n연결 가능\n만들 것\n3D 모델\n기준\nWeb / Three.js\n엔진에서 돌려보기\n사용 가능\n함께 남는 기록\n출처 · 라이선스 · 파일 지문\n\n파일 검사, 엔진에서 찍은 화면, 게임 화면, 사람의 판단은 각각 따로 남습니다. 하나가 통과해도 나머지가 통과한 것은 아닙니다.\n\n엔진 연결 상태 보기\n5단계 · 스프라이트 확인\n규격 검사와 사람 검토는 따로 돌립니다\n스프라이트 확인하기\n\n시트에 적힌 규격(격자·프레임·상태)이 서로 맞는지 확인합니다. 그림이 제대로 그려졌는지는 검수 화면에서 직접 보고 판단하세요.\n\n만들기 화면 미리보기\n미리 준비된 예시 · 크레딧 안 듦\n보기\n2D · 스프라이트\n3D · GLB 모델\n단계\n01 원본\n02 검사\n03 검토\n확대\n52%\n3D · GLB 모델\n파일 검사\nclunk-messy-sample.glb\n1,124 B · 181473ff49e2…\n검사 완료\n검사 결과 다시 보기\n검사 결과를 바로 읽습니다.\n\n파일 검사 점수와 발견된 문제를 실제 샘플 수치로 보여 줍니다. 엔진에서 찍은 화면이 없으면 그 빈칸을 그대로 남깁니다.\n\n근거\n파일 읽기 · 규칙 · 발견 사항\n파일 검사\n통과\n99/100 · 막는 문제 0건\n엔진 화면\n증거 없음\n엔진에서 찍은 화면 필요\n게임 화면\n확인 전\n실제 게임 화면 전\n사람 검토\n확인 전\n사람이 직접 봐야 합니다\n내 파일로 실행\n파일 하나\n→\n새로 만든 검사 기록\n→\n내보낼지 결정\n예시가 통과해도 게임 화면 통과는 아닙니다\n아직 확인하지 않았습니다. 버튼을 누르면 시트 규격을 검사합니다.\n시트 규격\n아직 실행 안 함\n격자 · 프레임 간 변화 · 투명도 · 외곽선\n엔진 화면\n증거 없음\n엔진에서 찍은 화면이 필요합니다\n사람 검토\n확인 전\n직접 보고 판단해야 합니다\n종합\n조건부\n위 세 가지가 모두 끝나야 완료입니다\n내 컴퓨터에서 실행하기\n같은 작업을 내 컴퓨터에서\n\nClunk는 원본 파일을 덮어쓰지 않습니다. 새 파일을 따로 만들고, 같은 엔진 기준으로 다시 열어 확인한 기록을 남깁니다.\n\nnpm.cmd run asset:generate -- --factory examples/generated/windmill.factory.mjs --target-profile harvest-frontier-web-three --recipe-id threejs-factory-v1 --recipe-version 1.0.0 --output-directory output/generated\n복사\nAI 도구 연결(MCP) 설정\n명령어 설명 보기\n점수와 화면은 다른 판정입니다\n점수와 화면은 다른 판정입니다.\n파일 검사\n파일 내용과 규칙, 차단 문제\n여기서 끝납니다\n엔진 화면\n엔진에서 실제로 그려 봐야 압니다\n직접 확인\n게임 화면\n플레이어에게 잘 보이는지\n직접 확인"
+   },
+   "m": {
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/studio",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failed": [],
+    "smallCount": 123,
+    "small": [
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.92,
+      "text": "내려받을 수 있는 진짜 파일"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.92,
+      "text": "만든 뒤 다시 열어 확인"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.92,
+      "text": "내 프로젝트에 연결"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.12,
+      "text": "SCENE"
+     },
+     {
+      "tag": "STRONG",
+      "cls": "",
+      "fs": 9.12,
+      "text": "GLB"
+     },
+     {
+      "tag": "I",
+      "cls": "",
+      "fs": 7.68,
+      "text": "UI PREVIEW"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.8,
+      "text": "mesh · material · bounds"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.64,
+      "text": "현재 선택"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 8.64,
+      "text": "결과"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 8.64,
+      "text": "GLB 파일"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "studio-series-option-index",
+      "fs": 10.4,
+      "text": "PNG"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "원하는 그림을 문장으로 적습니다"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "· 결과는"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "PNG 한 장"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "크레딧"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "1"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "개 ·"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "적어 준 문장이 실제 그림에 반영되는 것은 이 한 장짜리 이미지뿐입니다."
+     },
+     {
+      "tag": "SPAN",
+      "cls": "studio-series-option-index",
+      "fs": 10.4,
+      "text": "GLB"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "모양을 만드는 코드 파일을 올립니다"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "GLB 파일"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "문장만으로 3D 모양을 만들지는 못합니다. 모양은 코드가 정합니다."
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "3D 모델을 여러 방향에서 찍어 한 장으로 굽습니다"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "PNG 한 장 + 칸 좌표 파일"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 10.4,
+      "text": "문장은 기록만 되고 그림에는 닿지 않습니다. 그림은 정해진 방식으로 나옵니다."
+     }
+    ],
+    "overflow": 0,
+    "wide": [],
+    "title": "에셋 만들기 | Clunk"
+   }
+  }
+ },
+ {
+  "name": "passport",
+  "url": "/passport",
+  "sizes": {
+   "d": {
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/passport",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failed": [],
+    "smallCount": 0,
+    "small": [],
+    "overflow": 0,
+    "wide": [],
+    "title": "검사 증명서 | Clunk",
+    "bodyText": "Clunk\n내 작업실\n작업실\n홈\n내 파일\n만들기\n검사\n검사 증명서\n제품\n크레딧·요금제\n도움말\n설정\n지금 요금\n무료 베타\n결제를 받지 않습니다\nPassport 보관함\n내 파일 검사\n0건 보관\nA\nAudit QA\n원본과 출력이\n해시로 묶인 기록.\n\n모든 Passport는 최적화 직후의 새 재검사에서 만들어집니다. 원본 해시, 출력 해시, 적용한 작업, 전후 점수가 한 파일에 들어 있습니다.\n\nPassport 규격\nOUTPUT TRACE · SHA-256\nAWAITING FIRST OUTPUT\n01\nsource.glb\ninput bytes · hash\n→\n02\nfresh reopen\noutput bytes · digest\n→\n03\npassport.json\nbefore → after\n\n검사기에서 실제 최적화를 실행하면 이 흐름에 고정된 기록이 생깁니다.\n\nTRACEABLE OUTPUT\n최적화 결과도\n검사 전으로 돌아갑니다.\n\n원본과 출력의 해시, 전후 digest, 적용 작업을 한 화면에서 비교하고 다음 검토로 보냅니다.\n\n아직 Passport가 없습니다\n\n검사기에서 에셋을 안전하게 최적화하면 Passport가 생성됩니다. 출력 바이트를 다시 열어 검증한 뒤에만 기록이 남기 때문에, 최적화를 실행하지 않은 에셋은 여기에 나타나지 않습니다.\n\n검사기 열기"
+   },
+   "m": {
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/passport",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failed": [],
+    "smallCount": 0,
+    "small": [],
+    "overflow": 0,
+    "wide": [],
+    "title": "검사 증명서 | Clunk"
+   }
+  }
+ },
+ {
+  "name": "app",
+  "url": "/app",
+  "sizes": {
+   "d": {
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/app",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failed": [],
+    "smallCount": 16,
+    "small": [
+     {
+      "tag": "B",
+      "cls": "",
+      "fs": 9.92,
+      "text": "원본"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.92,
+      "text": "그대로 보관"
+     },
+     {
+      "tag": "B",
+      "cls": "",
+      "fs": 9.92,
+      "text": "결과"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.92,
+      "text": "정리한 새 파일"
+     },
+     {
+      "tag": "B",
+      "cls": "",
+      "fs": 9.92,
+      "text": "재검사"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.92,
+      "text": "새 파일 다시 확인"
+     },
+     {
+      "tag": "DT",
+      "cls": "",
+      "fs": 9.92,
+      "text": "장면 / 오브젝트"
+     },
+     {
+      "tag": "DT",
+      "cls": "",
+      "fs": 9.92,
+      "text": "메시 / 조각"
+     },
+     {
+      "tag": "DT",
+      "cls": "",
+      "fs": 9.92,
+      "text": "정점"
+     },
+     {
+      "tag": "DT",
+      "cls": "",
+      "fs": 9.92,
+      "text": "폴리곤"
+     },
+     {
+      "tag": "DT",
+      "cls": "",
+      "fs": 9.92,
+      "text": "재질"
+     },
+     {
+      "tag": "DT",
+      "cls": "",
+      "fs": 9.92,
+      "text": "텍스처 / 메모리"
+     },
+     {
+      "tag": "DT",
+      "cls": "",
+      "fs": 9.92,
+      "text": "입력 해시"
+     },
+     {
+      "tag": "DT",
+      "cls": "",
+      "fs": 9.92,
+      "text": "규칙 세트"
+     },
+     {
+      "tag": "DT",
+      "cls": "",
+      "fs": 9.92,
+      "text": "새 재검사"
+     },
+     {
+      "tag": "DT",
+      "cls": "",
+      "fs": 9.92,
+      "text": "다운로드 바이트"
+     }
+    ],
+    "overflow": 0,
+    "wide": [],
+    "title": "Game Ready | Clunk",
+    "bodyText": "Clunk\n내 작업실\n작업실\n홈\n내 파일\n만들기\n검사\n검사 증명서\n제품\n크레딧·요금제\n도움말\n설정\n지금 요금\n무료 베타\n결제를 받지 않습니다\n에셋 검사\n내 파일 검사\n대기 중\nA\nAudit QA\n01\n입력\n02\n파싱과 정책\n03\n최적화\n04\n재검사\n05\nPassport\n에셋 검사\n검사하고, 정리한 새 파일까지\n\n원본은 그대로 두고, 정리한 새 파일을 만들어 다시 검사합니다.\n\n원본 그대로 보관\n결과 정리한 새 파일\n재검사 새 파일 다시 확인\nClunk 제품군 보기\n검사 기준 · clunk-game-ready-v1\nPC\n데스크톱·콘솔 게임\n면 250,000개 · 재질 24개 · 텍스처 512MB\nWeb\n웹 뷰어·커머스\n면 100,000개 · 재질 12개 · 텍스처 128MB\nMobile\n모바일 게임\n면 25,000개 · 재질 6개 · 텍스처 64MB\n커스텀\n프로젝트 프로파일 JSON을 불러오면 활성화됩니다\n프로파일 JSON 불러오기\n\n선택한 예산으로 점수를 계산하며 다음 검사부터 적용됩니다. 같은 프로파일 JSON을 CLI --profile-file, MCP profileFile에도 그대로 쓸 수 있습니다. 예제: examples/profiles/harvest-frontier.example.json\n\n원본 에셋\nGLB 또는 GLTF를 놓으세요\n여러 파일을 한 번에 놓으면 일괄 검사 큐가 만들어집니다\n샘플로 시작\nGLB\n문제 있는 쿼드\n경고 3건\nGLB\n준비된 쿼드\n점수 100\n로컬 우선 처리\n\n파일은 브라우저에 남습니다. 메타데이터와 해시, 결과만 저장합니다.\n\nGLB\n선택된 에셋 없음\n파일을 올려 주세요\n해시 없음\n3D 미리보기\n\nGLB 또는 GLTF를 선택하면 여기에 나타납니다\n\n미리보기는 판정 게이트가 아닙니다. 점수와 finding은 Core가 바이트에서 계산합니다.\n\n관측 메트릭\n파일에서 읽은 수치\n장면 / 오브젝트\n—\n메시 / 조각\n—\n정점\n대기\n폴리곤\n대기\n재질\n대기\n텍스처 / 메모리\n대기\n파일 규격 점수\n\n—\n\n파일 규격만 본 점수입니다. 화면에서 어떻게 보이는지는 직접 확인하세요.\n\n점수는 실제 검사 보고서에서 계산됩니다. 화면 판정은 이 점수에 포함되지 않습니다.\n\n출처 기록\n시각 판정은 별도 레인.\n대기\n\n파일을 검사하면 여기에 결과가 나타납니다.\n\n발견된 문제\n아직 실행한 에셋이 없습니다\n\n왼쪽에서 파일을 놓거나 샘플을 선택하면 규칙 단위 근거가 나타납니다.\n\n안전하게 최적화\n\n정해진 안전한 손질만 합니다. 아무것도 없는 빈 노드 제거, 똑같은 재질 합치기, 메타데이터 정리, 새 파일로 다시 묶기. 모양이나 그림이 바뀌는 geometry나 texture 변환은 하지 않습니다.\n\n모든 결정은 흔적을 남깁니다\n입력 해시\n대기 중\n규칙 세트\n실행 시 선언\n새 재검사\n최적화 후\n다운로드 바이트\n최적화 후 확인\nINPUTHASH\n검사 후 표시\nRESULTDIGEST\n검사 후 표시"
+   },
+   "m": {
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/app",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failed": [],
+    "smallCount": 16,
+    "small": [
+     {
+      "tag": "B",
+      "cls": "",
+      "fs": 9.92,
+      "text": "원본"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.92,
+      "text": "그대로 보관"
+     },
+     {
+      "tag": "B",
+      "cls": "",
+      "fs": 9.92,
+      "text": "결과"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.92,
+      "text": "정리한 새 파일"
+     },
+     {
+      "tag": "B",
+      "cls": "",
+      "fs": 9.92,
+      "text": "재검사"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.92,
+      "text": "새 파일 다시 확인"
+     },
+     {
+      "tag": "DT",
+      "cls": "",
+      "fs": 9.92,
+      "text": "장면 / 오브젝트"
+     },
+     {
+      "tag": "DT",
+      "cls": "",
+      "fs": 9.92,
+      "text": "메시 / 조각"
+     },
+     {
+      "tag": "DT",
+      "cls": "",
+      "fs": 9.92,
+      "text": "정점"
+     },
+     {
+      "tag": "DT",
+      "cls": "",
+      "fs": 9.92,
+      "text": "폴리곤"
+     },
+     {
+      "tag": "DT",
+      "cls": "",
+      "fs": 9.92,
+      "text": "재질"
+     },
+     {
+      "tag": "DT",
+      "cls": "",
+      "fs": 9.92,
+      "text": "텍스처 / 메모리"
+     },
+     {
+      "tag": "DT",
+      "cls": "",
+      "fs": 9.92,
+      "text": "입력 해시"
+     },
+     {
+      "tag": "DT",
+      "cls": "",
+      "fs": 9.92,
+      "text": "규칙 세트"
+     },
+     {
+      "tag": "DT",
+      "cls": "",
+      "fs": 9.92,
+      "text": "새 재검사"
+     },
+     {
+      "tag": "DT",
+      "cls": "",
+      "fs": 9.92,
+      "text": "다운로드 바이트"
+     }
+    ],
+    "overflow": 0,
+    "wide": [],
+    "title": "Game Ready | Clunk"
+   }
+  }
+ },
+ {
+  "name": "kits",
+  "url": "/kits",
+  "sizes": {
+   "d": {
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/kits",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failed": [],
+    "smallCount": 0,
+    "small": [],
+    "overflow": 0,
+    "wide": [],
+    "title": "묶음 | Clunk",
+    "bodyText": "Clunk\n내 작업실\n작업실\n홈\n내 파일\n만들기\n검사\n검사 증명서\n제품\n크레딧·요금제\n도움말\n설정\n지금 요금\n무료 베타\n결제를 받지 않습니다\n묶음\n내 파일 검사\nA\nAudit QA\n묶음이란\n\n묶음은 검사를 통과한 파일 여러 개를 한 세트로 만들어 팀에 그대로 넘기는 기능입니다. 받는 사람은 어떤 파일이 들어 있는지, 그 파일이 어떤 검사를 통과했는지 함께 봅니다. 원본 파일은 그대로 두고, 묶음에는 어떤 파일을 담았는지만 적힙니다.\n\n내 묶음 열기\n내 작업 화면으로"
+   },
+   "m": {
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/kits",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failed": [],
+    "smallCount": 0,
+    "small": [],
+    "overflow": 0,
+    "wide": [],
+    "title": "묶음 | Clunk"
+   }
+  }
+ },
+ {
+  "name": "connect",
+  "url": "/connect",
+  "sizes": {
+   "d": {
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/agents#connect",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failed": [],
+    "smallCount": 50,
+    "small": [
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.44,
+      "text": "에이전트 결과"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.44,
+      "text": "미리 준비된 예시 · 크레딧 안 듦"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.16,
+      "text": "보기"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "2D · 스프라이트"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "is-active",
+      "fs": 9.12,
+      "text": "3D · GLB 모델"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.16,
+      "text": "단계"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "01"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "원본"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "is-active",
+      "fs": 9.12,
+      "text": "02"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "is-active",
+      "fs": 9.12,
+      "text": "검사"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "03"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "검토"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.16,
+      "text": "확대"
+     },
+     {
+      "tag": "OUTPUT",
+      "cls": "",
+      "fs": 9.28,
+      "text": "52"
+     },
+     {
+      "tag": "OUTPUT",
+      "cls": "",
+      "fs": 9.28,
+      "text": "%"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.96,
+      "text": "3D · GLB 모델"
+     },
+     {
+      "tag": "STRONG",
+      "cls": "",
+      "fs": 8.96,
+      "text": "파일 검사"
+     },
+     {
+      "tag": "STRONG",
+      "cls": "",
+      "fs": 11.04,
+      "text": "clunk-messy-sample.glb"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 8.96,
+      "text": "1,124 B · 181473ff49e2…"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "live-evidence-showcase-file-state",
+      "fs": 8,
+      "text": "검사 완료"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "live-evidence-showcase-kicker",
+      "fs": 9.28,
+      "text": "검사 결과 다시 보기"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.32,
+      "text": "근거"
+     },
+     {
+      "tag": "CODE",
+      "cls": "",
+      "fs": 9.44,
+      "text": "파일 읽기 · 규칙 · 발견 사항"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 7.68,
+      "text": "파일 검사"
+     },
+     {
+      "tag": "STRONG",
+      "cls": "",
+      "fs": 9.28,
+      "text": "통과"
+     }
+    ],
+    "overflow": 0,
+    "wide": [],
+    "title": "에이전트 연결 | Clunk",
+    "bodyText": "Clunk\n에셋 제작\n에셋 마켓\n에셋 검사\n제작 에이전트\n요금\n검수 뷰어\n문서\n내 작업공간\nAudit QA\n작업면 열기\nClunk 연결 서버\nv0.1.0\nAI 도구 연결(MCP)\n생성 직후,\n에이전트가 검사합니다.\n\nClunk가 직접 운영하는 HTTP MCP를 한 번 연결하면 Claude Code, Codex, Cursor, GitHub Copilot, Claude Desktop, VS Code가 이 웹사이트와 똑같은 검사 규칙을 쓰고, 똑같은 검사 기록을 받아 갑니다.\n\n연결 시작\n설정 가이드\n웹으로 바로 쓰는 도구\n7\n개\n내 컴퓨터에서 쓰는 도구\n7\n개\n원본 파일 덮어쓰기\n0\n에이전트 결과\n미리 준비된 예시 · 크레딧 안 듦\n보기\n2D · 스프라이트\n3D · GLB 모델\n단계\n01 원본\n02 검사\n03 검토\n확대\n52%\n3D · GLB 모델\n파일 검사\nclunk-messy-sample.glb\n1,124 B · 181473ff49e2…\n검사 완료\n검사 결과 다시 보기\n검사 결과를 바로 읽습니다.\n\n파일 검사 점수와 발견된 문제를 실제 샘플 수치로 보여 줍니다. 엔진에서 찍은 화면이 없으면 그 빈칸을 그대로 남깁니다.\n\n근거\n파일 읽기 · 규칙 · 발견 사항\n파일 검사\n통과\n99/100 · 막는 문제 0건\n엔진 화면\n증거 없음\n엔진에서 찍은 화면 필요\n게임 화면\n확인 전\n실제 게임 화면 전\n사람 검토\n확인 전\n사람이 직접 봐야 합니다\n내 파일로 실행\n파일 하나\n→\n새로 만든 검사 기록\n→\n내보낼지 결정\n예시가 통과해도 게임 화면 통과는 아닙니다\n연결 주소\n/api/mcp\n웹으로 바로 연결합니다\n인증\n내 계정 전용 키\n로그인 후 키 발급\n쓸 수 있는 도구\nHTTP 원격 도구 7개\n내 컴퓨터의 파일을 직접 읽고 쓰는 일은 로컬 stdio 도구 7개가 맡습니다. 그 도구는 내 컴퓨터에 설치해야 씁니다.\nMCP 연결 상태\n정상 응답\n다시 확인\n\n서버가 정상으로 응답했습니다. 실제 도구를 부르려면 내 계정 키가 필요합니다.\n\n연결 주소\nhttp://127.0.0.1:3100/api/mcp\n복사\n브라우저에서 바로 연결\n이 브라우저에서는 쓸 수 없습니다\n\n이 주소로는 카탈로그를 읽고, 직접 올린 파일을 검사할 수 있습니다. 내 컴퓨터에 있는 파일을 경로로 열어 읽고 쓰는 일은, 내 컴퓨터에 설치하는 로컬 서버가 맡습니다.\n\n키 발급하고 실제로 연결해 보기 →\n한 번 연결하면 다섯 종류\n에이전트가 부르면\n이 흐름으로 들어옵니다.\n파일은 내 컴퓨터에서 열거나, 직접 올려서 시작합니다.\nPIXEL\nSPRITE\n2D 이미지\nREGIONS\nATLAS\n스프라이트 시트\nRIG\nSPINE\n본 애니메이션\nCLIP\nMOTION\n00:00\n00:42\n01:00\n애니메이션 클립\nSCENE\nGLB\n3D 모델\n연결하기 전에 결과부터\n에이전트가 부르면\n이 결과가 돌아옵니다.\n\n아래는 미리 준비된 예시라 크레딧이 들지 않습니다. 엔진 화면과 사람의 검토는 따로 남습니다.\n\n예시 검사 한 번 돌려보기\n미리 준비된 예시 · 크레딧 안 듦\n실제로 배포된 예시 파일\nclunk-messy-sample.glb\n2D\n이미지 · 스프라이트 시트\n지원 형식 · 화면 예시\n2D\n본 애니메이션 · 움직임\n지원 형식 · 화면 예시\n실제 예시\nclunk-messy-sample.glb\n파일 크기 1,124B\n01\n원본 파일은 그대로 둡니다.\n해시 · 용량 · 출처를 함께 기록\n01\n원본 파일\n02\n검사\n03\n검토\n실제 파일에서 시작합니다\n실제 파일에서 시작합니다.\n\nClunk에 들어 있는 GLB 파일을 그대로 씁니다. 이 예시의 파일과 지문은 고정되어 있고, 예시가 통과했다고 해서 내 파일이 통과한 것은 아닙니다.\n\n파일 지문\n181473ff49e2a753…\n검사 점수\n99/100\n다음에 할 일\n원본 파일 내용 검사하기\n다음 단계 보기\n어디까지 통과인지\n파일 검사\n통과\n파일 내용 · 지문 · 규칙\n엔진 화면\n증거 없음\n엔진에서 찍은 화면 필요\n게임 화면\n확인 전\n실제 게임 화면 전\n사람 검토\n확인 전\n사람 검토 대기\n네 단계면 끝납니다\n연결은 짧고,\n결과는 실제여야 합니다.\n\n키를 발급하고, 설정을 복사하고, 서버가 실제로 응답하는지까지 확인합니다.\n\n01\n1. 키 발급\n내 계정 전용 키를 한 번 받습니다\n02\n2. 클라이언트 선택\n쓰는 도구를 고릅니다\n03\n3. 설정 복사\n연결 주소와 키가 채워진 설정을 붙여 넣습니다\n04\n4. 연결 확인\n서버가 실제로 응답하는지 확인합니다\n쓰는 도구 설정\n쓰는 도구를 고르면\n설정이 완성됩니다.\n\n선택한 클라이언트에 그대로 붙여 넣을 설정을 복사합니다. 인증에 실패하면 실패한 사실도 화면에 그대로 남습니다.\n\nClunk가 운영하는 연결\n한 번 발급하고 모든 클라이언트에서 사용\n연결 주소 http://127.0.0.1:3100/api/mcp · 내 컴퓨터 파일 검사는 로컬 서버가 맡고, 기록은 HTTPS로 오갑니다\nClunk 연결 키 만들기\n로그인 후 연결 확인\n01 · 연결 시작\nidle\n\n서버 이름과 MCP protocol 응답을 확인합니다.\n\n02 · 도구 목록\nidle\n\n키 발급 후 실제 도구 목록을 요청합니다.\n\n03 · 경계\n분리 유지\n\n이 핸드셰이크 PASS는 구조/연결 확인이며 player-facing 승인이 아닙니다.\n\nClaude Code권장\nCodex권장\nCursor권장\nGitHub Copilot권장\nClaude Desktop권장\nVS Code권장\n로컬 stdio\nClunk HTTP MCP권장\n2. 클라이언트 선택\n선택한 클라이언트: Claude Code\n\nClunk가 발급한 연결 키와 HTTPS endpoint를 그대로 등록합니다. 로컬 경로 치환이 없습니다.\n\n원격 MCP · 권장\nClunk 연결을 한 줄로 완료\n\nClunk가 발급한 연결 키와 HTTPS endpoint를 그대로 등록합니다. 로컬 경로 치환이 없습니다.\n\n키 발급 후 바로 연결\nterminal\n키 발급하고 설정 채우기\n‘Clunk 연결 키 만들기’를 누르면 이 설정에 실제 endpoint와 Bearer 키가 자동으로 채워집니다.\n\n이 공개 예시의 ${CLUNK_API_KEY}를 Clunk에서 발급한 연결 키로 바꾼 뒤 실행하세요.\n\n연결 키는 workspace별로 폐기할 수 있습니다.\nHTTP는 bytesBase64 업로드 또는 검증된 evidence만 받습니다.\n구조 PASS와 visual/player review는 끝까지 분리합니다.\n에이전트가 부를 수 있는 도구\n연결하면 바로 쓰는\n7개 도구\n\n만들기·검사하기·기록 연결이 같은 규칙을 씁니다. 웹으로 연결한 쪽은 내 컴퓨터의 파일 경로를 읽지 않습니다.\n\n01\nclunk_connection_check\n인증·endpoint·원격 기능이 실제 응답하는지 확인합니다.\n넣는 것 Bearer key · 나오는 것 connection, endpoint, capabilities\n02\nclunk_asset_inspect\nbase64 파일 또는 안전한 multi-file bundle을 구조적으로 검사합니다.\n넣는 것 bytesBase64 또는 files[], targetProfileId (예: harvest-frontier-web-three) · 나오는 것 AssetEvidence, findings, hashes\n03\nclunk_asset_validate\n업로드한 바이트를 선언된 프로파일 정책과 대조합니다.\n넣는 것 bytesBase64 또는 files[], targetProfileId (예: harvest-frontier-web-three) · 나오는 것 valid, score, hardBlockers, observations\n04\nclunk_asset_inspection_evidence\n검증된 v2 evidence를 받아 구조·런타임·사람 판정을 분리합니다.\n넣는 것 clunk.asset-inspection-evidence.v2 · 나오는 것 identity, qualityPolicy, findings, review states\n05\nclunk_collaboration_append\nframe manifest를 append/replace로 협업 스레드에 기록합니다.\n넣는 것 threadId, evidenceMode, frame manifest · 나오는 것 normalized evidence, freshness, review states\n06\nclunk_scene_review\nframe manifest의 scene gap과 shipped evidence를 정규화합니다.\n넣는 것 manifest (HTTP는 local path를 dereference하지 않음) · 나오는 것 scene review, linked assets, visualRuntime/playerFacing/humanDecision\n07\nclunk_sprite_sheet_review\n선언된 Pixi sprite-sheet manifest를 정규화합니다. 실제 파일 재해시는 local CLI에서 수행합니다.\n넣는 것 manifest (HTTP는 local path를 dereference하지 않음) · 나오는 것 pixel contract, quality, readiness, review states\n결과를 바르게 읽는 법\n파일 검사 통과와\n화면 통과는 다릅니다.\n\nClunk의 검사 규칙(clunk-game-ready-v1)이 확인하는 것은 파일 내용과 구조, 규칙 위반입니다. 엔진에서 실제로 그린 화면과 사람의 판단은 자동으로 통과가 되지 않습니다.\n\n규칙과 상태 보기\n파일 검사\n통과\n파일 내용 · 지문 · 규칙 · 차단 문제\n엔진 화면\n증거 없음\n엔진에서 찍은 화면이 필요합니다\n게임 화면\n확인 전\n플레이어가 보는 화면은 아직 판정 전\n사람 검토\n대기\n사람이 직접 보고 판단해야 합니다\nPixiJS 2D\nHarvest Frontier Web / Three.js\nGodot 4\nUnity Editor\nUnreal Engine\n사람 검토로 넘기기\n자동으로 나온 결과를\n사람의 검토로 보냅니다.\n\n예시가 통과했거나 파일 검사가 통과했다고 해서 게임에 넣어도 된다고 말하지 않습니다. 엔진에서 찍은 최신 화면과 사람의 결정을 따로 붙입니다.\n\n돌려 보지 않은 엔진은 \"확인할 환경 없음\"으로 남고, 통과로 바뀌지 않습니다.\n생성 결과 열기\n검수된 상품 보기\n파일 검사\n통과\n엔진 화면\n증거 없음\n게임 화면\n확인 전\n사람 검토\n대기\n다음\n실제 에셋을\n한 번 호출해 보세요.\n클라이언트 설정하기\n내 파일 검사하기\nCLUNK\n\n게임에 넣을 3D 모델과 2D 이미지를 만들고, 게임에 넣어도 되는지 검사하고, 마켓에서 주고받는 곳입니다.\n\n제품\n에셋 마켓\n에셋 제작\n에셋 검사\n제작 에이전트\n요금 · 크레딧\n자료\n문서\n검수 뷰어\nAI 도구 연결\n내 작업공간\n약관\n이용약관\n개인정보처리방침\n취소·환불정책\n아르테미스(Artemis) · 대표 박준성 · 사업자등록번호 361-02-03814 · 인천광역시 제물포구 화도진로 16, 109동 1604호\n지금은 무료 베타 기간입니다. 모든 기능을 결제 없이 쓸 수 있습니다."
+   },
+   "m": {
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/agents#connect",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failed": [],
+    "smallCount": 50,
+    "small": [
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.44,
+      "text": "에이전트 결과"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.44,
+      "text": "미리 준비된 예시 · 크레딧 안 듦"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.16,
+      "text": "보기"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "2D · 스프라이트"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "is-active",
+      "fs": 9.12,
+      "text": "3D · GLB 모델"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.16,
+      "text": "단계"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "01"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "원본"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "is-active",
+      "fs": 9.12,
+      "text": "02"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "is-active",
+      "fs": 9.12,
+      "text": "검사"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "03"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "검토"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.16,
+      "text": "확대"
+     },
+     {
+      "tag": "OUTPUT",
+      "cls": "",
+      "fs": 9.28,
+      "text": "52"
+     },
+     {
+      "tag": "OUTPUT",
+      "cls": "",
+      "fs": 9.28,
+      "text": "%"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.96,
+      "text": "3D · GLB 모델"
+     },
+     {
+      "tag": "STRONG",
+      "cls": "",
+      "fs": 8.96,
+      "text": "파일 검사"
+     },
+     {
+      "tag": "STRONG",
+      "cls": "",
+      "fs": 11.04,
+      "text": "clunk-messy-sample.glb"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 8.96,
+      "text": "1,124 B · 181473ff49e2…"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "live-evidence-showcase-file-state",
+      "fs": 8,
+      "text": "검사 완료"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "live-evidence-showcase-kicker",
+      "fs": 9.28,
+      "text": "검사 결과 다시 보기"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.32,
+      "text": "근거"
+     },
+     {
+      "tag": "CODE",
+      "cls": "",
+      "fs": 9.44,
+      "text": "파일 읽기 · 규칙 · 발견 사항"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 7.68,
+      "text": "파일 검사"
+     },
+     {
+      "tag": "STRONG",
+      "cls": "",
+      "fs": 9.28,
+      "text": "통과"
+     }
+    ],
+    "overflow": 0,
+    "wide": [],
+    "title": "에이전트 연결 | Clunk"
+   }
+  }
+ },
+ {
+  "name": "mcp",
+  "url": "/mcp",
+  "sizes": {
+   "d": {
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/agents",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failed": [],
+    "smallCount": 50,
+    "small": [
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.44,
+      "text": "에이전트 결과"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.44,
+      "text": "미리 준비된 예시 · 크레딧 안 듦"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.16,
+      "text": "보기"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "2D · 스프라이트"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "is-active",
+      "fs": 9.12,
+      "text": "3D · GLB 모델"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.16,
+      "text": "단계"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "01"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "원본"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "is-active",
+      "fs": 9.12,
+      "text": "02"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "is-active",
+      "fs": 9.12,
+      "text": "검사"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "03"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "검토"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.16,
+      "text": "확대"
+     },
+     {
+      "tag": "OUTPUT",
+      "cls": "",
+      "fs": 9.28,
+      "text": "52"
+     },
+     {
+      "tag": "OUTPUT",
+      "cls": "",
+      "fs": 9.28,
+      "text": "%"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.96,
+      "text": "3D · GLB 모델"
+     },
+     {
+      "tag": "STRONG",
+      "cls": "",
+      "fs": 8.96,
+      "text": "파일 검사"
+     },
+     {
+      "tag": "STRONG",
+      "cls": "",
+      "fs": 11.04,
+      "text": "clunk-messy-sample.glb"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 8.96,
+      "text": "1,124 B · 181473ff49e2…"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "live-evidence-showcase-file-state",
+      "fs": 8,
+      "text": "검사 완료"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "live-evidence-showcase-kicker",
+      "fs": 9.28,
+      "text": "검사 결과 다시 보기"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.32,
+      "text": "근거"
+     },
+     {
+      "tag": "CODE",
+      "cls": "",
+      "fs": 9.44,
+      "text": "파일 읽기 · 규칙 · 발견 사항"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 7.68,
+      "text": "파일 검사"
+     },
+     {
+      "tag": "STRONG",
+      "cls": "",
+      "fs": 9.28,
+      "text": "통과"
+     }
+    ],
+    "overflow": 0,
+    "wide": [],
+    "title": "에이전트 연결 | Clunk",
+    "bodyText": "Clunk\n에셋 제작\n에셋 마켓\n에셋 검사\n제작 에이전트\n요금\n검수 뷰어\n문서\n내 작업공간\nAudit QA\n작업면 열기\nClunk 연결 서버\nv0.1.0\nAI 도구 연결(MCP)\n생성 직후,\n에이전트가 검사합니다.\n\nClunk가 직접 운영하는 HTTP MCP를 한 번 연결하면 Claude Code, Codex, Cursor, GitHub Copilot, Claude Desktop, VS Code가 이 웹사이트와 똑같은 검사 규칙을 쓰고, 똑같은 검사 기록을 받아 갑니다.\n\n연결 시작\n설정 가이드\n웹으로 바로 쓰는 도구\n7\n개\n내 컴퓨터에서 쓰는 도구\n7\n개\n원본 파일 덮어쓰기\n0\n에이전트 결과\n미리 준비된 예시 · 크레딧 안 듦\n보기\n2D · 스프라이트\n3D · GLB 모델\n단계\n01 원본\n02 검사\n03 검토\n확대\n52%\n3D · GLB 모델\n파일 검사\nclunk-messy-sample.glb\n1,124 B · 181473ff49e2…\n검사 완료\n검사 결과 다시 보기\n검사 결과를 바로 읽습니다.\n\n파일 검사 점수와 발견된 문제를 실제 샘플 수치로 보여 줍니다. 엔진에서 찍은 화면이 없으면 그 빈칸을 그대로 남깁니다.\n\n근거\n파일 읽기 · 규칙 · 발견 사항\n파일 검사\n통과\n99/100 · 막는 문제 0건\n엔진 화면\n증거 없음\n엔진에서 찍은 화면 필요\n게임 화면\n확인 전\n실제 게임 화면 전\n사람 검토\n확인 전\n사람이 직접 봐야 합니다\n내 파일로 실행\n파일 하나\n→\n새로 만든 검사 기록\n→\n내보낼지 결정\n예시가 통과해도 게임 화면 통과는 아닙니다\n연결 주소\n/api/mcp\n웹으로 바로 연결합니다\n인증\n내 계정 전용 키\n로그인 후 키 발급\n쓸 수 있는 도구\nHTTP 원격 도구 7개\n내 컴퓨터의 파일을 직접 읽고 쓰는 일은 로컬 stdio 도구 7개가 맡습니다. 그 도구는 내 컴퓨터에 설치해야 씁니다.\nMCP 연결 상태\n정상 응답\n다시 확인\n\n서버가 정상으로 응답했습니다. 실제 도구를 부르려면 내 계정 키가 필요합니다.\n\n연결 주소\nhttp://127.0.0.1:3100/api/mcp\n복사\n브라우저에서 바로 연결\n이 브라우저에서는 쓸 수 없습니다\n\n이 주소로는 카탈로그를 읽고, 직접 올린 파일을 검사할 수 있습니다. 내 컴퓨터에 있는 파일을 경로로 열어 읽고 쓰는 일은, 내 컴퓨터에 설치하는 로컬 서버가 맡습니다.\n\n키 발급하고 실제로 연결해 보기 →\n한 번 연결하면 다섯 종류\n에이전트가 부르면\n이 흐름으로 들어옵니다.\n파일은 내 컴퓨터에서 열거나, 직접 올려서 시작합니다.\nPIXEL\nSPRITE\n2D 이미지\nREGIONS\nATLAS\n스프라이트 시트\nRIG\nSPINE\n본 애니메이션\nCLIP\nMOTION\n00:00\n00:42\n01:00\n애니메이션 클립\nSCENE\nGLB\n3D 모델\n연결하기 전에 결과부터\n에이전트가 부르면\n이 결과가 돌아옵니다.\n\n아래는 미리 준비된 예시라 크레딧이 들지 않습니다. 엔진 화면과 사람의 검토는 따로 남습니다.\n\n예시 검사 한 번 돌려보기\n미리 준비된 예시 · 크레딧 안 듦\n실제로 배포된 예시 파일\nclunk-messy-sample.glb\n2D\n이미지 · 스프라이트 시트\n지원 형식 · 화면 예시\n2D\n본 애니메이션 · 움직임\n지원 형식 · 화면 예시\n실제 예시\nclunk-messy-sample.glb\n파일 크기 1,124B\n01\n원본 파일은 그대로 둡니다.\n해시 · 용량 · 출처를 함께 기록\n01\n원본 파일\n02\n검사\n03\n검토\n실제 파일에서 시작합니다\n실제 파일에서 시작합니다.\n\nClunk에 들어 있는 GLB 파일을 그대로 씁니다. 이 예시의 파일과 지문은 고정되어 있고, 예시가 통과했다고 해서 내 파일이 통과한 것은 아닙니다.\n\n파일 지문\n181473ff49e2a753…\n검사 점수\n99/100\n다음에 할 일\n원본 파일 내용 검사하기\n다음 단계 보기\n어디까지 통과인지\n파일 검사\n통과\n파일 내용 · 지문 · 규칙\n엔진 화면\n증거 없음\n엔진에서 찍은 화면 필요\n게임 화면\n확인 전\n실제 게임 화면 전\n사람 검토\n확인 전\n사람 검토 대기\n네 단계면 끝납니다\n연결은 짧고,\n결과는 실제여야 합니다.\n\n키를 발급하고, 설정을 복사하고, 서버가 실제로 응답하는지까지 확인합니다.\n\n01\n1. 키 발급\n내 계정 전용 키를 한 번 받습니다\n02\n2. 클라이언트 선택\n쓰는 도구를 고릅니다\n03\n3. 설정 복사\n연결 주소와 키가 채워진 설정을 붙여 넣습니다\n04\n4. 연결 확인\n서버가 실제로 응답하는지 확인합니다\n쓰는 도구 설정\n쓰는 도구를 고르면\n설정이 완성됩니다.\n\n선택한 클라이언트에 그대로 붙여 넣을 설정을 복사합니다. 인증에 실패하면 실패한 사실도 화면에 그대로 남습니다.\n\nClunk가 운영하는 연결\n한 번 발급하고 모든 클라이언트에서 사용\n연결 주소 http://127.0.0.1:3100/api/mcp · 내 컴퓨터 파일 검사는 로컬 서버가 맡고, 기록은 HTTPS로 오갑니다\nClunk 연결 키 만들기\n로그인 후 연결 확인\n01 · 연결 시작\nidle\n\n서버 이름과 MCP protocol 응답을 확인합니다.\n\n02 · 도구 목록\nidle\n\n키 발급 후 실제 도구 목록을 요청합니다.\n\n03 · 경계\n분리 유지\n\n이 핸드셰이크 PASS는 구조/연결 확인이며 player-facing 승인이 아닙니다.\n\nClaude Code권장\nCodex권장\nCursor권장\nGitHub Copilot권장\nClaude Desktop권장\nVS Code권장\n로컬 stdio\nClunk HTTP MCP권장\n2. 클라이언트 선택\n선택한 클라이언트: Claude Code\n\nClunk가 발급한 연결 키와 HTTPS endpoint를 그대로 등록합니다. 로컬 경로 치환이 없습니다.\n\n원격 MCP · 권장\nClunk 연결을 한 줄로 완료\n\nClunk가 발급한 연결 키와 HTTPS endpoint를 그대로 등록합니다. 로컬 경로 치환이 없습니다.\n\n키 발급 후 바로 연결\nterminal\n키 발급하고 설정 채우기\n‘Clunk 연결 키 만들기’를 누르면 이 설정에 실제 endpoint와 Bearer 키가 자동으로 채워집니다.\n\n이 공개 예시의 ${CLUNK_API_KEY}를 Clunk에서 발급한 연결 키로 바꾼 뒤 실행하세요.\n\n연결 키는 workspace별로 폐기할 수 있습니다.\nHTTP는 bytesBase64 업로드 또는 검증된 evidence만 받습니다.\n구조 PASS와 visual/player review는 끝까지 분리합니다.\n에이전트가 부를 수 있는 도구\n연결하면 바로 쓰는\n7개 도구\n\n만들기·검사하기·기록 연결이 같은 규칙을 씁니다. 웹으로 연결한 쪽은 내 컴퓨터의 파일 경로를 읽지 않습니다.\n\n01\nclunk_connection_check\n인증·endpoint·원격 기능이 실제 응답하는지 확인합니다.\n넣는 것 Bearer key · 나오는 것 connection, endpoint, capabilities\n02\nclunk_asset_inspect\nbase64 파일 또는 안전한 multi-file bundle을 구조적으로 검사합니다.\n넣는 것 bytesBase64 또는 files[], targetProfileId (예: harvest-frontier-web-three) · 나오는 것 AssetEvidence, findings, hashes\n03\nclunk_asset_validate\n업로드한 바이트를 선언된 프로파일 정책과 대조합니다.\n넣는 것 bytesBase64 또는 files[], targetProfileId (예: harvest-frontier-web-three) · 나오는 것 valid, score, hardBlockers, observations\n04\nclunk_asset_inspection_evidence\n검증된 v2 evidence를 받아 구조·런타임·사람 판정을 분리합니다.\n넣는 것 clunk.asset-inspection-evidence.v2 · 나오는 것 identity, qualityPolicy, findings, review states\n05\nclunk_collaboration_append\nframe manifest를 append/replace로 협업 스레드에 기록합니다.\n넣는 것 threadId, evidenceMode, frame manifest · 나오는 것 normalized evidence, freshness, review states\n06\nclunk_scene_review\nframe manifest의 scene gap과 shipped evidence를 정규화합니다.\n넣는 것 manifest (HTTP는 local path를 dereference하지 않음) · 나오는 것 scene review, linked assets, visualRuntime/playerFacing/humanDecision\n07\nclunk_sprite_sheet_review\n선언된 Pixi sprite-sheet manifest를 정규화합니다. 실제 파일 재해시는 local CLI에서 수행합니다.\n넣는 것 manifest (HTTP는 local path를 dereference하지 않음) · 나오는 것 pixel contract, quality, readiness, review states\n결과를 바르게 읽는 법\n파일 검사 통과와\n화면 통과는 다릅니다.\n\nClunk의 검사 규칙(clunk-game-ready-v1)이 확인하는 것은 파일 내용과 구조, 규칙 위반입니다. 엔진에서 실제로 그린 화면과 사람의 판단은 자동으로 통과가 되지 않습니다.\n\n규칙과 상태 보기\n파일 검사\n통과\n파일 내용 · 지문 · 규칙 · 차단 문제\n엔진 화면\n증거 없음\n엔진에서 찍은 화면이 필요합니다\n게임 화면\n확인 전\n플레이어가 보는 화면은 아직 판정 전\n사람 검토\n대기\n사람이 직접 보고 판단해야 합니다\nPixiJS 2D\nHarvest Frontier Web / Three.js\nGodot 4\nUnity Editor\nUnreal Engine\n사람 검토로 넘기기\n자동으로 나온 결과를\n사람의 검토로 보냅니다.\n\n예시가 통과했거나 파일 검사가 통과했다고 해서 게임에 넣어도 된다고 말하지 않습니다. 엔진에서 찍은 최신 화면과 사람의 결정을 따로 붙입니다.\n\n돌려 보지 않은 엔진은 \"확인할 환경 없음\"으로 남고, 통과로 바뀌지 않습니다.\n생성 결과 열기\n검수된 상품 보기\n파일 검사\n통과\n엔진 화면\n증거 없음\n게임 화면\n확인 전\n사람 검토\n대기\n다음\n실제 에셋을\n한 번 호출해 보세요.\n클라이언트 설정하기\n내 파일 검사하기\nCLUNK\n\n게임에 넣을 3D 모델과 2D 이미지를 만들고, 게임에 넣어도 되는지 검사하고, 마켓에서 주고받는 곳입니다.\n\n제품\n에셋 마켓\n에셋 제작\n에셋 검사\n제작 에이전트\n요금 · 크레딧\n자료\n문서\n검수 뷰어\nAI 도구 연결\n내 작업공간\n약관\n이용약관\n개인정보처리방침\n취소·환불정책\n아르테미스(Artemis) · 대표 박준성 · 사업자등록번호 361-02-03814 · 인천광역시 제물포구 화도진로 16, 109동 1604호\n지금은 무료 베타 기간입니다. 모든 기능을 결제 없이 쓸 수 있습니다."
+   },
+   "m": {
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/agents",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failed": [],
+    "smallCount": 50,
+    "small": [
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.44,
+      "text": "에이전트 결과"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.44,
+      "text": "미리 준비된 예시 · 크레딧 안 듦"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.16,
+      "text": "보기"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "2D · 스프라이트"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "is-active",
+      "fs": 9.12,
+      "text": "3D · GLB 모델"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.16,
+      "text": "단계"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "01"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "원본"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "is-active",
+      "fs": 9.12,
+      "text": "02"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "is-active",
+      "fs": 9.12,
+      "text": "검사"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "03"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "검토"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.16,
+      "text": "확대"
+     },
+     {
+      "tag": "OUTPUT",
+      "cls": "",
+      "fs": 9.28,
+      "text": "52"
+     },
+     {
+      "tag": "OUTPUT",
+      "cls": "",
+      "fs": 9.28,
+      "text": "%"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.96,
+      "text": "3D · GLB 모델"
+     },
+     {
+      "tag": "STRONG",
+      "cls": "",
+      "fs": 8.96,
+      "text": "파일 검사"
+     },
+     {
+      "tag": "STRONG",
+      "cls": "",
+      "fs": 11.04,
+      "text": "clunk-messy-sample.glb"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 8.96,
+      "text": "1,124 B · 181473ff49e2…"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "live-evidence-showcase-file-state",
+      "fs": 8,
+      "text": "검사 완료"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "live-evidence-showcase-kicker",
+      "fs": 9.28,
+      "text": "검사 결과 다시 보기"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.32,
+      "text": "근거"
+     },
+     {
+      "tag": "CODE",
+      "cls": "",
+      "fs": 9.44,
+      "text": "파일 읽기 · 규칙 · 발견 사항"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 7.68,
+      "text": "파일 검사"
+     },
+     {
+      "tag": "STRONG",
+      "cls": "",
+      "fs": 9.28,
+      "text": "통과"
+     }
+    ],
+    "overflow": 0,
+    "wide": [],
+    "title": "에이전트 연결 | Clunk"
+   }
+  }
+ },
+ {
+  "name": "agents-auth",
+  "url": "/agents",
+  "sizes": {
+   "d": {
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/agents",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failed": [],
+    "smallCount": 50,
+    "small": [
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.44,
+      "text": "에이전트 결과"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.44,
+      "text": "미리 준비된 예시 · 크레딧 안 듦"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.16,
+      "text": "보기"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "2D · 스프라이트"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "is-active",
+      "fs": 9.12,
+      "text": "3D · GLB 모델"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.16,
+      "text": "단계"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "01"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "원본"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "is-active",
+      "fs": 9.12,
+      "text": "02"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "is-active",
+      "fs": 9.12,
+      "text": "검사"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "03"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "검토"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.16,
+      "text": "확대"
+     },
+     {
+      "tag": "OUTPUT",
+      "cls": "",
+      "fs": 9.28,
+      "text": "52"
+     },
+     {
+      "tag": "OUTPUT",
+      "cls": "",
+      "fs": 9.28,
+      "text": "%"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.96,
+      "text": "3D · GLB 모델"
+     },
+     {
+      "tag": "STRONG",
+      "cls": "",
+      "fs": 8.96,
+      "text": "파일 검사"
+     },
+     {
+      "tag": "STRONG",
+      "cls": "",
+      "fs": 11.04,
+      "text": "clunk-messy-sample.glb"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 8.96,
+      "text": "1,124 B · 181473ff49e2…"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "live-evidence-showcase-file-state",
+      "fs": 8,
+      "text": "검사 완료"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "live-evidence-showcase-kicker",
+      "fs": 9.28,
+      "text": "검사 결과 다시 보기"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.32,
+      "text": "근거"
+     },
+     {
+      "tag": "CODE",
+      "cls": "",
+      "fs": 9.44,
+      "text": "파일 읽기 · 규칙 · 발견 사항"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 7.68,
+      "text": "파일 검사"
+     },
+     {
+      "tag": "STRONG",
+      "cls": "",
+      "fs": 9.28,
+      "text": "통과"
+     }
+    ],
+    "overflow": 0,
+    "wide": [],
+    "title": "에이전트 연결 | Clunk",
+    "bodyText": "Clunk\n에셋 제작\n에셋 마켓\n에셋 검사\n제작 에이전트\n요금\n검수 뷰어\n문서\n내 작업공간\nAudit QA\n작업면 열기\nClunk 연결 서버\nv0.1.0\nAI 도구 연결(MCP)\n생성 직후,\n에이전트가 검사합니다.\n\nClunk가 직접 운영하는 HTTP MCP를 한 번 연결하면 Claude Code, Codex, Cursor, GitHub Copilot, Claude Desktop, VS Code가 이 웹사이트와 똑같은 검사 규칙을 쓰고, 똑같은 검사 기록을 받아 갑니다.\n\n연결 시작\n설정 가이드\n웹으로 바로 쓰는 도구\n7\n개\n내 컴퓨터에서 쓰는 도구\n7\n개\n원본 파일 덮어쓰기\n0\n에이전트 결과\n미리 준비된 예시 · 크레딧 안 듦\n보기\n2D · 스프라이트\n3D · GLB 모델\n단계\n01 원본\n02 검사\n03 검토\n확대\n52%\n3D · GLB 모델\n파일 검사\nclunk-messy-sample.glb\n1,124 B · 181473ff49e2…\n검사 완료\n검사 결과 다시 보기\n검사 결과를 바로 읽습니다.\n\n파일 검사 점수와 발견된 문제를 실제 샘플 수치로 보여 줍니다. 엔진에서 찍은 화면이 없으면 그 빈칸을 그대로 남깁니다.\n\n근거\n파일 읽기 · 규칙 · 발견 사항\n파일 검사\n통과\n99/100 · 막는 문제 0건\n엔진 화면\n증거 없음\n엔진에서 찍은 화면 필요\n게임 화면\n확인 전\n실제 게임 화면 전\n사람 검토\n확인 전\n사람이 직접 봐야 합니다\n내 파일로 실행\n파일 하나\n→\n새로 만든 검사 기록\n→\n내보낼지 결정\n예시가 통과해도 게임 화면 통과는 아닙니다\n연결 주소\n/api/mcp\n웹으로 바로 연결합니다\n인증\n내 계정 전용 키\n로그인 후 키 발급\n쓸 수 있는 도구\nHTTP 원격 도구 7개\n내 컴퓨터의 파일을 직접 읽고 쓰는 일은 로컬 stdio 도구 7개가 맡습니다. 그 도구는 내 컴퓨터에 설치해야 씁니다.\nMCP 연결 상태\n정상 응답\n다시 확인\n\n서버가 정상으로 응답했습니다. 실제 도구를 부르려면 내 계정 키가 필요합니다.\n\n연결 주소\nhttp://127.0.0.1:3100/api/mcp\n복사\n브라우저에서 바로 연결\n이 브라우저에서는 쓸 수 없습니다\n\n이 주소로는 카탈로그를 읽고, 직접 올린 파일을 검사할 수 있습니다. 내 컴퓨터에 있는 파일을 경로로 열어 읽고 쓰는 일은, 내 컴퓨터에 설치하는 로컬 서버가 맡습니다.\n\n키 발급하고 실제로 연결해 보기 →\n한 번 연결하면 다섯 종류\n에이전트가 부르면\n이 흐름으로 들어옵니다.\n파일은 내 컴퓨터에서 열거나, 직접 올려서 시작합니다.\nPIXEL\nSPRITE\n2D 이미지\nREGIONS\nATLAS\n스프라이트 시트\nRIG\nSPINE\n본 애니메이션\nCLIP\nMOTION\n00:00\n00:42\n01:00\n애니메이션 클립\nSCENE\nGLB\n3D 모델\n연결하기 전에 결과부터\n에이전트가 부르면\n이 결과가 돌아옵니다.\n\n아래는 미리 준비된 예시라 크레딧이 들지 않습니다. 엔진 화면과 사람의 검토는 따로 남습니다.\n\n예시 검사 한 번 돌려보기\n미리 준비된 예시 · 크레딧 안 듦\n실제로 배포된 예시 파일\nclunk-messy-sample.glb\n2D\n이미지 · 스프라이트 시트\n지원 형식 · 화면 예시\n2D\n본 애니메이션 · 움직임\n지원 형식 · 화면 예시\n실제 예시\nclunk-messy-sample.glb\n파일 크기 1,124B\n01\n원본 파일은 그대로 둡니다.\n해시 · 용량 · 출처를 함께 기록\n01\n원본 파일\n02\n검사\n03\n검토\n실제 파일에서 시작합니다\n실제 파일에서 시작합니다.\n\nClunk에 들어 있는 GLB 파일을 그대로 씁니다. 이 예시의 파일과 지문은 고정되어 있고, 예시가 통과했다고 해서 내 파일이 통과한 것은 아닙니다.\n\n파일 지문\n181473ff49e2a753…\n검사 점수\n99/100\n다음에 할 일\n원본 파일 내용 검사하기\n다음 단계 보기\n어디까지 통과인지\n파일 검사\n통과\n파일 내용 · 지문 · 규칙\n엔진 화면\n증거 없음\n엔진에서 찍은 화면 필요\n게임 화면\n확인 전\n실제 게임 화면 전\n사람 검토\n확인 전\n사람 검토 대기\n네 단계면 끝납니다\n연결은 짧고,\n결과는 실제여야 합니다.\n\n키를 발급하고, 설정을 복사하고, 서버가 실제로 응답하는지까지 확인합니다.\n\n01\n1. 키 발급\n내 계정 전용 키를 한 번 받습니다\n02\n2. 클라이언트 선택\n쓰는 도구를 고릅니다\n03\n3. 설정 복사\n연결 주소와 키가 채워진 설정을 붙여 넣습니다\n04\n4. 연결 확인\n서버가 실제로 응답하는지 확인합니다\n쓰는 도구 설정\n쓰는 도구를 고르면\n설정이 완성됩니다.\n\n선택한 클라이언트에 그대로 붙여 넣을 설정을 복사합니다. 인증에 실패하면 실패한 사실도 화면에 그대로 남습니다.\n\nClunk가 운영하는 연결\n한 번 발급하고 모든 클라이언트에서 사용\n연결 주소 http://127.0.0.1:3100/api/mcp · 내 컴퓨터 파일 검사는 로컬 서버가 맡고, 기록은 HTTPS로 오갑니다\nClunk 연결 키 만들기\n로그인 후 연결 확인\n01 · 연결 시작\nidle\n\n서버 이름과 MCP protocol 응답을 확인합니다.\n\n02 · 도구 목록\nidle\n\n키 발급 후 실제 도구 목록을 요청합니다.\n\n03 · 경계\n분리 유지\n\n이 핸드셰이크 PASS는 구조/연결 확인이며 player-facing 승인이 아닙니다.\n\nClaude Code권장\nCodex권장\nCursor권장\nGitHub Copilot권장\nClaude Desktop권장\nVS Code권장\n로컬 stdio\nClunk HTTP MCP권장\n2. 클라이언트 선택\n선택한 클라이언트: Claude Code\n\nClunk가 발급한 연결 키와 HTTPS endpoint를 그대로 등록합니다. 로컬 경로 치환이 없습니다.\n\n원격 MCP · 권장\nClunk 연결을 한 줄로 완료\n\nClunk가 발급한 연결 키와 HTTPS endpoint를 그대로 등록합니다. 로컬 경로 치환이 없습니다.\n\n키 발급 후 바로 연결\nterminal\n키 발급하고 설정 채우기\n‘Clunk 연결 키 만들기’를 누르면 이 설정에 실제 endpoint와 Bearer 키가 자동으로 채워집니다.\n\n이 공개 예시의 ${CLUNK_API_KEY}를 Clunk에서 발급한 연결 키로 바꾼 뒤 실행하세요.\n\n연결 키는 workspace별로 폐기할 수 있습니다.\nHTTP는 bytesBase64 업로드 또는 검증된 evidence만 받습니다.\n구조 PASS와 visual/player review는 끝까지 분리합니다.\n에이전트가 부를 수 있는 도구\n연결하면 바로 쓰는\n7개 도구\n\n만들기·검사하기·기록 연결이 같은 규칙을 씁니다. 웹으로 연결한 쪽은 내 컴퓨터의 파일 경로를 읽지 않습니다.\n\n01\nclunk_connection_check\n인증·endpoint·원격 기능이 실제 응답하는지 확인합니다.\n넣는 것 Bearer key · 나오는 것 connection, endpoint, capabilities\n02\nclunk_asset_inspect\nbase64 파일 또는 안전한 multi-file bundle을 구조적으로 검사합니다.\n넣는 것 bytesBase64 또는 files[], targetProfileId (예: harvest-frontier-web-three) · 나오는 것 AssetEvidence, findings, hashes\n03\nclunk_asset_validate\n업로드한 바이트를 선언된 프로파일 정책과 대조합니다.\n넣는 것 bytesBase64 또는 files[], targetProfileId (예: harvest-frontier-web-three) · 나오는 것 valid, score, hardBlockers, observations\n04\nclunk_asset_inspection_evidence\n검증된 v2 evidence를 받아 구조·런타임·사람 판정을 분리합니다.\n넣는 것 clunk.asset-inspection-evidence.v2 · 나오는 것 identity, qualityPolicy, findings, review states\n05\nclunk_collaboration_append\nframe manifest를 append/replace로 협업 스레드에 기록합니다.\n넣는 것 threadId, evidenceMode, frame manifest · 나오는 것 normalized evidence, freshness, review states\n06\nclunk_scene_review\nframe manifest의 scene gap과 shipped evidence를 정규화합니다.\n넣는 것 manifest (HTTP는 local path를 dereference하지 않음) · 나오는 것 scene review, linked assets, visualRuntime/playerFacing/humanDecision\n07\nclunk_sprite_sheet_review\n선언된 Pixi sprite-sheet manifest를 정규화합니다. 실제 파일 재해시는 local CLI에서 수행합니다.\n넣는 것 manifest (HTTP는 local path를 dereference하지 않음) · 나오는 것 pixel contract, quality, readiness, review states\n결과를 바르게 읽는 법\n파일 검사 통과와\n화면 통과는 다릅니다.\n\nClunk의 검사 규칙(clunk-game-ready-v1)이 확인하는 것은 파일 내용과 구조, 규칙 위반입니다. 엔진에서 실제로 그린 화면과 사람의 판단은 자동으로 통과가 되지 않습니다.\n\n규칙과 상태 보기\n파일 검사\n통과\n파일 내용 · 지문 · 규칙 · 차단 문제\n엔진 화면\n증거 없음\n엔진에서 찍은 화면이 필요합니다\n게임 화면\n확인 전\n플레이어가 보는 화면은 아직 판정 전\n사람 검토\n대기\n사람이 직접 보고 판단해야 합니다\nPixiJS 2D\nHarvest Frontier Web / Three.js\nGodot 4\nUnity Editor\nUnreal Engine\n사람 검토로 넘기기\n자동으로 나온 결과를\n사람의 검토로 보냅니다.\n\n예시가 통과했거나 파일 검사가 통과했다고 해서 게임에 넣어도 된다고 말하지 않습니다. 엔진에서 찍은 최신 화면과 사람의 결정을 따로 붙입니다.\n\n돌려 보지 않은 엔진은 \"확인할 환경 없음\"으로 남고, 통과로 바뀌지 않습니다.\n생성 결과 열기\n검수된 상품 보기\n파일 검사\n통과\n엔진 화면\n증거 없음\n게임 화면\n확인 전\n사람 검토\n대기\n다음\n실제 에셋을\n한 번 호출해 보세요.\n클라이언트 설정하기\n내 파일 검사하기\nCLUNK\n\n게임에 넣을 3D 모델과 2D 이미지를 만들고, 게임에 넣어도 되는지 검사하고, 마켓에서 주고받는 곳입니다.\n\n제품\n에셋 마켓\n에셋 제작\n에셋 검사\n제작 에이전트\n요금 · 크레딧\n자료\n문서\n검수 뷰어\nAI 도구 연결\n내 작업공간\n약관\n이용약관\n개인정보처리방침\n취소·환불정책\n아르테미스(Artemis) · 대표 박준성 · 사업자등록번호 361-02-03814 · 인천광역시 제물포구 화도진로 16, 109동 1604호\n지금은 무료 베타 기간입니다. 모든 기능을 결제 없이 쓸 수 있습니다."
+   },
+   "m": {
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/agents",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failed": [],
+    "smallCount": 50,
+    "small": [
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.44,
+      "text": "에이전트 결과"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.44,
+      "text": "미리 준비된 예시 · 크레딧 안 듦"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.16,
+      "text": "보기"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "2D · 스프라이트"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "is-active",
+      "fs": 9.12,
+      "text": "3D · GLB 모델"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.16,
+      "text": "단계"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "01"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "원본"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "is-active",
+      "fs": 9.12,
+      "text": "02"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "is-active",
+      "fs": 9.12,
+      "text": "검사"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "03"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 9.12,
+      "text": "검토"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.16,
+      "text": "확대"
+     },
+     {
+      "tag": "OUTPUT",
+      "cls": "",
+      "fs": 9.28,
+      "text": "52"
+     },
+     {
+      "tag": "OUTPUT",
+      "cls": "",
+      "fs": 9.28,
+      "text": "%"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.96,
+      "text": "3D · GLB 모델"
+     },
+     {
+      "tag": "STRONG",
+      "cls": "",
+      "fs": 8.96,
+      "text": "파일 검사"
+     },
+     {
+      "tag": "STRONG",
+      "cls": "",
+      "fs": 11.04,
+      "text": "clunk-messy-sample.glb"
+     },
+     {
+      "tag": "SMALL",
+      "cls": "",
+      "fs": 8.96,
+      "text": "1,124 B · 181473ff49e2…"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "live-evidence-showcase-file-state",
+      "fs": 8,
+      "text": "검사 완료"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "live-evidence-showcase-kicker",
+      "fs": 9.28,
+      "text": "검사 결과 다시 보기"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 8.32,
+      "text": "근거"
+     },
+     {
+      "tag": "CODE",
+      "cls": "",
+      "fs": 9.44,
+      "text": "파일 읽기 · 규칙 · 발견 사항"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 7.68,
+      "text": "파일 검사"
+     },
+     {
+      "tag": "STRONG",
+      "cls": "",
+      "fs": 9.28,
+      "text": "통과"
+     }
+    ],
+    "overflow": 0,
+    "wide": [],
+    "title": "에이전트 연결 | Clunk"
+   }
+  }
+ },
+ {
+  "name": "detail-fence-auth",
+  "url": "/marketplace/cozy-fence-gate",
+  "sizes": {
+   "d": {
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/marketplace/cozy-fence-gate",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failed": [],
+    "smallCount": 33,
+    "small": [
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.6,
+      "text": "GLB"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.6,
+      "text": "48.0 KB"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.6,
+      "text": "상업적 이용 가능"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "_swatchHex_1oqs0_1481",
+      "fs": 10.56,
+      "text": "#6b4630"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "_swatchHex_1oqs0_1481",
+      "fs": 10.56,
+      "text": "#a8794b"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "_swatchHex_1oqs0_1481",
+      "fs": 10.56,
+      "text": "#c99e6a"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "_swatchHex_1oqs0_1481",
+      "fs": 10.56,
+      "text": "#9a958a"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "_swatchHex_1oqs0_1481",
+      "fs": 10.56,
+      "text": "#3b4044"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "_matchScore_1oqs0_1560",
+      "fs": 11.2,
+      "text": "색 거리"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "_matchScore_1oqs0_1560",
+      "fs": 11.2,
+      "text": "0.031"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "_matchScore_1oqs0_1560",
+      "fs": 11.2,
+      "text": "0.078"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "_matchScore_1oqs0_1560",
+      "fs": 11.2,
+      "text": "0.080"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "_snippetTabOn_1oqs0_1402",
+      "fs": 10.88,
+      "text": "three.js"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 10.88,
+      "text": "React Three Fiber"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 10.88,
+      "text": "Clunk 검사"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.28,
+      "text": "파일 규격"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.28,
+      "text": "화면에서 확인"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.28,
+      "text": "판매자 검토"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.92,
+      "text": "본 파일"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.92,
+      "text": "·"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.92,
+      "text": "48.0 KB"
+     },
+     {
+      "tag": "CODE",
+      "cls": "",
+      "fs": 9.92,
+      "text": "a7c3c710e2edc5e1"
+     },
+     {
+      "tag": "CODE",
+      "cls": "",
+      "fs": 9.92,
+      "text": "…"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "_fileLocked_1oqs0_1644",
+      "fs": 9.92,
+      "text": "받기 버튼을 누르면 열립니다"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.92,
+      "text": "검사 증명서"
+     }
+    ],
+    "overflow": 0,
+    "wide": [],
+    "title": "에셋 상세 | Clunk",
+    "bodyText": "Clunk\n에셋 제작\n에셋 마켓\n에셋 검사\n제작 에이전트\n요금\n검수 뷰어\n문서\n내 작업공간\nAudit QA\n작업면 열기\n에셋 마켓\n코지 울타리 문\n드래그 회전 · 휠 줌 · 실제 판매 파일\n여닫기\n■ 멈춤\n0.5×\n1×\n2×\n실제 크기 · 사람 키 1.7 m\nGLB\n48.0 KB\n상업적 이용 가능\n코지 울타리 문\n✦\n생성형 AI로 제작한 에셋입니다 · 제작 기록 보관\n\n가벼운 3D 울타리 문입니다. 파일을 열어 잰 값으로 폴리곤 520개, 그리기 13회, 재질 6개이고 실제 크기는 2.67x1.75x0.52 m입니다. 웹·모바일 게임 기준 모두 100점, 막히는 문제 0건입니다. 문짝이 경첩 자리(gate_pivot)에 별도 부품으로 달려 있어 여닫는 연출을 바로 붙일 수 있고, 걸쇠와 경첩도 따로 들어 있습니다.\n\n₩1,900 베타 무료\n아르테미스 스토어 · 48.0 KB · fence-gate.m1.clunk-optimized.glb\n\n무료 베타 기간입니다. 로그인하면 이 에셋을 결제 없이 받을 수 있고, 표시된 가격은 유료 전환 후의 값입니다.\n\n베타 기간 무료로 받기\n3D 뷰어에서 검수\n이 모델로 만든 스프라이트 시트\n\n같은 모델을 Clunk 렌더러로 구운 PNG입니다. 2D 게임에 그대로 쓸 수 있습니다.\n\n스프라이트 시트\n한 칸 64×64 · 8방향 · 3.1 KB\n베타 무료로 받기\n여닫기 애니메이션\n한 칸 64×64 · 8방향 · 8프레임 · 15.4 KB\n베타 무료로 받기\n폴리곤 520개 · 덩어리 13개 · 재질 6개\n2.40 × 1.71 × 0.52 m · 실제 크기입니다\n바닥에 딱 맞음 · 높이를 따로 맞추지 않아도 땅 위에 바로 놓입니다\nGLB 48.0 KB · 이 페이지에서 파일을 직접 열어 잰 값입니다\n상업적 이용 가능 · 게임·앱·의뢰 작업에 쓸 수 있고, 원본 재판매만 제외됩니다\n파일 안의 색 5가지 · 면적 비율\n#6b4630\n#a8794b\n#c99e6a\n#9a958a\n#3b4044\n색이 맞는 에셋\n\n태그가 아니라 파일에서 잰 색으로 고른 것입니다. 숫자는 색 거리이고, 0에 가까울수록 같은 팔레트입니다.\n\n코지 창고 헛간\n색 거리 0.031\n코지 마켓 스톨\n색 거리 0.078\n코지 팜 세트 Vol.1 (3종 묶음)\n색 거리 0.078\n나무 궤짝 (닫힘)\n색 거리 0.080\n바로 쓰기\n받은 파일을\n붙여넣기로 씁니다\n\n구매한 GLB를 프로젝트에 넣고 아래 코드를 복사하면 끝입니다. 검사까지 같은 파일로 이어집니다.\n\nthree.js\nReact Three Fiber\nClunk 검사\nimport { GLTFLoader } from \"three/examples/jsm/loaders/GLTFLoader.js\";\n\nnew GLTFLoader().load(\"/assets/fence-gate.m1.clunk-optimized.glb\", (gltf) => {\n  scene.add(gltf.scene);\n});\n코드 복사\n판매 전 확인\n파일을 열어보고\n확인한 것\n파일 규격\n확인함\n면 개수·그리기 횟수·구조를 파일에서 직접 읽었습니다\n화면에서 확인\n확인함\n실제 게임 렌더러에 띄워 확인했습니다\n판매자 검토\n확인함\n아르테미스 스토어가 직접 만들고 검토했습니다\n받는 파일\n받으면\n이 파일들이 열립니다\nfence-gate.m1.clunk-optimized.glb\n본 파일 · 48.0 KB\na7c3c710e2edc5e1…\n받기 버튼을 누르면 열립니다\nfence-gate.m1.clunk-optimized.glb.passport.json\n검사 증명서 · 4.1 KB\n30bc14af5fab9f44…\n받기 버튼을 누르면 열립니다\nhero-cozy-fence-gate.png\n대표 이미지 · 46.4 KB\n5f41b44ec29780ba…\n받기 버튼을 누르면 열립니다\npreview-cozy-fence-gate.webp\n미리보기 이미지 · 9.2 KB\n41f9c3dbe12fb3f0…\n받기 버튼을 누르면 열립니다\n에셋은 한 번 사고,\nClunk 기능은 크레딧으로\n\n산 파일은 계정에 남아 언제든 다시 받을 수 있습니다. 검사·최적화 같은 Clunk 기능은 쓴 만큼 크레딧으로 계산합니다.\n\n다른 에셋 둘러보기\nClunk 제품 사용하기\n크레딧 정책 보기\nCLUNK\n\n게임에 넣을 3D 모델과 2D 이미지를 만들고, 게임에 넣어도 되는지 검사하고, 마켓에서 주고받는 곳입니다.\n\n제품\n에셋 마켓\n에셋 제작\n에셋 검사\n제작 에이전트\n요금 · 크레딧\n자료\n문서\n검수 뷰어\nAI 도구 연결\n내 작업공간\n약관\n이용약관\n개인정보처리방침\n취소·환불정책\n아르테미스(Artemis) · 대표 박준성 · 사업자등록번호 361-02-03814 · 인천광역시 제물포구 화도진로 16, 109동 1604호\n지금은 무료 베타 기간입니다. 모든 기능을 결제 없이 쓸 수 있습니다."
+   },
+   "m": {
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/marketplace/cozy-fence-gate",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failed": [],
+    "smallCount": 33,
+    "small": [
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.6,
+      "text": "GLB"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.6,
+      "text": "48.0 KB"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.6,
+      "text": "상업적 이용 가능"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "_swatchHex_1oqs0_1481",
+      "fs": 10.56,
+      "text": "#6b4630"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "_swatchHex_1oqs0_1481",
+      "fs": 10.56,
+      "text": "#a8794b"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "_swatchHex_1oqs0_1481",
+      "fs": 10.56,
+      "text": "#c99e6a"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "_swatchHex_1oqs0_1481",
+      "fs": 10.56,
+      "text": "#9a958a"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "_swatchHex_1oqs0_1481",
+      "fs": 10.56,
+      "text": "#3b4044"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "_matchScore_1oqs0_1560",
+      "fs": 11.2,
+      "text": "색 거리"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "_matchScore_1oqs0_1560",
+      "fs": 11.2,
+      "text": "0.031"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "_matchScore_1oqs0_1560",
+      "fs": 11.2,
+      "text": "0.078"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "_matchScore_1oqs0_1560",
+      "fs": 11.2,
+      "text": "0.080"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "_snippetTabOn_1oqs0_1402",
+      "fs": 10.88,
+      "text": "three.js"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 10.88,
+      "text": "React Three Fiber"
+     },
+     {
+      "tag": "BUTTON",
+      "cls": "",
+      "fs": 10.88,
+      "text": "Clunk 검사"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.28,
+      "text": "파일 규격"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.28,
+      "text": "화면에서 확인"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.28,
+      "text": "판매자 검토"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.92,
+      "text": "본 파일"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.92,
+      "text": "·"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.92,
+      "text": "48.0 KB"
+     },
+     {
+      "tag": "CODE",
+      "cls": "",
+      "fs": 9.92,
+      "text": "a7c3c710e2edc5e1"
+     },
+     {
+      "tag": "CODE",
+      "cls": "",
+      "fs": 9.92,
+      "text": "…"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "_fileLocked_1oqs0_1644",
+      "fs": 9.92,
+      "text": "받기 버튼을 누르면 열립니다"
+     },
+     {
+      "tag": "SPAN",
+      "cls": "",
+      "fs": 9.92,
+      "text": "검사 증명서"
+     }
+    ],
+    "overflow": 0,
+    "wide": [],
+    "title": "에셋 상세 | Clunk"
+   }
+  }
+ }
+]

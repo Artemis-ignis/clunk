@@ -4,11 +4,11 @@ import Image from "next/image";
 export type AssetFamilyVisualKind = "sprite" | "atlas" | "spine" | "motion" | "model";
 
 const LABELS: Record<AssetFamilyVisualKind, { eyebrow: string; title: string }> = {
-  sprite: { eyebrow: "PIXEL", title: "SPRITE" },
-  atlas: { eyebrow: "REGIONS", title: "ATLAS" },
-  spine: { eyebrow: "RIG", title: "SPINE" },
-  motion: { eyebrow: "CLIP", title: "MOTION" },
-  model: { eyebrow: "SCENE", title: "GLB" },
+  sprite: { eyebrow: "픽셀", title: "스프라이트" },
+  atlas: { eyebrow: "영역", title: "시트" },
+  spine: { eyebrow: "뼈대", title: "본 애니메이션" },
+  motion: { eyebrow: "클립", title: "움직임" },
+  model: { eyebrow: "장면", title: "3D 모델" },
 };
 
 /** Visual catalogue thumbnails. These are interface previews, never production evidence. */
@@ -16,7 +16,7 @@ export function AssetFamilyVisual({ kind, compact = false }: { kind: AssetFamily
   const label = LABELS[kind];
   return (
     <div className={`asset-family-visual asset-family-visual-${kind}${compact ? " asset-family-visual-compact" : ""}`} aria-label={`${label.title} UI preview`}>
-      <div className="asset-family-visual-topline"><span>{label.eyebrow}</span><strong>{label.title}</strong><i>UI PREVIEW</i></div>
+      <div className="asset-family-visual-topline"><span>{label.eyebrow}</span><strong>{label.title}</strong><i>화면 예시</i></div>
       {kind === "model" ? (
         <>
           <div className="asset-family-model-grid" aria-hidden="true" />
@@ -28,7 +28,7 @@ export function AssetFamilyVisual({ kind, compact = false }: { kind: AssetFamily
       {kind === "atlas" ? <AtlasPreview /> : null}
       {kind === "spine" ? <SpinePreview /> : null}
       {kind === "motion" ? <MotionPreview /> : null}
-      <div className="asset-family-visual-bottom"><span>{kind === "model" ? "mesh · material · bounds" : kind === "motion" ? "duration · loop · root motion" : kind === "spine" ? "bones · slots · clips" : kind === "atlas" ? "page · regions · trim" : "cell · pivot · hitbox"}</span><Icon name="arrowUpRight" size={13} /></div>
+      <div className="asset-family-visual-bottom"><span>{kind === "model" ? "덩어리 · 재질 · 크기" : kind === "motion" ? "duration · loop · root motion" : kind === "spine" ? "bones · slots · clips" : kind === "atlas" ? "page · regions · trim" : "cell · pivot · hitbox"}</span><Icon name="arrowUpRight" size={13} /></div>
     </div>
   );
 }

@@ -117,9 +117,12 @@ export function SiteNav({ active }: { active?: ShellSection }) {
           <div className="sitenav-actions">
             <ThemeToggle />
             {session ? (
-              <Link className="button button-quiet button-sm sitenav-login" href="/dashboard" prefetch={false}>
-                {session.displayName}
-              </Link>
+              <>
+                <Link className="button button-quiet button-sm sitenav-login" href="/dashboard" prefetch={false}>
+                  {session.displayName}
+                </Link>
+                <a className="button button-quiet button-sm sitenav-signout" href="/signout-with-chatgpt?return_to=%2F">로그아웃</a>
+              </>
             ) : (
               <>
                 <Link className="button button-quiet button-sm sitenav-login" href="/login" prefetch={false}>
@@ -175,9 +178,12 @@ export function SiteNav({ active }: { active?: ShellSection }) {
             </div>
             <div className="sitenav-drawer-actions">
               {session ? (
-                <Link className="button button-quiet button-sm" href="/dashboard" prefetch={false} onClick={() => setOpen(false)}>
-                  {session.displayName}
-                </Link>
+                <>
+                  <Link className="button button-quiet button-sm" href="/dashboard" prefetch={false} onClick={() => setOpen(false)}>
+                    {session.displayName}
+                  </Link>
+                  <a className="button button-quiet button-sm" href="/signout-with-chatgpt?return_to=%2F">로그아웃</a>
+                </>
               ) : (
                 <>
                   <Link className="button button-quiet button-sm" href="/login" prefetch={false} onClick={() => setOpen(false)}>

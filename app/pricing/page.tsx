@@ -34,7 +34,7 @@ export const metadata = createPageMetadata({
 const PLANS = [
   {
     id: "free",
-    name: "Free",
+    name: "무료",
     monthly: 0,
     annual: 0,
     credits: BETA_MONTHLY_GRANT_CREDITS,
@@ -44,22 +44,22 @@ const PLANS = [
   },
   {
     id: "maker",
-    name: "Maker",
+    name: "메이커",
     monthly: 9_900,
     annual: 99_000,
     credits: 300,
     images: 30,
-    lines: ["Free에 있는 것 전부", "마켓 에셋 내려받기 제한 없음", "작업 순서 우선 처리", "1인 상업 라이선스 명시"],
+    lines: ["무료 요금제에 있는 것 전부", "마켓 에셋 내려받기 제한 없음", "작업 순서 우선 처리", "1인 상업 라이선스 명시"],
     featured: true,
   },
   {
     id: "studio",
-    name: "Studio",
+    name: "스튜디오",
     monthly: 29_000,
     annual: 290_000,
     credits: 1_200,
     images: 100,
-    lines: ["Maker에 있는 것 전부", "팀 자리 3개", "팀이 함께 쓰는 크레딧", "상업 라이선스 서면 발급"],
+    lines: ["메이커에 있는 것 전부", "팀 자리 3개", "팀이 함께 쓰는 크레딧", "상업 라이선스 서면 발급"],
   },
 ] as const;
 
@@ -168,7 +168,7 @@ export default function PricingPage() {
               <div className={`${styles.betaAnswer} cv5-reveal`}>
                 <strong>베타가 끝나면 지금 계정은 어떻게 되나요?</strong>
                 <p>
-                  그대로 남습니다. 지금 만든 계정은 유료 전환 뒤에도 Free 조건을 그대로 씁니다.
+                  그대로 남습니다. 지금 만든 계정은 유료 전환 뒤에도 무료 요금제 조건을 그대로 씁니다.
                   받은 크레딧과 내려받은 파일은 그대로 두고, 갑자기 결제를 요구하지 않습니다.
                   유료 전환은 최소 30일 전에 이 페이지와 이메일로 미리 알립니다.
                 </p>

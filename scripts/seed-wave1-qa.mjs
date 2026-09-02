@@ -26,6 +26,8 @@ const STORE_WORKSPACE = "ws-artemis-store";
 /** QA-provisional credit prices by product family (whole credits × 10,000 = price_cents). */
 function creditPriceFor(slug, kind) {
   if (kind === "2d-image" || kind === "2d") return 9;
+  if (/^hf-(tractor|seeder|processing)/.test(slug)) return 99; // Harvest Frontier runtime machines
+  if (/^hf-/.test(slug)) return 69;
   if (/greenhouse|market-stall/.test(slug)) return 69;
   if (/shed|storage/.test(slug)) return 49;
   if (/tree|broadleaf|conifer|grove/.test(slug)) return 29;

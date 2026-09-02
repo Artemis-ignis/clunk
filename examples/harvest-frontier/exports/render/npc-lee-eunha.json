@@ -1,0 +1,50 @@
+{
+  "glb": "examples/harvest-frontier/exports/npc/lee-eunha.m1.glb",
+  "output": "examples/harvest-frontier/exports/render/npc-lee-eunha.png",
+  "width": 1024,
+  "height": 1024,
+  "supersample": 3,
+  "backgroundHex": "#ececec",
+  "cornerPixel": [
+    236,
+    236,
+    236
+  ],
+  "viewDir": [
+    0.78,
+    0.5,
+    0.92
+  ],
+  "targetFillFraction": 0.76,
+  "subjectBoundingBoxPx": {
+    "x": 328.6666666666667,
+    "y": 123,
+    "width": 366.6666666666667,
+    "height": 778
+  },
+  "subjectFillFraction": 0.7598,
+  "subjectPixelCoverageFraction": 0.1553,
+  "clippedTop": false,
+  "clippedBottom": false,
+  "clippedLeft": false,
+  "clippedRight": false,
+  "marginPx": {
+    "top": 123,
+    "bottom": 123,
+    "left": 328.6666666666667,
+    "right": 328.6666666666667
+  },
+  "triangles": 5906,
+  "meshes": 15,
+  "vertexColouredMeshes": 15,
+  "boundsMetres": [
+    1.1609,
+    2.2078,
+    0.7381
+  ],
+  "shadow": {
+    "kind": "soft contact shadow",
+    "strength": 0.3,
+    "blurRadiusPx": 22.666666666666668
+  }
+}

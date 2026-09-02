@@ -1,0 +1,50 @@
+{
+  "glb": "examples/harvest-frontier/exports/building/farmhouse.m1.glb",
+  "output": "examples/harvest-frontier/exports/render/building-farmhouse.png",
+  "width": 1024,
+  "height": 1024,
+  "supersample": 3,
+  "backgroundHex": "#ececec",
+  "cornerPixel": [
+    236,
+    236,
+    236
+  ],
+  "viewDir": [
+    0.78,
+    0.5,
+    0.92
+  ],
+  "targetFillFraction": 0.76,
+  "subjectBoundingBoxPx": {
+    "x": 123,
+    "y": 226.66666666666666,
+    "width": 778,
+    "height": 570.6666666666666
+  },
+  "subjectFillFraction": 0.7598,
+  "subjectPixelCoverageFraction": 0.2657,
+  "clippedTop": false,
+  "clippedBottom": false,
+  "clippedLeft": false,
+  "clippedRight": false,
+  "marginPx": {
+    "top": 226.66666666666666,
+    "bottom": 226.66666666666666,
+    "left": 123,
+    "right": 123
+  },
+  "triangles": 11836,
+  "meshes": 15,
+  "vertexColouredMeshes": 15,
+  "boundsMetres": [
+    8.5651,
+    6.2559,
+    8.0883
+  ],
+  "shadow": {
+    "kind": "soft contact shadow",
+    "strength": 0.3,
+    "blurRadiusPx": 22.666666666666668
+  }
+}

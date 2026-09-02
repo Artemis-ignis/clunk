@@ -24,7 +24,7 @@ export default function NotFound() {
       <SiteNav />
       <main className="cv5-nf">
         <div className="cv5-frame">
-          <span className="cv5-eyebrow">404 · NOT FOUND</span>
+          <span className="cv5-eyebrow">404 · 없는 주소</span>
           <h1>이 주소에는 <em>아무것도 없습니다.</em></h1>
           <p>
             주소가 바뀌었거나 잘못 입력된 경로입니다. 파일과 검사 기록은 원래 자리에
