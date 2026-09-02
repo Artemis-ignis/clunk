@@ -177,7 +177,7 @@ function ShelfCard({ listing }: { listing: GachaListing }) {
       <span className="gc3-shelf-art">
         {preview ? (
           // 상점 목록과 같은 주소·같은 규칙(unoptimized) — 이미 작게 구워 둔 그림이다.
-          <Image src={preview} alt="" width={220} height={165} unoptimized />
+          <Image src={preview} alt="" width={220} height={165} unoptimized loading="lazy" decoding="async" />
         ) : (
           <i aria-hidden="true" />
         )}
