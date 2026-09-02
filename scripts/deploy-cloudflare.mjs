@@ -36,20 +36,20 @@ if (Array.isArray(config.d1_databases) && config.d1_databases.length > 0) {
     database_id: D1_DATABASE_ID,
   }));
 }
-// R2 is not enabled on the account yet (dashboard consent pending, error
-// 10042), so the default deploy drops the R2 binding; the app already treats
-// missing artifact storage honestly (LOCAL_PREVIEW_ONLY / storage 503). Set
-// CLUNK_CF_WITH_R2=1 once R2 is enabled and the bucket exists.
-if (process.env.CLUNK_CF_WITH_R2 === "1") {
-  if (Array.isArray(config.r2_buckets) && config.r2_buckets.length > 0) {
-    config.r2_buckets = config.r2_buckets.map((entry) => ({
-      ...entry,
-      binding: entry.binding || "ASSETS",
-      bucket_name: R2_BUCKET,
-    }));
-  }
-} else {
+// R2 has been live since 2026-09-02 (bucket clunk-assets); the binding ships by default.
+// Deploying without it silently turns every preview and download into a storage 503 —
+// which happened five times that afternoon while the flag was still opt-in. Set
+// CLUNK_CF_WITHOUT_R2=1 only for a deliberate storage-less deploy.
+if (process.env.CLUNK_CF_WITHOUT_R2 === "1") {
   delete config.r2_buckets;
+} else if (Array.isArray(config.r2_buckets) && config.r2_buckets.length > 0) {
+  config.r2_buckets = config.r2_buckets.map((entry) => ({
+    ...entry,
+    binding: entry.binding || "ASSETS",
+    bucket_name: R2_BUCKET,
+  }));
+} else {
+  config.r2_buckets = [{ binding: "ASSETS", bucket_name: R2_BUCKET }];
 }
 // Workers AI. Unlike D1 and R2 this binds a capability on the account rather than a
 // resource that has to be created first, so it is declared unconditionally: the route
