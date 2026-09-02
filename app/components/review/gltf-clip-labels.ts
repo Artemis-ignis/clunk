@@ -17,6 +17,12 @@ export const GLTF_CLIP_LABELS: Readonly<Record<string, string>> = {
   hoe: "괭이질",
   harvest: "수확",
   "blades-spin": "날개 회전",
+  // Harvest Frontier's machines, as exported with their in-game motion (2026-09-02).
+  drive: "주행",
+  steer: "조향",
+  work: "경운",
+  sow: "파종",
+  run: "가동",
 };
 
 /**
