@@ -86,6 +86,7 @@ export async function GET(request: Request) {
             humanDecision: normalizeEvidenceStatus(review?.humanDecision),
           },
           license: listing.licenseStatus,
+          aiGenerated: isGenerativeListing(String(listing.slug)),
           palette: paletteFor(String(listing.slug)) ?? null,
         },
         // "Goes with this" computed from measured colour rather than from a tag someone
@@ -142,6 +143,7 @@ export async function GET(request: Request) {
           assetId: row.assetId,
         },
         license: row.licenseStatus,
+        aiGenerated: isGenerativeListing(String(row.slug)),
         palette: paletteFor(String(row.slug)) ?? null,
       })),
       checkout: checkoutStatus(),
@@ -280,6 +282,13 @@ function normalizeEvidenceStatus(value: unknown): ProductEvidenceStatus {
     ? value
     : "NOT_EVALUATED";
 }
+
+/**
+ * Which listings were made by a generative model (the AI-basic-law label): the texture tiles
+ * came out of an image model. The 3D models, their sheets and Harvest Frontier's machines are
+ * code-authored geometry — labelling them 'generative AI' was false.
+ */
+const isGenerativeListing = (slug: string): boolean => /^tex-|seamless-textures/.test(slug);
 
 function checkoutStatus(): { status: "AVAILABLE" | "PAYMENT_PROVIDER_NOT_CONFIGURED"; provider: "stripe" | null; configured: boolean } {
   const billing = getBillingStatus(getBillingEnvironment(getRuntimeEnvironment()));
