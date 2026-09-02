@@ -879,7 +879,12 @@ export function createGachaScene(
     trayLight.intensity = approach(trayLight.intensity, wantedTray, dt * 5);
 
     // 상품이 앞으로 나오는 동안에만 기계를 덮는다.
-    const wantedBackdrop = stage === "wobble" ? 0.55 : stage === "burst" || stage === "result" ? 0.78 : 0;
+    // The reveal is its own scene: fully opaque, and the machine is not drawn at all —
+    // the operator saw the cabinet ghosting through the prize.
+    const wantedBackdrop = stage === "wobble" ? 0.7 : stage === "burst" || stage === "result" ? 1 : 0;
+    const machineHidden = stage === "result" || (stage === "burst" && stageTime > 0.45);
+    machine.visible = !machineHidden;
+    pile.visible = !machineHidden;
     backdropMaterial.opacity = approach(backdropMaterial.opacity, wantedBackdrop, dt * 5);
     backdrop.visible = backdropMaterial.opacity > 0.01;
 

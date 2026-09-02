@@ -522,19 +522,21 @@
 .gc3 { gap: 10px; }
 
 .gc3-row {
+  /* 2026-09-02: the machine sits alone in the middle, big; the dial and legend go under it.
+     (The operator: '이걸 가운데 크게 놓고 옆에 있는건 밑에 있어야지.') */
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
   gap: 14px;
-  align-items: center;
   width: min(1000px, 94vw);
 }
 
 .gc3-stage {
   position: relative;
   min-width: 0;
-  width: 100%;
-  height: min(520px, calc(100svh - 290px));
-  min-height: 300px;
+  width: min(760px, 94vw);
+  height: min(700px, calc(100svh - 230px));
+  min-height: 360px;
   touch-action: pan-y;
 }
 
@@ -667,3 +669,7 @@
 @media (prefers-reduced-motion: reduce) {
   .gc3-hint i, .gc3 .gc-prize, .gc3 .gc-grade { animation: none; }
 }
+
+.gc3-side { width: min(860px, 94vw); }
+.gc3-panel { display: grid; gap: 10px; justify-items: center; text-align: center; }
+.gc3-panel .gc3-dial { justify-content: center; flex-wrap: wrap; }
