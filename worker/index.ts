@@ -49,6 +49,22 @@ const worker = {
       : stripUpstreamIdentityHeaders(request);
     const url = new URL(inbound.url);
 
+    // One host for cookies. The OAuth transaction cookie is set on whatever host the visitor
+    // started on, and Google/GitHub always return them to https://clunk.games — so a login
+    // begun on www., on plain http, or on the old workers.dev host ended in invalid_oauth_state.
+    // Those origins redirect to the canonical one before anything else runs. The preview
+    // worker (clunk-vending.*) and local hosts are not in this list on purpose.
+    const CANONICAL_HOST = "clunk.games";
+    const legacyHost = url.hostname === "www.clunk.games" || url.hostname === "clunk.artemis-clunk.workers.dev";
+    const plainHttp = url.protocol === "http:" && url.hostname === CANONICAL_HOST;
+    if (legacyHost || plainHttp) {
+      const canonical = new URL(url.toString());
+      canonical.protocol = "https:";
+      canonical.hostname = CANONICAL_HOST;
+      canonical.port = "";
+      return withSecurityHeaders(Response.redirect(canonical.toString(), 301));
+    }
+
     if (url.pathname === "/_vinext/image") {
       const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
       return withSecurityHeaders(await handleImageOptimization(inbound, {
