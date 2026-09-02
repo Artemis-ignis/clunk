@@ -488,7 +488,9 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
 @keyframes cv5-scan-blink { 50% { opacity: 0.45; } }
 
 .cv5-agent-badge {
-  position: absolute; right: 10px; bottom: 10px; z-index: 2;
+  /* 2026-09-03: 아래 오른쪽에 두면 왼쪽 아래의 "드래그 회전" 안내와 좁은 화면에서 겹친다
+     (운영자 실기기). 검사 표시가 사라진 뒤에 뜨므로 그 자리(위 오른쪽)를 이어받는다. */
+  position: absolute; right: 10px; top: 10px; z-index: 2;
   font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em;
   color: var(--v5-green); background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.45);
   border-radius: 9px; padding: 7px 11px;

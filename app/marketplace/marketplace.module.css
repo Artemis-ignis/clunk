@@ -2155,8 +2155,16 @@
 /* many named parts wrap into a scrollable block instead of covering the model */
 :global(.cv5-bench-motion) > :global(.cv5-bench-motion-group) { max-height: 108px; overflow-y: auto; }
 
-/* the motion block must never reach across the hint in the opposite corner */
-:global(.cv5-bench-motion) { max-width: min(780px, calc(100% - 260px)); }
+/* the motion block must never reach across the hint in the opposite corner (wide screens
+   only — on phones the block is a normal row under the picture, and this cap squeezed it
+   into a one-button-wide column that ran over the description; operator's phone, 2026-09-03). */
+@media (min-width: 861px) {
+  :global(.cv5-bench-motion) { max-width: min(780px, calc(100% - 260px)); }
+}
+@media (max-width: 860px) {
+  :global(.cv5-bench-motion) > :global(.cv5-bench-motion-group) { max-height: none; overflow: visible; }
+  .detailPage { padding-top: 132px; }
+}
 
 /* how many things move, on the card. The generative-AI badge that used to sit beside it
    is gone: a legal disclosure belongs once on the product page, not on every tile. */
