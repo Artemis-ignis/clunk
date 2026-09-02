@@ -50,7 +50,15 @@ const FEATURED_MODEL = {
   poster: "/landing/tractor-hero.png",
   name: "트랙터",
   fileName: "tractor.compact.m1.glb",
-  measured: { faces: "39,320", drawCalls: "98", size: "840 KB" },
+  measured: {
+    faces: "39,320",
+    materials: "9",
+    size: "840 KB",
+    // Rendered bounds of the placed model (hero-hf-tractor-compact.json boundsMetres).
+    sizeMetres: "5.24 × 2.92 × 3.35 m",
+    // Named pivots in the file: steeringPivot·wheel* ×4, threePointHitch, pivottine01–07.
+    movingParts: "앞바퀴 조향 · 바퀴 4개 · 3점 히치 · 경운 날 7개",
+  },
 } as const;
 
 /**
@@ -65,7 +73,8 @@ const INSPECTED_MODEL = {
   poster: "/landing/tractor-hero.png",
   name: "트랙터",
   fileName: "tractor.glb",
-  measured: { faces: "39,320", drawCalls: "98", size: "840 KB", faceLimit: "40,000", limitPercent: "98" },
+  // materials 9 / web ceiling 12: packages/core/src/assetops-profiles.ts web profile (MAT-MATERIAL-BUDGET).
+  measured: { faces: "39,320", materials: "9", materialLimit: "12", size: "840 KB", faceLimit: "40,000", limitPercent: "98" },
 } as const;
 
 const AGENT_CLIENTS = ["Claude Code", "Codex CLI", "Cursor", "VS Code", "Grok Build", "Antigravity", "DeepSeek", "GLM", "로컬 에이전트"] as const;
@@ -222,9 +231,13 @@ export default function Home() {
                       <b>{FEATURED_MODEL.name}</b>
                       <span>Harvest Frontier에서 실제로 쓰는 파일 · 아래 숫자는 이 파일에서 직접 읽은 값</span>
                     </div>
-                    <div><span>폴리곤</span><b>{FEATURED_MODEL.measured.faces}개</b></div>
-                    <div><span>그리기 횟수</span><b>{FEATURED_MODEL.measured.drawCalls}회</b></div>
-                    <div><span>파일 크기</span><b>{FEATURED_MODEL.measured.size}</b></div>
+                    {/* The five facts a shop like polyfork.dev lists, and nothing internal:
+                        polygons and materials, real size, file, moving parts. Every value is
+                        read from tractor.compact.m1.glb (node names verified 2026-09-02). */}
+                    <div><span>폴리곤 · 재질</span><b>{FEATURED_MODEL.measured.faces}개 · {FEATURED_MODEL.measured.materials}개</b></div>
+                    <div><span>실제 크기</span><b>{FEATURED_MODEL.measured.sizeMetres}</b></div>
+                    <div><span>파일</span><b>GLB ({FEATURED_MODEL.measured.size})</b></div>
+                    <div><span>움직이는 부품</span><b>{FEATURED_MODEL.measured.movingParts}</b></div>
                   </div>
                 </div>
               </div>
@@ -242,7 +255,7 @@ export default function Home() {
                 올리면 {RULE_COUNT}가지를 검사해 점수로 알려줍니다. 고치는 것도 여기서, 원본은 그대로.
               </p>
               <ul className="cv5-points">
-                <li><b>실제 수치</b> — 폴리곤 수, 그리기 횟수, 텍스처 크기를 파일에서 직접 읽습니다</li>
+                <li><b>실제 수치</b> — 폴리곤 수, 재질 수, 실제 크기를 파일에서 직접 읽습니다</li>
                 <li><b>2D도 함께</b> — 스프라이트 시트와 본 애니메이션까지</li>
                 <li><b>눈으로 확인</b> — 3D 뷰어로 돌려 보고 판단하세요</li>
               </ul>
@@ -285,8 +298,8 @@ export default function Home() {
                         <span><em>{INSPECTED_MODEL.measured.faces}개</em> · 웹 게임 권장 상한 {INSPECTED_MODEL.measured.faceLimit}개의 {INSPECTED_MODEL.measured.limitPercent}%</span>
                       </div>
                       <div>
-                        <b>그리기 횟수</b>
-                        <span><em>{INSPECTED_MODEL.measured.drawCalls}회</em></span>
+                        <b>재질</b>
+                        <span><em>{INSPECTED_MODEL.measured.materials}개</em> · 웹 게임 권장 상한 {INSPECTED_MODEL.measured.materialLimit}개</span>
                       </div>
                       <div>
                         <b>파일 크기</b>

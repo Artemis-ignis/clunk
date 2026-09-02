@@ -985,3 +985,7 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
 .cv5-agent-veil > span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--v5-violet), var(--v5-cyan)); transition: width 200ms linear; }
 .cv5-agent-veil > small { position: absolute; right: 0; top: 8px; font-size: 0.72rem; color: var(--v5-ink-dim); }
 .cv5-agent-stage[data-building="true"] .cv5-embed3d { filter: saturate(0.6) brightness(0.85); transition: filter 400ms ease; }
+
+/* Section 01 facts: the moving-parts line is prose, so it takes the whole second row. */
+.cv5-make-facts div:last-child { grid-column: 1 / -1; }
+.cv5-make-facts div:last-child b { font-size: 0.82rem; font-variant-numeric: normal; }

@@ -24,7 +24,7 @@ const USER_TEXT = "농장 게임에 쓸 시장 노점 하나 만들어줘.";
 const AGENT_TEXT = "게임에 넣어도 가벼운 크기로 만들고, 바로 검사까지 돌리겠습니다.";
 const STEPS = [
   { tool: "clunk_asset_author", note: "시장 노점 만들기 · 폴리곤 2,456개" },
-  { tool: "clunk_asset_inspect", note: "그리기 횟수 31회 · 문제 0건" },
+  { tool: "clunk_asset_inspect", note: "재질 11개 · 실제 크기 2.44 m · 문제 0건" },
   { tool: "clunk_optimize", note: "안전한 정리만, 원본은 그대로" },
   { tool: "clunk_passport", note: "만든 과정을 검사 증명서로 남김" },
 ] as const;
