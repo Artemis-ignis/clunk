@@ -408,8 +408,9 @@ test("한 바퀴 도는 동안 같은 것이 두 번 나오지 않는다", () =>
 });
 
 test("미리보기와 3D 파일은 상점이 이미 공개해 둔 경로 그대로다", () => {
-  assert.equal(previewUrlOf(STALL), "/market/cozy-market-stall/preview-cozy-market-stall.webp");
-  assert.equal(previewUrlOf({ slug: "a", previewFileName: null }), null);
+  // 2026-09-03: 미리보기는 저장소가 내주는 API 주소다 — 워커에 번들된 정적 사본은 옛 파일이 남는다.
+  assert.equal(previewUrlOf(STALL), "/api/marketplace/assets/asset-stall?file=preview-cozy-market-stall.webp&preview=1");
+  assert.equal(previewUrlOf({ assetId: "a", previewFileName: null }), null);
   assert.equal(modelUrlOf(STALL), "/market/cozy-market-stall/market-stall.m1.clunk-optimized.glb");
   // 텍스처를 3D 뷰어에 넣지 않는다.
   assert.equal(modelUrlOf(MEADOW), null);
