@@ -84,8 +84,13 @@ export function EmbeddedGlbViewer({
         const sun = new THREE.DirectionalLight(0xfff2e0, 2.2);
         sun.position.set(4, 7, 5);
         sun.castShadow = true;
-        sun.shadow.mapSize.set(matchMedia("(pointer: coarse)").matches ? 1024 : 2048, matchMedia("(pointer: coarse)").matches ? 1024 : 2048);
-        sun.shadow.bias = -0.0005;
+        // 1024 is plenty for a panel this size, and the landing runs three of these at once.
+        sun.shadow.mapSize.set(1024, 1024);
+        // The bias used to be negative, which in three.js moves the comparison the wrong way
+        // and *creates* self-shadow speckle — visible as a crawling flicker on flat low-poly
+        // faces as the model auto-rotates. normalBias offsets along the surface normal, which
+        // is the robust fix for flat-shaded geometry; it is set once the model's size is known.
+        sun.shadow.bias = 0;
         scene.add(sun);
         const rim = new THREE.DirectionalLight(0xdfe8ff, 0.85);
         rim.position.set(-5, 4, -6);
@@ -135,6 +140,9 @@ export function EmbeddedGlbViewer({
         camera.near = Math.max(radius * 0.012, 0.001);
         camera.far = Math.max(distance * 20, 50);
         camera.updateProjectionMatrix();
+        // In world units, so it scales with the model: ~2% of the bounding radius.
+        sun.shadow.normalBias = radius * 0.02;
+        sun.shadow.needsUpdate = true;
 
         // A shadow catcher that draws nothing where there is no shadow, so it
         // works over the dark panel and the light one without a second material.
@@ -142,6 +150,10 @@ export function EmbeddedGlbViewer({
           new THREE.CircleGeometry(radius * 11, 64).rotateX(-Math.PI / 2),
           new THREE.ShadowMaterial({ opacity: 0.24 }),
         );
+        // The model is placed with its lowest point exactly on y=0, and so was this disc:
+        // every bottom face fought the disc for the same depth and flickered. A hair below
+        // the model, scaled to its size, ends the fight without a visible gap.
+        ground.position.y = -radius * 0.002;
         ground.receiveShadow = true;
         scene.add(ground);
         model.traverse((node) => {
