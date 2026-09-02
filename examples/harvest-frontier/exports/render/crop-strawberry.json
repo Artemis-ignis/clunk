@@ -1,0 +1,50 @@
+{
+  "glb": "examples/harvest-frontier/exports/crop/strawberry.m1.glb",
+  "output": "examples/harvest-frontier/exports/render/crop-strawberry.png",
+  "width": 1024,
+  "height": 1024,
+  "supersample": 3,
+  "backgroundHex": "#ececec",
+  "cornerPixel": [
+    236,
+    236,
+    236
+  ],
+  "viewDir": [
+    0.78,
+    0.5,
+    0.92
+  ],
+  "targetFillFraction": 0.76,
+  "subjectBoundingBoxPx": {
+    "x": 123,
+    "y": 324.6666666666667,
+    "width": 778,
+    "height": 374.3333333333333
+  },
+  "subjectFillFraction": 0.7598,
+  "subjectPixelCoverageFraction": 0.0703,
+  "clippedTop": false,
+  "clippedBottom": false,
+  "clippedLeft": false,
+  "clippedRight": false,
+  "marginPx": {
+    "top": 324.6666666666667,
+    "bottom": 325,
+    "left": 123,
+    "right": 123
+  },
+  "triangles": 346,
+  "meshes": 3,
+  "vertexColouredMeshes": 3,
+  "boundsMetres": [
+    1.0197,
+    0.604,
+    0.9215
+  ],
+  "shadow": {
+    "kind": "soft contact shadow",
+    "strength": 0.3,
+    "blurRadiusPx": 22.666666666666668
+  }
+}

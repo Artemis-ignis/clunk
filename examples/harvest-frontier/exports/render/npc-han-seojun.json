@@ -1,0 +1,50 @@
+{
+  "glb": "examples/harvest-frontier/exports/npc/han-seojun.m1.glb",
+  "output": "examples/harvest-frontier/exports/render/npc-han-seojun.png",
+  "width": 1024,
+  "height": 1024,
+  "supersample": 3,
+  "backgroundHex": "#ececec",
+  "cornerPixel": [
+    236,
+    236,
+    236
+  ],
+  "viewDir": [
+    0.78,
+    0.5,
+    0.92
+  ],
+  "targetFillFraction": 0.76,
+  "subjectBoundingBoxPx": {
+    "x": 348,
+    "y": 123,
+    "width": 328,
+    "height": 778
+  },
+  "subjectFillFraction": 0.7598,
+  "subjectPixelCoverageFraction": 0.1398,
+  "clippedTop": false,
+  "clippedBottom": false,
+  "clippedLeft": false,
+  "clippedRight": false,
+  "marginPx": {
+    "top": 123,
+    "bottom": 123,
+    "left": 348,
+    "right": 348
+  },
+  "triangles": 6274,
+  "meshes": 18,
+  "vertexColouredMeshes": 18,
+  "boundsMetres": [
+    1.2919,
+    2.2739,
+    0.7976
+  ],
+  "shadow": {
+    "kind": "soft contact shadow",
+    "strength": 0.3,
+    "blurRadiusPx": 22.666666666666668
+  }
+}

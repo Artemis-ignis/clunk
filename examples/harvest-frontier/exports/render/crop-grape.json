@@ -1,0 +1,50 @@
+{
+  "glb": "examples/harvest-frontier/exports/crop/grape.m1.glb",
+  "output": "examples/harvest-frontier/exports/render/crop-grape.png",
+  "width": 1024,
+  "height": 1024,
+  "supersample": 3,
+  "backgroundHex": "#ececec",
+  "cornerPixel": [
+    236,
+    236,
+    236
+  ],
+  "viewDir": [
+    0.78,
+    0.5,
+    0.92
+  ],
+  "targetFillFraction": 0.76,
+  "subjectBoundingBoxPx": {
+    "x": 175,
+    "y": 123,
+    "width": 674,
+    "height": 778
+  },
+  "subjectFillFraction": 0.7598,
+  "subjectPixelCoverageFraction": 0.0989,
+  "clippedTop": false,
+  "clippedBottom": false,
+  "clippedLeft": false,
+  "clippedRight": false,
+  "marginPx": {
+    "top": 123,
+    "bottom": 123,
+    "left": 175,
+    "right": 175
+  },
+  "triangles": 652,
+  "meshes": 4,
+  "vertexColouredMeshes": 4,
+  "boundsMetres": [
+    1.5917,
+    1.9721,
+    1.4937
+  ],
+  "shadow": {
+    "kind": "soft contact shadow",
+    "strength": 0.3,
+    "blurRadiusPx": 22.666666666666668
+  }
+}
