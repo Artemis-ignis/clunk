@@ -37,6 +37,12 @@ test("server-renders the Clunk landing page", async () => {
   assert.match(html, /gc3-canvas/);
   assert.match(html, /레버를 당기세요/);
   assert.doesNotMatch(html, /머신에 캡슐을 채우는 중/);
+  // 2026-09-02: WebGL 이 첫 프레임을 내기 전(그리고 스크립트가 아예 돌지 않을 때)에도
+  // 같은 기계가 같은 자리에 서 있어야 한다 — 서버가 그린 SVG 포스터가 HTML 에 실린다.
+  assert.match(html, /gc3-poster/);
+  assert.match(html, /유리 돔에 캡슐이 가득 든 CLUNK 뽑기 기계/);
+  // 무대 위에는 값이나 베타 이야기가 붙지 않는다. 그 말은 뽑은 뒤 카드에서만 읽는다.
+  assert.doesNotMatch(html, /베타 무료/);
   assert.doesNotMatch(html, /손잡이를 돌리/);
   assert.match(html, /게임 에셋 검사 및 수정/);
   assert.match(html, /게임 제작 에이전트/);

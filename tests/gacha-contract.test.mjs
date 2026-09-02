@@ -588,7 +588,9 @@ test("공개 화면은 기계가 통째로 숨어도 남는다", async () => {
   assert.match(scene, /backdrop\.position\.set\(0, 1\.9, 2\.6\)/u);
   assert.match(scene, /STAGE_FRONT = new THREE\.Vector3\(0, 2\.1, 4\.5\)/u);
   // 카메라가 한 걸음 물러나 받침이 바닥에 닿는 곳까지 담는다 — 잘린 기계는 떠 보인다.
-  assert.match(scene, /const CAMERA_DISTANCE = 6\.8/u);
+  // 2026-09-02 밤: 무대가 화면 전체가 되면서 6.4 로 한 걸음 다가왔다. 세로 화면은 프레임에서 물러선다.
+  assert.match(scene, /const CAMERA_DISTANCE = 6\.4/u);
+  assert.match(scene, /const portrait = Math\.max\(1, 0\.62 \/ Math\.max\(0\.3, camera\.aspect\)\)/u);
   assert.match(scene, /const CAMERA_TARGET = 1\.6/u);
 
   const machine = await readFile(new URL("../app/components/gacha/GachaMachine3D.tsx", import.meta.url), "utf8");
@@ -656,9 +658,19 @@ test("머신 글자는 0.72rem 밑으로 내려가지 않는다", async () => {
 test("랜딩은 캡슐 머신 한 대를 렌더한다", async () => {
   const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   assert.match(source, /<GachaMachine3D \/>/u);
-  // 2026-09-02: 헤드라인은 게임 UI 처럼 짧고 크게, 그 아래는 한 줄짜리 부제뿐이다.
-  assert.match(source, /게임 에셋 <em>뽑기<\/em>/u);
-  assert.match(source, /레버를 당기면 마켓의 에셋이 캡슐로 떨어집니다/u);
+  // 2026-09-02 밤: 첫 화면은 스크롤이 카메라를 움직이는 한 편의 영상이다. 헤드라인과 부제는
+  // 무대 위 글줄(gc-beat-head)로 들어가 진행도가 띄우고 거둔다 — 페이지가 아니라 부품이 갖는다.
+  const machine = await readFile(new URL("../app/components/gacha/GachaMachine3D.tsx", import.meta.url), "utf8");
+  assert.match(machine, /className="gc-film-track"/u);
+  assert.match(machine, /className="gc-film-sticky"/u);
+  assert.match(machine, /<h1 id="home-heading">게임 에셋 <em>뽑기<\/em><\/h1>/u);
+  assert.match(machine, /레버를 당기면 마켓의 에셋이 캡슐로 떨어집니다/u);
+  // 스크롤이 레버를 당긴다 — 0.5 에서 0.6 사이.
+  assert.match(machine, /SCROLL_PULL\.from/u);
+  const scroll = await readFile(new URL("../app/components/gacha/gacha-scroll.ts", import.meta.url), "utf8");
+  assert.match(scroll, /from: 0\.5, to: 0\.6/u);
+  // 무대의 "베타 무료" 칩은 없다 — 값은 뽑은 뒤 카드에서만 말한다.
+  assert.doesNotMatch(machine, /gc3-beta|베타 무료<\/span>/u);
   assert.doesNotMatch(source, /손잡이를 돌리면/u);
   // 자판기 넉 대 짜리 홀은 더 이상 없다.
   assert.doesNotMatch(source, /VendingHall|VendingMachine/u);

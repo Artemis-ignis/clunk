@@ -11,8 +11,12 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 
+import Image from "next/image";
+
 import Link from "../NativeLink";
 import { CapsuleMachine } from "./CapsuleMachine";
+import { GachaPoster } from "./GachaPoster";
+import { SCROLL_PULL } from "./gacha-scroll";
 import { PrizeCard, type ClaimState } from "./PrizeCard";
 import {
   GACHA_THEMES,
@@ -25,6 +29,7 @@ import {
   gradeOf,
   listingsForTheme,
   modelUrlOf,
+  previewImageUrlOf,
   previewUrlOf,
   remainingInRound,
   themeById,
@@ -134,6 +139,55 @@ const LEVER_TRIGGER_PIXELS = 60;
 /** 손잡이가 끝까지 내려가는 거리(px). 끌어내린 만큼 레버가 따라 내려간다. */
 const LEVER_TRAVEL_PIXELS = 96;
 
+/**
+ * 선반에 걸린 상품 한 칸.
+ *
+ * 그림도 이름도 등급도 전부 /api/marketplace 응답에서 온 것이다. 손끝 쪽으로 살짝
+ * 기울어 만질 수 있는 물건처럼 굴고, 누르면 그 상품의 상세 화면으로 간다.
+ */
+function ShelfCard({ listing }: { listing: GachaListing }) {
+  const preview = previewImageUrlOf(listing);
+  const grade = gradeOf(listing);
+
+  const onMove = useCallback((event: ReactPointerEvent<HTMLAnchorElement>) => {
+    const node = event.currentTarget;
+    const box = node.getBoundingClientRect();
+    if (box.width === 0) return;
+    // 가운데를 0 으로 두고 -1~1. 카드 반대쪽이 들리도록 세로는 부호를 뒤집는다.
+    const x = ((event.clientX - box.left) / box.width) * 2 - 1;
+    const y = ((event.clientY - box.top) / box.height) * 2 - 1;
+    node.style.setProperty("--gc-tilt-x", `${(-y * 6).toFixed(2)}deg`);
+    node.style.setProperty("--gc-tilt-y", `${(x * 8).toFixed(2)}deg`);
+  }, []);
+
+  const onLeave = useCallback((event: ReactPointerEvent<HTMLAnchorElement>) => {
+    event.currentTarget.style.setProperty("--gc-tilt-x", "0deg");
+    event.currentTarget.style.setProperty("--gc-tilt-y", "0deg");
+  }, []);
+
+  return (
+    <Link
+      className="gc3-shelf-card"
+      href={`/marketplace/${listing.slug}`}
+      prefetch={false}
+      onPointerMove={onMove}
+      onPointerLeave={onLeave}
+      style={{ "--gc-grade": GRADE_COLORS[grade.letter] } as CSSProperties}
+    >
+      <span className="gc3-shelf-art">
+        {preview ? (
+          // 상점 목록과 같은 주소·같은 규칙(unoptimized) — 이미 작게 구워 둔 그림이다.
+          <Image src={preview} alt="" width={220} height={165} unoptimized />
+        ) : (
+          <i aria-hidden="true" />
+        )}
+        <b>{grade.letter}</b>
+      </span>
+      <span className="gc3-shelf-name">{listing.title}</span>
+    </Link>
+  );
+}
+
 function createIdempotencyKey(): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") return crypto.randomUUID();
   return `gacha-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
@@ -225,6 +279,19 @@ export function GachaMachine3D() {
    * 렌더가 한 번 더 도는 데다 서버가 그린 첫 화면과 어긋난다.
    */
   const rootRef = useRef<HTMLDivElement | null>(null);
+  /** 스크롤 연출의 트랙(긴 구간)과 장면마다 뜨는 글줄. */
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const beatHeadRef = useRef<HTMLDivElement | null>(null);
+  const beatScrollRef = useRef<HTMLParagraphElement | null>(null);
+  const beatInsideRef = useRef<HTMLDivElement | null>(null);
+  const beatLeverRef = useRef<HTMLDivElement | null>(null);
+  const progressRef = useRef(0);
+  /** 이번에 내려가면서 레버가 이미 당겨졌는지. 다시 올라가면 풀린다. */
+  const scrollFired = useRef(false);
+  const stageLive = useRef<Stage>("idle");
+  const turnLive = useRef<() => void>(() => {});
+  /** 스크롤 계산을 한 번 더 돌리는 손잡이 — 단계가 바뀌면 글줄도 바로 따라 바뀐다. */
+  const refreshFilm = useRef<() => void>(() => {});
   const markIntroChrome = useCallback((playing: boolean) => {
     const node = rootRef.current;
     if (!node) return;
@@ -246,13 +313,16 @@ export function GachaMachine3D() {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const leverRef = useRef<HTMLButtonElement | null>(null);
   const capsuleRef = useRef<HTMLButtonElement | null>(null);
-  const coinRef = useRef<HTMLSpanElement | null>(null);
+  const domeRef = useRef<HTMLDivElement | null>(null);
+  const hintRef = useRef<HTMLParagraphElement | null>(null);
   const sceneRef = useRef<GachaScene | null>(null);
   const timers = useRef<number[]>([]);
   const leverDrag = useRef({ active: false, startY: 0 });
   const stats = useRef({ frames: 0, totalMs: 0 });
   /** 캡슐을 이미 쏟아 부었는지. 카탈로그가 오는 그 한 번만 붓는다. */
   const poured = useRef(false);
+  /** 유리를 두드리는 소리는 손이 올라온 한 번만 난다. 훑고 지나갈 때마다 울리면 시끄럽다. */
+  const lastGlassTap = useRef(0);
 
   const clearTimers = useCallback(() => {
     for (const id of timers.current) window.clearTimeout(id);
@@ -306,17 +376,30 @@ export function GachaMachine3D() {
   const prizeRing = prizeGrade ? GRADE_COLORS[prizeGrade.letter] : accent;
   const prizeColor = prize ? capsuleColorOf(prize) : accent;
 
+  /**
+   * 선반에 거는 목록 — 지금 다이얼에 걸린 상품 가운데 미리보기 그림이 있는 것들.
+   * 스물이 넘어가면 가로 줄이 끝없이 길어지므로 거기서 끊는다.
+   */
+  const shelf = useMemo(
+    () => pool.filter((listing) => Boolean(listing.previewFileName)).slice(0, 20),
+    [pool],
+  );
+
   /** 돔에 채울 캡슐. 자리 수는 최대치이고, 장면이 기기에 맞게 앞에서부터 잘라 쓴다. */
   const capsuleSpecs = useMemo(
     () => domeCapsules(pool, 40).map((capsule) => ({ color: capsule.color, ring: capsule.ring })),
     [pool],
   );
 
-  const creditLine = authenticated
-    ? credits === null
+  /**
+   * 로그인한 사람에게만 잔액 한 줄. 값이나 베타 이야기는 무대에도, 이 판에도 적지
+   * 않는다 — 뽑고 나서 카드에서 한 번에 읽는 편이 낫다(운영자 지시 2026-09-02).
+   */
+  const creditLine = !authenticated
+    ? null
+    : credits === null
       ? "크레딧을 확인하는 중입니다"
-      : `크레딧 ${credits.toLocaleString("ko-KR")}개 · 베타 기간에는 차감되지 않습니다`
-    : "베타 기간 무료 · 동전 필요 없음";
+      : `내 크레딧 ${credits.toLocaleString("ko-KR")}개`;
 
   /* 장면 만들기 -------------------------------------------------------------
      카탈로그를 기다리지 않는다. 캔버스와 기계가 먼저 서고, 캡슐은 나중에 들어온다. */
@@ -365,10 +448,21 @@ export function GachaMachine3D() {
           };
           put(leverRef.current, points.lever, 56);
           put(capsuleRef.current, points.capsule, 48);
-          if (coinRef.current) {
-            coinRef.current.style.left = `${points.coin.x}px`;
-            coinRef.current.style.top = `${points.coin.y + points.coin.radius + 6}px`;
+          // 유리 돔 위의 손 닿는 자리 — 눈에 보이지 않고 캡슐을 흔들기만 한다.
+          put(domeRef.current, points.dome, 80);
+          // "잡고 아래로" 알약은 손잡이 왼쪽에 선다. 오른쪽에 두면 무대 밖으로 밀려난다.
+          if (hintRef.current) {
+            hintRef.current.style.left = `${points.lever.x - points.lever.radius - 10}px`;
+            hintRef.current.style.top = `${points.lever.y}px`;
           }
+        };
+
+        /** 첫 프레임이 실제로 그려진 뒤에야 캔버스를 켠다 — 그 전까지는 서버가 그린 포스터다. */
+        let painted = false;
+        const markPainted = () => {
+          if (painted) return;
+          painted = true;
+          rootRef.current?.setAttribute("data-live", "1");
         };
 
         const tick = (now: number) => {
@@ -381,6 +475,7 @@ export function GachaMachine3D() {
           stats.current.frames += 1;
           stats.current.totalMs += performance.now() - started;
           placeOverlays();
+          markPainted();
         };
         raf = window.requestAnimationFrame(tick);
 
@@ -404,9 +499,12 @@ export function GachaMachine3D() {
           stats.current.frames += 1;
           stats.current.totalMs += performance.now() - started;
           placeOverlays();
+          markPainted();
           return true;
         };
         scope.__gachaPixels = () => scene.countDrawnPixels();
+        // 예산 검증용 — 마지막 프레임의 삼각형 수와 그리기 횟수.
+        scope.__gachaInfo = () => scene.stats();
         scope.__gachaResetStats = () => { stats.current = { frames: 0, totalMs: 0 }; return true; };
         scope.__gachaResume = () => { manual = false; return true; };
         scope.__gachaFrameStats = () => ({
@@ -434,6 +532,7 @@ export function GachaMachine3D() {
       const scope = window as unknown as Record<string, unknown>;
       delete scope.__gachaFrame;
       delete scope.__gachaPixels;
+      delete scope.__gachaInfo;
       delete scope.__gachaFrameStats;
       delete scope.__gachaResetStats;
       delete scope.__gachaResume;
@@ -517,7 +616,60 @@ export function GachaMachine3D() {
     );
   }, []);
 
-  const onStageLeave = useCallback(() => { sceneRef.current?.setPointer(0, 0); }, []);
+  const onStageLeave = useCallback(() => {
+    sceneRef.current?.setPointer(0, 0);
+    sceneRef.current?.setHovered(false);
+  }, []);
+
+  /**
+   * 손가락으로 보는 화면에는 마우스가 없다. 기기를 기울이면 그만큼 기계가 돈다 —
+   * 이미 허락된 경우에만이다. 허락을 새로 묻는 창은 띄우지 않는다(운영자가 누른 적
+   * 없는 권한 창이 첫 화면에 뜨는 것이 더 큰 위화감이다).
+   */
+  useEffect(() => {
+    if (reducedMotion || typeof window === "undefined") return;
+    const orientation = (window as unknown as { DeviceOrientationEvent?: { requestPermission?: unknown } }).DeviceOrientationEvent;
+    // requestPermission 이 있는 기기(iOS)는 사용자가 직접 허락해야 한다 — 묻지 않고 지나간다.
+    if (!orientation || typeof orientation.requestPermission === "function") return;
+    const onTilt = (event: DeviceOrientationEvent) => {
+      if (event.gamma === null || event.beta === null) return;
+      // gamma 는 좌우(-90~90), beta 는 앞뒤. 스무 도쯤이면 끝까지 기운 것으로 본다.
+      sceneRef.current?.setPointer(
+        Math.max(-1, Math.min(1, event.gamma / 20)),
+        Math.max(-1, Math.min(1, (event.beta - 50) / 25)),
+      );
+    };
+    window.addEventListener("deviceorientation", onTilt);
+    return () => window.removeEventListener("deviceorientation", onTilt);
+  }, [reducedMotion]);
+
+  /* 유리 돔 — 손을 올리면 더미가 들썩이고, 두드리면 한 알이 튄다 ------------- */
+  const onDomeEnter = useCallback(() => {
+    sceneRef.current?.setDomeHover(true);
+    // 유리를 손끝으로 스치는 소리. 지나갈 때마다 울리지 않도록 사이를 둔다.
+    const now = Date.now();
+    if (!reducedMotion && now - lastGlassTap.current > 1200) {
+      lastGlassTap.current = now;
+      playCapsuleTap(0.55);
+    }
+  }, [reducedMotion]);
+
+  const onDomeLeave = useCallback(() => { sceneRef.current?.setDomeHover(false); }, []);
+
+  const onDomeTap = useCallback(() => {
+    sceneRef.current?.tapDome();
+    if (!reducedMotion) playCapsuleTap(1.1);
+  }, [reducedMotion]);
+
+  /* 레버 — 손이 올라오면 손잡이가 달아오르고 "잡고 아래로" 가 뜬다 ----------- */
+  const setLeverHover = useCallback((hovered: boolean) => {
+    sceneRef.current?.setLeverHover(hovered);
+    sceneRef.current?.setHovered(hovered);
+    const node = rootRef.current;
+    if (!node) return;
+    if (hovered) node.dataset.lever = "1";
+    else delete node.dataset.lever;
+  }, []);
 
   /* 연출 -------------------------------------------------------------------- */
   const pickPrize = useCallback((slug?: string): GachaListing | null => {
@@ -570,6 +722,7 @@ export function GachaMachine3D() {
     setClunked(false);
     sceneRef.current?.setLeverPull(0);
     leverDrag.current = { active: false, startY: 0 };
+    scrollFired.current = progressRef.current >= SCROLL_PULL.to;
   }, [clearTimers]);
 
   const chooseTheme = useCallback((next: ThemeId) => {
@@ -631,6 +784,7 @@ export function GachaMachine3D() {
   const onLeverDown = useCallback((event: ReactPointerEvent<HTMLButtonElement>) => {
     if (stage !== "idle") return;
     leverDrag.current = { active: true, startY: event.clientY };
+    sceneRef.current?.setLeverDragging(true);
     event.currentTarget.setPointerCapture(event.pointerId);
   }, [stage]);
 
@@ -641,6 +795,7 @@ export function GachaMachine3D() {
     sceneRef.current?.setLeverPull(Math.max(0, pulled) / LEVER_TRAVEL_PIXELS);
     if (pulled >= LEVER_TRIGGER_PIXELS) {
       drag.active = false;
+      sceneRef.current?.setLeverDragging(false);
       if (event.currentTarget.hasPointerCapture(event.pointerId)) {
         event.currentTarget.releasePointerCapture(event.pointerId);
       }
@@ -651,6 +806,7 @@ export function GachaMachine3D() {
   const onLeverUp = useCallback((event: ReactPointerEvent<HTMLButtonElement>) => {
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
     leverDrag.current.active = false;
+    sceneRef.current?.setLeverDragging(false);
     // 끝까지 당기지 못했으면 손잡이가 스스로 올라간다.
     if (stage === "idle") sceneRef.current?.setLeverPull(0);
   }, [stage]);
@@ -696,6 +852,80 @@ export function GachaMachine3D() {
     };
   }, [clearTimers, markIntroChrome, pickPrize]);
 
+  /* 스크롤이 곧 연출이다 -----------------------------------------------------
+     긴 트랙을 내려가는 동안 무대는 화면에 붙어 있고, 진행도(0~1)가 카메라를 옮긴다.
+     0.5~0.6 사이에서는 스크롤이 레버를 당기고 끝에 닿으면 뽑힌다. 글줄은 장면마다
+     제 구간에서만 떠오른다. 값은 매 프레임이 아니라 스크롤 이벤트마다 한 번 계산한다. */
+  useEffect(() => {
+    stageLive.current = stage;
+    turnLive.current = turn;
+    refreshFilm.current();
+  }, [stage, turn]);
+  useEffect(() => {
+    if (!webgl) return;
+    let raf = 0;
+    const ramp = (p: number, a: number, b: number, c: number, d: number) => {
+      if (p <= a || p >= d) return 0;
+      if (p < b) return (p - a) / Math.max(1e-6, b - a);
+      if (p <= c) return 1;
+      return 1 - (p - c) / Math.max(1e-6, d - c);
+    };
+    const show = (node: HTMLElement | null, amount: number, rise = 18) => {
+      if (!node) return;
+      const k = Math.min(1, Math.max(0, amount));
+      node.style.opacity = k.toFixed(3);
+      node.style.transform = `translate(var(--gc-beat-x, 0px), ${((1 - k) * rise).toFixed(1)}px)`;
+      node.style.visibility = k > 0.01 ? "visible" : "hidden";
+    };
+    const update = () => {
+      raf = 0;
+      const track = trackRef.current;
+      if (!track) return;
+      const rect = track.getBoundingClientRect();
+      const total = Math.max(1, rect.height - window.innerHeight);
+      const p = Math.min(1, Math.max(0, -rect.top / total));
+      progressRef.current = p;
+      rootRef.current?.style.setProperty("--gc-p", p.toFixed(4));
+      const scene = sceneRef.current;
+      if (scene) {
+        scene.setScroll(p);
+        // 내리기 시작했으면 등장 연출은 그 자리에서 끝난다 — 두 연출이 겹치지 않는다.
+        if (p > 0.02 && scene.introRunning()) { scene.skipIntro(); markIntroChrome(false); }
+      }
+      show(beatHeadRef.current, ramp(p, -1, 0, 0.06, 0.16));
+      show(beatScrollRef.current, 1 - p / 0.05, 0);
+      show(beatInsideRef.current, ramp(p, 0.17, 0.25, 0.4, 0.47));
+      const idle = stageLive.current === "idle";
+      show(beatLeverRef.current, idle ? ramp(p, 0.43, 0.5, 0.6, 0.66) : 0);
+      // 스크롤로 당기는 레버.
+      if (p < SCROLL_PULL.from) {
+        if (scrollFired.current) scrollFired.current = false;
+        if (idle && scene && scene.leverPull() > 0 && !leverDrag.current.active) scene.setLeverPull(0);
+      } else if (idle && !scrollFired.current && scene && !leverDrag.current.active) {
+        const k = (p - SCROLL_PULL.from) / (SCROLL_PULL.to - SCROLL_PULL.from);
+        if (k >= 1) {
+          scrollFired.current = true;
+          scene.setLeverPull(1);
+          turnLive.current();
+        } else {
+          scene.setLeverPull(k);
+        }
+      }
+    };
+    const onScroll = () => { if (!raf) raf = window.requestAnimationFrame(update); };
+    refreshFilm.current = onScroll;
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    update();
+    return () => {
+      refreshFilm.current = () => {};
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) window.cancelAnimationFrame(raf);
+    };
+    // 장면이 서면 한 번 더 돌아 지금 스크롤 자리를 실어 준다.
+  }, [webgl, sceneReady, markIntroChrome]);
+
   /* 그리기 ------------------------------------------------------------------ */
 
   if (!webgl) return <CapsuleMachine />;
@@ -713,126 +943,168 @@ export function GachaMachine3D() {
 
   return (
     <div
-      className="gc gc3"
+      className="gc gc3 gc-film"
       ref={rootRef}
       data-stage={stage}
       data-reduced={reducedMotion || undefined}
       style={{ "--gc-accent": accent, "--gc-prize": prizeColor, "--gc-grade": prizeRing } as CSSProperties}
     >
-      <div className="gc3-row">
-        <div
-          className="gc3-stage"
-          ref={stageRef}
-          onPointerMove={onStageMove}
-          onPointerLeave={onStageLeave}
-          onPointerEnter={() => sceneRef.current?.setHovered(true)}
-        >
-          <div className="gc3-canvas" ref={hostRef} aria-hidden="true" />
+      {/* 긴 트랙. 내려가는 동안 무대는 화면에 붙어 있고 스크롤이 카메라를 옮긴다. */}
+      <div className="gc-film-track" ref={trackRef}>
+        <div className="gc-film-sticky">
+          <div
+            className="gc3-stage"
+            ref={stageRef}
+            onPointerMove={onStageMove}
+            onPointerLeave={onStageLeave}
+          >
+            {/* 서버가 그려 둔 기계. 3D 가 첫 프레임을 낸 뒤 그 위로 캔버스가 겹쳐 켜지고,
+                WebGL 이 실패하면 이 그림이 그대로 남는다. */}
+            <GachaPoster />
+            <div className="gc3-canvas" ref={hostRef} aria-hidden="true" />
 
-          {/* 레버 손잡이 위에 투명하게 얹힌 진짜 단추 — 끌어내려도 되고 그냥 눌러도 된다. */}
-          <button
-            type="button"
-            className="gc3-lever"
-            ref={leverRef}
-            onPointerDown={onLeverDown}
-            onPointerMove={onLeverMove}
-            onPointerUp={onLeverUp}
-            onPointerCancel={onLeverUp}
-            onFocus={() => sceneRef.current?.setHovered(true)}
-            onBlur={() => sceneRef.current?.setHovered(false)}
-            onMouseEnter={() => sceneRef.current?.setHovered(true)}
-            onMouseLeave={() => sceneRef.current?.setHovered(false)}
-            onClick={onLeverClick}
-            disabled={stage !== "idle" || !stocked}
-            aria-label="레버를 당겨 에셋 뽑기"
-          />
-
-          {/* 배출구에 떨어진 캡슐 — 눌러서 연다. */}
-          <button
-            type="button"
-            className="gc3-capsule"
-            ref={capsuleRef}
-            onClick={openCapsule}
-            disabled={!canOpen}
-            hidden={!capsuleShown}
-            aria-label={canOpen ? "떨어진 캡슐 — 눌러서 열기" : "캡슐이 나오는 중입니다"}
-          />
-
-          <span className="gc3-coin" ref={coinRef}>베타 무료</span>
-
-          {stage === "idle" ? (
-            <p className="gc3-hint" aria-hidden="true"><b>레버를 당기세요</b><i>↓</i></p>
-          ) : null}
-          {stage === "capsule" ? <p className="gc3-hint gc3-hint-low" aria-hidden="true"><b>눌러서 열기</b></p> : null}
-
-          {clunked ? (
-            <>
-              <span className="gc-flash" aria-hidden="true" />
-              <strong className="gc-impact" aria-hidden="true">Clunk!</strong>
-            </>
-          ) : null}
-        </div>
-
-        <div className="gc3-side">
-          {stage === "result" && prize ? (
-            <PrizeCard
-              listing={prize}
-              beta={beta}
-              authenticated={authenticated}
-              claim={claim}
-              loginHref={LOGIN_HREF}
-              remaining={remaining}
-              showArt={false}
-              onClaim={() => { void collect(); }}
-              onAgain={again}
+            {/* 유리 돔 위의 손 닿는 자리. 보이지 않고, 눌러도 뽑히지 않는다. */}
+            <div
+              className="gc3-dome"
+              ref={domeRef}
+              aria-hidden="true"
+              onPointerEnter={onDomeEnter}
+              onPointerLeave={onDomeLeave}
+              onPointerDown={onDomeTap}
             />
-          ) : (
-            <div className="gc3-panel">
-              <p className="gc3-coin-line">{creditLine}</p>
-              {notice ? (
-                <p className="gc3-notice" role="status">
-                  {notice} <Link href="/marketplace" prefetch={false}>마켓에서 직접 확인하기</Link>
-                </p>
-              ) : null}
-              {stocked ? (
-                <>
-                  <div className="gc3-dial" role="group" aria-label="테마 다이얼">
-                    {GACHA_THEMES.map((row) => (
-                      <button
-                        type="button"
-                        key={row.id}
-                        className="gc-dial-option"
-                        aria-pressed={row.id === theme}
-                        onClick={() => chooseTheme(row.id)}
-                        style={{ "--gc-accent": row.accent } as CSSProperties}
-                      >
-                        {row.name}<i>{counts[row.id]}</i>
-                      </button>
-                    ))}
-                  </div>
-                  <p className="gc3-remaining">이번 바퀴 남은 개수 <b>{remaining}</b></p>
-                </>
-              ) : null}
-              <ul className="gc3-legend">
-                {(["S", "A", "B", "C"] as const).map((letter) => (
-                  <li key={letter}><i style={{ background: GRADE_COLORS[letter] }} />{letter}</li>
-                ))}
-              </ul>
-              <p className="gc3-rule">{GRADE_RULE}</p>
+
+            {/* 레버 손잡이 위에 투명하게 얹힌 진짜 단추 — 끌어내려도 되고 그냥 눌러도 된다. */}
+            <button
+              type="button"
+              className="gc3-lever"
+              ref={leverRef}
+              onPointerDown={onLeverDown}
+              onPointerMove={onLeverMove}
+              onPointerUp={onLeverUp}
+              onPointerCancel={onLeverUp}
+              onFocus={() => setLeverHover(true)}
+              onBlur={() => setLeverHover(false)}
+              onMouseEnter={() => setLeverHover(true)}
+              onMouseLeave={() => setLeverHover(false)}
+              onClick={onLeverClick}
+              disabled={stage !== "idle" || !stocked}
+              aria-label="레버를 당겨 에셋 뽑기"
+            />
+            <p className="gc3-grip" ref={hintRef} aria-hidden="true">잡고 아래로</p>
+
+            {/* 배출구에 떨어진 캡슐 — 눌러서 연다. */}
+            <button
+              type="button"
+              className="gc3-capsule"
+              ref={capsuleRef}
+              onClick={openCapsule}
+              disabled={!canOpen}
+              hidden={!capsuleShown}
+              aria-label={canOpen ? "떨어진 캡슐 — 눌러서 열기" : "캡슐이 나오는 중입니다"}
+            />
+            {stage === "capsule" ? <p className="gc3-hint gc3-hint-low" aria-hidden="true"><b>눌러서 열기</b></p> : null}
+
+            {clunked ? (
+              <>
+                <span className="gc-flash" aria-hidden="true" />
+                <strong className="gc-impact" aria-hidden="true">Clunk!</strong>
+              </>
+            ) : null}
+
+            {/* 장면마다 떠오르는 글줄. 자리는 스크롤 진행도가 정한다. */}
+            <div className="gc-beat gc-beat-head" ref={beatHeadRef}>
+              <span className="cv5-badge">✦ 게임 제작을 위한 <b>단 하나의 AI 슈퍼앱</b></span>
+              <h1 id="home-heading">게임 에셋 <em>뽑기</em></h1>
+              <p>레버를 당기면 마켓의 에셋이 캡슐로 떨어집니다</p>
             </div>
-          )}
+            <p className="gc-beat gc-beat-scroll" ref={beatScrollRef} aria-hidden="true">내려서 시작<i>↓</i></p>
+            <div className="gc-beat gc-beat-inside" ref={beatInsideRef} aria-hidden="true">
+              <b>{stocked ? `${drawableListings(listings).length}개` : "실제"}</b>
+              <span>마켓에 올라온 에셋이 그대로 들어 있습니다</span>
+              <small>3D 모델 · 스프라이트 시트 · 이어붙는 텍스처</small>
+            </div>
+            <div className="gc-beat gc-beat-lever" ref={beatLeverRef} aria-hidden="true">
+              <b>레버를 당기세요</b>
+              <small>계속 내리면 당겨집니다 · 손으로 끌어도 됩니다</small>
+            </div>
+
+            {stage === "result" && prize ? (
+              <div className="gc-film-prize">
+                <PrizeCard
+                  listing={prize}
+                  beta={beta}
+                  authenticated={authenticated}
+                  claim={claim}
+                  loginHref={LOGIN_HREF}
+                  remaining={remaining}
+                  showArt={false}
+                  onClaim={() => { void collect(); }}
+                  onAgain={again}
+                />
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
 
-      <p className="gc-foot">
-        떨어질 때 나는 소리, 그게 Clunk 입니다.
-        {soundSupported ? (
-          <button type="button" className="gc-mute" aria-pressed={muted} onClick={toggleGachaMuted}>
-            {muted ? "소리 켜기" : "소리 끄기"}
-          </button>
+      <div className="gc3-below">
+        <div className="gc3-side">
+          <div className="gc3-panel">
+            {creditLine ? <p className="gc3-coin-line">{creditLine}</p> : null}
+            {notice ? (
+              <p className="gc3-notice" role="status">
+                {notice} <Link href="/marketplace" prefetch={false}>마켓에서 직접 확인하기</Link>
+              </p>
+            ) : null}
+            {stocked ? (
+              <>
+                <div className="gc3-dial" role="group" aria-label="테마 다이얼">
+                  {GACHA_THEMES.map((row) => (
+                    <button
+                      type="button"
+                      key={row.id}
+                      className="gc-dial-option"
+                      aria-pressed={row.id === theme}
+                      onClick={() => chooseTheme(row.id)}
+                      style={{ "--gc-accent": row.accent } as CSSProperties}
+                    >
+                      {row.name}<i>{counts[row.id]}</i>
+                    </button>
+                  ))}
+                </div>
+                <p className="gc3-remaining">이번 바퀴 남은 개수 <b>{remaining}</b></p>
+              </>
+            ) : null}
+            <ul className="gc3-legend">
+              {(["S", "A", "B", "C"] as const).map((letter) => (
+                <li key={letter}><i style={{ background: GRADE_COLORS[letter] }} />{letter}</li>
+              ))}
+            </ul>
+            <p className="gc3-rule">{GRADE_RULE}</p>
+          </div>
+        </div>
+
+        {/* 이 기계에 실제로 들어 있는 것들. 지어낸 최근 뽑기 기록이 아니라, 지금 다이얼에
+            걸린 상품 목록 그대로다. */}
+        {shelf.length > 0 ? (
+          <section className="gc3-shelf" aria-labelledby="gc3-shelf-heading">
+            <h3 id="gc3-shelf-heading">이 기계에 든 것</h3>
+            <div className="gc3-shelf-rail">
+              {shelf.map((listing) => <ShelfCard key={listing.id} listing={listing} />)}
+            </div>
+          </section>
         ) : null}
-        <Link className="gc-foot-link" href="/marketplace" prefetch={false}>마켓 전체 목록</Link>
-      </p>
+
+        <p className="gc-foot">
+          떨어질 때 나는 소리, 그게 Clunk 입니다.
+          {soundSupported ? (
+            <button type="button" className="gc-mute" aria-pressed={muted} onClick={toggleGachaMuted}>
+              {muted ? "소리 켜기" : "소리 끄기"}
+            </button>
+          ) : null}
+          <Link className="gc-foot-link" href="/marketplace" prefetch={false}>마켓 전체 목록</Link>
+        </p>
+      </div>
     </div>
   );
 }

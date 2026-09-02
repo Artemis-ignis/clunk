@@ -349,6 +349,24 @@ export function previewUrlOf(listing: Pick<GachaListing, "slug" | "previewFileNa
   return `/market/${encodeURIComponent(listing.slug)}/${encodeURIComponent(listing.previewFileName)}`;
 }
 
+/**
+ * 상품 선반에 거는 미리보기 그림.
+ *
+ * 상점의 상세 화면(app/marketplace/[slug]/page.tsx)과 목록(MarketplaceCatalog)이 이미
+ * 쓰는 주소 그대로다 — 정적 파일이 아니라 API 가 내주므로, public 아래로 복사되지 않은
+ * 상품도 같은 그림이 뜬다.
+ */
+export function previewImageUrlOf(
+  listing: Pick<GachaListing, "assetId" | "previewFileName">,
+): string | null {
+  const fileName = listing.previewFileName?.trim();
+  // 상점 목록과 같은 조건 — 그림 파일일 때만 건다. 미리보기 자리에 GLB 가 적힌 상품이
+  // 있으면 깨진 그림 아이콘이 뜬다.
+  if (!fileName || !/\.(?:png|jpe?g|webp|avif|gif)$/iu.test(fileName)) return null;
+  return `/api/marketplace/assets/${encodeURIComponent(listing.assetId)}`
+    + `?file=${encodeURIComponent(fileName)}&preview=1`;
+}
+
 /** 3D 파일. GLB 가 아니면 null — 텍스처를 3D 뷰어에 넣지 않는다. */
 export function modelUrlOf(listing: Pick<GachaListing, "slug" | "entryFileName">): string | null {
   if (!listing.entryFileName.toLowerCase().endsWith(".glb")) return null;

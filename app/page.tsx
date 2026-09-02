@@ -71,16 +71,11 @@ export default function Home() {
             carries (app/globals.css). Under .cv5 its alignment rules are deliberately
             inert, so it changes nothing here and keeps the landing in the same family
             as /agents and /pricing. */}
-        <section className="cv5-hero gc-hero public-hero-frame" data-snap-section="hero" aria-labelledby="home-heading">
-          <div className="cv5-frame gc-hero-frame">
-            <span className="cv5-badge">✦ 게임 제작을 위한 <b>단 하나의 AI 슈퍼앱</b></span>
-            {/* 2026-09-02: 게임 UI 처럼 짧고 크게. 긴 설명문은 뽑기 화면에서 읽히지 않는다. */}
-            <h1 id="home-heading">게임 에셋 <em>뽑기</em></h1>
-            <p className="gc-hero-lede">레버를 당기면 마켓의 에셋이 캡슐로 떨어집니다</p>
-            {/* 통에 무엇이 들었는지 — 기계에 붙은 명판처럼 짧게. */}
-            <p className="gc-hero-kinds">3D 모델 · 스프라이트 시트 · 이어붙는 텍스처</p>
-            <GachaMachine3D />
-          </div>
+        <section className="cv5-hero gc-hero public-hero-frame" aria-labelledby="home-heading">
+          {/* 2026-09-02 밤: 첫 화면은 한 편의 짧은 영상이다 — 제목·부제도 무대 위 글줄로
+              들어가 스크롤 진행도가 띄우고 거둔다. 스냅 구간에서 빼서 스크롤이 카메라를
+              움직이는 동안 끊기지 않게 한다. */}
+          <GachaMachine3D />
         </section>
 
         {/* 01 — INSPECT & REPAIR --------------------------------------- */}
