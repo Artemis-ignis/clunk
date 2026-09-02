@@ -134,8 +134,8 @@ export default function Home() {
                         <span><em>{INSPECTED_MODEL.measured.faces}개</em> · 웹 게임 권장 상한 {INSPECTED_MODEL.measured.faceLimit}개의 {INSPECTED_MODEL.measured.limitPercent}%</span>
                       </div>
                       <div>
-                        <b>그리기 횟수</b>
-                        <span><em>{INSPECTED_MODEL.measured.drawCalls}회</em></span>
+                        <b>재질</b>
+                        <span><em>9개</em> · 웹 게임 권장 상한 12개</span>
                       </div>
                       <div>
                         <b>파일 크기</b>
