@@ -344,9 +344,13 @@ export function licenseLabelOf(status: string | null | undefined): string | null
    ------------------------------------------------------------------------- */
 
 /** 미리보기 이미지. MarketplaceCatalog 의 3D 뷰어가 쓰는 /market/<슬러그>/ 아래 그대로다. */
-export function previewUrlOf(listing: Pick<GachaListing, "slug" | "previewFileName">): string | null {
-  if (!listing.previewFileName) return null;
-  return `/market/${encodeURIComponent(listing.slug)}/${encodeURIComponent(listing.previewFileName)}`;
+/**
+ * 상품 카드와 공개 무대가 쓰는 미리보기 그림. 2026-09-03: 워커에 번들된 정적 사본
+ * (/market/…)은 워터마크가 있던 옛 파일이 남아 있었다 — 저장소(R2)가 내주는 API 주소가
+ * 늘 지금 파일이므로 그쪽을 쓴다.
+ */
+export function previewUrlOf(listing: Pick<GachaListing, "assetId" | "previewFileName">): string | null {
+  return previewImageUrlOf(listing);
 }
 
 /**
