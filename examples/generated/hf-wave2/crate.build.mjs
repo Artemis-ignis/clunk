@@ -24,9 +24,9 @@
  * object from the same world. Hardware is vertex-coloured dark rather than given its own
  * metal material, because the delivery contract is one material per variant.
  *
- * Contract: Group "<id>" -> Mesh "crate_body", Mesh "hardware", Mesh "<lid|packing|produce>".
- * Three nodes under one root, ONE material, every transform baked, origin on the ground at the
- * crate's centre.
+ * Contract: Group "<id>" -> Mesh "crate_body", Mesh "hardware", and, for the variants that
+ * carry one, Mesh "<lid|produce>". The open crate is empty and ships the two carcass meshes
+ * only. ONE material, every transform baked, origin on the ground at the crate's centre.
  */
 import {
   along,
@@ -37,7 +37,6 @@ import {
   finish,
   flatPainter,
   grainBoard,
-  loosePainter,
   lowestY,
   mergeParts,
   nailHead,
@@ -65,7 +64,7 @@ const TOP_Y = 0.41;
 
 const VARIANTS = {
   closed: { id: "hf_crate_closed", label: "crate, lidded", nailCourses: [0, 1, 2], extra: "lid" },
-  open: { id: "hf_crate_open", label: "crate, open and empty", nailCourses: [0, 2], extra: "packing" },
+  open: { id: "hf_crate_open", label: "crate, open and empty", nailCourses: [0, 2], extra: null },
   produce: { id: "hf_crate_produce", label: "crate, open and full of apples", nailCourses: [0, 2], extra: "produce" },
 };
 
@@ -86,7 +85,13 @@ export function buildCrate(THREE, variantName) {
   // give the bottom edge a shadow.
   const skidPainter = woodPainter({ role: "crateFrame", grainAxis: "z", grainStep: 0.2, boardAxis: "x", boardStep: 0.43, seed: 12 });
   for (const side of [-1, 1]) {
-    bodyParts.push(painted(board(THREE, [0.06, 0.028, 0.4], [side * 0.215, 0.014, 0]), skidPainter));
+    // 0.032 tall, not 0.028. The floor boards' undersides are at y = 0.028, so a 0.028 skid put
+    // its top face on EXACTLY that plane: 450 cm^2 of coplanar face pairs, 0.000 mm apart, seen
+    // through the 10 mm gaps between the floor boards. Four extra millimetres make it a joint
+    // instead of a tie. The skid is buried in the boards for those 4 mm, so the foot a buyer
+    // sees is still the 28 mm under the floor, the crate still stands on y = 0, and it is
+    // exactly as tall as before.
+    bodyParts.push(painted(board(THREE, [0.06, 0.032, 0.4], [side * 0.215, 0.016, 0]), skidPainter));
   }
 
   // Floor boards, seen only through the open top and the gaps, so they get the shadow tone.
@@ -167,9 +172,13 @@ export function buildCrate(THREE, variantName) {
   // carries, and it costs 12 triangles to say "this thing was built, not extruded".
   const bracePainter = woodPainter({ role: "crateFrame", grainAxis: "x", grainStep: 0.11, boardAxis: "z", boardStep: 0.42, seed: 53 });
   for (const sz of [-1, 1]) {
+    // + 0.004, not + 0.006. At 0.006 the batten's inner face landed on z = 0.207, which is
+    // exactly the wall boards' OUTER face — 120 cm^2 of coincident plane on the one surface of
+    // this crate a buyer looks straight at. The batten now bites 2 mm into the boarding, so it
+    // is nailed on rather than balanced on, and it still stands 10 mm proud.
     bodyParts.push(
       painted(
-        board(THREE, [0.44, 0.034, 0.012], [0, 0.232, sz * (PLANK_FACE_Z + BOARD_T * 0.5 + 0.006)], [0, 0, sz * 0.63]),
+        board(THREE, [0.44, 0.034, 0.012], [0, 0.232, sz * (PLANK_FACE_Z + BOARD_T * 0.5 + 0.004)], [0, 0, sz * 0.63]),
         bracePainter,
       ),
     );
@@ -221,65 +230,92 @@ export function buildCrate(THREE, variantName) {
     }
   }
 
-  if (variant.extra === "packing") {
-    extraName = "packing_straw";
-    // Four blades of packing straw left in the bottom. Cheap, and it is the one detail that
-    // ties the crate product to the haystack product as one delivery.
-    const strawPainter = loosePainter({ seed: 55 });
-    const layout = [
-      [-0.13, 0.062, 0.07, 0.9, 0.25, 0.3],
-      [0.09, 0.06, -0.05, -0.4, 0.3, 0.85],
-      [0.17, 0.064, 0.1, 0.6, 0.2, -0.7],
-      [-0.05, 0.058, -0.12, -0.8, 0.25, -0.5],
-    ];
-    for (let i = 0; i < layout.length; i += 1) {
-      const [x, y, z, dx, dy, dz] = layout[i];
-      const blade = strawBlade(THREE, { length: 0.15, width: 0.011, bend: 0.35, droop: 0.15, seed: 500 + i });
-      extraParts.push(painted(along(THREE, blade, [x, y, z], [dx, dy, dz], i * 1.1), strawPainter));
-    }
-  }
+  /*
+   * The "open" variant used to leave four blades of packing straw in the bottom. They are gone.
+   *
+   * They never worked. `along()` plants a blade at the point it is given, the four authored
+   * points sat at y = 0.058-0.064, and the floor boards top out at FLOOR_TOP = 0.050 — so every
+   * blade hovered 8-14 mm over the floor. Worse than the gap was the read: a 150 mm bleached
+   * prism (hayDust #c9b489) lying nearly flat on a 560 mm floor is a pale, sharp sliver, and two
+   * separate audits looked at the top-down render and logged it as an unexplained "pale wedge"
+   * before anyone identified it as the straw. Planting it on the boards fixed the geometry and
+   * did not fix the read.
+   *
+   * An empty crate should look empty. Removing them costs 36 triangles and removes the only
+   * thing in this variant a buyer could mistake for a modelling error.
+   */
 
   if (variant.extra === "produce") {
     extraName = "produce";
     // The fill plate. Only the top layer of fruit is modelled, so without a dark plate under it
     // the camera sees straight through to the floor boards and the crate reads as almost empty —
     // the same trick the market stall uses when it heaps produce above the crate rim.
-    extraParts.push(painted(board(THREE, [0.44, 0.02, 0.33], [0, 0.336, 0]), flatPainter("voidFill", 87, 0.22)));
+    // 0.50 x 0.36, not 0.44 x 0.33. The walls' inner faces are at x = +-0.255 and z = +-0.185,
+    // so the old plate stopped 35 mm short on each side and 20 mm short front and back — and the
+    // top-down render looked straight past its edge into the empty crate below, which is the
+    // opposite of what a fill plate is for. It now reaches to within 5 mm of the boarding and
+    // buries its corners in the corner posts. Same 12 triangles.
+    extraParts.push(painted(board(THREE, [0.5, 0.02, 0.36], [0, 0.336, 0]), flatPainter("voidFill", 87, 0.22)));
 
     const fruitPainter = applePainter(91);
     const stemPainter = flatPainter("stem", 93, 0.4);
     const leafPainter = flatPainter("leaf", 95, 0.6);
-    // Seven across the base and three riding on the pile. A single ring of five left the plate
-    // showing through at the corners and the crate read as almost empty; the base course has to
-    // reach the walls before the crown means anything. A grid would read as a tray of beads, so
-    // the two courses are offset and every fruit is spun to a different yaw.
+    /*
+     * Twelve across the base and three riding on the pile.
+     *
+     * Seven was not enough. The seven sat inside |x| <= 0.175 and |z| <= 0.09 while the crate's
+     * interior runs to |x| = 0.255 and |z| = 0.185, so a 9 cm band of bare voidFill plate ran
+     * along the front and the back and the listing's "full of apples" read as half empty from
+     * directly above — the angle a top-down game camera actually uses.
+     *
+     * The base is now three offset rows that reach the walls. An apple's widest point is at its
+     * own centre height, below the 0.41 rim, so a base centre may go no further out than
+     * 0.255 - 0.047 = 0.208 in x and 0.185 - 0.047 = 0.138 in z; every row below respects that.
+     * The rows are staggered and each fruit takes a different yaw, so twelve reads as a heap
+     * rather than as a tray of beads. Five more apples is 100 triangles.
+     */
     const base = [
-      [-0.175, 0.386, -0.09],
-      [-0.06, 0.383, 0.085],
-      [0.06, 0.386, -0.085],
-      [0.175, 0.383, 0.082],
-      [0.0, 0.384, -0.006],
-      [-0.135, 0.382, 0.09],
-      [0.145, 0.384, -0.095],
+      [-0.197, 0.386, -0.126],
+      [-0.066, 0.383, -0.121],
+      [0.066, 0.386, -0.127],
+      [0.197, 0.384, -0.122],
+      [-0.132, 0.384, -0.002],
+      [-0.001, 0.382, 0.004],
+      [0.132, 0.385, -0.004],
+      [0.197, 0.383, 0.06],
+      [-0.197, 0.385, 0.06],
+      [-0.099, 0.384, 0.126],
+      [0.033, 0.386, 0.121],
+      [0.165, 0.383, 0.127],
     ];
+    // Placed over the three widest holes the base course leaves, not scattered.
     const crown = [
-      [-0.09, 0.452, 0.012],
-      [0.055, 0.456, -0.028],
-      [0.135, 0.45, 0.062],
+      [-0.088, 0.462, -0.062],
+      [0.06, 0.466, 0.064],
+      [0.155, 0.46, -0.066],
     ];
+    /*
+     * radius 0.055, not 0.045. This is the one lever that closes the gaps between the fruit for
+     * FREE: an icosahedron is 20 triangles at any size. At 0.045 the twelve base apples were
+     * 90 mm across on a 131 mm pitch, so 40 mm of dark plate showed between every neighbour and
+     * the crate still read as a tray with some apples on it. At 0.055 they are 114 mm across and
+     * very nearly touch. The widest point of a base apple is at its own centre, below the 0.41
+     * rim, so the layout above keeps every base centre inside 0.255 - 0.057 = 0.198 in x and
+     * 0.185 - 0.057 = 0.128 in z and nothing pushes through the boarding.
+     */
     let index = 0;
     for (const [x, y, z] of [...base, ...crown]) {
-      const apple = appleGeometry(THREE, { radius: 0.045, seed: 7 + index });
+      const apple = appleGeometry(THREE, { radius: 0.055, seed: 7 + index });
       extraParts.push(painted(at(THREE, apple, [x, y, z], [0.1, index * 1.7, 0.06]), fruitPainter));
       index += 1;
     }
     for (let i = 0; i < crown.length; i += 1) {
       const [x, y, z] = crown[i];
-      extraParts.push(painted(board(THREE, [0.012, 0.022, 0.012], [x, y + 0.043, z], [0.16, 0, 0.22]), stemPainter));
+      extraParts.push(painted(board(THREE, [0.012, 0.022, 0.012], [x, y + 0.052, z], [0.16, 0, 0.22]), stemPainter));
     }
     for (const [x, y, z, dx, dy, dz] of [
-      [-0.075, 0.462, 0.028, -0.55, 0.62, 0.56],
-      [0.1, 0.458, -0.055, 0.7, 0.55, -0.45],
+      [-0.072, 0.474, -0.046, -0.55, 0.62, 0.56],
+      [0.105, 0.47, 0.08, 0.7, 0.55, -0.45],
     ]) {
       const leaf = strawBlade(THREE, { length: 0.06, width: 0.017, bend: 0.5, droop: 0.4, seed: 610 });
       extraParts.push(painted(along(THREE, leaf, [x, y, z], [dx, dy, dz], 0.6), leafPainter));
@@ -298,9 +334,14 @@ export function buildCrate(THREE, variantName) {
   bodyMesh.name = "crate_body";
   const hardwareMesh = new THREE.Mesh(mergeParts(THREE, hardwareParts), material);
   hardwareMesh.name = "hardware";
-  const extraMesh = new THREE.Mesh(mergeParts(THREE, extraParts), material);
-  extraMesh.name = extraName;
-  root.add(bodyMesh, hardwareMesh, extraMesh);
+  root.add(bodyMesh, hardwareMesh);
+  // `open` has no payload mesh at all now, and an empty merged geometry would be an empty node
+  // (SCENE-EMPTY-NODES). Two meshes is the honest contract for an empty crate.
+  if (extraParts.length) {
+    const extraMesh = new THREE.Mesh(mergeParts(THREE, extraParts), material);
+    extraMesh.name = extraName;
+    root.add(extraMesh);
+  }
 
   root.userData = {
     generator: "clunk-generate-pipeline",
@@ -322,8 +363,10 @@ export function buildCrate(THREE, variantName) {
       "diagonal brace per long face, nail heads at the board ends",
       "solid boards, so the open variants show real wall thickness at the rim",
     ],
-    parts: ["crate_body", "hardware", extraName],
-    swapNote: `replace the "${extraName}" mesh to restock or re-lid without touching the carcass`,
+    parts: extraParts.length ? ["crate_body", "hardware", extraName] : ["crate_body", "hardware"],
+    swapNote: extraParts.length
+      ? `replace the "${extraName}" mesh to restock or re-lid without touching the carcass`
+      : "an empty carcass: add a third mesh under this root to fill or lid it without touching the carcass",
   };
   root.userData.measured = summarize(THREE, root);
   return root;

@@ -31,8 +31,36 @@ const AWNING_PITCH = 0.38156; // rad, ~21.9 degrees
 const STRIPE_CENTER = [0, 2.02348, 0.08619];
 const STRIPE_LENGTH = 1.16324;
 const VALANCE_CENTER = [0, 1.78276, 0.68634]; // solid rim band closing the striped panels
-const SCALLOP_CENTER = [0, 1.76379, 0.73366]; // fringe discs, half-buried in the rim band
 const STRIPE_COUNT = 10;
+
+// The canvas plane, as two unit vectors, so the fringe below is placed IN that plane's terms
+// instead of by two hand-tuned world coordinates that cannot say what they mean.
+const AWNING_UP = [0, Math.cos(AWNING_PITCH), Math.sin(AWNING_PITCH)]; // out of the canvas
+const AWNING_FORWARD = [0, -Math.sin(AWNING_PITCH), Math.cos(AWNING_PITCH)]; // down the slope
+
+/*
+ * Where the fringe hangs.
+ *
+ * SCALLOP_DROP is the fix for the defect the storefront showed: the discs used to sit at
+ * drop = 0, i.e. exactly IN the canvas plane, and both the disc and the rim band are 0.038 m
+ * thick and centred on that plane. Their top faces and their bottom faces were therefore the
+ * same two planes over 3,678 cm^2 (measured: 182 coplanar triangle pairs, 0.015 mm apart), so
+ * the depth buffer had no winner and the garland flickered against the awning edge. Worse, it
+ * was *readable from above*: the three-quarter top render showed ten green hexagons lying flat
+ * on the roof with the cream rim band nowhere to be seen.
+ *
+ * A fringe hangs UNDER an awning. Dropping the discs 0.026 m along the canvas normal puts the
+ * disc's top face 0.012 m below the band's top face — still 0.012 m of overlap holding it on,
+ * so it is one joined object and not a floating decal, but with no shared plane anywhere and
+ * nothing of it visible over the roof.
+ */
+const SCALLOP_ALONG = 0.051; // forward of the band centre, in-plane: keeps the tab hanging past the edge
+const SCALLOP_DROP = 0.026; // below the canvas plane: 0.012 m of overlap, 0 mm of shared plane
+const SCALLOP_CENTER = [
+  0,
+  VALANCE_CENTER[1] + AWNING_FORWARD[1] * SCALLOP_ALONG - AWNING_UP[1] * SCALLOP_DROP,
+  VALANCE_CENTER[2] + AWNING_FORWARD[2] * SCALLOP_ALONG - AWNING_UP[2] * SCALLOP_DROP,
+];
 const STRIPE_PITCH = 0.242;
 const STRIPE_WIDTH = 0.238;
 const SCALLOP_RADIUS = 0.11; // < STRIPE_PITCH/2, so a notch stays open between neighbours
@@ -102,8 +130,28 @@ export function createMarketStall(THREE) {
   const counter = kit.group("counter");
   root.add(counter);
 
+  /*
+   * COUNTER_FACE is where the counter's front stops, and it is 4 mm BEHIND the front posts'
+   * front face (POST_FRONT_Z + 0.055 = 0.495).
+   *
+   * It used to be 0.495 exactly. The post, the counter's front rail and the front deck board
+   * all presented an outward face on that one plane, and where they overlap on screen — 121 cm^2
+   * of post against light `woodPlank` deck, 220 cm^2 of post against dark `woodFrame` rail — the
+   * depth buffer had two equally valid answers for the same pixel. Two of those three parts are
+   * different colours, so the tie is not academic: it is a band that changes tone as the camera
+   * moves, at the counter edge, at eye height, on the face of the model the storefront shows.
+   *
+   * Four millimetres is enough to settle every one of those ties, and it reads better besides:
+   * a post should stand a little proud of the counter it carries.
+   */
+  const COUNTER_FACE = POST_FRONT_Z + 0.055 - 0.004;
+
   const rails = [
-    place(kit.box(2.2, 0.1, 0.08), [0, 0.91, 0.455]),
+    // - 0.045, so the rail's own face lands 5 mm BEHIND the deck edge rather than flush with it:
+    // the two parts overlap for the 2.5 mm the deck board sits on the rail, and flush there was
+    // 55 cm^2 of dark rail tied with mid deck along the whole 2.2 m counter edge. A deck
+    // oversails the frame it rests on anyway.
+    place(kit.box(2.2, 0.1, 0.08), [0, 0.91, COUNTER_FACE - 0.045]),
     place(kit.box(2.24, 0.1, 0.08), [0, 0.91, -0.415]),
     place(kit.box(0.08, 0.1, 0.88), [-POST_FRONT_X, 0.91, 0.02]),
     place(kit.box(0.08, 0.1, 0.88), [POST_FRONT_X, 0.91, 0.02]),
@@ -111,9 +159,11 @@ export function createMarketStall(THREE) {
   counter.add(kit.merged("counter_frame_rails", mat.woodFrame, rails));
 
   // Six loose boards with real gaps between them — the plank line is geometry, not a texture.
+  // The run is laid out from the FRONT board back, so the deck edge is tied to COUNTER_FACE
+  // and cannot drift onto the post plane again.
   const deck = [];
   for (let index = 0; index < 6; index += 1) {
-    deck.push(place(kit.box(2.3, 0.055, 0.15), [0, 0.985, -0.42 + index * 0.168]));
+    deck.push(place(kit.box(2.3, 0.055, 0.15), [0, 0.985, COUNTER_FACE - 0.075 - index * 0.168]));
   }
   counter.add(kit.merged("counter_deck_planks", mat.woodPlank, deck));
 
@@ -128,10 +178,14 @@ export function createMarketStall(THREE) {
   apron.push(place(kit.box(2.08, 0.07, 0.05), [0, 0.27, 0.468])); // bottom rail
   counter.add(kit.merged("counter_front_apron", mat.woodPlank, apron));
 
+  // z 0.469, not 0.472. At 0.472 the braces' front face sat 1 mm behind the apron's top and
+  // bottom rails — same-facing, 131 cm^2 of overlap where the braces run under the rails, and
+  // dark `woodFrame` against mid `woodPlank`, so the tie showed as a changing tone. 3 mm back
+  // settles it; the braces still stand 21 mm proud of the boarding.
   const braces = [];
   for (const bay of [-0.505, 0.505]) {
-    braces.push(place(kit.box(1.06, 0.08, 0.04), [bay, 0.57, 0.472], [0, 0, 0.5471]));
-    braces.push(place(kit.box(1.06, 0.08, 0.04), [bay, 0.57, 0.472], [0, 0, -0.5471]));
+    braces.push(place(kit.box(1.06, 0.08, 0.04), [bay, 0.57, 0.469], [0, 0, 0.5471]));
+    braces.push(place(kit.box(1.06, 0.08, 0.04), [bay, 0.57, 0.469], [0, 0, -0.5471]));
   }
   counter.add(kit.merged("counter_x_braces", mat.woodFrame, braces));
 
@@ -169,9 +223,10 @@ export function createMarketStall(THREE) {
     const x = -((STRIPE_COUNT - 1) / 2) * STRIPE_PITCH + index * STRIPE_PITCH;
     const tone = index % 2 === 0 ? "cream" : "green";
     stripes[tone].push(place(stripeGeometry, [x, STRIPE_CENTER[1], STRIPE_CENTER[2]], [AWNING_PITCH, 0, 0]));
-    // One disc per stripe, lying flat in the canvas plane. Its upper half is swallowed by the
-    // valance band, so only a clean semicircular tab hangs below — a scalloped fringe built from
-    // geometry, readable in silhouette from any angle.
+    // One disc per stripe, hanging UNDER the rim band (see SCALLOP_DROP) and parallel to the
+    // canvas. Its upper half is swallowed by the band, so only a clean semicircular tab shows —
+    // a scalloped fringe built from geometry, readable in silhouette from any angle, and never
+    // visible over the top of the roof.
     scallops.push(place(scallopGeometry, [x, SCALLOP_CENTER[1], SCALLOP_CENTER[2]], [AWNING_PITCH, 0, 0]));
   }
   awning.add(kit.merged("awning_canvas_cream", mat.canvasCream, stripes.cream));
@@ -234,9 +289,11 @@ export function createMarketStall(THREE) {
     const slot = kit.group(name, [CRATE_X[index], CRATE_Y, CRATE_Z], [CRATE_TILT, 0, 0]);
     slot.userData = { socket: name, accepts: "produce", tiltRadians: CRATE_TILT };
     slot.add(kit.merged(`${name}_shell`, mat.woodCrate, crateShell()));
-    // Chalked price board wedged behind the upper front slat — the small human sign that a
-    // crate is stock for sale rather than a prop box.
-    slot.add(kit.solo(`${name}_price_tag`, mat.canvasCream, kit.box(0.12, 0.075, 0.012), [0.14, 0.09, 0.207], [0, 0, 0.07]));
+    // Chalked price board wedged INTO the upper front slat — the small human sign that a crate
+    // is stock for sale rather than a prop box. It used to sit at z = 0.207, and the slat face
+    // is at z = 0.199: the board hung 2 mm off the crate with daylight behind it. At 0.199 it
+    // bites 6 mm into the slat, which is what "wedged" was always supposed to mean.
+    slot.add(kit.solo(`${name}_price_tag`, mat.canvasCream, kit.box(0.12, 0.075, 0.012), [0.14, 0.09, 0.199], [0, 0, 0.07]));
     display.add(slot);
     return slot;
   };

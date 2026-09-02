@@ -1,35 +1,35 @@
 {
   "schemaVersion": "1.0",
-  "passportId": "passport-4d025d96b896-5b55b91b9904",
+  "passportId": "passport-08c043c7e3d6-cb5e7b5528ce",
   "coreVersion": "0.1.0",
   "ruleSetId": "clunk-game-ready-v1",
   "ruleSetVersion": "1.0.0",
   "profileId": "web",
-  "sourceHash": "4d025d96b89604cd8086baa743d3dcc4a726b3faf5ef24c5f84403a52c8d5333",
-  "outputHash": "5b55b91b9904b4386e211f637d402b4f3f528ef83fe67355d9de6f6ab894b793",
+  "sourceHash": "08c043c7e3d6b3a6fab0742e8212991b9045c925f52bfdb1345913ad07de30f9",
+  "outputHash": "cb5e7b5528ce62d19cd6759a0092dfc67c749c09f50ae8267f676e180521c51e",
   "sourceFileName": "crate-open.glb",
   "outputFileName": "crate-open.clunk-optimized.glb",
-  "sourceInspectionDigest": "47adab8a5f66eff344df40547f1a8aeb53403e7ab698b790a8f607e37b4e53eb",
-  "outputInspectionDigest": "547f3e78e6222510981c795a8d6e9a635b4addffb4551d9c475d70619b31ff84",
+  "sourceInspectionDigest": "1a2e0036abdc258a306d4550e404aeac9bd90635a0cc9c2ac2358a95c3d9b0f4",
+  "outputInspectionDigest": "7977067b6a7abf4072537b05bc2f6a5b9c8a4e35dded30c2ef88bd630fbca05a",
   "operations": [
     {
       "id": "clean-metadata",
-      "description": "Removed explicitly allowlisted non-runtime metadata: extras, asset.generator, and asset.copyright.",
-      "count": 2,
+      "description": "Removed explicitly allowlisted authoring provenance: asset.generator and asset.copyright. Every extras block is preserved because an engine can read it.",
+      "count": 1,
       "safety": "metadata-only"
     }
   ],
   "before": {
     "metrics": {
       "sceneCount": 1,
-      "nodeCount": 4,
+      "nodeCount": 3,
       "maxDepth": 2,
       "emptyNodeCount": 0,
-      "meshCount": 3,
-      "primitiveCount": 3,
-      "vertexCount": 1656,
-      "triangleCount": 552,
-      "drawCallCount": 3,
+      "meshCount": 2,
+      "primitiveCount": 2,
+      "vertexCount": 1548,
+      "triangleCount": 516,
+      "drawCallCount": 2,
       "materialCount": 1,
       "duplicateMaterialCount": 0,
       "textureCount": 0,
@@ -39,7 +39,7 @@
       "animationCount": 0,
       "skinCount": 0,
       "missingNormalPrimitiveCount": 0,
-      "missingUvPrimitiveCount": 3,
+      "missingUvPrimitiveCount": 2,
       "nonUnitScaleNodeCount": 0,
       "zeroScaleNodeCount": 0,
       "externalResourceCount": 0,
@@ -50,17 +50,17 @@
         "min": [
           -0.2800000011920929,
           0,
-          -0.21899999678134918
+          -0.21699999272823334
         ],
         "max": [
           0.2800000011920929,
           0.4099999964237213,
-          0.21899999678134918
+          0.21699999272823334
         ],
         "dimensions": [
           0.5600000023841858,
           0.4099999964237213,
-          0.43799999356269836
+          0.4339999854564667
         ]
       }
     },
@@ -84,14 +84,14 @@
   "after": {
     "metrics": {
       "sceneCount": 1,
-      "nodeCount": 4,
+      "nodeCount": 3,
       "maxDepth": 2,
       "emptyNodeCount": 0,
-      "meshCount": 3,
-      "primitiveCount": 3,
-      "vertexCount": 1656,
-      "triangleCount": 552,
-      "drawCallCount": 3,
+      "meshCount": 2,
+      "primitiveCount": 2,
+      "vertexCount": 1548,
+      "triangleCount": 516,
+      "drawCallCount": 2,
       "materialCount": 1,
       "duplicateMaterialCount": 0,
       "textureCount": 0,
@@ -101,7 +101,7 @@
       "animationCount": 0,
       "skinCount": 0,
       "missingNormalPrimitiveCount": 0,
-      "missingUvPrimitiveCount": 3,
+      "missingUvPrimitiveCount": 2,
       "nonUnitScaleNodeCount": 0,
       "zeroScaleNodeCount": 0,
       "externalResourceCount": 0,
@@ -112,17 +112,17 @@
         "min": [
           -0.2800000011920929,
           0,
-          -0.21899999678134918
+          -0.21699999272823334
         ],
         "max": [
           0.2800000011920929,
           0.4099999964237213,
-          0.21899999678134918
+          0.21699999272823334
         ],
         "dimensions": [
           0.5600000023841858,
           0.4099999964237213,
-          0.43799999356269836
+          0.4339999854564667
         ]
       }
     },
