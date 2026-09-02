@@ -513,7 +513,7 @@ test("등장 연출은 세션당 한 번, 2.4초 안에 끝나고, 누르면 건
   }
   // 세션당 한 번, 그리고 누르거나 키를 치면 건너뛴다.
   assert.match(machine, /const INTRO_KEY = "clunk\.gacha\.intro"/u);
-  assert.match(machine, /if \(reducedMotion \|\| introAlreadySeen\(\)\)/u);
+  assert.match(machine, /if \(reducedMotion \|\| introAlreadySeen\(\) \|\| posterShownMs\.current > 700\)/u);
   assert.match(machine, /scene\.skipIntro\(\)/u);
   assert.match(machine, /window\.addEventListener\("pointerdown", skip, true\)/u);
   // 연출 표시는 리액트 상태가 아니라 뿌리 요소의 속성이다 — 서버가 그린 첫 화면과
