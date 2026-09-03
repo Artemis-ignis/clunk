@@ -14,6 +14,8 @@ import {
   drawFrom,
   drawableListings,
   formatBytes,
+  formatOdds,
+  gradeOddsOf,
   formatWon,
   gradeBasisOf,
   gradeOf,
@@ -28,6 +30,7 @@ import {
   polygonsOf,
   previewUrlOf,
   remainingInRound,
+  remainingPool,
   priceTagOf,
   randomIndex,
   seamVerdictOf,
@@ -443,8 +446,10 @@ test("로그아웃이어도 뽑기와 연출은 되고, 받기만 로그인을 �
   assert.match(machine, /if \(Date\.now\(\) - record\.at > LAST_PRIZE_TTL_MS\) return null/u);
   assert.match(machine, /intent=market/u);
   assert.match(machine, /setStage\("result"\)/u);
-  // 잔액은 API 응답에서만 온다.
-  assert.match(machine, /"\/api\/credits"/u);
+  // 잔액은 이 화면이 들지 않는다 — 지갑이 내비로 올라갔고(CoinHud), 거기서 /api/credits 를
+  // 한 번만 부른다. 이 화면은 "받기" 단추 때문에 로그인 여부만 묻는다.
+  assert.doesNotMatch(machine, /"\/api\/credits"/u);
+  assert.match(machine, /void fetch\("\/api\/session", \{ cache: "no-store" \}\)/u);
   assert.doesNotMatch(machine, /Math\.random\(\)\s*\*\s*\d/u);
   // 뽑기 자체에는 로그인 검사가 없다 — 로그아웃이어도 연출과 카드까지 간다.
   assert.doesNotMatch(machine, /if \(!authenticated\)[\s\S]{0,120}setStage/u);
@@ -708,7 +713,7 @@ test("무대는 내비 밑에서 시작하고, 제목은 기계를 덮지 않는
   assert.match(site, /\.cv5 \.sitenav-dock \{ position: fixed; inset: 0 0 auto 0; z-index: 80; \}/u);
 
   // 넓은 화면: 제목은 왼쪽 칸, 기계는 그만큼 오른쪽으로 물러난다.
-  assert.match(css, /@media \(min-width: 1024px\) \{\s*\.gc-film \{ --gc-stage-left: clamp\(300px, 30vw, 460px\); \}/u);
+  assert.match(css, /@media \(min-width: 1024px\) \{\s*\.gc-film \{\s*--gc-stage-left: clamp\(292px, 25vw, 470px\);/u);
   // 캔버스가 비켜난 자리는 검은 상자가 아니라 같은 가게다 — 배경이 화면 전체에 남는다.
   assert.match(css, /\.gc-film\.gc3\[data-live\] \.gc3-stage::before,\s*\.gc-film\.gc3\[data-live\] \.gc3-stage::after \{ opacity: 1; \}/u);
   // 2026-09-03(2차): 모서리 페이드는 제목 글줄과 같은 ramp 로만 산다. 첫 샷 밖에서 남으면
@@ -722,13 +727,13 @@ test("무대는 내비 밑에서 시작하고, 제목은 기계를 덮지 않는
   // 그 빛은 캔버스 밑에 깔리고, 모서리 너머까지 늘어져 새 경계선을 만들지 않는다.
   assert.match(css, /\.gc-film-sticky::after \{[\s\S]*?width: calc\(var\(--gc-stage-left\) \+ 240px\);/u);
   // 장면에 카메라 훅이 붙으면 바로 쓰도록 호출을 미리 걸어 둔다(없으면 아무 일도 없다).
-  assert.match(machine, /scene\.setTopInset\?\.\(navBandHeight\(\)\)/u);
+  assert.match(machine, /scene\.setTopInset\?\.\(inset\)/u);
   // 위를 비운 만큼 거리를 늘려야 기계 밑동이 남는다 — 둘은 항상 같이 불린다.
-  assert.match(machine, /scene\.setFrameFill\?\.\(Math\.min\(1\.2, Math\.max\(1, \(h \/ Math\.max\(1, h - navH\)\) \* 1\.04\)\)\)/u);
+  assert.match(machine, /scene\.setFrameFill\?\.\(Math\.min\(1\.2, Math\.max\(1, \(h \/ Math\.max\(1, h - inset\)\) \* 1\.04 \* portrait\)\)\)/u);
   assert.match(machine, /applyCameraFraming\(scene as SceneWithCameraHooks, host\)/u);
-  assert.match(css, /\.gc-beat-head \{\s*left: 7vw;/u);
+  assert.match(css, /\.gc-beat-head \{\s*left: max\(28px, 4\.4vw\);/u);
   // 좁은 화면: 제목은 내비 아래 띠에 눕고 h1 은 2rem 을 넘지 않는다.
-  assert.match(css, /@media \(max-width: 767px\) \{\s*html:has\(\.gc-film\) \{ --gc-nav-h: 76px; \}\s*\.gc-film \{ --gc-head-h: 116px; \}/u);
+  assert.match(css, /@media \(max-width: 767px\) \{\s*html:has\(\.gc-film\) \{ --gc-nav-h: 76px; \}\s*\.gc-film \{ --gc-head-h: 196px; \}/u);
   assert.match(css, /\.gc-beat-head h1 \{ font-size: clamp\(1\.6rem, 6\.6vw, 2rem\); \}/u);
 
   // 자리잡기는 CSS 가, 떠오르는 거리만 스크롤이 넣는다 — 글줄의 스크롤 연출은 그대로다.
@@ -748,7 +753,8 @@ test("랜딩은 캡슐 머신 한 대를 렌더한다", async () => {
   const machine = await readFile(new URL("../app/components/gacha/GachaMachine3D.tsx", import.meta.url), "utf8");
   assert.match(machine, /className="gc-film-track"/u);
   assert.match(machine, /className="gc-film-sticky"/u);
-  assert.match(machine, /<h1 id="home-heading">게임 에셋 <em>뽑기<\/em><\/h1>/u);
+  // 2026-09-03(운영자 목업): 제목은 두 줄로 서고 "뽑기" 가 강조색을 갖는다.
+  assert.match(machine, /<h1 id="home-heading">게임 에셋<br \/><em>뽑기<\/em><\/h1>/u);
   assert.match(machine, /레버를 당기면 마켓의 에셋이 캡슐로 떨어집니다/u);
   // 스크롤이 레버를 당긴다 — 0.5 에서 0.6 사이.
   assert.match(machine, /SCROLL_PULL\.from/u);
@@ -766,66 +772,253 @@ test("랜딩은 캡슐 머신 한 대를 렌더한다", async () => {
 
 
 /**
- * 동전 계수기 — 무대 오른쪽 위 (2026-09-03)
- * 운영자: "크레딧은 일종의 코인처럼 우측 상단에 보이게 해야 실제 가챠 머신 돌리는 느낌이
- * 난다. 실시간으로 코인이 돌아가거나 반짝이게." 여기서 지키는 것은 넷이다 — 부품이 있고,
- * 숫자는 서버에서 오고, 움직임을 줄여 달라면 멈추고, 좁은 화면에서 제목을 밀지 않는다.
+ * 크레딧 지갑 — 내비 안의 동전 알약 (2026-09-03, 운영자 2차 지시)
+ *
+ * 처음에는 첫 화면 무대 오른쪽 위에 떠 있었다. 지갑은 첫 화면만의 물건이 아니므로 내비로
+ * 올라왔고, 그래서 규칙도 첫 화면만 읽는 gacha.css 가 아니라 모든 화면이 읽는 site-v5.css 에
+ * 산다. 여기서 지키는 것은 다섯이다 — 내비가 걸고, 숫자는 서버에서 오고, 모르는 동안 대시를
+ * 적지 않고, 충전은 약속하지 않고, 움직임을 줄여 달라면 멈춘다.
  */
-test("무대 오른쪽 위의 동전 계수기가 크레딧을 든다", async () => {
+test("크레딧 지갑은 내비 안의 알약이고 숫자는 전부 서버가 준 값이다", async () => {
   const hud = await readFile(new URL("../app/components/gacha/CoinHud.tsx", import.meta.url), "utf8");
+  const nav = await readFile(new URL("../app/components/SiteNav.tsx", import.meta.url), "utf8");
   const machine = await readFile(new URL("../app/components/gacha/GachaMachine3D.tsx", import.meta.url), "utf8");
+  const site = await readFile(new URL("../app/site-v5.css", import.meta.url), "utf8");
   const css = await readFile(new URL("../app/components/gacha/gacha.css", import.meta.url), "utf8");
 
-  // 기계는 무대(gc-film-sticky) 안, 캔버스 밖에 계수기를 건다.
-  assert.match(machine, /import \{ CoinHud \} from "\.\/CoinHud";/u);
-  assert.match(machine, /<CoinHud$/mu);
-  assert.match(hud, /className="gc-coin-hud"/u);
+  // 지갑은 내비가 건다 — 어느 화면에서나 같은 자리다. 무대는 더 이상 들지 않는다.
+  assert.match(nav, /import \{ CoinHud \} from "\.\/gacha\/CoinHud";/u);
+  assert.match(nav, /<CoinHud authenticated=\{authenticated\} joinHref=\{signupHref\} \/>/u);
+  assert.doesNotMatch(machine, /<CoinHud/u);
+  assert.doesNotMatch(machine, /from "\.\/CoinHud"/u);
+  assert.doesNotMatch(machine, /gc-coin-hud/u);
+  assert.match(hud, /className="gc-coin-pill"/u);
+  // 모든 화면이 읽는 파일에 규칙이 있어야 마켓·요금·작업공간에서도 같은 알약이 선다.
+  assert.match(site, /\.gc-coin-pill \{/u);
+  assert.doesNotMatch(css, /\.gc-coin-pill \{/u);
 
   // 숫자는 전부 서버에서 온다 — 이 파일에는 크레딧 숫자가 하나도 적혀 있지 않다.
   assert.doesNotMatch(hud, /\d+\s*크레딧|크레딧\s*\d+/u);
-  assert.match(hud, /signupGrant/u);
   assert.match(hud, /로그인하면 \{signupGrant\}크레딧/u);
-  // 가입 지급분은 서버의 SIGNUP_GRANT_CREDITS 를 그대로 싣는 access 블록에서 읽는다.
-  assert.match(machine, /payload\.access\?\.a_signed_in_workspace_adds\?\.credits_on_signup/u);
+  assert.match(hud, /const payload = await response\.json\(\) as CreditsPayload;/u);
+  // 가입 지급분은 서버의 SIGNUP_GRANT_CREDITS 를 그대로 싣는 공개 접근 계약에서 읽는다.
+  assert.match(hud, /fetch\("\/api\/credits\/packs"\)/u);
+  assert.match(hud, /payload\.access\?\.a_signed_in_workspace_adds\?\.credits_on_signup/u);
   const access = await readFile(new URL("../app/api/_lib/access.ts", import.meta.url), "utf8");
   assert.match(access, /credits_on_signup: SIGNUP_GRANT_CREDITS,/u);
+  const packs = await readFile(new URL("../app/api/credits/packs/route.ts", import.meta.url), "utf8");
+  assert.match(packs, /access: accessFor\(\{ authenticated: false \}\)/u);
+  // 로그아웃일 때 /api/credits 를 부르지 않는다 — 401 을 콘솔에 남기지 않는다.
+  assert.match(hud, /if \(!authenticated\) return;\s*let alive = true;\s*void fetch\("\/api\/credits"/u);
 
-  // 잔액은 /api/credits 가 준 값이고, 자릿수가 흔들리지 않게 tabular-nums 로 선다.
-  assert.match(machine, /const payload = await response\.json\(\) as CreditsPayload;/u);
-  assert.match(css, /\.gc-coin-count \{[^}]*font-variant-numeric: tabular-nums;/u);
-  // 화면 낭독기에게도 같은 값을 준다.
+  // 자릿수가 흔들리지 않게 tabular-nums 로 서고, 화면 낭독기에게도 같은 값을 준다.
+  assert.match(site, /\.gc-coin-count \{[^}]*font-variant-numeric: tabular-nums;/u);
   assert.match(hud, /aria-live="polite"/u);
   assert.match(hud, /aria-label=\{known \? `보유 크레딧 \$\{credits\}` : "보유 크레딧 확인 중"\}/u);
 
-  // 뽑기가 무료라는 말은 카드가 값을 지울 때 쓰는 그 플래그(beta)에서만 나온다.
-  assert.match(machine, /freePulls=\{beta\}/u);
-  assert.match(hud, /\{freePulls \? <small className="gc-coin-note">뽑기는 무료<\/small> : null\}/u);
+  // 잔액을 모르는 동안 대시를 적지 않는다 — 자리표시가 들어간다(운영자 2026-09-03).
+  assert.doesNotMatch(hud, /"—"/u);
+  assert.match(hud, /<span className="gc-coin-wait" aria-hidden="true" \/>/u);
+  assert.match(site, /\.gc-coin-wait \{/u);
 
-  // 레버가 내려가는 동안 동전이 한 바퀴 넘어간다. 차감은 흉내 내지 않는다.
-  assert.match(machine, /inserting=\{stage === "pull" \|\| stage === "shake" \|\| stage === "impact"\}/u);
-  assert.match(css, /@keyframes gc-coin-insert/u);
-  // 뽑는 동안 바뀌는 것은 동전의 몸짓뿐이다 — inserting 은 숫자 근처에 가지 않는다.
-  assert.match(hud, /data-insert=\{inserting \? "" : undefined\}/u);
-  assert.doesNotMatch(hud, /inserting \? [^}]*크레딧/u);
+  // "+" 는 충전 단추가 아니다. 결제가 없으므로 요금 화면으로만 데려간다.
+  assert.match(hud, /className="gc-coin-plus"[\s\S]{0,120}href="\/pricing"/u);
+  assert.doesNotMatch(hud, /충전하기|결제하기/u);
 
   // 실시간으로 돌고 반짝인다.
-  assert.match(css, /animation: gc-coin-spin 6s linear infinite;/u);
-  assert.match(css, /animation: gc-coin-sparkle 4s ease-in-out infinite;/u);
+  assert.match(site, /animation: gc-coin-spin 6s linear infinite;/u);
+  assert.match(site, /animation: gc-coin-sparkle 4s ease-in-out infinite;/u);
+  // 레버가 내려가는 동안 동전이 한 바퀴 넘어간다. 숫자는 그대로다(뽑기는 무료).
+  assert.match(css, /@keyframes gc-coin-insert/u);
+  assert.match(css, /html:has\(\.gc3\[data-stage="pull"\]\) \.gc-coin-spin/u);
 
-  // 자리 — 내비 띠 아래, 오른쪽.
-  assert.match(css, /\.gc-coin-hud \{[^}]*top: calc\(var\(--gc-nav-h, 84px\) \+ 16px\);[^}]*right: max\(20px, 4vw\);/u);
-
-  // 움직임을 줄여 달라면 동전은 멈춰 선다 — 돌지도, 반짝이지도 않는다.
+  // 움직임을 줄여 달라면 동전은 멈춰 선다.
   assert.match(
-    css,
-    /@media \(prefers-reduced-motion: reduce\) \{\s*\.gc-coin-spin,\s*\.gc-coin-hud\[data-insert\] \.gc-coin-spin,\s*\.gc-coin-shine,\s*\.gc-coin-sparkle \{ animation: none !important; \}/u,
+    site,
+    /@media \(prefers-reduced-motion: reduce\) \{\s*\.gc-coin-spin,\s*\.gc-coin-shine,\s*\.gc-coin-sparkle \{ animation: none !important; \}/u,
   );
 
-  // 좁은 화면 — 0.85 배로 줄고, 제목 칸이 그만큼 비켜 준다(글자와 겹치지 않는다).
-  assert.match(css, /@media \(max-width: 767px\) \{[\s\S]*?\.gc-film \{ --gc-coin-w: 130px; \}/u);
-  assert.match(css, /\.gc-coin-hud \{[^}]*transform: scale\(0\.85\);/u);
-  assert.match(css, /width: min\(680px, calc\(92vw - var\(--gc-coin-w\)\)\);/u);
+  // 좁은 화면에서도 알약은 남고, 내비의 다른 것을 밀어내지 않는다.
+  assert.match(site, /@media \(max-width: 900px\) \{\s*\.gc-coin-pill \{ height: 32px;/u);
+  assert.match(site, /@media \(max-width: 1199px\) \{\s*\.cv5 \.sitenav-utility \{ display: none; \}\s*\}/u);
+  assert.match(site, /@media \(max-width: 1499px\) \{\s*\.cv5 \.sitenav-utility-link \{ padding: 0 7px; \}\s*\}/u);
 
   // 아래 판의 잔액 글줄은 걷어냈다 — 같은 값을 두 번 말하지 않는다.
   assert.doesNotMatch(machine, /gc3-coin-line/u);
+});
+
+
+/**
+ * 가챠 라인업 판 — 계산된 확률만 (2026-09-03, 운영자 결정)
+ *
+ * "모든 에셋이 똑같이 나온다. 등급은 분류일 뿐이다." 그래서 판의 모든 수는 지금 자루를
+ * 세어 나눈 값이고, 손으로 적은 확률은 한 개도 없다. 이 검사가 지키는 것은 셋이다 —
+ * 자루가 뽑기와 같고, 몫이 개수와 맞고, 화면에 숫자가 적혀 있지 않다.
+ */
+test("라인업 판의 확률은 지금 자루를 세어 나눈 값이다", () => {
+  const pool = drawableListings(SAMPLE);
+  // 자루는 drawFrom 이 실제로 고르는 그 자루다.
+  assert.deepEqual(remainingPool(pool, []).map((row) => row.id), pool.map((row) => row.id));
+  assert.equal(remainingPool(pool, []).length, remainingInRound(pool, []));
+  const one = pool[0];
+  assert.equal(remainingPool(pool, [one.id]).length, pool.length - 1);
+  // 한 바퀴가 끝나면 통을 새로 채운다 — 개수와 확률이 함께 되돌아온다.
+  assert.equal(remainingPool(pool, pool.map((row) => row.id)).length, pool.length);
+
+  const rows = gradeOddsOf(pool, []);
+  assert.ok(rows.length > 0);
+  const total = rows[0].total;
+  assert.equal(total, pool.length);
+  // 등급별 개수의 합은 자루 전체이고, 몫의 합은 정확히 1 이다.
+  assert.equal(rows.reduce((sum, row) => sum + row.count, 0), total);
+  // 몫의 합은 1 이다(부동소수 오차만 허용).
+  assert.ok(Math.abs(rows.reduce((sum, row) => sum + row.share, 0) - 1) < 1e-12);
+  for (const row of rows) {
+    assert.equal(row.share, row.count / total);
+    assert.equal(row.color, GRADE_COLORS[row.letter]);
+    // 판에 거는 그림은 그 등급에 실제로 있는 상품의 것이고, 주소는 상점이 쓰는 그대로다.
+    assert.ok(row.samples.length <= 2);
+    for (const sample of row.samples) {
+      assert.equal(gradeOf(sample).letter, row.letter);
+      assert.ok(previewUrlOf(sample));
+      assert.match(previewUrlOf(sample), /^\/api\/marketplace\/assets\//u);
+    }
+  }
+  // 등급은 언제나 S·A·B·C 차례로 선다.
+  assert.deepEqual(
+    rows.map((row) => row.letter),
+    ["S", "A", "B", "C"].filter((letter) => rows.some((row) => row.letter === letter)),
+  );
+
+  // 한 번 뽑으면 자루가 하나 줄고 그 등급의 몫이 내려간다.
+  const drawnRow = pool.find((row) => gradeOf(row).letter === "C");
+  const after = gradeOddsOf(pool, [drawnRow.id]);
+  assert.equal(after[0].total, total - 1);
+  const beforeC = rows.find((row) => row.letter === "C");
+  const afterC = after.find((row) => row.letter === "C");
+  assert.equal(afterC.count, beforeC.count - 1);
+  assert.ok(afterC.share < beforeC.share);
+  assert.ok(Math.abs(after.reduce((sum, row) => sum + row.share, 0) - 1) < 1e-12);
+
+  // 소수점은 필요할 때만 한 자리 — 25% 를 25.0% 로 적지 않는다.
+  assert.equal(formatOdds(0.25), "25%");
+  assert.equal(formatOdds(1 / 24), "4.2%");
+  assert.equal(formatOdds(1 / 3), "33.3%");
+  assert.equal(formatOdds(1), "100%");
+});
+
+test("라인업 판은 확률을 화면에 적어 두지 않는다", async () => {
+  const machine = await readFile(new URL("../app/components/gacha/GachaMachine3D.tsx", import.meta.url), "utf8");
+  const catalog = await readFile(new URL("../app/components/gacha/gacha-catalog.ts", import.meta.url), "utf8");
+
+  // 판이 읽는 줄은 전부 gradeOddsOf 가 준다. 화면 파일에 확률 문자열이 없다.
+  assert.match(machine, /const odds = useMemo\(\(\) => gradeOddsOf\(pool, drawn\), \[pool, drawn\]\);/u);
+  assert.match(machine, /<b>\{formatOdds\(row\.share\)\}<\/b>/u);
+  assert.match(machine, /하나가 나올 확률 <b>\{formatOdds\(1 \/ total\)\}<\/b>/u);
+  assert.match(machine, /<small>\{row\.count\}개<\/small>/u);
+  // 판 안에 손으로 적은 확률이 없다 — 퍼센트 글자를 만드는 곳은 formatOdds 한 군데뿐이다.
+  const panel = machine.slice(machine.indexOf("function OddsPanel("), machine.indexOf("function createIdempotencyKey("));
+  assert.doesNotMatch(panel, /["'>]\s*\d+(?:\.\d+)?\s*%/u);
+  assert.match(catalog, /return `\$\{Number\.isInteger\(rounded\) \? rounded\.toFixed\(0\) : rounded\.toFixed\(1\)\}%`;/u);
+  // 가중치가 없다는 것이 곧 계약이다 — 등급은 분류일 뿐이다.
+  assert.match(catalog, /이 함수는 가중치를 하나도 갖지 않는다/u);
+  assert.match(catalog, /share: members\.length \/ total,/u);
+  assert.match(catalog, /한 개가 나올 확률은 1\/total, 한 등급이 나올 확률은 count\/total 이다\./u);
+
+  // 판이 다시 계산되는 두 손잡이(뽑기·다이얼)를 그대로 본다.
+  assert.match(machine, /const pool = useMemo\(\(\) => listingsForTheme\(listings, theme\), \[listings, theme\]\);/u);
+  assert.match(machine, /setDrawn\(result\.drawn\);/u);
+
+  // 정직한 한 줄. "확률은 변경될 수 있습니다" 같은 빠져나갈 문장은 쓰지 않는다.
+  assert.match(machine, /같은 바퀴에서는 같은 에셋이 다시 나오지 않습니다\. 남은 것 중 고르게 뽑습니다\./u);
+  assert.doesNotMatch(machine, /확률은 변경될 수 있습니다/u);
+
+  // 아래 판이 이미 말하던 것(등급 점·남은 개수)은 걷어냈다 — 같은 값을 두 번 말하지 않는다.
+  assert.doesNotMatch(machine, /className="gc3-legend"/u);
+  assert.doesNotMatch(machine, /gc3-remaining/u);
+  assert.match(machine, /<p className="gc3-rule">\{GRADE_RULE\}<\/p>/u);
+});
+
+
+/**
+ * 세 칸 구성 — 왼쪽 제목 · 가운데 기계 · 오른쪽 라인업 (2026-09-03, 운영자 목업)
+ */
+test("무대는 세 칸이고, 기계는 두 칸 사이에 선다", async () => {
+  const css = await readFile(new URL("../app/components/gacha/gacha.css", import.meta.url), "utf8");
+  const machine = await readFile(new URL("../app/components/gacha/GachaMachine3D.tsx", import.meta.url), "utf8");
+
+  // 왼쪽과 오른쪽을 함께 비워야 기계가 가운데 칸에 선다.
+  assert.match(css, /@media \(min-width: 1024px\) \{\s*\.gc-film \{\s*--gc-stage-left: clamp\(292px, 25vw, 470px\);\s*--gc-stage-right: clamp\(276px, 22vw, 366px\);/u);
+  assert.match(css, /left: calc\(var\(--gc-stage-left\) \* var\(--gc-left-ramp, 1\)\);\s*right: calc\(var\(--gc-stage-right\) \* var\(--gc-left-ramp, 1\)\);/u);
+  // 오른쪽 모서리 페이드도 제목 글줄과 같은 ramp 로 산다.
+  assert.match(css, /--gc-fade-right: calc\(var\(--gc-left-ramp, 1\) \* 200px\)/u);
+  // 라인업 판은 제목과 같은 ramp 로 뜨고 진다 — 근접샷에서 기계를 덮지 않는다.
+  assert.match(machine, /show\(beatOddsRef\.current, headBeat, 24\);/u);
+  assert.match(css, /@media \(max-width: 1023px\) \{ \.gc-beat-odds \{ display: none; \} \}/u);
+  assert.match(css, /@media \(min-width: 1024px\) \{ \.gc3-odds-below \{ display: none; \} \}/u);
+
+  // 제목은 이 화면의 주인공이다 — 두 줄로 서고 1440·1920 이 둘 다 의도한 크기가 된다.
+  assert.match(machine, /<h1 id="home-heading">게임 에셋<br \/><em>뽑기<\/em><\/h1>/u);
+  assert.match(css, /\.gc-beat-head h1 \{ font-size: clamp\(4\.1rem, 7vw, 7rem\); line-height: 0\.98; \}/u);
+
+  // "내려서 시작" 은 화면 구석의 각주가 아니라 소개 글 바로 밑에 선다.
+  assert.match(machine, /<p>레버를 당기면 마켓의 에셋이 캡슐로 떨어집니다<\/p>[\s\S]{0,320}?<p className="gc-beat-scroll" ref=\{beatScrollRef\}/u);
+  assert.match(css, /\.gc-beat-scroll \{\s*position: static;/u);
+
+  // 레버 화살표 — 손잡이 바로 위에 서고, 레버 구간에 대기 중일 때만 뜨고, 포인터를 가로채지 않는다.
+  assert.match(machine, /const leverBeat = idle \? ramp\(p, 0\.43, 0\.5, 0\.6, 0\.66\) : 0;/u);
+  assert.match(machine, /show\(beatLeverRef\.current, leverBeat\);\s*show\(leverCueRef\.current, leverBeat, 10\);/u);
+  assert.match(machine, /<b>당겨서 뽑기<\/b>/u);
+  assert.match(machine, /leverCueRef\.current\.style\.left = `\$\{dx \+ points\.lever\.x\}px`;/u);
+  assert.match(css, /\.gc3-lever-cue \{[\s\S]*?pointer-events: none;/u);
+});
+
+
+/**
+ * 좁은 화면 — 글줄은 기계 위에 얹히지 않는다 (2026-09-03, 운영자 실기기)
+ * "24개 / 마켓에 올라온 에셋이 …" 세 줄이 유리 돔 위에 겹쳐 셋째 줄이 읽히지 않았다.
+ */
+test("좁은 화면에서는 글줄이 내비 밑 한 띠에서만 살고, 캔버스는 그 밑을 쓴다", async () => {
+  const css = await readFile(new URL("../app/components/gacha/gacha.css", import.meta.url), "utf8");
+  const machine = await readFile(new URL("../app/components/gacha/GachaMachine3D.tsx", import.meta.url), "utf8");
+
+  // 글줄 셋이 같은 띠에 선다.
+  assert.match(
+    css,
+    /@media \(max-width: 1023px\) \{[\s\S]*?\.gc-beat-head,\s*\.gc-beat-inside,\s*\.gc-beat-lever \{\s*top: calc\(var\(--gc-nav-h\) \+ 6px\);/u,
+  );
+  // 띠 높이는 그 안에 실제로 서는 것의 높이다.
+  assert.match(css, /@media \(max-width: 1023px\) \{[\s\S]*?--gc-head-h: 214px;/u);
+  assert.match(css, /@media \(max-width: 767px\) \{[\s\S]*?--gc-head-h: 196px;/u);
+  // 한 띠를 돌려 쓰므로 두 글줄의 구간이 겹치면 안 된다 — "이 안에 든 것" 이 먼저 물러난다.
+  assert.match(machine, /show\(beatInsideRef\.current, ramp\(p, 0\.17, 0\.25, 0\.38, 0\.43\)\);/u);
+  // 캔버스가 내비 띠 밑에서 시작하는 화면에서는 카메라를 더 들어 올리지 않는다.
+  assert.match(machine, /const inset = Math\.max\(0, Math\.round\(navH - \(box\?\.top \?\? 0\)\)\);/u);
+  // 세로 화면에서는 한 걸음 더 물러서야 돔 꼭대기부터 받침까지 들어온다.
+  assert.match(machine, /const portrait = w \/ h < 0\.75 \? 1\.14 : 1;/u);
+  // 라인업 판은 무대 아래로 내려가 접히는 칸이 된다 — 기계 위에 얹지 않는다.
+  assert.match(machine, /<OddsPanel rows=\{odds\} collapsible \/>/u);
+  assert.match(machine, /<details className="gc-odds gc-odds-fold" open>/u);
+});
+
+
+/**
+ * 유령 기계 (2026-09-03, 운영자: "로고를 눌러 돌아오면 오른쪽에 기계가 하나 더")
+ * 포스터와 캔버스가 같은 상자 안에서 기계를 다른 자리에 세우고, 모서리 페이드 아래로
+ * 포스터가 비쳐 두 대가 함께 보였다.
+ */
+test("첫 프레임이 그려지면 포스터는 그 자리에서 사라진다", async () => {
+  const css = await readFile(new URL("../app/components/gacha/gacha.css", import.meta.url), "utf8");
+  const machine = await readFile(new URL("../app/components/gacha/GachaMachine3D.tsx", import.meta.url), "utf8");
+
+  assert.match(css, /\.gc3\[data-live\] \.gc3-poster,\s*\.gc3\[data-warm\] \.gc3-poster \{ display: none !important; \}/u);
+  // 이 세션에 이미 3D 를 본 브라우저는 포스터를 아예 띄우지 않는다(화면을 칠하기 전에 표시한다).
+  assert.match(machine, /const SCENE_LIVE_KEY = "clunk\.gacha\.live";/u);
+  assert.match(machine, /useLayoutEffect\(\(\) => \{\s*if \(webgl && sceneWasLiveBefore\(\)\) rootRef\.current\?\.setAttribute\("data-warm", "1"\);/u);
+  assert.match(machine, /markSceneLive\(\);/u);
+  // 3D 가 오지 않으면 포스터가 도로 선다 — 빈 무대를 남기지 않는다.
+  assert.match(machine, /if \(!liveRef\.current\) rootRef\.current\?\.removeAttribute\("data-warm"\);/u);
+  // 포스터는 상자를 바꾸지 않는다 — 커졌다 작아지면 캔버스와 같은 사각형이 아니게 된다.
+  assert.match(css, /@keyframes gc3-poster-breathe \{ 0%, 100% \{ filter: brightness\(1\); \} 50% \{ filter: brightness\(1\.07\); \} \}/u);
+  assert.doesNotMatch(css, /@keyframes gc3-poster-breathe \{[^}]*transform: scale/u);
 });

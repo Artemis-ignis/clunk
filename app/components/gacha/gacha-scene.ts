@@ -217,11 +217,14 @@ const PRIZE_DISTANCE = 1.9;
  * 모델은 바운딩 구 지름이, 카드는 판 높이가 이 비율이다.
  */
 const PRIZE_SCREEN = { model: 0.45, card: 0.32 } as const;
-/** 상품을 손으로 돌리는 감도(라디안/픽셀)와 위아래로 젖힐 수 있는 한계(35°). */
+/**
+ * 상품을 손으로 돌리는 감도(라디안/픽셀). 2026-09-03 운영자 지적으로 위아래 한계를 없앴다 —
+ * 어느 방향으로든 끝까지 돌아간다. 그래서 오일러 각이 아니라 쿼터니언을 쌓는다: 화면의
+ * 가로·세로는 언제나 카메라의 오른쪽·위 축이라, 뒤집힌 뒤에도 손이 가는 대로 따라온다.
+ */
 const PRIZE_DRAG = {
   yaw: 0.0075,
   pitch: 0.005,
-  pitchLimit: (35 * Math.PI) / 180,
   /** 손을 뗀 순간 남는 속도의 몫과 그 속도가 잦아드는 빠르기. 미끄러짐은 20° 안쪽이다. */
   glide: 0.3,
   decay: 9,
@@ -666,10 +669,13 @@ function makeWallTexture(): THREE.CanvasTexture {
   if (ctx) {
     ctx.fillStyle = "#070a16";
     ctx.fillRect(0, 0, 512, 288);
-    const halo = ctx.createRadialGradient(256, 150, 8, 256, 150, 168);
-    halo.addColorStop(0, "rgba(186,160,255,0.92)");
-    halo.addColorStop(0.34, "rgba(112,84,214,0.40)");
-    halo.addColorStop(0.72, "rgba(48,36,104,0.14)");
+    // 2026-09-03 13라운드: 후광이 너무 크고 밝아 유리 돔 안이 통째로 라벤더 안개였다.
+    // 잰 값으로 돔의 빈 윗칸이 146, 그 안의 캡슐 더미가 90 — 상품보다 빈 자리가 밝았다.
+    // 색은 그대로 두고 밝기와 크기만 줄인다. 유리가 검은 구슬이 되지 않을 만큼은 남긴다.
+    const halo = ctx.createRadialGradient(256, 150, 8, 256, 150, 132);
+    halo.addColorStop(0, "rgba(186,160,255,0.50)");
+    halo.addColorStop(0.34, "rgba(112,84,214,0.22)");
+    halo.addColorStop(0.72, "rgba(48,36,104,0.08)");
     halo.addColorStop(1, "rgba(7,10,22,0)");
     ctx.fillStyle = halo;
     ctx.fillRect(0, 0, 512, 288);
@@ -1615,7 +1621,19 @@ export function createGachaScene(
   lever.add(leverArm);
   // 2026-09-03 1라운드: 축이 0.48 에서 끝나고 공이 0.54 에서 시작해 공이 허공에 떠 있었다.
   // 축은 공 안까지 들어가 있어야 하나의 물건이 된다.
-  const leverShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.030, 0.030, 0.34, 12), chromeMaterial);
+  /**
+   * 축은 크롬을 같이 쓰지 않는다. 2026-09-03 13라운드: 첫 화면에서 축의 밝기가 12.7,
+   * 바로 옆 배경이 19.2 였다 — 배경보다 어두워 막대가 아예 안 보였고, 구슬만 허공에
+   * 뜬 구슬로 읽혔다. 기계 옆으로 튀어나온 자리라 되쏠 것이 없으니, 금속기를 조금
+   * 덜고 거칠기를 올려 림라이트를 확산으로 받게 한다 — 그래야 막대가 막대로 선다.
+   */
+  const leverSteelMaterial = new THREE.MeshStandardMaterial({
+    color: 0xb7c0d4,
+    roughness: 0.3,
+    metalness: 0.78,
+    envMapIntensity: 1.9,
+  });
+  const leverShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.030, 0.030, 0.34, 12), leverSteelMaterial);
   leverShaft.position.y = 0.44;
   leverShaft.name = "lever-shaft";
   leverShaft.castShadow = true;
@@ -1629,7 +1647,10 @@ export function createGachaScene(
     // 방 반사를 그대로 받으면 공에 흰 얼룩이 점점이 박혀 때 탄 플라스틱이 된다.
     envMapIntensity: 0.35,
     emissive: accent.clone(),
-    emissiveIntensity: 0.7,
+    // 2026-09-03 13라운드: 0.7 은 첫 화면에서 밝기 52, 바로 옆 배경이 33 이라
+    // 대비가 1.6:1 밖에 안 됐다 — 빛나는 손잡이가 아니라 보라색 구슬이었다.
+    // 심지를 올려 공 안이 스스로 밝게 한다(이 공은 블룸 층에 있어 둘레가 같이 번진다).
+    emissiveIntensity: 1.25,
   });
   const leverKnob = new THREE.Mesh(new THREE.SphereGeometry(0.115, 18, 12), leverKnobMaterial);
   leverKnob.position.y = 0.665;
@@ -1646,7 +1667,8 @@ export function createGachaScene(
     depthWrite: false,
     toneMapped: false,
   });
-  const knobGlow = new THREE.Mesh(new THREE.PlaneGeometry(0.86, 0.86), knobGlowMaterial);
+  // 후광은 공보다 넉넉해야 어두운 배경에서 공을 떼어 놓는다(0.86 → 1.08).
+  const knobGlow = new THREE.Mesh(new THREE.PlaneGeometry(1.08, 1.08), knobGlowMaterial);
   knobGlow.name = "glow-lever-knob";
   knobGlow.position.y = 0.665;
   knobGlow.renderOrder = 2;
@@ -2440,13 +2462,27 @@ export function createGachaScene(
 
   /* 손으로 돌려 보는 상품 ---------------------------------------------------
      2026-09-03 11라운드: 운영자가 "상품이 제멋대로 도는 게 싫다" 고 했다. 저 혼자 도는
-     회전을 없애고, 끄는 대로 따라오게 한다 — 가로로 끌면 yaw, 세로로 끌면 pitch(±35°),
+     회전을 없애고, 끄는 대로 따라오게 한다 — 가로·세로 어느 쪽으로든 한계 없이 돌고,
      놓으면 아주 짧게 미끄러지다 완전히 선다. 손이 없으면 그림은 한 픽셀도 바뀌지 않는다.
      휠은 받지 않는다(스크롤이 곧 카메라라서 확대와 싸운다). */
-  let prizeYaw = 0;
-  let prizePitch = 0;
+  const prizeQuat = new THREE.Quaternion();
+  const prizeDelta = new THREE.Quaternion();
+  const prizeAxis = new THREE.Vector3();
   let prizeYawRate = 0;
   let prizePitchRate = 0;
+  /** 화면 가로·세로 끌기를 카메라 축 둘레의 회전으로 바꿔 쌓는다. */
+  const turnPrize = (dYaw: number, dPitch: number): void => {
+    if (dYaw !== 0) {
+      prizeAxis.setFromMatrixColumn(camera.matrixWorld, 1).normalize();
+      prizeDelta.setFromAxisAngle(prizeAxis, dYaw);
+      prizeQuat.premultiply(prizeDelta);
+    }
+    if (dPitch !== 0) {
+      prizeAxis.setFromMatrixColumn(camera.matrixWorld, 0).normalize();
+      prizeDelta.setFromAxisAngle(prizeAxis, dPitch);
+      prizeQuat.premultiply(prizeDelta);
+    }
+  };
   let prizeDragging = false;
   let prizePointerId = -1;
   let prizeLastX = 0;
@@ -2455,8 +2491,7 @@ export function createGachaScene(
   let prizeGrabbable = false;
 
   function resetPrizeSpin(): void {
-    prizeYaw = 0;
-    prizePitch = 0;
+    prizeQuat.identity();
     prizeYawRate = 0;
     prizePitchRate = 0;
   }
@@ -2480,8 +2515,7 @@ export function createGachaScene(
     const dy = event.clientY - prizeLastY;
     prizeLastX = event.clientX;
     prizeLastY = event.clientY;
-    prizeYaw += dx * PRIZE_DRAG.yaw;
-    prizePitch = Math.max(-PRIZE_DRAG.pitchLimit, Math.min(PRIZE_DRAG.pitchLimit, prizePitch + dy * PRIZE_DRAG.pitch));
+    turnPrize(dx * PRIZE_DRAG.yaw, dy * PRIZE_DRAG.pitch);
     // 놓았을 때 미끄러질 만큼의 속도. 한 번의 움직임을 1/60 초로 본다.
     prizeYawRate = dx * PRIZE_DRAG.yaw * 60;
     prizePitchRate = dy * PRIZE_DRAG.pitch * 60;
@@ -2894,7 +2928,7 @@ export function createGachaScene(
     spot.intensity = lit * 12;
     coneMaterial.opacity = lit * 0.028 * quality.glow;
     bulbMaterial.opacity = lit * 0.6;
-    wallGlowMaterial.opacity = lit * 0.075;
+    wallGlowMaterial.opacity = lit * 0.05;
     dustMaterial.opacity = lit * 0.26;
     // 발치의 빛 웅덩이는 세게 — 참고 이미지의 바닥은 기계 색으로 젖어 있다.
     poolMaterial.opacity = lit * 0.46 * quality.glow;
@@ -2930,7 +2964,7 @@ export function createGachaScene(
       (mesh.material as THREE.MeshBasicMaterial).opacity = value * 0.42 * quality.glow;
     }
     trayGlowMaterial.opacity = value * 0.62 * quality.glow;
-    knobGlowMaterial.opacity = value * 0.5 * quality.glow;
+    knobGlowMaterial.opacity = value * 0.85 * quality.glow;
   }
 
   /** 연출을 끝난 자리에 그대로 세운다. 건너뛰기와 움직임 최소화가 같이 쓴다. */
@@ -3369,8 +3403,7 @@ export function createGachaScene(
         prizeYawRate = 0;
         prizePitchRate = 0;
       } else if (Math.abs(prizeYawRate) > 0.02 || Math.abs(prizePitchRate) > 0.02) {
-        prizeYaw += prizeYawRate * dt;
-        prizePitch = Math.max(-PRIZE_DRAG.pitchLimit, Math.min(PRIZE_DRAG.pitchLimit, prizePitch + prizePitchRate * dt));
+        turnPrize(prizeYawRate * dt, prizePitchRate * dt);
         const decay = Math.exp(-PRIZE_DRAG.decay * dt);
         prizeYawRate *= decay;
         prizePitchRate *= decay;
@@ -3412,7 +3445,7 @@ export function createGachaScene(
           .addScaledVector(prizeUp, wide ? -0.05 : 0.34);
         prizeArt.scale.setScalar(1);
         // 손이 돌린 만큼만 돈다. 저 혼자 도는 회전은 없앴다(운영자 지시 2026-09-03).
-        prizeArt.rotation.set(prizePitch, prizeYaw, 0);
+        prizeArt.quaternion.copy(prizeQuat);
         // 무대는 상품과 같은 자리에 카메라를 마주 보고 선다.
         prizeStage.position.copy(prizeArt.position);
         prizeStage.quaternion.copy(camera.quaternion);
@@ -3645,6 +3678,13 @@ export function createGachaScene(
         const texture = await new THREE.TextureLoader().loadAsync(url);
         texture.colorSpace = THREE.SRGBColorSpace;
         disposables.push(texture);
+        const backTexture = texture.clone();
+        backTexture.colorSpace = THREE.SRGBColorSpace;
+        backTexture.wrapS = THREE.RepeatWrapping;
+        backTexture.repeat.x = -1;
+        backTexture.offset.x = 1;
+        backTexture.needsUpdate = true;
+        disposables.push(backTexture);
         // 판 높이를 화면 세로의 32% 로 잡는다. 두께와 모서리는 그 크기에 비례한다.
         const side = prizeSpan(PRIZE_SCREEN.card);
         prizeGroundY = -side / 2 - 0.05;
@@ -3656,7 +3696,9 @@ export function createGachaScene(
             new THREE.MeshStandardMaterial({ color: 0x2a3050, roughness: 0.6 }),
             new THREE.MeshStandardMaterial({ color: 0x2a3050, roughness: 0.6 }),
             new THREE.MeshStandardMaterial({ map: texture, roughness: 0.55 }),
-            new THREE.MeshStandardMaterial({ color: 0x1b2038, roughness: 0.7 }),
+            // 뒷면도 같은 그림이다 — 손으로 끝까지 뒤집을 수 있게 된 뒤(2026-09-03) 뒤가
+            // 빈 검은 판이면 뒤집는 보람이 없다. 좌우가 뒤집혀 보이지 않도록 UV 를 되돌린 사본.
+            new THREE.MeshStandardMaterial({ map: backTexture, roughness: 0.55 }),
           ],
         );
         card.castShadow = true;

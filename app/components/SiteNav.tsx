@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "./NativeLink";
 import { BrandLockup } from "./BrandMark";
+import { CoinHud } from "./gacha/CoinHud";
 import { Icon } from "./Icon";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -51,6 +52,8 @@ export function SiteNav({ active }: { active?: ShellSection }) {
   // (2026-08-31 review). The nav asks the same /api/me the workspace uses and
   // stays anonymous when it answers 401 — never guessing a session.
   const [session, setSession] = useState<{ displayName: string } | null>(null);
+  // 크레딧 지갑은 이름이 아니라 로그인 자체를 본다 — 표시 이름이 비어 있어도 잔액은 있다.
+  const [authenticated, setAuthenticated] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -59,6 +62,7 @@ export function SiteNav({ active }: { active?: ShellSection }) {
         if (!response.ok) return;
         const body = await response.json() as { authenticated?: boolean; displayName?: string };
         const displayName = body.displayName?.trim();
+        if (active && body.authenticated) setAuthenticated(true);
         if (active && body.authenticated && displayName) setSession({ displayName });
       })
       .catch(() => {});
@@ -127,6 +131,8 @@ export function SiteNav({ active }: { active?: ShellSection }) {
           </div>
 
           <div className="sitenav-actions">
+            {/* 크레딧 지갑. 첫 화면의 무대가 아니라 내비에 산다 — 어느 화면에서나 같은 자리다. */}
+            <CoinHud authenticated={authenticated} joinHref={signupHref} />
             <ThemeToggle />
             {session ? (
               <>

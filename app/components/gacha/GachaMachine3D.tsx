@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -15,7 +16,6 @@ import Image from "next/image";
 
 import Link from "../NativeLink";
 import { CapsuleMachine } from "./CapsuleMachine";
-import { CoinHud } from "./CoinHud";
 import { GachaPoster, POSTER_IMAGES, type PosterVariant } from "./GachaPoster";
 import { SCROLL_PULL, SCROLL_OPEN_AT, SCROLL_REARM_BELOW } from "./gacha-scroll";
 import { PrizeCard, type ClaimState } from "./PrizeCard";
@@ -27,6 +27,8 @@ import {
   domeCapsules,
   drawFrom,
   drawableListings,
+  formatOdds,
+  gradeOddsOf,
   gradeOf,
   listingsForTheme,
   modelUrlOf,
@@ -35,6 +37,7 @@ import {
   remainingInRound,
   themeById,
   themeCounts,
+  type GradeOdds,
   type GachaListing,
   type ThemeId,
 } from "./gacha-catalog";
@@ -78,15 +81,8 @@ type CatalogPayload = {
   ok?: boolean;
   listings?: GachaListing[];
   checkout?: { status?: string };
-  /**
-   * 로그인하지 않은 사람에게 서버가 스스로 말해 주는 것들(app/api/_lib/access.ts).
-   * credits_on_signup 은 서버의 SIGNUP_GRANT_CREDITS 그대로다 — 화면은 그 숫자를 따로
-   * 적어 두지 않고 여기서 읽는다.
-   */
-  access?: { a_signed_in_workspace_adds?: { credits_on_signup?: number } };
 };
 type SessionPayload = { authenticated?: boolean };
-type CreditsPayload = { ok?: boolean; credits?: number };
 type CheckoutPayload = { ok?: boolean; status?: string; downloadUrl?: string; error?: string };
 
 type LoadState = "loading" | "ready" | "failed";
@@ -162,6 +158,25 @@ function loginHrefFor(listing: GachaListing | null): string {
 const DRAWN_KEY = "clunk.gacha.drawn";
 /** 등장 연출은 이 브라우저 세션에 한 번만 본다. */
 const INTRO_KEY = "clunk.gacha.intro";
+/**
+ * 이 브라우저 세션에서 3D 가 이미 한 번 그려졌는지.
+ *
+ * 2026-09-03(운영자): 머리말의 Clunk 로고를 눌러 첫 화면으로 돌아오면 오른쪽에 기계가
+ * 하나 더 유령처럼 겹쳐 보였다. 까닭은 서버가 그린 포스터(사진, object-fit: cover)와 3D
+ * 캔버스(카메라 프레이밍)가 같은 상자 안에서 기계를 **서로 다른 자리**에 세우는데, 캔버스
+ * 모서리의 페이드 아래로 포스터가 비쳐 두 대가 함께 보였기 때문이다. 이미 한 번 그려 본
+ * 브라우저라면 다음 방문에서는 포스터를 아예 띄우지 않는다 — 그동안은 무대 배경(빛기둥·
+ * 바닥 격자)만 서 있다가 3D 가 그 위에 켜진다.
+ */
+const SCENE_LIVE_KEY = "clunk.gacha.live";
+
+function sceneWasLiveBefore(): boolean {
+  try { return sessionStorage.getItem(SCENE_LIVE_KEY) === "1"; } catch { return false; }
+}
+
+function markSceneLive(): void {
+  try { sessionStorage.setItem(SCENE_LIVE_KEY, "1"); } catch { /* 저장이 막혀도 포스터가 한 번 더 보일 뿐이다. */ }
+}
 /** 마지막으로 뽑은 것. 로그인하고 돌아왔을 때 그 카드를 다시 세우는 데 쓴다. */
 const LAST_PRIZE_KEY = "clunk.gacha.last-prize";
 /** 그보다 오래된 기록은 남의 이야기다 — 30분. */
@@ -226,6 +241,89 @@ function ShelfCard({ listing }: { listing: GachaListing }) {
       </span>
       <span className="gc3-shelf-name">{listing.title}</span>
     </Link>
+  );
+}
+
+/**
+ * 가챠 라인업 — 등급별 확률 판.
+ *
+ * 운영자 결정(2026-09-03): **모든 에셋이 똑같이 나온다. 등급은 분류일 뿐이다.** 그래서
+ * 여기에는 손으로 적은 확률이 한 개도 없다. 판이 말하는 모든 수는 지금 이 순간 기계가
+ * 고르는 자루(gacha-catalog 의 remainingPool — drawFrom 의 첫 세 줄과 같은 계산)를 세어
+ * 나눈 값이다:
+ *   한 개가 나올 확률   1 / 남은 개수
+ *   한 등급이 나올 확률 그 등급의 남은 개수 / 남은 개수
+ * 뽑을 때마다 자루가 하나 줄고, 다이얼을 돌리면 자루가 통째로 바뀐다 — 두 경우 모두
+ * 이 판의 수가 그 자리에서 따라 움직인다.
+ *
+ * 미리보기 그림도 지어낸 것이 아니라 그 등급에 실제로 남아 있는 상품의 것이고,
+ * 주소는 상점이 이미 쓰는 previewUrlOf 그대로다.
+ */
+function OddsPanel({ rows, collapsible = false }: { rows: readonly GradeOdds[]; collapsible?: boolean }) {
+  const total = rows[0]?.total ?? 0;
+  if (total === 0) return null;
+  const head = (
+    <>
+      <h2>가챠 라인업</h2>
+      <p>
+        남은 <b>{total}개</b> · 하나가 나올 확률 <b>{formatOdds(1 / total)}</b>
+      </p>
+    </>
+  );
+  const body = (
+    <>
+      <ul className="gc-odds-rows">
+        {rows.map((row) => (
+          <li key={row.letter} style={{ "--gc-grade": row.color } as CSSProperties}>
+            <span className="gc-odds-grade">
+              <i aria-hidden="true" />
+              {row.letter}
+            </span>
+            <span className="gc-odds-num">
+              <b>{formatOdds(row.share)}</b>
+              <small>{row.count}개</small>
+            </span>
+            <span className="gc-odds-bar" aria-hidden="true">
+              <span style={{ width: `${(row.share * 100).toFixed(2)}%` }} />
+            </span>
+            <span className="gc-odds-thumbs" aria-hidden="true">
+              {row.samples.map((listing) => {
+                const preview = previewUrlOf(listing);
+                if (!preview) return null;
+                return (
+                  <Image
+                    key={listing.id}
+                    src={preview}
+                    alt=""
+                    width={72}
+                    height={54}
+                    unoptimized
+                    loading="lazy"
+                    decoding="async"
+                  />
+                );
+              })}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p className="gc-odds-rule">같은 바퀴에서는 같은 에셋이 다시 나오지 않습니다. 남은 것 중 고르게 뽑습니다.</p>
+    </>
+  );
+  // 좁은 화면에서는 무대 아래로 내려와 접히는 칸이 된다 — 기계 위에는 얹지 않는다.
+  if (collapsible) {
+    return (
+      <details className="gc-odds gc-odds-fold" open>
+        <summary className="gc-odds-head">{head}</summary>
+        {body}
+      </details>
+    );
+  }
+  return (
+    <div className="gc-odds">
+      <div className="gc-odds-head">{head}</div>
+      {body}
+    </div>
   );
 }
 
@@ -329,10 +427,24 @@ type SceneWithCameraHooks = GachaScene & { setTopInset?: (px: number) => void; s
  */
 function applyCameraFraming(scene: SceneWithCameraHooks, host: HTMLElement | null): void {
   const navH = navBandHeight();
+  const box = host?.getBoundingClientRect();
   const h = Math.max(320, host?.clientHeight ?? window.innerHeight);
-  scene.setTopInset?.(navBandHeight());
+  const w = Math.max(240, box?.width ?? window.innerWidth);
+  /*
+   * 캔버스가 내비 띠 밑에서 시작하는 화면(좁은 화면의 제목 띠)에서는 위를 더 비울 것이
+   * 없다. 그런데도 띠 높이만큼 카메라를 들어 올리고 있어서, 세로 화면에서는 기계가 아래로
+   * 밀려 돔만 보이고 몸통·레버·배출구가 화면 밖으로 나갔다(운영자 실기기 2026-09-03).
+   * 비울 만큼만 비운다 — 캔버스 윗변이 이미 띠 아래라면 0 이다.
+   */
+  const inset = Math.max(0, Math.round(navH - (box?.top ?? 0)));
+  scene.setTopInset?.(inset);
+  /*
+   * 세로 화면에서는 한 걸음 더 물러선다. 장면 쪽 세로 보정(0.62/aspect)은 기계 **폭**이
+   * 들어오는 데까지만 물리므로, 돔 꼭대기부터 받침까지 세로로 다 담기지 않았다.
+   */
+  const portrait = w / h < 0.75 ? 1.14 : 1;
   // 1.04: 받침 아래에 숨 쉴 여백 — 없으면 밑동이 화면 끝에 닿는다.
-  scene.setFrameFill?.(Math.min(1.2, Math.max(1, (h / Math.max(1, h - navH)) * 1.04)));
+  scene.setFrameFill?.(Math.min(1.2, Math.max(1, (h / Math.max(1, h - inset)) * 1.04 * portrait)));
 }
 
 /** 내비가 앉는 띠의 높이(px). CSS 의 --gc-nav-h 가 하나뿐인 출처다. */
@@ -358,9 +470,6 @@ export function GachaMachine3D() {
   const [beta, setBeta] = useState(false);
   const [load, setLoad] = useState<LoadState>("loading");
   const [authenticated, setAuthenticated] = useState(false);
-  const [credits, setCredits] = useState<number | null>(null);
-  /** 가입하면 들어오는 크레딧. /api/marketplace 가 실어 주는 서버 상수다. */
-  const [signupGrant, setSignupGrant] = useState<number | null>(null);
   const [theme, setTheme] = useState<ThemeId>("all");
   const [stage, setStage] = useState<Stage>("idle");
   const [prize, setPrize] = useState<GachaListing | null>(null);
@@ -384,6 +493,10 @@ export function GachaMachine3D() {
   const beatScrollRef = useRef<HTMLParagraphElement | null>(null);
   const beatInsideRef = useRef<HTMLDivElement | null>(null);
   const beatLeverRef = useRef<HTMLDivElement | null>(null);
+  /** 오른쪽 칸의 라인업 판. 제목 글줄과 같은 ramp 로 뜨고 진다. */
+  const beatOddsRef = useRef<HTMLDivElement | null>(null);
+  /** 레버 손잡이 바로 위에 서는 화살표 안내. 자리는 placeOverlays 가 잡는다. */
+  const leverCueRef = useRef<HTMLDivElement | null>(null);
   const progressRef = useRef(0);
   /** 이번에 내려가면서 레버가 이미 당겨졌는지. 다시 올라가면 풀린다. */
   const scrollFired = useRef(false);
@@ -466,6 +579,14 @@ export function GachaMachine3D() {
   /** 유리를 두드리는 소리는 손이 올라온 한 번만 난다. 훑고 지나갈 때마다 울리면 시끄럽다. */
   const lastGlassTap = useRef(0);
 
+  /**
+   * 이미 한 번 3D 를 본 브라우저면 포스터를 그리기 전에 접는다. 브라우저가 화면을 칠하기
+   * 전(useLayoutEffect)에 표시하므로 포스터가 한 프레임도 비치지 않는다.
+   */
+  useLayoutEffect(() => {
+    if (webgl && sceneWasLiveBefore()) rootRef.current?.setAttribute("data-warm", "1");
+  }, [webgl]);
+
   const clearTimers = useCallback(() => {
     for (const id of timers.current) window.clearTimeout(id);
     timers.current = [];
@@ -487,28 +608,20 @@ export function GachaMachine3D() {
         if (!alive) return;
         setListings(payload.listings);
         setBeta(payload.checkout?.status === "PAYMENT_PROVIDER_NOT_CONFIGURED");
-        // 동전 계수기가 로그아웃한 사람에게 보여 줄 숫자. 서버가 준 값만 쓴다.
-        const grant = payload.access?.a_signed_in_workspace_adds?.credits_on_signup;
-        if (typeof grant === "number") setSignupGrant(grant);
         setLoad("ready");
       })
       .catch(() => { if (alive) setLoad("failed"); });
     return () => { alive = false; };
   }, []);
 
-  /* 로그인과 잔액 ----------------------------------------------------------- */
+  /* 로그인 여부 -------------------------------------------------------------
+     잔액은 여기서 읽지 않는다 — 지갑이 내비로 올라갔고(CoinHud), 거기서 /api/credits 를
+     한 번만 부른다. 이 화면이 로그인 여부를 아는 것은 "받기" 단추 때문이다. */
   useEffect(() => {
     let alive = true;
     void fetch("/api/session", { cache: "no-store" })
       .then((response) => response.json() as Promise<SessionPayload>)
-      .then(async (session) => {
-        if (!alive || session.authenticated !== true) return;
-        setAuthenticated(true);
-        const response = await fetch("/api/credits", { cache: "no-store" });
-        if (!response.ok || !alive) return;
-        const payload = await response.json() as CreditsPayload;
-        if (typeof payload.credits === "number") setCredits(payload.credits);
-      })
+      .then((session) => { if (alive && session.authenticated === true) setAuthenticated(true); })
       .catch(() => { /* 로그인 상태를 못 읽으면 로그아웃으로 본다. */ });
     return () => { alive = false; };
   }, []);
@@ -517,6 +630,11 @@ export function GachaMachine3D() {
   const pool = useMemo(() => listingsForTheme(listings, theme), [listings, theme]);
   const accent = themeById(theme).accent;
   const remaining = useMemo(() => remainingInRound(pool, drawn), [pool, drawn]);
+  /**
+   * 라인업 판이 읽는 줄들. pool(다이얼)과 drawn(이번 바퀴에 나온 것)만 보고 세므로,
+   * 한 번 뽑을 때마다도 다이얼을 돌릴 때마다도 그 자리에서 다시 계산된다.
+   */
+  const odds = useMemo(() => gradeOddsOf(pool, drawn), [pool, drawn]);
   const prizeGrade = prize ? gradeOf(prize) : null;
   const prizeRing = prizeGrade ? GRADE_COLORS[prizeGrade.letter] : accent;
   const prizeColor = prize ? capsuleColorOf(prize) : accent;
@@ -537,9 +655,8 @@ export function GachaMachine3D() {
   );
 
   /**
-   * 잔액은 이제 무대 오른쪽 위의 동전 계수기(CoinHud)가 든다 — 아래 판의 글줄은
-   * 화면을 내리기 전에는 보이지 않았다(운영자 지시 2026-09-03). 판에는 안내와
-   * 오류 줄만 남는다.
+   * 잔액은 이 화면이 들지 않는다 — 지갑은 내비 안의 동전 알약(CoinHud)이고, 어느
+   * 화면에서나 같은 자리에 있다(운영자 지시 2026-09-03). 무대에는 기계와 글줄만 남는다.
    */
 
   /* 장면 만들기 -------------------------------------------------------------
@@ -558,6 +675,11 @@ export function GachaMachine3D() {
     let observer: IntersectionObserver | null = null;
     let onResize: (() => void) | null = null;
     let sizeObserver: ResizeObserver | null = null;
+    // 따뜻한 재방문이라 포스터를 접어 두었는데 이번에는 3D 가 오지 않는 경우가 있다.
+    // 4초 안에 첫 프레임이 없으면 포스터를 도로 세운다 — 빈 무대를 남기지 않는다.
+    const warmWatchdog = window.setTimeout(() => {
+      if (!liveRef.current) rootRef.current?.removeAttribute("data-warm");
+    }, 4000);
 
     note("scene module loading");
     mountedAt.current = performance.now();
@@ -606,6 +728,11 @@ export function GachaMachine3D() {
             hintRef.current.style.left = `${dx + points.lever.x - points.lever.radius - 10}px`;
             hintRef.current.style.top = `${dy + points.lever.y}px`;
           }
+          // 화살표 안내는 손잡이 바로 위에 선다(아래를 가리킨다). 단추 자체는 덮지 않는다.
+          if (leverCueRef.current) {
+            leverCueRef.current.style.left = `${dx + points.lever.x}px`;
+            leverCueRef.current.style.top = `${dy + points.lever.y - Math.max(LEVER_HIT_PIXELS, points.lever.radius * 2) / 2 - 6}px`;
+          }
         };
 
         /** 첫 프레임이 실제로 그려진 뒤에야 캔버스를 켠다 — 그 전까지는 서버가 그린 포스터다. */
@@ -617,6 +744,9 @@ export function GachaMachine3D() {
           posterShownMs.current = performance.now() - mountedAt.current;
           note("first frame painted");
           rootRef.current?.setAttribute("data-live", "1");
+          // 다음 방문에서는 포스터를 건너뛴다 — 전환 순간에 기계가 둘 보이지 않게.
+          markSceneLive();
+          window.clearTimeout(warmWatchdog);
         };
 
         const tick = (now: number) => {
@@ -691,6 +821,9 @@ export function GachaMachine3D() {
         setSceneReady((count) => count + 1);
       } catch (error) {
         note(`scene FAILED ${String(error).slice(0, 160)}`);
+        // 장면이 서지 못하면 포스터가 그 자리를 지킨다.
+        rootRef.current?.removeAttribute("data-warm");
+        window.clearTimeout(warmWatchdog);
         if (!disposed) setSceneFailed(true);
       }
     })();
@@ -698,6 +831,7 @@ export function GachaMachine3D() {
     return () => {
       disposed = true;
       poured.current = false;
+      window.clearTimeout(warmWatchdog);
       window.cancelAnimationFrame(raf);
       observer?.disconnect();
       if (onResize) window.removeEventListener("resize", onResize);
@@ -1137,6 +1271,11 @@ export function GachaMachine3D() {
         hintRef.current.style.left = `${offsetX + (spec.lever.x - spec.lever.r) * spec.width * scale - 10}px`;
         hintRef.current.style.top = `${offsetY + spec.lever.y * spec.height * scale}px`;
       }
+      if (leverCueRef.current) {
+        const knob = Math.max(LEVER_HIT_PIXELS, spec.lever.r * 2 * spec.width * scale);
+        leverCueRef.current.style.left = `${offsetX + spec.lever.x * spec.width * scale}px`;
+        leverCueRef.current.style.top = `${offsetY + spec.lever.y * spec.height * scale - knob / 2 - 6}px`;
+      }
     };
     place();
     window.addEventListener("resize", place);
@@ -1189,14 +1328,24 @@ export function GachaMachine3D() {
       }
       const headBeat = ramp(p, -1, 0, 0.06, 0.16);
       show(beatHeadRef.current, headBeat);
+      // 라인업 판은 제목과 같은 첫 샷의 물건이다 — 같은 ramp 로 떠 있다가, 카메라가 기계
+      // 안으로 들어가기 전에 물러난다(근접샷에서 기계와 겹치지 않는다).
+      show(beatOddsRef.current, headBeat, 24);
       // 캔버스 왼쪽·위쪽 모서리의 페이드는 제목 글줄과 같은 ramp 로 산다. 제목이 왼쪽 칸에
       // 서 있는 첫 샷에서만 필요하고, 카메라가 기계 안으로 들어간 뒤(p≳0.16)에는 0 이 되어
       // 기계 위를 세로로 가르는 어두운 띠가 남지 않는다(2026-09-03 2차 지적).
       rootRef.current?.style.setProperty("--gc-left-ramp", headBeat.toFixed(3));
       show(beatScrollRef.current, 1 - p / 0.05, 0);
-      show(beatInsideRef.current, ramp(p, 0.17, 0.25, 0.4, 0.47));
+      // 좁은 화면에서는 이 글줄과 아래의 레버 글줄이 같은 띠 한 칸을 돌려 쓴다. 두 구간이
+      // 겹치면 한 칸에서 두 글줄이 반투명하게 포개진다 — 그래서 이쪽이 먼저 완전히 물러난 뒤
+      // (0.43) 레버 글줄이 뜬다.
+      show(beatInsideRef.current, ramp(p, 0.17, 0.25, 0.38, 0.43));
       const idle = stageLive.current === "idle";
-      show(beatLeverRef.current, idle ? ramp(p, 0.43, 0.5, 0.6, 0.66) : 0);
+      // 레버 구간의 세기. 옆의 큰 글줄과 손잡이 위의 화살표가 같은 값으로 함께 뜬다 —
+      // 레버가 이 샷의 사정거리에 들어와 있을 때만 안내가 보인다.
+      const leverBeat = idle ? ramp(p, 0.43, 0.5, 0.6, 0.66) : 0;
+      show(beatLeverRef.current, leverBeat);
+      show(leverCueRef.current, leverBeat, 10);
       // 캡슐이 떨어진 뒤에도 계속 내리면 손대지 않아도 열린다 — 필름은 멈추지 않는다
       // (2026-09-03: 뽑은 채로 내리면 기계만 덩그러니 남는다는 지적).
       const stageNow = stageLive.current;
@@ -1264,16 +1413,6 @@ export function GachaMachine3D() {
       {/* 긴 트랙. 내려가는 동안 무대는 화면에 붙어 있고 스크롤이 카메라를 옮긴다. */}
       <div className="gc-film-track" ref={trackRef}>
         <div className="gc-film-sticky">
-          {/* 오락실 기계의 크레딧 표시. 무대 안이지만 캔버스 밖이라 3D 가 다시 그려도
-              살아 있고, 내비 띠 아래에 앉아 메뉴를 가리지 않는다. */}
-          <CoinHud
-            authenticated={authenticated}
-            credits={credits}
-            freePulls={beta}
-            signupGrant={signupGrant}
-            loginHref={loginHrefFor(prize)}
-            inserting={stage === "pull" || stage === "shake" || stage === "impact"}
-          />
           <div
             className="gc3-stage"
             ref={stageRef}
@@ -1312,6 +1451,24 @@ export function GachaMachine3D() {
             />
             <p className="gc3-grip" ref={hintRef} aria-hidden="true">잡고 아래로</p>
 
+            {/* 손잡이 바로 위의 화살표. 레버 구간에 들어와 대기 중일 때만 뜨고(같은 ramp),
+                pointer-events 가 없어 밑의 레버 단추를 가리지 않는다. */}
+            <div className="gc3-lever-cue" ref={leverCueRef} aria-hidden="true">
+              <b>당겨서 뽑기</b>
+              <svg viewBox="0 0 34 40" width="34" height="40" role="presentation">
+                {/* 손잡이를 감아 내려오는 곡선 화살표 한 획. */}
+                <path
+                  d="M5 4 C 5 22, 17 26, 17 33"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  strokeDasharray="4 5"
+                />
+                <path d="M10.5 27.5 L17 36 L23.5 27.5" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+
             {/* 배출구에 떨어진 캡슐 — 눌러서 연다. */}
             <button
               type="button"
@@ -1334,10 +1491,15 @@ export function GachaMachine3D() {
             {/* 장면마다 떠오르는 글줄. 자리는 스크롤 진행도가 정한다. */}
             <div className="gc-beat gc-beat-head" ref={beatHeadRef}>
               <span className="cv5-badge">✦ 게임 제작을 위한 <b>단 하나의 AI 슈퍼앱</b></span>
-              <h1 id="home-heading">게임 에셋 <em>뽑기</em></h1>
+              <h1 id="home-heading">게임 에셋<br /><em>뽑기</em></h1>
               <p>레버를 당기면 마켓의 에셋이 캡슐로 떨어집니다</p>
+              {/* 2026-09-03(운영자): "내려서 시작"이 화면 구석의 각주로 살아 있었다. 시작하는
+                  법은 읽는 순서의 끝, 소개 글 바로 밑에 있어야 한다. */}
+              <p className="gc-beat-scroll" ref={beatScrollRef} aria-hidden="true">
+                <span>내려서 시작</span>
+                <i>↓</i>
+              </p>
             </div>
-            <p className="gc-beat gc-beat-scroll" ref={beatScrollRef} aria-hidden="true">내려서 시작<i>↓</i></p>
             <div className="gc-beat gc-beat-inside" ref={beatInsideRef} aria-hidden="true">
               <b>{stocked ? `${drawableListings(listings).length}개` : "실제"}</b>
               <span>마켓에 올라온 에셋이 그대로 들어 있습니다</span>
@@ -1346,6 +1508,12 @@ export function GachaMachine3D() {
             <div className="gc-beat gc-beat-lever" ref={beatLeverRef} aria-hidden="true">
               <b>레버를 당기세요</b>
               <small>계속 내리면 당겨집니다 · 손으로 끌어도 됩니다</small>
+            </div>
+
+            {/* 오른쪽 칸 — 지금 이 기계의 라인업. 넓은 화면에서만 무대 안에 서고, 좁은
+                화면에서는 아래 판 쪽 사본이 대신 뜬다(둘 중 하나만 그려진다). */}
+            <div className="gc-beat gc-beat-odds" ref={beatOddsRef}>
+              <OddsPanel rows={odds} />
             </div>
 
             {stage === "result" && prize ? (
@@ -1378,31 +1546,30 @@ export function GachaMachine3D() {
               </p>
             ) : null}
             {stocked ? (
-              <>
-                <div className="gc3-dial" role="group" aria-label="테마 다이얼">
-                  {GACHA_THEMES.map((row) => (
-                    <button
-                      type="button"
-                      key={row.id}
-                      className="gc-dial-option"
-                      aria-pressed={row.id === theme}
-                      onClick={() => chooseTheme(row.id)}
-                      style={{ "--gc-accent": row.accent } as CSSProperties}
-                    >
-                      {row.name}<i>{counts[row.id]}</i>
-                    </button>
-                  ))}
-                </div>
-                <p className="gc3-remaining">이번 바퀴 남은 개수 <b>{remaining}</b></p>
-              </>
+              <div className="gc3-dial" role="group" aria-label="테마 다이얼">
+                {GACHA_THEMES.map((row) => (
+                  <button
+                    type="button"
+                    key={row.id}
+                    className="gc-dial-option"
+                    aria-pressed={row.id === theme}
+                    onClick={() => chooseTheme(row.id)}
+                    style={{ "--gc-accent": row.accent } as CSSProperties}
+                  >
+                    {row.name}<i>{counts[row.id]}</i>
+                  </button>
+                ))}
+              </div>
             ) : null}
-            <ul className="gc3-legend">
-              {(["S", "A", "B", "C"] as const).map((letter) => (
-                <li key={letter}><i style={{ background: GRADE_COLORS[letter] }} />{letter}</li>
-              ))}
-            </ul>
+            {/* 등급 점·글자·남은 개수는 라인업 판이 이미 말한다 — 여기서는 규칙 한 줄만 남는다. */}
             <p className="gc3-rule">{GRADE_RULE}</p>
           </div>
+        </div>
+
+        {/* 좁은 화면의 라인업 판. 무대 안에는 오른쪽 칸을 낼 자리가 없어서 여기에 눕는다 —
+            같은 부품, 같은 수다. 넓은 화면에서는 CSS 가 이쪽을 지운다. */}
+        <div className="gc3-odds-below">
+          <OddsPanel rows={odds} collapsible />
         </div>
 
         {/* 이 기계에 실제로 들어 있는 것들. 지어낸 최근 뽑기 기록이 아니라, 지금 다이얼에

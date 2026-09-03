@@ -483,6 +483,73 @@ export function remainingInRound(pool: readonly GachaListing[], drawn: readonly 
   return unseen > 0 ? unseen : pool.length;
 }
 
+/**
+ * 지금 이 순간 뽑기가 실제로 고르는 자루. drawFrom 의 첫 세 줄과 **같은 계산**이다 —
+ * 아직 안 나온 것들이고, 그것이 비었으면 통을 새로 채운 통째다. 라인업 판의 모든 숫자는
+ * 이 자루의 길이와 그 안의 등급 수를 나눈 값이므로, 화면이 말하는 확률과 기계가 뽑는
+ * 확률이 어긋날 자리가 없다.
+ */
+export function remainingPool(pool: readonly GachaListing[], drawn: readonly string[]): GachaListing[] {
+  const unseen = pool.filter((listing) => !drawn.includes(listing.id));
+  return unseen.length > 0 ? unseen : [...pool];
+}
+
+/** 라인업 판의 한 줄. 등급 하나가 지금 자루에서 차지하는 몫이다. */
+export type GradeOdds = {
+  letter: GradeLetter;
+  /** 그 등급의 색. 캡슐 이음 링·카드 배지와 같은 한 벌(GRADE_COLORS)이다. */
+  color: string;
+  /** 자루에 남은 그 등급의 개수. */
+  count: number;
+  /** 자루 전체. 두 값을 함께 실어야 판이 "n개 / 전체"를 스스로 말할 수 있다. */
+  total: number;
+  /** count / total. drawFrom 이 자루에서 고르게 뽑으므로 이 몫이 곧 확률이다. */
+  share: number;
+  /** 그 등급의 실제 상품 몇 개 — 판에 거는 미리보기는 여기서만 나온다. */
+  samples: GachaListing[];
+};
+
+/**
+ * 등급별 확률.
+ *
+ * 운영자 결정(2026-09-03): **모든 에셋이 똑같이 나온다. 등급은 분류일 뿐이다.**
+ * 그래서 이 함수는 가중치를 하나도 갖지 않는다 — 자루를 세고 나눌 뿐이다.
+ * 한 개가 나올 확률은 1/total, 한 등급이 나올 확률은 count/total 이다.
+ */
+export function gradeOddsOf(
+  pool: readonly GachaListing[],
+  drawn: readonly string[],
+  sampleCount = 2,
+): GradeOdds[] {
+  const bag = remainingPool(pool, drawn);
+  const total = bag.length;
+  if (total === 0) return [];
+  const order: readonly GradeLetter[] = ["S", "A", "B", "C"];
+  const rows: GradeOdds[] = [];
+  for (const letter of order) {
+    const members = bag.filter((listing) => gradeOf(listing).letter === letter);
+    if (members.length === 0) continue;
+    rows.push({
+      letter,
+      color: GRADE_COLORS[letter],
+      count: members.length,
+      total,
+      share: members.length / total,
+      // 그림이 있는 것부터 건다 — 미리보기 자리를 빈 칸으로 채우지 않는다.
+      samples: members.filter((listing) => previewImageUrlOf(listing) !== null).slice(0, sampleCount),
+    });
+  }
+  return rows;
+}
+
+/**
+ * 확률 표기. 소수점은 필요할 때만 한 자리 — 25% 를 25.0% 로 적으면 정밀해 보이려는 꾸밈이 된다.
+ */
+export function formatOdds(share: number): string {
+  const rounded = Math.round(share * 1000) / 10;
+  return `${Number.isInteger(rounded) ? rounded.toFixed(0) : rounded.toFixed(1)}%`;
+}
+
 /* ---------------------------------------------------------------------------
    결과 카드가 읽는 줄들
    ------------------------------------------------------------------------- */

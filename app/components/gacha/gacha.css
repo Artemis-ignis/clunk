@@ -858,14 +858,29 @@ html:has(.gc-film) .sitenav-dock::before {
 }
 .gc-beat-head h1 em { font-style: normal; color: var(--gc-accent); }
 .gc-beat-head p { margin: 0; font-size: clamp(0.9rem, 1.4vw, 1.1rem); color: var(--v5-ink-dim); }
+/* "내려서 시작" — 화면 구석의 각주가 아니라 소개 글 바로 밑의 시작 단서다(2026-09-03).
+   제목 칸 안에 살기 때문에 자리를 스스로 잡지 않는다: 뜨고 지는 것만 스크롤이 정한다. */
 .gc-beat-scroll {
-  bottom: 26px;
-  margin: 0;
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.28em; text-transform: uppercase;
-  color: var(--v5-ink-dim);
+  position: static;
+  margin: 2px 0 0;
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 9px 8px 9px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--v5-line-strong);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  font-size: 0.78rem; font-weight: 800; letter-spacing: 0.12em;
+  color: var(--v5-ink);
+  transform: translateY(var(--gc-beat-rise, 0px));
 }
-.gc-beat-scroll i { font-style: normal; color: var(--gc-accent); animation: gc3-pull 1.4s ease-in-out infinite; }
+.gc-beat-scroll i {
+  display: grid; place-items: center;
+  width: 26px; height: 26px; border-radius: 50%;
+  font-style: normal; font-size: 0.95rem; line-height: 1;
+  color: #0b0716;
+  background: var(--gc-accent);
+  box-shadow: 0 0 16px -2px var(--gc-accent);
+  animation: gc3-pull 1.4s ease-in-out infinite;
+}
 .gc-beat-inside { top: 13svh; display: grid; justify-items: center; gap: 4px; }
 .gc-beat-inside b { font-size: clamp(2.2rem, 6vw, 4.2rem); font-weight: 900; letter-spacing: -0.04em; color: var(--gc-accent); line-height: 1; }
 .gc-beat-inside span { font-size: clamp(1rem, 1.8vw, 1.35rem); font-weight: 700; color: var(--v5-ink); }
@@ -898,7 +913,6 @@ html:has(.gc-film) .sitenav-dock::before {
 @media (max-width: 720px) {
   .gc-film-track { height: 420svh; }
   .gc-beat-head { top: 76px; }
-  .gc-beat-lever { right: auto; left: 50%; --gc-beat-x: -50%; top: 11svh; text-align: center; justify-items: center; }
   .gc-film-prize { right: 10px; left: 10px; top: auto; bottom: 10px; transform: none; width: auto; max-height: 62svh; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -953,6 +967,13 @@ html:has(.gc-film) .sitenav-dock::before {
 .gc3-poster .gcp-beam { animation: gcp-beam 5s ease-in-out infinite; }
 /* 3D 가 켜지면 포스터의 움직임도 멈춘다(보이지 않는 곳에서 돌 이유가 없다). */
 .gc3[data-live] .gc3-poster * { animation: none !important; }
+/* ── 유령 기계 (2026-09-03, 운영자: "로고를 눌러 돌아오면 오른쪽에 기계가 하나 더")
+   포스터(사진, object-fit: cover)와 캔버스(카메라 프레이밍)는 같은 상자를 쓰지만 그 안에서
+   기계를 서로 다른 자리에 세운다. 캔버스 모서리의 페이드 아래로 포스터가 비치면 두 대가
+   함께 보인다. 그래서 첫 프레임이 그려지는 순간 포스터는 그 자리에서 사라지고, 이 세션에
+   이미 3D 를 본 브라우저(data-warm)에서는 처음부터 뜨지 않는다. */
+.gc3[data-live] .gc3-poster,
+.gc3[data-warm] .gc3-poster { display: none !important; }
 @media (prefers-reduced-motion: reduce) { .gc3-poster * { animation: none !important; } }
 
 /* 3D 가 오기 전에도 레버 단추는 포스터의 손잡이 위에 선다(자리는 JS 가 포스터 viewBox 에서 계산). */
@@ -996,7 +1017,9 @@ html:has(.gc-film) .sitenav-dock::before {
   transform-origin: 50% 60%;
   animation: gc3-poster-breathe 9s ease-in-out infinite;
 }
-@keyframes gc3-poster-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.025); } }
+/* 숨은 쉬되 상자는 그대로 — 포스터가 커졌다 작아지면 캔버스와 같은 사각형이 아니게 되고,
+   전환 순간에 두 그림이 반드시 어긋난다(2026-09-03). 이제 밝기만 오르내린다. */
+@keyframes gc3-poster-breathe { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.07); } }
 .gc3[data-live] .gc3-poster { animation: none; }
 @media (prefers-reduced-motion: reduce) { .gc-film .gc3-poster { animation: none; } }
 
@@ -1022,6 +1045,9 @@ html:has(.gc-film) { --gc-nav-h: 84px; }
   --gc-head-h: 0px;
   /* 넓은 화면에서 제목 칸이 가져가는 왼쪽 폭. 기계는 그만큼 오른쪽으로 물러난다. */
   --gc-stage-left: 0px;
+  /* 라인업 판이 가져가는 오른쪽 폭. 왼쪽과 함께 있어야 기계가 가운데 칸에 선다 —
+     한쪽만 비우면 기계가 판 밑으로 밀려 들어간다. */
+  --gc-stage-right: 0px;
 }
 /* 캔버스가 비켜난 자리는 무대 바탕으로 남는다 — 메뉴가 언제나 어두운 띠 위에 선다. */
 .gc-film-sticky { background: #07050f; }
@@ -1033,7 +1059,7 @@ html:has(.gc-film) { --gc-nav-h: 84px; }
   /* 왼쪽 열은 첫 샷(제목이 보일 때)에만 비운다. 스크롤이 진행되면 캔버스가 전폭으로 펴져
      근접샷에서 기계가 캔버스 모서리에 잘리는 경계선이 사라진다(ramp는 GachaMachine3D가 준다). */
   left: calc(var(--gc-stage-left) * var(--gc-left-ramp, 1));
-  right: 0;
+  right: calc(var(--gc-stage-right) * var(--gc-left-ramp, 1));
   bottom: 0;
   width: auto;
   height: auto;
@@ -1056,21 +1082,27 @@ html:has(.gc-film) { --gc-nav-h: 84px; }
 .gc-film .gc3-poster {
   /* 좁은 화면에는 왼쪽 칸이 없다 — 가로 페이드는 사실상 없는 값으로 둔다. */
   --gc-fade-left: 1px;
+  --gc-fade-right: 1px;
   /* 위쪽은 내비 띠와 캔버스가 만나는 자리를 늘 조금 눅인다(14px). 제목이 서 있는 동안에는
      44px 까지 넓어지고, 카메라가 기계 안으로 들어가면 다시 14px 로 좁아진다. */
   --gc-fade-top: calc(14px + var(--gc-left-ramp, 1) * 30px);
   -webkit-mask-image:
     linear-gradient(to bottom, transparent 0, #000 var(--gc-fade-top)),
-    linear-gradient(to right, transparent 0, #000 var(--gc-fade-left));
+    linear-gradient(to right, transparent 0, #000 var(--gc-fade-left)),
+    linear-gradient(to left, transparent 0, #000 var(--gc-fade-right));
   mask-image:
     linear-gradient(to bottom, transparent 0, #000 var(--gc-fade-top)),
-    linear-gradient(to right, transparent 0, #000 var(--gc-fade-left));
+    linear-gradient(to right, transparent 0, #000 var(--gc-fade-left)),
+    linear-gradient(to left, transparent 0, #000 var(--gc-fade-right));
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
 }
 @media (min-width: 1024px) {
   .gc-film .gc3-canvas,
-  .gc-film .gc3-poster { --gc-fade-left: calc(var(--gc-left-ramp, 1) * 240px); }
+  .gc-film .gc3-poster {
+    --gc-fade-left: calc(var(--gc-left-ramp, 1) * 240px);
+    --gc-fade-right: calc(var(--gc-left-ramp, 1) * 200px);
+  }
   /* 마스크가 0 이 된 뒤에도 캔버스 왼쪽 모서리는 어두운 칸과 만난다. 기계를 어둡게 덮는
      대신 **칸 쪽을** 모서리 가까이에서 밝혀 그 층계를 낮춘다 — 캔버스 아래에 깔리므로
      기계 픽셀은 한 점도 건드리지 않는다. */
@@ -1088,225 +1120,279 @@ html:has(.gc-film) { --gc-nav-h: 84px; }
       rgba(150, 120, 255, 0.15) 64%,
       rgba(150, 120, 255, 0) 100%);
   }
+  /* 오른쪽 칸도 같은 이유로 같은 빛을 받는다 — 세 칸의 무게가 한쪽으로 쏠리지 않게. */
+  .gc-film-sticky::before {
+    content: "";
+    position: absolute;
+    top: var(--gc-nav-h); bottom: 0; right: 0;
+    width: calc(var(--gc-stage-right) + 200px);
+    pointer-events: none;
+    background: linear-gradient(to left,
+      transparent 22%,
+      rgba(124, 93, 250, 0.08) 56%,
+      rgba(150, 120, 255, 0.13) 66%,
+      rgba(150, 120, 255, 0) 100%);
+  }
 }
 
 /* 넓은 화면 — 제목은 왼쪽 칸, 기계는 오른쪽 --------------------------------- */
 @media (min-width: 1024px) {
-  .gc-film { --gc-stage-left: clamp(300px, 30vw, 460px); }
-  /* '내려서 시작' 은 왼쪽 열 밑에 — 기계 받침 글자 위에 겹치지 않게. */
-  .gc-beat-scroll { left: 7vw; --gc-beat-x: 0px; }
+  .gc-film {
+    --gc-stage-left: clamp(292px, 25vw, 470px);
+    --gc-stage-right: clamp(276px, 22vw, 366px);
+  }
   .gc-beat-head {
-    left: 7vw;
+    left: max(28px, 4.4vw);
     right: auto;
     --gc-beat-x: 0px;
-    top: 38%;
+    top: 50%;
     transform: translate(var(--gc-beat-x), calc(-50% + var(--gc-beat-rise, 0px)));
-    width: min(430px, 34vw);
+    width: calc(var(--gc-stage-left) - max(28px, 4.4vw) - 12px);
     padding: 0;
     justify-items: start;
     text-align: left;
-    gap: 14px;
+    gap: 16px;
   }
   /* 기계 위가 아니라 빈 바탕 위에 서므로 글자 뒤의 어둠은 필요 없다. */
   .gc-beat-head::before { content: none; }
-  .gc-beat-head h1 { font-size: clamp(2.6rem, 4.4vw, 4.4rem); }
-  .gc-beat-head p { max-width: 30ch; }
+  /* 2026-09-03(운영자 목업): 제목은 이 화면의 주인공이다 — 지난 크기의 약 1.6배로 서고,
+     1440 과 1920 이 둘 다 의도한 크기가 되도록 clamp 로 자란다. */
+  .gc-beat-head h1 { font-size: clamp(4.1rem, 7vw, 7rem); line-height: 0.98; }
+  .gc-beat-head p { max-width: 26ch; font-size: clamp(0.98rem, 1.2vw, 1.18rem); }
   /* 나머지 글줄도 기계를 피해 오른쪽 무대 한가운데에 선다. */
   .gc-beat-inside { left: calc(var(--gc-stage-left) + (100% - var(--gc-stage-left)) / 2); top: calc(var(--gc-nav-h) + 5svh); }
 }
 
 /* 좁은 화면 — 제목은 내비 아래 띠, 기계는 그 아래 -------------------------- */
+/* 좁은 화면 — 글줄은 기계 위에 얹히지 않는다 ---------------------------------
+   2026-09-03(운영자 실기기): 세로 화면 p≈0.3 에서 "24개 / 마켓에 올라온 에셋이 …" 세 줄이
+   유리 돔과 갓 위에 그대로 겹쳐 셋째 줄은 읽히지도 않았다. 옆에 놓을 칸이 없는 화면에서는
+   **모든 글줄이 내비 밑 한 띠 안에서만** 살고, 캔버스는 그 띠를 뺀 나머지 높이만 쓴다.
+   글줄 셋(제목·이 안에 든 것·레버)은 스크롤 구간이 서로 겹치지 않으므로 한 띠를 돌려 쓴다. */
 @media (max-width: 1023px) {
-  .gc-film { --gc-head-h: 124px; }
-  .gc-beat-head {
-    top: calc(var(--gc-nav-h) + 2px);
+  /* 띠 높이는 그 안에 실제로 서는 것(배지·제목·소개·시작 알약)의 높이다 — 모자라면
+     캔버스가 글줄 밑으로 파고들어 상자가 겹친다(2026-09-03 실측). */
+  .gc-film { --gc-head-h: 214px; }
+  .gc-beat-head,
+  .gc-beat-inside,
+  .gc-beat-lever {
+    top: calc(var(--gc-nav-h) + 6px);
+    bottom: auto;
+    left: 50%;
+    right: auto;
+    --gc-beat-x: -50%;
     width: min(680px, 92vw);
     padding: 0;
-    gap: 6px;
+    text-align: center;
+    justify-items: center;
   }
+  .gc-beat-head { gap: 7px; }
   .gc-beat-head::before { content: none; }
+  /* 띠에 눕는 제목은 한 줄이다 — 넓은 화면의 두 줄을 그대로 들고 오면 띠가 기계를 밀어낸다. */
+  .gc-beat-head h1 br { display: none; }
+  .gc-beat-head h1 em { margin-left: 0.22em; }
   .gc-beat-head h1 { font-size: clamp(1.9rem, 5.2vw, 2.6rem); }
-  .gc-beat-inside { top: calc(var(--gc-nav-h) + 4svh); }
+  .gc-beat-scroll { padding: 7px 7px 7px 13px; font-size: 0.74rem; gap: 8px; }
+  .gc-beat-scroll i { width: 22px; height: 22px; font-size: 0.86rem; }
+  /* 띠 한 칸에 제목·소개·시작 알약만 남긴다. 배지까지 넣으면 띠가 33px 더 자라고 그만큼
+     기계를 밀어낸다(768×1024 에서 제목 상자가 캔버스를 25px 파고들었다). */
+  .gc-beat-head .cv5-badge { display: none; }
 }
 @media (max-width: 767px) {
   html:has(.gc-film) { --gc-nav-h: 76px; }
-  .gc-film { --gc-head-h: 116px; }
-  /* 띠 한 칸에 제목과 한 줄만 남긴다 — 배지까지 넣으면 기계를 밀어낸다. */
-  .gc-beat-head .cv5-badge { display: none; }
+  .gc-film { --gc-head-h: 196px; }
   .gc-beat-head h1 { font-size: clamp(1.6rem, 6.6vw, 2rem); }
   .gc-beat-head p { font-size: 0.86rem; }
-  .gc-beat-lever { top: calc(var(--gc-nav-h) + 3svh); }
+  .gc-beat-inside b { font-size: 2.2rem; }
+  .gc-beat-inside span { font-size: 1rem; }
+  .gc-beat-lever b { font-size: 1.8rem; }
 }
 
 /* ============================================================================
-   동전 계수기 — 무대 오른쪽 위 (2026-09-03)
-   운영자: "크레딧은 일종의 코인처럼 우측 상단에 보이게 해야 실제 가챠 머신 돌리는 느낌이
-   난다. 실시간으로 코인이 돌아가거나 반짝이게." 잔액은 아래 판의 글줄이 아니라 오락실
-   기계의 크레딧 표시처럼 무대 안, 내비 띠 바로 밑에 산다. 동전은 CSS 로만 지은 원반이고
-   Y 축으로 계속 돌면서 4초에 한 번 반짝인다.
+   가챠 라인업 — 무대 오른쪽 칸 (2026-09-03, 운영자 목업)
+
+   판에 적히는 수는 하나도 손으로 쓰지 않는다. 부품(GachaMachine3D 의 OddsPanel)이
+   gacha-catalog 의 gradeOddsOf 로 지금 자루를 세어 나눈 값이고, 뽑을 때마다·다이얼을
+   돌릴 때마다 그 자리에서 움직인다. 여기에는 색과 자리뿐이다.
+
+   생김새는 목업을 픽셀로 베끼지 않고 우리 토큰(site-v5.css / gacha-theme.css)으로 지었다:
+   기계 캐비닛과 같은 어두운 판, 등급색 점, 몫을 그대로 그리는 가는 막대 하나.
    ========================================================================= */
-.gc-coin-hud {
-  position: absolute;
-  z-index: 8;
-  top: calc(var(--gc-nav-h, 84px) + 16px);
-  right: max(20px, 4vw);
-  display: flex;
+.gc-beat-odds {
+  left: auto;
+  right: max(28px, 4.4vw);
+  top: 50%;
+  --gc-beat-x: 0px;
+  transform: translate(var(--gc-beat-x), calc(-50% + var(--gc-beat-rise, 0px)));
+  width: calc(var(--gc-stage-right) - max(28px, 4.4vw) - 12px);
+  text-align: left;
+  text-shadow: none;
+}
+/* 넓은 화면에서만 무대 안에 선다. 좁은 화면에서는 아래 판 쪽 사본이 대신 뜬다. */
+@media (max-width: 1023px) { .gc-beat-odds { display: none; } }
+@media (min-width: 1024px) { .gc3-odds-below { display: none; } }
+
+.gc-odds {
+  display: grid;
+  gap: 13px;
+  padding: 17px 17px 15px;
+  border-radius: 18px;
+  border: 1px solid var(--v5-line-strong);
+  background: linear-gradient(180deg, rgba(26, 19, 50, 0.78) 0%, rgba(11, 8, 22, 0.82) 100%);
+  box-shadow: 0 24px 60px -26px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.gc-odds-head { display: grid; gap: 5px; }
+.gc-odds-head h2 {
+  margin: 0;
+  font-size: 0.98rem; font-weight: 900; letter-spacing: 0.01em;
+  color: var(--v5-ink);
+}
+.gc-odds-head p { margin: 0; font-size: 0.78rem; line-height: 1.5; color: var(--v5-ink-dim); }
+.gc-odds-head b { color: var(--v5-ink); font-weight: 800; font-variant-numeric: tabular-nums; }
+
+.gc-odds-rows { display: grid; margin: 0; padding: 0; list-style: none; }
+/* 한 줄에 두 켜: 위는 등급·확률·실제 상품, 아래는 그 몫을 폭으로 그린 띠. 띠를 숫자 옆
+   좁은 칸에 끼워 넣으면 네 등급의 길이를 서로 견줄 수 없다 — 줄 전체를 눈금자로 쓴다. */
+.gc-odds-rows li {
+  display: grid;
+  grid-template-columns: 2.7em minmax(0, 1fr) auto;
+  grid-template-areas:
+    "grade num thumbs"
+    "bar   bar bar";
   align-items: center;
-  gap: 10px;
-  padding: 8px 14px 8px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(196, 160, 255, 0.28);
-  background: linear-gradient(180deg, rgba(24, 16, 44, 0.86) 0%, rgba(12, 8, 26, 0.88) 100%);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.07);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  pointer-events: auto;
+  gap: 8px 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--v5-line);
 }
-/* 로그아웃 쪽은 한 치수 작다 — 아직 셀 잔액이 없다. */
-.gc-coin-hud[data-signed-out] { padding: 0; border-color: rgba(196, 160, 255, 0.22); }
+.gc-odds-rows li:first-child { border-top: 0; padding-top: 2px; }
+.gc-odds-rows li:last-child { padding-bottom: 2px; }
+.gc-odds-grade { grid-area: grade; }
+.gc-odds-num { grid-area: num; }
+.gc-odds-thumbs { grid-area: thumbs; }
+.gc-odds-bar { grid-area: bar; }
 
-/* 동전 --------------------------------------------------------------------- */
-.gc-coin { position: relative; flex: none; width: 30px; height: 30px; perspective: 220px; }
-.gc-coin-spin {
-  position: absolute; inset: 0;
-  transform-style: preserve-3d;
-  animation: gc-coin-spin 6s linear infinite;
+.gc-odds-grade {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 0.9rem; font-weight: 900; letter-spacing: 0.02em;
+  color: var(--v5-ink);
 }
-.gc-coin-face,
-.gc-coin-back {
-  position: absolute; inset: 0;
-  border-radius: 50%;
-  backface-visibility: hidden;
-  display: grid; place-items: center;
+.gc-odds-grade i {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--gc-grade);
+  box-shadow: 0 0 9px -1px var(--gc-grade);
 }
-.gc-coin-face {
-  transform: translateZ(2px);
+.gc-odds-num { display: flex; align-items: baseline; gap: 6px; }
+.gc-odds-num b {
+  font-size: 0.98rem; font-weight: 900; line-height: 1.05;
+  font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
+  color: var(--v5-ink);
+}
+.gc-odds-num small { font-size: 0.76rem; line-height: 1.1; color: var(--v5-ink-dim); font-variant-numeric: tabular-nums; }
+
+/* 몫을 그대로 그리는 막대 — 숫자를 눈으로 한 번 더 확인시켜 주는 자리다. */
+.gc-odds-bar {
+  height: 4px; border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
   overflow: hidden;
-  background:
-    radial-gradient(circle at 34% 28%, #fff4c9 0%, #f6cf63 32%, #d79a26 62%, #a56b12 100%);
-  box-shadow:
-    inset 0 0 0 2px rgba(255, 240, 190, 0.6),
-    inset 0 -3px 6px rgba(120, 70, 0, 0.55),
-    0 0 14px rgba(246, 207, 99, 0.35);
 }
-.gc-coin-face i {
-  font-style: normal;
-  font-weight: 900;
-  font-size: 15px;
-  line-height: 1;
-  color: #8a5a0c;
-  text-shadow: 0 1px 0 rgba(255, 245, 205, 0.85), 0 -1px 0 rgba(96, 56, 0, 0.5);
-}
-/* 뒷면은 무늬만 있는 테두리 — 글자가 뒤집혀 보이지 않게 따로 둔다. */
-.gc-coin-back {
-  transform: rotateY(180deg) translateZ(2px);
-  background:
-    repeating-conic-gradient(from 0deg, rgba(140, 88, 12, 0.55) 0deg 6deg, rgba(246, 207, 99, 0.9) 6deg 12deg),
-    radial-gradient(circle at 40% 30%, #f8dc90 0%, #c78d22 70%, #96610f 100%);
-  box-shadow: inset 0 0 0 2px rgba(255, 240, 190, 0.55), inset 0 -3px 6px rgba(120, 70, 0, 0.5);
-}
-/* 옆면 — 앞뒷면과 직각으로 서 있다가 동전이 옆으로 설 때 정면으로 돌아온다.
-   이것이 없으면 6초에 두 번 동전이 통째로 사라진다. */
-.gc-coin-rim {
-  position: absolute;
-  top: 1px; bottom: 1px;
-  left: calc(50% - 2px);
-  width: 3px;
-  border-radius: 2px;
-  transform: rotateY(90deg);
-  background: linear-gradient(180deg, #f8dc90 0%, #d79a26 46%, #8f5c0d 100%);
+.gc-odds-bar > span {
+  display: block; height: 100%; border-radius: inherit;
+  background: var(--gc-grade);
+  box-shadow: 0 0 10px -2px var(--gc-grade);
 }
 
-/* 표면을 훑고 지나가는 빛. 3D 회전과 따로 돌아 금속처럼 보이게 한다. */
-.gc-coin-shine {
-  position: absolute; inset: 0;
-  border-radius: 50%;
-  pointer-events: none;
-  background: linear-gradient(115deg, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0.72) 50%, rgba(255, 255, 255, 0) 62%);
-  background-size: 260% 100%;
-  mix-blend-mode: screen;
-  animation: gc-coin-shine 6s linear infinite;
+/* 그 등급에 실제로 남아 있는 상품 두 개. 주소는 상점이 쓰는 그 미리보기 그대로다. */
+.gc-odds-thumbs { display: inline-flex; gap: 4px; }
+.gc-odds-thumbs img {
+  width: 34px; height: 26px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--v5-line);
+  background: rgba(255, 255, 255, 0.04);
 }
-/* 4초에 한 번 튀는 별. 자리는 동전 오른쪽 위 모서리다. */
-.gc-coin-sparkle {
+.gc-odds-rule {
+  margin: 0;
+  font-size: 0.72rem; line-height: 1.55;
+  color: var(--v5-ink-faint);
+  border-top: 1px solid var(--v5-line);
+  padding-top: 11px;
+}
+
+/* 좁은 화면 — 아래 판 자리에 눕는다. 같은 표를 폭에 맞춰 편다. */
+.gc3-odds-below { width: 100%; }
+.gc3-odds-below .gc-odds { width: 100%; }
+@media (max-width: 520px) {
+  .gc-odds-rows li { grid-template-columns: 2.5em minmax(0, 1fr) auto; gap: 7px 8px; }
+  .gc-odds-thumbs img { width: 32px; height: 24px; }
+}
+
+/* ============================================================================
+   레버 화살표 — 손잡이 바로 위 (2026-09-03)
+   레버 구간에 들어와 대기 중일 때만 뜬다(옆의 큰 글줄과 같은 ramp). 포인터를 가로채지
+   않으므로 그 밑의 레버 단추는 그대로 눌리고 끌린다.
+   ========================================================================= */
+.gc3-lever-cue {
   position: absolute;
-  top: -3px; right: -4px;
-  width: 11px; height: 11px;
+  z-index: 5;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  transform: translate(-50%, calc(-100% + var(--gc-beat-rise, 0px)));
   pointer-events: none;
-  background:
-    linear-gradient(to bottom, transparent 44%, var(--gc-neon, #e9d5ff) 44% 56%, transparent 56%),
-    linear-gradient(to right, transparent 44%, var(--gc-neon, #e9d5ff) 44% 56%, transparent 56%);
-  filter: drop-shadow(0 0 4px rgba(233, 213, 255, 0.9));
   opacity: 0;
-  animation: gc-coin-sparkle 4s ease-in-out infinite;
+  visibility: hidden;
+  color: var(--gc-neon, #e9d5ff);
+  text-shadow: 0 3px 18px rgba(0, 0, 0, 0.85);
+  will-change: opacity, transform;
 }
+.gc3-lever-cue b {
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(216, 180, 254, 0.34);
+  background: rgba(12, 8, 26, 0.78);
+  font-size: 0.78rem; font-weight: 800; letter-spacing: 0.01em;
+  white-space: nowrap;
+  color: var(--v5-ink);
+}
+.gc3-lever-cue svg { filter: drop-shadow(0 0 8px rgba(216, 180, 254, 0.6)); animation: gc3-pull 1.4s ease-in-out infinite; }
+/* 뽑기가 시작되면 안내는 그 자리에서 사라진다(인라인 값보다 우선). */
+.gc3:not([data-stage="idle"]) .gc3-lever-cue { opacity: 0 !important; visibility: hidden !important; }
+@media (prefers-reduced-motion: reduce) { .gc3-lever-cue svg { animation: none; } }
 
-@keyframes gc-coin-spin { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
-@keyframes gc-coin-shine { from { background-position: 160% 0; } to { background-position: -160% 0; } }
-@keyframes gc-coin-sparkle {
-  0%, 84% { opacity: 0; transform: scale(0.4) rotate(0deg); }
-  90% { opacity: 1; transform: scale(1) rotate(45deg); }
-  100% { opacity: 0; transform: scale(0.4) rotate(90deg); }
-}
-/* 레버가 내려가는 동안 — 동전 하나를 밀어 넣는 몸짓. 숫자는 그대로다(뽑기는 무료). */
+/* ============================================================================
+   레버가 내려갈 때 내비의 동전이 한 바퀴 넘어간다 (2026-09-03)
+   지갑은 내비에 살지만(site-v5.css) 이 몸짓은 첫 화면의 기계에서만 나온다. 숫자는
+   그대로다 — 뽑기는 크레딧을 쓰지 않고, 있지도 않은 차감을 흉내 내지 않는다.
+   ========================================================================= */
 @keyframes gc-coin-insert {
   0% { transform: rotateY(0deg) scale(1); }
   45% { transform: rotateY(200deg) scale(1.16); }
   100% { transform: rotateY(360deg) scale(1); }
 }
-.gc-coin-hud[data-insert] .gc-coin-spin { animation: gc-coin-insert 620ms cubic-bezier(0.3, 0, 0.2, 1) infinite; }
-
-/* 숫자 --------------------------------------------------------------------- */
-.gc-coin-body { display: grid; gap: 1px; }
-.gc-coin-read { display: flex; align-items: baseline; gap: 4px; }
-.gc-coin-count {
-  font-variant-numeric: tabular-nums;
-  font-size: 1.05rem;
-  font-weight: 900;
-  letter-spacing: -0.01em;
-  line-height: 1.1;
-  color: #ffe9a8;
-  text-shadow: 0 0 10px rgba(246, 207, 99, 0.45);
-}
-.gc-coin-unit { font-size: 0.74rem; font-weight: 700; color: var(--v5-ink-dim); letter-spacing: 0.02em; }
-.gc-coin-note { font-size: 0.72rem; line-height: 1.2; color: var(--v5-ink-dim); letter-spacing: 0.01em; }
-.gc-coin-join {
-  display: flex; align-items: center; gap: 8px;
-  padding: 7px 13px 7px 9px;
-  border-radius: 999px;
-  text-decoration: none;
-}
-.gc-coin-join b { font-size: 0.74rem; font-weight: 800; color: var(--gc-neon, #e9d5ff); letter-spacing: -0.01em; }
-.gc-coin-join:hover b { color: #fff; }
-.gc-coin-join:focus-visible { outline: 2px solid var(--gc-accent); outline-offset: 3px; }
-
-/* 좁은 화면 — 제목 띠의 오른쪽 끝. 제목은 그만큼 왼쪽으로 물러난다. ---------- */
-@media (max-width: 767px) {
-  /* 동전 칩이 띠에서 가져가는 폭(여백 포함). 제목 칸이 이 값을 그대로 비켜 준다. */
-  .gc-film { --gc-coin-w: 130px; }
-  .gc-coin-hud {
-    top: calc(var(--gc-nav-h, 76px) + 8px);
-    right: 12px;
-    transform: scale(0.85);
-    transform-origin: top right;
-  }
-  .gc-coin-hud[data-signed-out] .gc-coin-join b { max-width: 68px; }
-  .gc-beat-head {
-    width: min(680px, calc(92vw - var(--gc-coin-w)));
-    --gc-beat-x: calc(-50% - var(--gc-coin-w) / 2);
-  }
+html:has(.gc3[data-stage="pull"]) .gc-coin-spin,
+html:has(.gc3[data-stage="shake"]) .gc-coin-spin,
+html:has(.gc3[data-stage="impact"]) .gc-coin-spin {
+  animation: gc-coin-insert 620ms cubic-bezier(0.3, 0, 0.2, 1) infinite;
 }
 
-/* 움직임을 줄여 달라는 설정이면 동전은 멈춰 선다 — 돌지도, 반짝이지도 않는다. */
-@media (prefers-reduced-motion: reduce) {
-  .gc-coin-spin,
-  .gc-coin-hud[data-insert] .gc-coin-spin,
-  .gc-coin-shine,
-  .gc-coin-sparkle { animation: none !important; }
-  .gc-coin-sparkle { opacity: 0.65; transform: rotate(45deg); }
+/* 접히는 라인업(좁은 화면). summary 는 details 의 직계라야 열리고 닫힌다. */
+.gc-odds-fold > summary {
+  cursor: pointer;
+  list-style: none;
+  position: relative;
+  padding-right: 26px;
 }
-/* 장면이 스스로 '움직임 줄이기' 로 서 있을 때도 같다. */
-.gc3[data-reduced] .gc-coin-spin,
-.gc3[data-reduced] .gc-coin-shine,
-.gc3[data-reduced] .gc-coin-sparkle { animation: none !important; }
-.gc3[data-reduced] .gc-coin-sparkle { opacity: 0.65; transform: rotate(45deg); }
+.gc-odds-fold > summary::-webkit-details-marker { display: none; }
+.gc-odds-fold > summary::after {
+  content: "";
+  position: absolute; right: 4px; top: 12px;
+  width: 9px; height: 9px;
+  border-right: 2px solid var(--v5-ink-dim);
+  border-bottom: 2px solid var(--v5-ink-dim);
+  transform: rotate(45deg);
+  transition: transform .18s ease;
+}
+.gc-odds-fold[open] > summary::after { transform: rotate(-135deg); top: 15px; }
+.gc-odds-fold > summary:focus-visible { outline: 2px solid var(--v5-violet); outline-offset: 4px; border-radius: 10px; }

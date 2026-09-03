@@ -30,7 +30,8 @@ test("server-renders the Clunk landing page", async () => {
   // The old four-cabinet hall ("자판기 홀", "마켓에 올라와 있는 에셋") went with it.
   // 2026-09-02 (2): the headline reads like a game's own UI — short and big — and the
   // handle is one you pull, not one you turn.
-  assert.match(html, /게임 에셋 <em>뽑기<\/em>/);
+  // 2026-09-03 (운영자 목업): 제목은 왼쪽 칸에서 두 줄로 서고 "뽑기" 가 강조색을 갖는다.
+  assert.match(html, /게임 에셋<br\/?>\s*<em>뽑기<\/em>/);
   assert.match(html, /레버를 당기면 마켓의 에셋이 캡슐로 떨어집니다/);
   // The machine is already standing in the server's first paint: the canvas host and the
   // lever's own line ship in the HTML, and nothing says the machine is still filling up.
