@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Airbus H145 — Clunk showcase</title>
+<style>
+  :root { color-scheme: light; }
+  html, body { margin: 0; height: 100%; background: #d8dade; }
+  body { font: 13px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; color: #23262b; overflow: hidden; }
+  #stage { position: fixed; inset: 0; }
+  canvas { display: block; }
+  #hud {
+    position: fixed; left: 16px; bottom: 16px; display: flex; gap: 8px; flex-wrap: wrap;
+    background: rgba(255,255,255,.72); backdrop-filter: blur(8px);
+    border: 1px solid rgba(0,0,0,.10); border-radius: 10px; padding: 8px;
+  }
+  #hud button {
+    font: inherit; font-weight: 550; color: #23262b; background: #fff; cursor: pointer;
+    border: 1px solid rgba(0,0,0,.14); border-radius: 7px; padding: 6px 11px;
+  }
+  #hud button[aria-pressed="true"] { background: #23262b; color: #fff; border-color: #23262b; }
+  #title { position: fixed; left: 18px; top: 16px; font-weight: 600; letter-spacing: .01em; }
+  #title small { display: block; font-weight: 400; opacity: .62; }
+  body.shot #hud, body.shot #title { display: none; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="title">Airbus H145 · factory demonstrator<small>five-blade main rotor · Fenestron · 11.0 m rotor diameter</small></div>
+<div id="hud">
+  <button id="spin" aria-pressed="false">Rotors</button>
+  <button id="doors" aria-pressed="false">Doors</button>
+  <button id="orbit" aria-pressed="true">Auto-rotate</button>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.179.1/three.module.min.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.179.1/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+/*
+ * cdnjs carries the three.js bundles but not the examples/jsm addons, so the core is pinned on
+ * cdnjs and the four addons on jsDelivr at the SAME 0.179.1 — the import map points both at one
+ * module instance, so there is no second copy of three in the page.
+ */
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
+
+const params = new URLSearchParams(location.search);
+const stage = document.getElementById("stage");
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.98;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+stage.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.52;
+scene.background = new THREE.Color(0xd8dade);
+
+const camera = new THREE.PerspectiveCamera(34, innerWidth / innerHeight, 0.1, 200);
+camera.position.set(11.5, 5.4, 12.5);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.target.set(0, 1.9, -1.1);
+controls.autoRotateSpeed = 0.9;
+controls.minDistance = 5;
+controls.maxDistance = 60;
+
+/* ---- a neutral light-grey cyclorama: a floor that curves up into the backdrop, no horizon line */
+{
+  const R = 26;
+  const shape = new THREE.Shape();
+  shape.moveTo(0, 0);
+  shape.lineTo(R * 0.62, 0);
+  shape.quadraticCurveTo(R * 0.96, 0, R * 0.96, R * 0.38);
+  shape.lineTo(R * 0.96, R * 0.95);
+  const pts = shape.getPoints(64).map((p) => new THREE.Vector2(p.x, p.y));
+  const cyc = new THREE.Mesh(
+    new THREE.LatheGeometry(pts, 96),
+    new THREE.MeshStandardMaterial({ color: 0xd6d8dc, roughness: 0.97, metalness: 0.0, side: THREE.BackSide }),
+  );
+  cyc.receiveShadow = true;
+  scene.add(cyc);
+}
+
+/* ---- soft three-point studio lighting: broad key, cool fill, rim, plus a contact-shadow lamp */
+const key = new THREE.DirectionalLight(0xfff6ec, 2.15);
+key.position.set(7.5, 11.5, 8.0);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.radius = 5;
+key.shadow.bias = -0.0006;
+key.shadow.normalBias = 0.02;
+{
+  const c = key.shadow.camera;
+  c.left = -11; c.right = 11; c.top = 11; c.bottom = -11; c.near = 1; c.far = 42;
+  c.updateProjectionMatrix();
+}
+scene.add(key);
+
+const fill = new THREE.DirectionalLight(0xdfe9ff, 0.75);
+fill.position.set(-9.5, 4.6, 6.0);
+scene.add(fill);
+
+const rim = new THREE.DirectionalLight(0xffffff, 1.35);
+rim.position.set(-5.0, 6.5, -11.0);
+scene.add(rim);
+
+scene.add(new THREE.HemisphereLight(0xf3f6ff, 0xc6c9ce, 0.46));
+
+/* A bounce off the cyclorama floor. Without it the dark-blue lower band reads as flat black:
+   it faces down, so nothing in a three-point rig above the model ever lights it. */
+const bounce = new THREE.DirectionalLight(0xeef1f6, 0.55);
+bounce.position.set(2.5, -6.0, 5.5);
+scene.add(bounce);
+
+/* ---- model */
+let mixer = null;
+const actions = {};
+let ready = false;
+
+// The decoder is wired in unconditionally so this one page opens EITHER build: the hero GLB
+// is plain, the .m1 is EXT_meshopt_compression and is silently unloadable without it.
+const loader = new GLTFLoader();
+loader.setMeshoptDecoder(MeshoptDecoder);
+loader.load(params.get("model") ?? "h145.glb", (gltf) => {
+  const model = gltf.scene;
+  model.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+  scene.add(model);
+  mixer = new THREE.AnimationMixer(model);
+  for (const clip of gltf.animations) {
+    const action = mixer.clipAction(clip);
+    action.play();
+    action.paused = true;
+    actions[clip.name] = action;
+  }
+  // A readable idle: the baked clip is one main-rotor turn per second, which a game speeds up.
+  if (actions.rotor_spin) actions.rotor_spin.timeScale = 1.0;
+  if (actions.doors_open) { actions.doors_open.clampWhenFinished = true; actions.doors_open.setLoop(THREE.LoopOnce, 1); }
+  ready = true;
+  window.__h145Ready = true;
+});
+
+/* ---- controls */
+const toggle = (id, on) => {
+  const el = document.getElementById(id);
+  el.setAttribute("aria-pressed", String(on));
+};
+let spinning = false;
+let doorsOpen = false;
+document.getElementById("spin").onclick = () => setSpin(!spinning);
+document.getElementById("doors").onclick = () => setDoors(!doorsOpen);
+document.getElementById("orbit").onclick = () => {
+  controls.autoRotate = !controls.autoRotate;
+  toggle("orbit", controls.autoRotate);
+};
+function setSpin(on) {
+  spinning = on;
+  toggle("spin", on);
+  if (actions.rotor_spin) actions.rotor_spin.paused = !on;
+}
+function setDoors(on) {
+  doorsOpen = on;
+  toggle("doors", on);
+  const a = actions.doors_open;
+  if (!a) return;
+  a.paused = false;
+  a.timeScale = on ? 1 : -1;
+  if (on && a.time >= a.getClip().duration - 1e-4) a.time = 0;
+  if (!on && a.time <= 1e-4) a.time = a.getClip().duration;
+  a.play();
+}
+controls.autoRotate = true;
+
+/* ---- a render harness drives these from Playwright */
+window.h145 = {
+  setSpin,
+  setDoors,
+  /** Park a clip at an exact phase, for the per-phase clearance sweeps. */
+  seek(clipName, t) {
+    const a = actions[clipName];
+    if (!a) return false;
+    a.paused = true;
+    a.time = t;
+    mixer.setTime(mixer.time);
+    mixer.update(0);
+    a.time = t;
+    mixer.update(0);
+    return true;
+  },
+  view(name) {
+    controls.autoRotate = false;
+    const V = {
+      front: [0, 2.3, 17.5, 0, 2.0, -1.2, 30],
+      back: [0, 2.4, -20.0, 0, 2.2, -2.0, 30],
+      left: [-19.0, 2.6, -1.2, 0, 2.0, -1.2, 30],
+      right: [19.0, 2.6, -1.2, 0, 2.0, -1.2, 30],
+      "three-quarter-front-left": [-11.6, 6.4, 11.8, 0, 1.9, -0.6, 32],
+      "three-quarter-rear-right": [10.8, 1.35, -12.6, 0, 2.2, -2.4, 32],
+      top: [0.001, 24.0, -1.2, 0, 1.9, -1.2, 30],
+      "rotor-head": [3.05, 4.62, 3.15, 0.0, 3.62, 0.0, 24],
+      "cabin-door": [6.4, 2.1, -0.55, 0.9, 1.85, -0.75, 22],
+      "nose-detail": [5.2, 2.3, 5.6, 0.35, 1.85, 2.85, 24],
+      "tail-detail": [4.6, 2.9, -6.2, 0.0, 2.5, -7.3, 26],
+      "gear-detail": [4.2, 1.1, 2.3, 0.5, 0.5, 0.6, 26],
+    };
+    const v = V[name] ?? V.front;
+    camera.position.set(v[0], v[1], v[2]);
+    controls.target.set(v[3], v[4], v[5]);
+    camera.fov = v[6];
+    camera.updateProjectionMatrix();
+    controls.update();
+    return true;
+  },
+  hideChrome() { document.body.classList.add("shot"); },
+  /** Raycast a screen pixel and name the part under it — how a defect gets identified, not guessed. */
+  pick(px, py) {
+    const rc = new THREE.Raycaster();
+    rc.setFromCamera(new THREE.Vector2((px / innerWidth) * 2 - 1, -(py / innerHeight) * 2 + 1), camera);
+    const hits = rc.intersectObjects(scene.children, true).filter((h) => h.object.isMesh);
+    return hits.slice(0, 4).map((h) => ({ name: h.object.name, dist: +h.distance.toFixed(3), point: h.point.toArray().map((v) => +v.toFixed(3)) }));
+  },
+  isReady: () => ready,
+};
+
+addEventListener("resize", () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+const clock = new THREE.Clock();
+renderer.setAnimationLoop(() => {
+  const dt = clock.getDelta();
+  if (mixer) mixer.update(dt);
+  controls.update();
+  renderer.render(scene, camera);
+});
+</script>
+</body>
+</html>
