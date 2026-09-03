@@ -16,7 +16,7 @@ import Image from "next/image";
 import Link from "../NativeLink";
 import { CapsuleMachine } from "./CapsuleMachine";
 import { GachaPoster, POSTER_IMAGES, type PosterVariant } from "./GachaPoster";
-import { SCROLL_PULL } from "./gacha-scroll";
+import { SCROLL_PULL, SCROLL_OPEN_AT, SCROLL_REARM_BELOW } from "./gacha-scroll";
 import { PrizeCard, type ClaimState } from "./PrizeCard";
 import {
   GACHA_THEMES,
@@ -376,6 +376,10 @@ export function GachaMachine3D() {
   const scrollFired = useRef(false);
   const stageLive = useRef<Stage>("idle");
   const turnLive = useRef<() => void>(() => {});
+  const openLive = useRef<() => void>(() => {});
+  const againLive = useRef<() => void>(() => {});
+  /** 스크롤로 캡슐을 연 뒤 같은 바퀴에서 다시 열지 않게 하는 걸쇠. */
+  const scrollOpened = useRef(false);
   /** 스크롤 계산을 한 번 더 돌리는 손잡이 — 단계가 바뀌면 글줄도 바로 따라 바뀐다. */
   const refreshFilm = useRef<() => void>(() => {});
   /** 3D 가 첫 프레임을 냈는지. 그 전에는 포스터 위에 단추를 놓는다. */
@@ -872,6 +876,7 @@ export function GachaMachine3D() {
     leverDrag.current = { active: false, startY: 0, moved: 0, pointerId: -1 };
     swallowLeverClick.current = false;
     scrollFired.current = progressRef.current >= SCROLL_PULL.to;
+    scrollOpened.current = false;
   }, [clearTimers]);
 
   const chooseTheme = useCallback((next: ThemeId) => {
@@ -1122,8 +1127,10 @@ export function GachaMachine3D() {
   useEffect(() => {
     stageLive.current = stage;
     turnLive.current = turn;
+    openLive.current = openCapsule;
+    againLive.current = again;
     refreshFilm.current();
-  }, [stage, turn]);
+  }, [stage, turn, openCapsule, again]);
   useEffect(() => {
     if (!webgl) return;
     let raf = 0;
@@ -1167,6 +1174,18 @@ export function GachaMachine3D() {
       show(beatInsideRef.current, ramp(p, 0.17, 0.25, 0.4, 0.47));
       const idle = stageLive.current === "idle";
       show(beatLeverRef.current, idle ? ramp(p, 0.43, 0.5, 0.6, 0.66) : 0);
+      // 캡슐이 떨어진 뒤에도 계속 내리면 손대지 않아도 열린다 — 필름은 멈추지 않는다
+      // (2026-09-03: 뽑은 채로 내리면 기계만 덩그러니 남는다는 지적).
+      const stageNow = stageLive.current;
+      if (stageNow === "capsule" && p >= SCROLL_OPEN_AT && !scrollOpened.current) {
+        scrollOpened.current = true;
+        openLive.current();
+      }
+      // 결과를 본 뒤 레버 앞(당김 구간 위)까지 되감으면 새 바퀴가 준비된다 — 다시 내리면 다시 뽑힌다.
+      if (stageNow === "result" && p < SCROLL_REARM_BELOW) {
+        scrollOpened.current = false;
+        againLive.current();
+      }
       // 스크롤로 당기는 레버.
       if (p < SCROLL_PULL.from) {
         if (scrollFired.current) scrollFired.current = false;
