@@ -1228,6 +1228,10 @@ html:has(.gc-film) { --gc-nav-h: 84px; }
   text-align: left;
   text-shadow: none;
 }
+/* 라인업은 필름 내내 서 있다 — 스크롤 진행도를 따르지 않는다. 상품 카드가 오른쪽에
+   뜨는 공개 무대에서만 비켜선다(2026-09-04). */
+.gc-beat-odds { opacity: 1; visibility: visible; --gc-beat-rise: 0px; }
+.gc3[data-stage="result"] .gc-beat-odds { opacity: 0; visibility: hidden; }
 /* 넓은 화면에서만 무대 안에 선다. 좁은 화면에서는 아래 판 쪽 사본이 대신 뜬다. */
 @media (max-width: 1023px) { .gc-beat-odds { display: none; } }
 @media (min-width: 1024px) { .gc3-odds-below { display: none; } }

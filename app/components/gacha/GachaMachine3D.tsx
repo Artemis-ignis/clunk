@@ -1045,7 +1045,9 @@ export function GachaMachine3D() {
       window.scrollTo({ top: target, behavior: reducedMotion ? "auto" : "smooth" });
       progressRef.current = SCROLL_REARM_BELOW;
     }
-    scrollFired.current = false;
+    // 되감는 동안 레버 구간을 거꾸로 지나간다 — 걸쇠를 채워 두지 않으면 그 길에 또 뽑힌다.
+    // 진행도가 당김 구간 아래로 내려오면 감독이 스스로 푼다.
+    scrollFired.current = true;
   }, [clearTimers, reducedMotion]);
 
   const chooseTheme = useCallback((next: ThemeId) => {
@@ -1343,8 +1345,8 @@ export function GachaMachine3D() {
       // 라인업 판은 제목과 같은 첫 샷의 물건이다 — 같은 ramp 로 떠 있다가, 카메라가 기계
       // 안으로 들어가기 전에 물러난다(근접샷에서 기계와 겹치지 않는다).
       // 라인업은 글줄이 아니라 참고판이다 — 2026-09-04 운영자 지적("다시 뽑기 하면
-      // 우측 라인업이 사라진다"). 필름 어디에 있든 서 있고, 상품 카드가 뜬 동안만 비켜선다.
-      show(beatOddsRef.current, stageLive.current === "result" ? 0 : 1, 0);
+      // 우측 라인업이 사라진다"). 보이고 숨는 규칙은 CSS 가 data-stage 로 가진다:
+      // 매 프레임 자바스크립트가 정하면 무대가 바뀌는 순간과 어긋난다.
       // 캔버스 왼쪽·위쪽 모서리의 페이드는 제목 글줄과 같은 ramp 로 산다. 제목이 왼쪽 칸에
       // 서 있는 첫 샷에서만 필요하고, 카메라가 기계 안으로 들어간 뒤(p≳0.16)에는 0 이 되어
       // 기계 위를 세로로 가르는 어두운 띠가 남지 않는다(2026-09-03 2차 지적).

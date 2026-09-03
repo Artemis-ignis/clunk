@@ -953,7 +953,8 @@ test("무대는 세 칸이고, 기계는 두 칸 사이에 선다", async () => 
   // 오른쪽 모서리 페이드도 제목 글줄과 같은 ramp 로 산다.
   assert.match(css, /--gc-fade-right: calc\(var\(--gc-left-ramp, 1\) \* 200px\)/u);
   // 라인업 판은 제목과 같은 ramp 로 뜨고 진다 — 근접샷에서 기계를 덮지 않는다.
-  assert.match(machine, /show\(beatOddsRef\.current, stageLive\.current === "result" \? 0 : 1, 0\);/u);
+  assert.match(css, /\.gc3\[data-stage="result"\] \.gc-beat-odds \{ opacity: 0; visibility: hidden; \}/u);
+  assert.doesNotMatch(machine, /show\(beatOddsRef\.current/u);
   assert.match(css, /@media \(max-width: 1023px\) \{ \.gc-beat-odds \{ display: none; \} \}/u);
   assert.match(css, /@media \(min-width: 1024px\) \{ \.gc3-odds-below \{ display: none; \} \}/u);
 
