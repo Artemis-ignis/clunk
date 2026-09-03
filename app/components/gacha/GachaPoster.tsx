@@ -33,17 +33,18 @@ export const POSTER_IMAGES: Readonly<Record<PosterVariant, PosterSpec>> = {
     src: "/gacha/poster-wide.jpg",
     width: 1440,
     height: 900,
-    lever: { x: 0.6576, y: 0.3521, r: 0.0306 },
-    // 배출구 창 — 뽑힌 캡슐이 나오는 자리(사진에서 읽은 값).
-    capsule: { x: 0.5, y: 0.735, r: 0.03 },
+    lever: { x: 0.6697, y: 0.3508, r: 0.0306 },
+    // 배출구 창 — 뽑힌 캡슐이 나오는 자리. 장면의 카메라로 배출구 한가운데
+    // (월드 0, 0.77, 0.53)를 화면에 찍어 낸 값이다(2026-09-03 기계 재설계 후 다시 잼).
+    capsule: { x: 0.5, y: 0.7616, r: 0.0341 },
     dome: { x: 0.5, y: 0.2587, r: 0.1194 },
   },
   tall: {
     src: "/gacha/poster-tall.jpg",
     width: 412,
     height: 915,
-    lever: { x: 0.9053, y: 0.3929, r: 0.0786 },
-    capsule: { x: 0.5, y: 0.655, r: 0.07 },
+    lever: { x: 0.9364, y: 0.392, r: 0.0786 },
+    capsule: { x: 0.5, y: 0.6863, r: 0.0862 },
     dome: { x: 0.5, y: 0.3255, r: 0.3067 },
   },
 };

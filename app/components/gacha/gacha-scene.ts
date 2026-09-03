@@ -42,21 +42,33 @@ export type Quality = {
   transmission: boolean;
   /** 가게 안을 떠다니는 먼지 알갱이 수. 착지 먼지(24개)와 합쳐 60개를 넘지 않는다. */
   dust: number;
+  /**
+   * 더해 그리는 빛 판(글로우 스프라이트)을 몇 할이나 켤지. 모바일은 절반이다 —
+   * 반투명 판을 겹쳐 칠하는 것이 작은 기기에서 가장 비싼 일이라서.
+   */
+  glow: number;
+  /** LED 띠가 0.3 Hz 로 숨 쉬는지. 모바일은 켜 두기만 하고 숨은 쉬지 않는다. */
+  ledBreath: boolean;
 };
 
 // 2026-09-02 밤: 진짜 투과(transmission)는 장면을 한 번 더 그리면서 돔 안의 캡슐 반구를
 // 빈 조개껍데기처럼 찍었다(카메라가 돔에 다가간 장면에서 뚜렷). 투과 없이 옅은 유리 +
 // 반사 + 하이라이트 두 점으로 그리면 알이 온전하게 보이고 그리기도 한 번 줄어든다.
-export const DESKTOP_QUALITY: Quality = { capsules: 40, dpr: 2, shadowMap: 1024, transmission: false, dust: 34 };
-export const MOBILE_QUALITY: Quality = { capsules: 24, dpr: 1.5, shadowMap: 512, transmission: false, dust: 20 };
+export const DESKTOP_QUALITY: Quality = { capsules: 40, dpr: 2, shadowMap: 1024, transmission: false, dust: 34, glow: 1, ledBreath: true };
+export const MOBILE_QUALITY: Quality = { capsules: 24, dpr: 1.5, shadowMap: 512, transmission: false, dust: 20, glow: 0.5, ledBreath: false };
 
 export type SceneStage = "idle" | "pull" | "shake" | "impact" | "capsule" | "wobble" | "burst" | "result";
 
 export type CapsuleSpec = {
   /** 상품에서 잰 색. 등급 색에 이만큼 섞여 알마다 제 물건의 기색이 남는다. */
   color: string;
-  /** 등급 색. 위 반구의 바탕이고 이음 링은 그 색을 어둡게 쓴다. */
+  /** 등급 색. 아래 반구의 바탕이고 이음 링은 그 색을 밝게 쓴다. */
   ring: string;
+  /**
+   * 그 상품의 미리보기 그림 주소(previewImageUrlOf). 알 안에 실제 물건이 서 있게 하는
+   * 유일한 재료다 — 지어낸 아이콘은 쓰지 않는다. 없으면 알만 굴러다닌다.
+   */
+  preview?: string | null;
 };
 
 /** 화면 위 자리(CSS 픽셀). HTML 오버레이 단추를 그 위에 얹을 때 쓴다. */
@@ -126,7 +138,9 @@ export type GachaScene = {
 const DOME_CENTER = new THREE.Vector3(0, 2.62, 0);
 const DOME_RADIUS = 0.74;
 /** 캡슐이 실제로 굴러다니는 안쪽 반지름(유리 두께와 캡슐 반지름을 뺀 값). */
-const DOME_INNER = 0.63;
+// 2026-09-03 10라운드: 0.63 이면 알 겉면이 0.762 까지 나가 유리(0.74)를 뚫고 나갔다.
+// 유리 안쪽에서 알 반지름과 두께 1 cm 를 빼면 이 값이다.
+const DOME_INNER = 0.59;
 /**
  * 돔 바닥. 여기 가운데에 캡슐이 빠지는 구멍이 있다.
  * 유리공의 배(적도)보다 아래에 두어야 쌓인 캡슐이 유리 안에 들어와 보인다.
@@ -139,9 +153,17 @@ const DOME_FLOOR = 2.12;
  * 0.105 에서도 마흔 알이 유리공 부피의 3분의 1밖에 채우지 못했다(알 하나가
  * 0.0049, 통이 1.05). 0.125 면 같은 마흔 알로 배(적도)까지 차 오른다.
  */
-const CAPSULE_RADIUS = 0.125;
-/** 배출구 안에 캡슐이 눕는 자리. */
-const TRAY = new THREE.Vector3(0, 0.87, 0.53);
+// 2026-09-03 10라운드: 마흔 알이 돔 높이의 절반에서 멈춰 "덜 찬 기계" 로 읽혔다.
+// 알 수는 계약(quality.capsules 40)에 묶여 있으므로 반지름을 9.1% 키워(0.132 → 0.144)
+// 부피를 32% 늘리고, 동시에 통 안쪽 반지름을 유리에 맞게 좁힌다. 둘을 합치면 마흔 알이
+// 유리공 높이의 3분의 2까지 찬다.
+const CAPSULE_RADIUS = 0.144;
+/**
+ * 배출구 안에 캡슐이 눕는 자리.
+ * 2026-09-03: 배출구를 몸통 아래쪽(크롬 테 안쪽 y 0.58~0.98)으로 옮기면서 같이 내려왔다.
+ * 알 반지름이 0.194 이므로 0.78 이면 위아래가 테 안에 딱 들어온다.
+ */
+const TRAY = new THREE.Vector3(0, 0.77, 0.53);
 /**
  * 캡슐이 카메라 앞으로 떠오르는 자리 — 결과 상품도 같은 자리에 선다.
  * 카메라에서 2.3 만큼 떨어져 있어, 기계를 한 대 통째로 담느라 물러난 카메라에서도
@@ -195,7 +217,7 @@ export const SHOTS: readonly Shot[] = [
   { at: 0.3, position: [0.35, 2.8, 3.2], target: [0, 2.52, 0] },
   { at: 0.52, position: [2.35, 2.15, 2.75], target: [0.85, 1.85, 0.1] },
   // 레버 자리에서 배출구로는 크게 돌지 않고 조금 내려다볼 뿐이다 — 카메라가 휙 도는 것이 어지럽다.
-  { at: 0.7, position: [1.7, 1.75, 3.0], target: [0.35, 1.05, 0.4] },
+  { at: 0.7, position: [1.6, 1.62, 3.0], target: [0.3, 0.92, 0.4] },
   { at: 0.86, position: [0, CAMERA_HEIGHT, CAMERA_DISTANCE], target: [0, CAMERA_TARGET, 0] },
 ];
 export { SCROLL_PULL } from "./gacha-scroll";
@@ -416,50 +438,163 @@ function makeBrushedTexture(): THREE.CanvasTexture {
   return texture;
 }
 
+const UI_FONT = "system-ui, -apple-system, 'Segoe UI', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif";
+
 /**
- * 몸통 앞면의 CLUNK 사인 — 유리관 네온처럼 그린다.
+ * 사인판 위의 글자 — 흰 네온 CLUNK 와 그 아래 작은 보라색 부제 "에셋 뽑기 기계".
  *
  * 글자 하나를 세 번 겹쳐 칠한다: 넓게 번지는 후광, 좁고 진한 관, 그리고 한가운데의
  * 흰 심지. 이 세 겹이 발광 지도로 들어가면 평평한 흰 글씨가 아니라 불이 켜진 유리관이
- * 된다. 외부 폰트 파일은 쓰지 않는다.
+ * 된다. 바탕은 투명이다 — 판(유광 검정)은 3D 로 따로 서 있고 글자만 그 위에 뜬다.
+ * 외부 폰트 파일은 쓰지 않는다.
  */
 function makeSignTexture(tube: string): THREE.CanvasTexture {
   const canvas = document.createElement("canvas");
   canvas.width = 512;
-  canvas.height = 160;
+  canvas.height = 176;
   const ctx = canvas.getContext("2d");
   if (ctx) {
-    ctx.fillStyle = "#05070f";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.font = "800 92px system-ui, -apple-system, Segoe UI, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     const x = canvas.width / 2;
-    const y = canvas.height / 2 + 4;
+    const y = 74;
 
-    // 1) 넓은 후광 — 관 둘레의 공기가 물드는 부분.
+    // 1) 넓은 후광 — 관 둘레의 공기가 물드는 부분. 흰 관이라도 번지는 빛은 보랏빛이다.
+    ctx.font = `800 84px ${UI_FONT}`;
     ctx.shadowColor = tube;
-    ctx.shadowBlur = 46;
-    ctx.lineWidth = 15;
+    ctx.shadowBlur = 44;
+    ctx.lineWidth = 16;
     ctx.strokeStyle = tube;
     ctx.strokeText("CLUNK", x, y);
     ctx.strokeText("CLUNK", x, y);
 
-    // 2) 관 자체 — 좁고 진하다.
-    ctx.shadowBlur = 16;
+    // 2) 관 자체 — 좁고 흰데 아직 보랏빛 그림자를 달고 있다.
+    ctx.shadowBlur = 15;
     ctx.lineWidth = 9;
+    ctx.strokeStyle = "#f2ecff";
     ctx.strokeText("CLUNK", x, y);
 
     // 3) 심지 — 관 한가운데의 흰 선.
-    ctx.shadowBlur = 6;
+    ctx.shadowBlur = 7;
     ctx.shadowColor = "#ffffff";
     ctx.fillStyle = "#ffffff";
     ctx.fillText("CLUNK", x, y);
+
+    // 4) 부제 — 작은 보라색 한 줄. 후광은 얕게 둔다(같이 타 버리면 CLUNK 이 안 읽힌다).
+    ctx.font = `600 27px ${UI_FONT}`;
+    ctx.shadowColor = tube;
+    ctx.shadowBlur = 14;
+    ctx.fillStyle = "#cbaaff";
+    ctx.fillText("에셋 뽑기 기계", x, 138);
   }
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = 4;
   return texture;
+}
+
+/**
+ * LED 띠 둘레에 번지는 빛 한 장 — 직사각형 테를 크게 흐린 것.
+ *
+ * 2026-09-03: 처음에는 둥근 번짐 판 한 장을 앞판 위에 통째로 얹었는데, 그것이 앞판
+ * 전체에 보라색을 더해 짙은 보라 도장이 밝은 자홍으로 떠올랐다(운영자가 지적한
+ * "저퀄리티 느낌" 의 절반이 이것이었다). 번지는 것은 띠 둘레뿐이어야 한다.
+ */
+function makeFrameGlowTexture(ratio: number, inset: number): THREE.CanvasTexture {
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = Math.max(16, Math.round(256 * ratio));
+  const ctx = canvas.getContext("2d");
+  if (ctx) {
+    const w = canvas.width;
+    const h = canvas.height;
+    const m = Math.min(w, h) * inset;
+    ctx.strokeStyle = "#ffffff";
+    ctx.shadowColor = "#ffffff";
+    for (const [blur, width, alpha] of [[26, 4, 0.5], [12, 3, 0.7], [4, 2, 1]] as const) {
+      ctx.shadowBlur = blur;
+      ctx.lineWidth = width;
+      ctx.globalAlpha = alpha;
+      ctx.beginPath();
+      ctx.roundRect(m, m, w - m * 2, h - m * 2, Math.min(w, h) * 0.08);
+      ctx.stroke();
+    }
+  }
+  return new THREE.CanvasTexture(canvas);
+}
+
+/** 기계에 적히는 작은 글줄 한 장(투명 바탕). 동전판 안내와 받침의 이름판이 쓴다. */
+function makeLabelTexture(text: string, color: string, weight: number, size: number, width = 1024): THREE.CanvasTexture {
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = 96;
+  const ctx = canvas.getContext("2d");
+  if (ctx) {
+    ctx.font = `${weight} ${size}px ${UI_FONT}`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    // 어두운 판 위의 밝은 글자 — 뒤에 어두운 후광을 한 겹 깔아 대비를 세운다.
+    ctx.shadowColor = "#05030c";
+    ctx.shadowBlur = 10;
+    ctx.lineWidth = 6;
+    ctx.strokeStyle = "#05030c";
+    ctx.strokeText(text, width / 2, 50);
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = color;
+    ctx.fillText(text, width / 2, 50);
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 4;
+  return texture;
+}
+
+/**
+ * 모서리를 깎은 직사각형 테 하나. LED 띠와 배출구 크롬 테가 이것으로 만들어진다.
+ *
+ * 막대 넷을 세워 테를 만들면 모서리에서 네 번 겹친다(겹친 삼각형이 그대로 남는다).
+ * 구멍 뚫린 도형 하나면 겹치는 자리가 아예 생기지 않고 그리기도 한 번이다.
+ */
+function ringShape(outerW: number, outerH: number, outerR: number, innerW: number, innerH: number, innerR: number): THREE.Shape {
+  const rect = (w: number, h: number, r: number) => {
+    const path = new THREE.Shape();
+    const x = w / 2;
+    const y = h / 2;
+    const k = Math.min(r, x, y);
+    path.moveTo(-x + k, -y);
+    path.lineTo(x - k, -y);
+    path.quadraticCurveTo(x, -y, x, -y + k);
+    path.lineTo(x, y - k);
+    path.quadraticCurveTo(x, y, x - k, y);
+    path.lineTo(-x + k, y);
+    path.quadraticCurveTo(-x, y, -x, y - k);
+    path.lineTo(-x, -y + k);
+    path.quadraticCurveTo(-x, -y, -x + k, -y);
+    path.closePath();
+    return path;
+  };
+  const shape = rect(outerW, outerH, outerR);
+  shape.holes.push(rect(innerW, innerH, innerR) as unknown as THREE.Path);
+  return shape;
+}
+
+/** 모서리를 깎은 직사각형 판 하나(구멍은 나중에 넣는다). */
+function plateShape(w: number, h: number, r: number, cx = 0, cy = 0): THREE.Shape {
+  const shape = new THREE.Shape();
+  const x = w / 2;
+  const y = h / 2;
+  const k = Math.min(r, x, y);
+  shape.moveTo(cx - x + k, cy - y);
+  shape.lineTo(cx + x - k, cy - y);
+  shape.quadraticCurveTo(cx + x, cy - y, cx + x, cy - y + k);
+  shape.lineTo(cx + x, cy + y - k);
+  shape.quadraticCurveTo(cx + x, cy + y, cx + x - k, cy + y);
+  shape.lineTo(cx - x + k, cy + y);
+  shape.quadraticCurveTo(cx - x, cy + y, cx - x, cy + y - k);
+  shape.lineTo(cx - x, cy - y + k);
+  shape.quadraticCurveTo(cx - x, cy - y, cx - x + k, cy - y);
+  shape.closePath();
+  return shape;
 }
 
 /**
@@ -519,9 +654,185 @@ function makeFloorTexture(): THREE.CanvasTexture {
   return texture;
 }
 
+/* ---------------------------------------------------------------------------
+   캡슐 안에 든 진짜 물건 — 상점의 미리보기 그림을 한 장짜리 아틀라스로 굽는다.
+   ------------------------------------------------------------------------- */
+
+/** 아틀라스 한 변의 칸 수와 칸 하나의 픽셀. 8×8 = 예순네 칸이면 마흔 알에 넉넉하다. */
+const ATLAS_GRID = 8;
+const ATLAS_CELL = 128;
+/** 칸 테두리에 두는 빈 자리. 옆 칸 색이 번져 오는 것을 막는다. */
+const ATLAS_PAD = 6;
+
+/**
+ * 밝고 고른 바탕을 지운다. 상점의 3D 미리보기는 거의 흰 바탕에 물건 하나가 놓인
+ * 사진이라, 그대로 캡슐에 넣으면 유리알 안에 흰 카드가 든 것처럼 보인다. 네 귀퉁이가
+ * 서로 같은 밝은 색일 때만 그 색을 투명으로 바꾼다 — 텍스처 상품처럼 화면 전체가
+ * 무늬인 그림은 손대지 않는다(귀퉁이가 어둡거나 서로 다르다).
+ */
+function keyOutBackdrop(source: HTMLImageElement, size: number): HTMLCanvasElement | null {
+  const work = document.createElement("canvas");
+  work.width = size;
+  work.height = size;
+  const ctx = work.getContext("2d", { willReadFrequently: true });
+  if (!ctx) return null;
+  ctx.drawImage(source, 0, 0, size, size);
+  /**
+   * 바탕을 지우지 못한 그림(텍스처처럼 화면 전체가 무늬인 것)은 둥글게 오려 낸다.
+   * 알 안에 네모난 카드가 서 있으면 유리알이 아니라 액자로 읽힌다.
+   */
+  const roundOff = () => {
+    ctx.globalCompositeOperation = "destination-in";
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, size * 0.47, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalCompositeOperation = "source-over";
+    return work;
+  };
+  let data: ImageData;
+  try {
+    data = ctx.getImageData(0, 0, size, size);
+  } catch {
+    // 다른 출처의 그림이면 읽을 수 없다. 지우지 않고 둥글게만 오린다.
+    return roundOff();
+  }
+  const px = data.data;
+  const at = (x: number, y: number) => {
+    const index = (y * size + x) * 4;
+    return [px[index], px[index + 1], px[index + 2]] as const;
+  };
+  const corners = [at(1, 1), at(size - 2, 1), at(1, size - 2), at(size - 2, size - 2)];
+  const mean = [0, 1, 2].map((channel) => corners.reduce((sum, one) => sum + one[channel], 0) / 4);
+  const luma = (mean[0] * 0.299 + mean[1] * 0.587 + mean[2] * 0.114) / 255;
+  const spread = Math.max(...corners.map((one) => Math.hypot(one[0] - mean[0], one[1] - mean[1], one[2] - mean[2])));
+  if (luma < 0.76 || spread > 24) return roundOff();
+  const near = 30;
+  const far = 52;
+  for (let index = 0; index < px.length; index += 4) {
+    const distance = Math.hypot(px[index] - mean[0], px[index + 1] - mean[1], px[index + 2] - mean[2]);
+    if (distance <= near) px[index + 3] = 0;
+    else if (distance < far) px[index + 3] = Math.round(px[index + 3] * ((distance - near) / (far - near)));
+  }
+  ctx.putImageData(data, 0, 0);
+  return work;
+}
+
+type PreviewAtlas = {
+  texture: THREE.CanvasTexture;
+  /** 이 주소의 칸 번호. 처음 보는 주소면 그림을 받아 굽기 시작하고 번호를 미리 준다. */
+  slot(url: string | null | undefined): number;
+  /** 칸 번호 → 아틀라스 안의 (u, v, du, dv). */
+  tile(slot: number, out: Float32Array, offset: number): void;
+  dispose(): void;
+};
+
+function createPreviewAtlas(): PreviewAtlas {
+  const canvas = document.createElement("canvas");
+  canvas.width = ATLAS_GRID * ATLAS_CELL;
+  canvas.height = ATLAS_GRID * ATLAS_CELL;
+  const ctx = canvas.getContext("2d");
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  // 밉맵을 만들면 멀리서 칸끼리 섞여 알 안이 잿빛 죽이 된다. 대신 선형 확대만 쓴다.
+  texture.generateMipmaps = false;
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+
+  const slots = new Map<string, number>();
+  const pending = new Set<HTMLImageElement>();
+  let next = 0;
+
+  return {
+    texture,
+    slot(url) {
+      if (!url) return -1;
+      const known = slots.get(url);
+      if (known !== undefined) return known;
+      if (next >= ATLAS_GRID * ATLAS_GRID) return -1;
+      const index = next;
+      next += 1;
+      slots.set(url, index);
+      if (!ctx) return index;
+      // fetch 를 쓰지 않는다 — 이 파일이 받아 오는 파일은 상품 GLB 하나뿐이라는 계약이 있다.
+      const image = new Image();
+      image.decoding = "async";
+      pending.add(image);
+      image.onload = () => {
+        pending.delete(image);
+        const inner = ATLAS_CELL - ATLAS_PAD * 2;
+        const baked = keyOutBackdrop(image, inner);
+        const x = (index % ATLAS_GRID) * ATLAS_CELL;
+        const y = Math.floor(index / ATLAS_GRID) * ATLAS_CELL;
+        ctx.clearRect(x, y, ATLAS_CELL, ATLAS_CELL);
+        if (baked) ctx.drawImage(baked, x + ATLAS_PAD, y + ATLAS_PAD);
+        texture.needsUpdate = true;
+      };
+      image.onerror = () => { pending.delete(image); };
+      image.src = url;
+      return index;
+    },
+    tile(slot, out, offset) {
+      if (slot < 0) { out[offset] = 0; out[offset + 1] = 0; out[offset + 2] = 0; out[offset + 3] = 0; return; }
+      const step = 1 / ATLAS_GRID;
+      out[offset] = (slot % ATLAS_GRID) * step;
+      // 캔버스는 위에서 아래로, UV 는 아래에서 위로 센다.
+      out[offset + 1] = 1 - (Math.floor(slot / ATLAS_GRID) + 1) * step;
+      out[offset + 2] = step;
+      out[offset + 3] = step;
+    },
+    dispose() {
+      for (const image of pending) image.src = "";
+      pending.clear();
+      texture.dispose();
+    },
+  };
+}
+
+/**
+ * 유리에 테두리를 넣는다 — 스치듯 보이는 각도일수록 색이 짙어지고 불투명해진다(프레넬).
+ *
+ * 진짜 투과(transmission)는 장면을 한 번 더 그리면서 인스턴스 캡슐을 빈 껍데기로 찍었다.
+ * 투과 없이 유리를 유리로 읽히게 하는 것은 결국 이 테두리 한 줄이다 — 가운데는 비어
+ * 있고 가장자리만 빛나는 것이 유리공의 전부다.
+ */
+function addFresnelRim(
+  material: THREE.MeshPhysicalMaterial,
+  color: THREE.Color,
+  strength: number,
+  alphaLift: number,
+  key: string,
+  /**
+   * 테두리가 얼마나 좁은지. 크면 실루엣에만 얇게 걸리고(유리공), 작으면 면 전체에
+   * 넓게 퍼진다(알 뚜껑 — 뚜껑은 있다는 것이 보여야 해서 넓게 쓴다).
+   */
+  falloff = 4.5,
+): { color: THREE.Color } {
+  const uColor = { value: color };
+  const uStrength = { value: strength };
+  const uAlpha = { value: alphaLift };
+  const uFalloff = { value: falloff };
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.uRimColor = uColor;
+    shader.uniforms.uRimStrength = uStrength;
+    shader.uniforms.uRimAlpha = uAlpha;
+    shader.uniforms.uRimFalloff = uFalloff;
+    shader.fragmentShader = "uniform vec3 uRimColor;\nuniform float uRimStrength;\nuniform float uRimAlpha;\nuniform float uRimFalloff;\n"
+      + shader.fragmentShader.replace(
+        "#include <emissivemap_fragment>",
+        "#include <emissivemap_fragment>\n"
+        + "  float gRim = pow(1.0 - abs(dot(normalize(normal), normalize(vViewPosition))), uRimFalloff);\n"
+        + "  totalEmissiveRadiance += uRimColor * gRim * uRimStrength;\n"
+        + "  diffuseColor.a = min(1.0, diffuseColor.a + gRim * uRimAlpha);",
+      );
+  };
+  material.customProgramCacheKey = () => key;
+  return { color: uColor.value };
+}
+
 /**
  * 돔 안에 쌓이는 캡슐 한 알. 메시가 아니라 숫자 묶음이다 — 실제로 그리는 것은
- * 인스턴스 메시 세 개(위 반구·아래 반구·이음 링)이고, 이 값들이 그 행렬로 들어간다.
+ * 인스턴스 메시 네 개(위 반구·아래 반구·이음 링·안에 든 물건)이고, 이 값들이 그
+ * 행렬로 들어간다.
  */
 type Capsule = {
   position: THREE.Vector3;
@@ -540,10 +851,12 @@ type Capsule = {
  * 통이 비어 보이고, 원기둥처럼 쌓이면 상자에 담긴 것처럼 보인다.
  */
 const PILE_LAYERS = [
-  { count: 13, inner: 0.22, outer: 0.46 },
-  { count: 11, inner: 0.15, outer: 0.42 },
-  { count: 9, inner: 0.08, outer: 0.34 },
-  { count: 7, inner: 0.0, outer: 0.22 },
+  { count: 11, inner: 0.24, outer: 0.44 },
+  { count: 9, inner: 0.18, outer: 0.40 },
+  { count: 8, inner: 0.12, outer: 0.34 },
+  { count: 6, inner: 0.06, outer: 0.26 },
+  { count: 4, inner: 0.0, outer: 0.17 },
+  { count: 2, inner: 0.0, outer: 0.09 },
 ] as const;
 
 export function createGachaScene(
@@ -577,14 +890,18 @@ export function createGachaScene(
   const environment = pmrem.fromScene(new RoomEnvironment(), 0.04);
   scene.environment = environment.texture;
   // 반사를 반쯤 눌러 둔다. 그대로 두면 유리 돔이 우유처럼 하얘져 안이 안 보인다.
-  scene.environmentIntensity = 0.45;
+  scene.environmentIntensity = 0.3;
 
   /* 조명 — 키/필/림 두 점과 바닥 그림자 ------------------------------------ */
-  const ambient = new THREE.HemisphereLight(0xdfe8ff, 0x1a1c2a, 0.5);
+  // 하늘빛은 차갑고 바닥빛은 짙은 보라. 아무것도 안 비추는 자리가 회색이 아니라
+  // 보랏빛 어둠이어야 무대 전체가 한 색으로 읽힌다.
+  const ambient = new THREE.HemisphereLight(0xd6d0ff, 0x1a1030, 0.34);
   scene.add(ambient);
 
-  const key = new THREE.DirectionalLight(0xfff4e2, 2.5);
-  key.position.set(2.6, 7.6, 3.8);
+  // 키 라이트는 왼쪽 위에서 온다(운영자 참고 이미지). 오른쪽에서 오던 것을 옮겼다 —
+  // 레버가 달린 오른쪽은 보라 림라이트가 맡고, 앞판의 밝은 면이 왼쪽 위에 생긴다.
+  const key = new THREE.DirectionalLight(0xfff4e2, 1.6);
+  key.position.set(-2.8, 7.6, 3.9);
   key.castShadow = true;
   key.shadow.mapSize.set(quality.shadowMap, quality.shadowMap);
   key.shadow.bias = 0;
@@ -600,33 +917,33 @@ export function createGachaScene(
   key.shadow.camera.bottom = -0.4;
   scene.add(key);
 
-  const fill = new THREE.DirectionalLight(0x9fb6ff, 0.62);
-  fill.position.set(-4.2, 2.4, 3.2);
+  const fill = new THREE.DirectionalLight(0x9d8fd8, 0.72);
+  fill.position.set(3.6, 2.2, 3.4);
   scene.add(fill);
 
-  // 뒤 왼쪽에서 오는 찬 빛. 기계의 왼쪽 윤곽을 배경에서 떼어 놓는다.
-  const rim = new THREE.DirectionalLight(0xbfd6ff, 1.9);
-  rim.position.set(-3.0, 3.3, -4.4);
+  // 뒤 왼쪽의 보라 림라이트. 검정 모서리 기둥의 왼쪽 날을 어둠에서 떼어 놓는다.
+  const rim = new THREE.DirectionalLight(0xa855f7, 2.4);
+  rim.position.set(-3.4, 3.3, -4.2);
   scene.add(rim);
 
-  // 뒤 오른쪽에서 오는 따뜻한 빛. 레버가 달린 쪽 모서리와 크롬 기둥이 여기서 반짝인다.
-  const rimWarm = new THREE.DirectionalLight(0xffd6a8, 1.05);
-  rimWarm.position.set(3.4, 2.6, -3.6);
+  // 뒤 오른쪽의 보라 림라이트. 레버 쪽 모서리와 크롬이 여기서 반짝인다.
+  const rimWarm = new THREE.DirectionalLight(0xc084fc, 1.9);
+  rimWarm.position.set(3.6, 2.7, -3.6);
   scene.add(rimWarm);
 
   // 돔 위를 천천히 도는 반짝임 한 점.
-  const sweep = new THREE.PointLight(0xffffff, 2.6, 4.2, 2);
+  const sweep = new THREE.PointLight(0xffffff, 1.9, 4.2, 2);
   sweep.position.set(0.7, 3.3, 0.7);
   scene.add(sweep);
 
   // 유리공 안을 밝히는 한 점. 어두운 가게에서는 이것이 없으면 캡슐이 유리에 묻힌다.
-  const domeLight = new THREE.PointLight(0xfff3df, 2.4, 1.9, 2);
+  const domeLight = new THREE.PointLight(0xfff3df, 3.4, 2.1, 2);
   domeLight.position.copy(DOME_CENTER);
   scene.add(domeLight);
 
   // 배출구의 캡슐을 은은하게 비추는 빛. 캡슐이 떨어진 뒤에만 켜진다.
-  const trayLight = new THREE.PointLight(0xffffff, 0, 2.2, 2);
-  trayLight.position.set(0, 1.1, 1.35);
+  const trayLight = new THREE.PointLight(0xffffff, 0, 1.5, 2);
+  trayLight.position.set(0, 0.82, 1.05);
   scene.add(trayLight);
 
   // 기계 한 대만 비추는 스포트라이트. 그림자는 키 라이트가 이미 만들고 있어 끄고 쓴다.
@@ -685,6 +1002,22 @@ export function createGachaScene(
   const pool = new THREE.Mesh(new THREE.PlaneGeometry(4.4, 3.2).rotateX(-Math.PI / 2), poolMaterial);
   pool.position.y = 0.026;
   shop.add(pool);
+
+  /**
+   * 받침 밑에서 앞으로 새어 나오는 보라 띠. 기계가 바닥에 빛을 흘리고 있어야
+   * 바닥에 놓인 물건으로 읽힌다(참고 이미지의 언더글로).
+   */
+  const underGlowMaterial = new THREE.MeshBasicMaterial({
+    color: 0xa855f7,
+    map: makeGlowTexture(0.22),
+    transparent: true,
+    opacity: 0,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+  const underGlow = new THREE.Mesh(new THREE.PlaneGeometry(2.9, 1.5).rotateX(-Math.PI / 2), underGlowMaterial);
+  underGlow.position.set(0, 0.03, 0.55);
+  shop.add(underGlow);
 
   /**
    * 접지 그림자. 그림자 지도만으로는 받침이 바닥에 닿는 자리가 흐릿하게 번진다 —
@@ -830,29 +1163,71 @@ export function createGachaScene(
 
   const accent = toColor("#a855f7");
 
+  /* 색 한 벌 — 운영자가 보낸 참고 이미지의 값이다.
+     짙은 보라 앞판(#3b1e6e)·더 짙은 옆면·검정 모서리 기둥·크롬·보라 LED. */
+  // 2026-09-03 2라운드: #3b1e6e 를 그대로 칠했더니 스포트라이트와 림라이트를 지나 화면에서는
+  // 밝은 자홍이 되었다. 참고 이미지의 값은 "화면에 나온 색" 이므로, 칠하는 색은 그보다 한참
+  // 어두워야 한다 — 여기 값은 톤매핑을 통과한 뒤 #3b1e6e 근처에 도착하도록 고른 것이다.
+  const PANEL_PURPLE = 0x1d0f38;
+  const SIDE_PURPLE = 0x120825;
+  const WELL_PURPLE = 0x0d0619;
+  const CABINET_BLACK = 0x0a0a11;
+  const LED_PURPLE = 0xa855f7;
+
   /**
-   * 재질 — 몸통은 두 톤이다. 짙은 가지색 본체에 한 겹 밝은 앞판이 박혀 있고,
-   * 그 둘 사이를 얇은 크롬 테가 가른다. 한 가지 색으로 칠한 상자는 무슨 짓을 해도
-   * 장난감으로 읽힌다.
+   * 재질 — 몸통은 두 톤이다. 옆면은 거의 검정에 가까운 보라, 앞판은 한 단계 밝은
+   * 짙은 보라이고 그 둘 사이를 검정 모서리 기둥이 가른다. 한 가지 색으로 칠한 상자는
+   * 무슨 짓을 해도 장난감으로 읽힌다.
+   *
+   * 2026-09-03: 앞 판을 밝은 자홍으로 두었더니 운영자가 "저퀄리티 느낌" 이라고 했다.
+   * 밝은 채도는 빛과 그림자가 실릴 자리를 남기지 않는다 — 짙게 깔고 clearcoat 한 겹의
+   * 반사와 LED 로 밝기를 만든다.
    */
   const bodyPaint = new THREE.MeshPhysicalMaterial({
-    color: accent.clone().lerp(new THREE.Color(0x180f26), 0.66),
-    roughness: 0.34,
-    metalness: 0.12,
+    color: new THREE.Color(SIDE_PURPLE),
+    roughness: 0.38,
+    metalness: 0.15,
     clearcoat: 1,
-    clearcoatRoughness: 0.1,
-    envMapIntensity: 0.7,
+    clearcoatRoughness: 0.12,
+    envMapIntensity: 0.55,
   });
-  // 앞판은 "조금" 밝다. 크게 벌리면 두 톤이 아니라 서로 다른 두 기계가 붙어 있게 된다.
+  // 앞판 — 참고 이미지의 #3b1e6e. 자동차 도장처럼 clearcoat 한 겹을 덮는다.
   const panelPaint = new THREE.MeshPhysicalMaterial({
-    color: accent.clone().lerp(new THREE.Color(0x1d1230), 0.56),
-    roughness: 0.24,
-    metalness: 0.08,
+    color: new THREE.Color(PANEL_PURPLE),
+    roughness: 0.18,
+    metalness: 0.1,
     clearcoat: 1,
-    clearcoatRoughness: 0.05,
+    clearcoatRoughness: 0.035,
     envMapIntensity: 0.8,
   });
   const darkMaterial = new THREE.MeshStandardMaterial({ color: 0x090c17, roughness: 0.85, metalness: 0.1 });
+  /** 모서리 기둥·사인판·동전판이 쓰는 유광 검정. 빛을 한 줄로 되쏘아야 검정이 산다. */
+  const glossBlack = new THREE.MeshPhysicalMaterial({
+    color: new THREE.Color(CABINET_BLACK),
+    roughness: 0.22,
+    metalness: 0.35,
+    clearcoat: 1,
+    clearcoatRoughness: 0.06,
+    envMapIntensity: 0.9,
+  });
+  /** 배출구 안쪽의 짙은 보라. 빛이 들어가 거의 안 나오는 자리. */
+  /**
+   * 2026-09-03 5라운드: 빛을 받는 재질로 두었더니 안쪽 벽이 조명을 그대로 받아
+   * 회색 상자가 되었다(운영자가 싫어할 "빈 창문"). 우묵한 자리는 빛을 안 받아야 우묵하다 —
+   * 빛 계산 없이 정해진 어두운 색만 칠한다.
+   */
+  const wellPurple = new THREE.MeshBasicMaterial({
+    color: new THREE.Color(WELL_PURPLE),
+    side: THREE.BackSide,
+  });
+  /**
+   * LED 띠 — 재질 하나를 여러 띠가 나눠 쓴다. 밝기를 한 곳에서 올리고 내리기 위해서다.
+   * 자체 발광이므로 빛을 받지 않는다(MeshBasicMaterial): 어두운 가게에서 LED 가
+   * 조명에 따라 어두워지면 LED 가 아니다.
+   */
+  const ledMaterial = new THREE.MeshBasicMaterial({ color: new THREE.Color(LED_PURPLE), toneMapped: false });
+  /** LED 의 바탕색. 밝기는 이 색에 배수를 곱해 만든다(테마 색이 바뀌면 여기가 바뀐다). */
+  const ledBase = new THREE.Color(LED_PURPLE);
   /** 깊은 음각. 동전 구멍과 배출구 안쪽처럼 "빛이 들어가 안 나오는" 자리. */
   const recessMaterial = new THREE.MeshStandardMaterial({ color: 0x02030a, roughness: 1, metalness: 0 });
   /**
@@ -863,78 +1238,167 @@ export function createGachaScene(
    */
   const chromeMaterial = new THREE.MeshStandardMaterial({
     color: 0x8d97ad,
-    roughness: 0.2,
+    // 거칠수록 회색 플라스틱에 가까워진다. 크롬은 한 줄기 빛을 또렷하게 되쏘아야 크롬이다.
+    roughness: 0.1,
     metalness: 1,
-    envMapIntensity: 0.95,
+    envMapIntensity: 1.15,
   });
   const brushedTexture = makeBrushedTexture();
   const plinthMaterial = new THREE.MeshStandardMaterial({
-    // 2026-09-02 밤: 0x1b2030 은 무대 바닥과 한 덩어리로 묻혀 받침이 검은 구멍으로 보였다.
-    color: 0x2c3448,
-    roughness: 0.36,
+    // 2026-09-03: 참고 이미지의 받침은 무광 검정이다. 브러시드 결은 거칠기 지도로만 남겨
+    // 빛이 한 방향으로 흩어지게 한다 — 완전히 고른 검정은 플라스틱으로 읽힌다.
+    color: 0x0d0d13,
+    roughness: 0.72,
     roughnessMap: brushedTexture,
-    metalness: 0.82,
-    envMapIntensity: 0.9,
+    metalness: 0.35,
+    envMapIntensity: 0.5,
   });
 
-  // 받침 — 브러시드 메탈 굽에 크롬 테를 두른다.
-  const base = new THREE.Mesh(new RoundedBoxGeometry(2.02, 0.56, 1.44, 3, 0.05), plinthMaterial);
-  base.position.set(0, 0.28, 0);
+  /** LED 띠 둘레에 번지는 빛. 띠 모양 그대로 번진다(가운데는 비어 있다). 모바일은 절반만 켠다. */
+  const ledGlows: THREE.Mesh[] = [];
+  /**
+   * 띠 하나의 번짐. `frame` 이면 직사각형 테 모양으로, 아니면 부드러운 막대 하나로 번진다 —
+   * 옆으로 누운 띠(받침·뚜껑)는 앞에서 보면 선 한 줄이므로 테 모양이면 허공에 네모가 뜬다.
+   */
+  function addLedGlow(width: number, height: number, x: number, y: number, z: number, frame: boolean, inset = 0.1): THREE.Mesh {
+    const mesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(width, height),
+      new THREE.MeshBasicMaterial({
+        color: new THREE.Color(LED_PURPLE),
+        map: frame ? makeFrameGlowTexture(height / width, inset) : makeGlowTexture(0.2),
+        transparent: true,
+        opacity: 0,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        toneMapped: false,
+      }),
+    );
+    mesh.position.set(x, y, z);
+    mesh.name = `glow-led-${ledGlows.length}`;
+    mesh.renderOrder = 1;
+    machine.add(mesh);
+    ledGlows.push(mesh);
+    return mesh;
+  }
+
+  /* 받침 — 무광 검정 굽, 크롬 테, 둘레를 도는 보라 LED, 그리고 이름판 --------- */
+  const base = new THREE.Mesh(new RoundedBoxGeometry(1.88, 0.40, 1.32, 3, 0.05), plinthMaterial);
+  base.position.set(0, 0.20, 0);
+  base.name = "plinth";
   base.castShadow = true;
   base.receiveShadow = true;
   machine.add(base);
-  // 굽 위의 크롬 테. 얇아야 테다 — 두꺼우면 기계가 흰 접시 위에 얹힌 것처럼 보인다.
-  const baseLip = new THREE.Mesh(new RoundedBoxGeometry(2.08, 0.045, 1.50, 2, 0.02), chromeMaterial);
-  baseLip.position.set(0, 0.59, 0);
+  /**
+   * 굽 위의 크롬 테. 판이 아니라 테다 —
+   * 2026-09-03 4라운드: 판으로 두었더니 몸통(1.66 폭)보다 훨씬 넓은 회색 접시가 되어
+   * 기계가 그 위에 얹힌 장난감으로 보였다. 윗면은 무광 검정으로 두고 가장자리만 크롬이다.
+   */
+  const baseLip = new THREE.Mesh(
+    new THREE.ExtrudeGeometry(ringShape(1.94, 1.38, 0.06, 1.84, 1.28, 0.05), { depth: 0.026, bevelEnabled: false, curveSegments: 3 })
+      .rotateX(-Math.PI / 2),
+    chromeMaterial,
+  );
+  baseLip.position.set(0, 0.402, 0);
+  baseLip.name = "plinth-lip";
   baseLip.castShadow = true;
   machine.add(baseLip);
+  // 받침 테를 한 바퀴 도는 LED. 막대 넷이 아니라 구멍 뚫린 테 하나라 모서리가 겹치지 않는다.
+  const baseLed = new THREE.Mesh(
+    new THREE.ExtrudeGeometry(ringShape(1.96, 1.40, 0.06, 1.92, 1.36, 0.05), { depth: 0.035, bevelEnabled: false, curveSegments: 3 })
+      .rotateX(-Math.PI / 2),
+    ledMaterial,
+  );
+  baseLed.position.set(0, 0.30, 0);
+  baseLed.name = "led-base";
+  machine.add(baseLed);
+  addLedGlow(2.32, 0.32, 0, 0.318, 0.80, false);
 
-  // 몸통 — 모서리를 넉넉히 깎은 상자. 각이 살아 있으면 종이 상자로 읽힌다.
-  const body = new THREE.Mesh(new RoundedBoxGeometry(1.66, 1.40, 1.16, 4, 0.17), bodyPaint);
-  body.position.set(0, 1.36, 0);
+  // 이름판 — 굽 앞면에 붙은 크롬 조각과 그 위에 새긴 CLUNK.
+  const namePlate = new THREE.Mesh(new RoundedBoxGeometry(0.52, 0.095, 0.018, 2, 0.008), plinthMaterial);
+  namePlate.position.set(0, 0.20, 0.678);
+  namePlate.name = "nameplate";
+  machine.add(namePlate);
+  const nameTexture = makeLabelTexture("C L U N K", "#cfd6e6", 700, 44, 514);
+  const nameLabel = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.46, 0.086),
+    new THREE.MeshBasicMaterial({ map: nameTexture, transparent: true, opacity: 0.75, depthWrite: false, toneMapped: false }),
+  );
+  nameLabel.position.set(0, 0.20, 0.690);
+  nameLabel.name = "nameplate-text";
+  machine.add(nameLabel);
+
+  /* 몸통 — 배출구 구멍이 뚫린 상자 하나. 구멍이 도형에 들어 있어야 안이 실제로 비어 있다. */
+  // 구멍은 배출되는 알(반지름 0.205)이 위아래로 여유 있게 지나가야 한다 — 0.48 은
+  // 모따기를 빼고 나면 알 지름과 정확히 같아져서 알이 테두리를 스쳤다(2026-09-03 검사).
+  const bodyShape = plateShape(1.59, 1.55, 0.13, 0, 1.25);
+  bodyShape.holes.push(plateShape(0.84, 0.60, 0.04, 0, 0.77) as unknown as THREE.Path);
+  const body = new THREE.Mesh(
+    new THREE.ExtrudeGeometry(bodyShape, {
+      depth: 1.09, bevelEnabled: true, bevelSize: 0.035, bevelThickness: 0.035, bevelSegments: 1, curveSegments: 4, steps: 1,
+    }),
+    bodyPaint,
+  );
+  body.position.set(0, 0, -0.545);
+  body.name = "cabinet";
   body.castShadow = true;
   body.receiveShadow = true;
   machine.add(body);
 
-  // 앞판 — 한 겹 밝은 색으로 박혀 있고, 그 둘레로 얇은 크롬 테가 3 mm 만 삐져나온다.
-  const frontBezel = new THREE.Mesh(new RoundedBoxGeometry(1.36, 1.14, 0.045, 2, 0.055), chromeMaterial);
-  frontBezel.position.set(0, 1.34, 0.588);
-  machine.add(frontBezel);
-  const frontPanel = new THREE.Mesh(new RoundedBoxGeometry(1.30, 1.08, 0.055, 2, 0.05), panelPaint);
-  frontPanel.position.set(0, 1.34, 0.6);
+  // 네 모서리의 검정 팔각 기둥 — 참고 이미지의 "모서리를 깎은 검정 기둥".
+  // 앞의 두 개가 보라 앞판을 액자처럼 가둔다.
+  for (const [x, z] of [[-0.80, 0.545], [0.80, 0.545], [-0.80, -0.545], [0.80, -0.545]] as const) {
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.072, 0.072, 1.54, 8), glossBlack);
+    post.rotation.y = Math.PI / 8;
+    post.position.set(x, 1.25, z);
+    post.name = `corner-post-${x > 0 ? "r" : "l"}${z > 0 ? "f" : "b"}`;
+    post.castShadow = true;
+    machine.add(post);
+  }
+
+  /* 앞판 — 짙은 보라 도장 한 겹. 배출구 자리는 뚫려 있다. */
+  const frontPanel = new THREE.Mesh(
+    new THREE.ExtrudeGeometry(plateShape(1.44, 0.88, 0.06, 0, 1.50), { depth: 0.042, bevelEnabled: false, curveSegments: 4 }),
+    panelPaint,
+  );
+  frontPanel.position.set(0, 0, 0.586);
+  frontPanel.name = "front-panel";
   frontPanel.castShadow = true;
   machine.add(frontPanel);
 
-  // 네 모서리를 세로로 훑는 가는 크롬 기둥. 몸통의 높이를 읽게 해 주는 선이라
-  // 굵으면 선이 아니라 기둥이 되어 기계를 우리처럼 가둔다.
-  for (const [x, z] of [[-0.808, 0.53], [0.808, 0.53], [-0.808, -0.53], [0.808, -0.53]] as const) {
-    const rail = new THREE.Mesh(new THREE.CylinderGeometry(0.024, 0.024, 1.24, 10), chromeMaterial);
-    rail.position.set(x, 1.36, z);
-    rail.castShadow = true;
-    machine.add(rail);
-  }
+  // 앞판을 한 바퀴 도는 보라 LED 띠(두께 없는 테 하나)와 그 둘레의 번짐.
+  const panelLed = new THREE.Mesh(
+    new THREE.ShapeGeometry(ringShape(1.40, 0.84, 0.05, 1.345, 0.785, 0.045), 4),
+    ledMaterial,
+  );
+  panelLed.position.set(0, 1.50, 0.631);
+  panelLed.name = "led-panel";
+  machine.add(panelLed);
+  addLedGlow(1.60, 1.04, 0, 1.50, 0.634, true, 0.055);
 
-  // 리벳 넷 — 앞판 모서리에 박힌 반구. 빛을 한 점씩 되쏜다.
-  for (const [x, y] of [[-0.60, 1.79], [0.60, 1.79], [-0.60, 0.89], [0.60, 0.89]] as const) {
-    const rivet = new THREE.Mesh(new THREE.SphereGeometry(0.036, 14, 10, 0, Math.PI * 2, 0, Math.PI / 2), chromeMaterial);
+  // 리벳 여섯 — 앞판 좌우에 세 쌍. 빛을 한 점씩 되쏜다.
+  for (const [x, y] of [[-0.60, 1.84], [0.60, 1.84], [-0.60, 1.50], [0.60, 1.50], [-0.60, 1.16], [0.60, 1.16]] as const) {
+    const rivet = new THREE.Mesh(new THREE.SphereGeometry(0.032, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), chromeMaterial);
     rivet.rotation.x = Math.PI / 2;
-    rivet.position.set(x, y, 0.632);
+    rivet.position.set(x, y, 0.629);
+    rivet.name = `rivet-${x > 0 ? "r" : "l"}-${y.toFixed(2)}`;
     machine.add(rivet);
   }
 
   /* CLUNK 네온 사인 ---------------------------------------------------------
-     어두운 판 위에 유리관 글자가 붙고, 그 뒤에서 같은 색 후광이 더해진다. */
-  const signTexture = makeSignTexture("#c9a4ff");
-  const signMaterial = new THREE.MeshStandardMaterial({
-    color: 0x0b1020,
+     유광 검정 판 위에 흰 네온관 글자가 뜨고 그 밑에 작은 보라색 부제가 붙는다.
+     판보다 앞, 글자보다 뒤에서 같은 색 후광이 더해진다. */
+  const signTexture = makeSignTexture("#b78bff");
+  const signMaterial = new THREE.MeshBasicMaterial({
     map: signTexture,
-    emissive: new THREE.Color(0xffffff),
-    emissiveMap: signTexture,
-    emissiveIntensity: 1.1,
-    roughness: 0.5,
+    transparent: true,
+    // 네온은 빛이다 — 더해 그려야 검정 판 위에서 관이 타오른다.
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    toneMapped: false,
   });
-  const signFrame = new THREE.Mesh(new RoundedBoxGeometry(1.20, 0.44, 0.07, 2, 0.04), darkMaterial);
-  signFrame.position.set(0, 1.80, 0.59);
+  const signFrame = new THREE.Mesh(new RoundedBoxGeometry(1.10, 0.30, 0.028, 2, 0.025), glossBlack);
+  signFrame.position.set(0, 1.77, 0.648);
+  signFrame.name = "sign-plate";
   machine.add(signFrame);
   // 관 둘레에 번지는 빛. 판보다 앞, 글자보다 뒤에 더해 그린다.
   const signGlowMaterial = new THREE.MeshBasicMaterial({
@@ -944,123 +1408,218 @@ export function createGachaScene(
     opacity: 0,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
+    toneMapped: false,
   });
-  const signGlow = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.78), signGlowMaterial);
-  signGlow.position.set(0, 1.80, 0.626);
+  // 0.62 로 두면 아래 테두리가 크레딧 링(y 1.494)과 0.9 mm 로 맞물려 z 싸움 위험이 된다.
+  const signGlow = new THREE.Mesh(new THREE.PlaneGeometry(1.44, 0.48), signGlowMaterial);
+  signGlow.position.set(0, 1.77, 0.672);
+  signGlow.name = "glow-sign";
+  signGlow.renderOrder = 2;
   machine.add(signGlow);
-  const sign = new THREE.Mesh(new THREE.PlaneGeometry(1.04, 0.325), signMaterial);
-  sign.position.set(0, 1.80, 0.632);
+  const sign = new THREE.Mesh(new THREE.PlaneGeometry(1.02, 0.26), signMaterial);
+  sign.position.set(0, 1.77, 0.677);
+  sign.name = "sign-text";
+  sign.renderOrder = 3;
   machine.add(sign);
 
-  /* 동전 투입구 — 크롬판에 진짜 홈이 파여 있다 --------------------------- */
-  const coinPlate = new THREE.Mesh(new RoundedBoxGeometry(0.40, 0.48, 0.045, 2, 0.035), chromeMaterial);
-  coinPlate.position.set(-0.44, 1.32, 0.635);
+  /* 동전판 — 유광 검정판에 진짜 뚫린 가로 홈과 둥근 단추 ------------------- */
+  // 홈 뒤에 깔리는 어두운 바닥. 앞판보다 앞, 뚫린 판보다 뒤에 있어 홈이 깊어 보인다.
+  const coinBack = new THREE.Mesh(new RoundedBoxGeometry(0.86, 0.20, 0.020, 2, 0.015), recessMaterial);
+  coinBack.position.set(0, 1.42, 0.643);
+  coinBack.name = "coin-recess";
+  machine.add(coinBack);
+  // 판 자체에 홈과 단추 구멍이 뚫려 있다 — 앞에 덧붙인 검은 막대가 아니라 진짜 구멍이다.
+  const coinShape = plateShape(0.86, 0.20, 0.03);
+  coinShape.holes.push(plateShape(0.30, 0.036, 0.014, -0.16, 0) as unknown as THREE.Path);
+  const buttonHole = new THREE.Path();
+  buttonHole.absarc(0.24, 0, 0.078, 0, Math.PI * 2, true);
+  coinShape.holes.push(buttonHole);
+  const coinPlate = new THREE.Mesh(
+    new THREE.ExtrudeGeometry(coinShape, { depth: 0.022, bevelEnabled: false, curveSegments: 6 }),
+    glossBlack,
+  );
+  coinPlate.position.set(0, 1.42, 0.658);
+  coinPlate.name = "coin-plate";
   coinPlate.castShadow = true;
   machine.add(coinPlate);
-  // 홈은 판보다 뒤로 들어가 있어야 홈이다 — 판 앞에 붙이면 그냥 검은 막대다.
-  const coinSlot = new THREE.Mesh(new THREE.BoxGeometry(0.23, 0.045, 0.07), recessMaterial);
-  coinSlot.position.set(-0.44, 1.44, 0.626);
-  machine.add(coinSlot);
-  const coinReturn = new THREE.Mesh(new THREE.CylinderGeometry(0.072, 0.072, 0.07, 18), recessMaterial);
-  coinReturn.rotation.x = Math.PI / 2;
-  coinReturn.position.set(-0.44, 1.21, 0.626);
-  machine.add(coinReturn);
-  const coinRing = new THREE.Mesh(new THREE.TorusGeometry(0.082, 0.011, 8, 22), chromeMaterial);
-  coinRing.position.set(-0.44, 1.21, 0.652);
+  // 구멍 안에 앉은 크롬 단추.
+  const coinButton = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.026, 20), chromeMaterial);
+  coinButton.rotation.x = Math.PI / 2;
+  coinButton.position.set(0.24, 1.42, 0.669);
+  coinButton.name = "coin-button";
+  machine.add(coinButton);
+  /**
+   * 크레딧 자리를 알리는 보라 발광 링. 2026-09-03 10라운드: 밑에 적은 글줄은 첫 화면
+   * (기계가 화면 높이의 90%)에서 5 px 밖에 안 되어 어떤 크기로 키워도 뭉갠다 — 글자
+   * 대신 빛나는 고리 하나가 "여기에 넣는다" 를 말한다. 글줄은 다가갔을 때 읽히는 보조다.
+   */
+  const coinRing = new THREE.Mesh(new THREE.TorusGeometry(0.066, 0.008, 6, 24), ledMaterial);
+  coinRing.position.set(0.24, 1.42, 0.666);
+  coinRing.name = "coin-ring";
   machine.add(coinRing);
+  addLedGlow(0.34, 0.34, 0.24, 1.42, 0.672, false);
+  // 안내 한 줄. 기계에 적힌 글자는 작아야 기계가 커 보인다.
+  // 캔버스와 판의 가로세로가 어긋나면 글자가 옆으로 늘어나 뭉갠다. 둘 다 10.6:1 로 맞추고
+  // 글자를 1.6배로 키운다(34 → 54 px, 판 높이 0.045 → 0.072).
+  const coinLabelTexture = makeLabelTexture("코인 · 크레딧 넣기", "#efe6ff", 700, 54);
+  const coinLabel = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.76, 0.072),
+    new THREE.MeshBasicMaterial({ map: coinLabelTexture, transparent: true, opacity: 0.95, depthWrite: false, toneMapped: false }),
+  );
+  coinLabel.position.set(-0.04, 1.245, 0.637);
+  coinLabel.name = "coin-label";
+  machine.add(coinLabel);
 
   /* 당기는 레버 — 기계 오른쪽 옆면 -----------------------------------------
      받침(옆면에 붙는 원판) + 축(세로 막대) + 둥근 손잡이. 손잡이를 아래로 당기면
      축이 앞쪽 아래로 넘어갔다가 스프링처럼 튕겨 올라온다. 돌리는 것이 아니라
      당기는 것이다. */
-  const leverMount = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.19, 0.12, 24), darkMaterial);
+  const leverMount = new THREE.Mesh(new THREE.CylinderGeometry(0.135, 0.155, 0.085, 20), glossBlack);
   leverMount.rotation.z = Math.PI / 2;
-  leverMount.position.set(0.86, 1.6, 0.02);
+  leverMount.position.set(0.9, 1.6, 0.02);
+  leverMount.name = "lever-mount";
   leverMount.castShadow = true;
   machine.add(leverMount);
-  const leverBoss = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.2, 20), chromeMaterial);
+  const leverBoss = new THREE.Mesh(new THREE.CylinderGeometry(0.062, 0.062, 0.12, 16), chromeMaterial);
   leverBoss.rotation.z = Math.PI / 2;
-  leverBoss.position.set(0.93, 1.6, 0.02);
+  leverBoss.position.set(1.005, 1.6, 0.02);
+  leverBoss.name = "lever-boss";
   leverBoss.castShadow = true;
   machine.add(leverBoss);
 
   // 축이 도는 자리. rotation.x 를 키우면 손잡이가 앞쪽 아래로 내려온다.
   const lever = new THREE.Group();
-  lever.position.set(0.98, 1.6, 0.02);
+  // 2026-09-03 4라운드: 축이 1.13 에 서 있어 옆에서 보면 팔이 허브 옆 허공에서 시작했다.
+  // 팔은 허브 안에서 나와야 한 물건이다.
+  lever.position.set(1.055, 1.6, 0.02);
+  lever.name = "lever";
   machine.add(lever);
-  const leverArm = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.044, 0.62, 16), chromeMaterial);
-  leverArm.position.y = 0.31;
+  // 검정 팔 + 크롬 축 + 빛나는 보라 공. 한 가지 재질로 된 막대는 젓가락으로 읽힌다.
+  const leverArm = new THREE.Mesh(new THREE.CylinderGeometry(0.050, 0.062, 0.34, 14), glossBlack);
+  leverArm.position.y = 0.17;
+  leverArm.name = "lever-arm";
   leverArm.castShadow = true;
   lever.add(leverArm);
+  // 2026-09-03 1라운드: 축이 0.48 에서 끝나고 공이 0.54 에서 시작해 공이 허공에 떠 있었다.
+  // 축은 공 안까지 들어가 있어야 하나의 물건이 된다.
+  const leverShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.030, 0.030, 0.34, 12), chromeMaterial);
+  leverShaft.position.y = 0.44;
+  leverShaft.name = "lever-shaft";
+  leverShaft.castShadow = true;
+  lever.add(leverShaft);
   const leverKnobMaterial = new THREE.MeshPhysicalMaterial({
     color: accent.clone(),
-    roughness: 0.16,
-    metalness: 0.05,
+    roughness: 0.12,
+    metalness: 0,
     clearcoat: 1,
-    clearcoatRoughness: 0.05,
+    clearcoatRoughness: 0.03,
+    // 방 반사를 그대로 받으면 공에 흰 얼룩이 점점이 박혀 때 탄 플라스틱이 된다.
+    envMapIntensity: 0.35,
     emissive: accent.clone(),
-    emissiveIntensity: 0,
+    emissiveIntensity: 0.7,
   });
-  const leverKnob = new THREE.Mesh(new THREE.SphereGeometry(0.135, 22, 16), leverKnobMaterial);
-  leverKnob.position.y = 0.66;
+  const leverKnob = new THREE.Mesh(new THREE.SphereGeometry(0.115, 18, 12), leverKnobMaterial);
+  leverKnob.position.y = 0.665;
+  leverKnob.name = "lever-knob";
   leverKnob.castShadow = true;
   lever.add(leverKnob);
+  // 손잡이 둘레의 빛. 늘 카메라를 향한다(프레임마다 방향을 고쳐 준다).
+  const knobGlowMaterial = new THREE.MeshBasicMaterial({
+    color: accent.clone(),
+    map: makeGlowTexture(0.3),
+    transparent: true,
+    opacity: 0,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    toneMapped: false,
+  });
+  const knobGlow = new THREE.Mesh(new THREE.PlaneGeometry(0.86, 0.86), knobGlowMaterial);
+  knobGlow.name = "glow-lever-knob";
+  knobGlow.position.y = 0.665;
+  knobGlow.renderOrder = 2;
+  lever.add(knobGlow);
 
-  /* 배출구 — 경첩이 위에 달려 안쪽으로 열리는 문 ------------------------- */
-  const mouth = new THREE.Mesh(new THREE.BoxGeometry(0.78, 0.48, 0.34), recessMaterial);
-  mouth.position.set(0, 0.96, 0.42);
+  /* 배출구 — 크롬 테, 짙은 보라 우묵한 통, 바닥에 어린 보라빛, 경첩 문 ------- */
+  // 통은 안쪽 면만 그린다(BackSide). 앞이 뚫린 상자가 되어 몸통의 구멍을 그대로 잇는다.
+  // 통은 구멍보다 커야 한다 — 작으면 구멍의 밝은 안쪽 벽이 테두리로 드러나 회색 상자가 된다.
+  const mouth = new THREE.Mesh(new THREE.BoxGeometry(0.94, 0.70, 0.36), wellPurple);
+  mouth.position.set(0, 0.77, 0.38);
+  mouth.name = "tray-well";
   machine.add(mouth);
-  // 경첩 선 — 문 위쪽을 가로지르는 가는 크롬 봉.
-  const hinge = new THREE.Mesh(new THREE.CylinderGeometry(0.019, 0.019, 0.78, 10), chromeMaterial);
-  hinge.rotation.z = Math.PI / 2;
-  hinge.position.set(0, 1.20, 0.62);
-  machine.add(hinge);
+  // 통 바닥에 어린 옅은 보라. 캡슐이 없어도 배출구가 죽은 구멍으로 보이지 않는다.
+  const trayGlowMaterial = new THREE.MeshBasicMaterial({
+    color: new THREE.Color(LED_PURPLE),
+    map: makeGlowTexture(0.4),
+    transparent: true,
+    opacity: 0,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    toneMapped: false,
+  });
+  const trayGlow = new THREE.Mesh(new THREE.PlaneGeometry(0.74, 0.30).rotateX(-Math.PI / 2), trayGlowMaterial);
+  trayGlow.name = "glow-tray-floor";
+  trayGlow.position.set(0, 0.428, 0.36);
+  machine.add(trayGlow);
+
   const flapHinge = new THREE.Group();
-  flapHinge.position.set(0, 1.18, 0.6);
+  flapHinge.position.set(0, 1.00, 0.60);
   machine.add(flapHinge);
   // 문 자체가 창이다 — 안이 비쳐야 캡슐이 떨어지는 것이 보인다.
   const flap = new THREE.Mesh(
-    new RoundedBoxGeometry(0.72, 0.42, 0.035, 2, 0.02),
+    new RoundedBoxGeometry(0.70, 0.44, 0.026, 2, 0.015),
     new THREE.MeshPhysicalMaterial({
-      color: 0x8fb4e8,
-      roughness: 0.06,
+      color: 0x9a86d8,
+      roughness: 0.04,
       metalness: 0,
       transparent: true,
-      opacity: 0.24,
+      // 2026-09-03 3라운드: 0.22 는 배출구를 회색 유리판으로 덮어 안이 안 보였다.
+      opacity: 0.09,
       clearcoat: 1,
-      clearcoatRoughness: 0.03,
-      envMapIntensity: 1.2,
+      clearcoatRoughness: 0.02,
+      envMapIntensity: 0.7,
+      depthWrite: false,
     }),
   );
-  flap.position.set(0, -0.2, 0);
+  flap.position.set(0, -0.21, 0);
+  flap.name = "tray-flap";
   flapHinge.add(flap);
-  // 창을 두른 크롬 테. 판 넷을 둘러 창틀로 읽히게 한다.
-  for (const [x, y, w, h] of [[0, 1.235, 0.9, 0.045], [0, 0.705, 0.9, 0.045], [-0.43, 0.97, 0.045, 0.575], [0.43, 0.97, 0.045, 0.575]] as const) {
-    const bar = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.055), chromeMaterial);
-    bar.position.set(x, y, 0.615);
-    bar.castShadow = true;
-    machine.add(bar);
-  }
+  // 창을 두른 크롬 테 — 막대 넷이 아니라 구멍 뚫린 테 하나다(모서리가 겹치지 않는다).
+  const trayFrame = new THREE.Mesh(
+    // 2026-09-03 10라운드: 폭을 15% 줄이고 테 두께를 절반(가로 27.5 mm, 세로 30 mm)으로.
+    // 앞면을 가로지르던 큰 회색 사각형이 배출구 크기의 테가 된다.
+    new THREE.ExtrudeGeometry(ringShape(0.82, 0.585, 0.03, 0.765, 0.525, 0.022), {
+      depth: 0.022, bevelEnabled: true, bevelSize: 0.008, bevelThickness: 0.008, bevelSegments: 1, curveSegments: 3,
+    }),
+    chromeMaterial,
+  );
+  // 0.639 는 모따기가 시작하는 자리가 앞판 LED 띠(z 0.631)와 정확히 같은 면이 되어
+  // z 싸움 위험으로 잡혔다(2026-09-03 검사). 7 mm 앞으로 뺀다.
+  trayFrame.position.set(0, 0.77, 0.646);
+  trayFrame.name = "tray-frame";
+  trayFrame.castShadow = true;
+  machine.add(trayFrame);
 
-  // 캡슐이 눕는 바닥
-  const trayFloor = new THREE.Mesh(new THREE.BoxGeometry(0.66, 0.04, 0.34), darkMaterial);
-  trayFloor.position.set(0, 0.74, 0.5);
-  trayFloor.receiveShadow = true;
-  machine.add(trayFloor);
-
-  // 목 — 돔이 앉는 고리
-  const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.82, 0.26, 36), bodyPaint);
-  collar.position.set(0, 2.03, 0);
+  // 목 — 돔이 앉는 검정 고리. 몸통 위에서 좁아지며 유리공을 받는다.
+  const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.545, 0.63, 0.20, 26), bodyPaint);
+  collar.position.set(0, 2.11, 0);
+  collar.name = "collar";
   collar.castShadow = true;
   machine.add(collar);
-  const collarRing = new THREE.Mesh(new THREE.TorusGeometry(0.625, 0.045, 12, 44), chromeMaterial);
+  // 유리공이 앉는 크롬 립. 목보다 굵으면 접시 위의 구슬로 읽힌다 — 딱 목 끝에 두른다.
+  // 2026-09-03 검사: 0.563 반지름으로 목 끝에 두었더니 링이 유리공 안쪽(그 높이의 유리
+  // 반지름 0.617)에 통째로 잠겼다 — 유리 너머로 비치는 띠가 되었다. 유리 테두리 바로
+  // 위, 목보다 조금 바깥에 두른다.
+  const collarRing = new THREE.Mesh(new THREE.TorusGeometry(0.632, 0.021, 6, 28), chromeMaterial);
   collarRing.rotation.x = Math.PI / 2;
-  collarRing.position.set(0, 2.15, 0);
+  collarRing.position.set(0, 2.09, 0);
+  collarRing.name = "collar-ring";
   collarRing.castShadow = true;
   machine.add(collarRing);
   // 돔 바닥과 캡슐이 빠지는 구멍
-  const domeFloor = new THREE.Mesh(new THREE.RingGeometry(0.13, 0.66, 40).rotateX(-Math.PI / 2), darkMaterial);
+  // 구멍은 배출되는 알(반지름 0.205)보다 넓어야 한다 — 좁으면 알이 접시를 뚫고 내려간다.
+  const domeFloor = new THREE.Mesh(new THREE.RingGeometry(0.27, 0.66, 32).rotateX(-Math.PI / 2), recessMaterial);
   domeFloor.position.set(0, DOME_FLOOR, 0);
+  domeFloor.name = "dome-floor";
   domeFloor.receiveShadow = true;
   machine.add(domeFloor);
 
@@ -1084,42 +1643,64 @@ export function createGachaScene(
       side: THREE.FrontSide,
     })
     : new THREE.MeshPhysicalMaterial({
-      color: 0xdce9ff,
-      roughness: 0.05,
+      // 아주 옅은 보랏빛 유리. 파랗게 두면 보라 기계 위에 얹힌 다른 물건으로 읽힌다.
+      color: 0xd8ccff,
+      roughness: 0.04,
       metalness: 0,
       transparent: true,
       // 옅은 유리. 너무 옅으면 유리공이 아예 안 보이고, 짙게 두면 안의 캡슐이 우유에 잠긴다.
-      // 반사를 세게 두어 둥근 모양이 읽히게 한다.
-      opacity: 0.3,
+      // 2026-09-03: 0.3 은 돔을 우윳빛 덩어리로 만들었다 — 안에 든 물건이 상품인데 그것이
+      // 안 보이면 이 화면은 아무 말도 하지 않는다. 옅게 깔고 테두리(프레넬)로 형태를 세운다.
+      opacity: 0.06,
       clearcoat: 1,
       clearcoatRoughness: 0.02,
-      envMapIntensity: 1.5,
+      envMapIntensity: 0.6,
       side: THREE.FrontSide,
       depthWrite: false,
     });
+  /**
+   * 유리 테두리(프레넬) — 스치듯 보이는 각도일수록 보랏빛이 짙어진다.
+   * 진짜 투과 없이 유리를 유리로 읽히게 하는 것은 이 한 줄의 테두리다.
+   */
+  const glassRim = addFresnelRim(glassMaterial, new THREE.Color(0x9b6bff), 1.05, 0.42, "gacha-glass-rim");
   // 적도보다 조금 더 내려온 유리공. 바닥(구멍이 뚫린 접시)이 그 안에 들어가고,
   // 꼭대기는 캡슐을 붓는 투입구만큼 비어 있다.
   const dome = new THREE.Mesh(
-    new THREE.SphereGeometry(DOME_RADIUS, 44, 30, 0, Math.PI * 2, HATCH_PHI, Math.PI * 0.76 - HATCH_PHI),
+    new THREE.SphereGeometry(DOME_RADIUS, 40, 24, 0, Math.PI * 2, HATCH_PHI, Math.PI * 0.76 - HATCH_PHI),
     glassMaterial,
   );
   dome.position.copy(DOME_CENTER);
+  dome.name = "dome-glass";
   dome.renderOrder = 2;
   machine.add(dome);
 
-  // 투입구 — 유리공 꼭대기에 얹힌 금속 깔때기와 뚜껑 손잡이. 캡슐은 여기로 들어온다.
-  const hatchRing = new THREE.Mesh(new THREE.TorusGeometry(HATCH_RADIUS + 0.015, 0.028, 10, 32), chromeMaterial);
+  // 투입구 — 유리공 꼭대기에 얹힌 크롬 뚜껑, 그 테를 도는 보라 LED, 작은 손잡이.
+  // 캡슐은 이 뚜껑 아래 구멍으로 들어온다.
+  const hatchRing = new THREE.Mesh(new THREE.TorusGeometry(HATCH_RADIUS + 0.015, 0.028, 8, 26), chromeMaterial);
   hatchRing.rotation.x = Math.PI / 2;
   hatchRing.position.set(0, HATCH_Y, 0);
+  hatchRing.name = "hatch-ring";
   machine.add(hatchRing);
   const funnel = new THREE.Mesh(
-    new THREE.CylinderGeometry(HATCH_RADIUS + 0.11, HATCH_RADIUS + 0.01, 0.16, 28, 1, true),
-    new THREE.MeshStandardMaterial({ color: 0xb6c0d8, roughness: 0.3, metalness: 0.9, envMapIntensity: 1.3, side: THREE.DoubleSide }),
+    new THREE.CylinderGeometry(0.34, HATCH_RADIUS + 0.024, 0.13, 20, 1, true),
+    new THREE.MeshStandardMaterial({ color: 0x9aa4bc, roughness: 0.18, metalness: 1, envMapIntensity: 1.2, side: THREE.DoubleSide }),
   );
-  funnel.position.set(0, HATCH_Y + 0.06, 0);
+  funnel.position.set(0, HATCH_Y + 0.065, 0);
+  funnel.name = "cap";
   machine.add(funnel);
-  const lidKnob = new THREE.Mesh(new THREE.SphereGeometry(0.062, 16, 12), chromeMaterial);
-  lidKnob.position.set(0, HATCH_Y + 0.17, 0);
+  const capLed = new THREE.Mesh(new THREE.TorusGeometry(0.325, 0.018, 6, 26), ledMaterial);
+  capLed.rotation.x = Math.PI / 2;
+  capLed.position.set(0, HATCH_Y + 0.158, 0);
+  capLed.name = "led-cap";
+  machine.add(capLed);
+  addLedGlow(0.88, 0.26, 0, HATCH_Y + 0.158, 0.05, false);
+  const lidStem = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.22, 10), chromeMaterial);
+  lidStem.position.set(0, HATCH_Y + 0.08, 0);
+  lidStem.name = "lid-stem";
+  machine.add(lidStem);
+  const lidKnob = new THREE.Mesh(new THREE.SphereGeometry(0.058, 14, 10), chromeMaterial);
+  lidKnob.position.set(0, HATCH_Y + 0.21, 0);
+  lidKnob.name = "lid-knob";
   lidKnob.castShadow = true;
   machine.add(lidKnob);
 
@@ -1140,7 +1721,8 @@ export function createGachaScene(
     blending: THREE.AdditiveBlending,
     depthWrite: false,
   });
-  const highlightSoft = new THREE.Mesh(new THREE.PlaneGeometry(0.62, 0.5), highlightSoftMaterial);
+  const highlightSoft = new THREE.Mesh(new THREE.PlaneGeometry(0.46, 0.36), highlightSoftMaterial);
+  highlightSoft.name = "glow-dome-soft";
   highlight.add(highlightSoft);
   const highlightHardMaterial = new THREE.MeshBasicMaterial({
     color: 0xffffff,
@@ -1150,7 +1732,8 @@ export function createGachaScene(
     blending: THREE.AdditiveBlending,
     depthWrite: false,
   });
-  const highlightHard = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.2), highlightHardMaterial);
+  const highlightHard = new THREE.Mesh(new THREE.PlaneGeometry(0.13, 0.13), highlightHardMaterial);
+  highlightHard.name = "glow-dome-hard";
   highlight.add(highlightHard);
   // 대기 중 6~9초마다 돔을 훑고 지나가는 빛 한 줄.
   const glintMaterial = new THREE.MeshBasicMaterial({
@@ -1162,62 +1745,114 @@ export function createGachaScene(
     depthWrite: false,
   });
   const glint = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 1.5), glintMaterial);
+  glint.name = "glow-dome-streak";
   glint.rotation.z = 0.42;
   highlight.add(glint);
 
   /* 캡슐 -------------------------------------------------------------------
      알마다 메시 세 개를 두면 마흔 알에 그리기가 120회다. 인스턴스 메시 세 개로
      묶어 세 번에 그린다. 링은 기하를 미리 눕혀 두어 세 벌이 같은 행렬을 쓴다. */
-  const capsuleGeometryTop = new THREE.SphereGeometry(CAPSULE_RADIUS, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2);
-  const capsuleGeometryBottom = new THREE.SphereGeometry(CAPSULE_RADIUS, 16, 10, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-  const capsuleGeometryRing = new THREE.TorusGeometry(CAPSULE_RADIUS * 0.99, CAPSULE_RADIUS * 0.13, 6, 18)
+  // 알을 키운 만큼 면은 줄인다 — 화면에서 알 하나는 지름 40~90 px 이라 세로 일곱 줄이면
+  // 실루엣이 이미 둥글다. 위 반구만 조금 더 촘촘하다(빛이 여기서 맺힌다).
+  const capsuleGeometryTop = new THREE.SphereGeometry(CAPSULE_RADIUS, 14, 7, 0, Math.PI * 2, 0, Math.PI / 2);
+  const capsuleGeometryBottom = new THREE.SphereGeometry(CAPSULE_RADIUS, 14, 5, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+  const capsuleGeometryRing = new THREE.TorusGeometry(CAPSULE_RADIUS * 0.985, CAPSULE_RADIUS * 0.085, 4, 12)
     .rotateX(Math.PI / 2);
   // 반구는 양면으로 그린다 — 투과 패스가 절반 해상도로 다시 그릴 때 한 면만 있는
   // 반구는 안쪽이 뚫린 조개껍데기처럼 찍혔다(2026-09-02 밤, 카메라가 돔에 다가간 장면).
+  /** 아래 반구 — 등급 색으로 칠한 불투명 플라스틱. 통을 보면 등급이 한눈에 읽힌다. */
   const creamMaterial = new THREE.MeshPhysicalMaterial({
     color: 0xffffff,
-    roughness: 0.22,
+    roughness: 0.2,
     metalness: 0,
     clearcoat: 1,
     clearcoatRoughness: 0.06,
+    envMapIntensity: 0.75,
     side: THREE.DoubleSide,
   });
+  /**
+   * 위 반구 — 맑은 유리 뚜껑. 안에 든 물건이 보여야 이 화면이 말이 된다.
+   *
+   * 2026-09-03 1라운드: 옅게(0.3) 깔고 깊이를 끄자 알이 "뚜껑 없는 그릇" 이 되었다 —
+   * 아래 반구의 안쪽이 그대로 보였다. 깊이를 쓰고(같은 인스턴스 안에서도 깊이 검사는
+   * 제대로 돈다) 테두리를 세우니 비로소 닫힌 유리알이 된다.
+   */
   const capsuleTopMaterial = new THREE.MeshPhysicalMaterial({
-    color: 0xffffff,
-    roughness: 0.12,
-    metalness: 0.02,
+    color: 0xd9ceff,
+    roughness: 0.02,
+    metalness: 0,
+    transparent: true,
+    // 2026-09-03 10라운드: 0.24 + 좁은 테두리(지수 4.5)로는 윗반구가 거의 안 보여
+    // 알이 "스티커 붙은 그릇" 으로 읽혔다. 조금 짙게 깔고 테두리를 넓게 쓴다.
+    opacity: 0.32,
     clearcoat: 1,
-    clearcoatRoughness: 0.04,
-    envMapIntensity: 1.2,
-    side: THREE.DoubleSide,
+    clearcoatRoughness: 0.015,
+    // 방 반사가 뚜껑 위쪽에 밝은 점 하나로 맺힌다 — 유리는 이 한 점으로 유리가 된다.
+    envMapIntensity: 1.5,
+    side: THREE.FrontSide,
   });
+  addFresnelRim(capsuleTopMaterial, new THREE.Color(0xc4aeff), 0.85, 0.4, "gacha-capsule-glass", 2.2);
   // 이음 링은 크롬 — 회색 고무줄이 아니라 빛을 되쏘는 금속 띠여야 알이 알로 읽힌다.
   const capsuleRingMaterial = new THREE.MeshStandardMaterial({
     color: 0xffffff,
-    roughness: 0.22,
-    metalness: 0.9,
-    envMapIntensity: 1.1,
+    roughness: 0.18,
+    metalness: 0.95,
+    envMapIntensity: 1.2,
   });
 
   const MAX_CAPSULES = Math.max(1, quality.capsules);
   const pile = new THREE.Group();
   machine.add(pile);
+
+  /* 알 안에 선 진짜 상품 -----------------------------------------------------
+     상점의 미리보기 그림을 한 장짜리 아틀라스에 굽고, 알마다 제 칸을 본다.
+     알마다 스프라이트를 하나씩 두면 그리기가 마흔 번 는다 — 인스턴스 하나로 묶어
+     한 번에 그리고, 칸 번호만 알마다 다른 속성으로 넣는다. */
+  const atlas = createPreviewAtlas();
+  const artGeometry = new THREE.PlaneGeometry(1, 1);
+  const artTiles = new Float32Array(MAX_CAPSULES * 4);
+  artGeometry.setAttribute("aTile", new THREE.InstancedBufferAttribute(artTiles, 4));
+  const capsuleArtMaterial = new THREE.MeshBasicMaterial({
+    map: atlas.texture,
+    // 잘라 내기(알파 컷) — 반투명이 아니라 있고 없고다. 정렬 문제가 생기지 않는다.
+    alphaTest: 0.42,
+    side: THREE.DoubleSide,
+  });
+  capsuleArtMaterial.onBeforeCompile = (shader) => {
+    shader.vertexShader = "attribute vec4 aTile;\nvarying vec2 vTile;\n" + shader.vertexShader.replace(
+      "#include <begin_vertex>",
+      "#include <begin_vertex>\n  vTile = aTile.xy + uv * aTile.zw;",
+    );
+    shader.fragmentShader = "varying vec2 vTile;\n" + shader.fragmentShader.replace(
+      "#include <map_fragment>",
+      "  diffuseColor *= texture2D( map, vTile );",
+    );
+  };
+  capsuleArtMaterial.customProgramCacheKey = () => "gacha-capsule-art";
+
   const capsuleTops = new THREE.InstancedMesh(capsuleGeometryTop, capsuleTopMaterial, MAX_CAPSULES);
   const capsuleBottoms = new THREE.InstancedMesh(capsuleGeometryBottom, creamMaterial, MAX_CAPSULES);
   const capsuleRings = new THREE.InstancedMesh(capsuleGeometryRing, capsuleRingMaterial, MAX_CAPSULES);
-  for (const mesh of [capsuleTops, capsuleBottoms, capsuleRings]) {
-    mesh.castShadow = true;
+  const capsuleArt = new THREE.InstancedMesh(artGeometry, capsuleArtMaterial, MAX_CAPSULES);
+  for (const mesh of [capsuleTops, capsuleBottoms, capsuleRings, capsuleArt]) {
     mesh.count = 0;
     mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     mesh.frustumCulled = false;
     pile.add(mesh);
   }
+  capsuleBottoms.castShadow = true;
+  capsuleRings.castShadow = true;
+  // 유리와 그림은 그림자를 만들지 않는다 — 알 하나에 그림자가 세 겹이면 더미가 검게 죽는다.
+  capsuleTops.renderOrder = 5;
 
   const capsules: Capsule[] = Array.from({ length: MAX_CAPSULES }, (_unused, index) => ({
     position: new THREE.Vector3(),
     velocity: new THREE.Vector3(),
     spin: new THREE.Vector3(seeded(index, 7) - 0.5, seeded(index, 11) - 0.5, seeded(index, 13) - 0.5),
-    rotation: new THREE.Euler(seeded(index, 17) * 6.28, seeded(index, 19) * 6.28, 0),
+    // 맑은 뚜껑이 위를 보게 앉힌다. 좌우로만 자유롭게 돌고 앞뒤로는 조금만 기운다 —
+    // 아무렇게나 굴려 두면 절반이 색깔 반구를 카메라에 보여 주고, 그러면 통 안에 무엇이
+    // 들었는지 읽히지 않는다(2026-09-03 3라운드에 실제로 그렇게 나왔다).
+    rotation: new THREE.Euler((seeded(index, 17) - 0.5) * 0.7, seeded(index, 19) * 6.28, (seeded(index, 23) - 0.5) * 0.7),
     // 세 가지 크기. 한 가지 크기로 채운 통은 알갱이가 아니라 거품처럼 보인다.
     scale: [0.86, 1, 1.15][Math.floor(seeded(index, 31) * 3) % 3],
     entering: false,
@@ -1227,6 +1862,7 @@ export function createGachaScene(
 
   const matrixScratch = new THREE.Matrix4();
   const quaternionScratch = new THREE.Quaternion();
+  const billboardScratch = new THREE.Quaternion();
   const scaleScratch = new THREE.Vector3();
 
   function ensureCapsules(count: number): void {
@@ -1234,9 +1870,26 @@ export function createGachaScene(
     capsuleTops.count = capsuleCount;
     capsuleBottoms.count = capsuleCount;
     capsuleRings.count = capsuleCount;
+    capsuleArt.count = capsuleCount;
   }
 
-  /** 지금 값들을 인스턴스 행렬에 옮겨 적는다. 한 프레임에 한 번. */
+  /** 알 안의 그림 크기 — 알 지름의 7할. 그보다 크면 유리에 닿아 붙은 스티커로 읽힌다. */
+  const ART_SIZE = CAPSULE_RADIUS * 2 * 0.7;
+  /**
+   * 그림을 알 가운데보다 조금 위에 세운다.
+   * 2026-09-03 2라운드: 가운데에 두었더니 아래 반구(불투명)가 그림의 아랫도리를 가려
+   * 물건이 허리부터 잘려 보였다. 맑은 뚜껑 쪽으로 올려야 물건 하나가 통째로 선다.
+   */
+  const ART_LIFT = CAPSULE_RADIUS * 0.26;
+  const artMatrix = new THREE.Matrix4();
+  const artScale = new THREE.Vector3();
+  const artLift = new THREE.Vector3();
+
+  /**
+   * 지금 값들을 인스턴스 행렬에 옮겨 적는다. 한 프레임에 한 번.
+   * 알 안의 그림만 알과 같이 구르지 않고 늘 카메라를 마주 본다 — 어느 각도에서 봐도
+   * 무엇이 들었는지 읽혀야 하기 때문이다.
+   */
   function writeCapsuleInstances(): void {
     for (let index = 0; index < capsuleCount; index += 1) {
       const capsule = capsules[index];
@@ -1246,10 +1899,15 @@ export function createGachaScene(
       capsuleTops.setMatrixAt(index, matrixScratch);
       capsuleBottoms.setMatrixAt(index, matrixScratch);
       capsuleRings.setMatrixAt(index, matrixScratch);
+      artScale.setScalar(ART_SIZE * capsule.scale);
+      artLift.set(capsule.position.x, capsule.position.y + ART_LIFT * capsule.scale, capsule.position.z);
+      artMatrix.compose(artLift, camera.quaternion, artScale);
+      capsuleArt.setMatrixAt(index, artMatrix);
     }
     capsuleTops.instanceMatrix.needsUpdate = true;
     capsuleBottoms.instanceMatrix.needsUpdate = true;
     capsuleRings.instanceMatrix.needsUpdate = true;
+    capsuleArt.instanceMatrix.needsUpdate = true;
   }
 
   /**
@@ -1273,7 +1931,7 @@ export function createGachaScene(
     );
     capsule.velocity.set(0, 0, 0);
     capsule.entering = false;
-    capsule.rotation.set(seeded(index, 17) * 6.28, seeded(index, 19) * 6.28, 0);
+    capsule.rotation.set((seeded(index, 17) - 0.5) * 0.7, seeded(index, 19) * 6.28, (seeded(index, 23) - 0.5) * 0.7);
   }
 
   /**
@@ -1291,9 +1949,11 @@ export function createGachaScene(
   }
 
   /**
-   * 알마다 색을 칠한다. 위 반구는 등급 색이 바탕이고 거기에 그 상품에서 잰 색이
-   * 조금 섞인다 — 통을 보면 어떤 등급이 얼마나 들었는지 먼저 읽히고, 알마다 제
-   * 물건의 기색이 남는다. 이음 링은 같은 등급 색을 어둡게 쓴 그림자 선이다.
+   * 알마다 색을 칠하고 안에 세울 물건을 정한다.
+   *
+   * 2026-09-03: 위 반구를 맑은 유리로 바꾸면서 등급 색이 아래 반구로 내려왔다 —
+   * 통을 보면 어떤 등급이 얼마나 들었는지는 그대로 읽히고, 그 위로 상품이 보인다.
+   * 아래 반구에는 그 상품에서 잰 색이 조금 섞여 알마다 제 물건의 기색이 남는다.
    */
   function paintCapsule(index: number, spec: CapsuleSpec): void {
     const grade = toColor(spec.ring);
@@ -1306,15 +1966,20 @@ export function createGachaScene(
     const shade = 0.56 + depth * 0.44;
     capsule.scale = capsule.scale * (0.9 + depth * 0.16);
 
-    // 위 반구는 등급 색을 그대로 — 통을 보면 무슨 등급이 얼마나 들었는지 한눈에 읽혀야 한다.
-    // C(크림)도 흰색이 아니라 따뜻한 상아색이어야 회색 덩어리로 죽지 않는다.
-    const top = grade.clone().lerp(measured, 0.16);
+    // 아래 반구가 등급 색이다. C 등급의 잿빛도 채도를 조금 올려야 회색 덩어리로 죽지 않는다.
+    const shell = grade.clone().lerp(measured, 0.2);
     const hsl = { h: 0, s: 0, l: 0 };
-    top.getHSL(hsl);
-    top.setHSL(hsl.h, Math.min(1, hsl.s * 1.25 + 0.05), Math.min(0.72, Math.max(0.42, hsl.l)));
-    capsuleTops.setColorAt(index, top.multiplyScalar(0.7 + shade * 0.3));
-    capsuleBottoms.setColorAt(index, new THREE.Color(0xfff4dc).multiplyScalar(0.72 + shade * 0.28));
-    capsuleRings.setColorAt(index, new THREE.Color(0xe8edf8).multiplyScalar(0.75 + shade * 0.25));
+    shell.getHSL(hsl);
+    // 2026-09-03 3라운드: 채도를 올렸더니 노랑·파랑·자홍 사탕이 되었다. 등급은 읽히되
+    // 한 벌로 보여야 한다 — 채도를 오히려 눌러 짙은 플라스틱 색으로 내린다.
+    shell.setHSL(hsl.h, Math.min(0.78, hsl.s * 0.9 + 0.08), Math.min(0.4, Math.max(0.2, hsl.l * 0.58)));
+    capsuleBottoms.setColorAt(index, shell.multiplyScalar(0.7 + shade * 0.3));
+    // 유리 뚜껑은 알마다 같다 — 아주 옅게 뒤쪽 알만 어둡게 둔다.
+    capsuleTops.setColorAt(index, new THREE.Color(0xd9ceff).multiplyScalar(0.78 + shade * 0.22));
+    capsuleRings.setColorAt(index, new THREE.Color(0xc8d0e0).multiplyScalar(0.66 + shade * 0.34));
+
+    // 알 안에 설 물건 — 그 상품의 미리보기 그림 그대로다.
+    atlas.tile(atlas.slot(spec.preview), artTiles, index * 4);
   }
 
   /**
@@ -1329,12 +1994,16 @@ export function createGachaScene(
 
   /** 배출되는 캡슐 — 쌓인 무리와 따로 움직인다(반구가 갈라져야 해서 인스턴스가 아니다). */
   const prizeTopMaterial = new THREE.MeshPhysicalMaterial({
-    color: 0xffffff, roughness: 0.14, metalness: 0.02, clearcoat: 1, clearcoatRoughness: 0.04,
+    color: 0xd9ceff, roughness: 0.05, metalness: 0, transparent: true, opacity: 0.42,
+    clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.1,
   });
+  addFresnelRim(prizeTopMaterial, new THREE.Color(0xbba0ff), 0.9, 0.5, "gacha-prize-glass");
+  /** 배출된 알의 아래 반구 — 통 안의 알과 같은 등급 색이어야 같은 물건으로 읽힌다. */
+  const prizeBottomMaterial = creamMaterial.clone();
   const prizeRingMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3, metalness: 0.5, emissive: 0x000000 });
   const prize = { group: new THREE.Group(), top: prizeTopMaterial, ring: prizeRingMaterial };
   const prizeTopMesh = new THREE.Mesh(capsuleGeometryTop, prizeTopMaterial);
-  const prizeBottomMesh = new THREE.Mesh(capsuleGeometryBottom, creamMaterial);
+  const prizeBottomMesh = new THREE.Mesh(capsuleGeometryBottom, prizeBottomMaterial);
   const prizeRingMesh = new THREE.Mesh(capsuleGeometryRing, prizeRingMaterial);
   prizeTopMesh.castShadow = true;
   prizeBottomMesh.castShadow = true;
@@ -1562,7 +2231,7 @@ export function createGachaScene(
       capsule.position.addScaledVector(capsule.velocity, dt);
 
       // 바닥
-      const floorY = DOME_FLOOR + CAPSULE_RADIUS;
+      const floorY = DOME_FLOOR + CAPSULE_RADIUS * capsule.scale;
       if (capsule.position.y < floorY) {
         capsule.position.y = floorY;
         capsule.velocity.y = Math.abs(capsule.velocity.y) * (agitated ? 0.52 : 0.12);
@@ -1570,29 +2239,47 @@ export function createGachaScene(
       // 돔 안쪽 벽
       const offset = capsule.position.clone().sub(DOME_CENTER);
       const distance = offset.length();
-      if (distance > DOME_INNER) {
-        offset.multiplyScalar(DOME_INNER / distance);
+      // 큰 알일수록 벽에서 더 일찍 멈춘다. 한 값으로 두면 1.22배 알이 유리를 뚫는다.
+      const wall = DOME_INNER - CAPSULE_RADIUS * (capsule.scale - 1);
+      if (distance > wall) {
+        offset.multiplyScalar(wall / distance);
         capsule.position.copy(DOME_CENTER).add(offset);
         const normal = offset.normalize();
         capsule.velocity.addScaledVector(normal, -2 * capsule.velocity.dot(normal) * 0.55);
       }
     }
 
-    // 겹침 방지 — 구 대 구를 몇 번 밀어낸다. 정확할 필요가 없고 겹쳐 보이지만 않으면 된다.
-    const passes = agitated ? 3 : 1;
-    const minimum = CAPSULE_RADIUS * 2;
+    /**
+     * 겹침 방지 — 구 대 구를 몇 번 밀어낸다.
+     *
+     * 2026-09-03 10라운드: 통을 3분의 2까지 채우면서 알이 조밀해졌다. 한 번만 밀어내던
+     * 것으로는 뒤에 처리한 쌍이 앞의 결과를 되돌려, 가만히 있는 더미에서도 알이 최대
+     * 8 cm 서로 파고들었다. 여섯 번 돌리고 조금 세게(0.6) 밀면 정지 상태에서 겹침이 사라진다.
+     */
+    const passes = 6;
+    /**
+     * 알 껍데기끼리 2 mm 는 떨어져 있어야 한다 — 딱 붙으면 두 알이 한 덩어리로 뭉개진다.
+     *
+     * 2026-09-03 10라운드: 여기서 반지름을 한 값으로 고정해 두었더니 큰 알(1.22배)끼리는
+     * 필요한 거리의 4분의 3만 벌어져 최대 12 cm 를 서로 파고들었다. 알마다 크기가 다르므로
+     * 최소 거리도 알마다 다르다.
+     */
+    // 2 mm 를 목표로 두면 대기 중 숨결에 밀려 순간적으로 1.3 mm 까지 좁아졌다. 3.5 mm 로
+    // 잡아 두면 흔들리는 동안에도 2 mm 밑으로 내려가지 않는다.
+    const gap = 0.0035;
     for (let pass = 0; pass < passes; pass += 1) {
       for (let a = 0; a < capsuleCount; a += 1) {
         for (let b = a + 1; b < capsuleCount; b += 1) {
           const first = capsules[a].position;
           const second = capsules[b].position;
+          const minimum = CAPSULE_RADIUS * (capsules[a].scale + capsules[b].scale) + gap;
           const dx = second.x - first.x;
           const dy = second.y - first.y;
           const dz = second.z - first.z;
           const squared = dx * dx + dy * dy + dz * dz;
           if (squared >= minimum * minimum || squared < 1e-9) continue;
           const distance = Math.sqrt(squared);
-          const push = (minimum - distance) / 2;
+          const push = (minimum - distance) * 0.6;
           const nx = dx / distance;
           const ny = dy / distance;
           const nz = dz / distance;
@@ -1602,12 +2289,20 @@ export function createGachaScene(
       }
     }
 
+    // 흔들 때는 마구 구르고, 가만히 있을 때는 좌우로만 아주 천천히 돈다 —
+    // 대기 중에 앞뒤로 계속 구르면 맑은 뚜껑이 아래로 넘어가 물건이 사라진다.
     const spinRate = agitated ? 3.2 : 0.32;
     for (let index = 0; index < capsuleCount; index += 1) {
       const capsule = capsules[index];
-      capsule.rotation.x += capsule.spin.x * dt * spinRate;
       capsule.rotation.y += capsule.spin.y * dt * spinRate;
-      capsule.rotation.z += capsule.spin.z * dt * spinRate;
+      if (agitated) {
+        capsule.rotation.x += capsule.spin.x * dt * spinRate;
+        capsule.rotation.z += capsule.spin.z * dt * spinRate;
+      } else {
+        // 기울기는 스스로 0 으로 돌아온다. 흔들림이 끝나면 알이 다시 뚜껑을 위로 세운다.
+        capsule.rotation.x = approach(capsule.rotation.x, 0, dt * 0.9);
+        capsule.rotation.z = approach(capsule.rotation.z, 0, dt * 0.9);
+      }
     }
   }
 
@@ -1636,7 +2331,7 @@ export function createGachaScene(
       let y = restY;
       if (t < drop) {
         const k = t / drop;
-        y = 1.34 - (1.34 - restY) * k * k;
+        y = 1.30 - (1.30 - restY) * k * k;
       } else if (t < drop + first) {
         const k = (t - drop) / first;
         y = restY + Math.sin(k * Math.PI) * 0.2;
@@ -1644,7 +2339,10 @@ export function createGachaScene(
         const k = (t - drop - first) / second;
         y = restY + Math.sin(k * Math.PI) * 0.075;
       }
-      prize.group.position.set(0, y, TRAY.z);
+      // 떨어지는 동안에는 몸통 안쪽(z 0.34)에 있다 — 앞판 앞으로 나와 떨어지면 알이
+      // 보라 도장을 뚫고 지나간다. 바닥에 닿은 뒤에 배출구 앞자리로 굴러 나온다.
+      const forward = Math.min(1, Math.max(0, (t - drop) / 0.24));
+      prize.group.position.set(0, y, 0.34 + (TRAY.z - 0.34) * forward);
       prize.group.rotation.x += 0.14;
       prize.group.rotation.z += 0.05;
     }
@@ -1752,16 +2450,17 @@ export function createGachaScene(
   function stepHighlights(dt: number): void {
     camera.matrixWorld.extractBasis(cameraRight, cameraUp, cameraForward);
     const face = DOME_RADIUS * 0.99;
-    const place = (mesh: THREE.Mesh, across: number, up: number) => {
+    const place = (mesh: THREE.Mesh, across: number, up: number, depth = 0.42) => {
       mesh.position.copy(DOME_CENTER)
         .addScaledVector(cameraRight, across * DOME_RADIUS)
         .addScaledVector(cameraUp, up * DOME_RADIUS)
-        .addScaledVector(cameraForward, face * 0.42);
+        .addScaledVector(cameraForward, face * depth);
       mesh.quaternion.copy(camera.quaternion);
     };
     // 왼쪽 위의 넓은 반사와, 그 오른쪽에 맺힌 작고 단단한 점.
-    place(highlightSoft, -0.42, 0.44);
-    place(highlightHard, 0.2, 0.56);
+    place(highlightSoft, -0.44, 0.34, 0.42);
+    // 두 점이 같은 면에 있으면 겹치는 자리에서 서로를 갉는다 — 깊이를 갈라 둔다.
+    place(highlightHard, -0.2, 0.6, 0.52);
 
     if (glintTime >= 0) {
       glintTime += dt;
@@ -1773,7 +2472,7 @@ export function createGachaScene(
       } else {
         glint.visible = true;
         glintMaterial.opacity = Math.sin(k * Math.PI) * 0.5;
-        place(glint, -1.1 + k * 2.2, 0.12);
+        place(glint, -1.1 + k * 2.2, 0.12, 0.32);
         glint.rotation.z = 0.42;
       }
     } else {
@@ -1797,24 +2496,28 @@ export function createGachaScene(
     // 스포트라이트 — 이 순간까지는 가게가 거의 깜깜하다.
     const lit = t < INTRO_SECONDS.spotlight ? 0 : Math.min(1, (t - INTRO_SECONDS.spotlight) / 0.2);
     const dim = 0.1 + 0.9 * lit;
-    ambient.intensity = 0.5 * dim;
-    key.intensity = 2.5 * dim;
-    fill.intensity = 0.62 * dim;
+    ambient.intensity = 0.34 * dim;
+    key.intensity = 1.6 * dim;
+    fill.intensity = 0.72 * dim;
     rim.intensity = 1.9 * dim;
     rimWarm.intensity = 1.05 * dim;
-    sweep.intensity = 2.6 * dim;
-    domeLight.intensity = 2.4 * dim;
-    backLightMaterial.opacity = lit * 0.22;
+    sweep.intensity = 1.9 * dim;
+    domeLight.intensity = 3.4 * dim;
+    // 2026-09-03: 뒤판을 밝게 두면 얇은 유리를 통해 돔 안이 통째로 라벤더색 안개가 된다.
+    // 돔 안은 어둡고 캡슐만 밝아야 "안에 물건이 들었다" 로 읽힌다.
+    backLightMaterial.opacity = lit * 0.05;
     wallMaterial.color.setScalar(0.16 + 0.84 * lit);
-    spot.intensity = lit * 22;
-    coneMaterial.opacity = lit * 0.07;
-    bulbMaterial.opacity = lit * 0.75;
-    wallGlowMaterial.opacity = lit * 0.18;
-    dustMaterial.opacity = lit * 0.3;
-    poolMaterial.opacity = lit * 0.17;
-    contactMaterial.opacity = lit * 0.62;
-    highlightSoftMaterial.opacity = lit * 0.3;
-    highlightHardMaterial.opacity = lit * 0.62;
+    spot.intensity = lit * 12;
+    coneMaterial.opacity = lit * 0.028 * quality.glow;
+    bulbMaterial.opacity = lit * 0.6;
+    wallGlowMaterial.opacity = lit * 0.075;
+    dustMaterial.opacity = lit * 0.26;
+    // 발치의 빛 웅덩이는 세게 — 참고 이미지의 바닥은 기계 색으로 젖어 있다.
+    poolMaterial.opacity = lit * 0.46 * quality.glow;
+    underGlowMaterial.opacity = lit * 0.4 * quality.glow;
+    contactMaterial.opacity = lit * 0.66;
+    highlightSoftMaterial.opacity = lit * 0.14 * quality.glow;
+    highlightHardMaterial.opacity = lit * 0.32;
 
     // 기계가 위에서 내려와 착지한다.
     const fallSpan = INTRO_SECONDS.land - INTRO_SECONDS.spotlight;
@@ -1829,8 +2532,21 @@ export function createGachaScene(
 
     // 네온 사인 — 관과 그 둘레의 후광이 같이 지직거린다.
     const gate = neonGate(t);
-    signMaterial.emissiveIntensity = 1.05 * gate;
+    signMaterial.opacity = 0.15 + 0.85 * gate;
     signGlowMaterial.opacity = 0.34 * gate;
+    // LED 띠도 같은 순간에 들어온다 — 사인만 켜지고 몸통이 어두우면 반쪽만 살아난다.
+    setLed(gate);
+  }
+
+  /** LED 띠 한 벌의 밝기(0~1). 재질 하나와 번짐 판들이 같이 오르내린다. */
+  function setLed(level: number): void {
+    const value = Math.max(0, level);
+    ledMaterial.color.copy(ledBase).multiplyScalar(0.35 + value * 0.85);
+    for (const mesh of ledGlows) {
+      (mesh.material as THREE.MeshBasicMaterial).opacity = value * 0.42 * quality.glow;
+    }
+    trayGlowMaterial.opacity = value * 0.62 * quality.glow;
+    knobGlowMaterial.opacity = value * 0.5 * quality.glow;
   }
 
   /** 연출을 끝난 자리에 그대로 세운다. 건너뛰기와 움직임 최소화가 같이 쓴다. */
@@ -1938,6 +2654,12 @@ export function createGachaScene(
     // 돔 위를 도는 반짝임과 유리에 맺힌 반사.
     if (!reduced) sweep.position.set(Math.cos(clock * 0.6) * 1.15, 3.35, Math.sin(clock * 0.6) * 1.15);
     stepHighlights(dt);
+    // 더해 그리는 빛 판들은 늘 카메라를 마주 본다. 비스듬히 서면 빛이 아니라 판으로 읽힌다.
+    // 기계가 손끝을 따라 돌기 때문에, 카메라 방향을 부모의 회전으로 한 번 되돌려 준다.
+    machine.getWorldQuaternion(billboardScratch).invert().multiply(camera.quaternion);
+    for (const mesh of ledGlows) mesh.quaternion.copy(billboardScratch);
+    lever.getWorldQuaternion(billboardScratch).invert().multiply(camera.quaternion);
+    knobGlow.quaternion.copy(billboardScratch);
 
     /* 가만히 두어도 살아 있다 — 6~9초마다 빛이 돔을 훑고, 캡슐 한 알이 자리를 고친다. */
     if (!reduced && stage === "idle" && !introOn) {
@@ -1960,10 +2682,12 @@ export function createGachaScene(
     // 켜지는 중에는 등장 연출이 직접 잡는다.
     if (!introOn || introTime >= INTRO_SECONDS.neon + 0.3) {
       const breath = reduced ? 0 : Math.sin(clock * Math.PI) * 0.1;
-      // 멀리서(첫 화면) 1.05 는 꺼진 간판으로 읽혔다. 네온은 켜져 있어야 네온이다.
-      const wantedSign = hovered ? 2.8 : 1.9 + breath * 2;
-      signMaterial.emissiveIntensity = approach(signMaterial.emissiveIntensity, wantedSign, dt * 6);
+      signMaterial.opacity = approach(signMaterial.opacity, 1, dt * 6);
       signGlowMaterial.opacity = approach(signGlowMaterial.opacity, hovered ? 0.62 : 0.46 + breath * 0.6, dt * 6);
+      // LED 띠는 0.3 Hz 로 숨 쉰다. 모바일은 숨을 쉬지 않고 켜져만 있다 —
+      // 더해 그리는 판을 매 프레임 바꾸는 것이 작은 기기에서 제일 비싸다.
+      const pulse = reduced || !quality.ledBreath ? 0 : Math.sin(clock * Math.PI * 0.6) * 0.22;
+      setLed((hovered ? 1.15 : 1) + pulse);
     }
 
     /* 레버 — 당기면 끝까지 내려갔다 스프링처럼 튕겨 올라온다. */
@@ -1987,6 +2711,10 @@ export function createGachaScene(
     // 손을 올리면 축이 4° 만큼 앞으로 기운다 — 잡으라는 몸짓이다.
     leverHoverEase = approach(leverHoverEase, leverHover && stage === "idle" ? 1 : 0, dt * 8);
     lever.rotation.x += leverHoverEase * 0.07;
+    // 손을 올리면 공이 1.6배로 부푼다 — 여기가 잡는 자리라는 가장 큰 몸짓이다.
+    const knobScale = 1 + leverHoverEase * 0.6;
+    leverKnob.scale.setScalar(knobScale);
+    knobGlow.scale.setScalar(knobScale);
 
     // 손잡이의 발광 — 손을 올렸을 때와 등장 연출의 마지막 반짝임.
     if (knobGlint >= 0) {
@@ -2004,14 +2732,14 @@ export function createGachaScene(
     const wantedJostle = domeHover && stage === "idle" ? 0.35 : 0;
     jostle = Math.max(wantedJostle, jostle - dt * 1.6);
     // 손을 올린 동안에는 유리의 반사도 조금 밝아진다(움직임을 줄여 달라도 남는 반응).
-    highlightSoftMaterial.opacity = approach(highlightSoftMaterial.opacity, domeHover ? 0.46 : 0.3, dt * 6);
+    highlightSoftMaterial.opacity = approach(highlightSoftMaterial.opacity, (domeHover ? 0.26 : 0.14) * quality.glow, dt * 6);
 
     // 배출구 문 — 캡슐이 나올 때만 안쪽으로 열린다.
     const flapOpen = stage === "impact" && stageTime > 0.4 && stageTime < 0.95 ? -1.05 : 0;
     flapHinge.rotation.x = approach(flapHinge.rotation.x, flapOpen, dt * 9);
 
     // 배출구 조명
-    const wantedTray = stage === "capsule" ? 5.5 : stage === "impact" && stageTime > 0.6 ? 3.2 : 0;
+    const wantedTray = stage === "capsule" ? 3.2 : stage === "impact" && stageTime > 0.6 ? 1.8 : 0;
     trayLight.intensity = approach(trayLight.intensity, wantedTray, dt * 5);
 
     // 상품이 앞으로 나오는 동안에만 기계를 덮는다.
@@ -2094,6 +2822,18 @@ export function createGachaScene(
     };
   }
 
+  /**
+   * 검증용 손잡이. 주소에 ?audit=1 이 있을 때만 걸린다 — 겹치는 면(coplanar)·꿰뚫는
+   * 삼각형·레버 스윙 여유를 재는 스크립트가 기계 하나를 통째로 내보내야 하기 때문이다.
+   * 보통 방문에서는 아무 일도 일어나지 않는다.
+   */
+  if (typeof window !== "undefined" && /[?&]audit=1/.test(window.location.search)) {
+    (window as unknown as { __gachaAudit?: unknown }).__gachaAudit = {
+      THREE, scene, machine, lever, camera, capsules,
+      dome: { centre: DOME_CENTER, radius: DOME_RADIUS, floor: DOME_FLOOR, capsuleRadius: CAPSULE_RADIUS },
+    };
+  }
+
   // 통은 비어 있는 채로 선다. 카탈로그가 도착하면 setCapsules 가 쏟아 붓는다.
   ensureCapsules(0);
   // 아직 startIntro 를 부르지 않았어도 첫 프레임부터 가게가 켜져 있어야 한다.
@@ -2109,6 +2849,7 @@ export function createGachaScene(
         if (capsuleTops.instanceColor) capsuleTops.instanceColor.needsUpdate = true;
         if (capsuleBottoms.instanceColor) capsuleBottoms.instanceColor.needsUpdate = true;
         if (capsuleRings.instanceColor) capsuleRings.instanceColor.needsUpdate = true;
+        artGeometry.getAttribute("aTile").needsUpdate = true;
       }
       // 움직임을 줄여 달라는 설정에서는 캡슐 물리가 아예 돌지 않는다 — 쏟아 붓는 대신
       // 채워진 통을 그대로 보여 준다.
@@ -2118,7 +2859,12 @@ export function createGachaScene(
     },
     setPrizeCapsule(spec) {
       const grade = toColor(spec.ring);
-      prize.top.color.copy(grade.clone().lerp(toColor(spec.color), 0.24));
+      const shell = grade.clone().lerp(toColor(spec.color), 0.2);
+      const hsl = { h: 0, s: 0, l: 0 };
+      shell.getHSL(hsl);
+      shell.setHSL(hsl.h, Math.min(0.72, hsl.s * 0.82 + 0.06), Math.min(0.36, Math.max(0.18, hsl.l * 0.52)));
+      prizeBottomMaterial.color.copy(shell);
+      prize.top.color.copy(new THREE.Color(0xd9ceff));
       prize.ring.color.copy(grade.clone().multiplyScalar(0.5));
       prize.ring.emissive.copy(grade).multiplyScalar(0.4);
       sparkMaterial.color.copy(grade);
@@ -2127,8 +2873,15 @@ export function createGachaScene(
     },
     setAccent(hex) {
       const color = toColor(hex);
-      bodyPaint.color.copy(color).lerp(new THREE.Color(0x180f26), 0.66);
-      panelPaint.color.copy(color).lerp(new THREE.Color(0x241536), 0.4);
+      // 2026-09-03: 기계 자체는 어느 테마에서도 짙은 보라 캐비닛이다(운영자 참고 이미지).
+      // 테마 색은 도장에 아주 조금만 섞이고, 실제로 바뀌는 것은 빛 — LED·손잡이·웅덩이다.
+      bodyPaint.color.copy(new THREE.Color(SIDE_PURPLE)).lerp(color, 0.1);
+      panelPaint.color.copy(new THREE.Color(PANEL_PURPLE)).lerp(color, 0.14);
+      ledBase.copy(color).lerp(new THREE.Color(0xffffff), 0.12);
+      trayGlowMaterial.color.copy(ledBase);
+      knobGlowMaterial.color.copy(ledBase);
+      glassRim.color.copy(color).lerp(new THREE.Color(0x2a1650), 0.34);
+      for (const mesh of ledGlows) (mesh.material as THREE.MeshBasicMaterial).color.copy(ledBase);
       leverKnobMaterial.color.copy(color);
       leverKnobMaterial.emissive.copy(color);
       // 발치의 빛 웅덩이는 기계 색이 바닥에 번진 것이다.
@@ -2270,6 +3023,7 @@ export function createGachaScene(
     },
     dispose() {
       emptyPrizeArt();
+      atlas.dispose();
       for (const item of disposables) item.dispose();
       environment.texture.dispose();
       pmrem.dispose();
