@@ -320,7 +320,8 @@ function applyCameraFraming(scene: SceneWithCameraHooks, host: HTMLElement | nul
   const navH = navBandHeight();
   const h = Math.max(320, host?.clientHeight ?? window.innerHeight);
   scene.setTopInset?.(navBandHeight());
-  scene.setFrameFill?.(Math.min(1.2, Math.max(1, h / Math.max(1, h - navH))));
+  // 1.04: 받침 아래에 숨 쉴 여백 — 없으면 밑동이 화면 끝에 닿는다.
+  scene.setFrameFill?.(Math.min(1.2, Math.max(1, (h / Math.max(1, h - navH)) * 1.04)));
 }
 
 /** 내비가 앉는 띠의 높이(px). CSS 의 --gc-nav-h 가 하나뿐인 출처다. */

@@ -1030,7 +1030,9 @@ html:has(.gc-film) { --gc-nav-h: 84px; }
   /* 내비 높이만큼의 위 여백은 이제 장면이 setTopInset(--gc-nav-h)으로 카메라를 들어 만든다.
      캔버스는 내비 뒤까지 올라가고(내비 띠가 가린다), 여기서는 제목 띠(--gc-head-h)만 뺀다. */
   top: var(--gc-head-h);
-  left: var(--gc-stage-left);
+  /* 왼쪽 열은 첫 샷(제목이 보일 때)에만 비운다. 스크롤이 진행되면 캔버스가 전폭으로 펴져
+     근접샷에서 기계가 캔버스 모서리에 잘리는 경계선이 사라진다(ramp는 GachaMachine3D가 준다). */
+  left: calc(var(--gc-stage-left) * var(--gc-left-ramp, 1));
   right: 0;
   bottom: 0;
   width: auto;
