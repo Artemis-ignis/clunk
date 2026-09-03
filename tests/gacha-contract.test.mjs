@@ -763,3 +763,69 @@ test("랜딩은 캡슐 머신 한 대를 렌더한다", async () => {
   assert.doesNotMatch(source, /LandingMarketShowcase/u);
   assert.doesNotMatch(source, /const SHOWCASE =/u);
 });
+
+
+/**
+ * 동전 계수기 — 무대 오른쪽 위 (2026-09-03)
+ * 운영자: "크레딧은 일종의 코인처럼 우측 상단에 보이게 해야 실제 가챠 머신 돌리는 느낌이
+ * 난다. 실시간으로 코인이 돌아가거나 반짝이게." 여기서 지키는 것은 넷이다 — 부품이 있고,
+ * 숫자는 서버에서 오고, 움직임을 줄여 달라면 멈추고, 좁은 화면에서 제목을 밀지 않는다.
+ */
+test("무대 오른쪽 위의 동전 계수기가 크레딧을 든다", async () => {
+  const hud = await readFile(new URL("../app/components/gacha/CoinHud.tsx", import.meta.url), "utf8");
+  const machine = await readFile(new URL("../app/components/gacha/GachaMachine3D.tsx", import.meta.url), "utf8");
+  const css = await readFile(new URL("../app/components/gacha/gacha.css", import.meta.url), "utf8");
+
+  // 기계는 무대(gc-film-sticky) 안, 캔버스 밖에 계수기를 건다.
+  assert.match(machine, /import \{ CoinHud \} from "\.\/CoinHud";/u);
+  assert.match(machine, /<CoinHud$/mu);
+  assert.match(hud, /className="gc-coin-hud"/u);
+
+  // 숫자는 전부 서버에서 온다 — 이 파일에는 크레딧 숫자가 하나도 적혀 있지 않다.
+  assert.doesNotMatch(hud, /\d+\s*크레딧|크레딧\s*\d+/u);
+  assert.match(hud, /signupGrant/u);
+  assert.match(hud, /로그인하면 \{signupGrant\}크레딧/u);
+  // 가입 지급분은 서버의 SIGNUP_GRANT_CREDITS 를 그대로 싣는 access 블록에서 읽는다.
+  assert.match(machine, /payload\.access\?\.a_signed_in_workspace_adds\?\.credits_on_signup/u);
+  const access = await readFile(new URL("../app/api/_lib/access.ts", import.meta.url), "utf8");
+  assert.match(access, /credits_on_signup: SIGNUP_GRANT_CREDITS,/u);
+
+  // 잔액은 /api/credits 가 준 값이고, 자릿수가 흔들리지 않게 tabular-nums 로 선다.
+  assert.match(machine, /const payload = await response\.json\(\) as CreditsPayload;/u);
+  assert.match(css, /\.gc-coin-count \{[^}]*font-variant-numeric: tabular-nums;/u);
+  // 화면 낭독기에게도 같은 값을 준다.
+  assert.match(hud, /aria-live="polite"/u);
+  assert.match(hud, /aria-label=\{known \? `보유 크레딧 \$\{credits\}` : "보유 크레딧 확인 중"\}/u);
+
+  // 뽑기가 무료라는 말은 카드가 값을 지울 때 쓰는 그 플래그(beta)에서만 나온다.
+  assert.match(machine, /freePulls=\{beta\}/u);
+  assert.match(hud, /\{freePulls \? <small className="gc-coin-note">뽑기는 무료<\/small> : null\}/u);
+
+  // 레버가 내려가는 동안 동전이 한 바퀴 넘어간다. 차감은 흉내 내지 않는다.
+  assert.match(machine, /inserting=\{stage === "pull" \|\| stage === "shake" \|\| stage === "impact"\}/u);
+  assert.match(css, /@keyframes gc-coin-insert/u);
+  // 뽑는 동안 바뀌는 것은 동전의 몸짓뿐이다 — inserting 은 숫자 근처에 가지 않는다.
+  assert.match(hud, /data-insert=\{inserting \? "" : undefined\}/u);
+  assert.doesNotMatch(hud, /inserting \? [^}]*크레딧/u);
+
+  // 실시간으로 돌고 반짝인다.
+  assert.match(css, /animation: gc-coin-spin 6s linear infinite;/u);
+  assert.match(css, /animation: gc-coin-sparkle 4s ease-in-out infinite;/u);
+
+  // 자리 — 내비 띠 아래, 오른쪽.
+  assert.match(css, /\.gc-coin-hud \{[^}]*top: calc\(var\(--gc-nav-h, 84px\) \+ 16px\);[^}]*right: max\(20px, 4vw\);/u);
+
+  // 움직임을 줄여 달라면 동전은 멈춰 선다 — 돌지도, 반짝이지도 않는다.
+  assert.match(
+    css,
+    /@media \(prefers-reduced-motion: reduce\) \{\s*\.gc-coin-spin,\s*\.gc-coin-hud\[data-insert\] \.gc-coin-spin,\s*\.gc-coin-shine,\s*\.gc-coin-sparkle \{ animation: none !important; \}/u,
+  );
+
+  // 좁은 화면 — 0.85 배로 줄고, 제목 칸이 그만큼 비켜 준다(글자와 겹치지 않는다).
+  assert.match(css, /@media \(max-width: 767px\) \{[\s\S]*?\.gc-film \{ --gc-coin-w: 130px; \}/u);
+  assert.match(css, /\.gc-coin-hud \{[^}]*transform: scale\(0\.85\);/u);
+  assert.match(css, /width: min\(680px, calc\(92vw - var\(--gc-coin-w\)\)\);/u);
+
+  // 아래 판의 잔액 글줄은 걷어냈다 — 같은 값을 두 번 말하지 않는다.
+  assert.doesNotMatch(machine, /gc3-coin-line/u);
+});

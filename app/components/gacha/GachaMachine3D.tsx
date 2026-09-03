@@ -15,6 +15,7 @@ import Image from "next/image";
 
 import Link from "../NativeLink";
 import { CapsuleMachine } from "./CapsuleMachine";
+import { CoinHud } from "./CoinHud";
 import { GachaPoster, POSTER_IMAGES, type PosterVariant } from "./GachaPoster";
 import { SCROLL_PULL, SCROLL_OPEN_AT, SCROLL_REARM_BELOW } from "./gacha-scroll";
 import { PrizeCard, type ClaimState } from "./PrizeCard";
@@ -73,7 +74,17 @@ import { useGachaWebMcp } from "./useGachaWebMcp";
  * 상점이 이미 쓰는 흐름을 그대로 부른다. WebGL 이 없는 브라우저는 SVG 머신으로 되돌아간다.
  */
 
-type CatalogPayload = { ok?: boolean; listings?: GachaListing[]; checkout?: { status?: string } };
+type CatalogPayload = {
+  ok?: boolean;
+  listings?: GachaListing[];
+  checkout?: { status?: string };
+  /**
+   * 로그인하지 않은 사람에게 서버가 스스로 말해 주는 것들(app/api/_lib/access.ts).
+   * credits_on_signup 은 서버의 SIGNUP_GRANT_CREDITS 그대로다 — 화면은 그 숫자를 따로
+   * 적어 두지 않고 여기서 읽는다.
+   */
+  access?: { a_signed_in_workspace_adds?: { credits_on_signup?: number } };
+};
 type SessionPayload = { authenticated?: boolean };
 type CreditsPayload = { ok?: boolean; credits?: number };
 type CheckoutPayload = { ok?: boolean; status?: string; downloadUrl?: string; error?: string };
@@ -348,6 +359,8 @@ export function GachaMachine3D() {
   const [load, setLoad] = useState<LoadState>("loading");
   const [authenticated, setAuthenticated] = useState(false);
   const [credits, setCredits] = useState<number | null>(null);
+  /** 가입하면 들어오는 크레딧. /api/marketplace 가 실어 주는 서버 상수다. */
+  const [signupGrant, setSignupGrant] = useState<number | null>(null);
   const [theme, setTheme] = useState<ThemeId>("all");
   const [stage, setStage] = useState<Stage>("idle");
   const [prize, setPrize] = useState<GachaListing | null>(null);
@@ -474,6 +487,9 @@ export function GachaMachine3D() {
         if (!alive) return;
         setListings(payload.listings);
         setBeta(payload.checkout?.status === "PAYMENT_PROVIDER_NOT_CONFIGURED");
+        // 동전 계수기가 로그아웃한 사람에게 보여 줄 숫자. 서버가 준 값만 쓴다.
+        const grant = payload.access?.a_signed_in_workspace_adds?.credits_on_signup;
+        if (typeof grant === "number") setSignupGrant(grant);
         setLoad("ready");
       })
       .catch(() => { if (alive) setLoad("failed"); });
@@ -521,14 +537,10 @@ export function GachaMachine3D() {
   );
 
   /**
-   * 로그인한 사람에게만 잔액 한 줄. 값이나 베타 이야기는 무대에도, 이 판에도 적지
-   * 않는다 — 뽑고 나서 카드에서 한 번에 읽는 편이 낫다(운영자 지시 2026-09-02).
+   * 잔액은 이제 무대 오른쪽 위의 동전 계수기(CoinHud)가 든다 — 아래 판의 글줄은
+   * 화면을 내리기 전에는 보이지 않았다(운영자 지시 2026-09-03). 판에는 안내와
+   * 오류 줄만 남는다.
    */
-  const creditLine = !authenticated
-    ? null
-    : credits === null
-      ? "크레딧을 확인하는 중입니다"
-      : `내 크레딧 ${credits.toLocaleString("ko-KR")}개`;
 
   /* 장면 만들기 -------------------------------------------------------------
      카탈로그를 기다리지 않는다. 캔버스와 기계가 먼저 서고, 캡슐은 나중에 들어온다. */
@@ -1252,6 +1264,16 @@ export function GachaMachine3D() {
       {/* 긴 트랙. 내려가는 동안 무대는 화면에 붙어 있고 스크롤이 카메라를 옮긴다. */}
       <div className="gc-film-track" ref={trackRef}>
         <div className="gc-film-sticky">
+          {/* 오락실 기계의 크레딧 표시. 무대 안이지만 캔버스 밖이라 3D 가 다시 그려도
+              살아 있고, 내비 띠 아래에 앉아 메뉴를 가리지 않는다. */}
+          <CoinHud
+            authenticated={authenticated}
+            credits={credits}
+            freePulls={beta}
+            signupGrant={signupGrant}
+            loginHref={loginHrefFor(prize)}
+            inserting={stage === "pull" || stage === "shake" || stage === "impact"}
+          />
           <div
             className="gc3-stage"
             ref={stageRef}
@@ -1350,7 +1372,6 @@ export function GachaMachine3D() {
       <div className="gc3-below">
         <div className="gc3-side">
           <div className="gc3-panel">
-            {creditLine ? <p className="gc3-coin-line">{creditLine}</p> : null}
             {notice ? (
               <p className="gc3-notice" role="status">
                 {notice} <Link href="/marketplace" prefetch={false}>마켓에서 직접 확인하기</Link>

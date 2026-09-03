@@ -1137,3 +1137,176 @@ html:has(.gc-film) { --gc-nav-h: 84px; }
   .gc-beat-head p { font-size: 0.86rem; }
   .gc-beat-lever { top: calc(var(--gc-nav-h) + 3svh); }
 }
+
+/* ============================================================================
+   동전 계수기 — 무대 오른쪽 위 (2026-09-03)
+   운영자: "크레딧은 일종의 코인처럼 우측 상단에 보이게 해야 실제 가챠 머신 돌리는 느낌이
+   난다. 실시간으로 코인이 돌아가거나 반짝이게." 잔액은 아래 판의 글줄이 아니라 오락실
+   기계의 크레딧 표시처럼 무대 안, 내비 띠 바로 밑에 산다. 동전은 CSS 로만 지은 원반이고
+   Y 축으로 계속 돌면서 4초에 한 번 반짝인다.
+   ========================================================================= */
+.gc-coin-hud {
+  position: absolute;
+  z-index: 8;
+  top: calc(var(--gc-nav-h, 84px) + 16px);
+  right: max(20px, 4vw);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(196, 160, 255, 0.28);
+  background: linear-gradient(180deg, rgba(24, 16, 44, 0.86) 0%, rgba(12, 8, 26, 0.88) 100%);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  pointer-events: auto;
+}
+/* 로그아웃 쪽은 한 치수 작다 — 아직 셀 잔액이 없다. */
+.gc-coin-hud[data-signed-out] { padding: 0; border-color: rgba(196, 160, 255, 0.22); }
+
+/* 동전 --------------------------------------------------------------------- */
+.gc-coin { position: relative; flex: none; width: 30px; height: 30px; perspective: 220px; }
+.gc-coin-spin {
+  position: absolute; inset: 0;
+  transform-style: preserve-3d;
+  animation: gc-coin-spin 6s linear infinite;
+}
+.gc-coin-face,
+.gc-coin-back {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  backface-visibility: hidden;
+  display: grid; place-items: center;
+}
+.gc-coin-face {
+  transform: translateZ(2px);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 34% 28%, #fff4c9 0%, #f6cf63 32%, #d79a26 62%, #a56b12 100%);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 240, 190, 0.6),
+    inset 0 -3px 6px rgba(120, 70, 0, 0.55),
+    0 0 14px rgba(246, 207, 99, 0.35);
+}
+.gc-coin-face i {
+  font-style: normal;
+  font-weight: 900;
+  font-size: 15px;
+  line-height: 1;
+  color: #8a5a0c;
+  text-shadow: 0 1px 0 rgba(255, 245, 205, 0.85), 0 -1px 0 rgba(96, 56, 0, 0.5);
+}
+/* 뒷면은 무늬만 있는 테두리 — 글자가 뒤집혀 보이지 않게 따로 둔다. */
+.gc-coin-back {
+  transform: rotateY(180deg) translateZ(2px);
+  background:
+    repeating-conic-gradient(from 0deg, rgba(140, 88, 12, 0.55) 0deg 6deg, rgba(246, 207, 99, 0.9) 6deg 12deg),
+    radial-gradient(circle at 40% 30%, #f8dc90 0%, #c78d22 70%, #96610f 100%);
+  box-shadow: inset 0 0 0 2px rgba(255, 240, 190, 0.55), inset 0 -3px 6px rgba(120, 70, 0, 0.5);
+}
+/* 옆면 — 앞뒷면과 직각으로 서 있다가 동전이 옆으로 설 때 정면으로 돌아온다.
+   이것이 없으면 6초에 두 번 동전이 통째로 사라진다. */
+.gc-coin-rim {
+  position: absolute;
+  top: 1px; bottom: 1px;
+  left: calc(50% - 2px);
+  width: 3px;
+  border-radius: 2px;
+  transform: rotateY(90deg);
+  background: linear-gradient(180deg, #f8dc90 0%, #d79a26 46%, #8f5c0d 100%);
+}
+
+/* 표면을 훑고 지나가는 빛. 3D 회전과 따로 돌아 금속처럼 보이게 한다. */
+.gc-coin-shine {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0.72) 50%, rgba(255, 255, 255, 0) 62%);
+  background-size: 260% 100%;
+  mix-blend-mode: screen;
+  animation: gc-coin-shine 6s linear infinite;
+}
+/* 4초에 한 번 튀는 별. 자리는 동전 오른쪽 위 모서리다. */
+.gc-coin-sparkle {
+  position: absolute;
+  top: -3px; right: -4px;
+  width: 11px; height: 11px;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom, transparent 44%, var(--gc-neon, #e9d5ff) 44% 56%, transparent 56%),
+    linear-gradient(to right, transparent 44%, var(--gc-neon, #e9d5ff) 44% 56%, transparent 56%);
+  filter: drop-shadow(0 0 4px rgba(233, 213, 255, 0.9));
+  opacity: 0;
+  animation: gc-coin-sparkle 4s ease-in-out infinite;
+}
+
+@keyframes gc-coin-spin { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+@keyframes gc-coin-shine { from { background-position: 160% 0; } to { background-position: -160% 0; } }
+@keyframes gc-coin-sparkle {
+  0%, 84% { opacity: 0; transform: scale(0.4) rotate(0deg); }
+  90% { opacity: 1; transform: scale(1) rotate(45deg); }
+  100% { opacity: 0; transform: scale(0.4) rotate(90deg); }
+}
+/* 레버가 내려가는 동안 — 동전 하나를 밀어 넣는 몸짓. 숫자는 그대로다(뽑기는 무료). */
+@keyframes gc-coin-insert {
+  0% { transform: rotateY(0deg) scale(1); }
+  45% { transform: rotateY(200deg) scale(1.16); }
+  100% { transform: rotateY(360deg) scale(1); }
+}
+.gc-coin-hud[data-insert] .gc-coin-spin { animation: gc-coin-insert 620ms cubic-bezier(0.3, 0, 0.2, 1) infinite; }
+
+/* 숫자 --------------------------------------------------------------------- */
+.gc-coin-body { display: grid; gap: 1px; }
+.gc-coin-read { display: flex; align-items: baseline; gap: 4px; }
+.gc-coin-count {
+  font-variant-numeric: tabular-nums;
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  color: #ffe9a8;
+  text-shadow: 0 0 10px rgba(246, 207, 99, 0.45);
+}
+.gc-coin-unit { font-size: 0.74rem; font-weight: 700; color: var(--v5-ink-dim); letter-spacing: 0.02em; }
+.gc-coin-note { font-size: 0.72rem; line-height: 1.2; color: var(--v5-ink-dim); letter-spacing: 0.01em; }
+.gc-coin-join {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 13px 7px 9px;
+  border-radius: 999px;
+  text-decoration: none;
+}
+.gc-coin-join b { font-size: 0.74rem; font-weight: 800; color: var(--gc-neon, #e9d5ff); letter-spacing: -0.01em; }
+.gc-coin-join:hover b { color: #fff; }
+.gc-coin-join:focus-visible { outline: 2px solid var(--gc-accent); outline-offset: 3px; }
+
+/* 좁은 화면 — 제목 띠의 오른쪽 끝. 제목은 그만큼 왼쪽으로 물러난다. ---------- */
+@media (max-width: 767px) {
+  /* 동전 칩이 띠에서 가져가는 폭(여백 포함). 제목 칸이 이 값을 그대로 비켜 준다. */
+  .gc-film { --gc-coin-w: 130px; }
+  .gc-coin-hud {
+    top: calc(var(--gc-nav-h, 76px) + 8px);
+    right: 12px;
+    transform: scale(0.85);
+    transform-origin: top right;
+  }
+  .gc-coin-hud[data-signed-out] .gc-coin-join b { max-width: 68px; }
+  .gc-beat-head {
+    width: min(680px, calc(92vw - var(--gc-coin-w)));
+    --gc-beat-x: calc(-50% - var(--gc-coin-w) / 2);
+  }
+}
+
+/* 움직임을 줄여 달라는 설정이면 동전은 멈춰 선다 — 돌지도, 반짝이지도 않는다. */
+@media (prefers-reduced-motion: reduce) {
+  .gc-coin-spin,
+  .gc-coin-hud[data-insert] .gc-coin-spin,
+  .gc-coin-shine,
+  .gc-coin-sparkle { animation: none !important; }
+  .gc-coin-sparkle { opacity: 0.65; transform: rotate(45deg); }
+}
+/* 장면이 스스로 '움직임 줄이기' 로 서 있을 때도 같다. */
+.gc3[data-reduced] .gc-coin-spin,
+.gc3[data-reduced] .gc-coin-shine,
+.gc3[data-reduced] .gc-coin-sparkle { animation: none !important; }
+.gc3[data-reduced] .gc-coin-sparkle { opacity: 0.65; transform: rotate(45deg); }
