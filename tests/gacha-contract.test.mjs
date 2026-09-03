@@ -761,6 +761,9 @@ test("랜딩은 캡슐 머신 한 대를 렌더한다", async () => {
   // 뽑는 것은 손으로 레버를 당기거나 누를 때뿐이다. 스크롤이 다시 뽑게 만들지 않는다.
   assert.doesNotMatch(machine, /SCROLL_PULL|SCROLL_OPEN_AT|SCROLL_REARM_BELOW|scrollFired/u);
   assert.match(machine, /스크롤은 카메라만 옮긴다/u);
+  // 뽑기 단추는 동전을 먼저 넣고 레버를 내린 뒤에 뽑는다.
+  assert.match(machine, /playCoinInsert\(\)/u);
+  assert.match(machine, /setAttribute\("data-coin", "1"\)/u);
   // 손을 대지 않아도 캡슐은 잠깐 뒤 열린다 — 막다른 길을 남기지 않는다.
   assert.match(machine, /openLiveRef\.current\(\)/u);
   const scroll = await readFile(new URL("../app/components/gacha/gacha-scroll.ts", import.meta.url), "utf8");
@@ -968,7 +971,7 @@ test("무대는 세 칸이고, 기계는 두 칸 사이에 선다", async () => 
   assert.match(css, /\.gc-beat-head h1 \{ font-size: clamp\(4\.1rem, 7vw, 7rem\); line-height: 0\.98; \}/u);
 
   // "내려서 시작" 은 화면 구석의 각주가 아니라 소개 글 바로 밑에 선다.
-  assert.match(machine, /<p>레버를 당기면 마켓의 에셋이 캡슐로 떨어집니다<\/p>[\s\S]{0,320}?<p className="gc-beat-scroll" ref=\{beatScrollRef\}/u);
+  assert.match(machine, /<p>레버를 당기면 마켓의 에셋이 캡슐로 떨어집니다<\/p>[\s\S]{0,420}?className="gc-draw-cta"[\s\S]{0,200}?onClick=\{insertCoinAndTurn\}/u);
   assert.match(css, /\.gc-beat-scroll \{\s*position: static;/u);
 
   // 레버 화살표 — 손잡이 바로 위에 서고, 레버 구간에 대기 중일 때만 뜨고, 포인터를 가로채지 않는다.
