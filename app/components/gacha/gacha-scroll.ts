@@ -6,4 +6,4 @@ export const SCROLL_PULL = { from: 0.5, to: 0.6 } as const;
 /** 캡슐이 떨어진 뒤 이 진행도를 지나면 손대지 않아도 열린다. */
 export const SCROLL_OPEN_AT = 0.74;
 /** 결과를 본 뒤 이 진행도 위로 되감으면 새 바퀴가 준비된다. */
-export const SCROLL_REARM_BELOW = 0.42;
+export const SCROLL_REARM_BELOW = 0.47;
