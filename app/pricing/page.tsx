@@ -274,7 +274,7 @@ export default function PricingPage() {
                   </span>
                   <span className={styles.routeArrow} aria-hidden="true">→</span>
                 </Link>
-                <Link className={styles.route} href="/login?return_to=%2Fdashboard">
+                <Link className={styles.route} href="/signup?return_to=%2Fdashboard">
                   <span>
                     <small>쓰기</small>
                     <strong>내 작업실</strong>

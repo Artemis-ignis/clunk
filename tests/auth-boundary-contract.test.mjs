@@ -52,7 +52,8 @@ test("forged Sites identity headers cannot authenticate a deployment that did no
   const dashboard = await render("/dashboard", { headers: FORGED_SITES_HEADERS });
   assert.ok([307, 308].includes(dashboard.status));
   const target = new URL(dashboard.headers.get("location"), "http://localhost");
-  assert.equal(target.pathname, "/login");
+  // 2026-09-03: 막힌 사람은 처음 오는 사람의 문(/signup)으로 간다. 돌아갈 화면은 그대로다.
+  assert.equal(target.pathname, "/signup");
   assert.equal(target.searchParams.get("return_to"), "/dashboard");
 });
 

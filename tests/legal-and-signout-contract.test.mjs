@@ -351,16 +351,24 @@ test("/login과 /signup은 서로 다른 문이고, 영문 라벨이 남아 있�
   const login = await (await render("/login?return_to=%2Fdashboard")).text();
   const signup = await (await render("/signup")).text();
 
+  // 2026-09-03: 두 문 모두 가운데 카드 하나다. 좌측 마케팅 단은 사라졌고, 제목은
+  // 한 줄이다. 아래 문구는 그 한 줄과 그 아래 한 문장을 그대로 고정한다.
   // 돌아오는 사람의 문
-  assert.ok(login.includes("작업하던 화면으로"), "로그인 화면의 머리말이 다릅니다");
-  assert.ok(login.includes("Clunk 작업공간에"), "로그인 카드 제목이 다릅니다");
-  assert.ok(login.includes('href="/signup"'), "로그인 화면에 가입 문이 없습니다");
+  assert.ok(login.includes("다시 오셨군요"), "로그인 화면의 제목이 다릅니다");
+  assert.ok(
+    login.includes("비밀번호를 만들지도 보관하지도 않습니다"),
+    "로그인 화면의 한 문장이 다릅니다",
+  );
+  assert.ok(login.includes('href="/signup?return_to='), "로그인 화면에 가입 문이 없습니다");
   assert.ok(login.includes("가입하고 시작하기"), "로그인 화면의 가입 안내 문구가 다릅니다");
 
   // 처음 오는 사람의 문 — 받는 것이 머리말이다
-  assert.ok(signup.includes("계정 하나로"), "가입 카드 제목이 다릅니다");
-  assert.ok(signup.includes("작업공간을 만듭니다."), "가입 카드 제목이 다릅니다");
-  assert.ok(signup.includes('href="/login"'), "가입 화면에 로그인 문이 없습니다");
+  assert.ok(
+    signup.includes("카드도 비밀번호도 묻지 않습니다"),
+    "가입 화면의 한 문장이 다릅니다",
+  );
+  assert.ok(signup.includes("카드·비밀번호 없음"), "가입 카드 아래 한 줄이 다릅니다");
+  assert.ok(signup.includes('href="/login?return_to='), "가입 화면에 로그인 문이 없습니다");
 
   // 화면의 숫자는 전부 코드가 강제하는 상수에서 온다. 페이지에 직접 타이핑하면 원장과
   // 어긋난 약속이 되고, 그건 지어낸 숫자와 같다.
@@ -370,14 +378,24 @@ test("/login과 /signup은 서로 다른 문이고, 영문 라벨이 남아 있�
   const monthlyGrant = clunk.match(/export const BETA_MONTHLY_GRANT_CREDITS = (\d+);/)?.[1];
   const imagesPerDay = budget.match(/export const WORKSPACE_IMAGES_PER_DAY = (\d+);/)?.[1];
   assert.ok(signupGrant && monthlyGrant && imagesPerDay, "지급 상수를 읽지 못했습니다");
-  assert.ok(signup.includes(`가입하면 ${signupGrant}크레딧,`), "가입 즉시 지급 크레딧이 화면에 없습니다");
-  assert.ok(signup.includes(`매달 ${monthlyGrant}크레딧 더.`), "매월 지급 크레딧이 화면에 없습니다");
+  assert.ok(signup.includes(`가입하면 ${signupGrant}크레딧`), "가입 즉시 지급 크레딧이 화면에 없습니다");
+  assert.ok(signup.includes(`매달 ${monthlyGrant}크레딧`), "매월 지급 크레딧이 화면에 없습니다");
   assert.ok(signup.includes(`${imagesPerDay}장까지`), "하루 이미지 한도가 화면에 없습니다");
 
   const signupSource = await source("app/signup/page.tsx");
   assert.match(signupSource, /SIGNUP_GRANT_CREDITS/);
   assert.match(signupSource, /BETA_MONTHLY_GRANT_CREDITS/);
   assert.match(signupSource, /WORKSPACE_IMAGES_PER_DAY/);
+
+  // 2026-09-03: 화면 문구는 app/auth-intent.ts 로 옮겨졌다. 숫자를 손으로 적을 수 있는
+  // 곳이 하나 늘었다는 뜻이므로, 그 파일도 상수에서만 숫자를 받는지 함께 고정한다.
+  const intentSource = await source("app/auth-intent.ts");
+  assert.match(intentSource, /import \{ BETA_MONTHLY_GRANT_CREDITS, SIGNUP_GRANT_CREDITS \} from "\.\/api\/_lib\/clunk"/);
+  assert.match(intentSource, /import \{ WORKSPACE_IMAGES_PER_DAY \} from "\.\/api\/_lib\/ai-budget"/);
+  assert.ok(
+    !new RegExp(`${signupGrant}크레딧|${monthlyGrant}크레딧|${imagesPerDay}장`).test(intentSource),
+    "app/auth-intent.ts 에 숫자가 직접 적혀 있습니다",
+  );
 
   // 영문 눈썹 라벨과 푸터 띠는 사라졌다.
   for (const [name, html] of [["/login", login], ["/signup", signup]]) {

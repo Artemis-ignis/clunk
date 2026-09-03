@@ -5,6 +5,7 @@ import {
   type ChatGPTUser,
 } from "../chatgpt-auth";
 import { getOAuthEnvironment, getOAuthProviderStatuses, safeOAuthReturnPath } from "../oauth";
+import { authCardCopy, intentFromReturnTo, type AuthIntent } from "../auth-intent";
 import { getRuntimeEnvironment } from "../runtime-environment";
 import { trustsUpstreamIdentityHeaders } from "../api/_lib/identity-headers";
 import { SiteNav } from "../components/SiteNav";
@@ -20,17 +21,17 @@ export const dynamic = "force-dynamic";
 
 /**
  * /signup is the door for someone who has never been here; /login is the door for someone
- * who has. The card is the same markup as /login — only the intro column, the badge and
- * the two sentences inside the card differ.
+ * who has. One card in the middle of the screen, the same anatomy as /login — only the
+ * badge, the headline and the sentence differ.
  *
- * Every figure in the intro is imported from the module that enforces it, so this page
- * cannot promise a grant the ledger does not make.
+ * Every figure is imported from the module that enforces it, so this page cannot promise
+ * a grant the ledger does not make.
  */
 
 export const metadata = createPageMetadata({
   title: "가입",
   description:
-    "Google이나 GitHub 계정으로 가입하면 크레딧이 바로 들어옵니다. 무료 베타라 결제 수단은 묻지 않습니다.",
+    `Google이나 GitHub 계정으로 가입하면 ${SIGNUP_GRANT_CREDITS}크레딧이 바로 들어오고, 매달 ${BETA_MONTHLY_GRANT_CREDITS}크레딧이 더 들어옵니다. 이미지 만들기는 하루 ${WORKSPACE_IMAGES_PER_DAY}장까지이고, 무료 베타라 결제 수단은 묻지 않습니다.`,
   path: "/signup",
 });
 
@@ -89,10 +90,12 @@ function isHostSiwcAvailable(): boolean {
 function AuthJourney({
   user,
   returnTo,
+  intent,
   authError,
 }: {
   user: ChatGPTUser | null;
   returnTo: string;
+  intent: AuthIntent | null;
   authError?: string;
 }) {
   const errorMessage = getAuthErrorMessage(authError);
@@ -100,6 +103,10 @@ function AuthJourney({
   const readyCount = providers.filter((status) => status.ready).length;
   const hostSiwc = isHostSiwcAvailable();
   const signedIn = Boolean(user);
+  const copy = authCardCopy("signup", intent);
+  const returnQuery = encodeURIComponent(returnTo);
+  // The same return path travels to /login, so switching doors never loses the destination.
+  const signInHref = `/login?return_to=${returnQuery}`;
 
   return (
     <div className="cv5 cv5-auth-shell">
@@ -109,44 +116,18 @@ function AuthJourney({
       <SiteNav />
 
       <main id="main-content" className="cv5-auth">
-        <div className="cv5-frame cv5-auth-grid">
-          <div className="cv5-auth-intro">
-            <span className="cv5-badge">✦ CLUNK <b>무료 베타</b></span>
-            {/* 숫자는 전부 상수에서 옵니다. 한 개의 문자열로 렌더해야 숫자 앞뒤에 RSC
-                텍스트 분리 주석이 끼지 않습니다. */}
-            <h1>
-              {`가입하면 ${SIGNUP_GRANT_CREDITS}크레딧,`}
-              <br />
-              <em>{`매달 ${BETA_MONTHLY_GRANT_CREDITS}크레딧 더.`}</em>
-            </h1>
-            <p className="cv5-auth-lede">
-              {`카드도 비밀번호도 묻지 않습니다. Google이나 GitHub 계정으로 한 번 들어오면 내 작업공간이 만들어지고, 크레딧 ${SIGNUP_GRANT_CREDITS}개가 그 자리에서 들어옵니다. 이미지 만들기는 하루 ${WORKSPACE_IMAGES_PER_DAY}장까지, 마켓 에셋은 로그인만 하면 무료로 받습니다.`}
-            </p>
-            <div className="cv5-auth-facts">
-              <div className="cv5-auth-fact">
-                <span>가입 즉시</span>
-                <strong>{`${SIGNUP_GRANT_CREDITS}크레딧`}</strong>
-              </div>
-              <div className="cv5-auth-fact">
-                <span>매달</span>
-                <strong>{`+${BETA_MONTHLY_GRANT_CREDITS}크레딧`}</strong>
-              </div>
-              <div className="cv5-auth-fact">
-                <span>이미지 · 하루</span>
-                <strong>{`${WORKSPACE_IMAGES_PER_DAY}장까지`}</strong>
-              </div>
-            </div>
-          </div>
-
+        <div className="cv5-frame cv5-auth-solo">
           <section className="cv5-auth-card" aria-labelledby="signup-title">
             <span className="cv5-auth-status" data-state={signedIn ? "on" : "off"}>
-              {signedIn ? "로그인됨" : "가입"}
+              {signedIn ? "로그인됨" : copy.badge}
             </span>
-            <h2 id="signup-title">계정 하나로<br />작업공간을 만듭니다.</h2>
+            {/* 숫자는 전부 상수에서 옵니다. 한 개의 문자열로 렌더해야 숫자 앞뒤에 RSC
+                텍스트 분리 주석이 끼지 않습니다. */}
+            <h1 id="signup-title">{copy.h1}</h1>
             <p className="cv5-auth-copy">
               {signedIn
                 ? "이 브라우저는 이미 로그인되어 있습니다. 계속하면 요청한 화면으로 이동합니다."
-                : "쓰시는 계정을 고르면 첫 로그인에서 내 작업공간이 만들어집니다."}
+                : copy.lede}
             </p>
 
             {errorMessage ? <p className="cv5-auth-alert" role="alert">{errorMessage}</p> : null}
@@ -175,12 +156,12 @@ function AuthJourney({
                       <Link
                         className="cv5-auth-provider"
                         data-ready="true"
-                        href={"/api/auth/" + status.provider + "?return_to=" + encodeURIComponent(returnTo)}
+                        href={"/api/auth/" + status.provider + "?from=signup&return_to=" + returnQuery}
                         key={status.provider}
                       >
                         {/* 한 개의 문자열로 렌더해야 라벨 사이에 RSC 텍스트 분리 주석이 끼지 않는다. */}
                         {`${providerLabel(status.provider)}로 계속하기`}
-                        <small>계정으로 시작 ↗</small>
+                        <small>{copy.providerSmall}</small>
                       </Link>
                     ) : (
                       <div className="cv5-auth-provider" data-ready="false" key={status.provider}>
@@ -192,7 +173,7 @@ function AuthJourney({
                   {hostSiwc ? (
                     <Link className="cv5-auth-provider" data-ready="true" href={chatGPTSignInPath(returnTo)}>
                       ChatGPT 계정으로 시작하기
-                      <small>계정으로 시작 ↗</small>
+                      <small>{copy.providerSmall}</small>
                     </Link>
                   ) : null}
                 </div>
@@ -212,9 +193,11 @@ function AuthJourney({
 
             <p className="cv5-auth-switch">
               이미 계정이 있으신가요?{" "}
-              <Link href="/login">로그인하기</Link>
+              <Link href={signInHref}>로그인하기</Link>
             </p>
           </section>
+
+          <p className="cv5-auth-underline">{copy.facts.join(" · ")}</p>
         </div>
       </main>
       <SiteFooter />
@@ -231,5 +214,12 @@ export default async function SignupPage({
   const user = await getChatGPTUser();
   const returnTo = safeOAuthReturnPath(params.return_to ?? "/dashboard");
 
-  return <AuthJourney user={user} returnTo={returnTo} authError={params.auth_error} />;
+  return (
+    <AuthJourney
+      user={user}
+      returnTo={returnTo}
+      intent={intentFromReturnTo(returnTo)}
+      authError={params.auth_error}
+    />
+  );
 }

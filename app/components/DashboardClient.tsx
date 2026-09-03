@@ -175,7 +175,7 @@ const PRIMARY_ACTIONS = [
   },
 ];
 
-export function DashboardClient() {
+export function DashboardClient({ welcome }: { welcome?: string | null }) {
   const [runs, setRuns] = useState<Run[]>([]);
   const [jobs, setJobs] = useState<GenerationJob[]>([]);
   const [credits, setCredits] = useState<number | null>(null);
@@ -273,7 +273,17 @@ export function DashboardClient() {
   );
 
   return (
-    <WorkspaceShell active="overview" title="내 작업실" userLabel={userLabel} status={connectionChip}>
+    <WorkspaceShell
+      active="overview"
+      title="내 작업실"
+      userLabel={userLabel}
+      status={
+        <>
+          {welcome ? <span className="workspace-firstrun">{welcome}</span> : null}
+          {connectionChip}
+        </>
+      }
+    >
       <section className="home-hello" aria-labelledby="home-hello-heading">
         <div className="home-hello-copy">
           <p className="home-hello-greeting">
@@ -333,7 +343,7 @@ export function DashboardClient() {
         <div className="banner banner-info ws-banner" role="alert">
           <Icon name="shield" size={16} />
           <p>{message}</p>
-          <Link href="/login?return_to=%2Fdashboard" className="text-link">
+          <Link href="/signup?return_to=%2Fdashboard" className="text-link">
             로그인 · 회원가입
             <Icon name="arrowRight" size={13} />
           </Link>

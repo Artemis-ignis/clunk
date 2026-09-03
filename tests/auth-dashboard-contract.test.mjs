@@ -39,9 +39,45 @@ test("signup is a first-class route and links back to login", async () => {
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /ChatGPT 계정으로 시작하기/);
-  assert.match(html, /첫 로그인에서 내 작업공간이 만들어집니다/);
+  // 2026-09-03: 가입 문은 가운데 카드 하나다. 카드가 말하는 것은 "여기서 계정이
+  // 만들어진다"는 사실 하나뿐이다.
+  assert.match(html, /내 작업공간이 만들어지고/);
   assert.match(html, /로그인하기/);
   assert.match(html, /href="\/login/);
+});
+
+test("the door a visitor lands on answers the button they pressed", async () => {
+  // 의도는 return_to 안에 실려 온다(OAuth 상태 스키마는 그대로다). 가입 화면은 그
+  // 의도를 읽어 자기가 눌린 이유를 말한다.
+  const create = await render("/signup?return_to=%2Fstudio%3Fintent%3Dcreate");
+  assert.equal(create.status, 200);
+  const createHtml = await create.text();
+  assert.match(createHtml, /첫 에셋 만들기부터/);
+  assert.match(createHtml, /return_to=%2Fstudio%3Fintent%3Dcreate/);
+
+  const inspect = await render("/signup?return_to=%2Fapp%3Fintent%3Dinspect");
+  assert.equal(inspect.status, 200);
+  const inspectHtml = await inspect.text();
+  assert.match(inspectHtml, /파일 검사부터/);
+  assert.match(inspectHtml, /return_to=%2Fapp%3Fintent%3Dinspect/);
+
+  // 의도가 없으면 오늘까지 쓰던 기본 문구가 그대로 나온다.
+  const plain = await (await render("/signup")).text();
+  assert.doesNotMatch(plain, /첫 에셋 만들기부터|파일 검사부터/);
+});
+
+test("a guard sends a stranger to the sign-up door, intent and all", async () => {
+  const response = await render("/studio");
+  assert.ok([307, 308].includes(response.status));
+  const target = new URL(response.headers.get("location"), "http://localhost");
+  assert.equal(target.pathname, "/signup");
+  assert.equal(target.searchParams.get("return_to"), "/studio?intent=create");
+
+  const inspector = await render("/app");
+  assert.ok([307, 308].includes(inspector.status));
+  const inspectorTarget = new URL(inspector.headers.get("location"), "http://localhost");
+  assert.equal(inspectorTarget.pathname, "/signup");
+  assert.equal(inspectorTarget.searchParams.get("return_to"), "/app?intent=inspect");
 });
 
 test("authenticated login remains visible instead of redirecting away", async () => {
@@ -64,7 +100,9 @@ test("dashboard keeps unauthenticated users behind the host sign-in gate", async
   const location = response.headers.get("location");
   assert.ok(location);
   const target = new URL(location, "http://localhost");
-  assert.equal(target.pathname, "/login");
+  // 2026-09-03: 문 앞에서 막힌 사람은 여기 와 본 적이 없다. /login 은 "돌아오는
+  // 사람"의 문구라서, 가로막힌 사람은 /signup 으로 간다. 돌아갈 화면은 그대로 실려 간다.
+  assert.equal(target.pathname, "/signup");
   assert.equal(target.searchParams.get("return_to"), "/dashboard");
 });
 

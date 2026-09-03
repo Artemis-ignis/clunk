@@ -130,7 +130,7 @@ const TIMING = {
  */
 const INTRO_MS = { spotlight: 180, land: 860, neon: 1020, pour: 1280, total: 2400 } as const;
 
-const LOGIN_HREF = "/login?return_to=%2F";
+const LOGIN_HREF = "/signup?return_to=%2F%3Fintent%3Dmarket";
 const DRAWN_KEY = "clunk.gacha.drawn";
 /** 등장 연출은 이 브라우저 세션에 한 번만 본다. */
 const INTRO_KEY = "clunk.gacha.intro";
@@ -420,7 +420,7 @@ export function GachaMachine3D() {
 
   /** 돔에 채울 캡슐. 자리 수는 최대치이고, 장면이 기기에 맞게 앞에서부터 잘라 쓴다. */
   const capsuleSpecs = useMemo(
-    () => domeCapsules(pool, 40).map((capsule) => ({ color: capsule.color, ring: capsule.ring })),
+    () => domeCapsules(pool, 40).map((capsule) => ({ color: capsule.color, ring: capsule.ring, preview: capsule.preview })),
     [pool],
   );
 

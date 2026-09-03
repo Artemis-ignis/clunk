@@ -27,16 +27,24 @@ export function StudioClient({
   userLabel,
   initialSourceAssetId,
   initialAssetKind,
+  welcome,
 }: {
   userLabel: string;
   initialSourceAssetId?: string;
   initialAssetKind?: AssetKind;
+  /** 가입 직후 한 번만 뜨는 한 줄. 서버가 원장을 보고 정합니다. */
+  welcome?: string | null;
 }) {
   const [assetKind, setAssetKind] = useState<AssetKind>(initialAssetKind ?? "2d-image");
   const seriesId: StudioSeriesId = useMemo(() => seriesForAssetKind(assetKind), [assetKind]);
 
   return (
-    <WorkspaceShell active="studio" title="에셋 만들기" userLabel={userLabel}>
+    <WorkspaceShell
+      active="studio"
+      title="에셋 만들기"
+      userLabel={userLabel}
+      status={welcome ? <span className="workspace-firstrun">{welcome}</span> : undefined}
+    >
       <div className="studio-workspace-page">
         <AssetCreationWorkbench
           assetKind={assetKind}

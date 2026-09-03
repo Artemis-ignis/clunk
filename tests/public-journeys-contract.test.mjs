@@ -12,7 +12,7 @@ test("pricing explains real Clunk credit usage without invented price cards", as
   assert.match(page, /성공한 실행/);
   assert.match(page, /data-snap-section/);
   assert.match(page, new RegExp("/marketplace"));
-  assert.match(page, new RegExp("/login"));
+  assert.match(page, new RegExp("/signup"));
   assert.doesNotMatch(page, /MONTHLY_PLANS|CREDIT_PACKS/);
   assert.doesNotMatch(page, /49,000|190,000|15,000|65,000|220,000|예정가/);
   assert.doesNotMatch(page, /실제 에셋 만들기|상품 만들기/);

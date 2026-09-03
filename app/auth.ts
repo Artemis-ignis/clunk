@@ -47,6 +47,9 @@ const USER_FULL_NAME_ENCODING_HEADER: typeof UPSTREAM_IDENTITY_FULL_NAME_ENCODIN
 const PERCENT_ENCODED_UTF8 = "percent-encoded-utf-8";
 // 2026-08-31: the Sites-host gateway is gone; /login is the only sign-in door.
 const SIGN_IN_PATH = "/login";
+// 2026-09-03: a visitor stopped by a guard has never been here — the door that
+// matches them is /signup. /login stays for the person who says "로그인".
+const SIGN_UP_PATH = "/signup";
 const SIGN_OUT_PATH = "/signout-with-chatgpt";
 const CALLBACK_PATH = "/callback";
 
@@ -119,11 +122,16 @@ async function readUpstreamIdentityUser(): Promise<AuthUser | null> {
   }
 }
 
+/**
+ * A guard never knows the visitor, so it must not assume they already have an account.
+ * Everyone stopped here goes to /signup, which carries the same return path (intent and
+ * all) and links to /login in one line for the people who do have an account.
+ */
 export async function requireUser(returnTo: string): Promise<AuthUser> {
   const user = await getCurrentUser();
   if (user) return user;
 
-  redirect(signInPath(returnTo));
+  redirect(signUpPath(returnTo));
 }
 
 export async function getCurrentIdentity(): Promise<AuthIdentity | null> {
@@ -149,6 +157,12 @@ export function signOut(returnTo = "/"): string {
 export function signInPath(returnTo: string): string {
   const safeReturnTo = safeRelativeReturnPath(returnTo);
   return `${SIGN_IN_PATH}?return_to=${encodeURIComponent(safeReturnTo)}`;
+}
+
+/** The first-run door. Same validated return path, different words on the other side. */
+export function signUpPath(returnTo: string): string {
+  const safeReturnTo = safeRelativeReturnPath(returnTo);
+  return `${SIGN_UP_PATH}?return_to=${encodeURIComponent(safeReturnTo)}`;
 }
 
 export function signOutPath(returnTo = "/"): string {
@@ -182,6 +196,7 @@ function safeRelativeReturnPath(value: string): string {
 function isReservedAuthPath(pathname: string): boolean {
   return (
     pathname === SIGN_IN_PATH ||
+    pathname === SIGN_UP_PATH ||
     pathname === SIGN_OUT_PATH ||
     pathname === CALLBACK_PATH
   );

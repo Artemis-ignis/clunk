@@ -27,10 +27,17 @@ export async function GET(request: Request, context: RouteContext): Promise<Resp
   }
 
   const requestUrl = new URL(request.url);
-  const returnTo = requestUrl.searchParams.get("return_to") ?? "/app";
+  // 2026-09-03: the default landing is the workspace home, the same place every
+  // guard sends people back to. "/app" was the inspector, which is not where a
+  // sign-in with no stated destination belongs.
+  const returnTo = requestUrl.searchParams.get("return_to") ?? "/dashboard";
+  // Which door this started from, so a failure can send the person back to it
+  // instead of dropping a first-time visitor on the returning-user screen.
+  const from = requestUrl.searchParams.get("from") === "signup" ? "signup" : "login";
   try {
     const authorization = await createOAuthAuthorization(rawProvider, {
       returnTo,
+      from,
       env: environment,
     });
     const transaction = await encodeOAuthTransaction(authorization, stateSecret);

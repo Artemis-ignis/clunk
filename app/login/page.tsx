@@ -5,6 +5,7 @@ import {
   type ChatGPTUser,
 } from "../chatgpt-auth";
 import { getOAuthEnvironment, getOAuthProviderStatuses, safeOAuthReturnPath } from "../oauth";
+import { authCardCopy, intentFromReturnTo, returnLabel, type AuthIntent } from "../auth-intent";
 import { getRuntimeEnvironment } from "../runtime-environment";
 import { trustsUpstreamIdentityHeaders } from "../api/_lib/identity-headers";
 import { SiteNav } from "../components/SiteNav";
@@ -18,20 +19,15 @@ export const dynamic = "force-dynamic";
 
 /**
  * /login is the door for someone who already has an account; /signup is the door for
- * someone who does not. The card below is the same markup on both pages — only the
- * intro column, the badge and the two sentences inside the card differ, so a person
- * who bounces between them sees one screen, not two products.
+ * someone who does not. Both are one card in the middle of the screen with the same
+ * anatomy — badge, one headline, one sentence, the provider pills, the consent notice,
+ * the switch link — so a person who bounces between them sees one screen, not two
+ * products.
+ *
+ * 2026-09-03: the headline and the sentence come from the intent carried inside
+ * return_to (`/studio?intent=create`), so the door answers the button that was pressed.
+ * With no intent it says what it has always said.
  */
-
-/** The eyebrow used to print the raw route ("/app"). People do not go to routes. */
-function returnLabel(path: string): string {
-  if (path.startsWith("/dashboard")) return "내 작업공간";
-  if (path.startsWith("/app")) return "에셋 검사";
-  if (path.startsWith("/studio")) return "에셋 만들기";
-  if (path.startsWith("/marketplace")) return "에셋 마켓";
-  if (path.startsWith("/review")) return "검수 뷰어";
-  return "이전 화면";
-}
 
 export const metadata = createPageMetadata({
   title: "로그인",
@@ -95,10 +91,12 @@ function isHostSiwcAvailable(): boolean {
 function AuthJourney({
   user,
   returnTo,
+  intent,
   authError,
 }: {
   user: ChatGPTUser | null;
   returnTo: string;
+  intent: AuthIntent | null;
   authError?: string;
 }) {
   const errorMessage = getAuthErrorMessage(authError);
@@ -106,6 +104,10 @@ function AuthJourney({
   const readyCount = providers.filter((status) => status.ready).length;
   const hostSiwc = isHostSiwcAvailable();
   const signedIn = Boolean(user);
+  const copy = authCardCopy("login", intent);
+  const returnQuery = encodeURIComponent(returnTo);
+  // The same return path travels to /signup, so switching doors never loses the destination.
+  const signUpHref = `/signup?return_to=${returnQuery}`;
 
   return (
     <div className="cv5 cv5-auth-shell">
@@ -115,43 +117,16 @@ function AuthJourney({
       <SiteNav />
 
       <main id="main-content" className="cv5-auth">
-        <div className="cv5-frame cv5-auth-grid">
-          <div className="cv5-auth-intro">
-            <span className="cv5-badge">✦ CLUNK <b>작업공간</b></span>
-            <h1>
-              작업하던 화면으로
-              <br />
-              <em>돌아옵니다.</em>
-            </h1>
-            <p className="cv5-auth-lede">
-              이미 계정이 있다면 여기가 입구입니다. Clunk는 비밀번호를 만들지도 보관하지도 않습니다.
-              Google이나 GitHub 계정으로 들어오면 보던 화면으로 그대로 돌아갑니다.
-            </p>
-            <div className="cv5-auth-facts">
-              <div className="cv5-auth-fact">
-                <span>로그인 방법</span>
-                <strong>Google · GitHub 계정</strong>
-              </div>
-              <div className="cv5-auth-fact">
-                <span>돌아갈 화면</span>
-                <strong>{returnLabel(returnTo)}</strong>
-              </div>
-              <div className="cv5-auth-fact">
-                <span>내 파일</span>
-                <strong>내 작업공간에만</strong>
-              </div>
-            </div>
-          </div>
-
+        <div className="cv5-frame cv5-auth-solo">
           <section className="cv5-auth-card" aria-labelledby="login-title">
             <span className="cv5-auth-status" data-state={signedIn ? "on" : "off"}>
-              {signedIn ? "로그인됨" : "로그인"}
+              {signedIn ? "로그인됨" : copy.badge}
             </span>
-            <h2 id="login-title">Clunk 작업공간에<br />로그인합니다.</h2>
+            <h1 id="login-title">{copy.h1}</h1>
             <p className="cv5-auth-copy">
               {signedIn
                 ? "이 브라우저는 이미 로그인되어 있습니다. 계속하면 요청한 화면으로 이동합니다."
-                : "쓰던 계정을 고르세요. 확인이 끝나면 보던 화면으로 그대로 돌아갑니다."}
+                : copy.lede}
             </p>
 
             {errorMessage ? <p className="cv5-auth-alert" role="alert">{errorMessage}</p> : null}
@@ -180,12 +155,12 @@ function AuthJourney({
                       <Link
                         className="cv5-auth-provider"
                         data-ready="true"
-                        href={"/api/auth/" + status.provider + "?return_to=" + encodeURIComponent(returnTo)}
+                        href={"/api/auth/" + status.provider + "?from=login&return_to=" + returnQuery}
                         key={status.provider}
                       >
                         {/* 한 개의 문자열로 렌더해야 라벨 사이에 RSC 텍스트 분리 주석이 끼지 않는다. */}
                         {`${providerLabel(status.provider)}로 계속하기`}
-                        <small>계정으로 로그인 ↗</small>
+                        <small>{copy.providerSmall}</small>
                       </Link>
                     ) : (
                       <div className="cv5-auth-provider" data-ready="false" key={status.provider}>
@@ -197,7 +172,7 @@ function AuthJourney({
                   {hostSiwc ? (
                     <Link className="cv5-auth-provider" data-ready="true" href={chatGPTSignInPath(returnTo)}>
                       ChatGPT로 계속하기
-                      <small>계정으로 로그인 ↗</small>
+                      <small>{copy.providerSmall}</small>
                     </Link>
                   ) : null}
                 </div>
@@ -217,9 +192,13 @@ function AuthJourney({
 
             <p className="cv5-auth-switch">
               Clunk가 처음이신가요?{" "}
-              <Link href="/signup">가입하고 시작하기</Link>
+              <Link href={signUpHref}>가입하고 시작하기</Link>
             </p>
           </section>
+
+          <p className="cv5-auth-underline">
+            {[...copy.facts, `돌아갈 화면: ${returnLabel(returnTo)}`].join(" · ")}
+          </p>
         </div>
       </main>
       <SiteFooter />
@@ -236,5 +215,12 @@ export default async function LoginPage({
   const user = await getChatGPTUser();
   const returnTo = safeOAuthReturnPath(params.return_to ?? "/dashboard");
 
-  return <AuthJourney user={user} returnTo={returnTo} authError={params.auth_error} />;
+  return (
+    <AuthJourney
+      user={user}
+      returnTo={returnTo}
+      intent={intentFromReturnTo(returnTo)}
+      authError={params.auth_error}
+    />
+  );
 }

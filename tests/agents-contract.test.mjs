@@ -53,7 +53,7 @@ test("setup links preserve a real login return path", async () => {
   const clientSource = await readFile(new URL("../app/agents/AgentsClient.tsx", import.meta.url), "utf8");
   const guideSource = await readFile(new URL("../app/components/agent-guides.ts", import.meta.url), "utf8");
   assert.match(pageSource, /href="#connect"/);
-  assert.match(clientSource, /\/login\?return_to=%2Fagents%23connect/);
+  assert.match(clientSource, /\/signup\?return_to=%2Fagents%3Fintent%3Dagents%23connect/);
   assert.match(clientSource, /connectionState !== "ready"/);
   assert.match(guideSource, /codex mcp add clunk --url/);
   assert.match(guideSource, /--bearer-token-env-var CLUNK_API_KEY/);

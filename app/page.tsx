@@ -93,7 +93,7 @@ export default function Home() {
                 <li><b>눈으로 확인</b> — 3D 뷰어로 돌려 보고 판단하세요</li>
               </ul>
               <div>
-                <Link className="cv5-more" href="/app" prefetch={false}>검사 시작 <Icon name="arrowRight" size={15} /></Link>
+                <Link className="cv5-more" href="/signup?return_to=%2Fapp%3Fintent%3Dinspect" prefetch={false}>검사 시작 <Icon name="arrowRight" size={15} /></Link>
                 <Link className="cv5-more" href="/docs" prefetch={false}>문서 보기 <Icon name="arrowRight" size={15} /></Link>
               </div>
             </div>
@@ -194,7 +194,7 @@ export default function Home() {
             <h2 id="start-heading">필요한 에셋부터<br /><em>골라 보세요</em></h2>
             <p>뽑기 기계에서 바로 뽑거나, 마켓에서 고르거나, 직접 만들어 보세요.</p>
             <div className="cv5-cta-row" style={{ marginTop: 34 }}>
-              <Link className="cv5-btn cv5-btn-primary" href="/studio" prefetch={false}>
+              <Link className="cv5-btn cv5-btn-primary" href="/signup?return_to=%2Fstudio%3Fintent%3Dcreate" prefetch={false}>
                 Clunk 시작하기 <Icon name="arrowUpRight" size={17} />
               </Link>
               <Link className="cv5-btn cv5-btn-ghost" href="/agents" prefetch={false}>

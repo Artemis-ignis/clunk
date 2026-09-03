@@ -223,7 +223,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
           <Icon name="shield" size={20} />
           <strong>로그인한 워크스페이스에서만 쓰기 가능합니다.</strong>
           <p>공개 사이트에 임의의 feedback endpoint를 열지 않고, SIWC 인증과 workspace 범위로 저장합니다.</p>
-          <a className="button button-quiet button-sm" href="/login?return_to=%2Fdashboard">로그인 · 회원가입</a>
+          <a className="button button-quiet button-sm" href="/signup?return_to=%2Fdashboard">로그인 · 회원가입</a>
         </div>
       ) : (
         <div className="collaboration-layout">

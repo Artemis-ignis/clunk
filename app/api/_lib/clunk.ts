@@ -286,6 +286,39 @@ export async function ensureWorkspace(
   return workspaceId;
 }
 
+/**
+ * Has anything been taken out of this workspace's ledger yet? One indexed read on
+ * (workspace_id, …) — `idx_clunk_credits_workspace_created`. Grants are positive rows;
+ * only a spend is negative.
+ */
+export async function hasSpentCredits(db: D1Database, workspaceId: string): Promise<boolean> {
+  const row = await db
+    .prepare(`SELECT 1 AS spent FROM clunk_credit_ledger WHERE workspace_id = ? AND amount < 0 LIMIT 1`)
+    .bind(workspaceId)
+    .first<{ spent: number }>();
+  return Boolean(row);
+}
+
+/**
+ * 2026-09-03: there is no "just signed up" flag anywhere, and inventing one would be a
+ * second source of truth about a person's first minute. The ledger already answers it:
+ * `ensureWorkspace` writes the signup grant on the first authenticated call, so a
+ * workspace that has the grant and has spent nothing is one that has just arrived.
+ *
+ * Never throws: a missing D1 binding must not take a workspace page down over one line
+ * of copy.
+ */
+export async function isFreshWorkspace(user: AuthUser & { userId: string }): Promise<boolean> {
+  try {
+    const db = getRuntimeDb();
+    await ensureSchema(db);
+    const workspaceId = await ensureWorkspace(db, user);
+    return !(await hasSpentCredits(db, workspaceId));
+  } catch {
+    return false;
+  }
+}
+
 const DEFAULT_JSON_BODY_BYTES = 8 * 1024 * 1024;
 
 export async function parseJson<T>(request: Request, maxBytes = DEFAULT_JSON_BODY_BYTES): Promise<T> {

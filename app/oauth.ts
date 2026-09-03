@@ -30,6 +30,15 @@ export type OAuthProviderStatus = {
   missing: string[];
 };
 
+/**
+ * Which door the person left from: /signup or /login. It changes nothing about the
+ * security of the exchange, so it stays out of the signed state (that schema is
+ * compared byte-for-byte against the transaction) and rides in the transaction
+ * cookie instead, where the failure path can read it and send the person back to
+ * the same door they were standing at.
+ */
+export type OAuthDoor = "signup" | "login";
+
 export type OAuthAuthorization = {
   url: string;
   state: string;
@@ -37,6 +46,7 @@ export type OAuthAuthorization = {
   codeVerifier: string;
   provider: OAuthProvider;
   returnTo: string;
+  from: OAuthDoor;
 };
 
 export type OAuthTransaction = {
@@ -45,9 +55,14 @@ export type OAuthTransaction = {
   state: string;
   nonce: string;
   codeVerifier: string;
+  from: OAuthDoor;
   issuedAt: number;
   expiresAt: number;
 };
+
+function toOAuthDoor(value: unknown): OAuthDoor {
+  return value === "signup" ? "signup" : "login";
+}
 
 export const AUTH_SESSION_COOKIE = "clunk_auth_session";
 export const OAUTH_TRANSACTION_COOKIE_PREFIX = "clunk_oauth_tx_";
@@ -161,6 +176,7 @@ export async function createOAuthAuthorization(
   provider: OAuthProvider,
   input: {
     returnTo?: string;
+    from?: OAuthDoor;
     env?: OAuthEnvironment;
     now?: number;
     randomBytes?: (length: number) => Uint8Array;
@@ -215,6 +231,7 @@ export async function createOAuthAuthorization(
     codeVerifier,
     provider,
     returnTo,
+    from: toOAuthDoor(input.from),
   };
 }
 
@@ -259,6 +276,7 @@ export async function encodeOAuthTransaction(
     state: authorization.state,
     nonce: authorization.nonce,
     codeVerifier: authorization.codeVerifier,
+    from: toOAuthDoor(authorization.from),
     issuedAt,
     expiresAt: issuedAt + OAUTH_STATE_TTL_SECONDS,
   }, secret);
@@ -292,6 +310,9 @@ export async function decodeOAuthTransaction(
     state: payload.state,
     nonce: payload.nonce,
     codeVerifier: payload.codeVerifier,
+    // Optional on the wire: a transaction minted before this field existed still
+    // decodes, and lands on /login exactly as it used to.
+    from: toOAuthDoor(payload.from),
     issuedAt: payload.issuedAt,
     expiresAt: payload.expiresAt,
   };

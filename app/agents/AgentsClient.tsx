@@ -19,7 +19,7 @@ type HandshakeStep = "idle" | "checking" | "PASS" | "FAIL";
 /** What a visitor reads for each step; the constant stays internal. */
 const HANDSHAKE_LABEL: Record<HandshakeStep, string> = { idle: "대기", checking: "확인 중", PASS: "통과", FAIL: "실패" };
 
-const AGENT_CONNECT_LOGIN_HREF = "/login?return_to=%2Fagents%23connect";
+const AGENT_CONNECT_LOGIN_HREF = "/signup?return_to=%2Fagents%3Fintent%3Dagents%23connect";
 
 export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuthenticated?: boolean }) {
   const [selectedKey, setSelectedKey] = useState<AgentGuideKey>(DEFAULT_AGENT_GUIDE.key);

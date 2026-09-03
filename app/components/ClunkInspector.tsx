@@ -22,7 +22,11 @@ import { readinessHint, readinessNote, resolveReadiness } from "./readiness";
 import { StatusPill } from "./StatusPill";
 import { WorkspaceShell } from "./WorkspaceShell";
 
-type InspectorProps = { userLabel: string };
+type InspectorProps = {
+  userLabel: string;
+  /** 가입 직후 한 번만 뜨는 한 줄. 서버가 원장을 보고 정합니다. */
+  welcome?: string | null;
+};
 
 /** One entry in the batch inspection queue. Bytes stay in memory: local-first, never uploaded. */
 type QueueItem = {
@@ -84,7 +88,7 @@ const STATUS_TEXT: Record<string, string> = {
   UNAVAILABLE: "확인할 환경 없음",
 };
 
-export function ClunkInspector({ userLabel }: InspectorProps) {
+export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState("");
   const [sourceBytes, setSourceBytes] = useState<Uint8Array | null>(null);
@@ -338,7 +342,12 @@ export function ClunkInspector({ userLabel }: InspectorProps) {
       active="inspector"
       title="에셋 검사"
       userLabel={userLabel}
-      status={<StatusPill status={status} />}
+      status={
+        <>
+          {welcome ? <span className="workspace-firstrun">{welcome}</span> : null}
+          <StatusPill status={status} />
+        </>
+      }
     >
       <ol className="pipeline-strip" aria-label="에셋 처리 단계">
         {STEPS.map((step, index) => (

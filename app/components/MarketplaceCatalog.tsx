@@ -509,7 +509,9 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
 
   /** Straight to the login page, with the way back to this listing. No server round trip. */
   function goToLogin() {
-    window.location.assign(`/login?return_to=${encodeURIComponent(window.location.pathname)}`);
+    window.location.assign(
+      `/signup?return_to=${encodeURIComponent(`${window.location.pathname}?intent=market`)}`,
+    );
   }
 
   async function startCheckout(

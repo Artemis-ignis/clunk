@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import Link from "./NativeLink";
 import { BrandLockup } from "./BrandMark";
 import { Icon } from "./Icon";
@@ -33,6 +34,17 @@ const UTILITY_NAV_LINKS: { label: string; href: string; section: ShellSection }[
 
 export function SiteNav({ active }: { active?: ShellSection }) {
   const [open, setOpen] = useState(false);
+  // 2026-09-03: 로그인/회원가입이 지금 보던 화면을 잃어버리고 있었습니다. 두 링크는
+  // 이 페이지의 경로를 return_to 로 들고 갑니다. /login 과 /signup 자신에서 누르면
+  // 제자리로 돌아오는 고리가 되므로, 그때는 작업실로 보냅니다.
+  const pathname = usePathname();
+  const returnTo = encodeURIComponent(
+    !pathname || pathname === "/login" || pathname === "/signup" ? "/dashboard" : pathname,
+  );
+  const loginHref = `/login?return_to=${returnTo}`;
+  const signupHref = `/signup?return_to=${returnTo}`;
+  // 처음 오는 사람의 "Clunk 사용하기"는 만들기 화면으로 가는 가입 문입니다.
+  const startHref = "/signup?return_to=%2Fstudio%3Fintent%3Dcreate";
   const [scrolled, setScrolled] = useState(false);
   const scrollSentinelRef = useRef<HTMLSpanElement>(null);
   // Signed-in visitors used to still see 로그인/회원가입 on every public page
@@ -125,15 +137,15 @@ export function SiteNav({ active }: { active?: ShellSection }) {
               </>
             ) : (
               <>
-                <Link className="button button-quiet button-sm sitenav-login" href="/login" prefetch={false}>
+                <Link className="button button-quiet button-sm sitenav-login" href={loginHref} prefetch={false}>
                   로그인
                 </Link>
-                <Link className="button button-quiet button-sm sitenav-signup" href="/signup" prefetch={false}>
+                <Link className="button button-quiet button-sm sitenav-signup" href={signupHref} prefetch={false}>
                   회원가입
                 </Link>
               </>
             )}
-            <Link className="button button-primary button-sm sitenav-cta" href={session ? "/app" : "/studio"} prefetch={false}>
+            <Link className="button button-primary button-sm sitenav-cta" href={session ? "/app" : startHref} prefetch={false}>
               {session ? "작업면 열기" : "Clunk 사용하기"}
               <Icon name="arrowUpRight" size={14} />
             </Link>
@@ -186,15 +198,15 @@ export function SiteNav({ active }: { active?: ShellSection }) {
                 </>
               ) : (
                 <>
-                  <Link className="button button-quiet button-sm" href="/login" prefetch={false} onClick={() => setOpen(false)}>
+                  <Link className="button button-quiet button-sm" href={loginHref} prefetch={false} onClick={() => setOpen(false)}>
                     로그인
                   </Link>
-                  <Link className="button button-quiet button-sm" href="/signup" prefetch={false} onClick={() => setOpen(false)}>
+                  <Link className="button button-quiet button-sm" href={signupHref} prefetch={false} onClick={() => setOpen(false)}>
                     회원가입
                   </Link>
                 </>
               )}
-              <Link className="button button-primary button-sm" href={session ? "/app" : "/studio"} prefetch={false} onClick={() => setOpen(false)}>
+              <Link className="button button-primary button-sm" href={session ? "/app" : startHref} prefetch={false} onClick={() => setOpen(false)}>
                 {session ? "작업면 열기" : "Clunk 사용하기"}
                 <Icon name="arrowUpRight" size={14} />
               </Link>

@@ -25,6 +25,75 @@
   align-items: center;
 }
 
+/* ------------------------------------------------- 2026-09-03: one card
+   /login and /signup used to be a two-column pitch: a large marketing column
+   on the left, the card on the right. A door does not need a pitch. Both
+   pages now render one card in the middle of the screen and nothing else.
+   /consent still uses the two-column grid above, so the old rules stay. */
+.cv5-auth-solo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.cv5-auth-solo .cv5-auth-card {
+  width: 100%;
+  max-width: 440px;
+  border-radius: 20px;
+  padding: clamp(28px, 4.4vw, 38px) clamp(22px, 3.6vw, 34px) clamp(24px, 3.6vw, 30px);
+  text-align: center;
+}
+
+/* The badge is small and quiet; the headline is the only loud thing here. */
+.cv5-auth-solo .cv5-auth-status {
+  height: 26px;
+  padding: 0 11px;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+}
+
+.cv5-auth-solo .cv5-auth-card h1 {
+  margin: 16px 0 0;
+  font-size: clamp(1.7rem, 5.4vw, 2.15rem);
+  font-weight: 880;
+  line-height: 1.2;
+  letter-spacing: -0.038em;
+  text-wrap: balance;
+}
+
+.cv5-auth-solo .cv5-auth-copy {
+  margin: 12px auto 0;
+  max-width: 34ch;
+  font-size: 0.9rem;
+  line-height: 1.68;
+}
+
+.cv5-auth-solo .cv5-auth-providers { margin-top: 24px; text-align: left; }
+.cv5-auth-solo .cv5-auth-signedin { text-align: left; }
+
+.cv5-auth-solo .cv5-auth-switch {
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* One grey line under the card: what a person gets, in four words. */
+.cv5-auth-underline {
+  margin: 0;
+  max-width: 440px;
+  font-size: 0.74rem;
+  line-height: 1.6;
+  text-align: center;
+  color: var(--v5-ink-faint);
+}
+
+@media (max-width: 640px) {
+  .cv5-auth-solo .cv5-auth-card {
+    max-width: none;
+    padding: 26px 18px 22px;
+  }
+}
+
 /* ---------------------------------------------------------------- intro */
 .cv5-auth-intro h1 {
   margin: 20px 0 0;

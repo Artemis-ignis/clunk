@@ -14,6 +14,7 @@ import {
   OAuthConfigurationError,
   OAuthExchangeError,
   OAuthSecurityError,
+  type OAuthDoor,
 } from "../../../../oauth";
 import { getRuntimeEnvironment } from "../../../../runtime-environment";
 
@@ -26,19 +27,24 @@ export async function GET(request: Request, context: RouteContext): Promise<Resp
   if (!isOAuthProvider(rawProvider) || rawProvider === "qa") return authErrorRedirect(request, "unknown_provider", "/");
 
   const url = new URL(request.url);
-  const queryError = url.searchParams.get("error");
-  if (queryError) return authErrorRedirect(request, "provider_denied", safeOAuthReturnPath(url.searchParams.get("return_to") ?? "/"));
-
   const code = url.searchParams.get("code") ?? "";
   const state = url.searchParams.get("state") ?? "";
   const environment = getOAuthEnvironment(getRuntimeEnvironment());
   const stateSecret = environment.CLUNK_OAUTH_STATE_SECRET;
   const sessionSecret = environment.CLUNK_AUTH_SESSION_SECRET;
+  // Read the door out of the (signed, HttpOnly) transaction cookie before anything
+  // can fail, so every failure below lands on the screen the person started at.
+  // A cookie that is missing, expired or unreadable simply leaves it at /login.
+  const door = await readOAuthDoor(request, rawProvider, stateSecret);
+
+  const queryError = url.searchParams.get("error");
+  if (queryError) return authErrorRedirect(request, "provider_denied", safeOAuthReturnPath(url.searchParams.get("return_to") ?? "/"), door);
+
   const status = getOAuthProviderStatus(rawProvider, environment);
   if (!status.configured || !stateSecret || stateSecret.length < 16 || !sessionSecret || sessionSecret.length < 16) {
-    return authErrorRedirect(request, "config_required", "/");
+    return authErrorRedirect(request, "config_required", "/", door);
   }
-  if (!code || !state) return authErrorRedirect(request, "missing_callback_fields", "/");
+  if (!code || !state) return authErrorRedirect(request, "missing_callback_fields", "/", door);
 
   try {
     const cookies = parseCookieHeader(request.headers.get("cookie"));
@@ -103,7 +109,29 @@ export async function GET(request: Request, context: RouteContext): Promise<Resp
         : error instanceof OAuthExchangeError
           ? "provider_exchange_failed"
           : "oauth_callback_failed";
-    return authErrorRedirect(request, code, "/");
+    return authErrorRedirect(request, code, "/", door);
+  }
+}
+
+/**
+ * Best effort, never load-bearing: the transaction cookie is signed with the same
+ * state secret, so a forged one cannot get past `decodeOAuthTransaction`, and a
+ * failure to read it costs nothing but the older behaviour (back to /login).
+ */
+async function readOAuthDoor(
+  request: Request,
+  provider: "google" | "github",
+  stateSecret: string | undefined,
+): Promise<OAuthDoor> {
+  if (!stateSecret || stateSecret.length < 16) return "login";
+  try {
+    const token = parseCookieHeader(request.headers.get("cookie")).get(
+      oauthTransactionCookieName(provider),
+    );
+    if (!token) return "login";
+    return (await decodeOAuthTransaction(token, stateSecret)).from;
+  } catch {
+    return "login";
   }
 }
 
@@ -116,8 +144,13 @@ function providerRedirectUri(
   return primary || legacy || "";
 }
 
-function authErrorRedirect(request: Request, code: string, returnTo: string): Response {
-  const target = new URL("/login", request.url);
+function authErrorRedirect(
+  request: Request,
+  code: string,
+  returnTo: string,
+  from: OAuthDoor = "login",
+): Response {
+  const target = new URL(from === "signup" ? "/signup" : "/login", request.url);
   target.searchParams.set("auth_error", code);
   const safeReturnTo = safeOAuthReturnPath(returnTo);
   if (safeReturnTo !== "/") target.searchParams.set("return_to", safeReturnTo);

@@ -136,7 +136,7 @@ export function PassportClient({ userLabel }: { userLabel: string }) {
           <Icon name="info" size={16} />
           <p>{message}</p>
           {state === "error" ? (
-            <Link href="/login" className="text-link">
+            <Link href="/signup?return_to=%2Fpassport" className="text-link">
               로그인
               <Icon name="arrowRight" size={13} />
             </Link>

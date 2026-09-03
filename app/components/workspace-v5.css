@@ -160,6 +160,29 @@
   color: var(--v5-green);
 }
 
+/* 2026-09-03: the one line a workspace shows on its first arrival — the signup
+   grant landed and nothing has been spent. It lives in the toolbar's existing
+   status slot, not in a banner of its own, and disappears the moment a credit
+   is spent. Narrow screens have no room for it beside the chips. */
+.workspace-cv5 .workspace-firstrun {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border: 1px solid rgba(139, 92, 246, 0.38);
+  border-radius: 999px;
+  background: rgba(139, 92, 246, 0.1);
+  font-size: 0.76rem;
+  font-weight: 650;
+  line-height: 1.3;
+  color: var(--v5-ink);
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .workspace-cv5 .workspace-firstrun { display: none; }
+}
+
 /* ------------------------------------------------------- hero stamp panels */
 /* These are already dark, but tinted teal from the pre-cv5 palette; they sit
    directly on top of the hero renders so the mismatch is very visible. */

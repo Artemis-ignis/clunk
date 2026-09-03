@@ -1,6 +1,8 @@
 import { requireChatGPTUser } from "../chatgpt-auth";
 import { StudioClient } from "./StudioClient";
 import { createPageMetadata } from "../components/site-metadata";
+import { isFreshWorkspace } from "../api/_lib/clunk";
+import { isAuthIntent, welcomeLine } from "../auth-intent";
 import type { AssetKind } from "../../packages/core/src/assetops-contract";
 
 export const dynamic = "force-dynamic";
@@ -21,17 +23,22 @@ function makeParamToAssetKind(value: unknown): AssetKind | undefined {
     : undefined;
 }
 
-export default async function StudioPage({ searchParams }: { searchParams?: Promise<{ source_asset_id?: string; make?: string }> }) {
-  const user = await requireChatGPTUser("/studio");
+export default async function StudioPage({ searchParams }: { searchParams?: Promise<{ source_asset_id?: string; make?: string; intent?: string }> }) {
+  const user = await requireChatGPTUser("/studio?intent=create");
   const params = await searchParams;
   const sourceAssetId = typeof params?.source_asset_id === "string" && /^[a-zA-Z0-9:._-]{1,256}$/.test(params.source_asset_id)
     ? params.source_asset_id
     : undefined;
+  // `?intent=` is the same value the sign-up door carried; it survives OAuth inside
+  // return_to and says which sentence this person came here to hear.
+  const intent = isAuthIntent(params?.intent) ? params.intent : null;
+  const welcome = (await isFreshWorkspace(user)) ? welcomeLine(intent) : null;
   return (
     <StudioClient
       userLabel={user.displayName}
       initialSourceAssetId={sourceAssetId}
       initialAssetKind={makeParamToAssetKind(params?.make)}
+      welcome={welcome}
     />
   );
 }
