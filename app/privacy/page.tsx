@@ -43,9 +43,9 @@ export default function PrivacyPage() {
       <section aria-labelledby="privacy-officer">
         <h2 id="privacy-officer">개인정보보호책임자</h2>
         <p>
-          개인정보 보호법 제31조에 따른 개인정보보호책임자입니다. 운영자(아르테미스, 대표
-          박준성)의 사업자 등록은 완료되었으나 책임자 지정·공개 절차가 아직 남아 있으며,
-          <b>임의의 이름이나 연락처를 기재하지 않습니다</b>.
+          개인정보 보호법 제31조에 따른 개인정보보호책임자입니다. 운영자(주식회사 아르테미스)의
+          대표 박준성이 책임자를 맡으며, 열람·정정·삭제·처리정지 요구와 문의는 아래 연락처로
+          받습니다.
         </p>
         <LegalRows rows={PRIVACY_OFFICER_ROWS} />
       </section>
