@@ -37,13 +37,21 @@ test("login and signup render the real host OAuth journey and explain failures",
   }
 });
 
-test("missing public routes have public product guidance and a private workspace handoff", async () => {
+test("kits sends signed-out visitors to the marketplace and signed-in visitors to their workspace", async () => {
+  // 2026-09-02: the public marketing half of /kits was removed. The route now has
+  // exactly two doors — the workspace list behind sign-in, and a one-paragraph
+  // intro for signed-in visitors — and no public product page at all.
   const kits = await source("app/kits/page.tsx");
-  assert.match(kits, /SiteShell/);
+  assert.match(kits, /WorkspaceShell/);
   assert.match(kits, /KitsClient/);
-  assert.match(kits, /view=workspace|workspace/);
-  assert.match(kits, /hash-only|manifest/);
-  assert.match(kits, /data-snap-section/);
+  assert.match(kits, /params\.view === "workspace"/);
+  assert.match(kits, /requireChatGPTUser\("\/kits\?view=workspace"\)/);
+  assert.match(kits, /if \(!user\) redirect\("\/marketplace"\)/);
+  assert.match(kits, /href="\/kits\?view=workspace"/);
+  assert.match(kits, /href="\/dashboard"/);
+  assert.doesNotMatch(kits, /SiteShell/);
+  // The old marketing markup is only allowed to survive in the explanatory comment.
+  assert.doesNotMatch(kits, />NO PUBLIC KIT LISTINGS<|data-snap-section|className="kits-contract/);
 
   const series = await source("app/series/page.tsx");
   assert.match(series, /getClunkSeriesCatalog/);
@@ -51,16 +59,21 @@ test("missing public routes have public product guidance and a private workspace
   assert.match(series, /data-snap-section/);
   assert.match(series, /\/series/);
 
+  // 2026-09-02: /mcp duplicated /agents, so it is a bare redirect and the live
+  // endpoint status is rendered in exactly one place — /agents.
   const mcp = await source("app/mcp/page.tsx");
-  assert.match(mcp, /path: "\/mcp"/);
-  assert.match(mcp, /data-snap-section/);
-  assert.match(mcp, /McpEndpointStatus/);
+  assert.match(mcp, /redirect\("\/agents"\)/);
+  assert.doesNotMatch(mcp, /<McpEndpointStatus|data-snap-section/);
+  const agents = await source("app/agents/page.tsx");
+  assert.match(agents, /<McpEndpointStatus/);
 
+  // The 404 page points at the surfaces that still exist as pages; /kits and
+  // /mcp are redirects now, so they must not be advertised there.
   const notFound = await source("app/not-found.tsx");
-  for (const href of ["/marketplace", "/series", "/kits", "/mcp"]) {
-    assert.match(notFound, new RegExp(href.replaceAll("/", "\\/")));
+  for (const href of ["/", "/marketplace", "/app", "/review", "/agents", "/pricing"]) {
+    assert.match(notFound, new RegExp(`href="${href.replaceAll("/", "\/")}"`));
   }
-  assert.match(notFound, /data-snap-section/);
+  assert.doesNotMatch(notFound, /href="\/kits"|href="\/mcp"/);
 });
 
 test("all requested public route files remain present", async () => {
