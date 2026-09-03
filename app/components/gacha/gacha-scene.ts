@@ -2998,7 +2998,9 @@ export function createGachaScene(
    * 12라운드 첫 촬영에서 CLUNK 사인이 글자를 잃고 흰 덩어리가 되었다. 문턱 위의 밝은
    * 심지만 골라 그 둘레에 좁은 테를 두른다.
    */
-  for (const named of ["sign-text", "led-base", "led-panel", "led-cap", "coin-ring", "lever-knob"]) {
+  // 사인 글자는 번짐 층에서 뺀다 — 글자 자체 텍스처에 이미 후광이 구워져 있어 한 번 더 번지면
+  // 획이 뭉개져 읽히지 않았다(2026-09-03 운영자 지적). LED 띠·링·구슬만 번진다.
+  for (const named of ["led-base", "led-panel", "led-cap", "coin-ring", "lever-knob"]) {
     enableBloom(scene.getObjectByName(named));
   }
 

@@ -545,6 +545,7 @@ export function GachaMachine3D() {
     let manual = false;
     let observer: IntersectionObserver | null = null;
     let onResize: (() => void) | null = null;
+    let sizeObserver: ResizeObserver | null = null;
 
     note("scene module loading");
     mountedAt.current = performance.now();
@@ -634,6 +635,15 @@ export function GachaMachine3D() {
           placeOverlays();
         };
         window.addEventListener("resize", onResize);
+        // 캔버스 폭은 창 크기뿐 아니라 스크롤(--gc-left-ramp: 왼쪽 열이 접히며 전폭으로)로도
+        // 바뀐다. 창 resize 이벤트만 듣던 동안 그 구간에서 픽셀 버퍼가 옛 폭에 머물러 기계가
+        // 가로로 늘어났다(2026-09-03 운영자 지적 "뚱뚱해지고 늘어남"). 요소 크기를 직접 본다.
+        let resizeRaf = 0;
+        sizeObserver = new ResizeObserver(() => {
+          if (resizeRaf) return;
+          resizeRaf = window.requestAnimationFrame(() => { resizeRaf = 0; onResize?.(); });
+        });
+        sizeObserver.observe(host);
 
         // 검증용 손잡이 — rAF 없이도 한 프레임씩 진행시킨다.
         const scope = window as unknown as Record<string, unknown>;
@@ -679,6 +689,7 @@ export function GachaMachine3D() {
       window.cancelAnimationFrame(raf);
       observer?.disconnect();
       if (onResize) window.removeEventListener("resize", onResize);
+      sizeObserver?.disconnect();
       const scope = window as unknown as Record<string, unknown>;
       delete scope.__gachaFrame;
       delete scope.__gachaPixels;
