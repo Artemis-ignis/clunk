@@ -131,14 +131,43 @@ const TIMING = {
  */
 const INTRO_MS = { spotlight: 180, land: 860, neon: 1020, pour: 1280, total: 2400 } as const;
 
+/** 아무것도 뽑지 않은 채 로그인해야 할 때의 문. 뽑은 것이 있으면 아래 함수가 이긴다. */
 const LOGIN_HREF = "/signup?return_to=%2F%3Fintent%3Dmarket";
+
+/**
+ * 뽑은 물건의 상품 페이지로 되돌아오는 가입 문.
+ *
+ * 2026-09-03(운영자): "로그인하고 받기"가 빈손으로 돌아왔다 — return_to 가 첫 화면(`/`)
+ * 이라 OAuth 를 마치고 오면 기계는 처음 상태이고 뽑은 것은 사라져 있었다. 이제 그 물건의
+ * 상품 페이지로 돌아온다. 거기에는 같은 파일을 주는 받기 단추가 이미 있다.
+ * 경로는 내부 경로 하나에 쿼리만 붙인 모양이라 safeOAuthReturnPath 를 그대로 통과한다.
+ */
+function loginHrefFor(listing: GachaListing | null): string {
+  const slug = listing?.slug;
+  if (!slug) return LOGIN_HREF;
+  return `/signup?return_to=${encodeURIComponent(`/marketplace/${slug}?intent=market`)}`;
+}
+
 const DRAWN_KEY = "clunk.gacha.drawn";
 /** 등장 연출은 이 브라우저 세션에 한 번만 본다. */
 const INTRO_KEY = "clunk.gacha.intro";
-/** 레버를 이만큼(px) 아래로 끌면 발동한다. 엄지로 한 번 훑는 거리다. */
-const LEVER_TRIGGER_PIXELS = 60;
+/** 마지막으로 뽑은 것. 로그인하고 돌아왔을 때 그 카드를 다시 세우는 데 쓴다. */
+const LAST_PRIZE_KEY = "clunk.gacha.last-prize";
+/** 그보다 오래된 기록은 남의 이야기다 — 30분. */
+const LAST_PRIZE_TTL_MS = 30 * 60 * 1000;
 /** 손잡이가 끝까지 내려가는 거리(px). 끌어내린 만큼 레버가 따라 내려간다. */
 const LEVER_TRAVEL_PIXELS = 96;
+/**
+ * 레버를 이만큼(px) 아래로 끌면 발동한다 — 끝까지 내려가는 거리의 40% 를 넘긴 지점.
+ *
+ * 2026-09-03(운영자): 60px 은 손잡이 자체(88px)만큼 긴 거리라 한 번에 넘기기 어려웠고,
+ * 넘기지 못하고 놓아도 뒤따르는 클릭이 그대로 뽑아 버려 끌기와 클릭이 구별되지 않았다.
+ */
+const LEVER_TRIGGER_PIXELS = 40;
+/** 이만큼(px)보다 많이 움직였으면 그것은 끌기다 — 놓을 때 따라오는 클릭은 뽑지 않는다. */
+const LEVER_DRAG_SLOP = 6;
+/** 손잡이 단추의 최소 지름(px). 엄지로 한 번에 잡을 크기. */
+const LEVER_HIT_PIXELS = 64;
 
 /**
  * 선반에 걸린 상품 한 칸.
@@ -247,6 +276,49 @@ function writeDrawn(theme: ThemeId, ids: readonly string[]): void {
   }
 }
 
+/** 로그인하러 나갔다 돌아온 사람에게 돌려줄 마지막 뽑기. */
+type StoredPrize = { slug: string; theme: ThemeId; at: number };
+
+function writeLastPrize(listing: GachaListing, theme: ThemeId): void {
+  try {
+    const record: StoredPrize = { slug: listing.slug, theme, at: Date.now() };
+    sessionStorage.setItem(LAST_PRIZE_KEY, JSON.stringify(record));
+  } catch {
+    /* 저장이 막힌 브라우저에서는 상품 페이지로 돌아오는 문만 남는다. */
+  }
+}
+
+function readLastPrize(): StoredPrize | null {
+  try {
+    const raw = sessionStorage.getItem(LAST_PRIZE_KEY);
+    if (!raw) return null;
+    const parsed: unknown = JSON.parse(raw);
+    if (typeof parsed !== "object" || parsed === null) return null;
+    const record = parsed as Partial<StoredPrize>;
+    if (typeof record.slug !== "string" || typeof record.at !== "number") return null;
+    if (Date.now() - record.at > LAST_PRIZE_TTL_MS) return null;
+    const theme = (GACHA_THEMES.some((row) => row.id === record.theme) ? record.theme : "all") as ThemeId;
+    return { slug: record.slug, theme, at: record.at };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 장면이 아직 갖고 있지 않은 손잡이. 다른 작업자가 gacha-scene.ts 에 카메라 훅
+ * (setTopInset — 모든 샷에서 화면 위쪽에 px 만큼 빈 프레임을 남긴다)을 붙이는 중이라,
+ * 화면 쪽 호출을 옵셔널 체이닝으로 미리 걸어 둔다. 훅이 없는 지금은 아무 일도 없다.
+ */
+type SceneWithCameraHooks = GachaScene & { setTopInset?: (px: number) => void };
+
+/** 내비가 앉는 띠의 높이(px). CSS 의 --gc-nav-h 가 하나뿐인 출처다. */
+function navBandHeight(): number {
+  if (typeof window === "undefined") return 84;
+  const raw = getComputedStyle(document.documentElement).getPropertyValue("--gc-nav-h").trim();
+  const value = Number.parseFloat(raw);
+  return Number.isFinite(value) ? value : 84;
+}
+
 /** 이 브라우저가 WebGL 을 그릴 수 있는지. 못 그리면 SVG 머신으로 간다. */
 function canUseWebGL(): boolean {
   try {
@@ -351,7 +423,13 @@ export function GachaMachine3D() {
   const hintRef = useRef<HTMLParagraphElement | null>(null);
   const sceneRef = useRef<GachaScene | null>(null);
   const timers = useRef<number[]>([]);
-  const leverDrag = useRef({ active: false, startY: 0 });
+  /**
+   * 손잡이를 잡고 있는 동안의 상태. pointerId 를 함께 들고 있어서 창(window)이 듣는
+   * 움직임 가운데 이 손가락의 것만 고른다 — 포인터 잡기(capture)가 풀려도 끌기는 이어진다.
+   */
+  const leverDrag = useRef({ active: false, startY: 0, moved: 0, pointerId: -1 });
+  /** 끌기로 끝난 동작이면 뒤따라오는 클릭은 삼킨다 — 짧게 끌고 놓은 것은 뽑기가 아니다. */
+  const swallowLeverClick = useRef(false);
   const stats = useRef({ frames: 0, totalMs: 0 });
   /** 캡슐을 이미 쏟아 부었는지. 카탈로그가 오는 그 한 번만 붓는다. */
   const poured = useRef(false);
@@ -476,22 +554,27 @@ export function GachaMachine3D() {
 
         const placeOverlays = () => {
           const points = scene.points();
+          // 캔버스는 내비 띠 아래(넓은 화면에서는 글 칸 옆)로 물러나 있다. 장면이 주는 자리는
+          // 캔버스 안의 좌표이므로, 단추가 사는 무대 좌표로 그만큼 옮겨 놓는다. 무대가
+          // position: relative 라 캔버스의 offsetLeft/Top 이 곧 그 차이다(레이아웃을 읽지 않는다).
+          const dx = host.offsetLeft;
+          const dy = host.offsetTop;
           const put = (node: HTMLElement | null, point: { x: number; y: number; radius: number }, minimum: number) => {
             if (!node) return;
             const size = Math.max(minimum, point.radius * 2);
-            node.style.left = `${point.x - size / 2}px`;
-            node.style.top = `${point.y - size / 2}px`;
+            node.style.left = `${dx + point.x - size / 2}px`;
+            node.style.top = `${dy + point.y - size / 2}px`;
             node.style.width = `${size}px`;
             node.style.height = `${size}px`;
           };
-          put(leverRef.current, points.lever, 56);
+          put(leverRef.current, points.lever, LEVER_HIT_PIXELS);
           put(capsuleRef.current, points.capsule, 48);
           // 유리 돔 위의 손 닿는 자리 — 눈에 보이지 않고 캡슐을 흔들기만 한다.
           put(domeRef.current, points.dome, 80);
           // "잡고 아래로" 알약은 손잡이 왼쪽에 선다. 오른쪽에 두면 무대 밖으로 밀려난다.
           if (hintRef.current) {
-            hintRef.current.style.left = `${points.lever.x - points.lever.radius - 10}px`;
-            hintRef.current.style.top = `${points.lever.y}px`;
+            hintRef.current.style.left = `${dx + points.lever.x - points.lever.radius - 10}px`;
+            hintRef.current.style.top = `${dy + points.lever.y}px`;
           }
         };
 
@@ -528,7 +611,11 @@ export function GachaMachine3D() {
         );
         observer.observe(host);
 
-        onResize = () => { scene.resize(); placeOverlays(); };
+        onResize = () => {
+          scene.resize();
+          (scene as SceneWithCameraHooks).setTopInset?.(navBandHeight());
+          placeOverlays();
+        };
         window.addEventListener("resize", onResize);
 
         // 검증용 손잡이 — rAF 없이도 한 프레임씩 진행시킨다.
@@ -556,6 +643,9 @@ export function GachaMachine3D() {
 
         // 방금 만든 장면이라 지금 상태를 한 번 실어 준다.
         scene.resize();
+        // 카메라가 내비 띠만큼 위를 비워 두게 한다. 훅이 붙기 전까지는 캔버스가 그 자리에서
+        // 시작하는 것으로 같은 일을 하고 있다 — 훅이 오면 캔버스 쪽 여백을 줄여야 한다.
+        (scene as SceneWithCameraHooks).setTopInset?.(navBandHeight());
         placeOverlays();
         // 장면이 섰다고 알린다. 아래의 "값 넣기" 훅들이 이 신호에 한 번 더 돌아,
         // 장면을 불러오는 동안 이미 정해져 있던 캡슐 색·단계가 빠짐없이 들어간다.
@@ -766,7 +856,8 @@ export function GachaMachine3D() {
     setClaim({ kind: "idle" });
     setClunked(false);
     sceneRef.current?.setLeverPull(0);
-    leverDrag.current = { active: false, startY: 0 };
+    leverDrag.current = { active: false, startY: 0, moved: 0, pointerId: -1 };
+    swallowLeverClick.current = false;
     scrollFired.current = progressRef.current >= SCROLL_PULL.to;
   }, [clearTimers]);
 
@@ -823,49 +914,112 @@ export function GachaMachine3D() {
     }
   }, [prize]);
 
+  /* 로그인하러 나갔다 돌아온 사람에게 뽑은 것을 돌려준다 ---------------------
+     문 자체는 그 물건의 상품 페이지로 돌아오게 되어 있다(loginHrefFor). 그래도 다른 길로
+     첫 화면에 `?intent=market` 을 달고 돌아오는 경우가 있어(내비의 로그인, 뒤로 가기)
+     그때는 이 세션에 적어 둔 마지막 뽑기를 그 자리에 다시 세운다. 30분이 지난 기록은 버린다. */
+  useEffect(() => {
+    if (prize) writeLastPrize(prize, theme);
+  }, [prize, theme]);
+
+  const prizeRestored = useRef(false);
+  useEffect(() => {
+    if (prizeRestored.current || !authenticated || listings.length === 0) return;
+    if (typeof window === "undefined" || !/[?&]intent=market(?:&|$)/.test(window.location.search)) return;
+    const stored = readLastPrize();
+    if (!stored) return;
+    const listing = drawableListings(listings).find((row) => row.slug === stored.slug);
+    if (!listing) return;
+    prizeRestored.current = true;
+    clearTimers();
+    if (stored.theme !== theme) {
+      setTheme(stored.theme);
+      setDrawn(readDrawn(stored.theme));
+    }
+    setPrize(listing);
+    setClaim({ kind: "idle" });
+    setClunked(false);
+    setStage("result");
+  }, [authenticated, clearTimers, listings, theme]);
+
   /* 에이전트도 같은 기계를 쓴다 — WebMCP 도구가 위의 손잡이를 그대로 부른다. */
   useGachaWebMcp({
     trackRef, stage, theme, prize, pool, counts, remaining, beta,
-    authenticated, claim, loginHref: LOGIN_HREF,
+    authenticated, claim, loginHref: loginHrefFor(prize),
     turn, openCapsule, again, chooseTheme, collect,
   });
 
   /* 레버 당기기 -------------------------------------------------------------
-     아래로 끌면 손잡이가 손을 따라 내려오고, 60px 을 넘기는 순간 발동한다.
-     그냥 누르거나 엔터·스페이스를 쳐도 같은 것이 일어난다. */
-  const onLeverDown = useCallback((event: ReactPointerEvent<HTMLButtonElement>) => {
-    if (stage !== "idle") return;
-    leverDrag.current = { active: true, startY: event.clientY };
-    sceneRef.current?.setLeverDragging(true);
-    event.currentTarget.setPointerCapture(event.pointerId);
-  }, [stage]);
+     손잡이를 잡고 아래로 끌면 레버가 손을 따라 내려오고, 끝까지 내려가는 거리의 40%
+     (LEVER_TRIGGER_PIXELS)를 넘기는 순간 발동한다. 거기 못 미치고 놓으면 손잡이는 스스로
+     올라가고 아무것도 뽑히지 않는다 — 끌기를 도중에 그만둘 수 있어야 끌기다.
+     그냥 누르거나 엔터·스페이스를 쳐도 같은 것이 일어난다.
 
-  const onLeverMove = useCallback((event: ReactPointerEvent<HTMLButtonElement>) => {
-    const drag = leverDrag.current;
-    if (!drag.active || stage !== "idle") return;
-    const pulled = event.clientY - drag.startY;
-    sceneRef.current?.setLeverPull(Math.max(0, pulled) / LEVER_TRAVEL_PIXELS);
-    if (pulled >= LEVER_TRIGGER_PIXELS) {
-      drag.active = false;
-      sceneRef.current?.setLeverDragging(false);
-      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-        event.currentTarget.releasePointerCapture(event.pointerId);
-      }
-      turn();
-    }
-  }, [stage, turn]);
-
-  const onLeverUp = useCallback((event: ReactPointerEvent<HTMLButtonElement>) => {
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
-    leverDrag.current.active = false;
+     움직임은 단추가 아니라 창(window)이 듣는다. 포인터 잡기(setPointerCapture)는 손잡이가
+     발동하면서 disabled 가 되는 순간 브라우저가 스스로 풀어 버리고, 그러면 단추에 걸어 둔
+     onPointerMove 는 손이 88px 짜리 손잡이 밖으로 나가는 순간 조용히 끊긴다. 창이 들으면
+     잡기가 풀려도 끝까지 따라간다. */
+  const releaseLever = useCallback((pointerId: number) => {
+    const node = leverRef.current;
     sceneRef.current?.setLeverDragging(false);
-    // 끝까지 당기지 못했으면 손잡이가 스스로 올라간다.
-    if (stage === "idle") sceneRef.current?.setLeverPull(0);
-  }, [stage]);
+    if (node && pointerId >= 0 && node.hasPointerCapture?.(pointerId)) {
+      try { node.releasePointerCapture(pointerId); } catch { /* 이미 풀렸으면 그만이다. */ }
+    }
+    leverDrag.current.pointerId = -1;
+  }, []);
 
-  // 끌어서 당겨 이미 발동했으면 단계가 "pull" 이라 turn 이 스스로 물러난다 —
-  // 같은 동작으로 두 번 뽑히지 않는다. 끝까지 못 당기고 놓은 뒤의 클릭은 그냥 뽑기다.
-  const onLeverClick = useCallback(() => { turn(); }, [turn]);
+  const onLeverDown = useCallback((event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (stageLive.current !== "idle") return;
+    leverDrag.current = { active: true, startY: event.clientY, moved: 0, pointerId: event.pointerId };
+    swallowLeverClick.current = false;
+    sceneRef.current?.setLeverDragging(true);
+    // 잡아 두면 손이 손잡이 밖으로 나가도 이 단추가 계속 듣는다. 손가락 화면에서는
+    // .gc3-lever 의 touch-action: none 이 페이지가 같이 밀리는 것을 막는다.
+    try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* 못 잡아도 창이 듣는다. */ }
+  }, []);
+
+  useEffect(() => {
+    const onMove = (event: PointerEvent) => {
+      const drag = leverDrag.current;
+      if (!drag.active || event.pointerId !== drag.pointerId) return;
+      if (stageLive.current !== "idle") return;
+      const pulled = event.clientY - drag.startY;
+      drag.moved = Math.max(drag.moved, Math.abs(pulled));
+      sceneRef.current?.setLeverPull(Math.max(0, Math.min(1, pulled / LEVER_TRAVEL_PIXELS)));
+      if (pulled >= LEVER_TRIGGER_PIXELS) {
+        drag.active = false;
+        // 끌기가 이미 뽑았다 — 손을 떼면서 따라오는 클릭이 한 번 더 뽑지 않게 한다.
+        swallowLeverClick.current = true;
+        releaseLever(event.pointerId);
+        turnLive.current();
+      }
+    };
+    const onUp = (event: PointerEvent) => {
+      const drag = leverDrag.current;
+      if (event.pointerId !== drag.pointerId) return;
+      const wasDragging = drag.active;
+      drag.active = false;
+      // 손가락이 지나간 거리가 몇 픽셀을 넘으면 그것은 클릭이 아니라 끌기다.
+      if (wasDragging && drag.moved > LEVER_DRAG_SLOP) swallowLeverClick.current = true;
+      releaseLever(event.pointerId);
+      // 끝까지 당기지 못했으면 손잡이가 스스로 올라간다.
+      if (stageLive.current === "idle") sceneRef.current?.setLeverPull(0);
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+    };
+  }, [releaseLever]);
+
+  // 끌어서 당긴 뒤의 클릭은 삼킨다. 그냥 누른 것(또는 엔터·스페이스)은 그대로 뽑기다.
+  const onLeverClick = useCallback(() => {
+    if (swallowLeverClick.current) { swallowLeverClick.current = false; return; }
+    turn();
+  }, [turn]);
 
   /* 화면 없이 단계를 넘기는 손잡이 ------------------------------------------ */
   useEffect(() => {
@@ -935,7 +1089,7 @@ export function GachaMachine3D() {
         node.style.width = `${size}px`;
         node.style.height = `${size}px`;
       };
-      put(leverRef.current, spec.lever, 56);
+      put(leverRef.current, spec.lever, LEVER_HIT_PIXELS);
       put(capsuleRef.current, spec.capsule, 48);
       put(domeRef.current, spec.dome, 80);
       if (hintRef.current) {
@@ -966,11 +1120,13 @@ export function GachaMachine3D() {
       if (p <= c) return 1;
       return 1 - (p - c) / Math.max(1e-6, d - c);
     };
+    // 떠오르는 거리만 넘겨 주고 자리잡기(transform)는 CSS 가 갖는다 — 글줄이 화면마다
+    // 다른 자리에 서기 때문이다(넓은 화면에서는 기계 왼쪽 칸, 좁은 화면에서는 기계 위 띠).
     const show = (node: HTMLElement | null, amount: number, rise = 18) => {
       if (!node) return;
       const k = Math.min(1, Math.max(0, amount));
       node.style.opacity = k.toFixed(3);
-      node.style.transform = `translate(var(--gc-beat-x, 0px), ${((1 - k) * rise).toFixed(1)}px)`;
+      node.style.setProperty("--gc-beat-rise", `${((1 - k) * rise).toFixed(1)}px`);
       node.style.visibility = k > 0.01 ? "visible" : "hidden";
     };
     const update = () => {
@@ -988,7 +1144,12 @@ export function GachaMachine3D() {
         // 내리기 시작했으면 등장 연출은 그 자리에서 끝난다 — 두 연출이 겹치지 않는다.
         if (p > 0.02 && scene.introRunning()) { scene.skipIntro(); markIntroChrome(false); }
       }
-      show(beatHeadRef.current, ramp(p, -1, 0, 0.06, 0.16));
+      const headBeat = ramp(p, -1, 0, 0.06, 0.16);
+      show(beatHeadRef.current, headBeat);
+      // 캔버스 왼쪽·위쪽 모서리의 페이드는 제목 글줄과 같은 ramp 로 산다. 제목이 왼쪽 칸에
+      // 서 있는 첫 샷에서만 필요하고, 카메라가 기계 안으로 들어간 뒤(p≳0.16)에는 0 이 되어
+      // 기계 위를 세로로 가르는 어두운 띠가 남지 않는다(2026-09-03 2차 지적).
+      rootRef.current?.style.setProperty("--gc-left-ramp", headBeat.toFixed(3));
       show(beatScrollRef.current, 1 - p / 0.05, 0);
       show(beatInsideRef.current, ramp(p, 0.17, 0.25, 0.4, 0.47));
       const idle = stageLive.current === "idle";
@@ -1076,9 +1237,6 @@ export function GachaMachine3D() {
               className="gc3-lever"
               ref={leverRef}
               onPointerDown={onLeverDown}
-              onPointerMove={onLeverMove}
-              onPointerUp={onLeverUp}
-              onPointerCancel={onLeverUp}
               onFocus={() => setLeverHover(true)}
               onBlur={() => setLeverHover(false)}
               onMouseEnter={() => setLeverHover(true)}
@@ -1132,7 +1290,7 @@ export function GachaMachine3D() {
                   beta={beta}
                   authenticated={authenticated}
                   claim={claim}
-                  loginHref={LOGIN_HREF}
+                  loginHref={loginHrefFor(prize)}
                   remaining={remaining}
                   showArt={false}
                   onClaim={() => { void collect(); }}

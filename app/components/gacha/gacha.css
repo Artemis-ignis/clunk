@@ -804,9 +804,20 @@
 .cv5 .gc-hero { display: block; min-height: 0; padding: 0; overflow: visible; }
 /* 스크롤이 카메라를 움직이는 동안 스냅이 끼어들면 화면이 튄다. 이 페이지에서는 끈다. */
 html:has(.gc-film) { scroll-snap-type: none; }
-/* 내비 아래 136px 을 어둡게 덮는 사이트 공통 스크림. 무대가 화면 전체인 이 페이지에서는
-   기계 윗부분을 검은 띠로 잘라 버리므로 끈다 — 내비 알약들은 제 배경을 갖고 있다. */
-html:has(.gc-film) .sitenav-dock::before { opacity: 0 !important; }
+/* 내비가 앉는 띠.
+   2026-09-03(운영자: "기계가 위 메뉴를 가린다"): 예전에는 이 스크림을 통째로 껐다 —
+   무대가 화면 전체이던 때에는 136px 짜리 사이트 공통 스크림이 기계 윗부분을 검은 띠로
+   잘라 버렸기 때문이다. 그 대신 메뉴 글자가 기계의 크롬 갓 위에 그대로 얹혔다.
+   이제 기계는 내비 밑(--gc-nav-h)에서 시작하므로 잘라 낼 것이 없고, 띠는 내비 높이만큼만
+   서서 아래로 사라진다. 카메라가 기계 안까지 들어가는 근접 장면(p≈0.52)에서도 메뉴는
+   이 띠 위에서 읽힌다. 색은 무대 바탕과 같아서 첫 화면에서는 이음매가 보이지 않는다. */
+html:has(.gc-film) .sitenav-dock::before {
+  opacity: 1 !important;
+  top: 0;
+  height: var(--gc-nav-h, 84px);
+  border-bottom: 0;
+  background: linear-gradient(180deg, #07050f 0%, rgba(7, 5, 15, 0.92) 64%, rgba(7, 5, 15, 0) 100%);
+}
 .gc-film { display: block; width: 100%; }
 .gc-film-track { position: relative; height: 480svh; }
 .gc-film-sticky { position: sticky; top: 0; height: 100svh; overflow: hidden; }
@@ -820,7 +831,8 @@ html:has(.gc-film) .sitenav-dock::before { opacity: 0 !important; }
   position: absolute;
   left: 50%;
   --gc-beat-x: -50%;
-  transform: translate(var(--gc-beat-x), 0);
+  /* 떠오르는 거리는 스크롤이 --gc-beat-rise 로 넣어 주고, 자리는 CSS 가 잡는다. */
+  transform: translate(var(--gc-beat-x), var(--gc-beat-rise, 0px));
   text-align: center;
   pointer-events: none;
   opacity: 0;
@@ -987,3 +999,136 @@ html:has(.gc-film) .sitenav-dock::before { opacity: 0 !important; }
 @keyframes gc3-poster-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.025); } }
 .gc3[data-live] .gc3-poster { animation: none; }
 @media (prefers-reduced-motion: reduce) { .gc-film .gc3-poster { animation: none; } }
+
+/* ============================================================================
+   내비 아래로 물러난 무대 · 기계 옆에 선 제목 (2026-09-03, 운영자 지적 2건)
+
+   1) "기계가 위 메뉴를 가린다" — 캔버스가 화면 전체(100svh)를 쓰는 동안 기계 꼭대기의
+      크롬 갓이 내비 띠(0~68px) 안까지 올라와, 배경 없는 메뉴 글자가 그 위에 얹혀 읽히지
+      않았다. 실측(1440×900, clunk.games): 유리 돔 위끝 y=60.97 — 내비 아래끝 53 에서
+      겨우 7.97px, 갓은 그보다 더 위였다. 이제 캔버스와 포스터가 --gc-nav-h 만큼 내려서
+      시작한다. 띠는 무대 배경색으로 남아 메뉴가 언제나 어두운 바탕 위에 선다.
+   2) "제목이 돔을 덮고 답답하다" — 제목 글줄이 화면 한가운데(left 50%)에 서서 유리 돔
+      위에 그대로 얹혀 있었다. 넓은 화면에서는 왼쪽 칸으로 나오고 기계가 그 오른쪽에
+      서며, 좁은 화면에서는 내비 바로 아래 띠에 눕고 기계가 그 아래를 채운다.
+   장면 파일(gacha-scene.ts)은 건드리지 않는다 — 카메라는 그대로이고, 캔버스가 서는
+   자리만 바뀐다. 단추 자리는 GachaMachine3D 의 placeOverlays 가 캔버스 오프셋만큼 옮긴다.
+   ========================================================================= */
+/* 내비 띠(.cv5 .sitenav 높이 68px) + 숨 쉴 자리. 기계는 이 밑에서만 산다.
+   내비의 스크림도 같은 값을 읽어야 하므로 뿌리에 둔다 — 내비는 무대 밖에 산다. */
+html:has(.gc-film) { --gc-nav-h: 84px; }
+.gc-film {
+  /* 좁은 화면에서 제목이 눕는 띠의 높이. 넓은 화면에서는 0 이다(제목이 옆으로 간다). */
+  --gc-head-h: 0px;
+  /* 넓은 화면에서 제목 칸이 가져가는 왼쪽 폭. 기계는 그만큼 오른쪽으로 물러난다. */
+  --gc-stage-left: 0px;
+}
+/* 캔버스가 비켜난 자리는 무대 바탕으로 남는다 — 메뉴가 언제나 어두운 띠 위에 선다. */
+.gc-film-sticky { background: #07050f; }
+.gc-film .gc3-canvas,
+.gc-film .gc3-poster {
+  top: calc(var(--gc-nav-h) + var(--gc-head-h));
+  left: var(--gc-stage-left);
+  right: 0;
+  bottom: 0;
+  width: auto;
+  height: auto;
+}
+/* 캔버스가 비켜난 자리는 검은 상자가 아니라 같은 가게여야 한다. 무대 배경(빛기둥·보라
+   물빛·바닥 격자)은 화면 전체에 그대로 깔린 채로 남고, 3D 는 그 위에 얹힌다 — 3D 가 켜지면
+   배경을 지우던 규칙은 이 웹필름에서만 물린다. */
+.gc-film.gc3[data-live] .gc3-stage::before,
+.gc-film.gc3[data-live] .gc3-stage::after { opacity: 1; }
+/* 캔버스의 위·왼쪽 모서리는 그 배경으로 녹아든다 — 잘라 붙인 상자처럼 보이지 않게.
+
+   2026-09-03(2차): 이 페이드가 첫 샷 밖에서는 해가 됐다. 120px 짜리 왼쪽 마스크가 레버
+   근접샷(p≈0.52)에서 기계 한가운데를 세로로 가르는 어두운 띠가 되어 CLUNK 사인 절반을
+   잘라 먹었고, 위쪽 44px 은 같은 샷에서 돔을 잘라 보이게 했다. 페이드가 필요한 것은
+   제목이 왼쪽 칸에 서 있는 동안뿐이다 — 그래서 세기를 제목 글줄과 **같은 ramp** 로 몬다
+   (GachaMachine3D 의 스크롤 계산이 --gc-left-ramp 에 0~1 을 적어 준다: p 0.06 까지 1,
+   0.16 에서 0). 그 뒤로는 마스크가 0 이 되어 캔버스가 통째로 그려진다.
+   경계가 직선으로 읽히지 않도록 폭도 120px → 240px 로 늘렸다. */
+.gc-film .gc3-canvas,
+.gc-film .gc3-poster {
+  /* 좁은 화면에는 왼쪽 칸이 없다 — 가로 페이드는 사실상 없는 값으로 둔다. */
+  --gc-fade-left: 1px;
+  /* 위쪽은 내비 띠와 캔버스가 만나는 자리를 늘 조금 눅인다(14px). 제목이 서 있는 동안에는
+     44px 까지 넓어지고, 카메라가 기계 안으로 들어가면 다시 14px 로 좁아진다. */
+  --gc-fade-top: calc(14px + var(--gc-left-ramp, 1) * 30px);
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent 0, #000 var(--gc-fade-top)),
+    linear-gradient(to right, transparent 0, #000 var(--gc-fade-left));
+  mask-image:
+    linear-gradient(to bottom, transparent 0, #000 var(--gc-fade-top)),
+    linear-gradient(to right, transparent 0, #000 var(--gc-fade-left));
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+@media (min-width: 1024px) {
+  .gc-film .gc3-canvas,
+  .gc-film .gc3-poster { --gc-fade-left: calc(var(--gc-left-ramp, 1) * 240px); }
+  /* 마스크가 0 이 된 뒤에도 캔버스 왼쪽 모서리는 어두운 칸과 만난다. 기계를 어둡게 덮는
+     대신 **칸 쪽을** 모서리 가까이에서 밝혀 그 층계를 낮춘다 — 캔버스 아래에 깔리므로
+     기계 픽셀은 한 점도 건드리지 않는다. */
+  .gc-film-sticky::after {
+    content: "";
+    position: absolute;
+    top: var(--gc-nav-h); bottom: 0; left: 0;
+    /* 캔버스 모서리에서 뚝 끊기면 그 자리가 새 경계선이 된다. 모서리 너머까지 240px 을 더
+       늘려 두고 거기서 0 으로 잦아들게 한다 — 넘어간 부분은 캔버스 밑이라 보이지 않는다. */
+    width: calc(var(--gc-stage-left) + 240px);
+    pointer-events: none;
+    background: linear-gradient(to right,
+      transparent 20%,
+      rgba(124, 93, 250, 0.09) 55%,
+      rgba(150, 120, 255, 0.15) 64%,
+      rgba(150, 120, 255, 0) 100%);
+  }
+}
+
+/* 넓은 화면 — 제목은 왼쪽 칸, 기계는 오른쪽 --------------------------------- */
+@media (min-width: 1024px) {
+  .gc-film { --gc-stage-left: clamp(300px, 30vw, 460px); }
+  .gc-beat-head {
+    left: 7vw;
+    right: auto;
+    --gc-beat-x: 0px;
+    top: 38%;
+    transform: translate(var(--gc-beat-x), calc(-50% + var(--gc-beat-rise, 0px)));
+    width: min(430px, 34vw);
+    padding: 0;
+    justify-items: start;
+    text-align: left;
+    gap: 14px;
+  }
+  /* 기계 위가 아니라 빈 바탕 위에 서므로 글자 뒤의 어둠은 필요 없다. */
+  .gc-beat-head::before { content: none; }
+  .gc-beat-head h1 { font-size: clamp(2.6rem, 4.4vw, 4.4rem); }
+  .gc-beat-head p { max-width: 30ch; }
+  /* 나머지 글줄도 기계를 피해 오른쪽 무대 한가운데에 선다. */
+  .gc-beat-inside { left: calc(var(--gc-stage-left) + (100% - var(--gc-stage-left)) / 2); top: calc(var(--gc-nav-h) + 5svh); }
+  .gc-beat-scroll { left: calc(var(--gc-stage-left) + (100% - var(--gc-stage-left)) / 2); }
+}
+
+/* 좁은 화면 — 제목은 내비 아래 띠, 기계는 그 아래 -------------------------- */
+@media (max-width: 1023px) {
+  .gc-film { --gc-head-h: 124px; }
+  .gc-beat-head {
+    top: calc(var(--gc-nav-h) + 2px);
+    width: min(680px, 92vw);
+    padding: 0;
+    gap: 6px;
+  }
+  .gc-beat-head::before { content: none; }
+  .gc-beat-head h1 { font-size: clamp(1.9rem, 5.2vw, 2.6rem); }
+  .gc-beat-inside { top: calc(var(--gc-nav-h) + 4svh); }
+}
+@media (max-width: 767px) {
+  html:has(.gc-film) { --gc-nav-h: 76px; }
+  .gc-film { --gc-head-h: 116px; }
+  /* 띠 한 칸에 제목과 한 줄만 남긴다 — 배지까지 넣으면 기계를 밀어낸다. */
+  .gc-beat-head .cv5-badge { display: none; }
+  .gc-beat-head h1 { font-size: clamp(1.6rem, 6.6vw, 2rem); }
+  .gc-beat-head p { font-size: 0.86rem; }
+  .gc-beat-lever { top: calc(var(--gc-nav-h) + 3svh); }
+}

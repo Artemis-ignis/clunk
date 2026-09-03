@@ -711,6 +711,18 @@ test("무대는 내비 밑에서 시작하고, 제목은 기계를 덮지 않는
   assert.match(css, /@media \(min-width: 1024px\) \{\s*\.gc-film \{ --gc-stage-left: clamp\(300px, 30vw, 460px\); \}/u);
   // 캔버스가 비켜난 자리는 검은 상자가 아니라 같은 가게다 — 배경이 화면 전체에 남는다.
   assert.match(css, /\.gc-film\.gc3\[data-live\] \.gc3-stage::before,\s*\.gc-film\.gc3\[data-live\] \.gc3-stage::after \{ opacity: 1; \}/u);
+  // 2026-09-03(2차): 모서리 페이드는 제목 글줄과 같은 ramp 로만 산다. 첫 샷 밖에서 남으면
+  // 기계 한가운데를 세로로 가르는 어두운 띠가 된다(레버 근접샷에서 CLUNK 사인이 잘렸다).
+  assert.match(css, /--gc-fade-left: calc\(var\(--gc-left-ramp, 1\) \* 240px\)/u);
+  assert.match(css, /--gc-fade-top: calc\(14px \+ var\(--gc-left-ramp, 1\) \* 30px\)/u);
+  assert.doesNotMatch(css, /--gc-fade-left: 120px/u);
+  assert.match(machine, /const headBeat = ramp\(p, -1, 0, 0\.06, 0\.16\);/u);
+  assert.match(machine, /setProperty\("--gc-left-ramp", headBeat\.toFixed\(3\)\)/u);
+  // 마스크가 사라진 뒤의 층계는 기계를 덮어서가 아니라 옆 칸을 밝혀서 낮춘다 —
+  // 그 빛은 캔버스 밑에 깔리고, 모서리 너머까지 늘어져 새 경계선을 만들지 않는다.
+  assert.match(css, /\.gc-film-sticky::after \{[\s\S]*?width: calc\(var\(--gc-stage-left\) \+ 240px\);/u);
+  // 장면에 카메라 훅이 붙으면 바로 쓰도록 호출을 미리 걸어 둔다(없으면 아무 일도 없다).
+  assert.match(machine, /\(scene as SceneWithCameraHooks\)\.setTopInset\?\.\(navBandHeight\(\)\)/u);
   assert.match(css, /\.gc-beat-head \{\s*left: 7vw;/u);
   // 좁은 화면: 제목은 내비 아래 띠에 눕고 h1 은 2rem 을 넘지 않는다.
   assert.match(css, /@media \(max-width: 767px\) \{\s*html:has\(\.gc-film\) \{ --gc-nav-h: 76px; \}\s*\.gc-film \{ --gc-head-h: 116px; \}/u);
