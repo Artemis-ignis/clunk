@@ -54,10 +54,11 @@ export function toggleGachaMuted(): void {
   for (const listener of muteListeners) listener();
 }
 
-export type SoundName = "lever" | "ratchet" | "rumble" | "clunk" | "bounce" | "tap" | "sparkle" | "neon";
+export type SoundName = "lever" | "ratchet" | "rumble" | "clunk" | "bounce" | "tap" | "sparkle" | "neon"
+  | "coin";
 
 const counts: Record<SoundName, number> = {
-  lever: 0, ratchet: 0, rumble: 0, clunk: 0, bounce: 0, tap: 0, sparkle: 0, neon: 0,
+  lever: 0, ratchet: 0, rumble: 0, clunk: 0, bounce: 0, tap: 0, sparkle: 0, neon: 0, coin: 0,
 };
 
 /** 어느 합성 함수가 몇 번 불렸는지. 소리를 들을 수 없는 환경의 유일한 증거다. */
@@ -253,6 +254,19 @@ export function playCapsuleTap(strength = 1): void {
 }
 
 /** 캡슐이 열리며 빛이 터질 때 올라가는 아르페지오. */
+/**
+ * 동전이 투입구로 들어가는 소리 — 테두리에 한 번 닿고 안으로 떨어진다.
+ * 2026-09-04: 레버가 당겨지기 전에 이 소리가 먼저 난다(운영자 요청).
+ */
+export function playCoinInsert(): void {
+  const started = begin("coin", 0.8);
+  if (!started) return;
+  const { ctx, master, at } = started;
+  scheduleBlip(ctx, master, at, { type: "triangle", frequency: 1860, to: 1340, level: 0.10, length: 0.1 });
+  scheduleBlip(ctx, master, at + 0.085, { type: "triangle", frequency: 1420, to: 980, level: 0.075, length: 0.12 });
+  scheduleNoise(ctx, master, at + 0.17, { length: 0.07, frequency: 1200, q: 3.2, level: 0.06 });
+}
+
 export function playOpenSparkle(): void {
   const started = begin("sparkle", 0.75);
   if (!started) return;

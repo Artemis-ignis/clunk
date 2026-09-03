@@ -1520,7 +1520,10 @@ export function createGachaScene(
   const signMaterial = new THREE.MeshBasicMaterial({
     map: signTexture,
     transparent: true,
-    // 네온은 빛이다 — 더해 그려야 검정 판 위에서 관이 타오른다.
+    // 네온은 빛이다 — 더해 그려야 검정 판 위에서 관이 타오른다. 다만 2026-09-04 운영자가
+    // "너무 밝아 눈이 아프다"고 해 더해지는 양을 0.62 로 줄였다. 글자는 그대로 읽히고
+    // 화면을 태우지는 않는다.
+    opacity: 0.62,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     toneMapped: false,
@@ -1531,8 +1534,8 @@ export function createGachaScene(
   machine.add(signFrame);
   // 관 둘레에 번지는 빛. 판보다 앞, 글자보다 뒤에 더해 그린다.
   const signGlowMaterial = new THREE.MeshBasicMaterial({
-    color: 0xa06bff,
-    map: makeGlowTexture(0.28),
+    color: 0x8f5cf0,
+    map: makeGlowTexture(0.24),
     transparent: true,
     opacity: 0,
     blending: THREE.AdditiveBlending,
@@ -2954,7 +2957,7 @@ export function createGachaScene(
     // 네온 사인 — 관과 그 둘레의 후광이 같이 지직거린다.
     const gate = neonGate(t);
     signMaterial.opacity = 0.15 + 0.85 * gate;
-    signGlowMaterial.opacity = 0.34 * gate;
+    signGlowMaterial.opacity = 0.2 * gate;
     // LED 띠도 같은 순간에 들어온다 — 사인만 켜지고 몸통이 어두우면 반쪽만 살아난다.
     setLed(gate);
   }
@@ -3293,7 +3296,7 @@ export function createGachaScene(
     if (!introOn || introTime >= INTRO_SECONDS.neon + 0.3) {
       const breath = reduced ? 0 : Math.sin(clock * Math.PI) * 0.1;
       signMaterial.opacity = approach(signMaterial.opacity, 1, dt * 6);
-      signGlowMaterial.opacity = approach(signGlowMaterial.opacity, hovered ? 0.62 : 0.46 + breath * 0.6, dt * 6);
+      signGlowMaterial.opacity = approach(signGlowMaterial.opacity, hovered ? 0.38 : 0.26 + breath * 0.34, dt * 6);
       // LED 띠는 0.3 Hz 로 숨 쉰다. 모바일은 숨을 쉬지 않고 켜져만 있다 —
       // 더해 그리는 판을 매 프레임 바꾸는 것이 작은 기기에서 제일 비싸다.
       const pulse = reduced || !quality.ledBreath ? 0 : Math.sin(clock * Math.PI * 0.6) * 0.22;

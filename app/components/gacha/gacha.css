@@ -1056,10 +1056,11 @@ html:has(.gc-film) { --gc-nav-h: 84px; }
   /* 내비 높이만큼의 위 여백은 이제 장면이 setTopInset(--gc-nav-h)으로 카메라를 들어 만든다.
      캔버스는 내비 뒤까지 올라가고(내비 띠가 가린다), 여기서는 제목 띠(--gc-head-h)만 뺀다. */
   top: var(--gc-head-h);
-  /* 왼쪽 열은 첫 샷(제목이 보일 때)에만 비운다. 스크롤이 진행되면 캔버스가 전폭으로 펴져
-     근접샷에서 기계가 캔버스 모서리에 잘리는 경계선이 사라진다(ramp는 GachaMachine3D가 준다). */
-  left: calc(var(--gc-stage-left) * var(--gc-left-ramp, 1));
-  right: calc(var(--gc-stage-right) * var(--gc-left-ramp, 1));
+  /* 2026-09-04: 이 값을 스크롤 ramp 로 흔들었더니 내리는 내내 캔버스 폭이 바뀌고, 그때마다
+     ResizeObserver 가 장면을 다시 크기 맞추느라 화면이 깜빡이고 걸렸다(운영자 지적).
+     캔버스 상자는 고정이다 — 카메라만 움직인다. */
+  left: var(--gc-stage-left);
+  right: var(--gc-stage-right);
   bottom: 0;
   width: auto;
   height: auto;
@@ -1411,3 +1412,65 @@ html:has(.gc3[data-stage="impact"]) .gc-coin-spin {
 }
 .gc-odds-fold[open] > summary::after { transform: rotate(-135deg); top: 15px; }
 .gc-odds-fold > summary:focus-visible { outline: 2px solid var(--v5-violet); outline-offset: 4px; border-radius: 10px; }
+
+
+/* ============================================================================
+   에셋 뽑기 단추 · 동전 투입 (2026-09-04 운영자 요청)
+   "내려서 시작"은 스크롤이 뽑던 시절의 안내였다. 이제 기계까지 가지 않아도 여기서 뽑고,
+   동전이 먼저 들어간 뒤 레버가 내려간다.
+   ========================================================================= */
+.gc-draw-cta {
+  margin-top: 22px;
+  display: inline-flex; align-items: center; gap: 11px;
+  padding: 13px 22px 13px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(190, 150, 255, 0.42);
+  background: linear-gradient(180deg, rgba(124, 93, 250, 0.95), rgba(93, 58, 214, 0.95));
+  color: #fff; font-size: 1rem; font-weight: 800; letter-spacing: -0.01em;
+  cursor: pointer;
+  box-shadow: 0 14px 34px -16px rgba(124, 93, 250, 0.9);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+}
+.gc-draw-cta:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 18px 40px -16px rgba(150, 110, 255, 1); }
+.gc-draw-cta:active:not(:disabled) { transform: translateY(1px); }
+.gc-draw-cta:disabled { opacity: 0.5; cursor: default; box-shadow: none; }
+.gc-draw-coin {
+  width: 26px; height: 26px; flex: none;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 0.78rem; font-weight: 900; color: #4a2a00;
+  background: radial-gradient(circle at 34% 30%, #ffe9a8, #f0b93c 62%, #c98a1c);
+  box-shadow: inset 0 0 0 1px rgba(255, 240, 200, 0.75), 0 0 10px rgba(255, 205, 110, 0.5);
+}
+/* 동전이 들어가는 동안 — 단추의 동전이 기울며 빨려 들어가고 단추는 잠깐 눌린다. */
+.gc3[data-coin] .gc-draw-cta { transform: translateY(2px); filter: brightness(1.12); }
+.gc3[data-coin] .gc-draw-coin { animation: gc-draw-coin-in 420ms cubic-bezier(0.4, 0, 0.6, 1) 1; }
+@keyframes gc-draw-coin-in {
+  0% { transform: translateX(0) rotate(0) scale(1); opacity: 1; }
+  70% { transform: translateX(9px) rotate(220deg) scale(0.6); opacity: 0.85; }
+  100% { transform: translateX(14px) rotate(360deg) scale(0.2); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gc-draw-cta { transition: none; }
+  .gc3[data-coin] .gc-draw-coin { animation: none; }
+}
+
+
+/* 레버를 누르고 싶게 — 대기 중에는 손잡이 자리에 옅은 맥박 고리가 돈다(2026-09-04). */
+.gc3[data-stage="idle"] .gc3-lever::after {
+  content: "";
+  position: absolute; inset: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(196, 152, 255, 0.65);
+  animation: gc-lever-ring 1.9s ease-out infinite;
+  pointer-events: none;
+}
+.gc3-lever:hover::after, .gc3-lever:focus-visible::after { animation-duration: 1.1s; }
+@keyframes gc-lever-ring {
+  0% { transform: scale(0.86); opacity: 0; }
+  35% { opacity: 0.85; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gc3[data-stage="idle"] .gc3-lever::after { animation: none; opacity: 0.5; transform: none; }
+}

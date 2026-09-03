@@ -46,6 +46,7 @@ import {
   playCapsuleTap,
   playClunk,
   playCrankRatchet,
+  playCoinInsert,
   playLeverClick,
   playNeonBuzz,
   playOpenSparkle,
@@ -489,7 +490,7 @@ export function GachaMachine3D() {
   /** 스크롤 연출의 트랙(긴 구간)과 장면마다 뜨는 글줄. */
   const trackRef = useRef<HTMLDivElement | null>(null);
   const beatHeadRef = useRef<HTMLDivElement | null>(null);
-  const beatScrollRef = useRef<HTMLParagraphElement | null>(null);
+  const drawCtaRef = useRef<HTMLButtonElement | null>(null);
   const beatInsideRef = useRef<HTMLDivElement | null>(null);
   const beatLeverRef = useRef<HTMLDivElement | null>(null);
   /** 오른쪽 칸의 라인업 판. 제목 글줄과 같은 ramp 로 뜨고 진다. */
@@ -1336,7 +1337,6 @@ export function GachaMachine3D() {
       // 서 있는 첫 샷에서만 필요하고, 카메라가 기계 안으로 들어간 뒤(p≳0.16)에는 0 이 되어
       // 기계 위를 세로로 가르는 어두운 띠가 남지 않는다(2026-09-03 2차 지적).
       rootRef.current?.style.setProperty("--gc-left-ramp", headBeat.toFixed(3));
-      show(beatScrollRef.current, 1 - p / 0.05, 0);
       // 좁은 화면에서는 이 글줄과 아래의 레버 글줄이 같은 띠 한 칸을 돌려 쓴다. 두 구간이
       // 겹치면 한 칸에서 두 글줄이 반투명하게 포개진다 — 그래서 이쪽이 먼저 완전히 물러난 뒤
       // (0.43) 레버 글줄이 뜬다.
@@ -1373,6 +1373,30 @@ export function GachaMachine3D() {
 
   // 기계는 언제나 서 있다. 카탈로그가 아직이거나 실패했으면 옆 판에 한 줄만 붙는다.
   const stocked = drawableListings(listings).length > 0;
+
+  /**
+   * 화면의 "에셋 뽑기" 단추. 기계까지 가지 않아도 여기서 뽑는다 — 다만 그냥 뽑히지는
+   * 않는다: 동전이 투입구로 들어가는 소리가 먼저 나고(0.42초), 그 사이 레버가 스스로
+   * 내려간 뒤에 뽑힌다(2026-09-04 운영자 요청).
+   */
+  const insertCoinAndTurn = useCallback(() => {
+    if (stage !== "idle" || !stocked) return;
+    if (!muted) playCoinInsert();
+    rootRef.current?.setAttribute("data-coin", "1");
+    const scene = sceneRef.current;
+    const started = performance.now();
+    const pullDown = () => {
+      const k = Math.min(1, (performance.now() - started) / 320);
+      scene?.setLeverPull(reducedMotion ? 1 : k);
+      if (k < 1) window.requestAnimationFrame(pullDown);
+    };
+    later(reducedMotion ? 0 : 120, () => window.requestAnimationFrame(pullDown));
+    later(reducedMotion ? 60 : 460, () => {
+      rootRef.current?.removeAttribute("data-coin");
+      turnLive.current();
+    });
+  }, [later, muted, reducedMotion, stage, stocked]);
+
   const notice = load === "failed"
     ? "지금은 머신 안을 불러오지 못했습니다."
     : load === "ready" && !stocked
@@ -1473,12 +1497,19 @@ export function GachaMachine3D() {
               <span className="cv5-badge">✦ 게임 제작을 위한 <b>단 하나의 AI 슈퍼앱</b></span>
               <h1 id="home-heading">게임 에셋<br /><em>뽑기</em></h1>
               <p>레버를 당기면 마켓의 에셋이 캡슐로 떨어집니다</p>
-              {/* 2026-09-03(운영자): "내려서 시작"이 화면 구석의 각주로 살아 있었다. 시작하는
-                  법은 읽는 순서의 끝, 소개 글 바로 밑에 있어야 한다. */}
-              <p className="gc-beat-scroll" ref={beatScrollRef} aria-hidden="true">
-                <span>내려서 시작</span>
-                <i>↓</i>
-              </p>
+              {/* 2026-09-04(운영자): "내려서 시작"은 스크롤이 뽑던 시절의 안내였고 눌러지지도
+                  않았다. 이제 진짜 단추다 — 기계까지 가지 않아도 여기서 뽑는다. 동전이
+                  들어가는 소리가 먼저 나고, 그 다음 레버가 내려간다. */}
+              <button
+                type="button"
+                className="gc-draw-cta"
+                ref={drawCtaRef}
+                onClick={insertCoinAndTurn}
+                disabled={stage !== "idle" || !stocked}
+              >
+                <span className="gc-draw-coin" aria-hidden="true">C</span>
+                <span>{stage === "idle" ? "에셋 뽑기" : "뽑는 중"}</span>
+              </button>
             </div>
             <div className="gc-beat gc-beat-inside" ref={beatInsideRef} aria-hidden="true">
               <b>{stocked ? `${drawableListings(listings).length}개` : "실제"}</b>

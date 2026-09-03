@@ -954,7 +954,7 @@ test("무대는 세 칸이고, 기계는 두 칸 사이에 선다", async () => 
 
   // 왼쪽과 오른쪽을 함께 비워야 기계가 가운데 칸에 선다.
   assert.match(css, /@media \(min-width: 1024px\) \{\s*\.gc-film \{\s*--gc-stage-left: clamp\(292px, 25vw, 470px\);\s*--gc-stage-right: clamp\(276px, 22vw, 366px\);/u);
-  assert.match(css, /left: calc\(var\(--gc-stage-left\) \* var\(--gc-left-ramp, 1\)\);\s*right: calc\(var\(--gc-stage-right\) \* var\(--gc-left-ramp, 1\)\);/u);
+  assert.match(css, /left: var\(--gc-stage-left\);\s*right: var\(--gc-stage-right\);/u);
   // 오른쪽 모서리 페이드도 제목 글줄과 같은 ramp 로 산다.
   assert.match(css, /--gc-fade-right: calc\(var\(--gc-left-ramp, 1\) \* 200px\)/u);
   // 라인업 판은 제목과 같은 ramp 로 뜨고 진다 — 근접샷에서 기계를 덮지 않는다.
