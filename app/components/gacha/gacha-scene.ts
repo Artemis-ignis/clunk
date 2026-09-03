@@ -194,7 +194,8 @@ export const SHOTS: readonly Shot[] = [
   { at: 0.0, position: [0, CAMERA_HEIGHT, CAMERA_DISTANCE], target: [0, CAMERA_TARGET, 0] },
   { at: 0.3, position: [0.35, 2.8, 3.2], target: [0, 2.52, 0] },
   { at: 0.52, position: [2.35, 2.15, 2.75], target: [0.85, 1.85, 0.1] },
-  { at: 0.7, position: [0.75, 1.4, 2.9], target: [0, 0.98, 0.45] },
+  // 레버 자리에서 배출구로는 크게 돌지 않고 조금 내려다볼 뿐이다 — 카메라가 휙 도는 것이 어지럽다.
+  { at: 0.7, position: [1.7, 1.75, 3.0], target: [0.35, 1.05, 0.4] },
   { at: 0.86, position: [0, CAMERA_HEIGHT, CAMERA_DISTANCE], target: [0, CAMERA_TARGET, 0] },
 ];
 export { SCROLL_PULL } from "./gacha-scroll";
