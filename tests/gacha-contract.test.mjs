@@ -426,7 +426,7 @@ test("로그아웃이어도 뽑기와 연출은 되고, 받기만 로그인을 �
   assert.match(machine, /BETA_GRANTED/u);
   // 받은 파일은 같은 출처의 downloadUrl 을 링크로 눌러 곧장 내려받는다.
   assert.match(machine, /anchor\.download = prize\.entryFileName/u);
-  assert.match(machine, /const LOGIN_HREF = "\/login\?return_to=%2F"/u);
+  assert.match(machine, /const LOGIN_HREF = "\/signup\?return_to=%2F%3Fintent%3Dmarket"/u);
   // 잔액은 API 응답에서만 온다.
   assert.match(machine, /"\/api\/credits"/u);
   assert.doesNotMatch(machine, /Math\.random\(\)\s*\*\s*\d/u);
