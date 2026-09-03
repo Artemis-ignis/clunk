@@ -79,13 +79,20 @@ export const KIT_NAMES: Readonly<Record<KitId, string>> = {
   "grove-tree-pack": "그로브 트리 팩",
 };
 
+/**
+ * What the format row says when neither the file name nor the content type states a format.
+ * Named rather than spelled out at each site, so the places that have to recognise the shrug —
+ * `underlayPrevious` below — compare against the same thing `formatLabelOf` returns.
+ */
+export const UNKNOWN_FORMAT_LABEL = "파일";
+
 /** "GLB" / "PNG", from a file name or a content type. Never invented. */
 export function formatLabelOf(fileName: string, contentType?: string | null): string {
   const extension = /\.([a-z0-9]+)$/i.exec(fileName)?.[1];
   if (extension) return extension.toUpperCase();
   if (contentType?.includes("gltf")) return "GLB";
   if (contentType?.includes("png")) return "PNG";
-  return "파일";
+  return UNKNOWN_FORMAT_LABEL;
 }
 
 /** The part of a clunk.sprite-sheet-review manifest that states the grid. */
@@ -269,18 +276,83 @@ export function factsFromListings(
   return facts;
 }
 
+/**
+ * A snapshot-derived record laid over what the previous index already measured.
+ *
+ * /api/marketplace states a row's byte size and its file name, and the baker's manifest beside
+ * the PNG states the grid. None of them states geometry. So `factsFromListings` mints an
+ * all-null record for *every* listing the wave1 manifest does not carry — including listings
+ * whose numbers were measured elsewhere and written straight into the index. On 2026-09-03 the
+ * H145 helicopter was exactly that: a rebake replaced its 85,150 polygons, its bounds, its six
+ * moving parts and its two clips with nulls, and the carry-forward in `main()` did not restore
+ * them because it only fills slugs this run built *nothing* for — and this run had built the
+ * empty record. The card lost its specification row without a single error.
+ *
+ * The rule that fixes it: on a snapshot-derived record, a null or an empty list is silence, not
+ * a measurement of zero, and the previous index shows through it. What the row itself really
+ * says — byteLength, format — still wins, so a re-uploaded file reports its new size.
+ *
+ * Those two are optional on an ApiListing, and their absence is minted as a 0 and as
+ * UNKNOWN_FORMAT_LABEL, so they need the same reading: no product weighs nothing, and "파일" is
+ * a shrug rather than a format. Both are silences, and the previous measurement shows through
+ * them too. A row that states a size or a file name still overrides, as it should.
+ *
+ * Manifest records never pass through here. There the pipeline re-measured the file, so an
+ * empty `animations` means the model genuinely lost its clips; reviving a stale value would
+ * make the shop promise motion the file no longer has.
+ */
+export function underlayPrevious(fresh: ListingFact, previous: ListingFact | undefined): ListingFact {
+  if (!previous) return fresh;
+  return {
+    ...fresh,
+    byteLength: fresh.byteLength > 0 ? fresh.byteLength : previous.byteLength,
+    format: fresh.format === UNKNOWN_FORMAT_LABEL ? previous.format : fresh.format,
+    triangles: fresh.triangles ?? previous.triangles,
+    materials: fresh.materials ?? previous.materials,
+    boundsMetres: fresh.boundsMetres ?? previous.boundsMetres,
+    animatedParts: fresh.animatedParts.length > 0 ? fresh.animatedParts : previous.animatedParts,
+    animations: fresh.animations.length > 0 ? fresh.animations : previous.animations,
+    // The kit and its size are one sentence: a count with no set named is a number about
+    // nothing, so they are carried together or not at all.
+    kit: fresh.kit ?? previous.kit,
+    kitSize: fresh.kit ? fresh.kitSize : previous.kit ? previous.kitSize : fresh.kitSize,
+    members: fresh.members ?? previous.members,
+    viewYawDegrees: fresh.viewYawDegrees ?? previous.viewYawDegrees,
+    // The grid is read off disk, not off the API: a checkout without public/market states no
+    // grid rather than a wrong one, and must not blank the thirteen sheets on its way past.
+    sheet: fresh.sheet ?? previous.sheet,
+    texture: fresh.texture ?? previous.texture,
+    inspection: fresh.inspection ?? previous.inspection,
+  };
+}
+
 export function buildFacts(
   manifest: ManifestFile,
   listings: ApiListing[],
   sources: string[],
   marketRoot: string,
+  previous: Record<string, ListingFact> = {},
 ): ListingFactsFile {
   const fromManifest = factsFromManifest(manifest);
-  const facts = { ...fromManifest, ...factsFromListings(listings, fromManifest, marketRoot) };
+  const facts: Record<string, ListingFact> = { ...fromManifest };
+  for (const [slug, fact] of Object.entries(factsFromListings(listings, fromManifest, marketRoot))) {
+    facts[slug] = underlayPrevious(fact, previous[slug]);
+  }
+
+  // The sprite sheets live only in D1, so a run without a snapshot of it would delete their
+  // entries and blank fourteen cards. Anything the previous index knew that neither source
+  // mentions at all is kept whole; the manifest and the snapshot always win where they speak.
+  let carried = 0;
+  for (const [slug, fact] of Object.entries(previous)) {
+    if (facts[slug]) continue;
+    facts[slug] = fact;
+    carried += 1;
+  }
+
   return {
     schema: "clunk.listing-facts.v1",
     generatedAt: new Date().toISOString(),
-    sources,
+    sources: carried ? [...sources, `이전 판에서 유지한 항목 ${carried}건`] : sources,
     facts: Object.fromEntries(Object.entries(facts).sort(([a], [b]) => a.localeCompare(b))),
   };
 }
@@ -307,26 +379,16 @@ function main() {
     process.stderr.write(`no listings snapshot at ${listingsPath} — keeping what the previous run knew about D1-only listings\n`);
   }
 
-  const built = buildFacts(manifest, listings, sources, resolve(root, "public/market"));
-
-  // The sprite sheets live only in D1, so a run without a snapshot of it would delete their
-  // entries and blank fourteen cards. Carry forward anything the previous index knew that
-  // this run could not rebuild; the manifest and the snapshot always win where they speak.
+  // The previous index is an input, not a patch applied afterwards: reading it here keeps the
+  // merge itself a pure function the tests can drive without touching the filesystem.
+  let previous: Record<string, ListingFact> = {};
   try {
-    const previous = JSON.parse(readFileSync(outPath, "utf8")) as ListingFactsFile;
-    let carried = 0;
-    for (const [slug, fact] of Object.entries(previous.facts ?? {})) {
-      if (built.facts[slug]) continue;
-      built.facts[slug] = fact;
-      carried += 1;
-    }
-    if (carried) {
-      built.sources.push(`이전 판에서 유지한 항목 ${carried}건`);
-      built.facts = Object.fromEntries(Object.entries(built.facts).sort(([a], [b]) => a.localeCompare(b)));
-    }
+    previous = (JSON.parse(readFileSync(outPath, "utf8")) as ListingFactsFile).facts ?? {};
   } catch {
     // No previous index to carry anything from.
   }
+
+  const built = buildFacts(manifest, listings, sources, resolve(root, "public/market"), previous);
 
   mkdirSync(dirname(outPath), { recursive: true });
   writeFileSync(outPath, `${JSON.stringify(built, null, 2)}\n`, "utf8");

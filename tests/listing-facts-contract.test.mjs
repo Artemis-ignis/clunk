@@ -19,6 +19,8 @@ import {
   gltfClipLabel,
 } from "../app/components/review/gltf-clip-labels.ts";
 import {
+  UNKNOWN_FORMAT_LABEL,
+  buildFacts,
   factsFromManifest,
   formatLabelOf,
   sheetManifestsFor,
@@ -118,7 +120,7 @@ test("the file format comes from the file name, never from a guess", () => {
   assert.equal(formatLabelOf("assets/hf-barn/barn.m1.glb", "model/gltf-binary"), "GLB");
   assert.equal(formatLabelOf("tex-soil-tilled-v2.png", "image/png"), "PNG");
   assert.equal(formatLabelOf("no-extension", "model/gltf-binary"), "GLB");
-  assert.equal(formatLabelOf("no-extension", null), "파일");
+  assert.equal(formatLabelOf("no-extension", null), UNKNOWN_FORMAT_LABEL);
 });
 
 test("facts are built from the pipeline's measurement, and a kit knows how big it is", () => {
@@ -187,6 +189,106 @@ test("the material-budget caveat is stated only when the inspection actually rai
     }],
   });
   assert.equal(overBudgetWithoutFinding.y.inspection.note, null);
+});
+
+// --- a rebake must not blank what only the previous index knows -----------------------------
+
+// 2026-09-03: re-running `npm run asset:facts` silently emptied clunk-heli-h145. The
+// helicopter's numbers were measured outside the wave1 manifest and written straight into the
+// index, so every rebake minted a fresh all-null record for it out of the /api/marketplace
+// snapshot, and the carry-forward then skipped the slug because this run had "built" something
+// for it. A listing the snapshot names but the manifest does not must keep its measurement.
+// The published PNGs under public/market are not in the repository, so these tests read their
+// sheet manifests from the baker's own output tree, which is. The shape is the same file.
+const MARKET_ROOT = fileURLToPath(new URL("tmp/anim-sheets", root));
+
+const h145Listing = {
+  slug: "clunk-heli-h145",
+  title: "구조용 헬리콥터",
+  entryFileName: "h145.glb",
+  format: "model/gltf-binary",
+  byteLength: 3_303_252,
+};
+
+const h145Measured = emptyFacts({
+  triangles: 85_150,
+  materials: 9,
+  boundsMetres: [10.605, 3.95, 13.64],
+  byteLength: 3_303_252,
+  animatedParts: ["main_rotor_hub", "fenestron_rotor", "door_left_slide"],
+  animations: [{ name: "rotor_spin", seconds: 1 }, { name: "doors_open", seconds: 2.4 }],
+  viewYawDegrees: 40.3,
+});
+
+test("a listing the snapshot names but the manifest does not keeps its measured numbers", () => {
+  const built = buildFacts({ products: [] }, [h145Listing], [], MARKET_ROOT, {
+    "clunk-heli-h145": h145Measured,
+  });
+  const h145 = built.facts["clunk-heli-h145"];
+  assert.ok(h145, "the helicopter is still in the index");
+  assert.equal(h145.triangles, 85_150);
+  assert.equal(h145.materials, 9);
+  assert.deepEqual(h145.boundsMetres, [10.605, 3.95, 13.64]);
+  assert.deepEqual(h145.animatedParts, ["main_rotor_hub", "fenestron_rotor", "door_left_slide"]);
+  assert.deepEqual(h145.animations, [{ name: "rotor_spin", seconds: 1 }, { name: "doors_open", seconds: 2.4 }]);
+  assert.equal(h145.viewYawDegrees, 40.3);
+});
+
+test("the snapshot still wins where it actually speaks — the file's size and format", () => {
+  const resized = { ...h145Listing, byteLength: 3_400_000, entryFileName: "h145.m1.glb" };
+  const built = buildFacts({ products: [] }, [resized], [], MARKET_ROOT, {
+    "clunk-heli-h145": emptyFacts({ ...h145Measured, byteLength: 3_303_252, format: "PNG" }),
+  });
+  assert.equal(built.facts["clunk-heli-h145"].byteLength, 3_400_000, "the row the shop serves states the size");
+  assert.equal(built.facts["clunk-heli-h145"].format, "GLB");
+});
+
+// The same failure mode as the helicopter's, one field over: a snapshot row is allowed to omit
+// its size and its file name, and the minted record then carries a 0 and a "파일" that would
+// paper over a real measurement.
+test("a snapshot row that omits its size and file name keeps the previous size and format", () => {
+  const silent = { slug: "clunk-heli-h145", title: "구조용 헬리콥터", entryFileName: "" };
+  const built = buildFacts({ products: [] }, [silent], [], MARKET_ROOT, {
+    "clunk-heli-h145": h145Measured,
+  });
+  assert.equal(built.facts["clunk-heli-h145"].byteLength, 3_303_252, "0 bytes is a silence, not a file");
+  assert.equal(built.facts["clunk-heli-h145"].format, "GLB", UNKNOWN_FORMAT_LABEL + " is a shrug, not a format");
+});
+
+test("a D1 listing the previous index never saw still gets its size, format and grid", () => {
+  const built = buildFacts(
+    { products: [] },
+    [{ slug: "cozy-fence-gate-swing", title: "울타리 문", entryFileName: "gate.sheet.png", format: "image/png", byteLength: 15_441 }],
+    [],
+    MARKET_ROOT,
+    {},
+  );
+  const sheet = built.facts["cozy-fence-gate-swing"];
+  assert.equal(sheet.byteLength, 15_441);
+  assert.equal(sheet.format, "PNG");
+  assert.deepEqual(sheet.sheet, { cell: 64, directions: 8, frames: 8, cuts: 64 });
+  assert.equal(sheet.triangles, null, "a sheet has no geometry to claim");
+});
+
+test("the manifest's record is whole — a model that lost its clips does not get them back", () => {
+  const manifest = {
+    products: [{
+      slug: "a-gate", kind: "3d-model", title: "문",
+      files: [{ path: "assets/a-gate/gate.glb", role: "entry", contentType: "model/gltf-binary", byteLength: 47_960 }],
+      measured: { triangleCount: 520, materialCount: 6 },
+    }],
+  };
+  const built = buildFacts(manifest, [{ slug: "a-gate", title: "문", entryFileName: "gate.glb", byteLength: 47_960 }], [], MARKET_ROOT, {
+    "a-gate": emptyFacts({ animations: [{ name: "swing", seconds: 2 }], animatedParts: ["gate_pivot"], triangles: 99_999 }),
+  });
+  assert.deepEqual(built.facts["a-gate"].animations, [], "the pipeline re-measured it as still");
+  assert.deepEqual(built.facts["a-gate"].animatedParts, []);
+  assert.equal(built.facts["a-gate"].triangles, 520, "the manifest's own count, not the stale one");
+});
+
+test("a slug neither source mentions is still carried forward whole", () => {
+  const built = buildFacts({ products: [] }, [], [], MARKET_ROOT, { "gone-from-both": h145Measured });
+  assert.deepEqual(built.facts["gone-from-both"], h145Measured);
 });
 
 // --- the rows the shop renders --------------------------------------------------------------
