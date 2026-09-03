@@ -295,8 +295,23 @@ function paintFaces(THREE, geometry, paint) {
   return geometry;
 }
 
-/** Warm key from +X/+Z/up, cool sky fill from above — the style bible's lighting note. */
-const SUN = [0.58, 0.62, 0.53];
+/**
+ * Sky term, not a sun.
+ *
+ * These used to shade against a fixed direction, [0.58, 0.62, 0.53], baked
+ * straight into COLOR_0. A buyer who rotated the tree about Y got a different
+ * tree: the same trunk read bright facing one way and flat facing the other,
+ * and the sprite exports came out with visible brightness drift between angles
+ * because each frame saw a different side of a sun that never moved with it.
+ *
+ * Vertical facing is the part worth keeping. Undersides sit in shadow and
+ * upward faces catch the sky no matter which way the tree is turned, so the
+ * crown still reads as a volume while the asset stays rotation-invariant and
+ * lights correctly under the buyer's own scene lighting.
+ */
+function skyKey(ny) {
+  return clamp01(0.5 + 0.5 * ny);
+}
 
 function barkPainter(template, extent) {
   const base = rgb(template.bark.base);
@@ -308,7 +323,7 @@ function barkPainter(template, extent) {
     // Damp, dark at the root flare; warmer and lighter into the crown.
     let color = mix(shadow, base, smoothstep(0, 0.30, t));
     color = mix(color, light, 0.42 * smoothstep(0.15, 1, t));
-    const key = clamp01(nx * SUN[0] + ny * SUN[1] + nz * SUN[2]);
+    const key = skyKey(ny);
     color = mix(color, light, 0.34 * key);
     color = mix(color, shadow, 0.30 * clamp01(-ny));
     return shift(color, 0.045 * hashSigned(cx, cy, cz, 77));
@@ -322,7 +337,7 @@ function leafPainter(template, extent, tint) {
   const span = Math.max(0.001, extent.max - extent.min);
   return (cx, cy, cz, nx, ny, nz) => {
     const t = clamp01((cy - extent.min) / span);
-    const key = clamp01(nx * SUN[0] + ny * SUN[1] + nz * SUN[2]);
+    const key = skyKey(ny);
     // Three-stop ramp: shaded underside -> body -> sunlit tips. Height and facing are
     // weighted together so the crown reads as a lit volume, not as a gradient decal.
     const lift = clamp01(0.44 * t + 0.56 * key);

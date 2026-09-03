@@ -312,12 +312,33 @@ function main() {
   // The sprite sheets live only in D1, so a run without a snapshot of it would delete their
   // entries and blank fourteen cards. Carry forward anything the previous index knew that
   // this run could not rebuild; the manifest and the snapshot always win where they speak.
+  //
+  // "Missing" is not only an absent slug. A run that finds the file but cannot read its
+  // geometry still writes an entry -- one with triangles, materials and bounds all null.
+  // That shell used to pass the `built.facts[slug]` check and silently replace real
+  // measurements: H145 went from 85,150 triangles, 9 materials and 6 animated parts to
+  // nulls on its card. Treat a shell as not-rebuilt so the previous numbers survive.
+  const isShell = (fact: ListingFact | undefined) =>
+    fact != null &&
+    fact.triangles == null &&
+    fact.materials == null &&
+    fact.boundsMetres == null;
+
   try {
     const previous = JSON.parse(readFileSync(outPath, "utf8")) as ListingFactsFile;
     let carried = 0;
     for (const [slug, fact] of Object.entries(previous.facts ?? {})) {
-      if (built.facts[slug]) continue;
-      built.facts[slug] = fact;
+      const rebuilt = built.facts[slug];
+      if (rebuilt && !isShell(rebuilt)) continue;
+      if (isShell(rebuilt) && isShell(fact)) continue;
+      // Keep what this run did measure (byteLength, format) on top of the known-good fact.
+      built.facts[slug] = rebuilt
+        ? {
+            ...fact,
+            byteLength: rebuilt.byteLength ?? fact.byteLength,
+            format: rebuilt.format ?? fact.format,
+          }
+        : fact;
       carried += 1;
     }
     if (carried) {
