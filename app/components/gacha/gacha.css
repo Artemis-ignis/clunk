@@ -1093,6 +1093,8 @@ html:has(.gc-film) { --gc-nav-h: 84px; }
 /* 넓은 화면 — 제목은 왼쪽 칸, 기계는 오른쪽 --------------------------------- */
 @media (min-width: 1024px) {
   .gc-film { --gc-stage-left: clamp(300px, 30vw, 460px); }
+  /* '내려서 시작' 은 왼쪽 열 밑에 — 기계 받침 글자 위에 겹치지 않게. */
+  .gc-beat-scroll { left: 7vw; --gc-beat-x: 0px; }
   .gc-beat-head {
     left: 7vw;
     right: auto;
