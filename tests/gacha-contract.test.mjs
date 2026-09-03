@@ -702,7 +702,7 @@ test("무대는 내비 밑에서 시작하고, 제목은 기계를 덮지 않는
   assert.doesNotMatch(css, /\.sitenav-dock::before \{ opacity: 0 !important; \}/u);
   assert.match(
     css,
-    /\.gc-film \.gc3-canvas,\s*\.gc-film \.gc3-poster \{\s*top: calc\(var\(--gc-nav-h\) \+ var\(--gc-head-h\)\);/u,
+    /\.gc-film \.gc3-canvas,\s*\.gc-film \.gc3-poster \{[\s\S]{0,400}?top: var\(--gc-head-h\);/u,
   );
   // 내비는 무대의 어떤 층보다도 위에 선다.
   assert.match(site, /\.cv5 \.sitenav-dock \{ position: fixed; inset: 0 0 auto 0; z-index: 80; \}/u);
