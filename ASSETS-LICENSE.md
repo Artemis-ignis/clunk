@@ -1,5 +1,7 @@
 # Asset files — separate terms
 
+> `LICENSE` (MIT) is kept verbatim so that GitHub can detect it; this file carries the scope note that would otherwise sit under it.
+
 The MIT licence in `LICENSE` applies to Clunk's **source code**. It does **not**
 apply to the game-asset files listed below. Those files are the products sold
 or distributed through the Clunk marketplace (https://clunk.games/marketplace),
