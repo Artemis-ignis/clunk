@@ -45,7 +45,7 @@ export const LEGAL_OPERATOR_ROWS: LegalRow[] = [
   { label: "대표자", value: "박준성" },
   { label: "사업자등록번호", value: "361-02-03814" },
   { label: "통신판매업 신고번호", value: "[유료 판매를 시작할 때 신고 후 기재 — 무료 베타 중에는 해당 없음]", placeholder: true },
-  { label: "사업장 주소", value: "인천광역시 제물포구 화도진로 16" },
+  { label: "사업장 주소", value: "인천광역시 제물포구 화도진로 16 (우편번호 22552)" },
   { label: "연락처", value: "+82 10-2761-9841" },
   { label: "전자우편", value: "junsuopar@gmail.com" },
   // Stated, not placeholder: the privacy policy already names D1 and R2, and this is where
