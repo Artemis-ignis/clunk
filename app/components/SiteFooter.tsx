@@ -19,7 +19,7 @@ export function SiteFooter() {
       <div className="cv5-frame cv5-footer-inner">
         <div className="cv5-footer-brand">
           <strong>CLUNK</strong>
-          <p>게임에 넣을 3D 모델과 2D 이미지를 만들고, 게임에 넣어도 되는지 검사하고, 마켓에서 주고받는 곳입니다.</p>
+          <p>게임에 넣을 3D 모델과 2D 이미지를 만들고, 게임에 넣어도 되는지 검사하고, 마켓에서 골라 쓰는 곳입니다.</p>
         </div>
         <nav className="cv5-footer-col" aria-label="제품">
           <header>제품</header>
