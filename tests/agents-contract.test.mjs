@@ -40,9 +40,12 @@ test("server-renders an actionable setup journey instead of a text wall", async 
   const response = await render();
   const html = await response.text();
   assert.match(html, /agent-journey/);
-  assert.match(html, /1\. 키 발급/);
-  assert.match(html, /2\. 클라이언트 선택/);
-  assert.match(html, /4\. 연결 확인/);
+  // 2026-09-03: 번호는 왼쪽 칸(01~04)만 붙입니다. 제목에도 "1." 이 있어 "01 1. 키 발급"으로
+  // 읽히던 것을 걷어냈습니다. 네 단계가 순서대로 다 있는지는 그대로 확인합니다.
+  assert.match(html, /<span>01<\/span><strong>키 발급<\/strong>/);
+  assert.match(html, /<span>02<\/span><strong>클라이언트 선택<\/strong>/);
+  assert.match(html, /<span>03<\/span><strong>설정 복사<\/strong>/);
+  assert.match(html, /<span>04<\/span><strong>연결 확인<\/strong>/);
   assert.match(html, /agent-tab-purpose/);
   assert.match(html, /선택한 클라이언트/);
   assert.match(html, /로그인 후 키 발급/);

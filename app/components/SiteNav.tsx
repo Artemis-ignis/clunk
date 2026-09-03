@@ -36,7 +36,7 @@ export function SiteNav({ active }: { active?: ShellSection }) {
   const [open, setOpen] = useState(false);
   // 2026-09-03: 로그인/회원가입이 지금 보던 화면을 잃어버리고 있었습니다. 두 링크는
   // 이 페이지의 경로를 return_to 로 들고 갑니다. /login 과 /signup 자신에서 누르면
-  // 제자리로 돌아오는 고리가 되므로, 그때는 작업실로 보냅니다.
+  // 제자리로 돌아오는 고리가 되므로, 그때는 작업공간으로 보냅니다.
   const pathname = usePathname();
   const returnTo = encodeURIComponent(
     !pathname || pathname === "/login" || pathname === "/signup" ? "/dashboard" : pathname,
@@ -146,7 +146,7 @@ export function SiteNav({ active }: { active?: ShellSection }) {
               </>
             )}
             <Link className="button button-primary button-sm sitenav-cta" href={session ? "/app" : startHref} prefetch={false}>
-              {session ? "작업면 열기" : "Clunk 사용하기"}
+              {session ? "에셋 검사 열기" : "Clunk 사용하기"}
               <Icon name="arrowUpRight" size={14} />
             </Link>
             <button
@@ -207,7 +207,7 @@ export function SiteNav({ active }: { active?: ShellSection }) {
                 </>
               )}
               <Link className="button button-primary button-sm" href={session ? "/app" : startHref} prefetch={false} onClick={() => setOpen(false)}>
-                {session ? "작업면 열기" : "Clunk 사용하기"}
+                {session ? "에셋 검사 열기" : "Clunk 사용하기"}
                 <Icon name="arrowUpRight" size={14} />
               </Link>
             </div>

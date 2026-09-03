@@ -63,7 +63,7 @@ export function WorkspaceAssetDetail({ assetId }: { assetId: string }) {
   const reviewComplete = payload?.review?.visualRuntime === "PASS" && payload?.review?.playerFacing === "PASS" && payload?.review?.humanDecision === "PASS";
   const isReady = payload?.storageStatus === "STORED" && structuralStatus === "PASS" && provenanceComplete && reviewComplete;
   if (state === "loading") return <div className="workspace-asset-state"><span className="spinner" /><strong>에셋 기록을 불러오는 중입니다</strong><small>artifact, provenance, evidence를 확인합니다.</small></div>;
-  if (state === "error" || !payload?.asset) return <div className="workspace-asset-state workspace-asset-state-error"><Icon name="triangleAlert" size={22} /><strong>에셋 기록을 열 수 없습니다.</strong><small>{message}</small><Link className="button button-quiet button-sm" href="/dashboard">작업공간로 돌아가기 <Icon name="arrowLeft" size={13} /></Link></div>;
+  if (state === "error" || !payload?.asset) return <div className="workspace-asset-state workspace-asset-state-error"><Icon name="triangleAlert" size={22} /><strong>에셋 기록을 열 수 없습니다.</strong><small>{message}</small><Link className="button button-quiet button-sm" href="/dashboard">작업공간으로 돌아가기 <Icon name="arrowLeft" size={13} /></Link></div>;
 
   const { asset } = payload;
   const download = (fileName: string) => `/api/assets/${encodeURIComponent(asset.id)}?file=${encodeURIComponent(fileName)}&download=1`;

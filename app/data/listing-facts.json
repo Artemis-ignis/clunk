@@ -1151,6 +1151,42 @@
       "sheet": null,
       "texture": null,
       "inspection": null
+    },
+    "clunk-heli-h145": {
+      "triangles": 85150,
+      "materials": 9,
+      "boundsMetres": [
+        10.605,
+        3.95,
+        13.64
+      ],
+      "byteLength": 3303252,
+      "format": "GLB",
+      "animatedParts": [
+        "main_rotor_hub",
+        "fenestron_rotor",
+        "door_left_slide",
+        "door_right_slide",
+        "door_rear_left",
+        "door_rear_right"
+      ],
+      "animations": [
+        {
+          "name": "rotor_spin",
+          "seconds": 1
+        },
+        {
+          "name": "doors_open",
+          "seconds": 2.4
+        }
+      ],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": null
     }
   }
 }

@@ -18,11 +18,12 @@ export const dynamic = "force-dynamic";
 
 export const metadata = createPageMetadata({ title: "에이전트 연결", description: "Claude Code, Codex, Cursor, GitHub Copilot, Claude Desktop, VS Code에서 Clunk를 연결하는 작업 가이드입니다.", path: "/agents" });
 
+// 번호는 왼쪽 칸(01~04)이 이미 붙입니다. 제목에 "1." 을 또 적으면 "01 1. 키 발급"으로 읽힙니다.
 const setupSteps = [
-  ["01", "1. 키 발급", "내 계정 전용 키를 한 번 받습니다"],
-  ["02", "2. 클라이언트 선택", "쓰는 도구를 고릅니다"],
-  ["03", "3. 설정 복사", "연결 주소와 키가 채워진 설정을 붙여 넣습니다"],
-  ["04", "4. 연결 확인", "서버가 실제로 응답하는지 확인합니다"],
+  ["01", "키 발급", "내 계정 전용 키를 한 번 받습니다"],
+  ["02", "클라이언트 선택", "쓰는 도구를 고릅니다"],
+  ["03", "설정 복사", "연결 주소와 키가 채워진 설정을 붙여 넣습니다"],
+  ["04", "연결 확인", "서버가 실제로 응답하는지 확인합니다"],
 ] as const;
 
 const AGENT_ASSETS: Array<{ kind: AssetFamilyVisualKind; label: string }> = [

@@ -54,7 +54,12 @@ const INSPECTED_MODEL = {
   measured: { faces: "39,320", drawCalls: "98", size: "840 KB", faceLimit: "40,000", limitPercent: "98" },
 } as const;
 
-const AGENT_CLIENTS = ["Claude Code", "Codex CLI", "Cursor", "VS Code", "Grok Build", "Antigravity", "DeepSeek", "GLM", "로컬 에이전트"] as const;
+/**
+ * /agents가 실제로 설정을 만들어 주는 클라이언트 그대로입니다
+ * (app/components/agent-guides.ts의 buildAgentGuides 키 목록).
+ * 이 저장소에 연결 가이드가 없는 이름(Grok Build·Antigravity·DeepSeek·GLM)은 뺐습니다.
+ */
+const AGENT_CLIENTS = ["Claude Code", "Codex", "Cursor", "GitHub Copilot", "Claude Desktop", "VS Code", "로컬 stdio"] as const;
 
 export default function Home() {
   return (
@@ -85,11 +90,14 @@ export default function Home() {
               <div className="cv5-sec-kicker"><span className="cv5-num">01</span><small>검사와 수정</small></div>
               <h2 id="sec-inspect">게임 에셋 검사 및 수정</h2>
               <p>
-                뽑은 것이든 직접 만든 것이든, 올리면 {RULE_COUNT}가지를 검사해 점수로 알려줍니다. 고치는 것도 여기서, 원본은 그대로.
+                뽑은 것이든 직접 만든 것이든, GLB 파일을 올리면 {RULE_COUNT}가지를 검사해 점수로 알려줍니다. 고치는 것도 여기서, 원본은 그대로.
               </p>
               <ul className="cv5-points">
                 <li><b>실제 수치</b> — 폴리곤 수, 재질 수, 실제 크기를 파일에서 직접 읽습니다</li>
-                <li><b>2D도 함께</b> — 스프라이트 시트와 본 애니메이션까지</li>
+                {/* 이 화면(/app)이 받는 파일은 GLB·glTF뿐입니다(ClunkInspector accept=".glb,.gltf").
+                    스프라이트 시트·본 애니메이션 검사는 로컬 MCP·명령줄 도구가 맡습니다
+                    (integrations/mcp/server.ts의 clunk_asset_inspect·clunk_sprite_sheet_review). */}
+                <li><b>2D도 함께</b> — 스프라이트 시트와 본 애니메이션은 AI 도구 연결(MCP)에서</li>
                 <li><b>눈으로 확인</b> — 3D 뷰어로 돌려 보고 판단하세요</li>
               </ul>
               <div>
@@ -160,7 +168,10 @@ export default function Home() {
                 Claude Code, Cursor, Codex에 연결하면, 에이전트가 대화만으로 에셋을 만들고 검사까지 끝냅니다.
               </p>
               <ul className="cv5-points">
-                <li><b>말로 만듭니다</b> — &ldquo;시장 노점 만들어줘&rdquo; 한 줄이면 GLB가 나옵니다</li>
+                {/* 3D는 /api/series가 템플릿 보관소에서 다시 구워 냅니다 — 문장이 모양을 만들지
+                    않습니다(app/api/series/route.ts, /series의 "문장만으로 모양을 만들지는
+                    못합니다"와 같은 사실). 문장으로 그리는 것은 2D 이미지(/api/generation)뿐입니다. */}
+                <li><b>말로 부릅니다</b> — 템플릿을 고르고 한 줄로 부르면 GLB가 나옵니다</li>
                 <li><b>문제를 먼저 알려줍니다</b> — 무엇이 걸렸는지 짚어 주고, 고칠지 물어봅니다</li>
                 <li><b>어디서든 그대로</b> — Unity, Godot, Three.js에 바로 넣어 씁니다</li>
               </ul>

@@ -58,7 +58,7 @@ export function ClunkSeriesCatalog({
                   : <span className="series-source-chip series-source-chip-native">Clunk-owned surface</span>}
               </div>
               <Link className="text-link" href={SERIES_ROUTES[series.id]}>
-                {series.id === "market" ? "카탈로그 열기" : series.id === "game-ready" ? "검사기 열기" : "작업면 열기"}
+                {series.id === "market" ? "카탈로그 열기" : series.id === "game-ready" ? "검사기 열기" : "만들기 화면 열기"}
                 <Icon name="arrowRight" size={14} />
               </Link>
             </div>

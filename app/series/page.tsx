@@ -27,7 +27,9 @@ const SERIES_CARDS: ReadonlyArray<{ id: string; title: string; description: stri
   {
     id: "asset-forge",
     title: "3D 모델 만들기",
-    description: "모양을 만드는 코드 파일을 올리면 GLB 파일이 나옵니다. 어디서 왔는지와 파일 지문이 함께 기록됩니다. 문장만으로 모양을 만들지는 못합니다.",
+    // /studio는 GET /api/series/templates 가 준 템플릿 중에서 고르게 하고, POST /api/series 는
+    // 템플릿을 지정하지 않은 요청을 거절합니다. 코드 파일을 올리는 화면은 없습니다.
+    description: "만들 모양을 템플릿에서 고르면 GLB 파일이 나옵니다. 어디서 왔는지와 파일 지문이 함께 기록됩니다. 문장만으로 모양을 만들지는 못합니다.",
     href: "/studio?make=3d-model",
     action: "만들기 화면 열기",
   },

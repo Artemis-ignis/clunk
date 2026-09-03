@@ -6,6 +6,8 @@ description: 2D와 3D 모두 provenance를 남기고 검사합니다
 
 2D와 3D 모두 provenance를 남기고 검사합니다. **생성 완료와 게임 화면 승인은 다른 증거**입니다.
 
+웹의 [에셋 제작](https://clunk.games/studio) 화면은 네 가지를 만듭니다 — 2D 이미지는 문장으로(`POST /api/generation`), 3D 모델·스프라이트 시트·애니메이션 클립은 템플릿 보관소에서 다시 구워 냅니다(`POST /api/series`). 문장이 3D 모양을 만들지는 않습니다. 아래 명령줄 도구는 같은 일을 내 컴퓨터에서 하고, 자기 코드(factory)를 넣을 수 있습니다.
+
 ## Clunk Series · Native
 
 GitHub 자료는 감사된 source material로만 기록하고, 실제 실행은 Clunk 내부 코드와 Core 계약으로 수행합니다. [여섯 시리즈와 소스 장부](https://clunk.games/series)

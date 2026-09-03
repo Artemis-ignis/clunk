@@ -307,7 +307,7 @@ export function CollaborationPanel({ latestRun }: { latestRun: RunContext | null
       ) : null}
 
       {error ? <p className="collaboration-error" role="alert"><Icon name="triangleAlert" size={15} />{error}</p> : null}
-      <p className="collaboration-contract-note">메모와 화면 캡처는 이 작업실 안에만 저장됩니다.</p>
+      <p className="collaboration-contract-note">메모와 화면 캡처는 이 작업공간 안에만 저장됩니다.</p>
     </section>
   );
 }

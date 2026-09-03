@@ -35,7 +35,7 @@ export default function NotFound() {
               홈으로 <Icon name="arrowRight" size={16} />
             </Link>
             <Link className="cv5-btn cv5-btn-ghost" href="/marketplace" prefetch={false}>
-              공개 에셋 보기
+              에셋 마켓 보기
             </Link>
           </div>
           <div className="cv5-nf-links">

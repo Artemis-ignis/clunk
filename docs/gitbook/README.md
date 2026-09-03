@@ -1,8 +1,8 @@
 # Clunk 문서
 
-Clunk는 게임 에셋을 **만들고, 게임에 넣어도 되는지 검사하고, 받아 쓰는** 곳입니다. 2D 이미지는 문장으로, 3D 모델과 스프라이트 시트는 코드로 만들고, 만든 파일은 그 자리에서 검사합니다. Claude Code·Cursor 같은 AI 도구에서도 같은 기능을 부를 수 있습니다.
+Clunk는 게임 에셋을 **만들고, 게임에 넣어도 되는지 검사하고, 받아 쓰는** 곳입니다. 2D 이미지는 문장으로, 3D 모델과 스프라이트 시트는 템플릿으로 만들고, 만든 파일은 그 자리에서 검사합니다. Claude Code·Cursor 같은 AI 도구에서도 같은 기능을 부를 수 있습니다.
 
-제품 사이트: [clunk.games](https://clunk.games) · 지금은 무료 베타입니다.
+제품 사이트: [clunk.games](https://clunk.games) · 지금은 결제 없이 모든 기능을 쓸 수 있습니다.
 
 ## 검사 결과를 읽는 법
 
@@ -22,16 +22,18 @@ Clunk는 한 파일을 네 가지 방법으로 봅니다. 하나가 통과했다
 읽는 순서가 곧 해 보는 순서입니다.
 
 1. [빠른 시작](quickstart.md) — 가입하고 첫 파일을 검사하거나 만들어 보기
-2. [클라이언트별 설정](client-setup.md) — Claude Code·Cursor·Codex 등에서 Clunk 연결하기
-3. [CLI와 CI](cli-and-ci.md) — 터미널과 빌드 파이프라인에서 검사 돌리기
-4. [에셋 만들기](asset-studio.md) — 2D·3D·스프라이트 시트·애니메이션을 만드는 방법과 한계
+2. [클라이언트별 설정](clients.md) — Claude Code·Cursor·Codex 등에서 Clunk 연결하기
+3. [CLI와 CI](cli-ci.md) — 터미널과 빌드 파이프라인에서 검사 돌리기
+4. [Asset Studio](asset-studio.md) — 2D·3D·스프라이트 시트·애니메이션을 만드는 방법과 한계
 5. [계약과 상태](contracts.md) — API가 돌려주는 값의 뜻
-6. [지원 범위](scope.md) — 되는 것과 아직 안 되는 것
+6. [Harvest Frontier](harvest-frontier.md) — 외부 팀에 넘긴 증거와 그 경계
+7. [브라우저 WebMCP](webmcp.md) — 화면 자신이 내주는 도구
+8. [지원 범위](scope.md) — 되는 것과 아직 안 되는 것
 
 ## 바로 해 보기
 
-* [에셋 마켓](https://clunk.games/marketplace) — 3D 모델을 돌려 보고, 로그인하면 무료로 받기
-* [내 파일 검사](https://clunk.games/app) — GLB·PNG를 올리면 게임에 넣어도 되는지 알려 줍니다
+* [에셋 마켓](https://clunk.games/marketplace) — 3D 모델을 돌려 보고 텍스처를 이어 붙여 본 뒤, 로그인하면 무료로 받기
+* [내 파일 검사](https://clunk.games/app) — GLB·glTF를 올리면 게임에 넣어도 되는지 알려 줍니다
 * [AI 도구 연결](https://clunk.games/agents) — 쓰던 AI 도구에서 Clunk 부르기
 * [검수 뷰어](https://clunk.games/review) — 3D는 돌려 보고, 스프라이트는 재생해 보기
 

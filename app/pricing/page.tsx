@@ -137,13 +137,13 @@ const PACKS: Pack[] = [
 const USAGE = [
   { action: "가입", amount: `+${SIGNUP_GRANT_CREDITS}`, positive: true, detail: "계정을 만든 그 자리에서 한 번 들어옵니다." },
   { action: "매달 지급", amount: `+${BETA_MONTHLY_GRANT_CREDITS}`, positive: true, detail: "달이 바뀐 뒤 처음 접속할 때 자동으로 들어옵니다." },
-  { action: "에셋 검사", amount: `−${CREDITS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "올린 GLB·PNG 파일을 열어 폴리곤 수, 재질 수, 크기, 규격을 확인합니다." },
+  { action: "에셋 검사", amount: `−${CREDITS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "올린 GLB·glTF 파일을 열어 폴리곤 수, 재질 수, 크기, 규격을 확인합니다." },
   { action: "안전 최적화", amount: `−${CREDITS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "원본은 그대로 두고 정리한 새 파일을 만들어 다시 검사합니다." },
-  { action: "에셋 만들기", amount: `−${CREDITS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "문장으로 2D 이미지를, 코드로 3D 모델과 스프라이트 시트를 만듭니다." },
-  { action: "외부 결과 재검사", amount: `−${CREDITS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "다른 도구로 만든 파일도 같은 기준으로 다시 검사합니다." },
+  { action: "2D 이미지 만들기", amount: "−1", detail: "문장으로 PNG 한 장을 만듭니다." },
+  { action: "3D·시트·클립 만들기", amount: "−1", detail: "고른 템플릿으로 GLB, 스프라이트 시트, 애니메이션 클립을 만듭니다." },
   { action: "마켓 에셋 받기", amount: "0", positive: true, detail: "로그인만 하면 결제도 크레딧도 없이 받습니다." },
   { action: "실패·거부된 작업", amount: "0", positive: true, detail: "입력 오류, 모델 거부, 저장 실패는 끝나지 않은 작업이라 차감하지 않습니다." },
-  { action: "같은 요청 두 번", amount: `−${CREDITS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "같은 요청을 다시 보내도 한 번만 처리하고 한 번만 셉니다." },
+  { action: "같은 요청 두 번", amount: `합계 −${CREDITS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "같은 요청을 다시 보내도 한 번만 처리하고 한 번만 셉니다." },
 ] as const;
 
 /** 요금제 비교표. 각 행의 값은 PLANS 와 상수에서 계산합니다. */

@@ -6,6 +6,8 @@ description: 입력 종류별로 검증 가능한 범위와 target profile 목�
 
 자세한 모델 · 재질 · Spine · 애니메이션 범위는 입력 종류별로 분리되어 반환됩니다.
 
+웹의 [내 파일 검사](https://clunk.games/app) 화면이 받는 파일은 GLB·glTF뿐입니다. 아래 표의 2D·Sprite·Spine·Animation은 로컬 stdio MCP와 CLI에서 검사합니다.
+
 ## 검사 가능한 입력
 
 | 종류        | 범위                                            |
@@ -20,7 +22,7 @@ description: 입력 종류별로 검증 가능한 범위와 target profile 목�
 
 | 프로파일                            | 엔진 · 플랫폼         | ID                           |
 | ------------------------------- | ---------------- | ---------------------------- |
-| 영허검가 PixiJS 2D                  | pixi-js · web    | `yeongheo-pixi-2d`           |
+| PixiJS 2D                       | pixi-js · web    | `yeongheo-pixi-2d`           |
 | Harvest Frontier Web / Three.js | web-three · web  | `harvest-frontier-web-three` |
 | Godot 4                         | godot · desktop  | `godot-4`                    |
 | Unity Editor                    | unity · desktop  | `unity`                      |

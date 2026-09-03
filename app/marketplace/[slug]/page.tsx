@@ -146,12 +146,12 @@ export default async function MarketplaceListingPage({ params }: { params: Promi
                     to buy a 3D model. Nobody outside this repo speaks that way. */}
                 <div className={styles.sectionHead}>
                   <h2 id="detail-buyer-heading">
-                    에셋은 한 번 사고,
+                    에셋은 계정에 남고,
                     <br />
                     <em>Clunk 기능은 크레딧으로</em>
                   </h2>
                   <p>
-                    산 파일은 계정에 남아 언제든 다시 받을 수 있습니다. 검사·최적화 같은
+                    한 번 받은 파일은 계정에 남아 언제든 다시 받을 수 있습니다. 검사·최적화 같은
                     Clunk 기능은 쓴 만큼 크레딧으로 계산합니다.
                   </p>
                 </div>

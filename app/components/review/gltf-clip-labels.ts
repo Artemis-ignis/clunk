@@ -23,6 +23,9 @@ export const GLTF_CLIP_LABELS: Readonly<Record<string, string>> = {
   work: "경운",
   sow: "파종",
   run: "가동",
+  // The H145-style helicopter built in code (2026-09-03).
+  "rotor-spin": "로터 회전",
+  "doors-open": "문 열기",
 };
 
 /**

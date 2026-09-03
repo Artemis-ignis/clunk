@@ -74,9 +74,10 @@ export default function WebMcpPage() {
             </p>
             <h3 className={styles.subhead}>After signing in</h3>
             <p>
-              Three more surfaces open: receive a drawn file, make an asset in the studio through the
-              screen&apos;s own create flow, and inspect a GLB from a URL in the browser tab. An agent
-              never signs anyone in; the human does that themselves at <Link href="/signup">/signup</Link>.
+              Four more tools open on two surfaces: the studio (list templates, create through the
+              screen&apos;s own create flow, list what you made) and the inspector (inspect a GLB from a
+              URL in the browser tab). An agent never signs anyone in; the human does that themselves
+              at <Link href="/signup">/signup</Link>.
             </p>
 
             <h3 className={styles.subhead}>Prompts to try</h3>
