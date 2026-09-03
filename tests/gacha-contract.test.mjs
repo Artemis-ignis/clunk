@@ -722,7 +722,10 @@ test("무대는 내비 밑에서 시작하고, 제목은 기계를 덮지 않는
   // 그 빛은 캔버스 밑에 깔리고, 모서리 너머까지 늘어져 새 경계선을 만들지 않는다.
   assert.match(css, /\.gc-film-sticky::after \{[\s\S]*?width: calc\(var\(--gc-stage-left\) \+ 240px\);/u);
   // 장면에 카메라 훅이 붙으면 바로 쓰도록 호출을 미리 걸어 둔다(없으면 아무 일도 없다).
-  assert.match(machine, /\(scene as SceneWithCameraHooks\)\.setTopInset\?\.\(navBandHeight\(\)\)/u);
+  assert.match(machine, /scene\.setTopInset\?\.\(navBandHeight\(\)\)/u);
+  // 위를 비운 만큼 거리를 늘려야 기계 밑동이 남는다 — 둘은 항상 같이 불린다.
+  assert.match(machine, /scene\.setFrameFill\?\.\(Math\.min\(1\.2, Math\.max\(1, h \/ Math\.max\(1, h - navH\)\)\)\)/u);
+  assert.match(machine, /applyCameraFraming\(scene as SceneWithCameraHooks, host\)/u);
   assert.match(css, /\.gc-beat-head \{\s*left: 7vw;/u);
   // 좁은 화면: 제목은 내비 아래 띠에 눕고 h1 은 2rem 을 넘지 않는다.
   assert.match(css, /@media \(max-width: 767px\) \{\s*html:has\(\.gc-film\) \{ --gc-nav-h: 76px; \}\s*\.gc-film \{ --gc-head-h: 116px; \}/u);
