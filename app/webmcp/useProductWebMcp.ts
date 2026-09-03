@@ -57,7 +57,7 @@ export function useProductWebMcp(input: ProductWebMcpInput): void {
                 ? "This is the open beta: signing in is enough, nothing is charged."
                 : "The human has to sign in before this file can be received.",
               message_ko: now.beta
-                ? "무료 베타입니다. 로그인하면 결제 없이 받을 수 있습니다."
+                ? "로그인하면 결제 없이 받을 수 있습니다."
                 : "로그인해야 받을 수 있습니다.",
             };
           }

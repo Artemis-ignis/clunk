@@ -62,7 +62,7 @@ const LOGIN_PROVIDER_SMALL = "계정으로 로그인 ↗";
 /** 아무 의도도 실려 오지 않았을 때의 문구. 두 문의 기본값이다. */
 export const DEFAULT_AUTH_COPY: AuthIntentCopy = {
   signup: {
-    badge: "무료 베타",
+    badge: "카드 없이 시작",
     h1: `가입하면 ${SIGNUP_GRANT_CREDITS}크레딧`,
     lede: `카드도 비밀번호도 묻지 않습니다. Google이나 GitHub 계정으로 한 번 들어오면 내 작업공간이 만들어지고, 매달 ${BETA_MONTHLY_GRANT_CREDITS}크레딧이 더 들어옵니다.`,
     facts: SIGNUP_FACTS,
@@ -81,7 +81,7 @@ export const DEFAULT_AUTH_COPY: AuthIntentCopy = {
 export const INTENT_COPY: Record<AuthIntent, AuthIntentCopy> = {
   create: {
     signup: {
-      badge: "무료 베타",
+      badge: "카드 없이 시작",
       h1: "첫 에셋 만들기부터",
       lede: `계정 하나면 만들기 화면이 열립니다. 가입하는 그 자리에서 크레딧 ${SIGNUP_GRANT_CREDITS}개가 들어오고, 확인이 끝나면 만들던 화면으로 그대로 돌아갑니다.`,
       facts: SIGNUP_FACTS,
@@ -98,7 +98,7 @@ export const INTENT_COPY: Record<AuthIntent, AuthIntentCopy> = {
   },
   inspect: {
     signup: {
-      badge: "무료 베타",
+      badge: "카드 없이 시작",
       h1: "파일 검사부터",
       lede: `파일 하나를 올리면 게임에 넣어도 되는지 확인해 드립니다. 가입하는 그 자리에서 크레딧 ${SIGNUP_GRANT_CREDITS}개가 들어오고, 확인이 끝나면 검사 화면으로 돌아갑니다.`,
       facts: SIGNUP_FACTS,
@@ -115,7 +115,7 @@ export const INTENT_COPY: Record<AuthIntent, AuthIntentCopy> = {
   },
   agents: {
     signup: {
-      badge: "무료 베타",
+      badge: "카드 없이 시작",
       h1: "에이전트 연결부터",
       lede: `내 계정 전용 키를 하나 만들면 쓰던 AI 도구가 바로 Clunk를 부릅니다. 가입하는 그 자리에서 크레딧 ${SIGNUP_GRANT_CREDITS}개가 들어옵니다.`,
       facts: SIGNUP_FACTS,
@@ -132,9 +132,9 @@ export const INTENT_COPY: Record<AuthIntent, AuthIntentCopy> = {
   },
   market: {
     signup: {
-      badge: "무료 베타",
+      badge: "카드 없이 시작",
       h1: "에셋 받기부터",
-      lede: `마켓 에셋은 무료 베타 동안 계정만 있으면 받습니다. 가입하는 그 자리에서 크레딧 ${SIGNUP_GRANT_CREDITS}개도 함께 들어옵니다.`,
+      lede: `마켓 에셋은 계정만 있으면 받습니다. 가입하는 그 자리에서 크레딧 ${SIGNUP_GRANT_CREDITS}개도 함께 들어옵니다.`,
       facts: SIGNUP_FACTS,
       providerSmall: SIGNUP_PROVIDER_SMALL,
     },

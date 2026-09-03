@@ -69,30 +69,35 @@ test("the pricing surface renders pack state from the API and never invents a pr
   // instead, labelled as such, and every grant figure is imported from the module that
   // enforces it rather than typed on the page.
   const pricing = await source("app/pricing/page.tsx");
-  assert.doesNotMatch(pricing, /CreditPacksPanel/, "베타 중 요금 페이지는 팩 패널을 그리지 않는다");
+  assert.doesNotMatch(pricing, /CreditPacksPanel/, "요금 페이지는 팩 패널을 그리지 않는다");
   assert.match(pricing, /SIGNUP_GRANT_CREDITS/);
   assert.match(pricing, /BETA_MONTHLY_GRANT_CREDITS/);
   assert.match(pricing, /WORKSPACE_IMAGES_PER_DAY/);
-  assert.match(pricing, /예정 가격/);
-  assert.match(pricing, /30일 전/);
-  assert.doesNotMatch(pricing, /충전하기|구매하기/, "베타 중에는 살 수 있는 것처럼 보이는 버튼이 없어야 한다");
-  // 2026-09-02: 베타 계정을 만든 사람이 가장 먼저 묻는 것은 "베타가 끝나면 내 계정은
-  // 어떻게 되나"다. 표만 보여 주고 답하지 않으면 예정 가격표가 곧 청구서로 읽힌다.
-  assert.match(pricing, /베타가 끝나면 지금 계정은 어떻게 되나요\?/);
-  assert.match(pricing, /무료 요금제 조건을 그대로 씁니다/);
+  assert.doesNotMatch(pricing, /충전하기|구매하기/, "결제가 없는 동안 살 수 있는 것처럼 보이는 버튼이 없어야 한다");
+  // 2026-09-03(마스터 결정): 결제 자체가 없으므로 "베타"라는 말을 이 화면에서 쓰지 않는다.
+  assert.doesNotMatch(pricing, /베타/u, "요금 화면에 베타 표현이 남아 있으면 안 된다");
+  assert.doesNotMatch(pricing, /예정가|DEMO/u, "옛 예정가·DEMO 잔재가 남아 있으면 안 된다");
   // 용어집: 화면에는 "면"과 "그리기 횟수"로 적는다.
   assert.doesNotMatch(pricing, /삼각형|드로우콜/, "내부 용어가 요금 화면에 남아 있으면 안 된다");
   // 2026-09-02: the gloss after the number was removed at the operator's request.
   assert.match(pricing, /폴리곤 수, 재질 수/);
 
-  // The planned figures on the page are the ones the plan document records.
+  // 구독 카드의 값은 계획 문서가 기록한 숫자 그대로이고, 페이지의 PLANS 한 곳에서만 나온다.
   const plan = await source("docs/free-beta-plan.ko.md");
-  for (const figure of ["₩9,900/월", "₩29,000/월", "500 = ₩45,000", "2,000 = ₩160,000", "6,000 = ₩420,000"]) {
+  for (const figure of ["₩9,900/월", "₩29,000/월"]) {
     assert.ok(plan.includes(figure), `계획 문서에 ${figure} 이 없다`);
   }
-  for (const [credits, price] of [["500", "45_000"], ["2_000", "160_000"], ["6_000", "420_000"]]) {
-    assert.ok(pricing.includes(`{ credits: ${credits}, priceKrw: ${price} }`), `페이지의 팩 ${credits} 가 계획과 다르다`);
+  assert.match(pricing, /priceKrw: 9_900,\s*annualKrw: 99_000/);
+  assert.match(pricing, /priceKrw: 29_000,\s*annualKrw: 290_000/);
+
+  // 크레딧 팩 3종은 D1 정의(clunk_credit_packs)와 같은 id·크레딧 수를 쓰고, price_cents 가
+  // 0(=미정)이므로 화면에는 값을 지어내지 않고 "가격 미정" + 비활성 버튼으로 둔다.
+  for (const [id, credits] of [["pack-starter", "500"], ["pack-studio", "2_000"], ["pack-foundry", "6_000"]]) {
+    assert.ok(
+      pricing.includes(`id: "${id}", name:`) && pricing.includes(`credits: ${credits}, priceKrw: null`),
+      `페이지의 팩 ${id} 가 D1 정의와 다르다`,
+    );
   }
-  assert.match(pricing, /monthly: 9_900,\s*annual: 99_000/);
-  assert.match(pricing, /monthly: 29_000,\s*annual: 290_000/);
+  assert.match(pricing, /가격 미정/);
+  assert.match(pricing, /결제 준비 중/);
 });

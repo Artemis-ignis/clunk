@@ -1645,7 +1645,7 @@
   color: var(--v5-ink);
 }
 
-/* The struck price beside "베타 무료": the number people will pay later, shown now so the
+/* The struck price beside "무료": the number people will pay later, shown now so the
    beta reads as a gift with a stated value rather than a product with no price. */
 .priceStruck { opacity: 0.55; font-weight: 500; margin-right: 6px; }
 
@@ -2222,7 +2222,7 @@
 .gradeBadge[data-grade="C"] { --gc-grade: #e6dcc6; }
 @media (prefers-reduced-motion: reduce) { .card:hover { transform: none; } }
 
-/* 카드 위 값 칩 — 좁은 칩 안의 취소선 값은 읽히지 않는다. 카드에서는 "베타 무료"만, 값은 상세에서. */
+/* 카드 위 값 칩 — 좁은 칩 안의 취소선 값은 읽히지 않는다. 카드에서는 "무료"만, 값은 상세에서. */
 .cardBadges .priceStruck { display: none; }
 .cardBadges .priceBadge { white-space: nowrap; }
 /* 마켓 첫 화면의 진열 판과 상세의 판들도 같은 캐비닛이다. */

@@ -67,8 +67,8 @@ function trisOf(listing: Listing): string | null {
 }
 
 function priceOf(listing: Listing, beta: boolean): string {
-  // During the free beta a signed-in visitor is given the file; a price here would be a lie.
-  if (beta) return "베타 무료";
+  // While there is no payment rail a signed-in visitor is given the file; a price here would be a lie.
+  if (beta) return "무료";
   if (listing.priceCents === 0) return "무료";
   try {
     return new Intl.NumberFormat("ko-KR", { style: "currency", currency: /^[A-Z]{3}$/u.test(listing.currency) ? listing.currency : "KRW" })

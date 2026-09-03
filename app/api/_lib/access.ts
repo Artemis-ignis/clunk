@@ -49,7 +49,7 @@ export function accessFor(options: {
         images_per_day: WORKSPACE_IMAGES_PER_DAY,
       },
       sales_open: salesOpen,
-      ...(salesOpen ? {} : { sales_note: "무료 베타 기간입니다. 결제 없이 씁니다; 유료 전환은 미리 공지합니다." }),
+      ...(salesOpen ? {} : { sales_note: "결제 기능이 아직 없어 결제 없이 씁니다; 유료 전환은 미리 공지합니다." }),
     };
   }
 
@@ -79,7 +79,7 @@ export function accessFor(options: {
       ? { cannot: [] }
       : {
           cannot: ["buy credits", "buy a paid listing"],
-          sales_note: "무료 베타 기간입니다. 크레딧은 가입 지급분과 월 지급분으로 쓰고, 결제는 유료 전환 때 미리 공지한 뒤 엽니다.",
+          sales_note: "결제 기능이 아직 없습니다. 크레딧은 가입 지급분과 월 지급분으로 쓰고, 결제는 유료 전환 때 미리 공지한 뒤 엽니다.",
         }),
   };
 }

@@ -408,7 +408,7 @@ function ListingCard({ listing, colour, beta }: { listing: Listing; colour?: str
           ) : null}
           <span className={styles.gradeBadge} data-grade={cardGrade(listing)}>{cardGrade(listing)}</span>
           <span className={styles.formatBadge}>{formatLabel(listing)}</span>
-          <span className={`${styles.priceBadge}${listing.priceCents === 0 || beta ? ` ${styles.priceBadgeFree}` : ""}`}>{beta && listing.priceCents > 0 ? <><s className={styles.priceStruck}>{price}</s> 베타 무료</> : price}</span>
+          <span className={`${styles.priceBadge}${listing.priceCents === 0 || beta ? ` ${styles.priceBadgeFree}` : ""}`}>{beta && listing.priceCents > 0 ? <><s className={styles.priceStruck}>{price}</s> 무료</> : price}</span>
         </span>
       </span>
       <span className={styles.cardBody}>
@@ -462,7 +462,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
   // Whether this visitor is signed in, asked once on mount. null while the answer is still
   // in flight.
   //
-  // A signed-out visitor used to press "베타 기간 무료로 받기", wait for a checkout POST to
+  // A signed-out visitor used to press "무료로 받기", wait for a checkout POST to
   // come back 401, read a sentence, and only then get moved to the login page. For the
   // length of that round trip the page looked like it had done nothing at all. Knowing the
   // answer before the click lets the button say what it will do and do it instantly.
@@ -574,7 +574,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
         setOwnedIds((current) => new Set(current).add(purchase.id));
         setMessage(
           payload.status === "BETA_GRANTED"
-              ? `${purchase.label} — 받았습니다. 베타 기간이라 결제 없이 드립니다. 내려받기가 시작됩니다. 시작되지 않으면 내려받기 버튼을 누르세요.`
+              ? `${purchase.label} — 받았습니다. 결제 없이 드립니다. 내려받기가 시작됩니다. 시작되지 않으면 내려받기 버튼을 누르세요.`
               : payload.status === "PAID_WITH_CREDITS"
             ? `구매 완료 — ${payload.creditsCharged?.toLocaleString("ko-KR") ?? "?"} 크레딧 차감, 잔액 ${payload.balance?.toLocaleString("ko-KR") ?? "?"} 크레딧. 내려받기가 시작됩니다.`
             : `${purchase.label} — 이미 받은 상품입니다. 내려받기가 시작됩니다.`,
@@ -725,15 +725,15 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
           {/* AI기본법 제31조② 생성물 표시. One sentence, once, where a buyer is already
               reading the facts — not a badge repeated on every card in the grid. */}
           {isAiGenerated(listing) ? (
-            <p className={styles.kitLine}>이 {isModel ? "에셋" : "텍스처"}은 생성형 AI로 만들었습니다.</p>
+            <p className={styles.kitLine}>이 {isModel ? "에셋은" : "텍스처는"} 생성형 AI로 만들었습니다.</p>
           ) : null}
         </div>
 
         <div className={styles.detailBuy}>
-          <div className={styles.priceRow}><strong>{beta && listing.priceCents > 0 ? <><s className={styles.priceStruck}>{formatPrice(listing.priceCents, listing.currency)}</s> 베타 무료</> : formatPrice(listing.priceCents, listing.currency)}</strong><small>{listing.sellerName ?? "Clunk"} · {formatBytes(listing.byteLength)} · {listing.entryFileName}</small></div>
+          <div className={styles.priceRow}><strong>{beta && listing.priceCents > 0 ? <><s className={styles.priceStruck}>{formatPrice(listing.priceCents, listing.currency)}</s> 무료</> : formatPrice(listing.priceCents, listing.currency)}</strong><small>{listing.sellerName ?? "Clunk"} · {formatBytes(listing.byteLength)} · {listing.entryFileName}</small></div>
           {listing.priceCents > 0 && paymentUnavailable ? (
             <p className={styles.payState} data-payment-state={checkout?.status ?? "UNKNOWN"} role="status">
-              무료 베타 기간입니다. 로그인하면 이 에셋을 결제 없이 받을 수 있고, 표시된 가격은 유료 전환 후의 값입니다.
+              로그인하면 이 에셋을 결제 없이 받을 수 있습니다. 표시된 가격은 결제를 시작한 뒤의 값입니다.
             </p>
           ) : null}
           {listing.priceCents > 0 && !beta ? (
@@ -756,10 +756,10 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
             ) : owned ? (
               <a className={`${styles.btn} ${styles.btnPrimary}`} href={downloadHref} download={listing.entryFileName}>{beta ? "받은 파일 내려받기" : "구매한 파일 받기"} <Icon name="download" size={15} /></a>
             ) : beta ? (
-              // The beta has one action. Consent to a withdrawal limit is a condition of a
-              // paid sale, and a card button that can never work is a broken button.
+              // Without a payment rail there is one action. Consent to a withdrawal limit is a
+              // condition of a paid sale, and a card button that can never work is a broken button.
               <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => void startCheckout("beta")} disabled={buying}>
-                {signedIn === false ? "로그인하고 받기" : buying ? "받는 중…" : "베타 기간 무료로 받기"} <Icon name={signedIn === false ? "arrowUpRight" : "download"} size={15} />
+                {signedIn === false ? "로그인하고 받기" : buying ? "받는 중…" : "무료로 받기"} <Icon name={signedIn === false ? "arrowUpRight" : "download"} size={15} />
               </button>
             ) : (
               <>
@@ -821,7 +821,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
                       disabled={buying}
                       onClick={() => void startCheckout("beta", variantTarget)}
                     >
-                      {signedIn === false ? "로그인하고 받기" : buying ? "받는 중…" : "베타 무료로 받기"} <Icon name={signedIn === false ? "arrowUpRight" : "download"} size={14} />
+                      {signedIn === false ? "로그인하고 받기" : buying ? "받는 중…" : "무료로 받기"} <Icon name={signedIn === false ? "arrowUpRight" : "download"} size={14} />
                     </button>
                   ) : (
                     <button
@@ -968,8 +968,8 @@ function CheckoutNotice() {
   return (
     <div className={styles.checkoutNotice} role="status">
       <Icon name="circleAlert" size={17} />
-      <strong>무료 베타 — 결제 없이 받습니다</strong>
-      <span>지금은 무료 베타 기간입니다. 로그인하면 모든 에셋을 결제 없이 받을 수 있고, 유료 전환 전에 이 자리와 이메일로 먼저 알립니다.</span>
+      <strong>결제 없이 받습니다</strong>
+      <span>지금은 결제 없이 모든 기능을 쓸 수 있습니다. 로그인하면 모든 에셋을 결제 없이 받을 수 있고, 결제를 시작하기 전에 이 자리와 이메일로 먼저 알립니다.</span>
     </div>
   );
 }
@@ -1191,7 +1191,7 @@ function TileBench({ src, alt, seamless }: { src: string; alt: string; seamless:
         {seamless
           ? "이어 붙인 경계를 재 봤을 때 자국이 남지 않았습니다. 위에서 직접 이어 붙여 확인해 보세요."
           : "이어 붙인 경계에 옅은 자국이 남는 것으로 재졌습니다."}
-        {" 여기 보이는 그림은 결제 전 공개용 미리보기이고, 받는 파일은 원본 해상도입니다."}
+        {" 여기 보이는 그림은 공개용 미리보기이고, 받는 파일은 원본 해상도입니다."}
       </p>
     </div>
   );
@@ -1328,7 +1328,7 @@ function SheetBench({
       <p className={styles.flatNote}>
         {playable
           ? `한 칸 ${sheet.cell}×${sheet.cell}, ${sheet.directions}방향 × ${sheet.frames}프레임입니다. 방향 하나가 한 줄이라, 게임에서도 한 줄을 그대로 재생하면 됩니다. 위 재생은 이 시트의 실제 칸을 그대로 넘긴 것입니다.`
-          : `한 칸 ${sheet.cell}×${sheet.cell}, ${sheet.directions}방향${sheet.frames ? ` × ${sheet.frames}프레임` : ""}입니다. 여기 보이는 그림은 결제 전 공개용 미리보기라 격자 그대로가 아니어서 재생은 받은 뒤에 확인할 수 있습니다.`}
+          : `한 칸 ${sheet.cell}×${sheet.cell}, ${sheet.directions}방향${sheet.frames ? ` × ${sheet.frames}프레임` : ""}입니다. 여기 보이는 그림은 공개용 미리보기라 격자 그대로가 아니어서 재생은 받은 뒤에 확인할 수 있습니다.`}
       </p>
     </div>
   );

@@ -20,8 +20,8 @@ import "./workspace-v5.css";
 
 export type WorkspaceSection = "overview" | "assets" | "studio" | "inspector" | "passports" | "kits" | "pricing" | "docs" | "settings";
 
-/* 2026-09-02: "모음집"(/kits)은 해시 목록으로 파일을 묶는 내부 작업면이라, 베타로
-   처음 들어온 사람에게는 눌러도 할 일이 없는 칸이었습니다. 사이드바에서 뺐습니다.
+/* 2026-09-02: "모음집"(/kits)은 해시 목록으로 파일을 묶는 내부 작업면이라, 처음
+   들어온 사람에게는 눌러도 할 일이 없는 칸이었습니다. 사이드바에서 뺐습니다.
    경로와 `kits` 섹션 값은 그대로 살아 있어 /kits 를 직접 열면 여전히 동작합니다. */
 const PRIMARY_NAV: { section: WorkspaceSection; label: string; href: string; icon: IconName }[] = [
   { section: "overview", label: "홈", href: "/dashboard", icon: "layout" },
@@ -62,12 +62,12 @@ export function WorkspaceShell({
         </span>
         <span>
           <strong>Clunk</strong>
-          <small>내 작업실</small>
+          <small>내 작업공간</small>
         </span>
       </Link>
 
-      <nav className="rail-nav" aria-label="작업실 메뉴">
-        <span className="rail-group">작업실</span>
+      <nav className="rail-nav" aria-label="작업공간 메뉴">
+        <span className="rail-group">작업공간</span>
         {PRIMARY_NAV.map((item) => (
           <Link
             key={item.href}
@@ -110,8 +110,8 @@ export function WorkspaceShell({
         </Link>
         <div className="rail-plan">
           <span className="mono-label">지금 요금</span>
-          <strong>무료 베타</strong>
-          <small>결제를 받지 않습니다</small>
+          <strong>무료</strong>
+          <small>결제 기능이 아직 없습니다</small>
         </div>
       </div>
     </div>
@@ -130,7 +130,7 @@ export function WorkspaceShell({
       <div className="cv5-stars" aria-hidden="true" />
       <div className="workspace-aurora" aria-hidden="true" />
 
-      <aside className="workspace-rail" aria-label="작업실 사이드바">
+      <aside className="workspace-rail" aria-label="작업공간 사이드바">
         {rail("side")}
       </aside>
 

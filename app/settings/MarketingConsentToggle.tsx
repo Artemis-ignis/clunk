@@ -80,7 +80,7 @@ export function MarketingConsentToggle() {
       <div className="settings-toggle-copy">
         <strong>마케팅 이메일 수신</strong>
         <small>
-          새 기능과 무료 베타 소식만 가끔 보냅니다. 받지 않아도 Clunk를 쓰는 데에는 아무 차이가
+          새 기능 소식만 가끔 보냅니다. 받지 않아도 Clunk를 쓰는 데에는 아무 차이가
           없고, 언제든 여기서 다시 끌 수 있습니다.
         </small>
       </div>

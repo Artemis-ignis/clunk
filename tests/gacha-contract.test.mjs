@@ -329,8 +329,8 @@ test("카드는 읽지 못한 항목을 빈칸으로 채우지 않고 줄째로 
   assert.ok(!noBytes.includes("파일 크기"));
 });
 
-test("무료 베타면 값을 지우지 않고 그어 둔다", () => {
-  assert.deepEqual(priceTagOf({ priceCents: 190000 }, true), { struck: "1,900원", label: "베타 무료" });
+test("결제가 없으면 값을 지우지 않고 그어 둔다", () => {
+  assert.deepEqual(priceTagOf({ priceCents: 190000 }, true), { struck: "1,900원", label: "무료" });
   assert.deepEqual(priceTagOf({ priceCents: 190000 }, false), { struck: null, label: "1,900원" });
   assert.deepEqual(priceTagOf({ priceCents: 0 }, true), { struck: null, label: "무료" });
   assert.equal(formatWon(690000), "6,900원");

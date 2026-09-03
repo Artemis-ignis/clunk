@@ -23,7 +23,7 @@ function authDescription(provider: string): {
     const name = provider === "google" ? "Google" : "GitHub";
     return {
       label: `${name} 계정으로 로그인`,
-      lede: `${name} 계정으로 들어온 작업실입니다.`,
+      lede: `${name} 계정으로 들어온 작업공간입니다.`,
       accountNote: `${name} 계정에서 받은 정보입니다.`,
       passwordNote: `로그인은 ${name}에서 처리하고, Clunk는 비밀번호를 받지도 보관하지도 않습니다.`,
     };
@@ -31,14 +31,14 @@ function authDescription(provider: string): {
   if (provider === "qa") {
     return {
       label: "임시 접속",
-      lede: "임시 접속으로 열린 작업실입니다.",
+      lede: "임시 접속으로 열린 작업공간입니다.",
       accountNote: "접속할 때 발급된 임시 정보에서 가져왔습니다.",
       passwordNote: "Clunk는 비밀번호를 저장하지 않습니다.",
     };
   }
   return {
     label: "ChatGPT 로그인",
-    lede: "ChatGPT 로그인으로 들어온 작업실입니다.",
+    lede: "ChatGPT 로그인으로 들어온 작업공간입니다.",
     accountNote: "ChatGPT가 전달한 로그인 정보에서 가져왔습니다.",
     passwordNote: "로그인은 ChatGPT가 처리하고, Clunk는 따로 아이디와 비밀번호를 만들지 않습니다.",
   };
@@ -54,8 +54,8 @@ export default async function SettingsPage() {
   const rows = [
     { label: "계정", value: user.email, note: auth.accountNote },
     {
-      label: "내 작업실",
-      value: `${user.displayName}님의 작업실`,
+      label: "내 작업공간",
+      value: `${user.displayName}님의 작업공간`,
       note: "처음 로그인할 때 자동으로 만들어졌습니다. 여기에 만든 파일과 검사 결과가 쌓입니다.",
     },
     { label: "로그인 방식", value: auth.label, note: "Clunk는 따로 아이디와 비밀번호를 만들지 않습니다." },
@@ -69,7 +69,7 @@ export default async function SettingsPage() {
   const notStored = [
     { label: "검사에 올린 원본 파일", note: "GLB와 GLTF는 브라우저 안에서만 열립니다. 서버로 올라가지 않습니다." },
     { label: "비밀번호", note: auth.passwordNote },
-    { label: "결제 수단", note: "카드 정보는 Clunk 서버에 저장하지 않습니다. 무료 베타 기간에는 결제 자체를 받지 않습니다." },
+    { label: "결제 수단", note: "카드 정보는 Clunk 서버에 저장하지 않습니다. 지금은 결제 기능이 없어 결제 자체를 받지 않습니다." },
     { label: "원본 덮어쓰기", note: "검사와 정리는 새 파일을 만들 뿐 원본을 바꾸지 않습니다." },
   ];
 

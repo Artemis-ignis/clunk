@@ -171,7 +171,7 @@ const PRIMARY_ACTIONS = [
     title: "마켓에서 받기",
     detail: "다른 사람이 올린 에셋을 받습니다. 검사 기록이 붙어 있는 파일만 올라옵니다.",
     cost: "무료",
-    costNote: "베타 기간 동안",
+    costNote: "로그인만 하면 됩니다",
   },
 ];
 
@@ -213,7 +213,7 @@ export function DashboardClient({ welcome }: { welcome?: string | null }) {
           setCredits(null);
           setImagesLeft(null);
           setConnection("error");
-          setMessage("내 작업실 정보를 불러오지 못했습니다. 서버가 " + failed.status + " 를 돌려주었습니다.");
+          setMessage("내 작업공간 정보를 불러오지 못했습니다. 서버가 " + failed.status + " 를 돌려주었습니다.");
           return;
         }
         const meBody = (await me.json()) as MeResponse;
@@ -275,7 +275,7 @@ export function DashboardClient({ welcome }: { welcome?: string | null }) {
   return (
     <WorkspaceShell
       active="overview"
-      title="내 작업실"
+      title="내 작업공간"
       userLabel={userLabel}
       status={
         <>
@@ -323,8 +323,8 @@ export function DashboardClient({ welcome }: { welcome?: string | null }) {
           </div>
           <div className="home-meter-item home-meter-beta">
             <span>지금 요금</span>
-            <strong>무료 베타</strong>
-            <small>결제를 받지 않습니다</small>
+            <strong>무료</strong>
+            <small>결제 기능이 아직 없습니다</small>
           </div>
           <Link className="home-meter-link" href="/pricing">
             이 숫자가 무슨 뜻인지 보기
@@ -336,7 +336,7 @@ export function DashboardClient({ welcome }: { welcome?: string | null }) {
       {connection === "checking" ? (
         <div className="banner banner-info ws-banner" role="status" aria-live="polite">
           <span className="spinner" />
-          <p>내 작업실을 불러오는 중입니다.</p>
+          <p>내 작업공간을 불러오는 중입니다.</p>
         </div>
       ) : null}
       {connection === "auth-required" ? (
@@ -425,7 +425,7 @@ export function DashboardClient({ welcome }: { welcome?: string | null }) {
           <p>
             Claude Code, Cursor 같은 코딩 도구에서 Clunk를 바로 부를 수 있습니다. 도구에 연결해 두면
             채팅창에서 &ldquo;이 GLB 검사해 줘&rdquo; 라고 말하는 것만으로 여기와 같은 검사가 돌아가고,
-            결과도 이 작업실에 함께 쌓입니다.
+            결과도 이 작업공간에 함께 쌓입니다.
           </p>
         </div>
         <Link className="button button-quiet button-sm" href="/agents">

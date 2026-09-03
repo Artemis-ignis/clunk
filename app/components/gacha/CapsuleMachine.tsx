@@ -217,8 +217,8 @@ export function CapsuleMachine() {
   const creditLine = authenticated
     ? credits === null
       ? "크레딧을 확인하는 중입니다"
-      : `크레딧 ${credits.toLocaleString("ko-KR")}개 · 베타 기간에는 차감되지 않습니다`
-    : "베타 기간 무료 · 동전 필요 없음";
+      : `크레딧 ${credits.toLocaleString("ko-KR")}개 · 뽑기에는 차감되지 않습니다`
+    : "결제 없이 뽑습니다 · 동전 필요 없음";
 
   /* 연출 -------------------------------------------------------------------- */
 
@@ -297,7 +297,7 @@ export function CapsuleMachine() {
         body: JSON.stringify({ listingId: prize.id, paymentMethod: "beta" }),
       });
       if (response.status === 401) {
-        setClaim({ kind: "failed", message: "로그인하면 받을 수 있어요. 베타 기간이라 값은 0원입니다." });
+        setClaim({ kind: "failed", message: "로그인하면 받을 수 있어요. 결제 없이 드립니다." });
         return;
       }
       const payload = await response.json() as CheckoutPayload;

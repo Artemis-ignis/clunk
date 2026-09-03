@@ -88,7 +88,7 @@ export function useGachaWebMcp(input: GachaWebMcpInput): void {
           ? "free during the open beta"
           : facts.priceWon === 0 ? "free" : `${facts.priceWon.toLocaleString("en-US")} KRW`,
         priceLabel_ko: live.current.beta && facts.priceWon > 0
-          ? "베타 무료"
+          ? "무료"
           : facts.priceWon === 0 ? "무료" : `${facts.priceWon.toLocaleString("ko-KR")}원`,
       };
     };
@@ -248,7 +248,7 @@ export function useGachaWebMcp(input: GachaWebMcpInput): void {
               signupUrl: new URL(now.loginHref, window.location.origin).toString(),
               asset: facts,
               message: "Sign in to receive the file. It costs nothing during the open beta.",
-              message_ko: "로그인하면 받을 수 있습니다. 베타 기간이라 값은 0원입니다.",
+              message_ko: "로그인하면 받을 수 있습니다. 결제 없이 드립니다.",
             };
           }
           await now.collect();

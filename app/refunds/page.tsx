@@ -30,7 +30,7 @@ export default function RefundsPage() {
       <section aria-labelledby="refunds-operator">
         <h2 id="refunds-operator">판매자 표시사항</h2>
         <p>
-          청약철회와 환불의 상대방이 되는 통신판매업자 정보입니다. 무료 베타 기간이라 유상 거래가 없고, 유료 전환 시 신고번호와 연락처를 채웁니다.
+          청약철회와 환불의 상대방이 되는 통신판매업자 정보입니다. 현재 유료 결제 기능이 없어 유상 거래가 없고, 결제를 시작할 때 신고번호와 연락처를 채웁니다.
         </p>
         <LegalRows rows={LEGAL_OPERATOR_ROWS} />
       </section>
@@ -80,8 +80,8 @@ export default function RefundsPage() {
           위 고지·동의 절차는 구매 흐름에 구현되어 있습니다: 유료 에셋과 크레딧 팩 결제는
           청약철회 제한 동의가 함께 전달된 요청에서만 시작되며, 동의가 없으면 결제 세션이
           생성되지 않습니다. 동의가 있어야만 주문이 생성되므로 주문 기록이 동의 시점의
-          기록을 겸합니다. 이 정책은 2026-09-02부터 시행 중이며, 지금은 무료 베타라 유상 거래를
-          하지 않습니다.
+          기록을 겸합니다. 이 정책은 2026-09-02부터 시행 중이며, 현재 유료 결제 기능이 없어 유상
+          거래를 하지 않습니다.
         </p>
       </section>
 
@@ -134,8 +134,8 @@ export default function RefundsPage() {
           <a href="/terms">이용약관</a>, 개인정보 처리는 <a href="/privacy">개인정보처리방침</a>을 따릅니다.
         </p>
         <p className="cv5-legal-note">
-          이 정책은 {LEGAL_DRAFT_DATE} 작성되어 {LEGAL_EFFECTIVE_DATE}부터 시행합니다. 무료 베타 기간에는
-          결제가 없으므로 유상 환불 조항은 유료 전환 후에 적용됩니다. 받은 파일이 손상됐거나 내려받아지지
+          이 정책은 {LEGAL_DRAFT_DATE} 작성되어 {LEGAL_EFFECTIVE_DATE}부터 시행합니다. 현재 유료 결제
+          기능이 없으므로 유상 환불 조항은 결제를 시작할 때 적용됩니다. 받은 파일이 손상됐거나 내려받아지지
           않는 문제는 고객문의 전자우편 junsuopar@gmail.com으로 알려 주시면 다시 제공합니다.
         </p>
       </section>

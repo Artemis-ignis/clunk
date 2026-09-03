@@ -8,11 +8,16 @@ const source = async (path) => readFile(new URL(path, root), "utf8");
 test("pricing explains real Clunk credit usage without invented price cards", async () => {
   const page = await source("app/pricing/page.tsx");
 
-  assert.match(page, /getBillingStatus/);
+  // 2026-09-03: the page reads the pre-launch sales lock (app/api/_lib/sales-lock.ts),
+  // which is the gate that actually decides whether a purchase can complete on this
+  // deployment. getBillingStatus is the provider-config probe the footer uses.
+  assert.match(page, /areSalesOpen/);
   assert.match(page, /성공한 실행/);
   assert.match(page, /data-snap-section/);
   assert.match(page, new RegExp("/marketplace"));
-  assert.match(page, new RegExp("/signup"));
+  // 2026-09-03: the sign-up door is built by the validated helper (app/auth.ts signUpPath),
+  // not typed as a literal, so the return path cannot drift off-site.
+  assert.match(page, /signUpPath\("\/studio\?intent=create"\)/);
   assert.doesNotMatch(page, /MONTHLY_PLANS|CREDIT_PACKS/);
   assert.doesNotMatch(page, /49,000|190,000|15,000|65,000|220,000|예정가/);
   assert.doesNotMatch(page, /실제 에셋 만들기|상품 만들기/);

@@ -792,7 +792,7 @@ export function GachaMachine3D() {
         body: JSON.stringify({ listingId: prize.id, paymentMethod: "beta" }),
       });
       if (response.status === 401) {
-        setClaim({ kind: "failed", message: "로그인하면 받을 수 있어요. 베타 기간이라 값은 0원입니다." });
+        setClaim({ kind: "failed", message: "로그인하면 받을 수 있어요. 결제 없이 드립니다." });
         return;
       }
       const payload = await response.json() as CheckoutPayload;

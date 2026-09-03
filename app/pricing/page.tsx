@@ -4,6 +4,7 @@ import { SiteShell } from "../components/SiteShell";
 import { ForceDarkTheme } from "../components/ForceDarkTheme";
 import { RevealObserver } from "../components/Reveal";
 import { createPageMetadata } from "../components/site-metadata";
+import { signUpPath } from "../auth";
 import { BETA_MONTHLY_GRANT_CREDITS, SIGNUP_GRANT_CREDITS } from "../api/_lib/clunk";
 import { WORKSPACE_IMAGES_PER_DAY } from "../api/_lib/ai-budget";
 import { areSalesOpen } from "../api/_lib/sales-lock";
@@ -12,81 +13,197 @@ import styles from "./pricing.module.css";
 export const dynamic = "force-dynamic";
 
 export const metadata = createPageMetadata({
-  title: "요금 · 무료 베타",
-  description: "지금은 무료 베타 — 가입하면 크레딧이 지급되고 결제는 없습니다. 유료 전환 후의 플랜과 크레딧 가격을 미리 공개합니다.",
+  title: "요금",
+  description:
+    "Clunk 요금. 지금은 결제 없이 모든 기능을 쓸 수 있습니다. 월정액 구독과 크레딧 충전은 결제 기능이 붙는 날 시작합니다.",
   path: "/pricing",
 });
 
 /**
- * Pricing during the free beta.
+ * /pricing — one grid of plan cards, one grid of credit packs, one usage table, one
+ * comparison table, an FAQ, a closing door. No glow headline, no status chips.
  *
- * The previous page showed three credit packs with no price and no button, a note that
- * "the payment provider is not configured", and a ledger card that said RULE SET 1.0.0 and
- * "idempotent". To a visitor that read as a shop that had crashed. What is actually true
- * is simpler and better: everything is free right now, the credits come from signup and a
- * monthly grant, and the prices that will apply later are already decided.
- *
- * Every number on this page is a constant the product runs on, imported from where it is
- * enforced, so the page cannot promise a grant the ledger does not make.
+ * TRUTH RULES FOR THIS PAGE
+ * 1. Every number a visitor reads comes from one of two places and nowhere else:
+ *    - the constants the product actually enforces (imported below), or
+ *    - the PLANS / PACKS tables in this file.
+ *    Nothing is typed inline in JSX. When the operator changes a price, they change
+ *    PLANS or PACKS and the whole page follows.
+ * 2. `priceKrw: null` is the honest slot for a number that does not exist yet — it
+ *    renders "가격 미정" and the card's button is disabled. Dropping a real number in
+ *    later needs no layout work.
+ * 3. There is no payment rail on this deployment (app/api/_lib/sales-lock.ts). Every
+ *    paid button therefore says 결제 준비 중 and is disabled. We never render a button
+ *    that cannot do what it says.
  */
 
-/** Planned prices — recorded in docs/free-beta-plan.ko.md with the reference prices they were set against. */
-const PLANS = [
+/** Credits charged per successful job. Source of truth: `amount: -1` in
+ *  app/api/runs/route.ts, app/api/generation/route.ts, app/api/optimizations/route.ts,
+ *  app/api/providers/run/route.ts, and app/api/series/route.ts — plus the published
+ *  contract in app/api/_lib/access.ts (`costs: { generate: 1, inspect: 1 }`). */
+const CREDITS_PER_SUCCESSFUL_JOB = 1;
+
+type Plan = {
+  id: string;
+  name: string;
+  /** ₩/월. null = 아직 정해지지 않음 → "가격 미정" + 비활성 버튼. */
+  priceKrw: number | null;
+  /** ₩/년. null = 연 결제 없음 또는 미정. */
+  annualKrw: number | null;
+  summary: string;
+  /** 매달 들어오는 크레딧. */
+  credits: number;
+  /** 하루 이미지 생성 장수. */
+  images: number;
+  /** 작업공간 자리 수. */
+  seats: number;
+  features: string[];
+  featured?: boolean;
+};
+
+/**
+ * 월정액 구독. 무료 요금제의 세 숫자는 원장이 실제로 집행하는 상수를 그대로 씁니다.
+ * 메이커·스튜디오의 숫자는 docs/free-beta-plan.ko.md 의 플랜 정의입니다.
+ */
+const PLANS: Plan[] = [
   {
     id: "free",
     name: "무료",
-    monthly: 0,
-    annual: 0,
+    priceKrw: 0,
+    annualKrw: 0,
+    summary: "가입하면 바로 씁니다. 카드도 비밀번호도 묻지 않습니다.",
     credits: BETA_MONTHLY_GRANT_CREDITS,
     images: WORKSPACE_IMAGES_PER_DAY,
-    lines: ["마켓 에셋 미리보기·3D 뷰어·색 팔레트", "파일 검사와 스프라이트 시트 검사", "AI 도구 연결(MCP)과 API — 추가 요금 없음", "상업적으로 써도 됩니다"],
-    note: "지금 모든 계정이 이 조건 이상으로 무료입니다.",
+    seats: 1,
+    features: [
+      `가입 즉시 ${SIGNUP_GRANT_CREDITS}크레딧`,
+      "마켓 에셋 내려받기 — 로그인만 하면 무료",
+      "3D 뷰어·색 팔레트·파일 검사",
+      "AI 도구 연결(MCP)과 API",
+      "만든 에셋은 상업적으로 써도 됩니다",
+    ],
   },
   {
     id: "maker",
     name: "메이커",
-    monthly: 9_900,
-    annual: 99_000,
+    priceKrw: 9_900,
+    annualKrw: 99_000,
+    summary: "혼자 꾸준히 만드는 사람을 위한 자리.",
     credits: 300,
     images: 30,
-    lines: ["무료 요금제에 있는 것 전부", "마켓 에셋 내려받기 제한 없음", "작업 순서 우선 처리", "1인 상업 라이선스 명시"],
+    seats: 1,
     featured: true,
+    features: [
+      "무료 요금제에 있는 것 전부",
+      "마켓 에셋 내려받기 제한 없음",
+      "작업 순서 우선 처리",
+      "1인 상업 라이선스 명시",
+    ],
   },
   {
     id: "studio",
     name: "스튜디오",
-    monthly: 29_000,
-    annual: 290_000,
+    priceKrw: 29_000,
+    annualKrw: 290_000,
+    summary: "여럿이 같은 크레딧을 나눠 쓰는 팀을 위한 자리.",
     credits: 1_200,
     images: 100,
-    lines: ["메이커에 있는 것 전부", "팀 자리 3개", "팀이 함께 쓰는 크레딧", "상업 라이선스 서면 발급"],
+    seats: 3,
+    features: [
+      "메이커에 있는 것 전부",
+      "팀이 함께 쓰는 크레딧",
+      "상업 라이선스 서면 발급",
+      "요청 시 결제·세금계산서 처리",
+    ],
   },
+];
+
+type Pack = { id: string; name: string; credits: number; priceKrw: number | null; note: string };
+
+/**
+ * 크레딧 팩. 구독과 완전히 다른 물건이라 섹션을 나눕니다 — 한 번 사면 끝, 매달 나가지 않음.
+ * 세 팩은 D1 에 이미 정의돼 있습니다(app/api/_lib/clunk.ts, clunk_credit_packs):
+ * pack-starter 500 / pack-studio 2000 / pack-foundry 6000, price_cents 0, status DRAFT.
+ * 값이 0 이라는 것은 "공짜"가 아니라 "아직 정해지지 않았다"는 뜻이므로 null 로 옮겨 적고
+ * 화면에는 가격 미정으로 씁니다. 운영자가 값을 정하면 여기 숫자만 채우면 됩니다.
+ */
+const PACKS: Pack[] = [
+  { id: "pack-starter", name: "Starter", credits: 500, priceKrw: null, note: "가볍게 한 번 채울 때" },
+  { id: "pack-studio", name: "Studio", credits: 2_000, priceKrw: null, note: "한 프로젝트를 끝까지" },
+  { id: "pack-foundry", name: "Foundry", credits: 6_000, priceKrw: null, note: "팀이 한 번에 채울 때" },
+];
+
+/** 크레딧이 오가는 모든 경우. 숫자는 위 상수와 원장 코드에서만 옵니다. */
+const USAGE = [
+  { action: "가입", amount: `+${SIGNUP_GRANT_CREDITS}`, positive: true, detail: "계정을 만든 그 자리에서 한 번 들어옵니다." },
+  { action: "매달 지급", amount: `+${BETA_MONTHLY_GRANT_CREDITS}`, positive: true, detail: "달이 바뀐 뒤 처음 접속할 때 자동으로 들어옵니다." },
+  { action: "에셋 검사", amount: `−${CREDITS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "올린 GLB·PNG 파일을 열어 폴리곤 수, 재질 수, 크기, 규격을 확인합니다." },
+  { action: "안전 최적화", amount: `−${CREDITS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "원본은 그대로 두고 정리한 새 파일을 만들어 다시 검사합니다." },
+  { action: "에셋 만들기", amount: `−${CREDITS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "문장으로 2D 이미지를, 코드로 3D 모델과 스프라이트 시트를 만듭니다." },
+  { action: "외부 결과 재검사", amount: `−${CREDITS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "다른 도구로 만든 파일도 같은 기준으로 다시 검사합니다." },
+  { action: "마켓 에셋 받기", amount: "0", positive: true, detail: "로그인만 하면 결제도 크레딧도 없이 받습니다." },
+  { action: "실패·거부된 작업", amount: "0", positive: true, detail: "입력 오류, 모델 거부, 저장 실패는 끝나지 않은 작업이라 차감하지 않습니다." },
+  { action: "같은 요청 두 번", amount: `−${CREDITS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "같은 요청을 다시 보내도 한 번만 처리하고 한 번만 셉니다." },
 ] as const;
 
-const PACKS = [
-  { credits: 500, priceKrw: 45_000 },
-  { credits: 2_000, priceKrw: 160_000 },
-  { credits: 6_000, priceKrw: 420_000 },
-] as const;
+/** 요금제 비교표. 각 행의 값은 PLANS 와 상수에서 계산합니다. */
+const COMPARISON: { label: string; value: (plan: Plan) => string }[] = [
+  { label: "월 요금", value: (p) => (p.priceKrw === null ? "가격 미정" : p.priceKrw === 0 ? "₩0" : `₩${p.priceKrw.toLocaleString("ko-KR")}`) },
+  { label: "연 결제", value: (p) => (p.annualKrw === null ? "가격 미정" : p.annualKrw === 0 ? "없음" : `₩${p.annualKrw.toLocaleString("ko-KR")}`) },
+  { label: "가입 크레딧", value: () => `${SIGNUP_GRANT_CREDITS}크레딧` },
+  { label: "매달 크레딧", value: (p) => `${p.credits.toLocaleString("ko-KR")}크레딧` },
+  { label: "이미지 생성 / 하루", value: (p) => `${p.images}장` },
+  { label: "작업공간 자리", value: (p) => `${p.seats}자리` },
+  { label: "성공한 실행 1건", value: () => `${CREDITS_PER_SUCCESSFUL_JOB}크레딧` },
+  { label: "실패한 실행", value: () => "0크레딧" },
+  { label: "마켓 에셋 내려받기", value: (p) => (p.id === "free" ? "로그인하면 무료" : "제한 없음") },
+  { label: "AI 도구 연결(MCP)·API", value: () => "포함" },
+  { label: "작업 순서 우선 처리", value: (p) => (p.id === "free" ? "—" : "포함") },
+  { label: "상업 라이선스", value: (p) => (p.id === "studio" ? "서면 발급" : p.id === "maker" ? "1인 명시" : "허용") },
+];
 
-const OPERATIONS = [
-  { label: "에셋 검사", detail: "올린 GLB·PNG 파일을 열어 폴리곤 수, 재질 수, 크기, 규격을 확인합니다." },
-  { label: "안전 최적화", detail: "원본은 그대로 두고 정리한 새 파일을 만들어 다시 검사합니다." },
-  { label: "에셋 만들기", detail: "문장으로 2D 이미지를, 코드로 3D 모델과 스프라이트 시트를 만듭니다." },
-  { label: "외부 결과 재검사", detail: "다른 도구로 만든 파일도 같은 기준으로 다시 검사합니다." },
-] as const;
-
-const RULES = [
-  { label: "성공한 작업", value: "1 크레딧", detail: "네 가지 작업 모두 성공했을 때만 1크레딧입니다." },
-  { label: "실패·거부", value: "0 크레딧", detail: "입력 오류, 모델 거부, 저장 실패는 끝나지 않은 작업이라 차감하지 않습니다." },
-  { label: "같은 요청 두 번", value: "한 번만", detail: "같은 요청을 다시 보내도 한 번만 처리하고 한 번만 셉니다." },
-  { label: "하루 이미지 한도", value: `${WORKSPACE_IMAGES_PER_DAY}장`, detail: "베타 기간의 공정 사용 한도입니다. 닿으면 한국 시간으로 언제 다시 열리는지 알려 드립니다." },
+const FAQ = [
+  {
+    q: "결제 정보가 필요한가요?",
+    a: "아니요. 지금은 결제 기능 자체가 없어서 카드 번호도, 계좌도 묻지 않습니다. Google이나 GitHub 계정으로 한 번 들어오면 그걸로 끝입니다.",
+  },
+  {
+    q: "크레딧이 다 떨어지면 어떻게 되나요?",
+    a: `달이 바뀐 뒤 처음 접속할 때 ${BETA_MONTHLY_GRANT_CREDITS}크레딧이 자동으로 다시 들어옵니다. 그 사이에도 마켓 에셋 내려받기, 3D 미리보기, 색 팔레트 보기는 크레딧 없이 그대로 쓸 수 있습니다.`,
+  },
+  {
+    q: "마켓 에셋은 왜 무료인가요?",
+    a: "결제 기능이 아직 붙지 않았기 때문입니다. 로그인하면 결제 없이 받습니다. 상품에 적힌 값은 결제를 시작한 뒤에 받을 값이고, 그전까지는 취소선으로만 보입니다.",
+  },
+  {
+    q: "구독은 언제 시작하나요?",
+    a: "결제 기능이 붙는 날 시작합니다. 날짜는 아직 정해지지 않았고, 시작 최소 30일 전에 이 페이지와 이메일로 먼저 알립니다.",
+    href: "/terms",
+    hrefLabel: "이용약관에서 이 약속 보기",
+  },
+  {
+    q: "환불은 어떻게 되나요?",
+    a: "유상 거래가 없으므로 지금 환불할 대상이 없습니다. 결제를 시작하면 디지털 콘텐츠 청약철회 기준이 그대로 적용됩니다.",
+    href: "/refunds",
+    hrefLabel: "취소·환불정책",
+  },
 ] as const;
 
 const won = (value: number) => `₩${value.toLocaleString("ko-KR")}`;
 
+function PriceSlot({ priceKrw, period }: { priceKrw: number | null; period: string }) {
+  if (priceKrw === null) return <strong className={styles.priceTbd}>가격 미정</strong>;
+  return (
+    <strong className={styles.price}>
+      <span className={styles.priceNumber}>{won(priceKrw)}</span>
+      <span className={styles.pricePeriod}>{period}</span>
+    </strong>
+  );
+}
+
 export default function PricingPage() {
   const salesOpen = areSalesOpen();
+  const startHref = signUpPath("/studio?intent=create");
 
   return (
     <div className="cv5">
@@ -95,201 +212,246 @@ export default function PricingPage() {
       <div className="cv5-stars" aria-hidden="true" />
       <SiteShell active="pricing">
         <main className={styles.page}>
-          <section className={styles.hero} data-snap-section="pricing-intro" aria-labelledby="pricing-title">
-            <div className={`cv5-frame ${styles.heroGrid}`}>
-              <div>
-                <span className="cv5-badge">✦ {salesOpen ? "1 크레딧 = 100원" : "무료 베타 진행 중"}</span>
-                <h1 id="pricing-title">
-                  요금은 단순합니다.
-                  <br />
-                  <em>쓴 만큼, 크레딧으로.</em>
-                </h1>
-                <p className={styles.heroLede}>
-                  {salesOpen
-                    ? `크레딧 하나가 100원입니다. 검사·생성은 성공한 작업당 1크레딧이고, 실패한 작업은 세지 않습니다.`
-                    : `무료 베타 기간에는 가입만 하면 ${SIGNUP_GRANT_CREDITS}크레딧을 드리고, 매달 ${BETA_MONTHLY_GRANT_CREDITS}크레딧을 더 드립니다. 검사·생성은 성공한 작업당 1크레딧, 마켓 에셋은 로그인만 하면 받습니다. 결제 정보는 받지 않습니다.`}
-                </p>
-                <div className={styles.actions}>
-                  <Link className="cv5-btn cv5-btn-primary" href="/signup">
-                    가입하고 {SIGNUP_GRANT_CREDITS}크레딧 받기 <Icon name="arrowUpRight" size={16} />
-                  </Link>
-                  <Link className="cv5-btn cv5-btn-ghost" href="/marketplace">
-                    에셋 보기 <Icon name="arrowRight" size={16} />
-                  </Link>
-                </div>
-                <p className={styles.aiPreNotice}>
-                  <i>✦</i>
-                  <span>
-                    2D 이미지 생성은 생성형 AI로 만듭니다. 그렇게 만든 에셋에는 상품 정보에 그 사실이
-                    표시됩니다. 3D 모델과 스프라이트 시트는 코드로 만들어 검사까지 같은 파일로 이어집니다.
-                  </span>
-                </p>
-              </div>
-
-              {/* What a new account actually holds, from the constants the ledger enforces. */}
-              <div className={styles.ledger} aria-label="베타 지급 내역">
-                <div className={styles.ledgerTopline}>
-                  <span>베타 계정에 들어오는 것</span>
-                  <span>결제 0원</span>
-                </div>
-                <div className={styles.ledgerAmount}>
-                  <strong>{SIGNUP_GRANT_CREDITS}</strong>
-                  <span>크레딧<br />가입 즉시</span>
-                </div>
-                <div className={styles.ledgerFacts}>
-                  <div>
-                    <span>매월</span>
-                    <strong>+{BETA_MONTHLY_GRANT_CREDITS}</strong>
-                  </div>
-                  <div>
-                    <span>이미지 / 하루</span>
-                    <strong>{WORKSPACE_IMAGES_PER_DAY}장</strong>
-                  </div>
-                  <div>
-                    <span>마켓 에셋</span>
-                    <strong>무료</strong>
-                  </div>
-                </div>
-              </div>
+          {/* ---------------------------------------------------------------- header */}
+          <header className={styles.head} data-snap-section="pricing-intro">
+            <div className="cv5-frame">
+              <h1 id="pricing-title">요금</h1>
+              <p className={styles.lede}>
+                {salesOpen
+                  ? "크레딧 하나가 100원입니다. 검사와 만들기는 성공한 실행에만 1크레딧이 들고, 실패한 실행은 세지 않습니다."
+                  : "지금은 결제 없이 모든 기능을 쓸 수 있습니다. 아래 구독과 크레딧 충전은 결제 기능이 붙는 날 시작합니다."}
+              </p>
+              <ul className={styles.headFacts}>
+                <li>
+                  <strong>{SIGNUP_GRANT_CREDITS}크레딧</strong>
+                  <span>가입 즉시</span>
+                </li>
+                <li>
+                  <strong>+{BETA_MONTHLY_GRANT_CREDITS}</strong>
+                  <span>매달</span>
+                </li>
+                <li>
+                  <strong>{WORKSPACE_IMAGES_PER_DAY}장</strong>
+                  <span>이미지 / 하루</span>
+                </li>
+                <li>
+                  <strong>{CREDITS_PER_SUCCESSFUL_JOB}크레딧</strong>
+                  <span>성공한 실행 1건</span>
+                </li>
+              </ul>
             </div>
-          </section>
+          </header>
 
+          {/* ------------------------------------------------------------- 월정액 구독 */}
           <section className={styles.section} data-snap-section="pricing-plans" aria-labelledby="plans-title">
             <div className="cv5-frame">
-              <div className={`${styles.sectionHead} cv5-reveal`}>
-                <span className="cv5-eyebrow">유료 전환 후 플랜 · 예정 가격</span>
-                <h2 id="plans-title">
-                  미리 <em>공개합니다</em>
-                </h2>
-                <p>
-                  베타가 끝나면 이 표대로 받습니다. 바뀌면 최소 30일 전에 이 페이지와 이메일로 알립니다.
-                </p>
+              <div className={styles.sectionHead}>
+                <h2 id="plans-title">월정액 구독</h2>
+                <p>매달 크레딧이 들어오고, 남은 크레딧은 다음 달로 넘어가지 않습니다.</p>
               </div>
-              <div className={`${styles.betaAnswer} cv5-reveal`}>
-                <strong>베타가 끝나면 지금 계정은 어떻게 되나요?</strong>
-                <p>
-                  그대로 남습니다. 지금 만든 계정은 유료 전환 뒤에도 무료 요금제 조건을 그대로 씁니다.
-                  받은 크레딧과 내려받은 파일은 그대로 두고, 갑자기 결제를 요구하지 않습니다.
-                  유료 전환은 최소 30일 전에 이 페이지와 이메일로 미리 알립니다.
-                </p>
-              </div>
-              <div className={`${styles.planGrid} cv5-reveal`} data-delay="1">
-                {PLANS.map((plan) => (
-                  <article className={`${styles.plan}${"featured" in plan && plan.featured ? ` ${styles.planFeatured}` : ""}`} key={plan.id}>
-                    <header>
-                      <span className={styles.planName}>{plan.name}</span>
-                      <strong className={styles.planPrice}>
-                        {plan.monthly === 0 ? "₩0" : `${won(plan.monthly)}`}
-                        <small>{plan.monthly === 0 ? "영구" : "/ 월"}</small>
-                      </strong>
-                      {plan.annual > 0 ? (
-                        <span className={styles.planAnnual}>연 {won(plan.annual)} · 열 달 값으로 열두 달</span>
+              <div className={styles.planGrid}>
+                {PLANS.map((plan) => {
+                  const isFree = plan.priceKrw === 0;
+                  return (
+                    <article
+                      className={`${styles.plan}${plan.featured ? ` ${styles.planFeatured}` : ""}`}
+                      key={plan.id}
+                      aria-labelledby={`plan-${plan.id}`}
+                    >
+                      <div className={styles.planTop}>
+                        <div className={styles.planNameRow}>
+                          <h3 id={`plan-${plan.id}`} className={styles.planName}>{plan.name}</h3>
+                          {plan.featured ? <span className={styles.planTag}>가장 많이 고릅니다</span> : null}
+                        </div>
+                        <PriceSlot priceKrw={plan.priceKrw} period={isFree ? "영구 무료" : "/ 월"} />
+                        <p className={styles.planAnnual}>
+                          {plan.annualKrw === null
+                            ? "연 결제 가격 미정"
+                            : plan.annualKrw === 0
+                              ? "카드 없이 시작"
+                              : `연 결제 ${won(plan.annualKrw)} · 열 달 값으로 열두 달`}
+                        </p>
+                        <p className={styles.planSummary}>{plan.summary}</p>
+                      </div>
+
+                      {/* 결제가 붙으면 이 버튼이 결제 화면으로 이어질 자리입니다. */}
+                      {isFree ? (
+                        <Link className={`${styles.planBtn} ${styles.planBtnPrimary}`} href={startHref}>
+                          가입하고 시작하기 <Icon name="arrowUpRight" size={15} />
+                        </Link>
                       ) : (
-                        <span className={styles.planAnnual}>카드 없이 시작</span>
+                        <button type="button" className={styles.planBtn} disabled aria-disabled="true">
+                          결제 준비 중
+                        </button>
                       )}
-                    </header>
-                    <ul className={styles.planList}>
-                      <li><b>매월 {plan.credits.toLocaleString("ko-KR")}크레딧</b></li>
-                      <li>이미지 하루 {plan.images}장</li>
-                      {plan.lines.map((line) => <li key={line}>{line}</li>)}
-                    </ul>
-                    {"note" in plan && plan.note ? <p className={styles.planNote}>{plan.note}</p> : null}
-                    {salesOpen ? null : (
-                      <span className={styles.planState}>{plan.monthly === 0 ? "지금 이 조건으로 이용 중" : "유료 전환 후 시작"}</span>
-                    )}
-                  </article>
-                ))}
-              </div>
-              <div className={styles.packsNote}>
-                <span><b>크레딧 팩 (예정)</b> · {PACKS.map((pack) => `${pack.credits.toLocaleString("ko-KR")} = ${won(pack.priceKrw)}`).join(" · ")}</span>
-                <span>만료 없음 · 구독보다 크레딧당 조금 비싸게 두어, 꾸준히 쓰면 구독이 유리하도록 잡았습니다</span>
+
+                      <ul className={styles.planList}>
+                        <li className={styles.planListLead}>
+                          매달 <b>{plan.credits.toLocaleString("ko-KR")}크레딧</b> · 이미지 하루 <b>{plan.images}장</b>
+                        </li>
+                        {plan.features.map((feature) => (
+                          <li key={feature}>
+                            <Icon name="check" size={14} />
+                            <span>{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </article>
+                  );
+                })}
               </div>
             </div>
           </section>
 
-          <section className={styles.section} data-snap-section="pricing-operations" aria-labelledby="operations-title">
+          {/* ------------------------------------------------------------ 크레딧 충전 */}
+          <section className={styles.section} data-snap-section="pricing-packs" aria-labelledby="packs-title">
             <div className="cv5-frame">
-              <div className={`${styles.sectionHead} cv5-reveal`}>
-                <span className="cv5-eyebrow">크레딧이 드는 작업</span>
-                <h2 id="operations-title">
-                  네 가지, <em>각 1크레딧</em>
-                </h2>
+              <div className={styles.sectionHead}>
+                <h2 id="packs-title">크레딧만 따로 충전</h2>
+                <p>구독과는 별개입니다. 한 번 채워 두고 필요할 때 쓰며, 매달 나가는 돈이 없습니다.</p>
+              </div>
+              <div className={styles.packGrid}>
+                {PACKS.map((pack) => (
+                  <article className={styles.pack} key={pack.id} aria-labelledby={`pack-${pack.id}`}>
+                    <h3 id={`pack-${pack.id}`} className={styles.packName}>{pack.name}</h3>
+                    <p className={styles.packCredits}>
+                      <b>{pack.credits.toLocaleString("ko-KR")}</b> 크레딧
+                    </p>
+                    <PriceSlot priceKrw={pack.priceKrw} period="1회" />
+                    <p className={styles.packNote}>{pack.note}</p>
+                    {/* 결제가 붙으면 이 버튼이 결제 화면으로 이어질 자리입니다. */}
+                    <button type="button" className={styles.planBtn} disabled aria-disabled="true">
+                      준비 중
+                    </button>
+                  </article>
+                ))}
+              </div>
+              <p className={styles.packFoot}>
+                세 팩은 이미 정의돼 있고 값만 정해지지 않았습니다. 값이 정해지면 이 자리에 그대로 들어옵니다.
+              </p>
+            </div>
+          </section>
+
+          {/* ---------------------------------------------------- 크레딧은 이렇게 씁니다 */}
+          <section className={styles.section} data-snap-section="pricing-usage" aria-labelledby="usage-title">
+            <div className="cv5-frame">
+              <div className={styles.sectionHead}>
+                <h2 id="usage-title">크레딧은 이렇게 씁니다</h2>
                 <p>에셋을 받는 데는 크레딧이 들지 않습니다. 만들고 검사하는 데만 듭니다.</p>
               </div>
-              <div className={`${styles.opGrid} cv5-reveal`} data-delay="1">
-                {OPERATIONS.map((operation, index) => (
-                  <article className={styles.op} key={operation.label}>
-                    <span className={styles.opIndex}>0{index + 1}</span>
-                    <div>
-                      <h3>{operation.label}</h3>
-                      <p>{operation.detail}</p>
-                    </div>
-                    <strong className={styles.opCost}>1 크레딧</strong>
-                  </article>
-                ))}
+              <div className={styles.tableWrap}>
+                <table className={styles.usageTable}>
+                  <caption className={styles.srOnly}>작업별 크레딧 증감</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">작업</th>
+                      <th scope="col" className={styles.numCol}>크레딧</th>
+                      <th scope="col">언제</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {USAGE.map((row) => (
+                      <tr key={row.action}>
+                        <th scope="row">{row.action}</th>
+                        <td className={styles.numCol}>
+                          <span className={row.positive ? styles.amountUp : styles.amountDown}>{row.amount}</span>
+                        </td>
+                        <td>{row.detail}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className={styles.tableFoot}>
+                이미지 생성은 하루 {WORKSPACE_IMAGES_PER_DAY}장까지입니다. 한도에 닿으면 한국 시간으로 언제
+                다시 열리는지 알려 드리고, 크레딧은 차감하지 않습니다.
+              </p>
+            </div>
+          </section>
+
+          {/* ------------------------------------------------------------- 비교표 */}
+          <section className={styles.section} data-snap-section="pricing-compare" aria-labelledby="compare-title">
+            <div className="cv5-frame">
+              <div className={styles.sectionHead}>
+                <h2 id="compare-title">요금제 비교</h2>
+                <p>같은 항목을 나란히 놓고 봅니다.</p>
+              </div>
+              <div className={styles.tableWrap}>
+                <table className={styles.compareTable}>
+                  <caption className={styles.srOnly}>요금제별 항목 비교</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">항목</th>
+                      {PLANS.map((plan) => (
+                        <th scope="col" key={plan.id} className={plan.featured ? styles.compareFeatured : undefined}>
+                          {plan.name}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {COMPARISON.map((row) => (
+                      <tr key={row.label}>
+                        <th scope="row">{row.label}</th>
+                        {PLANS.map((plan) => (
+                          <td key={plan.id} className={plan.featured ? styles.compareFeatured : undefined}>
+                            {row.value(plan)}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </section>
 
-          <section className={styles.section} data-snap-section="pricing-rules" aria-labelledby="rules-title">
+          {/* ---------------------------------------------------------------- FAQ */}
+          <section className={styles.section} data-snap-section="pricing-faq" aria-labelledby="faq-title">
             <div className="cv5-frame">
-              <div className={`${styles.sectionHead} cv5-reveal`}>
-                <span className="cv5-eyebrow">차감 규칙</span>
-                <h2 id="rules-title">
-                  <em>실패하면</em> 돌려받습니다
-                </h2>
-                <p>끝난 작업만 셉니다. 같은 요청을 두 번 보내도 한 번만.</p>
+              <div className={styles.sectionHead}>
+                <h2 id="faq-title">자주 묻는 것</h2>
               </div>
-              <div className={styles.ruleList}>
-                {RULES.map((rule) => (
-                  <div className={styles.rule} key={rule.label}>
-                    <div>
-                      <span>{rule.label}</span>
-                      <strong>{rule.value}</strong>
-                    </div>
-                    <p>{rule.detail}</p>
+              <dl className={styles.faq}>
+                {FAQ.map((item) => (
+                  <div className={styles.faqItem} key={item.q}>
+                    <dt>{item.q}</dt>
+                    <dd>
+                      {item.a}
+                      {"href" in item && item.href ? (
+                        <>
+                          {" "}
+                          <Link className={styles.faqLink} href={item.href} prefetch={false}>
+                            {item.hrefLabel} <Icon name="arrowRight" size={13} />
+                          </Link>
+                        </>
+                      ) : null}
+                    </dd>
                   </div>
                 ))}
-              </div>
-              <div className={styles.inlineActions}>
-                <Link className="cv5-btn cv5-btn-ghost" href="/refunds">
-                  취소·환불정책 <Icon name="arrowRight" size={15} />
-                </Link>
-              </div>
+              </dl>
             </div>
           </section>
 
-          <section className={styles.routeSection} data-snap-section="pricing-next" aria-labelledby="next-title">
+          {/* ----------------------------------------------------------------- CTA */}
+          <section className={styles.closer} data-snap-section="pricing-next" aria-labelledby="closer-title">
             <div className="cv5-frame">
-              <div className={`${styles.sectionHead} cv5-reveal`}>
-                <span className="cv5-eyebrow">다음 단계</span>
-                <h2 id="next-title">어디로 <em>가면 되나요</em></h2>
-              </div>
-              <div className={`${styles.routeGrid} cv5-reveal`} data-delay="1">
-                <Link className={styles.route} href="/marketplace">
-                  <span>
-                    <small>받기</small>
-                    <strong>공개 에셋 카탈로그</strong>
-                    <em>완성된 에셋을 골라 로그인만 하면 받습니다.</em>
-                  </span>
-                  <span className={styles.routeArrow} aria-hidden="true">→</span>
-                </Link>
-                <Link className={styles.route} href="/signup?return_to=%2Fdashboard">
-                  <span>
-                    <small>쓰기</small>
-                    <strong>내 작업실</strong>
-                    <em>내 파일을 올려 검사하고, 만들고, 고칩니다.</em>
-                  </span>
-                  <span className={styles.routeArrow} aria-hidden="true">→</span>
-                </Link>
-                <Link className={styles.route} href="/agents">
-                  <span>
-                    <small>연결</small>
-                    <strong>에이전트 연결</strong>
-                    <em>쓰던 AI 도구와 터미널에서 같은 기능을 부릅니다.</em>
-                  </span>
-                  <span className={styles.routeArrow} aria-hidden="true">→</span>
-                </Link>
+              <div className={styles.closerBox}>
+                <div>
+                  <h2 id="closer-title">먼저 써 보고 정하세요</h2>
+                  <p>
+                    가입하면 {SIGNUP_GRANT_CREDITS}크레딧이 바로 들어오고, 매달 {BETA_MONTHLY_GRANT_CREDITS}크레딧이
+                    더 들어옵니다. 결제 정보는 묻지 않습니다.
+                  </p>
+                </div>
+                <div className={styles.closerActions}>
+                  <Link className="cv5-btn cv5-btn-primary" href={startHref}>
+                    가입하고 시작하기 <Icon name="arrowUpRight" size={16} />
+                  </Link>
+                  <Link className="cv5-btn cv5-btn-ghost" href="/marketplace">
+                    에셋 먼저 보기 <Icon name="arrowRight" size={16} />
+                  </Link>
+                </div>
               </div>
             </div>
           </section>

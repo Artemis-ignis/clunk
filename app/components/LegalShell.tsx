@@ -27,7 +27,7 @@ export const LEGAL_DRAFT_DATE = "2026-08-31";
 export const LEGAL_EFFECTIVE_DATE = "2026-09-02";
 
 export const LEGAL_DRAFT_NOTICE =
-  "이 문서는 2026-09-02부터 시행 중입니다. 지금은 무료 베타라 결제가 없고, 유상 판매에 관한 조항은 유료 전환을 미리 공지한 뒤부터 적용됩니다. 통신판매업 신고번호는 유료 판매를 시작할 때 기재합니다.";
+  "이 문서는 2026-09-02부터 시행 중입니다. 현재 유료 결제 기능이 없어 유상 판매 관련 조항은 결제를 시작할 때 적용됩니다. 통신판매업 신고번호는 유료 판매를 시작할 때 기재합니다.";
 
 /**
  * `code: true` marks a label that is a literal string the machine stores (a cookie name).
@@ -44,7 +44,7 @@ export const LEGAL_OPERATOR_ROWS: LegalRow[] = [
   { label: "상호", value: "Artemis" },
   { label: "대표자", value: "박준성" },
   { label: "사업자등록번호", value: "361-02-03814" },
-  { label: "통신판매업 신고번호", value: "[유료 판매를 시작할 때 신고 후 기재 — 무료 베타 중에는 해당 없음]", placeholder: true },
+  { label: "통신판매업 신고번호", value: "[유료 판매를 시작할 때 신고 후 기재 — 유료 결제 기능이 없어 해당 없음]", placeholder: true },
   { label: "사업장 주소", value: "인천광역시 제물포구 화도진로 16 (우편번호 22552)" },
   { label: "연락처", value: "+82 10-2761-9841" },
   { label: "전자우편", value: "junsuopar@gmail.com" },
@@ -97,7 +97,7 @@ export function LegalShell({
             <p className="cv5-legal-lede">{lede}</p>
             {/* 한 개의 문자열로 렌더해야 날짜 앞에 RSC 텍스트 분리 주석이 끼지 않는다. */}
             <ul className="cv5-legal-dates" aria-label="문서 상태">
-              <li><strong>시행 중 · 무료 베타</strong></li>
+              <li><strong>시행 중</strong></li>
               <li>{`시행일 ${effectiveDate}`}</li>
               <li>{`최종 수정일 ${updatedDate}`}</li>
               <li>{`초안 작성일 ${LEGAL_DRAFT_DATE}`}</li>

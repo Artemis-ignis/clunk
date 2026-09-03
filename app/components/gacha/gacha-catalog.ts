@@ -329,7 +329,7 @@ export type PriceTag = {
 export function priceTagOf(listing: Pick<GachaListing, "priceCents">, beta: boolean): PriceTag {
   if (listing.priceCents === 0) return { struck: null, label: "무료" };
   const formatted = formatWon(listing.priceCents);
-  if (beta) return { struck: formatted, label: "베타 무료" };
+  if (beta) return { struck: formatted, label: "무료" };
   return { struck: null, label: formatted };
 }
 

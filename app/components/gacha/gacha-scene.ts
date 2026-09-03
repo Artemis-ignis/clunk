@@ -480,12 +480,7 @@ function makeSignTexture(tube: string): THREE.CanvasTexture {
     ctx.fillStyle = "#ffffff";
     ctx.fillText("CLUNK", x, y);
 
-    // 4) 부제 — 작은 보라색 한 줄. 후광은 얕게 둔다(같이 타 버리면 CLUNK 이 안 읽힌다).
-    ctx.font = `600 27px ${UI_FONT}`;
-    ctx.shadowColor = tube;
-    ctx.shadowBlur = 14;
-    ctx.fillStyle = "#cbaaff";
-    ctx.fillText("에셋 뽑기 기계", x, 138);
+    // 부제는 두지 않는다 — 간판은 CLUNK 하나가 시그니처다(운영자 결정 2026-09-03).
   }
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -1461,14 +1456,7 @@ export function createGachaScene(
   // 안내 한 줄. 기계에 적힌 글자는 작아야 기계가 커 보인다.
   // 캔버스와 판의 가로세로가 어긋나면 글자가 옆으로 늘어나 뭉갠다. 둘 다 10.6:1 로 맞추고
   // 글자를 1.6배로 키운다(34 → 54 px, 판 높이 0.045 → 0.072).
-  const coinLabelTexture = makeLabelTexture("코인 · 크레딧 넣기", "#efe6ff", 700, 54);
-  const coinLabel = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.76, 0.072),
-    new THREE.MeshBasicMaterial({ map: coinLabelTexture, transparent: true, opacity: 0.95, depthWrite: false, toneMapped: false }),
-  );
-  coinLabel.position.set(-0.04, 1.245, 0.637);
-  coinLabel.name = "coin-label";
-  machine.add(coinLabel);
+  // 동전판 글줄은 두지 않는다 — 슬롯과 크레딧 링만으로 읽힌다(운영자 결정 2026-09-03).
 
   /* 당기는 레버 — 기계 오른쪽 옆면 -----------------------------------------
      받침(옆면에 붙는 원판) + 축(세로 막대) + 둥근 손잡이. 손잡이를 아래로 당기면
