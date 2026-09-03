@@ -17,7 +17,6 @@ import Image from "next/image";
 import Link from "../NativeLink";
 import { CapsuleMachine } from "./CapsuleMachine";
 import { GachaPoster, POSTER_IMAGES, type PosterVariant } from "./GachaPoster";
-import { SCROLL_PULL, SCROLL_OPEN_AT, SCROLL_REARM_BELOW } from "./gacha-scroll";
 import { PrizeCard, type ClaimState } from "./PrizeCard";
 import {
   GACHA_THEMES,
@@ -499,13 +498,10 @@ export function GachaMachine3D() {
   const leverCueRef = useRef<HTMLDivElement | null>(null);
   const progressRef = useRef(0);
   /** 이번에 내려가면서 레버가 이미 당겨졌는지. 다시 올라가면 풀린다. */
-  const scrollFired = useRef(false);
   const stageLive = useRef<Stage>("idle");
   const turnLive = useRef<() => void>(() => {});
-  const openLive = useRef<() => void>(() => {});
-  const againLive = useRef<() => void>(() => {});
-  /** 스크롤로 캡슐을 연 뒤 같은 바퀴에서 다시 열지 않게 하는 걸쇠. */
-  const scrollOpened = useRef(false);
+  /** 지금 살아 있는 openCapsule — 타이머가 옛 것을 붙들지 않게 한다. */
+  const openLiveRef = useRef<() => void>(() => {});
   /** 스크롤 계산을 한 번 더 돌리는 손잡이 — 단계가 바뀌면 글줄도 바로 따라 바뀐다. */
   const refreshFilm = useRef<() => void>(() => {});
   /** 3D 가 첫 프레임을 냈는지. 그 전에는 포스터 위에 단추를 놓는다. */
@@ -1014,6 +1010,9 @@ export function GachaMachine3D() {
     later(t.clunk, () => { setClunked(true); if (!reducedMotion) playClunk(); });
     t.bounces.forEach((delay, index) => later(delay, () => { if (!reducedMotion) playBounce(index === 0 ? 0.8 : 0.45); }));
     later(t.capsule, () => { setStage("capsule"); setClunked(false); });
+    // 캡슐은 눌러서 열지만, 손을 대지 않아도 잠깐 뒤 저절로 열린다 — 스크롤이 열어 주던
+    // 길을 없앤 자리에 막다른 길을 남기지 않는다(2026-09-04).
+    later(t.capsule + (reducedMotion ? 600 : 2400), () => { openLiveRef.current(); });
   }, [clearTimers, later, muted, pickPrize, pool.length, reducedMotion, stage]);
 
   const openCapsule = useCallback(() => {
@@ -1035,20 +1034,7 @@ export function GachaMachine3D() {
     sceneRef.current?.setLeverPull(0);
     leverDrag.current = { active: false, startY: 0, moved: 0, pointerId: -1 };
     swallowLeverClick.current = false;
-    scrollOpened.current = false;
-    // 필름을 레버 앞으로 되감는다. 그러지 않으면 진행도가 끝에 머물러 글줄도 라인업도
-    // 접힌 채 기계만 덩그러니 남는다(2026-09-04 운영자 지적).
-    const track = trackRef.current;
-    if (track) {
-      const total = Math.max(1, track.offsetHeight - window.innerHeight);
-      const target = track.offsetTop + total * SCROLL_REARM_BELOW;
-      window.scrollTo({ top: target, behavior: reducedMotion ? "auto" : "smooth" });
-      progressRef.current = SCROLL_REARM_BELOW;
-    }
-    // 되감는 동안 레버 구간을 거꾸로 지나간다 — 걸쇠를 채워 두지 않으면 그 길에 또 뽑힌다.
-    // 진행도가 당김 구간 아래로 내려오면 감독이 스스로 푼다.
-    scrollFired.current = true;
-  }, [clearTimers, reducedMotion]);
+  }, [clearTimers]);
 
   const chooseTheme = useCallback((next: ThemeId) => {
     clearTimers();
@@ -1303,10 +1289,9 @@ export function GachaMachine3D() {
   useEffect(() => {
     stageLive.current = stage;
     turnLive.current = turn;
-    openLive.current = openCapsule;
-    againLive.current = again;
+    openLiveRef.current = openCapsule;
     refreshFilm.current();
-  }, [stage, turn, openCapsule, again]);
+  }, [stage, turn, openCapsule]);
   useEffect(() => {
     if (!webgl) return;
     let raf = 0;
@@ -1362,32 +1347,11 @@ export function GachaMachine3D() {
       const leverBeat = idle ? ramp(p, 0.43, 0.5, 0.6, 0.66) : 0;
       show(beatLeverRef.current, leverBeat);
       show(leverCueRef.current, leverBeat, 10);
-      // 캡슐이 떨어진 뒤에도 계속 내리면 손대지 않아도 열린다 — 필름은 멈추지 않는다
-      // (2026-09-03: 뽑은 채로 내리면 기계만 덩그러니 남는다는 지적).
-      const stageNow = stageLive.current;
-      if (stageNow === "capsule" && p >= SCROLL_OPEN_AT && !scrollOpened.current) {
-        scrollOpened.current = true;
-        openLive.current();
-      }
-      // 결과를 본 뒤 레버 앞(당김 구간 위)까지 되감으면 새 바퀴가 준비된다 — 다시 내리면 다시 뽑힌다.
-      if (stageNow === "result" && p < SCROLL_REARM_BELOW) {
-        scrollOpened.current = false;
-        againLive.current();
-      }
-      // 스크롤로 당기는 레버.
-      if (p < SCROLL_PULL.from) {
-        if (scrollFired.current) scrollFired.current = false;
-        if (idle && scene && scene.leverPull() > 0 && !leverDrag.current.active) scene.setLeverPull(0);
-      } else if (idle && !scrollFired.current && !leverDrag.current.active) {
-        const k = (p - SCROLL_PULL.from) / (SCROLL_PULL.to - SCROLL_PULL.from);
-        if (k >= 1) {
-          scrollFired.current = true;
-          scene?.setLeverPull(1);
-          turnLive.current();
-        } else {
-          scene?.setLeverPull(k);
-        }
-      }
+      // 2026-09-04 운영자 지적: 스크롤과 레버가 같은 일을 두 가지 방법으로 하고 있었다.
+      // 내리다 보면 저절로 뽑히고, 뽑힌 자리에서 또 눌리고, 되감으면 또 뽑혔다. 이제
+      // **스크롤은 카메라만 옮긴다.** 뽑는 것은 손으로 레버를 당기거나 누를 때뿐이다.
+      // 손을 대지 않은 레버는 늘 제자리로 돌아온다.
+      if (idle && scene && scene.leverPull() > 0 && !leverDrag.current.active) scene.setLeverPull(0);
     };
     const onScroll = () => { if (!raf) raf = window.requestAnimationFrame(update); };
     refreshFilm.current = onScroll;

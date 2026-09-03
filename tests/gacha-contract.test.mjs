@@ -757,7 +757,12 @@ test("랜딩은 캡슐 머신 한 대를 렌더한다", async () => {
   assert.match(machine, /<h1 id="home-heading">게임 에셋<br \/><em>뽑기<\/em><\/h1>/u);
   assert.match(machine, /레버를 당기면 마켓의 에셋이 캡슐로 떨어집니다/u);
   // 스크롤이 레버를 당긴다 — 0.5 에서 0.6 사이.
-  assert.match(machine, /SCROLL_PULL\.from/u);
+  // 2026-09-04 운영자 지적으로 스크롤과 레버를 갈랐다: 스크롤은 카메라만 옮기고,
+  // 뽑는 것은 손으로 레버를 당기거나 누를 때뿐이다. 스크롤이 다시 뽑게 만들지 않는다.
+  assert.doesNotMatch(machine, /SCROLL_PULL|SCROLL_OPEN_AT|SCROLL_REARM_BELOW|scrollFired/u);
+  assert.match(machine, /스크롤은 카메라만 옮긴다/u);
+  // 손을 대지 않아도 캡슐은 잠깐 뒤 열린다 — 막다른 길을 남기지 않는다.
+  assert.match(machine, /openLiveRef\.current\(\)/u);
   const scroll = await readFile(new URL("../app/components/gacha/gacha-scroll.ts", import.meta.url), "utf8");
   assert.match(scroll, /from: 0\.5, to: 0\.6/u);
   // 무대의 "베타 무료" 칩은 없다 — 값은 뽑은 뒤 카드에서만 말한다.

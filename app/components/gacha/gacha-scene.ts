@@ -274,9 +274,12 @@ type Shot = { at: number; position: [number, number, number]; target: [number, n
 export const SHOTS: readonly Shot[] = [
   { at: 0.0, position: [0, CAMERA_HEIGHT, CAMERA_DISTANCE], target: [0, CAMERA_TARGET, 0] },
   { at: 0.3, position: [0.35, 2.8, 3.2], target: [0, 2.52, 0] },
-  { at: 0.52, position: [2.35, 2.15, 2.75], target: [0.85, 1.85, 0.1] },
-  // 레버 자리에서 배출구로는 크게 돌지 않고 조금 내려다볼 뿐이다 — 카메라가 휙 도는 것이 어지럽다.
-  { at: 0.7, position: [1.6, 1.62, 3.0], target: [0.3, 0.92, 0.4] },
+  // 2026-09-04: 레버 샷이 기계 오른쪽 옆구리만 크게 잡아 무엇을 보는 화면인지 알 수 없었다.
+  // 이제 스크롤이 뽑지 않으므로 이 샷은 "레버가 손에 닿는 자리"면 충분하다 — 기계 전체가
+  // 프레임에 남을 만큼 물러서고 레버 쪽으로만 살짝 돈다.
+  { at: 0.52, position: [1.55, 2.25, 4.3], target: [0.35, 1.95, 0] },
+  // 배출구로는 크게 돌지 않고 조금 내려다볼 뿐이다 — 카메라가 휙 도는 것이 어지럽다.
+  { at: 0.7, position: [1.05, 1.85, 4.5], target: [0.15, 1.15, 0.2] },
   { at: 0.86, position: [0, CAMERA_HEIGHT, CAMERA_DISTANCE], target: [0, CAMERA_TARGET, 0] },
 ];
 export { SCROLL_PULL } from "./gacha-scroll";
