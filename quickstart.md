@@ -4,7 +4,7 @@ description: 원격 에이전트는 HTTPS MCP, 로컬 파일은 stdio로 연결�
 
 # 빠른 시작
 
-원격 에이전트는 HTTPS MCP, 로컬 파일은 stdio를 사용합니다. [에이전트 연결 화면](https://clunk.artemis-clunk.workers.dev/connect)에서 키를 발급하면 클라이언트별 설정이 완성됩니다.
+원격 에이전트는 HTTPS MCP, 로컬 파일은 stdio를 사용합니다. [에이전트 연결 화면](https://clunk.games/agents)에서 키를 발급하면 클라이언트별 설정이 완성됩니다.
 
 ## 설정 블록 복사
 
@@ -22,7 +22,7 @@ description: 원격 에이전트는 HTTPS MCP, 로컬 파일은 stdio로 연결�
 }
 ```
 
-원격으로 붙일 때는 `/connect`에서 발급한 endpoint와 Bearer 키를 넣습니다.
+원격으로 붙일 때는 `/agents`에서 발급한 endpoint와 Bearer 키를 넣습니다.
 
 ## 실제 연결 확인
 

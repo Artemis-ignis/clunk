@@ -6,6 +6,8 @@ description: 점수는 구조 계약의 한 축입니다 — 화면과 사람의
 
 점수는 구조 계약의 한 축입니다. 실제 게임 화면과 사람의 판단은 각각 별도 필드이며 **자동 승격하지 않습니다**.
 
+검사 규칙은 `clunk-game-ready-v1` 1.0.0이고, 규칙 17가지를 봅니다. 점수 90점 이상 · 차단 finding 0건 · 남은 finding이 전부 INFO — 이 세 가지가 모두 맞을 때만 `ready` 입니다.
+
 ## 네 개의 상태
 
 | 필드            | 기본값            | 근거                    |
@@ -25,7 +27,7 @@ description: 점수는 구조 계약의 한 축입니다 — 화면과 사람의
   "resultDigest": "<sha256-of-canonical-result>",
   "byteLength": 680412,
   "coreBuildId": "0.1.0",
-  "ruleSetVersion": "0.1.0",
+  "ruleSetVersion": "1.0.0",
   "profileId": "pc",
   "profileHash": "<sha256-of-profile>",
   "inspectionRunId": "HF-M117-tractor-r01",
