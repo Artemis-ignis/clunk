@@ -112,6 +112,8 @@ export type GachaScene = {
   points(): { lever: ScreenPoint; capsule: ScreenPoint; dome: ScreenPoint };
   /** 실제로 색이 칠해진 픽셀 수(검증용). 지금 그려진 화면을 그대로 읽는다. */
   countDrawnPixels(): number;
+  /** 검증용 — 지금 카메라 자리. */
+  cameraPosition(): [number, number, number];
   /** 마지막 프레임의 삼각형 수와 그리기 횟수. */
   stats(): SceneStats;
   dispose(): void;
@@ -1862,7 +1864,7 @@ export function createGachaScene(
     // 착지하는 프레임에 먼지와 카메라 흔들림을 한 번만 낸다.
     if (introTime >= INTRO_SECONDS.land && introTime - dt < INTRO_SECONDS.land) {
       puffTime = 0;
-      cameraShake = 0.13;
+      cameraShake = 0.03;
     }
     if (introTime >= INTRO_SECONDS.lever && introTime - dt < INTRO_SECONDS.lever) knobGlint = 0;
     if (introTime >= INTRO_SECONDS.total) {
@@ -1891,7 +1893,11 @@ export function createGachaScene(
     // 스크롤 자리 — 공개 무대(캡슐이 갈라지는 순간부터)에서는 상품이 카메라 앞 정해진
     // 자리에 서므로 첫 자리로 돌아간다.
     const revealing = stage === "wobble" || stage === "burst" || stage === "result";
-    scrollEased = approach(scrollEased, revealing ? 0 : scrollTarget, reduced ? 1 : Math.min(1, dt * 5));
+    // 2026-09-03: 공개 무대에서 카메라를 첫 자리로 되돌리던 것을 없앴다 — 뽑을 때마다 기계가
+    // 멀어졌다 다시 다가와 어지러웠다(운영자 영상). 상품은 카메라 기준으로 놓이므로 카메라는
+    // 스크롤 자리에 그대로 머문다.
+    void revealing;
+    scrollEased = approach(scrollEased, scrollTarget, reduced ? 1 : Math.min(1, dt * 3.5));
     shotAt(scrollEased, shotPosition, shotTarget);
     // 세로 화면에서는 같은 자리에서 기계가 좌우로 잘린다 — 화면 비율만큼 물러선다.
     // 390×844(비율 0.46)에서 1.35배: 첫 자리 6.4 m 가 8.6 m 가 되어 기계 폭 2.1 m 가 들어온다.
@@ -1918,7 +1924,7 @@ export function createGachaScene(
     // 기계가 손끝 쪽으로 5° 돌아본다. 레버를 잡고 끄는 동안에는 몸통이 1° 기운다.
     leverDragEase = approach(leverDragEase, leverDragging ? 1 : 0, dt * 7);
     machine.rotation.y = pointerEased.x * PARALLAX.yaw * sway;
-    machine.rotation.z = -leverValue * 0.0175 * sway - leverDragEase * 0.004 * sway;
+    machine.rotation.z = -leverValue * 0.008 * sway - leverDragEase * 0.003 * sway;
     // 레버를 놓은 순간의 눌림 — 2% 안에서 눌렸다 펴진다.
     if (squash > 0.001) {
       squash = Math.max(0, squash - dt * 1.7);
@@ -2019,13 +2025,18 @@ export function createGachaScene(
     shop.visible = !machineHidden;
     backdropMaterial.opacity = approach(backdropMaterial.opacity, wantedBackdrop, dt * 5);
     backdrop.visible = backdropMaterial.opacity > 0.01;
+    if (backdrop.visible) {
+      camera.getWorldDirection(prizeForward);
+      backdrop.position.copy(camera.position).addScaledVector(prizeForward, 2.3);
+      backdrop.quaternion.copy(camera.quaternion);
+    }
 
     if (!reduced) stepCapsules(dt, stage === "shake" || stage === "pull");
     writeCapsuleInstances();
 
     if (stage === "impact") {
       stepDispense(stageTime);
-      if (stageTime > 0.78 && stageTime - dt <= 0.78 && !reduced) cameraShake = 0.06;
+      // 충격 순간의 카메라 흔들림은 없앴다 — 몸통 눌림(squash)만 남는다.
     } else if (stage === "capsule") {
       prize.group.visible = true;
       prize.group.position.set(0, TRAY.y + (reduced ? 0 : Math.sin(clock * 2.2) * 0.012), TRAY.z);
@@ -2252,6 +2263,7 @@ export function createGachaScene(
       // 읽은 조각의 비율을 화면 전체로 되돌린다.
       return Math.round((drawn / (sampleWidth * sampleHeight)) * w * h);
     },
+    cameraPosition() { return [camera.position.x, camera.position.y, camera.position.z] as [number, number, number]; },
     stats() {
       return { triangles: renderer.info.render.triangles, calls: renderer.info.render.calls };
     },

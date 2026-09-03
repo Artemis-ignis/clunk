@@ -545,6 +545,7 @@ export function GachaMachine3D() {
         scope.__gachaPixels = () => scene.countDrawnPixels();
         // 예산 검증용 — 마지막 프레임의 삼각형 수와 그리기 횟수.
         scope.__gachaInfo = () => scene.stats();
+        scope.__gachaCamera = () => scene.cameraPosition();
         scope.__gachaResetStats = () => { stats.current = { frames: 0, totalMs: 0 }; return true; };
         scope.__gachaResume = () => { manual = false; return true; };
         scope.__gachaFrameStats = () => ({
@@ -574,6 +575,7 @@ export function GachaMachine3D() {
       delete scope.__gachaFrame;
       delete scope.__gachaPixels;
       delete scope.__gachaInfo;
+      delete scope.__gachaCamera;
       delete scope.__gachaFrameStats;
       delete scope.__gachaResetStats;
       delete scope.__gachaResume;
