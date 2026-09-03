@@ -21,6 +21,7 @@ import Link from "./NativeLink";
 import { readinessHint, readinessNote, resolveReadiness } from "./readiness";
 import { StatusPill } from "./StatusPill";
 import { WorkspaceShell } from "./WorkspaceShell";
+import { useInspectorWebMcp } from "../webmcp/useInspectorWebMcp";
 
 type InspectorProps = {
   userLabel: string;
@@ -135,10 +136,12 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
     Boolean(optimization),
   ];
 
-  async function loadAsset(name: string, bytes: Uint8Array, isSample: boolean) {
+  async function loadAsset(name: string, bytes: Uint8Array, isSample: boolean): Promise<InspectionReport | null> {
     setBusy("inspect"); setError(null); setNotice(null); setOptimization(null); setDownloadGate("pending"); setSampleMode(isSample); setFileName(name); setSourceBytes(bytes); setAssetId(null);
+    let produced: InspectionReport | null = null;
     try {
       const nextReport = inspectAsset(createAssetBundle(name, bytes), activePolicy);
+      produced = nextReport;
       setReport(nextReport);
       if (isSample) setNotice("예시 파일입니다. 기록과 크레딧에 반영되지 않습니다.");
       else if (isCustomActive)
@@ -147,9 +150,76 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
         );
       else await persistAnalysis(nextReport);
     } catch (caught) {
+      produced = null;
       setReport(null); setError(caught instanceof Error ? caught.message : "이 파일을 열지 못했습니다. GLB 또는 GLTF 파일인지 확인해 주세요.");
     } finally { setBusy("idle"); }
+    return produced;
   }
+
+  /**
+   * 주소 하나로 검사하기 — 에이전트가 부르는 자리.
+   *
+   * 받은 바이트는 이 탭에만 있고 서버로 올라가지 않는다. 사람이 파일을 끌어다 놓았을
+   * 때와 완전히 같은 흐름(loadAsset)을 타므로, 화면의 점수판도 같이 채워진다.
+   */
+  async function inspectFromUrl(url: string) {
+    let target: URL;
+    try {
+      target = new URL(url, window.location.href);
+    } catch {
+      return { ok: false as const, error: "That URL could not be parsed.", error_ko: "주소를 읽지 못했습니다." };
+    }
+    if (target.protocol !== "http:" && target.protocol !== "https:") {
+      return { ok: false as const, error: "Only http and https addresses are inspected.", error_ko: "http 또는 https 주소만 검사합니다." };
+    }
+    let bytes: Uint8Array;
+    let name: string;
+    try {
+      const response = await fetch(target.toString(), { cache: "no-store" });
+      if (!response.ok) return { ok: false as const, error: `The file could not be fetched. Response code ${response.status}.`, error_ko: `파일을 받지 못했습니다. 응답 코드 ${response.status}.` };
+      bytes = new Uint8Array(await response.arrayBuffer());
+      const fromQuery = target.searchParams.get("file");
+      name = decodeURIComponent(fromQuery ?? target.pathname.split("/").pop() ?? "asset.glb");
+    } catch {
+      return { ok: false as const, error: "The file could not be fetched. Check that the address opens in this browser.", error_ko: "파일을 받지 못했습니다. 주소가 이 브라우저에서 열리는지 확인해 주세요." };
+    }
+    // A File is what the drop zone hands over; the flow itself only ever needs the bytes.
+    const nextReport = await loadAsset(name, bytes, false);
+    if (!nextReport) return { ok: false as const, error: "This file could not be opened. Check that it is a GLB or GLTF.", error_ko: "이 파일을 열지 못했습니다. GLB 또는 GLTF 파일인지 확인해 주세요." };
+    const line = (finding: (typeof nextReport.findings)[number]) => ({
+      rule: finding.ruleId,
+      title: finding.title,
+      title_ko: localizeFindingTitle(finding.title),
+      severity: finding.severity,
+      observed: finding.observed,
+      threshold: finding.threshold,
+    });
+    return {
+      ok: true as const,
+      fileName: nextReport.fileName,
+      profileId: nextReport.profileId,
+      score: nextReport.score.score,
+      threshold: nextReport.score.threshold,
+      ready: nextReport.score.ready,
+      hardBlockerCount: nextReport.score.hardBlockerCount,
+      blockers: nextReport.findings.filter((f) => f.severity === "CRITICAL" || f.severity === "ERROR").map(line),
+      warnings: nextReport.findings.filter((f) => f.severity === "WARNING").map(line),
+      facts: {
+        triangles: nextReport.metrics.triangleCount,
+        drawCalls: nextReport.metrics.drawCallCount,
+        materials: nextReport.metrics.materialCount,
+        textures: nextReport.metrics.textureCount,
+        textureMemoryBytes: nextReport.metrics.textureMemoryBytes,
+        nodes: nextReport.metrics.nodeCount,
+        animations: nextReport.metrics.animationCount,
+        byteLength: nextReport.byteLength,
+      },
+      inputHash: nextReport.inputHash,
+      analysisId: nextReport.analysisId,
+    };
+  }
+
+  useInspectorWebMcp({ active: true, run: inspectFromUrl });
 
   async function saveRun(
     nextReport: InspectionReport,

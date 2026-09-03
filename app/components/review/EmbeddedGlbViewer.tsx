@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 
 import { gltfClipLabel } from "./gltf-clip-labels";
 import { readPalette, type PaletteEntry } from "./measure-palette";
+import { useViewerWebMcp, type ViewerView } from "../../webmcp/useViewerWebMcp";
 
 /**
  * Product-page 3D viewer.
@@ -916,6 +917,55 @@ export function EmbeddedGlbViewer({
     if (document.fullscreenElement === node) void document.exitFullscreen();
     else void node.requestFullscreen?.();
   }
+
+  /**
+   * 레일 단추가 하는 그 일을, 이름으로 부를 수 있게 한 자리에 모은 것.
+   *
+   * 사람이 누르든 에이전트가 부르든 같은 두 줄이 돈다 — 리액트 상태를 바꿔 단추가 눌린
+   * 모양이 되고, 장면 손잡이를 불러 화면이 실제로 바뀐다. 두 길이 갈라지면 단추는 켜져
+   * 있는데 모델은 그대로인 화면이 나온다.
+   */
+  function applyView(patch: Partial<ViewerView>) {
+    const handles = handlesRef.current;
+    if (patch.wireframe !== undefined) { setWireframe(patch.wireframe); handles?.setWireframe(patch.wireframe); }
+    if (patch.mirror !== undefined) { setMirror(patch.mirror); handles?.setMirror(patch.mirror); }
+    if (patch.dimensions !== undefined) { setDimensions(patch.dimensions); handles?.setDimensions(patch.dimensions); }
+    if (patch.flatShading !== undefined) { setFlatShading(patch.flatShading); handles?.setFlatShading(patch.flatShading); }
+    if (patch.background !== undefined) { setBackground(patch.background); handles?.setBackground(patch.background); }
+    if (patch.lighting !== undefined) { setLighting(patch.lighting); handles?.setLighting(patch.lighting); }
+    if (patch.grid !== undefined) { setGrid(patch.grid); handles?.setGrid(patch.grid); }
+    if (patch.shadows !== undefined) { setShadows(patch.shadows); handles?.setShadows(patch.shadows); }
+    if (patch.autoRotate !== undefined) { setAutoRotate(patch.autoRotate); handles?.setAutoRotate(patch.autoRotate); }
+    if (patch.playing !== undefined) { setPlaying(patch.playing); handles?.setPlaying(patch.playing); }
+  }
+
+  // 에이전트가 같은 작업대를 만진다. 상품 화면(작업대)에서만 걸리고, 떠나면 내려간다.
+  useViewerWebMcp({
+    active: workbench && !failed,
+    fileName: fileName ?? alt,
+    clips: clipStatus.map((clip) => ({ name: clip.name, label: clip.label, kind: clip.kind, playable: !clip.missingNode })),
+    pivots: pivotList.map((pivot) => ({ name: pivot.name, present: pivot.present, mode: pivot.mode })),
+    view: {
+      wireframe, mirror, dimensions, flatShading, background, lighting, grid, shadows, autoRotate, playing,
+      clip: active >= 0 ? clipStatus[active]?.name ?? null : null,
+      clip_ko: active >= 0 ? clipStatus[active]?.label ?? null : null,
+    },
+    apply: applyView,
+    playClip: (index) => {
+      setActive(index);
+      setActivePivots([]);
+      handlesRef.current?.clearPivots();
+      handlesRef.current?.selectClip(index);
+    },
+    testPivot: (name) => {
+      const entry = pivotList.find((pivot) => pivot.name === name && pivot.present);
+      if (!entry) return false;
+      setActive(-1);
+      setActivePivots([name]);
+      handlesRef.current?.testPivot(name, pivotAxis, true);
+      return true;
+    },
+  });
 
   function saveScreenshot() {
     handlesRef.current?.capture((blob) => {

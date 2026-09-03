@@ -55,6 +55,7 @@ import {
   toggleGachaMuted,
 } from "./gacha-sound";
 import type { GachaScene, SceneStage } from "./gacha-scene";
+import { useGachaWebMcp } from "./useGachaWebMcp";
 
 /**
  * 실시간 3D 가챠 머신 한 대.
@@ -821,6 +822,13 @@ export function GachaMachine3D() {
       setClaim({ kind: "failed", message: "연결이 끊겨 받지 못했습니다. 잠시 뒤에 다시 눌러 주세요." });
     }
   }, [prize]);
+
+  /* 에이전트도 같은 기계를 쓴다 — WebMCP 도구가 위의 손잡이를 그대로 부른다. */
+  useGachaWebMcp({
+    trackRef, stage, theme, prize, pool, counts, remaining, beta,
+    authenticated, claim, loginHref: LOGIN_HREF,
+    turn, openCapsule, again, chooseTheme, collect,
+  });
 
   /* 레버 당기기 -------------------------------------------------------------
      아래로 끌면 손잡이가 손을 따라 내려오고, 60px 을 넘기는 순간 발동한다.

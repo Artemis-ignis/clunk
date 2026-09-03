@@ -157,6 +157,73 @@ npm.cmd run --silent mcp
 
 stdio JSON-RPC 서버가 `clunk_inspect`, `clunk_validate`, `clunk_optimize`, `clunk_passport`를 제공합니다. 실제 MCP 클라이언트에 연결할 때는 작업 폴더의 절대 경로와 위 Windows 명령을 사용하고, 원본과 출력 경로를 분리합니다.
 
+## WebMCP (in-page tools for agents)
+
+Clunk's pages register their own tools with the browser, so a person and their agent work on
+the same screen at the same time. When the agent pulls the capsule machine's lever, the machine
+the person is watching turns; when it flips the model to wireframe, the model in front of them
+changes. Registration goes through `navigator.modelContext.registerTool()`, falling back to
+`document.modelContext` (the wording the specification's own text uses); a browser that exposes
+neither simply gets the site as it always was, with nothing logged and nothing broken.
+
+The human-readable manifest, a live panel of what is registered on the current page, and a
+"How to test this" section live at **`/webmcp`** — this list and that page say the same thing.
+
+**No sign-in needed**
+
+| Tool | Page | Input | Returns |
+| --- | --- | --- | --- |
+| `clunk_connection_check` | every page | — | response code and body of `GET /api/mcp` |
+| `clunk_product_capabilities` | every page | — | contract ids and the four evidence states |
+| `clunk_site_map` | every page | — | which tools live on which page, what is registered right now, sign-in addresses |
+| `clunk_search_assets` | every page | `query`, `theme`, `grade`, `minPolygons`, `maxPolygons`, `hasAnimation`, `limit` | slug, title, grade and its basis, polygons, materials, size in metres, bytes, animations, URL |
+| `clunk_asset_facts` | every page | `slug` | one listing's full measured record |
+| `clunk_navigate` | every page | `page` or `slug` | the address the human's screen moved to |
+| `gacha_state` | `/` | — | stage, theme, what is left this round, the drawn prize |
+| `gacha_list_themes` | `/` | — | the dial's themes and how many assets each holds |
+| `gacha_set_theme` | `/` | `theme` | the chosen theme and its count |
+| `gacha_pull` | `/` | — | scrolls to the lever shot, pulls, waits for the capsule, returns the prize and its grade |
+| `gacha_open` | `/` | — | what came out of the capsule |
+| `gacha_again` | `/` | — | the stage the machine returned to |
+| `viewer_set` | `/marketplace/<slug>` | `wireframe`, `background`, `grid`, `shadows`, `autoRotate`, `flatShading`, `mirror`, `dimensions` | the bench's full view state after the change |
+| `viewer_play_clip` | `/marketplace/<slug>` | `name` | the clip that started, and every clip the file carries |
+| `viewer_stop` | `/marketplace/<slug>` | — | the view state after stopping |
+| `viewer_pivot_test` | `/marketplace/<slug>` | `part` | swings one named part ±30°, reports which parts exist |
+| `viewer_state` | `/marketplace/<slug>` | — | view state, clips, moving parts, file name |
+| `asset_download_link` | `/marketplace/<slug>` | — | the exact address the receive button opens |
+
+**Sign-in required** (`gacha_claim` returns the sign-up URL when signed out; an agent never
+signs in on someone's behalf)
+
+| Tool | Page | Input | Returns |
+| --- | --- | --- | --- |
+| `gacha_claim` | `/` | — | the download outcome, or the sign-up address |
+| `studio_templates` | `/studio` | `kind` | the list `GET /api/series/templates` serves |
+| `studio_create` | `/studio` | `kind`, `prompt`, `templateId`, `paletteId`, `sizeId` | the stored asset id, its files and their URLs, and the server's inspection evidence |
+| `studio_my_generations` | `/studio` | — | what this workspace has made |
+| `inspect_url` | `/app` | `url` | score, hard blockers, warnings and the figures read out of the file — inspected in the browser tab, bytes never uploaded |
+
+### How to test
+
+1. **Chrome 149+** — enable `chrome://flags/#enable-webmcp-testing`, restart, open the site.
+   The panel at `/webmcp` names the tools that registered.
+2. **ChatGPT in-app browser** — open the site inside ChatGPT and the model in that conversation
+   can call these tools directly.
+3. Prompts to try: *"Pull a capsule from the tree theme and tell me the grade and why."* ·
+   *"Search this shop for assets that carry animation and are under 2,000 polygons."* ·
+   *"Open the cheapest S-grade asset, switch the viewer to wireframe, then play its motion."*
+
+### The rules the tool layer enforces
+
+- Every result is plain JSON — no DOM nodes, no `undefined`. A failure is
+  `{ ok: false, error }`, never a thrown exception (`app/webmcp/register.ts`).
+- No invented figures. Polygons, materials, real size, bytes and animations come from the
+  measured `facts` served with `GET /api/marketplace`; anything unmeasured is `null`.
+- Agent-facing text is English; the sentence each screen actually shows is returned beside it
+  in a `_ko` field, so an English answer and a Korean screen never disagree.
+- Structural inspection passing is not a shipped-frame pass. That boundary is stated in the
+  tool results and on `/agents`.
+
 ## Codex Plugin·Skill
 
 `plugins/clunk-assetops/`에는 Clunk의 제품 표면을 재사용하기 위한 검증된 Codex Plugin과 `clunk-assetops` Skill이 있습니다. 이 Skill은 Web·CLI·MCP·VS Code가 `packages/core`의 단일 계약을 사용하도록 라우팅하고, 원본 보존·hash·fresh reinspection·Passport·Windows PowerShell 경계를 강제합니다. Plugin의 `.mcp.json`은 이 저장소의 `npm.cmd run --silent mcp`를 Windows stdio 서버로 연결합니다. `--silent`는 MCP stdout을 JSON-RPC 전용으로 유지하기 위한 필수 옵션입니다.

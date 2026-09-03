@@ -17,6 +17,7 @@ import {
 import styles from "../marketplace/marketplace.module.css";
 // 뽑기 화면과 같은 등급(S/A/B/C) — 같은 규칙, 같은 색. 가게 안의 진열대와 기계가 한 가게다.
 import { gradeOf } from "./gacha/gacha-catalog";
+import { useProductWebMcp } from "../webmcp/useProductWebMcp";
 
 type Listing = {
   id: string;
@@ -597,6 +598,22 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
       setBuying(false);
     }
   }
+
+  // 이 상품 화면이 떠 있는 동안만 걸리는 도구 — 받기 버튼이 쓰는 그 주소를 그대로 내준다.
+  useProductWebMcp({
+    active: state === "ready" && Boolean(listing),
+    slug: listing?.slug ?? "",
+    title: listing ? displayTitle(listing.slug, listing.title) : "",
+    downloadHref: listing
+      ? `/api/marketplace/assets/${encodeURIComponent(listing.assetId)}?file=${encodeURIComponent(listing.entryFileName)}`
+      : "",
+    entryFileName: listing?.entryFileName ?? "",
+    byteLength: listing?.byteLength ?? 0,
+    priceWon: Math.round((listing?.priceCents ?? 0) / 100),
+    beta: checkout?.status === "PAYMENT_PROVIDER_NOT_CONFIGURED",
+    signedIn,
+    signupUrl: `/signup?return_to=${encodeURIComponent(`/marketplace/${listing?.slug ?? ""}?intent=market`)}`,
+  });
 
   if (state === "loading") {
     return <div className={styles.detailState} role="status"><span className="spinner" /><strong>상품 근거를 불러오는 중입니다</strong><small>실제 파일 구성과 공개 상태를 확인합니다.</small></div>;

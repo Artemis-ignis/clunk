@@ -406,6 +406,11 @@ export type DomeCapsule = {
   /** 가운데 이음 링 색 — 그 상품의 등급 색. 돔 안에서 무엇이 들었는지 미리 읽힌다. */
   ring: string;
   letter: GradeLetter;
+  /**
+   * 알 안에 서는 그림 — 그 상품의 미리보기다. 상점이 이미 내주는 주소를 그대로 쓴다.
+   * 그림이 없는 상품(미리보기 파일이 없거나 그림이 아닌 것)은 null 이고, 그때는 알만 굴러간다.
+   */
+  preview: string | null;
 };
 
 /**
@@ -424,6 +429,7 @@ export function domeCapsules(pool: readonly GachaListing[], slots: number): Dome
       color: capsuleColorOf(listing),
       ring: GRADE_COLORS[grade.letter],
       letter: grade.letter,
+      preview: previewImageUrlOf(listing),
     };
   });
 }

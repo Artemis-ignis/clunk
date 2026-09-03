@@ -7,6 +7,7 @@ import { EmbeddedGlbViewer, type MeasuredSpec } from "./review/EmbeddedGlbViewer
 import { Icon, type IconName } from "./Icon";
 import Link from "./NativeLink";
 import { seriesForAssetKind, type StudioSeriesId } from "../studio/studio-model";
+import { useStudioWebMcp } from "../webmcp/useStudioWebMcp";
 
 /**
  * The making workspace.
@@ -429,11 +430,14 @@ export function AssetCreationWorkbench({
   /** The request body each lane sends. Kept in one place so 다시 만들기 repeats it exactly. */
   function requestBody(kind: AssetKind, overrides: Record<string, unknown> = {}) {
     const sheet = kind === "sprite-atlas" || kind === "spine-project";
+    // The profile follows the kind being sent rather than the tab the screen happens to be
+    // showing: an agent may ask for a different kind than the one in front of the human.
+    const target = (ASSET_OPTIONS.find((option) => option.id === kind) ?? selectedOption).target;
     return {
       assetKind: kind,
       label: label.trim() || "새 에셋",
       prompt: prompt.trim(),
-      targetProfileId: selectedOption.target,
+      targetProfileId: target,
       frames: kind === "2d-image" ? 1 : sheet ? sheetFrames : 4,
       width: sheet ? sheetCell * sheetFrames : 256,
       height: sheet ? sheetCell : 256,
@@ -448,18 +452,64 @@ export function AssetCreationWorkbench({
     };
   }
 
-  async function generate() {
-    if (!prompt.trim()) {
+  /**
+   * 에이전트가 이 화면의 만들기를 부를 때 넘기는 값.
+   *
+   * 사람이 폼을 채워 누르는 것과 같은 길을 탄다 — 값만 밖에서 온다. 그래서 만들어진
+   * 파일도, 검사도, 저장도 화면이 하던 그대로다.
+   */
+  type GenerateOverride = {
+    kind: AssetKind;
+    prompt: string;
+    label?: string;
+    templateId?: string;
+    paletteId?: string;
+    sizeId?: string;
+  };
+
+  /** 만들기 한 번의 결과. 화면은 쓰지 않고, WebMCP 도구가 그대로 돌려준다. */
+  type GenerateOutcome =
+    | { ok: true; assetId: string; entryFileName: string; storageStatus: string; artifacts: ArtifactResult[]; evidence: unknown; provider?: string; promptApplied?: boolean; promptNote?: string }
+    | { ok: false; error: string };
+
+  async function generate(override?: GenerateOverride): Promise<GenerateOutcome> {
+    const assetKindNow = override?.kind ?? assetKind;
+    const promptNow = (override?.prompt ?? prompt).trim();
+    const overrideTemplate = override?.templateId?.trim() ?? "";
+    if (!promptNow) {
+      const error = assetKindNow === "2d-image" ? "무엇을 그릴지 한 문장으로 적어 주세요." : "메모를 한 줄 적어 주세요. 만든 기록에 남습니다.";
       setPhase("error");
       setMessageTone("error");
-      setMessage(assetKind === "2d-image" ? "무엇을 그릴지 한 문장으로 적어 주세요." : "메모를 한 줄 적어 주세요. 만든 기록에 남습니다.");
-      return;
+      setMessage(error);
+      return { ok: false, error };
     }
-    if (needsTemplate) {
+    // An agent's request is put into the form first, so the human watching sees what was
+    // asked for rather than a file appearing out of nowhere.
+    if (override) {
+      if (override.kind !== assetKind) {
+        setInternalAssetKind(override.kind);
+        onAssetKindChange?.(override.kind);
+        setInternalSeriesId(seriesForAssetKind(override.kind));
+        onSeriesIdChange?.(seriesForAssetKind(override.kind));
+      }
+      setPrompt(promptNow);
+      if (override.label) setLabel(override.label);
+      if (overrideTemplate) setTemplateId(overrideTemplate);
+      if (override.paletteId) setPaletteId(override.paletteId);
+      if (override.sizeId) setTemplateSize(override.sizeId);
+    }
+    const templateMissing = override
+      ? assetKindNow !== "2d-image"
+        && templates.some((template) => template.kind === assetKindNow)
+        && !overrideTemplate
+        && !activeTemplateId
+      : needsTemplate;
+    if (templateMissing) {
+      const error = "먼저 템플릿을 고르세요.";
       setPhase("error");
       setMessageTone("error");
-      setMessage("먼저 템플릿을 고르세요.");
-      return;
+      setMessage(error);
+      return { ok: false, error };
     }
     setPhase("generating");
     setMeasured(null);
@@ -472,9 +522,20 @@ export function AssetCreationWorkbench({
     setMessage("서버에서 만들고, 검사하고, 저장하는 중입니다.");
     // 2D goes to the route that asks the image model; everything else to the
     // Clunk Series bundle route. See the note at the top of this file.
-    const isImage = assetKind === "2d-image";
+    const isImage = assetKindNow === "2d-image";
     const endpoint = isImage ? "/api/generation" : "/api/series";
-    const body = isImage ? requestBody(assetKind) : { seriesId, ...requestBody(assetKind) };
+    const overrides: Record<string, unknown> = override
+      ? {
+        prompt: promptNow,
+        ...(override.label ? { label: override.label } : {}),
+        ...(overrideTemplate ? { templateId: overrideTemplate } : {}),
+        ...(override.paletteId ? { paletteId: override.paletteId } : {}),
+        ...(override.sizeId ? { sizeId: override.sizeId } : {}),
+      }
+      : {};
+    const body = isImage
+      ? requestBody(assetKindNow, overrides)
+      : { seriesId: override ? seriesForAssetKind(assetKindNow) : seriesId, ...requestBody(assetKindNow, overrides) };
     try {
       const response = await fetch(endpoint, {
         method: "POST",
@@ -493,8 +554,8 @@ export function AssetCreationWorkbench({
       setSteps({ make: "done", inspect: inspectState, store: storeState });
       setStage({
         assetId: payload.assetId,
-        assetKind,
-        label: label.trim() || "새 에셋",
+        assetKind: assetKindNow,
+        label: override?.label ?? (label.trim() || "새 에셋"),
         storageStatus: payload.storageStatus,
         entryFileName: payload.entryFileName,
         artifacts: payload.artifacts,
@@ -518,12 +579,36 @@ export function AssetCreationWorkbench({
           : `파일 ${payload.artifacts.length}개를 만들었습니다.${typeof payload.credits === "number" ? ` 남은 크레딧 ${payload.credits}개.` : ""}`,
       );
       await refreshLive();
+      return {
+        ok: true,
+        assetId: payload.assetId,
+        entryFileName: payload.entryFileName,
+        storageStatus: payload.storageStatus,
+        artifacts: payload.artifacts,
+        evidence: payload.evidence ?? null,
+        ...(payload.provider ? { provider: payload.provider } : {}),
+        ...(payload.promptApplied === undefined ? {} : { promptApplied: payload.promptApplied }),
+        ...(payload.promptNote ? { promptNote: payload.promptNote } : {}),
+      };
     } catch (error) {
+      const message = error instanceof Error ? error.message : "요청을 처리하지 못했습니다.";
       setPhase("error");
       setMessageTone("error");
-      setMessage(error instanceof Error ? error.message : "요청을 처리하지 못했습니다.");
+      setMessage(message);
+      return { ok: false, error: message };
     }
   }
+
+  /* 에이전트도 같은 만들기를 부른다. 이 화면(/studio)이 떠 있는 동안에만 걸린다. */
+  useStudioWebMcp({
+    active: true,
+    templates,
+    templateState,
+    mine,
+    credits: credit.credits,
+    imagesRemaining: credit.imagesRemaining,
+    create: (request) => generate(request),
+  });
 
   /** Open a file this workspace already made. Bytes come from the private artifact route. */
   async function openMine(item: MineItem) {

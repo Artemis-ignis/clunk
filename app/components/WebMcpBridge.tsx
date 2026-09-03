@@ -2,28 +2,16 @@
 
 import { useEffect } from "react";
 
-type WebMcpTool = {
-  name: string;
-  description: string;
-  inputSchema: Record<string, unknown>;
-  execute: (input: unknown, options?: { signal?: AbortSignal }) => Promise<unknown>;
-};
+import { createGlobalTools } from "../webmcp/global-tools";
+import { registerTools, STATUS_EVENT, type WebMcpTool } from "../webmcp/register";
 
-type ModelContext = {
-  registerTool: (tool: WebMcpTool, options?: { signal?: AbortSignal }) => void | Promise<void>;
-};
-
-type ContextWindow = Window & {
-  modelContext?: ModelContext;
-};
-
-const STATUS_EVENT = "clunk:webmcp-status";
-
-function announce(status: "registered" | "unavailable" | "error", detail: string) {
-  document.documentElement.dataset.webmcpStatus = status;
-  document.documentElement.dataset.webmcpDetail = detail;
-  window.dispatchEvent(new CustomEvent(STATUS_EVENT, { detail: { status, detail } }));
-}
+/**
+ * 모든 화면에 걸리는 WebMCP 도구.
+ *
+ * 브라우저 자리를 찾는 일(navigator.modelContext, 옛 이름 document.modelContext), 등록,
+ * 상태 알림은 전부 app/webmcp/register.ts 한 곳에 있다 — 화면마다 도구를 다시 등록하지만
+ * 등록부는 하나다.
+ */
 
 function publicOrigin() {
   return new URL("/api/mcp", window.location.origin).toString();
@@ -83,27 +71,7 @@ function createTools(): WebMcpTool[] {
 export function WebMcpBridge() {
   useEffect(() => {
     const controller = new AbortController();
-    // Primary API is document.modelContext; navigator.modelContext remains a compatibility fallback.
-    const context = (document as Document & { modelContext?: ModelContext }).modelContext
-      ?? (navigator as Navigator & { modelContext?: ModelContext }).modelContext
-      ?? (window as ContextWindow).modelContext;
-
-    if (!context?.registerTool) {
-      announce("unavailable", "이 브라우저는 WebMCP imperative API를 노출하지 않습니다.");
-      return () => controller.abort();
-    }
-
-    void (async () => {
-      try {
-        for (const tool of createTools()) {
-          await context.registerTool(tool, { signal: controller.signal });
-        }
-        announce("registered", "2개 읽기 전용 도구가 등록되었습니다.");
-      } catch (error) {
-        announce("error", error instanceof Error ? error.message : "WebMCP 도구 등록에 실패했습니다.");
-      }
-    })();
-
+    void registerTools([...createTools(), ...createGlobalTools()], controller.signal, "global");
     return () => controller.abort();
   }, []);
 

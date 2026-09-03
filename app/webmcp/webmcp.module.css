@@ -1,0 +1,308 @@
+/* /webmcp — 이 사이트가 브라우저에서 내주는 도구를 사람이 읽는 판.
+   cv5 다크 토큰만 쓴다(app/site-v5.css). 새 색을 만들지 않는다. */
+
+.page {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 96px 24px 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cv5-accent, #59d9ff);
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(30px, 4.4vw, 46px);
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+}
+
+.hero p {
+  margin: 0;
+  max-width: 62ch;
+  font-size: 16px;
+  line-height: 1.75;
+  opacity: 0.82;
+}
+
+.status {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.statusHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+}
+
+.statusDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.28);
+  flex: none;
+}
+
+.statusDot[data-on] {
+  background: #4ade80;
+  box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.16);
+}
+
+.statusDetail {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.7;
+  opacity: 0.74;
+}
+
+.statusList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.statusList li {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12.5px;
+}
+
+.statusList code {
+  font-family: var(--font-mono, ui-monospace, "SFMono-Regular", Menlo, monospace);
+  font-size: 12.5px;
+}
+
+.statusList span {
+  opacity: 0.6;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.section h2 {
+  margin: 0;
+  font-size: clamp(20px, 2.4vw, 26px);
+  letter-spacing: -0.01em;
+}
+
+.section > p {
+  margin: 0;
+  max-width: 66ch;
+  font-size: 15px;
+  line-height: 1.8;
+  opacity: 0.8;
+}
+
+.steps {
+  margin: 0;
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 15px;
+  line-height: 1.75;
+  opacity: 0.88;
+}
+
+.steps code {
+  font-family: var(--font-mono, ui-monospace, "SFMono-Regular", Menlo, monospace);
+  font-size: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  padding: 1px 6px;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.groupHead {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 8px;
+}
+
+.groupHead h3 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.groupHead small {
+  font-size: 13px;
+  opacity: 0.6;
+}
+
+.tools {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.tool {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toolHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.toolHead code {
+  font-family: var(--font-mono, ui-monospace, "SFMono-Regular", Menlo, monospace);
+  font-size: 14px;
+  color: var(--cv5-accent, #59d9ff);
+}
+
+.badge {
+  font-size: 11.5px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  padding: 2px 9px;
+  opacity: 0.75;
+}
+
+.tool p {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+
+.tool dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 84px 1fr;
+  gap: 6px 14px;
+  font-size: 13.5px;
+  line-height: 1.65;
+}
+
+.tool dt {
+  opacity: 0.55;
+}
+
+.tool dd {
+  margin: 0;
+  opacity: 0.85;
+}
+
+.inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.inputs span {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 1px 7px;
+  font-size: 12.5px;
+  font-family: var(--font-mono, ui-monospace, "SFMono-Regular", Menlo, monospace);
+}
+
+.foot {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.8;
+  opacity: 0.62;
+  max-width: 70ch;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 72px 18px 96px;
+    gap: 44px;
+  }
+
+  .tool dl {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}
+
+/* 한국어 줄. 영어가 먼저 서고, 같은 뜻의 한국어가 아래에 조금 작게 붙는다. */
+.ko {
+  font-size: 13.5px;
+  line-height: 1.75;
+  opacity: 0.58;
+}
+
+p.ko {
+  margin: 0;
+  max-width: 64ch;
+}
+
+.subhead {
+  margin: 8px 0 0;
+  font-size: 15.5px;
+  letter-spacing: -0.005em;
+  opacity: 0.92;
+}
+
+.prompts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.prompts li {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 2px solid var(--cv5-accent, #59d9ff);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+.prompts li > span {
+  font-style: italic;
+}
