@@ -1047,7 +1047,9 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
 .gc-coin-spin {
   position: absolute; inset: 0;
   transform-style: preserve-3d;
-  animation: gc-coin-spin 6s linear infinite;
+  /* 2026-09-04 운영자 지시: 도는 동전은 어지럽다. 회전을 걷고 빛만 남긴다 — 앞면을
+     고정해 늘 C 가 보이고, 은은한 숨결과 이따금의 반짝임으로만 살아 있다. */
+  animation: gc-coin-breathe 3.4s ease-in-out infinite;
 }
 .gc-coin-face,
 .gc-coin-back {
@@ -1116,7 +1118,10 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
   opacity: 0;
   animation: gc-coin-sparkle 4s ease-in-out infinite;
 }
-@keyframes gc-coin-spin { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+@keyframes gc-coin-breathe {
+  0%, 100% { filter: drop-shadow(0 0 3px rgba(255, 214, 120, 0.34)); transform: none; }
+  50% { filter: drop-shadow(0 0 7px rgba(255, 224, 150, 0.62)); transform: none; }
+}
 @keyframes gc-coin-shine { from { background-position: 160% 0; } to { background-position: -160% 0; } }
 @keyframes gc-coin-sparkle {
   0%, 84% { opacity: 0; transform: scale(0.4) rotate(0deg); }

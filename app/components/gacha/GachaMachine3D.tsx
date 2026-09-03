@@ -584,7 +584,10 @@ export function GachaMachine3D() {
    * 전(useLayoutEffect)에 표시하므로 포스터가 한 프레임도 비치지 않는다.
    */
   useLayoutEffect(() => {
-    if (webgl && sceneWasLiveBefore()) rootRef.current?.setAttribute("data-warm", "1");
+    // 2026-09-04: 첫 방문에서도 접는다. 사진은 3D 가 오기 전의 대역이 아니라 3D 가 오지
+    // 않을 때의 대역이다 — 잠깐 비치는 사진은 프레이밍이 달라 "기계가 하나 더 생겼다
+    // 사라진다"로 읽혔다(운영자 영상). 아래 감시 타이머가 제때 못 오면 그때 세운다.
+    if (webgl) rootRef.current?.setAttribute("data-warm", "1");
   }, [webgl]);
 
   const clearTimers = useCallback(() => {
@@ -675,11 +678,11 @@ export function GachaMachine3D() {
     let observer: IntersectionObserver | null = null;
     let onResize: (() => void) | null = null;
     let sizeObserver: ResizeObserver | null = null;
-    // 따뜻한 재방문이라 포스터를 접어 두었는데 이번에는 3D 가 오지 않는 경우가 있다.
-    // 4초 안에 첫 프레임이 없으면 포스터를 도로 세운다 — 빈 무대를 남기지 않는다.
+    // 포스터를 접어 두었는데 3D 가 오지 않는 경우가 있다. 2.2초 안에 첫 프레임이 없으면
+    // 사진을 도로 세운다 — 빈 무대를 남기지 않는다. 이 시간 안에 오면 아무도 사진을 못 본다.
     const warmWatchdog = window.setTimeout(() => {
       if (!liveRef.current) rootRef.current?.removeAttribute("data-warm");
-    }, 4000);
+    }, 2200);
 
     note("scene module loading");
     mountedAt.current = performance.now();
@@ -1032,9 +1035,18 @@ export function GachaMachine3D() {
     sceneRef.current?.setLeverPull(0);
     leverDrag.current = { active: false, startY: 0, moved: 0, pointerId: -1 };
     swallowLeverClick.current = false;
-    scrollFired.current = progressRef.current >= SCROLL_PULL.to;
     scrollOpened.current = false;
-  }, [clearTimers]);
+    // 필름을 레버 앞으로 되감는다. 그러지 않으면 진행도가 끝에 머물러 글줄도 라인업도
+    // 접힌 채 기계만 덩그러니 남는다(2026-09-04 운영자 지적).
+    const track = trackRef.current;
+    if (track) {
+      const total = Math.max(1, track.offsetHeight - window.innerHeight);
+      const target = track.offsetTop + total * SCROLL_REARM_BELOW;
+      window.scrollTo({ top: target, behavior: reducedMotion ? "auto" : "smooth" });
+      progressRef.current = SCROLL_REARM_BELOW;
+    }
+    scrollFired.current = false;
+  }, [clearTimers, reducedMotion]);
 
   const chooseTheme = useCallback((next: ThemeId) => {
     clearTimers();
@@ -1330,7 +1342,9 @@ export function GachaMachine3D() {
       show(beatHeadRef.current, headBeat);
       // 라인업 판은 제목과 같은 첫 샷의 물건이다 — 같은 ramp 로 떠 있다가, 카메라가 기계
       // 안으로 들어가기 전에 물러난다(근접샷에서 기계와 겹치지 않는다).
-      show(beatOddsRef.current, headBeat, 24);
+      // 라인업은 글줄이 아니라 참고판이다 — 2026-09-04 운영자 지적("다시 뽑기 하면
+      // 우측 라인업이 사라진다"). 필름 어디에 있든 서 있고, 상품 카드가 뜬 동안만 비켜선다.
+      show(beatOddsRef.current, stageLive.current === "result" ? 0 : 1, 0);
       // 캔버스 왼쪽·위쪽 모서리의 페이드는 제목 글줄과 같은 ramp 로 산다. 제목이 왼쪽 칸에
       // 서 있는 첫 샷에서만 필요하고, 카메라가 기계 안으로 들어간 뒤(p≳0.16)에는 0 이 되어
       // 기계 위를 세로로 가르는 어두운 띠가 남지 않는다(2026-09-03 2차 지적).

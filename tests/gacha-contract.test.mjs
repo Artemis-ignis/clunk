@@ -826,7 +826,7 @@ test("크레딧 지갑은 내비 안의 알약이고 숫자는 전부 서버가 
   assert.doesNotMatch(hud, /충전하기|결제하기/u);
 
   // 실시간으로 돌고 반짝인다.
-  assert.match(site, /animation: gc-coin-spin 6s linear infinite;/u);
+  assert.match(site, /animation: gc-coin-breathe 3\.4s ease-in-out infinite;/u);
   assert.match(site, /animation: gc-coin-sparkle 4s ease-in-out infinite;/u);
   // 레버가 내려가는 동안 동전이 한 바퀴 넘어간다. 숫자는 그대로다(뽑기는 무료).
   assert.match(css, /@keyframes gc-coin-insert/u);
@@ -953,7 +953,7 @@ test("무대는 세 칸이고, 기계는 두 칸 사이에 선다", async () => 
   // 오른쪽 모서리 페이드도 제목 글줄과 같은 ramp 로 산다.
   assert.match(css, /--gc-fade-right: calc\(var\(--gc-left-ramp, 1\) \* 200px\)/u);
   // 라인업 판은 제목과 같은 ramp 로 뜨고 진다 — 근접샷에서 기계를 덮지 않는다.
-  assert.match(machine, /show\(beatOddsRef\.current, headBeat, 24\);/u);
+  assert.match(machine, /show\(beatOddsRef\.current, stageLive\.current === "result" \? 0 : 1, 0\);/u);
   assert.match(css, /@media \(max-width: 1023px\) \{ \.gc-beat-odds \{ display: none; \} \}/u);
   assert.match(css, /@media \(min-width: 1024px\) \{ \.gc3-odds-below \{ display: none; \} \}/u);
 
@@ -1014,7 +1014,7 @@ test("첫 프레임이 그려지면 포스터는 그 자리에서 사라진다",
   assert.match(css, /\.gc3\[data-live\] \.gc3-poster,\s*\.gc3\[data-warm\] \.gc3-poster \{ display: none !important; \}/u);
   // 이 세션에 이미 3D 를 본 브라우저는 포스터를 아예 띄우지 않는다(화면을 칠하기 전에 표시한다).
   assert.match(machine, /const SCENE_LIVE_KEY = "clunk\.gacha\.live";/u);
-  assert.match(machine, /useLayoutEffect\(\(\) => \{\s*if \(webgl && sceneWasLiveBefore\(\)\) rootRef\.current\?\.setAttribute\("data-warm", "1"\);/u);
+  assert.match(machine, /useLayoutEffect\(\(\) => \{[\s\S]{0,400}?if \(webgl\) rootRef\.current\?\.setAttribute\("data-warm", "1"\);/u);
   assert.match(machine, /markSceneLive\(\);/u);
   // 3D 가 오지 않으면 포스터가 도로 선다 — 빈 무대를 남기지 않는다.
   assert.match(machine, /if \(!liveRef\.current\) rootRef\.current\?\.removeAttribute\("data-warm"\);/u);

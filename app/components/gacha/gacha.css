@@ -1362,14 +1362,13 @@ html:has(.gc-film) { --gc-nav-h: 84px; }
 @media (prefers-reduced-motion: reduce) { .gc3-lever-cue svg { animation: none; } }
 
 /* ============================================================================
-   레버가 내려갈 때 내비의 동전이 한 바퀴 넘어간다 (2026-09-03)
+   레버가 내려갈 때 내비의 동전이 한 번 밝아진다 (2026-09-04)
    지갑은 내비에 살지만(site-v5.css) 이 몸짓은 첫 화면의 기계에서만 나온다. 숫자는
    그대로다 — 뽑기는 크레딧을 쓰지 않고, 있지도 않은 차감을 흉내 내지 않는다.
    ========================================================================= */
 @keyframes gc-coin-insert {
-  0% { transform: rotateY(0deg) scale(1); }
-  45% { transform: rotateY(200deg) scale(1.16); }
-  100% { transform: rotateY(360deg) scale(1); }
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(255, 214, 120, 0.4)); }
+  50% { transform: scale(1.14); filter: drop-shadow(0 0 12px rgba(255, 232, 170, 0.9)); }
 }
 html:has(.gc3[data-stage="pull"]) .gc-coin-spin,
 html:has(.gc3[data-stage="shake"]) .gc-coin-spin,
