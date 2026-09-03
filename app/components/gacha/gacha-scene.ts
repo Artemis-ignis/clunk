@@ -159,6 +159,20 @@ const DOME_FLOOR = 2.12;
 // 유리공 높이의 3분의 2까지 찬다.
 const CAPSULE_RADIUS = 0.144;
 /**
+ * 쏟아져 들어오는 알이 "통 안" 으로 넘어가는 높이(돔 중심 위 0.42 m).
+ *
+ * 2026-09-03 11라운드: 예전에는 돔 중심에서 0.446 m 안에 들어와야 통에 들어온 것으로
+ * 쳤다. 그런데 쏟아지는 동안 겹침 밀어내기가 알을 옆으로 밀어(반지름 0.51~0.57) 그
+ * 작은 공을 아예 스치지 못하는 알이 마흔 중 여섯이나 나왔다. 그 알들은 유리 벽도
+ * 바닥도 없는 채로 영원히 떨어져 몸통을 통째로 지나갔고, 알 겉면(중심 반지름 0.57 +
+ * 0.176)이 앞판(z 0.628)보다 앞으로 나와 보라 도장 위에 떠 있는 것으로 찍혔다
+ * (라이브 첫 화면, 영상 프레임 둘 다). 그래서 판정을 높이로 바꾼다 — 높이는 떨어지는
+ * 동안 단조롭게 줄어들므로 이 문턱은 어떤 프레임 간격에서도 반드시 넘어간다.
+ * 유리공 안쪽 꼭대기(2.62 + 0.59 = 3.21)보다 조금 낮게 두어, 옆으로 밀린 알이 잡힐 때
+ * 벽으로 끌려 들어가는 거리가 6 cm 를 넘지 않는다.
+ */
+const DOME_ENTRY_Y = DOME_CENTER.y + 0.42;
+/**
  * 배출구 안에 캡슐이 눕는 자리.
  * 2026-09-03: 배출구를 몸통 아래쪽(크롬 테 안쪽 y 0.58~0.98)으로 옮기면서 같이 내려왔다.
  * 알 반지름이 0.194 이므로 0.78 이면 위아래가 테 안에 딱 들어온다.
@@ -170,6 +184,30 @@ const TRAY = new THREE.Vector3(0, 0.77, 0.53);
  * 상품은 예전과 같은 크기로 보인다. 높이는 그 깊이에서의 화면 한가운데다.
  */
 const STAGE_FRONT = new THREE.Vector3(0, 2.1, 4.5);
+
+/** 공개 무대에서 상품이 서는, 카메라로부터의 거리(m). */
+const PRIZE_DISTANCE = 1.9;
+/**
+ * 공개 무대에서 상품이 차지하는 화면 세로 비율.
+ *
+ * 2026-09-03 11라운드: 운영자가 "상품이 너무 크다 — 텍스처 판이 화면을 다 덮는다" 고
+ * 했다. 그전에는 3D 모델의 가장 긴 변을 0.78 m, 카드를 1.05 m 로 못박아 두었는데,
+ * 카메라 앞 1.9 m 에서 화면 세로가 담는 길이가 1.162 m(세로 화각 34°)이므로 카드는
+ * 화면 세로의 90%, 모서리로 선 모델은 100%를 넘었다. 크기를 길이가 아니라 화면 비율로
+ * 정하면 가로·세로 어느 화면에서도(390 포함) 같은 크기로 보인다 — 세로 화각은 화면
+ * 비율과 무관하고, 상품은 늘 카메라에서 같은 거리에 서기 때문이다.
+ * 모델은 바운딩 구 지름이, 카드는 판 높이가 이 비율이다.
+ */
+const PRIZE_SCREEN = { model: 0.45, card: 0.32 } as const;
+/** 상품을 손으로 돌리는 감도(라디안/픽셀)와 위아래로 젖힐 수 있는 한계(35°). */
+const PRIZE_DRAG = {
+  yaw: 0.0075,
+  pitch: 0.005,
+  pitchLimit: (35 * Math.PI) / 180,
+  /** 손을 뗀 순간 남는 속도의 몫과 그 속도가 잦아드는 빠르기. 미끄러짐은 20° 안쪽이다. */
+  glide: 0.3,
+  decay: 9,
+} as const;
 
 /**
  * 카메라 자리. 받침이 바닥에 닿는 자리부터 투입구 꼭대기까지가 한 화면에 들어와야 한다.
@@ -1790,6 +1828,7 @@ export function createGachaScene(
 
   const MAX_CAPSULES = Math.max(1, quality.capsules);
   const pile = new THREE.Group();
+  pile.name = "capsule-pile";
   machine.add(pile);
 
   /* 알 안에 선 진짜 상품 -----------------------------------------------------
@@ -1852,6 +1891,8 @@ export function createGachaScene(
   const quaternionScratch = new THREE.Quaternion();
   const billboardScratch = new THREE.Quaternion();
   const scaleScratch = new THREE.Vector3();
+  /** 알을 유리 안으로 도로 넣을 때 쓰는 임시 벡터. 매 프레임 마흔 번 도니 새로 만들지 않는다. */
+  const confineScratch = new THREE.Vector3();
 
   function ensureCapsules(count: number): void {
     capsuleCount = Math.max(0, Math.min(MAX_CAPSULES, count));
@@ -1996,6 +2037,7 @@ export function createGachaScene(
   prizeTopMesh.castShadow = true;
   prizeBottomMesh.castShadow = true;
   prize.group.add(prizeTopMesh, prizeBottomMesh, prizeRingMesh);
+  prize.group.name = "prize-capsule";
   prize.group.visible = false;
   prize.group.scale.setScalar(1.55);
   reveal.add(prize.group);
@@ -2086,6 +2128,14 @@ export function createGachaScene(
     prizeArtLoaded = false;
   }
 
+  /**
+   * 카메라 앞 PRIZE_DISTANCE 에서 화면 세로의 fraction 만큼이 되는 실제 길이(m).
+   * 세로 화각은 화면 비율과 무관하므로 1440 에서도 390 에서도 같은 값이 나온다.
+   */
+  function prizeSpan(fraction: number): number {
+    return 2 * PRIZE_DISTANCE * Math.tan((camera.fov * Math.PI) / 360) * fraction;
+  }
+
   /* 상태 ------------------------------------------------------------------- */
   let stage: SceneStage = "idle";
   let stageTime = 0;
@@ -2138,6 +2188,69 @@ export function createGachaScene(
   let puffTime = -1;
   let knobGlint = -1;
 
+  /* 손으로 돌려 보는 상품 ---------------------------------------------------
+     2026-09-03 11라운드: 운영자가 "상품이 제멋대로 도는 게 싫다" 고 했다. 저 혼자 도는
+     회전을 없애고, 끄는 대로 따라오게 한다 — 가로로 끌면 yaw, 세로로 끌면 pitch(±35°),
+     놓으면 아주 짧게 미끄러지다 완전히 선다. 손이 없으면 그림은 한 픽셀도 바뀌지 않는다.
+     휠은 받지 않는다(스크롤이 곧 카메라라서 확대와 싸운다). */
+  let prizeYaw = 0;
+  let prizePitch = 0;
+  let prizeYawRate = 0;
+  let prizePitchRate = 0;
+  let prizeDragging = false;
+  let prizePointerId = -1;
+  let prizeLastX = 0;
+  let prizeLastY = 0;
+  /** 무대가 손을 받는 중인지. 공개 무대에서만 켠다 — 그 밖에는 캔버스가 손을 통과시킨다. */
+  let prizeGrabbable = false;
+
+  function resetPrizeSpin(): void {
+    prizeYaw = 0;
+    prizePitch = 0;
+    prizeYawRate = 0;
+    prizePitchRate = 0;
+  }
+
+  const canvas = renderer.domElement;
+  const onPrizeDown = (event: PointerEvent): void => {
+    if (!prizeGrabbable || event.button !== 0) return;
+    prizeDragging = true;
+    prizePointerId = event.pointerId;
+    prizeLastX = event.clientX;
+    prizeLastY = event.clientY;
+    prizeYawRate = 0;
+    prizePitchRate = 0;
+    // 무대 안에서만 처리한다 — 손가락이 화면 밖으로 나가도 필름이 따라 스크롤되지 않는다.
+    try { canvas.setPointerCapture(event.pointerId); } catch { /* 캡처를 못 해도 끌기는 된다 */ }
+    event.preventDefault();
+  };
+  const onPrizeMove = (event: PointerEvent): void => {
+    if (!prizeDragging || event.pointerId !== prizePointerId) return;
+    const dx = event.clientX - prizeLastX;
+    const dy = event.clientY - prizeLastY;
+    prizeLastX = event.clientX;
+    prizeLastY = event.clientY;
+    prizeYaw += dx * PRIZE_DRAG.yaw;
+    prizePitch = Math.max(-PRIZE_DRAG.pitchLimit, Math.min(PRIZE_DRAG.pitchLimit, prizePitch + dy * PRIZE_DRAG.pitch));
+    // 놓았을 때 미끄러질 만큼의 속도. 한 번의 움직임을 1/60 초로 본다.
+    prizeYawRate = dx * PRIZE_DRAG.yaw * 60;
+    prizePitchRate = dy * PRIZE_DRAG.pitch * 60;
+    event.preventDefault();
+  };
+  const onPrizeUp = (event: PointerEvent): void => {
+    if (event.pointerId !== prizePointerId) return;
+    prizeDragging = false;
+    prizePointerId = -1;
+    // 손을 뗀 뒤에는 아주 조금만 미끄러진다 — 던져 놓은 팽이가 되면 "제멋대로 도는" 그것이다.
+    prizeYawRate *= PRIZE_DRAG.glide;
+    prizePitchRate *= PRIZE_DRAG.glide;
+    try { canvas.releasePointerCapture(event.pointerId); } catch { /* 이미 놓였으면 그만 */ }
+  };
+  canvas.addEventListener("pointerdown", onPrizeDown);
+  canvas.addEventListener("pointermove", onPrizeMove);
+  canvas.addEventListener("pointerup", onPrizeUp);
+  canvas.addEventListener("pointercancel", onPrizeUp);
+
   function setStage(next: SceneStage): void {
     stage = next;
     stageTime = 0;
@@ -2156,6 +2269,8 @@ export function createGachaScene(
       }
     }
     if (next === "impact") {
+      // 새 상품은 늘 정면으로 선다 — 앞 사람이 돌려 놓은 각도가 남아 있으면 안 된다.
+      resetPrizeSpin();
       prize.group.visible = true;
       prize.group.scale.setScalar(1.55);
       prizeTopMesh.position.set(0, 0, 0);
@@ -2169,6 +2284,7 @@ export function createGachaScene(
       sparkMaterial.opacity = 0;
     }
     if (next === "idle") {
+      resetPrizeSpin();
       prize.group.visible = false;
       prizeArt.visible = false;
       burstGroup.visible = false;
@@ -2200,7 +2316,15 @@ export function createGachaScene(
         capsule.position.addScaledVector(capsule.velocity, dt);
         capsule.rotation.x += capsule.spin.x * dt * 2.4;
         capsule.rotation.z += capsule.spin.z * dt * 2.4;
-        if (capsule.position.distanceTo(DOME_CENTER) < DOME_INNER - CAPSULE_RADIUS) capsule.entering = false;
+        // 통 안에 들어섰는지. 유리 안쪽에 들어오면 그 순간이고, 옆으로 밀려 그 공을
+        // 스치지 못했더라도 목 아래로 내려왔으면 무조건 통 안이다 — 높이는 떨어지는
+        // 동안 반드시 줄어드니 이 문턱은 절대로 건너뛰어지지 않는다.
+        if (
+          capsule.position.distanceTo(DOME_CENTER) < DOME_INNER
+          || capsule.position.y <= DOME_ENTRY_Y
+        ) {
+          capsule.entering = false;
+        }
         continue;
       }
       if (!agitated) {
@@ -2274,6 +2398,28 @@ export function createGachaScene(
           first.x -= nx * push; first.y -= ny * push; first.z -= nz * push;
           second.x += nx * push; second.y += ny * push; second.z += nz * push;
         }
+      }
+    }
+
+    /**
+     * 밀어낸 뒤에 유리 벽과 바닥에 한 번 더 도로 넣는다.
+     *
+     * 2026-09-03 11라운드: 벽에 넣는 일이 밀어내기보다 먼저였다. 밀어내기는 속도가 아니라
+     * 자리를 직접 옮기므로, 먼저 벽에 넣어 봐야 그 다음 여섯 번의 밀어냄이 알을 유리 밖으로
+     * 그대로 내보냈다 — 가만히 있을 때도 겉면이 중심에서 0.80 까지(유리 0.74) 나갔고,
+     * 레버를 당겨 흔드는 순간에는 0.97 까지 튀어 앞판 위에 757 px 로 찍혔다.
+     * 여기서는 자리만 고친다(속도는 위에서 이미 튕겼다).
+     */
+    for (let index = 0; index < capsuleCount; index += 1) {
+      const capsule = capsules[index];
+      if (capsule.entering) continue;
+      const floorY = DOME_FLOOR + CAPSULE_RADIUS * capsule.scale;
+      if (capsule.position.y < floorY) capsule.position.y = floorY;
+      confineScratch.copy(capsule.position).sub(DOME_CENTER);
+      const distance = confineScratch.length();
+      const wall = DOME_INNER - CAPSULE_RADIUS * (capsule.scale - 1);
+      if (distance > wall) {
+        capsule.position.copy(DOME_CENTER).addScaledVector(confineScratch, wall / distance);
       }
     }
 
@@ -2594,6 +2740,11 @@ export function createGachaScene(
        움직임을 줄여 달라는 설정에서는 이 전부가 0 이다(색이 바뀌는 반응만 남는다). */
     const sway = reduced ? 0 : 1;
     pointerEased.lerp(pointer, reduced ? 1 : Math.min(1, dt * 4));
+    // 충분히 가까워지면 딱 붙인다. 끝없이 수렴만 하면 손을 뗀 화면이 영원히 아주 조금씩
+    // 바뀌어(2026-09-03 11라운드: 공개 무대에서 5초 사이 81 px), 가만히 둔 화면이 서지 않는다.
+    if (Math.abs(pointerEased.x - pointer.x) < 1e-4 && Math.abs(pointerEased.y - pointer.y) < 1e-4) {
+      pointerEased.copy(pointer);
+    }
     const shake = cameraShake > 0 ? cameraShake : 0;
     // 스크롤 자리 — 공개 무대(캡슐이 갈라지는 순간부터)에서는 상품이 카메라 앞 정해진
     // 자리에 서므로 첫 자리로 돌아간다.
@@ -2640,7 +2791,9 @@ export function createGachaScene(
     }
 
     // 돔 위를 도는 반짝임과 유리에 맺힌 반사.
-    if (!reduced) sweep.position.set(Math.cos(clock * 0.6) * 1.15, 3.35, Math.sin(clock * 0.6) * 1.15);
+    // 돔 위를 도는 반짝임. 공개 무대에서는 멈춘다 — 기계가 사라진 화면에서 이 빛만
+    // 계속 돌면 가만히 둔 상품 위에서 하이라이트가 혼자 기어다닌다(운영자: 완전히 정지).
+    if (!reduced && stage !== "result") sweep.position.set(Math.cos(clock * 0.6) * 1.15, 3.35, Math.sin(clock * 0.6) * 1.15);
     stepHighlights(dt);
     // 더해 그리는 빛 판들은 늘 카메라를 마주 본다. 비스듬히 서면 빛이 아니라 판으로 읽힌다.
     // 기계가 손끝을 따라 돌기 때문에, 카메라 방향을 부모의 회전으로 한 번 되돌려 준다.
@@ -2751,6 +2904,41 @@ export function createGachaScene(
     if (!reduced) stepCapsules(dt, stage === "shake" || stage === "pull");
     writeCapsuleInstances();
 
+    /* 손으로 돌리는 상품 — 공개 무대에서만 캔버스가 손을 받는다. */
+    const grabbable = stage === "result" && prizeArtLoaded;
+    if (grabbable !== prizeGrabbable) {
+      prizeGrabbable = grabbable;
+      // 평소에는 캔버스가 손을 통과시켜야 한다 — 레버·돔 단추와 세로 스크롤이 그 위에 있다.
+      canvas.style.pointerEvents = grabbable ? "auto" : "";
+      // pan-y 로 둔다: 옆으로 시작한 손짓은 통째로 우리 것이 되어(포인터 캡처) 위아래
+      // 성분까지 따라오고, 위아래로 시작한 손짓은 브라우저의 세로 스크롤로 남는다.
+      // none 으로 막으면 세로 화면에서 상품을 본 사람이 페이지 밖으로 나갈 길이 없어진다.
+      canvas.style.touchAction = grabbable ? "pan-y" : "";
+      canvas.style.cursor = grabbable ? "grab" : "";
+      if (!grabbable) prizeDragging = false;
+    }
+    if (prizeDragging) {
+      canvas.style.cursor = "grabbing";
+    } else if (grabbable) {
+      canvas.style.cursor = "grab";
+      // 놓은 뒤의 짧은 미끄러짐. 느려지면 딱 멈춘다 — 가만히 둔 화면은 완전히 정지한다.
+      if (reduced) {
+        prizeYawRate = 0;
+        prizePitchRate = 0;
+      } else if (Math.abs(prizeYawRate) > 0.02 || Math.abs(prizePitchRate) > 0.02) {
+        prizeYaw += prizeYawRate * dt;
+        prizePitch = Math.max(-PRIZE_DRAG.pitchLimit, Math.min(PRIZE_DRAG.pitchLimit, prizePitch + prizePitchRate * dt));
+        const decay = Math.exp(-PRIZE_DRAG.decay * dt);
+        prizeYawRate *= decay;
+        prizePitchRate *= decay;
+        if (Math.abs(prizeYawRate) <= 0.02) prizeYawRate = 0;
+        if (Math.abs(prizePitchRate) <= 0.02) prizePitchRate = 0;
+      } else {
+        prizeYawRate = 0;
+        prizePitchRate = 0;
+      }
+    }
+
     if (stage === "impact") {
       stepDispense(stageTime);
       // 충격 순간의 카메라 흔들림은 없앴다 — 몸통 눌림(squash)만 남는다.
@@ -2776,11 +2964,12 @@ export function createGachaScene(
         prizeRight.crossVectors(prizeForward, camera.up).normalize();
         prizeUp.crossVectors(prizeRight, prizeForward).normalize();
         prizeArt.position.copy(camera.position)
-          .addScaledVector(prizeForward, 1.9)
+          .addScaledVector(prizeForward, PRIZE_DISTANCE)
           .addScaledVector(prizeRight, wide ? -0.3 : 0)
           .addScaledVector(prizeUp, wide ? -0.05 : 0.34);
         prizeArt.scale.setScalar(1);
-        if (!reduced) prizeArt.rotation.y += dt * 0.55;
+        // 손이 돌린 만큼만 돈다. 저 혼자 도는 회전은 없앴다(운영자 지시 2026-09-03).
+        prizeArt.rotation.set(prizePitch, prizeYaw, 0);
       }
     }
 
@@ -2817,8 +3006,10 @@ export function createGachaScene(
    */
   if (typeof window !== "undefined" && /[?&]audit=1/.test(window.location.search)) {
     (window as unknown as { __gachaAudit?: unknown }).__gachaAudit = {
-      THREE, scene, machine, lever, camera, capsules,
+      THREE, scene, machine, lever, camera, capsules, renderer, pile, prize: prize.group, prizeArt,
       dome: { centre: DOME_CENTER, radius: DOME_RADIUS, floor: DOME_FLOOR, capsuleRadius: CAPSULE_RADIUS },
+      // 11라운드: "알이 몸통을 뚫고 보이는가" 를 픽셀로 세려면 알을 껐다 켠 두 장을
+      // 같은 프레임에서 그려 비교해야 한다. 그래서 렌더러와 알 무리를 함께 내보낸다.
     };
   }
 
@@ -2924,15 +3115,13 @@ export function createGachaScene(
         const gltf = await loader.parseAsync(buffer, "");
         const model = gltf.scene;
         const bounds = new THREE.Box3().setFromObject(model);
-        const size = bounds.getSize(new THREE.Vector3());
-        const center = bounds.getCenter(new THREE.Vector3());
-        const longest = Math.max(size.x, size.y, size.z, 1e-4);
-        model.position.set(-center.x, -center.y, -center.z);
+        // 바운딩 "구" 로 맞춘다. 상자의 가장 긴 변으로 맞추면 모서리를 카메라로 돌렸을 때
+        // 대각선(√3배)이 그만큼 커져 화면을 넘긴다 — 어느 각도로 돌려도 크기가 같아야 한다.
+        const sphere = bounds.getBoundingSphere(new THREE.Sphere());
+        model.position.set(-sphere.center.x, -sphere.center.y, -sphere.center.z);
         const wrapper = new THREE.Group();
         wrapper.add(model);
-        // 무대가 화면 전체가 된 뒤로 카메라 앞 1.9 m 에서 보이는 높이는 1.16 m 다. 가장 긴
-        // 변을 0.78 m 로 맞추면 상품이 잘리지 않고, 오른쪽 카드 옆에 선다.
-        wrapper.scale.setScalar(0.78 / longest);
+        wrapper.scale.setScalar(prizeSpan(PRIZE_SCREEN.model) / Math.max(2 * sphere.radius, 1e-4));
         model.traverse((node) => {
           const mesh = node as THREE.Mesh;
           if (mesh.isMesh) { mesh.castShadow = true; mesh.receiveShadow = false; }
@@ -2951,8 +3140,10 @@ export function createGachaScene(
         const texture = await new THREE.TextureLoader().loadAsync(url);
         texture.colorSpace = THREE.SRGBColorSpace;
         disposables.push(texture);
+        // 판 높이를 화면 세로의 32% 로 잡는다. 두께와 모서리는 그 크기에 비례한다.
+        const side = prizeSpan(PRIZE_SCREEN.card);
         const card = new THREE.Mesh(
-          new RoundedBoxGeometry(1.05, 1.05, 0.045, 3, 0.03),
+          new RoundedBoxGeometry(side, side, side * 0.043, 3, side * 0.029),
           [
             new THREE.MeshStandardMaterial({ color: 0x2a3050, roughness: 0.6 }),
             new THREE.MeshStandardMaterial({ color: 0x2a3050, roughness: 0.6 }),
@@ -3010,6 +3201,10 @@ export function createGachaScene(
       return { triangles: renderer.info.render.triangles, calls: renderer.info.render.calls };
     },
     dispose() {
+      canvas.removeEventListener("pointerdown", onPrizeDown);
+      canvas.removeEventListener("pointermove", onPrizeMove);
+      canvas.removeEventListener("pointerup", onPrizeUp);
+      canvas.removeEventListener("pointercancel", onPrizeUp);
       emptyPrizeArt();
       atlas.dispose();
       for (const item of disposables) item.dispose();
