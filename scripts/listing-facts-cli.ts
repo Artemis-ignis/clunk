@@ -14,14 +14,14 @@
  *   1. outputs/market-launch/wave1/upload-manifest.json — every 3D model, bundle and texture,
  *      with `measured` written by the render-and-inspect pipeline.
  *   2. A saved /api/marketplace response (--listings), for the thirteen sprite sheets that
- *      exist only as D1 rows. Their grid is stated in their own title, which the baker wrote
- *      from the sheet manifest, so the specification is read back out of it rather than guessed.
+ *      exist only as D1 rows. Their grid comes from the sheet manifest the baker
+ *      published beside the PNG (public/market/<slug>/*.sheet.json), never from the title.
  *
  * Usage:
  *   npm run asset:facts
  *   npm run asset:facts -- --listings tmp/listings-snapshot.json --out app/data/listing-facts.json
  */
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { readFileSync, readdirSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -88,20 +88,52 @@ export function formatLabelOf(fileName: string, contentType?: string | null): st
   return "파일";
 }
 
+/** The part of a clunk.sprite-sheet-review manifest that states the grid. */
+export type SheetManifest = {
+  grid?: { frameWidth?: number };
+  generation?: { views?: number; clip?: { frames?: number } | null };
+};
+
 /**
- * The grid a sprite-sheet listing states in its own title.
+ * The grid a sprite-sheet listing has, read from the manifest the baker wrote beside the PNG.
  *
- * "코지 울타리 문 — 여닫기 애니메이션 (64×64, 8방향 × 8프레임)" and
- * "코지 온실 — 스프라이트 시트 (64×64, 8방향)" are the two shapes the baker writes. A title
- * that matches neither returns null, and the row is left off rather than filled with a guess.
+ * It used to be parsed back out of the listing title — "… — 스프라이트 시트 (64×64, 8방향)" —
+ * which made the shop's *name* for a product the source of a measured number. Renaming the
+ * products to plain nouns (2026-09-03) would then have silently blanked the specification row
+ * on all thirteen sheets. The manifest states the same numbers, is written from the real
+ * pixels, and cannot drift from them, so it is read instead. No manifest returns null, and the
+ * row is left off rather than filled with a guess.
  */
-export function sheetSpecFromTitle(title: string): ListingFact["sheet"] {
-  const match = /\((\d+)×(\d+),\s*(\d+)방향(?:\s*×\s*(\d+)프레임)?\)/u.exec(title);
-  if (!match) return null;
-  const cell = Number(match[1]);
-  const directions = Number(match[3]);
-  const frames = match[4] ? Number(match[4]) : null;
+export function sheetSpecFromManifests(manifests: readonly SheetManifest[]): ListingFact["sheet"] {
+  const first = manifests[0];
+  const cell = first?.grid?.frameWidth;
+  const directions = first?.generation?.views;
+  if (!cell || !directions) return null;
+  const frames = first?.generation?.clip?.frames ?? null;
   return { cell, directions, frames, cuts: frames === null ? null : directions * frames };
+}
+
+/**
+ * The sheet manifests published beside a listing's PNG (public/market/<slug>/*.sheet.json),
+ * or an empty list for a listing that is not a sheet.
+ */
+export function sheetManifestsFor(slug: string, marketRoot: string): SheetManifest[] {
+  const dir = resolve(marketRoot, slug);
+  let names: string[];
+  try {
+    names = readdirSync(dir).filter((name) => name.endsWith(".sheet.json")).sort();
+  } catch {
+    return [];
+  }
+  const manifests: SheetManifest[] = [];
+  for (const name of names) {
+    try {
+      manifests.push(JSON.parse(readFileSync(resolve(dir, name), "utf8")) as SheetManifest);
+    } catch {
+      // A manifest that will not parse states nothing; the row is left off, never guessed.
+    }
+  }
+  return manifests;
 }
 
 type ManifestProduct = {
@@ -208,11 +240,15 @@ export function factsFromManifest(manifest: ManifestFile): Record<string, Listin
  * Facts for the listings that live only in D1 — the sprite sheets. Everything here is read
  * back from the row the shop already serves, so a sheet cannot claim a grid it does not have.
  */
-export function factsFromListings(listings: ApiListing[], known: Record<string, ListingFact>): Record<string, ListingFact> {
+export function factsFromListings(
+  listings: ApiListing[],
+  known: Record<string, ListingFact>,
+  marketRoot: string,
+): Record<string, ListingFact> {
   const facts: Record<string, ListingFact> = {};
   for (const listing of listings) {
     if (known[listing.slug]) continue;
-    const sheet = sheetSpecFromTitle(listing.title);
+    const sheet = sheetSpecFromManifests(sheetManifestsFor(listing.slug, marketRoot));
     facts[listing.slug] = {
       triangles: null,
       materials: null,
@@ -233,9 +269,14 @@ export function factsFromListings(listings: ApiListing[], known: Record<string, 
   return facts;
 }
 
-export function buildFacts(manifest: ManifestFile, listings: ApiListing[], sources: string[]): ListingFactsFile {
+export function buildFacts(
+  manifest: ManifestFile,
+  listings: ApiListing[],
+  sources: string[],
+  marketRoot: string,
+): ListingFactsFile {
   const fromManifest = factsFromManifest(manifest);
-  const facts = { ...fromManifest, ...factsFromListings(listings, fromManifest) };
+  const facts = { ...fromManifest, ...factsFromListings(listings, fromManifest, marketRoot) };
   return {
     schema: "clunk.listing-facts.v1",
     generatedAt: new Date().toISOString(),
@@ -266,7 +307,7 @@ function main() {
     process.stderr.write(`no listings snapshot at ${listingsPath} — keeping what the previous run knew about D1-only listings\n`);
   }
 
-  const built = buildFacts(manifest, listings, sources);
+  const built = buildFacts(manifest, listings, sources, resolve(root, "public/market"));
 
   // The sprite sheets live only in D1, so a run without a snapshot of it would delete their
   // entries and blank fourteen cards. Carry forward anything the previous index knew that

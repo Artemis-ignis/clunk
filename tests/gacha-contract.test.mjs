@@ -59,12 +59,12 @@ const TRACTOR = {
 };
 
 const STALL = {
-  id: "listing-stall", slug: "cozy-market-stall", title: "코지 마켓 스톨",
+  id: "listing-stall", slug: "cozy-market-stall", title: "시장 노점",
   description: "가벼운 3D 시장 좌판입니다. 파일을 열어 잰 값으로 폴리곤 2,456개, 그리기 31회, 재질 11개이고 실제 크기는 2.44x2.39x1.35 m입니다. 웹·모바일 게임 기준 모두 100점, 막히는 문제 0건입니다.",
   priceCents: 690000, currency: "KRW", licenseStatus: "cleared", status: "PUBLISHED",
   assetId: "asset-stall", entryFileName: "market-stall.m1.clunk-optimized.glb", byteLength: 214584,
   previewFileName: "preview-cozy-market-stall.webp", variantOf: null,
-  variants: [{ slug: "cozy-market-stall-sprites", title: "코지 마켓 스톨 — 스프라이트 시트 (64×64, 8방향)" }],
+  variants: [{ slug: "cozy-market-stall-sprites", title: "시장 노점 · 스프라이트 시트" }],
   palette: [{ hex: "#a8794b", share: 0.3586 }, { hex: "#6b4630", share: 0.2865 }],
 };
 
@@ -79,25 +79,25 @@ const FARM_SET = {
 };
 
 const GROVE = {
-  id: "listing-grove", slug: "grove-tree-pack-vol1", title: "그로브 트리 팩 Vol.1 (6 템플릿)",
+  id: "listing-grove", slug: "grove-tree-pack-vol1", title: "나무 6종 팩",
   description: "잎 넓은 나무 4종과 침엽수 2종, 모두 여섯 그루의 가벼운 3D 나무 묶음입니다. 한 그루에 폴리곤 860~2,136개이며, 그루마다 재질 2개·그리기 2회·텍스처 0장으로 통일돼 있습니다. 여섯 그루 모두 웹·모바일 게임 기준 100점, 막히는 문제 0건이고 색이 모델에 들어 있어 텍스처 파일이 없습니다.",
   priceCents: 290000, currency: "KRW", licenseStatus: "cleared", status: "PUBLISHED",
   assetId: "asset-grove", entryFileName: "broadleaf-round-full.glb", byteLength: 189820,
   previewFileName: "preview-grove-broadleaf-column-flame.webp", variantOf: null,
-  variants: [{ slug: "grove-tree-pack-vol1-sprites", title: "그로브 트리 팩 Vol.1 (6종) — 스프라이트 시트 (64×64, 8방향)" }],
+  variants: [{ slug: "grove-tree-pack-vol1-sprites", title: "나무 6종 팩 · 스프라이트 시트" }],
   palette: [{ hex: "#6d8b4a", share: 0.6 }],
 };
 
 /** 여닫기 동작 시트가 딸린 모델. 실제 운영 응답에서 그대로 옮긴 제목이다. */
 const GATE = {
-  id: "listing-gate", slug: "cozy-fence-gate", title: "코지 울타리 문",
+  id: "listing-gate", slug: "cozy-fence-gate", title: "울타리 문",
   description: "가벼운 3D 울타리 문입니다. 파일을 열어 잰 값으로 폴리곤 520개, 그리기 13회, 재질 6개이고 실제 크기는 2.67x1.75x0.52 m입니다. 웹·모바일 게임 기준 모두 100점, 막히는 문제 0건입니다.",
   priceCents: 190000, currency: "KRW", licenseStatus: "cleared", status: "PUBLISHED",
   assetId: "asset-gate", entryFileName: "fence-gate.m1.clunk-optimized.glb", byteLength: 30000,
   previewFileName: "preview-cozy-fence-gate.webp", variantOf: null,
   variants: [
-    { slug: "cozy-fence-gate-sprites", title: "코지 울타리 문 — 스프라이트 시트 (64×64, 8방향)" },
-    { slug: "cozy-fence-gate-swing-sprites", title: "코지 울타리 문 — 여닫기 애니메이션 (64×64, 8방향 × 8프레임)" },
+    { slug: "cozy-fence-gate-sprites", title: "울타리 문 · 스프라이트 시트" },
+    { slug: "cozy-fence-gate-swing-sprites", title: "울타리 문 · 여닫기 애니메이션 시트" },
   ],
   palette: [{ hex: "#6b4630", share: 0.32 }],
 };
@@ -114,7 +114,7 @@ const GREENHOUSE = {
 };
 
 const MEADOW = {
-  id: "listing-meadow", slug: "tex-grass-meadow-v1", title: "초원 풀 · 이어붙는 텍스처",
+  id: "listing-meadow", slug: "tex-grass-meadow-v1", title: "초원 풀 텍스처",
   description: "1024x1024 크기의 이음매 없는 타일 한 장입니다. 이어 붙여도 경계가 안 보이는지 잰 결과는 경계 약함(가로 1.62 / 세로 1.77, 1에 가까울수록 좋음)입니다.",
   priceCents: 190000, currency: "KRW", licenseStatus: "cleared", status: "PUBLISHED",
   assetId: "asset-meadow", entryFileName: "tex-grass-meadow-v1.png", byteLength: 2732086,
@@ -123,7 +123,7 @@ const MEADOW = {
 };
 
 const SOIL = {
-  id: "listing-soil", slug: "tex-soil-tilled-v2", title: "경작지 흙 · 이어붙는 텍스처",
+  id: "listing-soil", slug: "tex-soil-tilled-v2", title: "경작지 흙 텍스처",
   description: "1024x1024 크기의 이음매 없는 타일 한 장입니다. 이어 붙여도 경계가 안 보이는지 잰 결과는 이음매 없음(가로 1.19 / 세로 1.5, 1에 가까울수록 좋음)입니다.",
   priceCents: 190000, currency: "KRW", licenseStatus: "cleared", status: "PUBLISHED",
   assetId: "asset-soil", entryFileName: "tex-soil-tilled-v2.png", byteLength: 2591910,
@@ -282,7 +282,7 @@ test("등급은 눈에 보이는 품질로 가르고, 규칙을 그대로 적는
   // 텍스처 일곱 장 묶음은 모델 묶음이 아니다 — 낱장 일곱 장이라 C 에 남는다.
   const texturePack = {
     ...MEADOW,
-    slug: "verified-seamless-textures-vol1", title: "이어붙는 텍스처 7종 묶음",
+    slug: "verified-seamless-textures-vol1", title: "텍스처 7종 묶음",
     description: "1024×1024 이음매 없는 텍스처 7종을 한 번에 받는 묶음입니다.",
   };
   assert.equal(isModelBundleOf(texturePack), false);
@@ -427,6 +427,22 @@ test("로그아웃이어도 뽑기와 연출은 되고, 받기만 로그인을 �
   // 받은 파일은 같은 출처의 downloadUrl 을 링크로 눌러 곧장 내려받는다.
   assert.match(machine, /anchor\.download = prize\.entryFileName/u);
   assert.match(machine, /const LOGIN_HREF = "\/signup\?return_to=%2F%3Fintent%3Dmarket"/u);
+  // 2026-09-03(운영자): "로그인하고 받기"가 빈손으로 돌아왔다. 뽑은 것이 있으면 문은 그
+  // 물건의 상품 페이지로 돌아온다 — 거기 받기 단추가 이미 있다. 아무것도 안 뽑았을 때만
+  // 위의 첫 화면 주소를 쓴다.
+  assert.match(machine, /function loginHrefFor\(listing: GachaListing \| null\): string/u);
+  assert.match(
+    machine,
+    /return `\/signup\?return_to=\$\{encodeURIComponent\(`\/marketplace\/\$\{slug\}\?intent=market`\)\}`/u,
+  );
+  assert.match(machine, /loginHref: loginHrefFor\(prize\)/u);
+  assert.match(machine, /loginHref=\{loginHrefFor\(prize\)\}/u);
+  // 돌아온 사람에게 돌려줄 마지막 뽑기는 이 세션에만, 30분만 남는다.
+  assert.match(machine, /const LAST_PRIZE_KEY = "clunk\.gacha\.last-prize"/u);
+  assert.match(machine, /const LAST_PRIZE_TTL_MS = 30 \* 60 \* 1000/u);
+  assert.match(machine, /if \(Date\.now\(\) - record\.at > LAST_PRIZE_TTL_MS\) return null/u);
+  assert.match(machine, /intent=market/u);
+  assert.match(machine, /setStage\("result"\)/u);
   // 잔액은 API 응답에서만 온다.
   assert.match(machine, /"\/api\/credits"/u);
   assert.doesNotMatch(machine, /Math\.random\(\)\s*\*\s*\d/u);
@@ -460,10 +476,26 @@ test("연출은 레버 당김 → 흔들림 → Clunk → 캡슐 → 흔들흔�
   assert.match(machine, /capsule: 3200/u);
   // 움직임을 줄여 달라는 설정에서는 짧은 시간표를 쓴다.
   assert.match(machine, /reducedMotion \? TIMING\.reduced : TIMING\.full/u);
-  // 레버는 60px 이상 아래로 끌면 발동하고, 키보드로도 눌린다(button + onClick).
-  assert.match(machine, /const LEVER_TRIGGER_PIXELS = 60/u);
+  // 레버는 끝까지 내려가는 거리(96px)의 40% 인 40px 을 넘겨 끌면 발동하고, 키보드로도
+  // 눌린다(button + onClick). 2026-09-03: 60px 은 손잡이 지름(88px)만큼 긴 거리였다.
+  assert.match(machine, /const LEVER_TRIGGER_PIXELS = 40/u);
   assert.match(machine, /const LEVER_TRAVEL_PIXELS = 96/u);
   assert.match(machine, /pulled >= LEVER_TRIGGER_PIXELS/u);
+  const trigger = Number(/const LEVER_TRIGGER_PIXELS = (\d+)/u.exec(machine)?.[1]);
+  const travel = Number(/const LEVER_TRAVEL_PIXELS = (\d+)/u.exec(machine)?.[1]);
+  assert.ok(trigger / travel >= 0.4, `발동 거리 ${trigger}px 은 전체 ${travel}px 의 40% 에 못 미친다`);
+  // 짧게 끌고 놓으면 아무것도 뽑히지 않는다 — 뒤따라오는 클릭을 삼킨다.
+  assert.match(machine, /const LEVER_DRAG_SLOP = 6/u);
+  assert.match(machine, /if \(wasDragging && drag\.moved > LEVER_DRAG_SLOP\) swallowLeverClick\.current = true/u);
+  assert.match(machine, /if \(swallowLeverClick\.current\) \{ swallowLeverClick\.current = false; return; \}/u);
+  // 끌기는 단추가 아니라 창이 듣는다 — 포인터 잡기가 풀려도 끝까지 따라간다.
+  assert.match(machine, /window\.addEventListener\("pointermove", onMove\)/u);
+  assert.match(machine, /window\.addEventListener\("pointerup", onUp\)/u);
+  assert.match(machine, /window\.addEventListener\("pointercancel", onUp\)/u);
+  assert.match(machine, /setPointerCapture\(event\.pointerId\)/u);
+  // 엄지로 한 번에 잡을 크기 — 손잡이 단추는 64px 밑으로 내려가지 않는다.
+  assert.match(machine, /const LEVER_HIT_PIXELS = 64/u);
+  assert.match(machine, /put\(leverRef\.current, points\.lever, LEVER_HIT_PIXELS\)/u);
   assert.match(machine, /aria-label="레버를 당겨 에셋 뽑기"/u);
   // 화면 없이 단계를 세우고 프레임을 돌리는 두 손잡이.
   assert.match(machine, /__gachaStep/u);
@@ -654,6 +686,43 @@ test("머신 글자는 0.72rem 밑으로 내려가지 않는다", async () => {
   assert.match(css, /\.gc3-capsule \{[\s\S]*?min-height: 48px/u);
   // 움직임을 줄여 달라는 설정에서는 흔들림과 파티클을 아예 만들지 않는다.
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/u);
+});
+
+test("무대는 내비 밑에서 시작하고, 제목은 기계를 덮지 않는다", async () => {
+  const css = await readFile(new URL("../app/components/gacha/gacha.css", import.meta.url), "utf8");
+  const machine = await readFile(new URL("../app/components/gacha/GachaMachine3D.tsx", import.meta.url), "utf8");
+  const site = await readFile(new URL("../app/site-v5.css", import.meta.url), "utf8");
+
+  // 2026-09-03(운영자): 기계 꼭대기가 내비 띠 안으로 올라와 메뉴를 가렸다. 캔버스와
+  // 포스터가 내비 높이만큼 내려서 시작한다 — 장면 파일은 건드리지 않는다.
+  assert.match(css, /html:has\(\.gc-film\) \{ --gc-nav-h: 84px; \}/u);
+  // 내비가 앉는 띠는 꺼 두지 않는다 — 카메라가 기계 안으로 들어가는 근접 장면에서도
+  // 메뉴는 이 띠 위에서 읽힌다.
+  assert.match(css, /html:has\(\.gc-film\) \.sitenav-dock::before \{\s*opacity: 1 !important;\s*top: 0;\s*height: var\(--gc-nav-h, 84px\);/u);
+  assert.doesNotMatch(css, /\.sitenav-dock::before \{ opacity: 0 !important; \}/u);
+  assert.match(
+    css,
+    /\.gc-film \.gc3-canvas,\s*\.gc-film \.gc3-poster \{\s*top: calc\(var\(--gc-nav-h\) \+ var\(--gc-head-h\)\);/u,
+  );
+  // 내비는 무대의 어떤 층보다도 위에 선다.
+  assert.match(site, /\.cv5 \.sitenav-dock \{ position: fixed; inset: 0 0 auto 0; z-index: 80; \}/u);
+
+  // 넓은 화면: 제목은 왼쪽 칸, 기계는 그만큼 오른쪽으로 물러난다.
+  assert.match(css, /@media \(min-width: 1024px\) \{\s*\.gc-film \{ --gc-stage-left: clamp\(300px, 30vw, 460px\); \}/u);
+  // 캔버스가 비켜난 자리는 검은 상자가 아니라 같은 가게다 — 배경이 화면 전체에 남는다.
+  assert.match(css, /\.gc-film\.gc3\[data-live\] \.gc3-stage::before,\s*\.gc-film\.gc3\[data-live\] \.gc3-stage::after \{ opacity: 1; \}/u);
+  assert.match(css, /\.gc-beat-head \{\s*left: 7vw;/u);
+  // 좁은 화면: 제목은 내비 아래 띠에 눕고 h1 은 2rem 을 넘지 않는다.
+  assert.match(css, /@media \(max-width: 767px\) \{\s*html:has\(\.gc-film\) \{ --gc-nav-h: 76px; \}\s*\.gc-film \{ --gc-head-h: 116px; \}/u);
+  assert.match(css, /\.gc-beat-head h1 \{ font-size: clamp\(1\.6rem, 6\.6vw, 2rem\); \}/u);
+
+  // 자리잡기는 CSS 가, 떠오르는 거리만 스크롤이 넣는다 — 글줄의 스크롤 연출은 그대로다.
+  assert.match(css, /transform: translate\(var\(--gc-beat-x\), var\(--gc-beat-rise, 0px\)\)/u);
+  assert.match(machine, /node\.style\.setProperty\("--gc-beat-rise"/u);
+  // 캔버스가 비켜난 만큼 단추 자리도 함께 옮긴다.
+  assert.match(machine, /const dx = host\.offsetLeft;\s*const dy = host\.offsetTop;/u);
+  // 움직임을 줄여 달라는 설정의 규칙은 그대로 남아 있다.
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\) \{\s*\.gc-film-track \{ height: 100svh; \}/u);
 });
 
 test("랜딩은 캡슐 머신 한 대를 렌더한다", async () => {

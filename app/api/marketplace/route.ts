@@ -140,6 +140,10 @@ export async function GET(request: Request) {
         entryFileName: row.entryFileName,
         byteLength: row.byteLength,
         format: row.format,
+        // The sheet's grid travels with the row. The product page used to recover it by
+        // parsing the variant's title; the titles are plain nouns now, and a measured number
+        // should never have come out of a name in the first place.
+        facts: factsFor(String(row.slug)),
       }));
     return Response.json({
       ok: true,

@@ -1,6 +1,7 @@
 import { strict as assert } from "node:assert";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
+import { fileURLToPath } from "node:url";
 
 import {
   cardSpec,
@@ -20,7 +21,8 @@ import {
 import {
   factsFromManifest,
   formatLabelOf,
-  sheetSpecFromTitle,
+  sheetManifestsFor,
+  sheetSpecFromManifests,
 } from "../scripts/listing-facts-cli.ts";
 
 const root = new URL("../", import.meta.url);
@@ -85,20 +87,31 @@ test("the animation summary serialises what the file carries and nothing else", 
 
 // --- the facts index ----------------------------------------------------------------------
 
-test("a sheet's grid is read back out of the title the baker wrote", () => {
-  assert.deepEqual(sheetSpecFromTitle("코지 울타리 문 — 여닫기 애니메이션 (64×64, 8방향 × 8프레임)"), {
-    cell: 64,
-    directions: 8,
-    frames: 8,
-    cuts: 64,
-  });
-  assert.deepEqual(sheetSpecFromTitle("코지 온실 — 스프라이트 시트 (64×64, 8방향)"), {
-    cell: 64,
-    directions: 8,
-    frames: null,
-    cuts: null,
-  });
-  assert.equal(sheetSpecFromTitle("하베스트 프론티어 농부"), null, "a 3D title states no grid");
+test("a sheet's grid comes from the baker's manifest, never from the product name", () => {
+  assert.deepEqual(
+    sheetSpecFromManifests([{ grid: { frameWidth: 64 }, generation: { views: 8, clip: { frames: 8 } } }]),
+    { cell: 64, directions: 8, frames: 8, cuts: 64 },
+  );
+  assert.deepEqual(
+    sheetSpecFromManifests([{ grid: { frameWidth: 64 }, generation: { views: 8, clip: null } }]),
+    { cell: 64, directions: 8, frames: null, cuts: null },
+  );
+  assert.equal(sheetSpecFromManifests([]), null, "a product with no sheet manifest states no grid");
+});
+
+// The titles are plain nouns since 2026-09-03 ("울타리 문 · 여닫기 애니메이션 시트"), so a grid
+// parsed out of a name would now be null on every sheet. These are the published files.
+test("every published sheet still has a manifest that states its grid", () => {
+  const marketRoot = fileURLToPath(new URL("public/market", root));
+  assert.deepEqual(
+    sheetSpecFromManifests(sheetManifestsFor("cozy-fence-gate-swing-sprites", marketRoot)),
+    { cell: 64, directions: 8, frames: 8, cuts: 64 },
+  );
+  assert.deepEqual(
+    sheetSpecFromManifests(sheetManifestsFor("grove-tree-pack-vol1-sprites", marketRoot)),
+    { cell: 64, directions: 8, frames: null, cuts: null },
+  );
+  assert.equal(sheetSpecFromManifests(sheetManifestsFor("hf-barn", marketRoot)), null, "a 3D listing has no sheet");
 });
 
 test("the file format comes from the file name, never from a guess", () => {

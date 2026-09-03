@@ -38,15 +38,15 @@ const CREDITS = 9;
 const TITLES = {
   "cozy-crate-closed": "나무 궤짝 (닫힘)",
   "cozy-crate-open": "나무 궤짝 (열림)",
-  "cozy-crate-produce": "나무 궤짝 (수확물 적재)",
+  "cozy-crate-produce": "나무 궤짝 (수확물)",
   "cozy-farm-set-vol1": "코지 팜 세트 Vol.1 (3종)",
-  "cozy-fence-gate": "코지 울타리 문",
+  "cozy-fence-gate": "울타리 문",
   "cozy-greenhouse": "코지 온실",
   "cozy-haystack-full": "건초 롤 (온전한 것)",
   "cozy-haystack-used": "건초 롤 (헐린 것)",
-  "cozy-market-stall": "코지 마켓 스톨",
+  "cozy-market-stall": "시장 노점",
   "cozy-storage-shed": "코지 창고 헛간",
-  "grove-tree-pack-vol1": "그로브 트리 팩 Vol.1 (6종)",
+  "grove-tree-pack-vol1": "나무 6종 팩",
   "farmhand": "팜핸드 (밀짚모자 농부)",
 };
 
@@ -129,9 +129,12 @@ for (const sourceSlug of readdirSync(sheetsRoot).sort()) {
   const clip = sheets[0].manifest.generation.clip;
   const fps = clip ? sheets[0].manifest.animations[0].fps : null;
 
+  // The title is the product's plain name and nothing else: the grid, the direction count
+  // and the frame count are measured facts and belong in the specification rows, which read
+  // them from the sheet manifest (app/data/listing-facts.json), not out of this string.
   const title = clip
-    ? `${TITLES[titleKey] ?? sourceSlug} — ${CLIP_LABELS[clip.name] ?? clip.name} 애니메이션 (${cell}×${cell}, ${views}방향 × ${clip.frames}프레임)`
-    : `${TITLES[titleKey] ?? sourceSlug} — 스프라이트 시트 (${cell}×${cell}, ${views}방향)`;
+    ? `${TITLES[titleKey] ?? sourceSlug} · ${CLIP_LABELS[clip.name] ?? clip.name} 애니메이션 시트`
+    : `${TITLES[titleKey] ?? sourceSlug} · 스프라이트 시트`;
 
   const description = [
     clip

@@ -77,7 +77,7 @@ export default function MarketplacePage() {
               <div aria-hidden="true">
                 <div className={styles.heroPanel}>
                   <div className={styles.heroPanelHead}>
-                    <span>코지 마켓 스톨</span>
+                    <span>시장 노점</span>
                     <span>GLB · 215 KB</span>
                   </div>
                   <div className={styles.heroPanelArt}>

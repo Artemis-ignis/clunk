@@ -70,6 +70,8 @@ type ListingVariant = {
   entryFileName: string;
   byteLength: number;
   format: string;
+  /** The sheet's measured grid, served with the row so its facts survive a rename. */
+  facts?: ListingFacts | null;
 };
 
 /** A motion the sprite baker turned this model's pivots with, as the viewer replays it. */
@@ -156,28 +158,16 @@ function isAiGenerated(listing: Pick<Listing, "aiGenerated">): boolean {
 }
 
 /**
- * Korean shop names for the texture listings.
+ * The name to show — the stored title, and nothing else.
  *
- * Their stored titles are the words the pipeline was run with — "tilled soil (Harvest
- * Frontier 실수주) 심리스 텍스처 (1024x1024)" names an internal order and an English
- * material id, and a visitor is asked to buy it. The file, the size and the seamless verdict
- * are unchanged; only the name a person reads is. The stored titles should be renamed at the
- * source, and this table goes away when they are.
+ * This used to be a lookup table that renamed the eight texture listings on their way to the
+ * screen, because their stored titles were the words the pipeline was run with ("tilled soil
+ * (Harvest Frontier 실수주) 심리스 텍스처 (1024x1024)"). Every one of those rows has since been
+ * renamed at the source in D1, so the table now only had the power to overrule a rename made
+ * there and show a name the shop no longer uses. It is gone: the row is the name.
  */
-const DISPLAY_TITLES: Readonly<Record<string, string>> = {
-  "tex-soil-tilled-v2": "경작지 흙 · 이어붙는 텍스처",
-  "tex-grass-meadow-v1": "초원 풀 · 이어붙는 텍스처",
-  "tex-dirt-path-v1": "흙길 · 이어붙는 텍스처",
-  "tex-stone-wall-v1": "돌담 · 이어붙는 텍스처",
-  "tex-wood-planks-v1": "나무 판자 · 이어붙는 텍스처",
-  "tex-roof-tiles-v2": "기와 지붕 · 이어붙는 텍스처",
-  "tex-sand-dry-v1": "마른 모래 · 이어붙는 텍스처",
-  "verified-seamless-textures-vol1": "이어붙는 텍스처 7종 묶음",
-};
-
-/** The name to show. Falls back to the stored title, so a new listing is never nameless. */
-function displayTitle(slug: string, title: string): string {
-  return DISPLAY_TITLES[slug] ?? title;
+function displayTitle(_slug: string, title: string): string {
+  return title;
 }
 
 /** A 3D model rather than a picture — decides which numbers describe the file honestly. */
@@ -186,18 +176,23 @@ function isModelListing(listing: Pick<Listing, "entryFileName">): boolean {
 }
 
 /**
- * The sheet's own numbers, read back out of the title the baker wrote.
+ * The sheet's own numbers, served with the row.
  *
- * "코지 울타리 문 — 여닫기 애니메이션 (64×64, 8방향 × 8프레임)" is the whole source: nothing
- * here is recomputed, so a row cannot state a frame count the sheet does not have.
+ * The grid used to be parsed back out of the title ("… (64×64, 8방향 × 8프레임)"), which made
+ * the product's name the source of a measured number: renaming the sheets to plain nouns on
+ * 2026-09-03 would have emptied this row on all thirteen. The figures now come from
+ * app/data/listing-facts.json, which the baker's sheet manifest wrote, so nothing here is
+ * recomputed and a row cannot state a frame count the sheet does not have. Only the kind of
+ * sheet — "스프라이트 시트", "여닫기 애니메이션 시트" — is still the title's last clause,
+ * because that is a name rather than a measurement.
  */
 function variantFacts(variant: ListingVariant): { kind: string; facts: string[] } {
-  const kind = variant.title.match(/—\s*(.+?)\s*\(/u)?.[1]?.trim() ?? "스프라이트 시트";
-  const grid = variant.title.match(/\((\d+)×(\d+),\s*(\d+)방향(?:\s*×\s*(\d+)프레임)?\)/u);
+  const kind = variant.title.match(/·\s*([^·]+?)\s*$/u)?.[1] ?? "스프라이트 시트";
+  const sheet = variant.facts?.sheet ?? null;
   const facts: string[] = [];
-  if (grid) {
-    facts.push(`한 칸 ${grid[1]}×${grid[2]}`, `${grid[3]}방향`);
-    if (grid[4]) facts.push(`${grid[4]}프레임`);
+  if (sheet) {
+    facts.push(`한 칸 ${sheet.cell}×${sheet.cell}`, `${sheet.directions}방향`);
+    if (sheet.frames !== null) facts.push(`${sheet.frames}프레임`);
   }
   facts.push(formatBytes(variant.byteLength));
   return { kind, facts };
