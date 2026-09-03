@@ -1027,7 +1027,9 @@ html:has(.gc-film) { --gc-nav-h: 84px; }
 .gc-film-sticky { background: #07050f; }
 .gc-film .gc3-canvas,
 .gc-film .gc3-poster {
-  top: calc(var(--gc-nav-h) + var(--gc-head-h));
+  /* 내비 높이만큼의 위 여백은 이제 장면이 setTopInset(--gc-nav-h)으로 카메라를 들어 만든다.
+     캔버스는 내비 뒤까지 올라가고(내비 띠가 가린다), 여기서는 제목 띠(--gc-head-h)만 뺀다. */
+  top: var(--gc-head-h);
   left: var(--gc-stage-left);
   right: 0;
   bottom: 0;
