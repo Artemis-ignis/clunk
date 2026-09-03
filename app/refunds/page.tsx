@@ -115,7 +115,7 @@ export default function RefundsPage() {
       <section aria-labelledby="refunds-process">
         <h2 id="refunds-process">5. 신청 방법과 처리 절차</h2>
         <ol>
-          <li>구매자가 주문 번호와 사유를 적어 고객문의 전자우편으로 신청합니다. 이 주소는 아직 공개되지 않았으며, <b>확정되는 대로 이 자리와 위 판매자 표시사항에 기재합니다</b>.</li>
+          <li>구매자가 주문 번호와 사유를 적어 고객문의 전자우편 <b>junsuopar@gmail.com</b>으로 신청합니다.</li>
           <li>운영자가 주문 기록, 받을 권리의 상태, 내려받은 기록, 파일 지문을 확인합니다.</li>
           <li>환불 사유가 확인되면 결제대행사를 통해 환불을 요청합니다.</li>
           <li>환불이 확인되면 주문은 <b>환불 완료</b>로, 그 에셋을 받을 권리는 <b>회수됨</b>으로 바뀌어 더 이상 내려받을 수 없습니다.</li>
@@ -136,8 +136,7 @@ export default function RefundsPage() {
         <p className="cv5-legal-note">
           이 정책은 {LEGAL_DRAFT_DATE} 작성되어 {LEGAL_EFFECTIVE_DATE}부터 시행합니다. 무료 베타 기간에는
           결제가 없으므로 유상 환불 조항은 유료 전환 후에 적용됩니다. 받은 파일이 손상됐거나 내려받아지지
-          않는 문제는 고객문의 전자우편이 공개되는 대로 그 주소로 알려 주시면 다시 제공하며, 주소는
-          확정되는 대로 이 자리에 기재합니다.
+          않는 문제는 고객문의 전자우편 junsuopar@gmail.com으로 알려 주시면 다시 제공합니다.
         </p>
       </section>
     </LegalShell>

@@ -43,11 +43,24 @@ export function SiteFooter() {
           <Link href="/refunds" prefetch={false}>취소·환불정책</Link>
         </nav>
       </div>
+      {/* 전자상거래법 제10조 표시사항 — 사업자등록증명 값 그대로. 한 블록, 한 줄. */}
       <div className="cv5-frame cv5-footer-legal">
-        <span>아르테미스(Artemis) · 대표 박준성 · 사업자등록번호 361-02-03814 · 인천광역시 제물포구 화도진로 16, 109동 1604호</span>
-        {billingConfigured ? null : (
-          <span>지금은 무료 베타 기간입니다. 모든 기능을 결제 없이 쓸 수 있습니다.</span>
-        )}
+        <div className="cv5-footer-biz">
+          <strong>Artemis</strong>
+          <span>대표자: 박준성</span>
+          <span>사업자등록번호: 361-02-03814</span>
+          <span>사업장 주소: 인천광역시 제물포구 화도진로 16</span>
+          <span>전화: +82 10-2761-9841</span>
+          <span>이메일: junsuopar@gmail.com</span>
+        </div>
+        <div className="cv5-footer-bottom">
+          <span>© 2026 Artemis. All rights reserved.{billingConfigured ? "" : " · 지금은 무료 베타 기간입니다. 모든 기능을 결제 없이 쓸 수 있습니다."}</span>
+          <nav aria-label="약관 바로가기">
+            <Link href="/privacy" prefetch={false}>개인정보처리방침</Link>
+            <Link href="/terms" prefetch={false}>이용약관</Link>
+            <Link href="/refunds" prefetch={false}>취소·환불정책</Link>
+          </nav>
+        </div>
       </div>
     </footer>
   );

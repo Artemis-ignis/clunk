@@ -8,8 +8,10 @@
 
 .cv5-legal {
   position: relative;
-  padding: clamp(128px, 17vh, 176px) 0 clamp(64px, 9vh, 104px);
+  padding: clamp(112px, 15vh, 150px) 0 clamp(64px, 9vh, 104px);
 }
+/* 문서는 좁은 한 단으로 읽힌다. */
+.cv5-legal > .cv5-frame { max-width: 760px; }
 
 .cv5-legal-head {
   border-bottom: 1px solid var(--v5-line);
@@ -17,63 +19,45 @@
 }
 
 .cv5-legal-head h1 {
-  margin: 18px 0 0;
-  font-size: clamp(2rem, 4.4vw, 3rem);
+  margin: 0;
+  font-size: clamp(1.8rem, 3.6vw, 2.4rem);
   font-weight: 860;
-  line-height: 1.12;
-  letter-spacing: -0.038em;
+  line-height: 1.16;
+  letter-spacing: -0.03em;
 }
 
 .cv5-legal-lede {
-  margin: 18px 0 0;
+  margin: 12px 0 0;
   max-width: 62ch;
   color: var(--v5-ink-dim);
-  font-size: 1rem;
-  line-height: 1.72;
+  font-size: 0.95rem;
+  line-height: 1.7;
 }
 
 /* Draft badge: this document is honestly not in force until the operator's
    registered business details replace the placeholders below it. */
+/* 한 문장 고지 — 상자 없이 조용하게. */
 .cv5-legal-status {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 8px 14px;
-  margin: 24px 0 0;
-  padding: 14px 16px;
-  border: 1px solid rgba(251, 191, 36, 0.5);
-  border-radius: var(--v5-r);
-  background: rgba(251, 191, 36, 0.07);
-}
-
-.cv5-legal-status strong {
-  font-family: var(--v5-label);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--v5-amber);
-}
-
-.cv5-legal-status span {
-  color: var(--v5-ink-dim);
-  font-size: 0.88rem;
-  line-height: 1.6;
+  margin: 14px 0 0;
+  color: var(--v5-ink-faint);
+  font-size: 0.84rem;
+  line-height: 1.65;
 }
 
 .cv5-legal-dates {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 24px;
-  margin: 18px 0 0;
+  gap: 4px 18px;
+  margin: 16px 0 0;
   padding: 0;
   list-style: none;
   font-family: var(--v5-label);
   font-size: 0.72rem;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
 }
 
 .cv5 .cv5-legal-dates li { color: var(--v5-ink-faint); }
+.cv5 .cv5-legal-dates li strong { color: var(--v5-green); font-weight: 700; }
 
 /* ---------------------------------------------------------------- body */
 .cv5-legal-body {
@@ -170,10 +154,10 @@
 
 .cv5-legal-table dt {
   margin: 0;
-  font-family: var(--v5-label);
-  font-size: 0.72rem;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
+  font-family: var(--v5-font);
+  font-size: 0.86rem;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--v5-ink-faint);
 }
 

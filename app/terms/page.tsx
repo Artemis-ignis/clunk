@@ -33,8 +33,8 @@ export default function TermsPage() {
         </p>
         <LegalRows rows={LEGAL_OPERATOR_ROWS} />
         <p className="cv5-legal-note">
-          이 약관은 2026-09-02부터 시행 중입니다. 다만 통신판매업 신고번호와 연락처가 채워지기 전까지
-          서비스는 유상 결제를 받지 않습니다. 연락처는 확정되는 대로 이 자리에 기재합니다.
+          이 약관은 2026-09-02부터 시행 중입니다. 다만 통신판매업 신고번호가 채워지기 전까지
+          서비스는 유상 결제를 받지 않습니다. 문의는 junsuopar@gmail.com 또는 +82 10-2761-9841로 받습니다.
         </p>
       </section>
 

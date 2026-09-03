@@ -20,10 +20,10 @@ export const metadata = createPageMetadata({
  * 둡니다.
  */
 const PRIVACY_OFFICER_ROWS: LegalRow[] = [
-  { label: "개인정보보호책임자", value: "[성명·직위 — 운영자 지정 후 기재]", placeholder: true },
-  { label: "책임자 연락처", value: "[전화번호 — 확정 후 기재]", placeholder: true },
-  { label: "책임자 전자우편", value: "[개인정보 문의 이메일 — 운영 계정 확정 후 기재]", placeholder: true },
-  { label: "개인정보 열람 청구 접수", value: "[접수 창구 — 확정 후 기재]", placeholder: true },
+  { label: "개인정보보호책임자", value: "박준성 (대표)" },
+  { label: "책임자 연락처", value: "+82 10-2761-9841" },
+  { label: "책임자 전자우편", value: "junsuopar@gmail.com" },
+  { label: "개인정보 열람 청구 접수", value: "junsuopar@gmail.com (전자우편 접수)" },
 ];
 
 // code: true — 쿠키 이름은 브라우저에 저장되는 문자 그대로다. 표의 라벨 대문자 변환을
@@ -102,9 +102,9 @@ export default function PrivacyPage() {
         </ul>
         <p className="cv5-legal-note">
           <b>계정 삭제 요청 시 30일 이내</b>에 계정·작업공간·크레딧 기록을 파기합니다. 법령상 보존
-          의무가 있는 거래 기록만 그 기간 동안 따로 보관한 뒤 파기합니다. 삭제 요청을 받을 전자우편
-          주소는 아직 공개되지 않았으며, <b>확정되는 대로 이 자리에 기재합니다</b>. 그때까지 로그인
-          상태를 끝내는 것은 <a href="/settings">설정 화면</a>에서 바로 할 수 있습니다.
+          의무가 있는 거래 기록만 그 기간 동안 따로 보관한 뒤 파기합니다. 삭제 요청은
+          <b>junsuopar@gmail.com</b>으로 받습니다. 이 브라우저의 로그인 상태를 끝내는 것은
+          <a href="/settings">설정 화면</a>에서 바로 할 수 있습니다.
         </p>
       </section>
 
@@ -135,8 +135,7 @@ export default function PrivacyPage() {
         <h2 id="privacy-rights">7. 정보주체의 권리</h2>
         <p>
           이용자는 언제든지 자신의 개인정보에 대한 <b>열람·정정·삭제·처리정지</b>를 요구할 수 있습니다.
-          접수용 전자우편 주소는 아직 공개되지 않았으며, <b>확정되는 대로 이 자리와 위 표에 기재합니다</b>.
-          공개된 뒤에는 그 주소로 받은 요청을 법령이 정한 기간 안에 처리하고 결과를 알립니다. 그때까지도
+          요청은 <b>junsuopar@gmail.com</b>으로 받으며, 법령이 정한 기간 안에 처리하고 결과를 알립니다.
           이 브라우저의 로그인 상태를 끝내는 것은 <a href="/settings">설정 화면</a>에서 바로 할 수 있습니다.
           법령상 보존 의무가 있는 기록은 삭제 요구가 제한될 수 있으며, 그 사유를 함께 알립니다.
         </p>

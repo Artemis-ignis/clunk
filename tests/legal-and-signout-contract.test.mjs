@@ -75,10 +75,10 @@ test("사업자 표시사항은 등록증 실값과 정확히 일치하고, 미�
     const html = await (await render(pathname)).text();
     // 사업자등록증명(인천세무서, 2026-08-31 발급) 원본 값과의 정확 일치.
     for (const realValue of [
-      "아르테미스(Artemis)",
+      "Artemis",
       "박준성",
       "361-02-03814",
-      "인천광역시 제물포구 화도진로 16, 109동 1604호",
+      "인천광역시 제물포구 화도진로 16",
     ]) {
       assert.ok(html.includes(realValue), `${pathname}에 등록증 실값 ${realValue} 이 없습니다`);
     }
@@ -115,10 +115,10 @@ test("이용약관이 실제 서비스 실체와 디지털 콘텐츠 특칙을 �
 test("개인정보처리방침이 실제 저장 항목과 책임자 플레이스홀더를 밝힌다", async () => {
   const html = await (await render("/privacy")).text();
   assert.ok(html.includes("개인정보보호책임자"), "개인정보보호책임자 항목이 없습니다");
-  assert.ok(
-    html.includes("[성명·직위 — 운영자 지정 후 기재]"),
-    "책임자 정보가 플레이스홀더로 표시되지 않았습니다",
-  );
+  // 2026-09-03: 운영자가 책임자·연락처를 확정해 주었다 — 플레이스홀더가 아니라 실값이어야 한다.
+  assert.ok(html.includes("박준성 (대표)"), "개인정보보호책임자 성명이 없습니다");
+  assert.ok(html.includes("junsuopar@gmail.com"), "책임자 전자우편이 없습니다");
+  assert.ok(!html.includes("[성명·직위"), "책임자 플레이스홀더가 남아 있습니다");
   assert.ok(html.includes("clunk_auth_session"), "세션 쿠키 항목이 없습니다");
   assert.ok(html.includes("clunk_oauth_tx_"), "OAuth 트랜잭션 쿠키 항목이 없습니다");
   assert.ok(html.includes("SHA-256"), "저장하는 에셋 메타데이터 항목이 없습니다");
@@ -276,7 +276,7 @@ test("결제 미개시 안내는 결제 provider 미설정 상태에서만 렌�
   const footer = await source("app/components/SiteFooter.tsx");
   assert.match(footer, /getBillingStatus/);
   assert.match(footer, /AVAILABLE/);
-  assert.match(footer, /billingConfigured \? null :/);
+  assert.match(footer, /billingConfigured \? "" :/);
 
   // 기본 테스트 환경에는 결제 설정이 없으므로 CONFIG_REQUIRED = 안내 문장 노출.
   // 2026-09-02: 문장은 "신고 절차 진행 중"이 아니라 무료 베타를 말한다 — 절차 대기는
@@ -306,7 +306,8 @@ test("연락처가 없는 자리를 가리키지 않고, 지금 할 수 있는 �
   // 보내 주세요"는 아무 데도 가리키지 못하는 문장이었다.
   for (const pathname of ["/privacy", "/refunds"]) {
     const html = await (await render(pathname)).text();
-    assert.ok(html.includes("확정되는 대로 이 자리에"), `${pathname}에 연락처 확정 안내가 없습니다`);
+    assert.ok(html.includes("junsuopar@gmail.com"), `${pathname}에 실제 문의 주소가 없습니다`);
+    assert.ok(!html.includes("확정되는 대로 이 자리에"), `${pathname}에 옛 "확정되는 대로" 문구가 남아 있습니다`);
     assert.ok(!html.includes("아래 문의 창구"), `${pathname}에 가리킬 곳 없는 안내가 남아 있습니다`);
   }
   const privacy = await (await render("/privacy")).text();
