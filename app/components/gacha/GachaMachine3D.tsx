@@ -309,7 +309,19 @@ function readLastPrize(): StoredPrize | null {
  * (setTopInset — 모든 샷에서 화면 위쪽에 px 만큼 빈 프레임을 남긴다)을 붙이는 중이라,
  * 화면 쪽 호출을 옵셔널 체이닝으로 미리 걸어 둔다. 훅이 없는 지금은 아무 일도 없다.
  */
-type SceneWithCameraHooks = GachaScene & { setTopInset?: (px: number) => void };
+type SceneWithCameraHooks = GachaScene & { setTopInset?: (px: number) => void; setFrameFill?: (k: number) => void };
+
+/**
+ * 내비 띠만큼 위를 비우면서도 기계 전체가 남은 높이 안에 들어가게 한다: 카메라를 띠 높이만큼
+ * 들어 올리고(setTopInset), 그만큼 줄어든 높이에 맞춰 거리를 늘린다(setFrameFill). 둘 중 하나만
+ * 하면 기계 밑동이 화면 아래로 잘린다(2026-09-03 라운드 12 확인).
+ */
+function applyCameraFraming(scene: SceneWithCameraHooks, host: HTMLElement | null): void {
+  const navH = navBandHeight();
+  const h = Math.max(320, host?.clientHeight ?? window.innerHeight);
+  scene.setTopInset?.(navBandHeight());
+  scene.setFrameFill?.(Math.min(1.2, Math.max(1, h / Math.max(1, h - navH))));
+}
 
 /** 내비가 앉는 띠의 높이(px). CSS 의 --gc-nav-h 가 하나뿐인 출처다. */
 function navBandHeight(): number {
@@ -613,7 +625,7 @@ export function GachaMachine3D() {
 
         onResize = () => {
           scene.resize();
-          (scene as SceneWithCameraHooks).setTopInset?.(navBandHeight());
+          applyCameraFraming(scene as SceneWithCameraHooks, host);
           placeOverlays();
         };
         window.addEventListener("resize", onResize);
@@ -645,7 +657,7 @@ export function GachaMachine3D() {
         scene.resize();
         // 카메라가 내비 띠만큼 위를 비워 두게 한다. 훅이 붙기 전까지는 캔버스가 그 자리에서
         // 시작하는 것으로 같은 일을 하고 있다 — 훅이 오면 캔버스 쪽 여백을 줄여야 한다.
-        (scene as SceneWithCameraHooks).setTopInset?.(navBandHeight());
+        applyCameraFraming(scene as SceneWithCameraHooks, host);
         placeOverlays();
         // 장면이 섰다고 알린다. 아래의 "값 넣기" 훅들이 이 신호에 한 번 더 돌아,
         // 장면을 불러오는 동안 이미 정해져 있던 캡슐 색·단계가 빠짐없이 들어간다.
