@@ -28,6 +28,7 @@
   ],
   "exclude": [
     "node_modules",
+    "tmp",
     "outputs",
     "integrations/vscode",
     "agentic-build-and-orchestrate-ai-agents-while-you-sleep",
