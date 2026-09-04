@@ -818,9 +818,18 @@ export function EmbeddedGlbViewer({
 
         const surfaceStage = stage as HTMLDivElement;
         function resize() {
+          // canvas 가 stage 밖에 있으면 `.cv5-embed3d canvas` 의 크기 규칙이 안 걸려,
+          // canvas 가 자기 속성만큼 자리를 차지하고 그 자리가 다시 setSize 로 들어가
+          // 배로 커진다. 위쪽 껍데기를 하나로 고정해 그 일이 안 나게 했지만, 한 번 나면
+          // 화면 전체가 검은 공백이 되므로 여기서 한 번 더 붙잡는다.
+          if (renderer.domElement.parentElement !== surfaceStage) surfaceStage.appendChild(renderer.domElement);
           const width = surfaceStage.clientWidth;
           const height = surfaceStage.clientHeight;
           if (!width || !height) return;
+          // 화면보다 훨씬 큰 값은 되먹임이 시작됐다는 뜻이다. 그 값을 그대로 그리면
+          // 그래픽 메모리도 같이 커진다.
+          const cap = Math.max(window.innerHeight * 2, 2048);
+          if (height > cap) return;
           renderer.setSize(width, height, false);
           camera.aspect = width / height;
           camera.updateProjectionMatrix();
@@ -1219,11 +1228,24 @@ export function EmbeddedGlbViewer({
   // A file can carry its own animations, which nobody knew about until it was opened, so the
   // bar has to be able to appear after the load rather than only when the parent passed clips.
   const wantsControls = (clips?.length ?? 0) > 0 || clipStatus.length > 0 || scaleReference;
-  if (!wantsControls) return stage;
 
+  // 껍데기를 늘 같은 것으로 둔다. 예전에는 조종 줄이 없으면 stage 를 그대로 돌려주고
+  // 있으면 감싸서 돌려줬는데, 파일 안의 동작은 파일을 연 뒤에야 알 수 있으므로 그 전환이
+  // 로딩이 끝난 뒤에 일어난다. 그 순간 React 가 최상위 요소를 갈아 끼우면서 stage 를 다시
+  // 붙이고, 손으로 append 해 둔 <canvas> 는 React 가 모르는 노드라 stage 밖으로 밀려났다.
+  //
+  // 밖으로 나간 canvas 에는 `.cv5-embed3d canvas` 의 크기 규칙이 걸리지 않는다. 그러면
+  // canvas 는 자기 width/height 속성만큼 자리를 차지하고, ResizeObserver 가 그 커진 자리를
+  // 다시 setSize 에 넣어 배로 키운다 — 2026-09-04 첫 화면에서 canvas 가 12,575px 까지
+  // 자라 문서가 31,000px 짜리 검은 공백이 됐다. 동작이 든 파일을 올린 순간 터졌다.
+  //
+  // `display: contents` 는 껍데기를 레이아웃에서 지운다. 조종 줄이 없을 때의 모양은
+  // 예전과 같고, DOM 최상위 요소는 처음부터 끝까지 하나로 유지된다.
   return (
-    <div style={bar.wrap}>
+    <div style={wantsControls ? bar.wrap : bar.passthrough}>
       {stage}
+      {!wantsControls ? null : (
+        <>
       <div style={bar.row}>
         {clipStatus.length > 0 ? (
           <div style={bar.group} role="group" aria-label="움직임 고르기">
@@ -1281,6 +1303,8 @@ export function EmbeddedGlbViewer({
           이 파일에는 {blocked.missingNode} 부분이 없어 {blocked.label} 움직임을 재생할 수 없습니다.
         </p>
       ) : null}
+        </>
+      )}
     </div>
   );
 }
@@ -1328,6 +1352,9 @@ function RailButton({
  */
 const bar: Record<string, CSSProperties> = {
   wrap: { display: "grid", gap: 10 },
+  // 조종 줄이 없을 때의 껍데기. 레이아웃에서 자기를 지워 stage 가 부모의 직접 자식처럼
+  // 놓이므로 예전과 같은 모양이 나오고, DOM 최상위 요소는 그대로 하나로 유지된다.
+  passthrough: { display: "contents" },
   row: { display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" },
   group: { display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" },
   chip: {
