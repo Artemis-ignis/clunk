@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "./Icon";
+import { usesMeshopt } from "./meshopt-decoder";
 
 export function AssetPreview({ bytes, fileName }: { bytes: Uint8Array | null; fileName: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -30,8 +31,12 @@ export function AssetPreview({ bytes, fileName }: { bytes: Uint8Array | null; fi
       import("three"),
       import("three/examples/jsm/loaders/GLTFLoader.js"),
       import("three/examples/jsm/controls/OrbitControls.js"),
-      import("three/examples/jsm/libs/meshopt_decoder.module.js")
-    ]).then(([threeModule, { GLTFLoader }, { OrbitControls }, { MeshoptDecoder }]) => {
+      // 압축을 푸는 코드는 압축된 파일에서만 부른다. three 의 디코더 모듈은 불러오는
+      // 것만으로 WebAssembly 를 컴파일해서, 늘 부르면 파일과 무관하게 그 값을 치른다.
+      usesMeshopt(browserBytes)
+        ? import("three/examples/jsm/libs/meshopt_decoder.module.js")
+        : Promise.resolve(null)
+    ]).then(([threeModule, { GLTFLoader }, { OrbitControls }, meshopt]) => {
       if (disposed) return;
       const THREE = threeModule;
       const scene = new THREE.Scene();
@@ -56,7 +61,7 @@ export function AssetPreview({ bytes, fileName }: { bytes: Uint8Array | null; fi
       const loader = new GLTFLoader();
       // Compacted runtime GLBs (e.g. Harvest Frontier exports) ship EXT_meshopt_compression;
       // without the decoder the preview fails while the byte-level inspection still succeeds.
-      loader.setMeshoptDecoder(MeshoptDecoder);
+      if (meshopt) loader.setMeshoptDecoder(meshopt.MeshoptDecoder);
 
       cleanupPreview = () => {
         controls.dispose();

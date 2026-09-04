@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 
 import { gltfClipLabel } from "./gltf-clip-labels";
+import { attachMeshoptDecoder } from "../meshopt-decoder";
 import { readPalette, type PaletteEntry } from "./measure-palette";
 import { useViewerWebMcp, type ViewerView } from "../../webmcp/useViewerWebMcp";
 
@@ -255,10 +256,6 @@ export function EmbeddedGlbViewer({
         const THREE = await import("three");
         const { OrbitControls } = await import("three/examples/jsm/controls/OrbitControls.js");
         const { GLTFLoader } = await import("three/examples/jsm/loaders/GLTFLoader.js");
-        // Our own optimiser emits EXT_meshopt_compression, so a loader without
-        // the decoder throws on exactly the files we sell. It has to be wired in
-        // before the first parse, not as a fallback after one fails.
-        const { MeshoptDecoder } = await import("three/examples/jsm/libs/meshopt_decoder.module.js");
         if (disposed) return;
 
         const renderer = new THREE.WebGLRenderer({
@@ -304,7 +301,10 @@ export function EmbeddedGlbViewer({
 
         const buffer = await (await fetch(src)).arrayBuffer();
         const loader = new GLTFLoader();
-        loader.setMeshoptDecoder(MeshoptDecoder);
+        // 압축된 GLB 는 디코더 없이는 열리지 않는다. 다만 그 디코더는 불러오는 것만으로
+        // WebAssembly 를 컴파일하므로, 파일이 실제로 압축을 쓸 때만 붙인다.
+        await attachMeshoptDecoder(loader, buffer);
+        if (disposed) return;
         const gltf = await loader.parseAsync(buffer, "");
         if (disposed) {
           renderer.dispose();

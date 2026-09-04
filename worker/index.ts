@@ -92,8 +92,8 @@ const CSP_BASE = "default-src 'self'; base-uri 'self'; object-src 'none'; frame-
   // 모든 3D 상품에 그림이 생겼고, 그때 라이브 콘솔에서 실제로 막히는 것을 봤습니다.
   + " connect-src 'self' blob: https://cloudflareinsights.com";
 
-const ENFORCED_CSP = `${CSP_BASE}; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com`;
-const REPORT_ONLY_CSP = `${CSP_BASE}; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://static.cloudflareinsights.com`;
+const ENFORCED_CSP = `${CSP_BASE}; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://static.cloudflareinsights.com`;
+const REPORT_ONLY_CSP = `${CSP_BASE}; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com`;
 
 function withSecurityHeaders(response: Response): Response {
   const values: Record<string, string> = {
@@ -113,12 +113,22 @@ function withSecurityHeaders(response: Response): Response {
     // 호출은 전부 워커 안에서 일어나 connect-src 의 대상이 아닙니다. 남긴 하나는 Cloudflare
     // 웹 분석 비콘으로, 대시보드에서 켜면 그때부터 보고를 보냅니다.
     "Content-Security-Policy": ENFORCED_CSP,
-    // script-src 에서 'unsafe-eval' 을 뺀 판. 2026-09-04 라이브에서 보고를 받아 보니
-    // WebAssembly 컴파일 위반이 하나 잡혔습니다 — three 의 MeshoptDecoder 가 압축된
-    // GLB(EXT_meshopt_compression)를 푸는 데 씁니다(app/components/AssetPreview.tsx).
-    // 그래서 그냥 뺄 수는 없고, WebAssembly 만 허용하고 eval 과 new Function 은 계속
-    // 막는 'wasm-unsafe-eval' 로 좁힙니다. 이 값을 모르는 옛 브라우저(Safari 16.4 미만)
-    // 에서는 뷰어가 동작하지 않으므로, 보고가 0 인 것을 다시 확인한 뒤 강제로 옮깁니다.
+    // 이제 eval 을 통째로 뺀 판을 잽니다. 2026-09-04 강제하는 쪽이 'unsafe-eval' 에서
+    // 'wasm-unsafe-eval' 로 내려왔습니다 — eval() 과 new Function() 은 이제 막히고
+    // WebAssembly 컴파일만 열려 있습니다.
+    //
+    // 그 전에 걸림돌이 하나 있었습니다. three 의 MeshoptDecoder 모듈은 맨 바깥에서
+    // WebAssembly.instantiate 를 불러, import 하는 것만으로 컴파일이 일어납니다. 뷰어가
+    // 그것을 조건 없이 부르고 있었으므로 압축되지 않은 파일에서도 매번 그 값을 치렀고,
+    // 'wasm-unsafe-eval' 을 모르는 옛 브라우저(Safari 16.4 미만)에서는 뷰어가 통째로
+    // 죽게 됩니다. 이제 파일이 EXT_meshopt_compression 을 쓸 때만 부릅니다
+    // (app/components/meshopt-decoder.ts). 파는 파일은 확장을 하나도 요구하지 않으므로
+    // 마켓에서는 WebAssembly 가 아예 돌지 않고, 옛 브라우저에서도 상품이 전부 열립니다.
+    //
+    // 남은 그 한 줄을 지우지 않는 이유는 두 가지입니다. 우리 최적화기가 내놓는 압축본을
+    // 검사기에 다시 넣는 길이 실제로 있고, 첫 화면의 트랙터는 무게 때문에 일부러 압축본
+    // (565KB, 안 푼 것은 1,493KB)을 씁니다. 옛 브라우저에서는 그 뷰어만 포스터 그림으로
+    // 물러납니다 — 이미 그렇게 되어 있고, 이 변경으로 나빠지지 않았습니다.
     //
     // 'unsafe-inline' 은 여기서도 못 뺍니다. vinext 가 RSC 청크마다 인라인 스크립트를
     // 뿜어 첫 화면 한 장에 939 개가 실리고, 내용이 매번 달라 해시로 고정할 수 없습니다.
