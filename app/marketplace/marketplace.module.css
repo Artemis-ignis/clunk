@@ -1371,6 +1371,15 @@
 }
 .specList li b { color: var(--v5-ink); font-weight: 700; }
 
+/* the same product's English name, under its Korean one */
+.detailTitleEn {
+  margin: 4px 0 0;
+  font-size: 0.94rem;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  color: var(--v5-ink-faint);
+}
+
 /* which engines open this file, and what they open it with */
 .engineFit {
   margin: 18px 0 0;

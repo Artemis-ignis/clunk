@@ -26,6 +26,8 @@ type Listing = {
   id: string;
   slug: string;
   title: string;
+  /** 같은 상품의 영어 이름. 아직 붙이지 않은 상품은 null. */
+  titleEn?: string | null;
   description: string;
 
   currency: string;
@@ -655,6 +657,9 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
           <span>{licenseLabel(listing.licenseStatus)}</span>
         </div>
         <h1>{name}</h1>
+        {/* 영어 이름. 한국인은 한국어로, 그 밖은 영어로 이 물건을 찾는다. 같은 물건에
+            두 이름이 붙어 있어야 어느 쪽으로 와도 같은 자리에 닿는다. */}
+        {listing.titleEn ? <p className={styles.detailTitleEn} lang="en">{listing.titleEn}</p> : null}
       </div>
 
       {/* The bench. A 3D product gets the tool rails; a tile and a sheet get the bench their

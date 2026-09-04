@@ -41,7 +41,7 @@ export async function GET(request: Request) {
         return Response.json({ ok: false, error: "A valid listing slug is required." }, { status: 400 });
       }
       const listing = await db.prepare(
-        `SELECT l.id, l.slug, l.title, l.description,
+        `SELECT l.id, l.slug, l.title, l.title_en AS titleEn, l.description,
           l.license_status AS licenseStatus, l.status, l.asset_id AS assetId,
           l.created_at AS createdAt, l.published_at AS publishedAt,
           a.file_name AS entryFileName, a.format, a.byte_length AS byteLength,
@@ -52,7 +52,7 @@ export async function GET(request: Request) {
          LEFT JOIN clunk_users u ON u.id = (SELECT owner_user_id FROM clunk_workspaces WHERE id = l.workspace_id)
          WHERE l.status = 'PUBLISHED' AND l.slug = ? LIMIT 1`,
       ).bind(slug).first<{
-        id: string; slug: string; title: string; description: string;
+        id: string; slug: string; title: string; titleEn: string; description: string;
         licenseStatus: string; status: string; assetId: string; createdAt: string; publishedAt: string | null;
         entryFileName: string; format: string; byteLength: number; sellerName: string | null; previewFileName: string | null;
       }>();
@@ -111,7 +111,7 @@ export async function GET(request: Request) {
       }, { headers: { "cache-control": "public, max-age=30" } });
     }
     const rows = await db.prepare(
-      `SELECT l.id, l.slug, l.title, l.description,
+      `SELECT l.id, l.slug, l.title, l.title_en AS titleEn, l.description,
         l.license_status AS licenseStatus, l.status, l.asset_id AS assetId,
         l.created_at AS createdAt, l.published_at AS publishedAt,
         a.file_name AS entryFileName, a.format, a.byte_length AS byteLength,
@@ -134,6 +134,7 @@ export async function GET(request: Request) {
         id: row.id,
         slug: row.slug,
         title: row.title,
+        titleEn: row.titleEn || null,
         assetId: row.assetId,
         entryFileName: row.entryFileName,
         byteLength: row.byteLength,
