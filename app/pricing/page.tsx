@@ -15,20 +15,24 @@ export const dynamic = "force-dynamic";
 export const metadata = createPageMetadata({
   title: "요금",
   description:
-    "Clunk 요금. 지금은 결제 없이 모든 기능을 쓸 수 있습니다. 월정액 구독과 크레딧 충전은 결제 기능이 붙는 날 시작합니다.",
+    "Clunk 요금. 지금은 결제 없이 모든 기능을 쓸 수 있습니다. 무료 등급 에셋은 로그인만 하면 받고, 구독하면 전체 카탈로그를 받습니다.",
   path: "/pricing",
 });
 
 /**
- * /pricing — one grid of plan cards, one grid of credit packs, one usage table, one
- * comparison table, an FAQ, a closing door. No glow headline, no status chips.
+ * /pricing — one grid of plan cards, one usage table, one comparison table, an FAQ,
+ * a closing door. No glow headline, no status chips.
+ *
+ * 이 화면이 파는 것은 구독 하나다. 낱개 판매와 크레딧 충전은 결제대행 심사에서
+ * 환금성으로 걸려 없앴다(2026-09-04). 무료 등급은 로그인만 하면 받고, 구독은
+ * 기간 동안 전체 카탈로그를 연다.
  *
  * TRUTH RULES FOR THIS PAGE
  * 1. Every number a visitor reads comes from one of two places and nowhere else:
  *    - the constants the product actually enforces (imported below), or
- *    - the PLANS / PACKS tables in this file.
+ *    - the PLANS table in this file.
  *    Nothing is typed inline in JSX. When the operator changes a price, they change
- *    PLANS or PACKS and the whole page follows.
+ *    PLANS and the whole page follows.
  * 2. `priceKrw: null` is the honest slot for a number that does not exist yet — it
  *    renders "가격 미정" and the card's button is disabled. Dropping a real number in
  *    later needs no layout work.
@@ -37,11 +41,11 @@ export const metadata = createPageMetadata({
  *    that cannot do what it says.
  */
 
-/** Credits charged per successful job. Source of truth: `amount: -1` in
+/** 성공한 실행 한 번에 세는 수. Source of truth: `amount: -1` in
  *  app/api/runs/route.ts, app/api/generation/route.ts, app/api/optimizations/route.ts,
  *  app/api/providers/run/route.ts, and app/api/series/route.ts — plus the published
  *  contract in app/api/_lib/access.ts (`costs: { generate: 1, inspect: 1 }`). */
-const CREDITS_PER_SUCCESSFUL_JOB = 1;
+const RUNS_PER_SUCCESSFUL_JOB = 1;
 
 type Plan = {
   id: string;
@@ -51,7 +55,7 @@ type Plan = {
   /** ₩/년. null = 연 결제 없음 또는 미정. */
   annualKrw: number | null;
   summary: string;
-  /** 매달 들어오는 크레딧. */
+  /** 매달 쓸 수 있는 실행 횟수. */
   credits: number;
   /** 하루 이미지 생성 장수. */
   images: number;
@@ -64,6 +68,10 @@ type Plan = {
 /**
  * 월정액 구독. 무료 요금제의 세 숫자는 원장이 실제로 집행하는 상수를 그대로 씁니다.
  * 메이커·스튜디오의 숫자는 docs/free-beta-plan.ko.md 의 플랜 정의입니다.
+ *
+ * 파는 것은 기간 접근권입니다. 무료 등급 에셋은 로그인만 하면 받고, 구독하면
+ * 구독이 살아 있는 동안 전체 카탈로그를 제한 없이 받습니다. 낱개로 사는 길은
+ * 없습니다.
  */
 const PLANS: Plan[] = [
   {
@@ -76,11 +84,11 @@ const PLANS: Plan[] = [
     images: WORKSPACE_IMAGES_PER_DAY,
     seats: 1,
     features: [
-      `가입 즉시 ${SIGNUP_GRANT_CREDITS}크레딧`,
-      "마켓 에셋 내려받기 — 로그인만 하면 무료",
+      "무료 등급 에셋 내려받기 — 로그인만 하면 됩니다",
+      `가입 즉시 실행 ${SIGNUP_GRANT_CREDITS}회`,
       "3D 뷰어·색 팔레트·파일 검사",
       "AI 도구 연결(MCP)과 API",
-      "만든 에셋은 상업적으로 써도 됩니다",
+      "받은 에셋은 상업적으로 써도 됩니다",
     ],
   },
   {
@@ -94,9 +102,10 @@ const PLANS: Plan[] = [
     seats: 1,
     featured: true,
     features: [
+      "전체 에셋 내려받기 제한 없음",
+      "앞으로 올라오는 에셋도 포함",
+      "구독을 끊어도 받은 파일은 그대로 남습니다",
       "무료 요금제에 있는 것 전부",
-      "마켓 에셋 내려받기 제한 없음",
-      "작업 순서 우선 처리",
       "1인 상업 라이선스 명시",
     ],
   },
@@ -105,42 +114,42 @@ const PLANS: Plan[] = [
     name: "스튜디오",
     priceKrw: 29_000,
     annualKrw: 290_000,
-    summary: "여럿이 같은 크레딧을 나눠 쓰는 팀을 위한 자리.",
+    summary: "여럿이 함께 쓰는 팀을 위한 자리.",
     credits: 1_200,
     images: 100,
     seats: 3,
     features: [
       "메이커에 있는 것 전부",
-      "팀이 함께 쓰는 크레딧",
+      "작업공간 자리 3개",
       "상업 라이선스 서면 발급",
       "요청 시 결제·세금계산서 처리",
     ],
   },
 ];
 
-/** 크레딧이 오가는 모든 경우. 숫자는 위 상수와 원장 코드에서만 옵니다. */
+/** 실행 횟수가 오가는 모든 경우. 숫자는 위 상수와 원장 코드에서만 옵니다. */
 const USAGE = [
   { action: "가입", amount: `+${SIGNUP_GRANT_CREDITS}`, positive: true, detail: "계정을 만든 그 자리에서 한 번 들어옵니다." },
   { action: "매달 지급", amount: `+${BETA_MONTHLY_GRANT_CREDITS}`, positive: true, detail: "달이 바뀐 뒤 처음 접속할 때 자동으로 들어옵니다." },
-  { action: "에셋 검사", amount: `−${CREDITS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "올린 GLB·glTF 파일을 열어 폴리곤 수, 재질 수, 크기, 규격을 확인합니다." },
-  { action: "안전 최적화", amount: `−${CREDITS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "원본은 그대로 두고 정리한 새 파일을 만들어 다시 검사합니다." },
-  { action: "2D 이미지 만들기", amount: `−${CREDITS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "문장으로 PNG 한 장을 만듭니다." },
-  { action: "3D·시트·클립 만들기", amount: `−${CREDITS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "고른 템플릿으로 GLB, 스프라이트 시트, 애니메이션 클립을 만듭니다." },
-  { action: "마켓 에셋 받기", amount: "0", positive: true, detail: "로그인만 하면 결제도 크레딧도 없이 받습니다." },
+  { action: "에셋 검사", amount: `−${RUNS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "올린 GLB·glTF 파일을 열어 폴리곤 수, 재질 수, 크기, 규격을 확인합니다." },
+  { action: "안전 최적화", amount: `−${RUNS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "원본은 그대로 두고 정리한 새 파일을 만들어 다시 검사합니다." },
+  { action: "2D 이미지 만들기", amount: `−${RUNS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "문장으로 PNG 한 장을 만듭니다." },
+  { action: "3D·시트·클립 만들기", amount: `−${RUNS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "고른 템플릿으로 GLB, 스프라이트 시트, 애니메이션 클립을 만듭니다." },
+  { action: "마켓 에셋 받기", amount: "0", positive: true, detail: "무료 등급은 로그인만 하면, 그 밖은 구독으로 받습니다. 실행 횟수는 쓰지 않습니다." },
   { action: "실패·거부된 작업", amount: "0", positive: true, detail: "입력 오류, 모델 거부, 저장 실패는 끝나지 않은 작업이라 차감하지 않습니다." },
-  { action: "같은 요청 두 번", amount: `합계 −${CREDITS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "같은 요청을 다시 보내도 한 번만 처리하고 한 번만 셉니다." },
+  { action: "같은 요청 두 번", amount: `합계 −${RUNS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "같은 요청을 다시 보내도 한 번만 처리하고 한 번만 셉니다." },
 ] as const;
 
 /** 요금제 비교표. 각 행의 값은 PLANS 와 상수에서 계산합니다. */
 const COMPARISON: { label: string; value: (plan: Plan) => string }[] = [
   { label: "월 요금", value: (p) => (p.priceKrw === null ? "가격 미정" : p.priceKrw === 0 ? "₩0" : `₩${p.priceKrw.toLocaleString("ko-KR")}`) },
   { label: "연 결제", value: (p) => (p.annualKrw === null ? "가격 미정" : p.annualKrw === 0 ? "없음" : `₩${p.annualKrw.toLocaleString("ko-KR")}`) },
-  { label: "가입 크레딧", value: () => `${SIGNUP_GRANT_CREDITS}크레딧` },
-  { label: "매달 크레딧", value: (p) => `${p.credits.toLocaleString("ko-KR")}크레딧` },
+  { label: "가입 실행 횟수", value: () => `${SIGNUP_GRANT_CREDITS}회` },
+  { label: "매달 실행 횟수", value: (p) => `${p.credits.toLocaleString("ko-KR")}회` },
   { label: "이미지 생성 / 하루", value: (p) => `${p.images}장` },
   { label: "작업공간 자리", value: (p) => `${p.seats}자리` },
-  { label: "성공한 실행 1건", value: () => `${CREDITS_PER_SUCCESSFUL_JOB}크레딧` },
-  { label: "실패한 실행", value: () => "0크레딧" },
+  { label: "성공한 실행 1건", value: () => `${RUNS_PER_SUCCESSFUL_JOB}회` },
+  { label: "실패한 실행", value: () => "0회" },
   { label: "마켓 에셋 내려받기", value: (p) => (p.id === "free" ? "로그인하면 무료" : "제한 없음") },
   { label: "AI 도구 연결(MCP)·API", value: () => "포함" },
   { label: "작업 순서 우선 처리", value: (p) => (p.id === "free" ? "—" : "포함") },
@@ -153,8 +162,8 @@ const FAQ = [
     a: "아니요. 지금은 결제 기능 자체가 없어서 카드 번호도, 계좌도 묻지 않습니다. Google이나 GitHub 계정으로 한 번 들어오면 그걸로 끝입니다.",
   },
   {
-    q: "크레딧이 다 떨어지면 어떻게 되나요?",
-    a: `달이 바뀐 뒤 처음 접속할 때 ${BETA_MONTHLY_GRANT_CREDITS}크레딧이 자동으로 다시 들어옵니다. 그 사이에도 마켓 에셋 내려받기, 3D 미리보기, 색 팔레트 보기는 크레딧 없이 그대로 쓸 수 있습니다.`,
+    q: "실행 횟수를 다 쓰면 어떻게 되나요?",
+    a: `달이 바뀐 뒤 처음 접속할 때 ${BETA_MONTHLY_GRANT_CREDITS}회가 자동으로 다시 채워집니다. 그 사이에도 에셋 내려받기, 3D 미리보기, 색 팔레트 보기는 실행 횟수를 쓰지 않고 그대로 됩니다.`,
   },
   {
     q: "마켓 에셋은 왜 무료인가요?",
@@ -203,12 +212,12 @@ export default function PricingPage() {
               <h1 id="pricing-title">요금</h1>
               <p className={styles.lede}>
                 {salesOpen
-                  ? "크레딧 하나가 100원입니다. 검사와 만들기는 성공한 실행에만 1크레딧이 들고, 실패한 실행은 세지 않습니다."
-                  : "지금은 결제 없이 모든 기능을 쓸 수 있습니다. 아래 구독과 크레딧 충전은 결제 기능이 붙는 날 시작합니다."}
+                  ? "검사와 만들기는 성공한 실행만 1회로 셉니다. 실패한 실행은 세지 않습니다."
+                  : "지금은 결제 없이 모든 기능을 쓸 수 있습니다. 아래 구독은 결제 기능이 붙는 날 시작합니다."}
               </p>
               <ul className={styles.headFacts}>
                 <li>
-                  <strong>{SIGNUP_GRANT_CREDITS}크레딧</strong>
+                  <strong>{SIGNUP_GRANT_CREDITS}회</strong>
                   <span>가입 즉시</span>
                 </li>
                 <li>
@@ -220,7 +229,7 @@ export default function PricingPage() {
                   <span>이미지 / 하루</span>
                 </li>
                 <li>
-                  <strong>{CREDITS_PER_SUCCESSFUL_JOB}크레딧</strong>
+                  <strong>{RUNS_PER_SUCCESSFUL_JOB}회</strong>
                   <span>성공한 실행 1건</span>
                 </li>
               </ul>
@@ -232,7 +241,7 @@ export default function PricingPage() {
             <div className="cv5-frame">
               <div className={styles.sectionHead}>
                 <h2 id="plans-title">월정액 구독</h2>
-                <p>매달 크레딧이 들어오고, 남은 크레딧은 다음 달로 넘어가지 않습니다.</p>
+                <p>매달 실행 횟수가 다시 채워지고, 남은 횟수는 다음 달로 넘어가지 않습니다.</p>
               </div>
               <div className={styles.planGrid}>
                 {PLANS.map((plan) => {
@@ -272,7 +281,7 @@ export default function PricingPage() {
 
                       <ul className={styles.planList}>
                         <li className={styles.planListLead}>
-                          매달 <b>{plan.credits.toLocaleString("ko-KR")}크레딧</b> · 이미지 하루 <b>{plan.images}장</b>
+                          매달 실행 <b>{plan.credits.toLocaleString("ko-KR")}회</b> · 이미지 하루 <b>{plan.images}장</b>
                         </li>
                         {plan.features.map((feature) => (
                           <li key={feature}>
@@ -288,20 +297,20 @@ export default function PricingPage() {
             </div>
           </section>
 
-          {/* ---------------------------------------------------- 크레딧은 이렇게 씁니다 */}
+          {/* ---------------------------------------------------- 실행 횟수는 이렇게 씁니다 */}
           <section className={styles.section} data-snap-section="pricing-usage" aria-labelledby="usage-title">
             <div className="cv5-frame">
               <div className={styles.sectionHead}>
-                <h2 id="usage-title">크레딧은 이렇게 씁니다</h2>
-                <p>에셋을 받는 데는 크레딧이 들지 않습니다. 만들고 검사하는 데만 듭니다.</p>
+                <h2 id="usage-title">실행 횟수는 이렇게 씁니다</h2>
+                <p>에셋을 받는 데는 실행 횟수가 들지 않습니다. 만들고 검사하는 데만 씁니다.</p>
               </div>
               <div className={styles.tableWrap}>
                 <table className={styles.usageTable}>
-                  <caption className={styles.srOnly}>작업별 크레딧 증감</caption>
+                  <caption className={styles.srOnly}>작업별 실행 횟수 증감</caption>
                   <thead>
                     <tr>
                       <th scope="col">작업</th>
-                      <th scope="col" className={styles.numCol}>크레딧</th>
+                      <th scope="col" className={styles.numCol}>실행</th>
                       <th scope="col">언제</th>
                     </tr>
                   </thead>
@@ -320,7 +329,7 @@ export default function PricingPage() {
               </div>
               <p className={styles.tableFoot}>
                 이미지 생성은 하루 {WORKSPACE_IMAGES_PER_DAY}장까지입니다. 한도에 닿으면 한국 시간으로 언제
-                다시 열리는지 알려 드리고, 크레딧은 차감하지 않습니다.
+                다시 열리는지 알려 드리고, 실행 횟수는 세지 않습니다.
               </p>
             </div>
           </section>
@@ -396,7 +405,7 @@ export default function PricingPage() {
                 <div>
                   <h2 id="closer-title">먼저 써 보고 정하세요</h2>
                   <p>
-                    가입하면 {SIGNUP_GRANT_CREDITS}크레딧이 바로 들어오고, 매달 {BETA_MONTHLY_GRANT_CREDITS}크레딧이
+                    가입하면 실행 {SIGNUP_GRANT_CREDITS}회가 바로 들어오고, 매달 {BETA_MONTHLY_GRANT_CREDITS}회가
                     더 들어옵니다. 결제 정보는 묻지 않습니다.
                   </p>
                 </div>
