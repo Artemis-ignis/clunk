@@ -23,6 +23,11 @@ export const GLTF_CLIP_LABELS: Readonly<Record<string, string>> = {
   work: "경운",
   sow: "파종",
   run: "가동",
+  // The cozy farm set's hinged props. `swing` is the fence gate's open/close,
+  // the same motion its sprite sheet was baked from and the same name the
+  // template library authors it under (scripts/template-library/templates.mjs).
+  swing: "여닫기",
+  open: "문 열기",
   // The H145-style helicopter built in code (2026-09-03).
   "rotor-spin": "로터 회전",
   "doors-open": "문 열기",

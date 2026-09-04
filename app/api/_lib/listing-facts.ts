@@ -27,7 +27,30 @@ export type ListingFacts = {
   members: number | null;
   viewYawDegrees: number | null;
   sheet: { cell: number; directions: number; frames: number | null; cuts: number | null } | null;
-  texture: { resolution: string; seamless: boolean } | null;
+  /**
+   * Tile facts, for a listing whose product is a texture.
+   *
+   * `seamless` is not a word taken from the title: it is the measurement below passing
+   * the shop's bar. `seamLeftRight` / `seamTopBottom` are the wrap-edge pixel difference
+   * divided by the same measure inside the tile, so 1.0 means the join cannot be told
+   * from the interior and anything at or under 1.15 is what the shop calls seamless.
+   * `sharpness` is the mean |Laplacian| over the tile. Measured by
+   * scripts/texture-seam-cli.mjs into app/data/texture-seam-measurements.json.
+   */
+  texture: {
+    resolution: string;
+    seamless: boolean;
+    seamLeftRight?: number;
+    seamTopBottom?: number;
+    sharpness?: number;
+    /** Colour tiles in this listing. More than one means variants that share a border and may be mixed. */
+    colourVariants?: number;
+    /** The extra map kinds that ship beside each colour tile. */
+    maps?: string[];
+    /** Every file the buyer receives, and what they weigh together. */
+    files?: number;
+    totalBytes?: number;
+  } | null;
   inspection: { webScore: number; mobileScore: number; hardBlockers: number; note: string | null } | null;
 };
 
