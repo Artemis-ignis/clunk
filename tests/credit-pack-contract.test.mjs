@@ -77,8 +77,15 @@ test("the pricing surface renders pack state from the API and never invents a pr
   // 2026-09-03(마스터 결정): 결제 자체가 없으므로 "베타"라는 말을 이 화면에서 쓰지 않는다.
   assert.doesNotMatch(pricing, /베타/u, "요금 화면에 베타 표현이 남아 있으면 안 된다");
   assert.doesNotMatch(pricing, /예정가|DEMO/u, "옛 예정가·DEMO 잔재가 남아 있으면 안 된다");
-  // 용어집: 화면에는 "면"과 "그리기 횟수"로 적는다.
-  assert.doesNotMatch(pricing, /삼각형|드로우콜/, "내부 용어가 요금 화면에 남아 있으면 안 된다");
+  // 용어집(2026-09-04 마스터 지시로 다시 고정): 화면에는 "폴리곤 수"로 적는다.
+  //
+  // 옛 매핑은 삼각형→"면", 드로우콜→"그리기 횟수"였다. 둘 다 만드는 사람의 말을 한 겹
+  // 옮겨 적은 것뿐이라 구매자가 판단에 쓸 수 없었다 — "면 2,456개"를 보고 자기 게임에
+  // 넣어도 되는지 아는 사람은 없다. 새 기준은 구매자가 직접 읽을 수 있는 값(폴리곤 수,
+  // 파일 용량, 텍스처 크기)과 판정 결과로 말한다. 그러므로 내부 용어와 옛 대체어를
+  // 함께 막는다. 푸는 것이 아니라 기준이 바뀐 것이다.
+  assert.doesNotMatch(pricing, /삼각형|드로우콜|엔진 예산/u, "내부 용어가 요금 화면에 남아 있으면 안 된다");
+  assert.doesNotMatch(pricing, /그리기 횟수|그리기 [\d,]+회/u, "옛 대체어(그리기 횟수)가 요금 화면에 남아 있으면 안 된다");
   // 2026-09-02: the gloss after the number was removed at the operator's request.
   assert.match(pricing, /폴리곤 수, 재질 수/);
 

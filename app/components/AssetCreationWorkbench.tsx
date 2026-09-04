@@ -1208,7 +1208,7 @@ function buildFacts(input: {
   if (!stage) return [];
   const facts: Array<{ label: string; value: string }> = [];
   if (measured) {
-    facts.push({ label: "폴리곤 · 재질", value: `삼각형 ${measured.triangles.toLocaleString()}개 · 재질 ${measured.materials}개` });
+    facts.push({ label: "폴리곤 · 재질", value: `폴리곤 ${measured.triangles.toLocaleString()}개 · 재질 ${measured.materials}개` });
     facts.push({ label: "크기", value: `${measured.bounds.x.toFixed(2)} × ${measured.bounds.y.toFixed(2)} × ${measured.bounds.z.toFixed(2)} m` });
   } else if (atlas) {
     facts.push({ label: "칸", value: `${atlas.frames.length}개 · 칸당 ${atlas.frames[0]?.width ?? 0}×${atlas.frames[0]?.height ?? 0}` });

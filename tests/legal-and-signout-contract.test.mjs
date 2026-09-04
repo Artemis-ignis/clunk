@@ -432,7 +432,65 @@ test("요금 화면이 구독 시작 시점과 사전 공지를 FAQ 한 항목�
   assert.ok(html.includes("구독은 언제 시작하나요?"), "구독 시작 시점 질문이 없습니다");
   assert.ok(html.includes("결제 기능이 붙는 날 시작합니다"), "구독 시작 조건 답이 없습니다");
   assert.ok(html.includes("최소 30일 전에"), "사전 공지 약속이 없습니다");
-  // 용어집: 삼각형·드로우콜은 화면에 쓰지 않는다.
+  // 용어집: 삼각형·드로우콜·엔진 예산도, 옛 대체어인 "그리기 횟수"도 화면에 쓰지 않는다.
   const pricing = await source("app/pricing/page.tsx");
-  assert.doesNotMatch(pricing, /삼각형|드로우콜/, "내부 용어가 요금 화면에 남아 있습니다");
+  assert.doesNotMatch(pricing, /삼각형|드로우콜|엔진 예산/u, "내부 용어가 요금 화면에 남아 있습니다");
+  assert.doesNotMatch(pricing, /그리기 횟수|그리기 [\d,]+회/u, "옛 대체어(그리기 횟수)가 요금 화면에 남아 있습니다");
+});
+
+/**
+ * 사양 표기 용어집 — 화면은 구매자의 말로 적는다 (2026-09-04 마스터 지시)
+ *
+ * | 지금까지 | 앞으로 |
+ * |---|---|
+ * | 삼각형 수 | 폴리곤 수 |
+ * | 드로우콜 | 파일 용량 · 텍스처 크기 |
+ * | 엔진 예산 | 게임 사용 적합 여부 |
+ *
+ * 드로우콜에는 그대로 옮길 짝이 없다. 구매자가 알고 싶은 것은 "내 게임에 넣어도 되는가"
+ * 하나뿐이고, 드로우콜 수치는 그 답이 아니라 답을 내는 사람이 쓰는 중간값이다. 그래서
+ * 수치를 옮겨 적지 않고, 구매자가 파일을 열지 않고도 확인할 수 있는 값(파일 용량,
+ * 텍스처 크기)으로 바꿔 적는다.
+ *
+ * 앞선 기준은 삼각형→"면", 드로우콜→"그리기 횟수"였다. 그 매핑으로 적힌 문장이 화면에
+ * 다시 들어오면 같은 문제가 돌아오므로, 내부 용어와 옛 대체어를 함께 막는다. 요금 화면
+ * 한 곳만 지키던 핀을 규격을 말하는 화면 전체로 넓힌 것이다.
+ *
+ * 주석은 대상이 아니다 — 코드가 스스로를 설명할 때 쓰는 말까지 바꾸면 무엇을 재는
+ * 코드인지 읽을 수 없게 된다. 그래서 검사 전에 주석을 걷어낸다.
+ */
+const SPEC_SURFACES = [
+  "app/page.tsx",
+  "app/pricing/page.tsx",
+  "app/marketplace/page.tsx",
+  "app/marketplace/[slug]/page.tsx",
+  "app/components/MarketplaceCatalog.tsx",
+  "app/components/AssetCreationWorkbench.tsx",
+  "app/components/ClunkInspector.tsx",
+  "app/components/LandingMarketShowcase.tsx",
+  "app/components/review/GlbReviewer.tsx",
+  "app/components/listing-facts-rows.ts",
+];
+
+/** 화면 문구만 남긴다: 블록 주석과 줄 주석을 걷어낸다(URL 의 `//` 는 건드리지 않는다). */
+function screenText(code) {
+  return code
+    .replace(/\/\*[\s\S]*?\*\//gu, "")
+    .replace(/(^|[^:"'`\\])\/\/[^\n]*/gu, "$1");
+}
+
+test("규격을 말하는 화면은 구매자의 말로 적는다 — 폴리곤 수·파일 용량·텍스처 크기", async () => {
+  for (const file of SPEC_SURFACES) {
+    const text = screenText(await source(file));
+    assert.doesNotMatch(text, /삼각형/u, `${file} 에 내부 용어 "삼각형"이 남아 있습니다 — "폴리곤"으로 적습니다`);
+    assert.doesNotMatch(text, /드로우콜/u, `${file} 에 "드로우콜"이 남아 있습니다 — 파일 용량·텍스처 크기로 적습니다`);
+    assert.doesNotMatch(text, /엔진 예산/u, `${file} 에 "엔진 예산"이 남아 있습니다 — 게임 사용 적합 여부로 적습니다`);
+    assert.doesNotMatch(text, /그리기 횟수/u, `${file} 에 옛 대체어 "그리기 횟수"가 남아 있습니다`);
+  }
+
+  // 바꾼 자리는 사라진 것만이 아니라 새 말이 실제로 서 있는지도 본다.
+  const workbench = screenText(await source("app/components/AssetCreationWorkbench.tsx"));
+  assert.match(workbench, /`폴리곤 \$\{measured\.triangles\.toLocaleString\(\)\}개 · 재질 \$\{measured\.materials\}개`/u);
+  const rows = screenText(await source("app/components/listing-facts-rows.ts"));
+  assert.match(rows, /폴리곤 \$\{facts\.triangles\.toLocaleString\("ko-KR"\)\}개/u);
 });
