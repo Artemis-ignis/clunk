@@ -1,0 +1,521 @@
+{
+  "input": "public\\market\\hf-tractor-compact\\tractor.compact.m1.glb",
+  "output": "examples\\harvest-frontier\\runtime-animated\\tractor.repaired.glb",
+  "before": {
+    "meshes": 182,
+    "drawnTriangles": 58312,
+    "groundMinYmm": 0.7
+  },
+  "frameWidth": {
+    "why": "the rear wheels (inner face z = -656 mm) were buried in a 1.82 m wide slab",
+    "parts": [
+      {
+        "part": "chassis",
+        "halfWidthMmBefore": 910,
+        "halfWidthMmAfter": 600
+      },
+      {
+        "part": "rearDeck",
+        "halfWidthMmBefore": 850,
+        "halfWidthMmAfter": 600
+      }
+    ]
+  },
+  "frontWheels": {
+    "why": "the crown sat 429 mm above the chassis floor and 109 mm above the hood floor",
+    "wheels": [
+      {
+        "node": "wheelFrontLeft",
+        "scale": 0.665,
+        "diameterMmBefore": 1338.6,
+        "diameterMmAfter": 890.2,
+        "crownYmmAfter": 890.2,
+        "axleYmm": 445.1,
+        "bottomYmm": 0
+      },
+      {
+        "node": "wheelFrontRight",
+        "scale": 0.665,
+        "diameterMmBefore": 1338.6,
+        "diameterMmAfter": 890.2,
+        "crownYmmAfter": 890.2,
+        "axleYmm": 445.1,
+        "bottomYmm": 0
+      }
+    ],
+    "rearDiameterMm": 1718.6,
+    "frontToRearRatio": 0.518,
+    "chassisFloorYmm": 909.9
+  },
+  "frontAxle": {
+    "yMmBefore": 670,
+    "yMmAfter": 445.1,
+    "halfWidthMmAfter": 650
+  },
+  "entrySteps": {
+    "why": "they sat inside the rear tyre, which spans x 78-1702 mm at step height",
+    "parts": [
+      {
+        "part": "entryStepLeft",
+        "xMmBefore": 450,
+        "xMmAfter": -370
+      },
+      {
+        "part": "entryStepRight",
+        "xMmBefore": 450,
+        "xMmAfter": -370
+      }
+    ],
+    "bracketAdded": [
+      "entryStepArmLeft/Right (under the chassis edge)",
+      "entryStepHangerLeft/Right (down to the tread)"
+    ]
+  },
+  "tines": {
+    "wasDegrees": "+-2",
+    "nowDegrees": "0 .. +8",
+    "cyclesPerClip": 3,
+    "pivotRaisedMm": 340,
+    "nodes": [
+      "pivottine01",
+      "pivottine02",
+      "pivottine03",
+      "pivottine04",
+      "pivottine05",
+      "pivottine06",
+      "pivottine07"
+    ]
+  },
+  "hiddenProxies": [
+    {
+      "name": "socketMarkerruntimeOnly",
+      "triangles": 12,
+      "material": "tractor-palette-hidden-0-000"
+    },
+    {
+      "name": "colliderProxyruntimeOnly_1",
+      "triangles": 12,
+      "material": "tractor-palette-hidden-0-000"
+    },
+    {
+      "name": "socketMarkerruntimeOnly_1",
+      "triangles": 12,
+      "material": "tractor-palette-hidden-0-000"
+    },
+    {
+      "name": "socketattachtractortopruntimeOnly",
+      "triangles": 12,
+      "material": "tractor-palette-hidden-0-000"
+    },
+    {
+      "name": "socketattachtractorlowerLeftruntimeOnly",
+      "triangles": 12,
+      "material": "tractor-palette-hidden-0-000"
+    },
+    {
+      "name": "socketattachtractorlowerRightruntimeOnly",
+      "triangles": 12,
+      "material": "tractor-palette-hidden-0-000"
+    },
+    {
+      "name": "colliderbodyproxy",
+      "triangles": 12,
+      "material": "tractor-palette-hidden-0-000"
+    },
+    {
+      "name": "collidertineEnvelopeproxy",
+      "triangles": 12,
+      "material": "tractor-palette-hidden-0-000"
+    },
+    {
+      "name": "collidergaugeWheelLeftproxy",
+      "triangles": 48,
+      "material": "tractor-palette-hidden-0-000"
+    },
+    {
+      "name": "collidergaugeWheelRightproxy",
+      "triangles": 48,
+      "material": "tractor-palette-hidden-0-000"
+    },
+    {
+      "name": "colliderProxyruntimeOnly",
+      "triangles": 12,
+      "material": "tractor-palette-hidden-0-000"
+    }
+  ],
+  "ground": {
+    "beforeMm": 0,
+    "afterMm": 0
+  },
+  "bakedInstances": [
+    {
+      "node": "treadLugs",
+      "instances": 48,
+      "triangles": 576
+    },
+    {
+      "node": "treadLugs_1",
+      "instances": 48,
+      "triangles": 576
+    },
+    {
+      "node": "treadLugs_2",
+      "instances": 48,
+      "triangles": 576
+    },
+    {
+      "node": "treadLugs_3",
+      "instances": 48,
+      "triangles": 576
+    }
+  ],
+  "merge": [
+    {
+      "mesh": "body_matte",
+      "anchor": "(scene)",
+      "material": "tractor-palette-matte",
+      "absorbed": [
+        "tractorStaticDetail",
+        "rearDeck",
+        "hood",
+        "hoodTop",
+        "nose",
+        "cabRoof",
+        "sideMirrorArmLeft",
+        "sideMirrorArmRight",
+        "frontFenderLeft",
+        "frontFenderRight",
+        "rearFenderLeft",
+        "rearFenderRight",
+        "tailLightLeft",
+        "tailLightRight",
+        "exhaust",
+        "exhaustCap",
+        "tractorMesh5",
+        "hitchMastPin",
+        "topLinkPin",
+        "depthAdjusterHandle"
+      ],
+      "triangles": 15372
+    },
+    {
+      "mesh": "body_metal",
+      "anchor": "(scene)",
+      "material": "tractor-palette-metal",
+      "absorbed": [
+        "beaconBase",
+        "beaconCap",
+        "chassis",
+        "frontAxle",
+        "rearAxle",
+        "rollBarPostLeft",
+        "rollBarPostRight",
+        "rollBarTop",
+        "sideMirrorLeft",
+        "sideMirrorRight",
+        "entryStepLeft",
+        "entryStepRight",
+        "frontBumper",
+        "frontGrille",
+        "frontGrilleBar1",
+        "frontGrilleBar2",
+        "frontGrilleBar3",
+        "frontGrilleBar4",
+        "tractorMesh4",
+        "cultivatorFrame",
+        "cultivatorToolbar",
+        "toolbarCrossRail1",
+        "toolbarCrossRail2",
+        "toolbarCrossRail3",
+        "toolbarCrossRail4",
+        "cultivatorWingLeft",
+        "cultivatorWingRight",
+        "endPlateLeft",
+        "endPlateRight",
+        "gaugeWheelLeftfork",
+        "gaugeWheelLeftsupportFront",
+        "gaugeWheelLeftsupportRear",
+        "gaugeWheelRightfork",
+        "gaugeWheelRightsupportFront",
+        "gaugeWheelRightsupportRear",
+        "hitchMastLeft",
+        "hitchMastRight",
+        "hitchBraceLeft",
+        "hitchBraceRight",
+        "hitchMastCap",
+        "liftArmLeft",
+        "liftArmRight",
+        "topLink",
+        "depthAdjuster",
+        "entryStepArmLeft",
+        "entryStepHangerLeft",
+        "entryStepArmRight",
+        "entryStepHangerRight"
+      ],
+      "triangles": 20316
+    },
+    {
+      "mesh": "body_glass-0-760-0-120",
+      "anchor": "(scene)",
+      "material": "tractor-palette-glass-0-760-0-120",
+      "absorbed": [
+        "cabWindshield",
+        "cabGlassLeft",
+        "cabGlassRight"
+      ],
+      "triangles": 36
+    },
+    {
+      "mesh": "body_gloss",
+      "anchor": "(scene)",
+      "material": "tractor-palette-gloss",
+      "absorbed": [
+        "sideMirrorGlassLeft",
+        "sideMirrorGlassRight"
+      ],
+      "triangles": 1176
+    },
+    {
+      "mesh": "body_rubber",
+      "anchor": "(scene)",
+      "material": "tractor-palette-rubber",
+      "absorbed": [
+        "tractorMesh0",
+        "tractorMesh1"
+      ],
+      "triangles": 1176
+    },
+    {
+      "mesh": "steeringWheel_metal",
+      "anchor": "steeringWheel",
+      "material": "tractor-palette-metal",
+      "absorbed": [
+        "tractorMesh2",
+        "tractorMesh3"
+      ],
+      "triangles": 328
+    },
+    {
+      "mesh": "body_emissive-1-000-0-680-0-191-1-800",
+      "anchor": "(scene)",
+      "material": "tractor-palette-emissive-1-000-0-680-0-191-1-800",
+      "absorbed": [
+        "headlightLeft",
+        "headlightRight"
+      ],
+      "triangles": 504
+    },
+    {
+      "mesh": "wheelFrontLeft_metal",
+      "anchor": "wheelFrontLeft",
+      "material": "tractor-palette-metal",
+      "absorbed": [
+        "hub",
+        "hubCap",
+        "rim"
+      ],
+      "triangles": 184
+    },
+    {
+      "mesh": "wheelFrontLeft_matte",
+      "anchor": "wheelFrontLeft",
+      "material": "tractor-palette-matte",
+      "absorbed": [
+        "sidewallRingLeft",
+        "sidewallRingRight"
+      ],
+      "triangles": 768
+    },
+    {
+      "mesh": "wheelFrontRight_metal",
+      "anchor": "wheelFrontRight",
+      "material": "tractor-palette-metal",
+      "absorbed": [
+        "hub_1",
+        "hubCap_1",
+        "rim_1"
+      ],
+      "triangles": 184
+    },
+    {
+      "mesh": "wheelFrontRight_matte",
+      "anchor": "wheelFrontRight",
+      "material": "tractor-palette-matte",
+      "absorbed": [
+        "sidewallRingLeft_1",
+        "sidewallRingRight_1"
+      ],
+      "triangles": 768
+    },
+    {
+      "mesh": "wheelRearLeft_metal",
+      "anchor": "wheelRearLeft",
+      "material": "tractor-palette-metal",
+      "absorbed": [
+        "hub_2",
+        "hubCap_2",
+        "rim_2"
+      ],
+      "triangles": 184
+    },
+    {
+      "mesh": "wheelRearLeft_matte",
+      "anchor": "wheelRearLeft",
+      "material": "tractor-palette-matte",
+      "absorbed": [
+        "sidewallRingLeft_2",
+        "sidewallRingRight_2"
+      ],
+      "triangles": 768
+    },
+    {
+      "mesh": "wheelRearRight_metal",
+      "anchor": "wheelRearRight",
+      "material": "tractor-palette-metal",
+      "absorbed": [
+        "hub_3",
+        "hubCap_3",
+        "rim_3"
+      ],
+      "triangles": 184
+    },
+    {
+      "mesh": "wheelRearRight_matte",
+      "anchor": "wheelRearRight",
+      "material": "tractor-palette-matte",
+      "absorbed": [
+        "sidewallRingLeft_3",
+        "sidewallRingRight_3"
+      ],
+      "triangles": 768
+    },
+    {
+      "mesh": "pivottine01_metal",
+      "anchor": "pivottine01",
+      "material": "tractor-palette-metal",
+      "absorbed": [
+        "tine1",
+        "tineClamp1",
+        "sweepMarker1"
+      ],
+      "triangles": 1464
+    },
+    {
+      "mesh": "pivottine02_metal",
+      "anchor": "pivottine02",
+      "material": "tractor-palette-metal",
+      "absorbed": [
+        "tine2",
+        "tineClamp2",
+        "sweepMarker2"
+      ],
+      "triangles": 1464
+    },
+    {
+      "mesh": "pivottine03_metal",
+      "anchor": "pivottine03",
+      "material": "tractor-palette-metal",
+      "absorbed": [
+        "tine3",
+        "tineClamp3",
+        "sweepMarker3"
+      ],
+      "triangles": 1464
+    },
+    {
+      "mesh": "pivottine04_metal",
+      "anchor": "pivottine04",
+      "material": "tractor-palette-metal",
+      "absorbed": [
+        "tine4",
+        "tineClamp4",
+        "sweepMarker4"
+      ],
+      "triangles": 1464
+    },
+    {
+      "mesh": "pivottine05_metal",
+      "anchor": "pivottine05",
+      "material": "tractor-palette-metal",
+      "absorbed": [
+        "tine5",
+        "tineClamp5",
+        "sweepMarker5"
+      ],
+      "triangles": 1464
+    },
+    {
+      "mesh": "pivottine06_metal",
+      "anchor": "pivottine06",
+      "material": "tractor-palette-metal",
+      "absorbed": [
+        "tine6",
+        "tineClamp6",
+        "sweepMarker6"
+      ],
+      "triangles": 1464
+    },
+    {
+      "mesh": "pivottine07_metal",
+      "anchor": "pivottine07",
+      "material": "tractor-palette-metal",
+      "absorbed": [
+        "tine7",
+        "tineClamp7",
+        "sweepMarker7"
+      ],
+      "triangles": 1464
+    },
+    {
+      "mesh": "gaugeWheelLeft_rubber",
+      "anchor": "gaugeWheelLeft",
+      "material": "tractor-palette-rubber",
+      "absorbed": [
+        "gaugeWheelLefttire",
+        "gaugeWheelLeftsidewall",
+        "gaugeWheelLeftlug01",
+        "gaugeWheelLeftlug02",
+        "gaugeWheelLeftlug03",
+        "gaugeWheelLeftlug04",
+        "gaugeWheelLeftlug05",
+        "gaugeWheelLeftlug06",
+        "gaugeWheelLeftlug07",
+        "gaugeWheelLeftlug08",
+        "gaugeWheelLeftlug09",
+        "gaugeWheelLeftlug10",
+        "gaugeWheelLeftlug11",
+        "gaugeWheelLeftlug12"
+      ],
+      "triangles": 600
+    },
+    {
+      "mesh": "gaugeWheelRight_rubber",
+      "anchor": "gaugeWheelRight",
+      "material": "tractor-palette-rubber",
+      "absorbed": [
+        "gaugeWheelRighttire",
+        "gaugeWheelRightsidewall",
+        "gaugeWheelRightlug01",
+        "gaugeWheelRightlug02",
+        "gaugeWheelRightlug03",
+        "gaugeWheelRightlug04",
+        "gaugeWheelRightlug05",
+        "gaugeWheelRightlug06",
+        "gaugeWheelRightlug07",
+        "gaugeWheelRightlug08",
+        "gaugeWheelRightlug09",
+        "gaugeWheelRightlug10",
+        "gaugeWheelRightlug11",
+        "gaugeWheelRightlug12"
+      ],
+      "triangles": 600
+    }
+  ],
+  "unsharedGeometries": 16,
+  "prunedEmptyNodes": 22,
+  "after": {
+    "meshes": 51,
+    "drawnTriangles": 58156,
+    "groundMinYmm": 0
+  }
+}

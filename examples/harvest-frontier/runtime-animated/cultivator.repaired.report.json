@@ -1,0 +1,358 @@
+{
+  "input": "public\\market\\hf-cultivator-compact\\cultivator.compact.m1.glb",
+  "output": "examples\\harvest-frontier\\runtime-animated\\cultivator.repaired.glb",
+  "before": {
+    "meshes": 104,
+    "drawnTriangles": 27848,
+    "groundMinYmm": 19.3
+  },
+  "tinePivotRaise": {
+    "why": "the pivot sat 340 mm below the clamp, so a visible swing dragged the clamp through the toolbar",
+    "pivots": [
+      {
+        "node": "pivottine01",
+        "raisedMm": 340,
+        "restPoseShiftMm": 0
+      },
+      {
+        "node": "pivottine02",
+        "raisedMm": 340,
+        "restPoseShiftMm": 0
+      },
+      {
+        "node": "pivottine03",
+        "raisedMm": 340,
+        "restPoseShiftMm": 0
+      },
+      {
+        "node": "pivottine04",
+        "raisedMm": 340,
+        "restPoseShiftMm": 0
+      },
+      {
+        "node": "pivottine05",
+        "raisedMm": 340,
+        "restPoseShiftMm": 0
+      },
+      {
+        "node": "pivottine06",
+        "raisedMm": 340,
+        "restPoseShiftMm": 0
+      },
+      {
+        "node": "pivottine07",
+        "raisedMm": 340,
+        "restPoseShiftMm": 0
+      }
+    ]
+  },
+  "tineLift": {
+    "wasDegrees": "+-2 (quaternion z delta 0.028)",
+    "nowDegrees": "0 .. +8.0",
+    "cyclesPerClip": 3,
+    "keysPerTrack": 61,
+    "tines": [
+      {
+        "node": "pivottine01",
+        "degrees": [
+          0,
+          8
+        ],
+        "cyclesPerClip": 3,
+        "phaseOffsetTurns": 0
+      },
+      {
+        "node": "pivottine02",
+        "degrees": [
+          0,
+          8
+        ],
+        "cyclesPerClip": 3,
+        "phaseOffsetTurns": 0.143
+      },
+      {
+        "node": "pivottine03",
+        "degrees": [
+          0,
+          8
+        ],
+        "cyclesPerClip": 3,
+        "phaseOffsetTurns": 0.286
+      },
+      {
+        "node": "pivottine04",
+        "degrees": [
+          0,
+          8
+        ],
+        "cyclesPerClip": 3,
+        "phaseOffsetTurns": 0.429
+      },
+      {
+        "node": "pivottine05",
+        "degrees": [
+          0,
+          8
+        ],
+        "cyclesPerClip": 3,
+        "phaseOffsetTurns": 0.571
+      },
+      {
+        "node": "pivottine06",
+        "degrees": [
+          0,
+          8
+        ],
+        "cyclesPerClip": 3,
+        "phaseOffsetTurns": 0.714
+      },
+      {
+        "node": "pivottine07",
+        "degrees": [
+          0,
+          8
+        ],
+        "cyclesPerClip": 3,
+        "phaseOffsetTurns": 0.857
+      }
+    ]
+  },
+  "hiddenProxies": [
+    {
+      "name": "socketMarkerruntimeOnly",
+      "triangles": 12,
+      "material": "cultivator.fixed-palette-hidden-0-000"
+    },
+    {
+      "name": "socketattachtractortopruntimeOnly",
+      "triangles": 12,
+      "material": "cultivator.fixed-palette-hidden-0-000"
+    },
+    {
+      "name": "socketattachtractorlowerLeftruntimeOnly",
+      "triangles": 12,
+      "material": "cultivator.fixed-palette-hidden-0-000"
+    },
+    {
+      "name": "socketattachtractorlowerRightruntimeOnly",
+      "triangles": 12,
+      "material": "cultivator.fixed-palette-hidden-0-000"
+    },
+    {
+      "name": "colliderbodyproxy",
+      "triangles": 12,
+      "material": "cultivator.fixed-palette-hidden-0-000"
+    },
+    {
+      "name": "collidertineEnvelopeproxy",
+      "triangles": 12,
+      "material": "cultivator.fixed-palette-hidden-0-000"
+    },
+    {
+      "name": "collidergaugeWheelLeftproxy",
+      "triangles": 48,
+      "material": "cultivator.fixed-palette-hidden-0-000"
+    },
+    {
+      "name": "collidergaugeWheelRightproxy",
+      "triangles": 48,
+      "material": "cultivator.fixed-palette-hidden-0-000"
+    },
+    {
+      "name": "colliderProxyruntimeOnly",
+      "triangles": 12,
+      "material": "cultivator.fixed-palette-hidden-0-000"
+    }
+  ],
+  "gaugeWheelWidth": [
+    {
+      "node": "gaugeWheelLeft",
+      "widthMmBefore": 150,
+      "widthMmAfter": 141
+    },
+    {
+      "node": "gaugeWheelRight",
+      "widthMmBefore": 150,
+      "widthMmAfter": 141
+    }
+  ],
+  "ground": {
+    "beforeMm": 22.3,
+    "afterMm": 0
+  },
+  "bakedInstances": [],
+  "merge": [
+    {
+      "mesh": "body_metal",
+      "anchor": "(scene)",
+      "material": "cultivator.fixed-palette-metal",
+      "absorbed": [
+        "cultivatorFrame",
+        "cultivatorToolbar",
+        "toolbarCrossRail1",
+        "toolbarCrossRail2",
+        "toolbarCrossRail3",
+        "toolbarCrossRail4",
+        "cultivatorWingLeft",
+        "cultivatorWingRight",
+        "endPlateLeft",
+        "endPlateRight",
+        "gaugeWheelLeftfork",
+        "gaugeWheelLeftsupportFront",
+        "gaugeWheelLeftsupportRear",
+        "gaugeWheelRightfork",
+        "gaugeWheelRightsupportFront",
+        "gaugeWheelRightsupportRear",
+        "hitchMastLeft",
+        "hitchMastRight",
+        "hitchBraceLeft",
+        "hitchBraceRight",
+        "hitchMastCap",
+        "liftArmLeft",
+        "liftArmRight",
+        "topLink",
+        "depthAdjuster"
+      ],
+      "triangles": 14700
+    },
+    {
+      "mesh": "pivottine01_metal",
+      "anchor": "pivottine01",
+      "material": "cultivator.fixed-palette-metal",
+      "absorbed": [
+        "tine1",
+        "tineClamp1",
+        "sweepMarker1"
+      ],
+      "triangles": 1464
+    },
+    {
+      "mesh": "pivottine02_metal",
+      "anchor": "pivottine02",
+      "material": "cultivator.fixed-palette-metal",
+      "absorbed": [
+        "tine2",
+        "tineClamp2",
+        "sweepMarker2"
+      ],
+      "triangles": 1464
+    },
+    {
+      "mesh": "pivottine03_metal",
+      "anchor": "pivottine03",
+      "material": "cultivator.fixed-palette-metal",
+      "absorbed": [
+        "tine3",
+        "tineClamp3",
+        "sweepMarker3"
+      ],
+      "triangles": 1464
+    },
+    {
+      "mesh": "pivottine04_metal",
+      "anchor": "pivottine04",
+      "material": "cultivator.fixed-palette-metal",
+      "absorbed": [
+        "tine4",
+        "tineClamp4",
+        "sweepMarker4"
+      ],
+      "triangles": 1464
+    },
+    {
+      "mesh": "pivottine05_metal",
+      "anchor": "pivottine05",
+      "material": "cultivator.fixed-palette-metal",
+      "absorbed": [
+        "tine5",
+        "tineClamp5",
+        "sweepMarker5"
+      ],
+      "triangles": 1464
+    },
+    {
+      "mesh": "pivottine06_metal",
+      "anchor": "pivottine06",
+      "material": "cultivator.fixed-palette-metal",
+      "absorbed": [
+        "tine6",
+        "tineClamp6",
+        "sweepMarker6"
+      ],
+      "triangles": 1464
+    },
+    {
+      "mesh": "pivottine07_metal",
+      "anchor": "pivottine07",
+      "material": "cultivator.fixed-palette-metal",
+      "absorbed": [
+        "tine7",
+        "tineClamp7",
+        "sweepMarker7"
+      ],
+      "triangles": 1464
+    },
+    {
+      "mesh": "body_matte",
+      "anchor": "(scene)",
+      "material": "cultivator.fixed-palette-matte",
+      "absorbed": [
+        "hitchMastPin",
+        "topLinkPin",
+        "depthAdjusterHandle"
+      ],
+      "triangles": 264
+    },
+    {
+      "mesh": "gaugeWheelLeft_rubber",
+      "anchor": "gaugeWheelLeft",
+      "material": "cultivator.fixed-palette-rubber",
+      "absorbed": [
+        "gaugeWheelLefttire",
+        "gaugeWheelLeftsidewall",
+        "gaugeWheelLeftlug01",
+        "gaugeWheelLeftlug02",
+        "gaugeWheelLeftlug03",
+        "gaugeWheelLeftlug04",
+        "gaugeWheelLeftlug05",
+        "gaugeWheelLeftlug06",
+        "gaugeWheelLeftlug07",
+        "gaugeWheelLeftlug08",
+        "gaugeWheelLeftlug09",
+        "gaugeWheelLeftlug10",
+        "gaugeWheelLeftlug11",
+        "gaugeWheelLeftlug12"
+      ],
+      "triangles": 600
+    },
+    {
+      "mesh": "gaugeWheelRight_rubber",
+      "anchor": "gaugeWheelRight",
+      "material": "cultivator.fixed-palette-rubber",
+      "absorbed": [
+        "gaugeWheelRighttire",
+        "gaugeWheelRightsidewall",
+        "gaugeWheelRightlug01",
+        "gaugeWheelRightlug02",
+        "gaugeWheelRightlug03",
+        "gaugeWheelRightlug04",
+        "gaugeWheelRightlug05",
+        "gaugeWheelRightlug06",
+        "gaugeWheelRightlug07",
+        "gaugeWheelRightlug08",
+        "gaugeWheelRightlug09",
+        "gaugeWheelRightlug10",
+        "gaugeWheelRightlug11",
+        "gaugeWheelRightlug12"
+      ],
+      "triangles": 600
+    }
+  ],
+  "unsharedGeometries": 14,
+  "prunedEmptyNodes": 18,
+  "after": {
+    "meshes": 29,
+    "drawnTriangles": 27668,
+    "groundMinYmm": 0
+  }
+}

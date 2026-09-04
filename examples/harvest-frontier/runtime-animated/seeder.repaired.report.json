@@ -1,0 +1,959 @@
+{
+  "input": "public\\market\\hf-seeder-compact\\seeder.compact.m1.glb",
+  "output": "examples\\harvest-frontier\\runtime-animated\\seeder.repaired.glb",
+  "before": {
+    "meshes": 410,
+    "drawnTriangles": 51602,
+    "groundMinYmm": 0.2
+  },
+  "hiddenProxies": [],
+  "closingWheelGap": {
+    "movedMm": 5,
+    "wheels": [
+      {
+        "node": "pivotclosingWheel01Left",
+        "xMmBefore": 1278.3,
+        "xMmAfter": 1283.3
+      },
+      {
+        "node": "pivotclosingWheel01Right",
+        "xMmBefore": 1278.3,
+        "xMmAfter": 1283.3
+      },
+      {
+        "node": "pivotclosingWheel02Left",
+        "xMmBefore": 1278.3,
+        "xMmAfter": 1283.3
+      },
+      {
+        "node": "pivotclosingWheel02Right",
+        "xMmBefore": 1278.3,
+        "xMmAfter": 1283.3
+      },
+      {
+        "node": "pivotclosingWheel03Left",
+        "xMmBefore": 1278.3,
+        "xMmAfter": 1283.3
+      },
+      {
+        "node": "pivotclosingWheel03Right",
+        "xMmBefore": 1278.3,
+        "xMmAfter": 1283.3
+      },
+      {
+        "node": "pivotclosingWheel04Left",
+        "xMmBefore": 1278.3,
+        "xMmAfter": 1283.3
+      },
+      {
+        "node": "pivotclosingWheel04Right",
+        "xMmBefore": 1278.3,
+        "xMmAfter": 1283.3
+      }
+    ]
+  },
+  "seedHoseLift": {
+    "alongNormal": [
+      -0.399,
+      -0.28,
+      0.873
+    ],
+    "millimetres": 4,
+    "hoses": [
+      "rowHose01",
+      "rowHose02",
+      "rowHose03",
+      "rowHose04"
+    ]
+  },
+  "rowUnitFloat": {
+    "cyclesPerClip": 2,
+    "rows": [
+      {
+        "node": "pivotrowUnit01",
+        "restQuaternionZ": -0.0275,
+        "degrees": [
+          0,
+          8
+        ],
+        "phaseOffsetTurns": 0
+      },
+      {
+        "node": "pivotrowUnit02",
+        "restQuaternionZ": -0.0275,
+        "degrees": [
+          0,
+          8
+        ],
+        "phaseOffsetTurns": 0.25
+      },
+      {
+        "node": "pivotrowUnit03",
+        "restQuaternionZ": -0.0275,
+        "degrees": [
+          0,
+          8
+        ],
+        "phaseOffsetTurns": 0.5
+      },
+      {
+        "node": "pivotrowUnit04",
+        "restQuaternionZ": -0.0275,
+        "degrees": [
+          0,
+          8
+        ],
+        "phaseOffsetTurns": 0.75
+      }
+    ]
+  },
+  "hopperAgitator": {
+    "why": "the seed meter shafts the clip already drives are inside the meter housing; from outside no hopper moved",
+    "drives": [
+      {
+        "node": "hopperAgitatorPivot01",
+        "atMm": [
+          395,
+          1254.6,
+          -1200
+        ],
+        "turnsPerClip": 4
+      },
+      {
+        "node": "hopperAgitatorPivot02",
+        "atMm": [
+          395,
+          1254.6,
+          -400
+        ],
+        "turnsPerClip": 4
+      },
+      {
+        "node": "hopperAgitatorPivot03",
+        "atMm": [
+          395,
+          1254.6,
+          400
+        ],
+        "turnsPerClip": 4
+      },
+      {
+        "node": "hopperAgitatorPivot04",
+        "atMm": [
+          395,
+          1254.6,
+          1200
+        ],
+        "turnsPerClip": 4
+      }
+    ]
+  },
+  "ground": {
+    "beforeMm": 0.2,
+    "afterMm": 0
+  },
+  "bakedInstances": [],
+  "merge": [
+    {
+      "mesh": "body_metal",
+      "anchor": "(scene)",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "toolbarBeam",
+        "toolbarRail",
+        "rowMount01",
+        "rowMountPin01",
+        "rowMount02",
+        "rowMountPin02",
+        "rowMount03",
+        "rowMountPin03",
+        "rowMount04",
+        "rowMountPin04",
+        "toolbarEndPlateLeft",
+        "toolbarEndPlateRight",
+        "hopperBolt01-1",
+        "hopperBolt01-2",
+        "hopperTopLipFront01",
+        "hopperTopLipBack01",
+        "hopperOutlet01",
+        "hopperLid01",
+        "hopperHandle01",
+        "hopperBolt02-1",
+        "hopperBolt02-2",
+        "hopperTopLipFront02",
+        "hopperTopLipBack02",
+        "hopperOutlet02",
+        "hopperLid02",
+        "hopperHandle02",
+        "hopperBolt03-1",
+        "hopperBolt03-2",
+        "hopperTopLipFront03",
+        "hopperTopLipBack03",
+        "hopperOutlet03",
+        "hopperLid03",
+        "hopperHandle03",
+        "hopperBolt04-1",
+        "hopperBolt04-2",
+        "hopperTopLipFront04",
+        "hopperTopLipBack04",
+        "hopperOutlet04",
+        "hopperLid04",
+        "hopperHandle04",
+        "hitchMastLeft",
+        "hitchMastRight",
+        "hitchMastSpine",
+        "hitchMastCap",
+        "hitchBraceLeft",
+        "hitchBraceRight",
+        "hitchMastPin",
+        "hitchHydraulicCylinder",
+        "hitchHydraulicRod",
+        "hitchHydraulicLowerCollar",
+        "hitchHydraulicUpperCollar",
+        "topLinkBar",
+        "lowerLinkBarLeft",
+        "lowerLinkPinLeft",
+        "lowerLinkBarRight",
+        "lowerLinkPinRight"
+      ],
+      "triangles": 8370
+    },
+    {
+      "mesh": "body_matte",
+      "anchor": "(scene)",
+      "material": "seeder.fixed-palette-matte",
+      "absorbed": [
+        "reflectorLeft",
+        "reflectorRight",
+        "hopperInspectionWindow01",
+        "hopperInspectionWindow02",
+        "hopperInspectionWindow03",
+        "hopperInspectionWindow04",
+        "hopperToMeterFeed01",
+        "hopperToMeterFeed02",
+        "hopperToMeterFeed03",
+        "hopperToMeterFeed04"
+      ],
+      "triangles": 2352
+    },
+    {
+      "mesh": "body_coated",
+      "anchor": "(scene)",
+      "material": "seeder.fixed-palette-coated",
+      "absorbed": [
+        "hopperBody01",
+        "hopperBody02",
+        "hopperBody03",
+        "hopperBody04"
+      ],
+      "triangles": 48
+    },
+    {
+      "mesh": "hopperAgitatorPivot01_metal",
+      "anchor": "hopperAgitatorPivot01",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "hopperAgitatorPulley01",
+        "hopperAgitatorCrank01",
+        "hopperAgitatorPin01"
+      ],
+      "triangles": 116
+    },
+    {
+      "mesh": "hopperAgitatorPivot02_metal",
+      "anchor": "hopperAgitatorPivot02",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "hopperAgitatorPulley02",
+        "hopperAgitatorCrank02",
+        "hopperAgitatorPin02"
+      ],
+      "triangles": 116
+    },
+    {
+      "mesh": "hopperAgitatorPivot03_metal",
+      "anchor": "hopperAgitatorPivot03",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "hopperAgitatorPulley03",
+        "hopperAgitatorCrank03",
+        "hopperAgitatorPin03"
+      ],
+      "triangles": 116
+    },
+    {
+      "mesh": "hopperAgitatorPivot04_metal",
+      "anchor": "hopperAgitatorPivot04",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "hopperAgitatorPulley04",
+        "hopperAgitatorCrank04",
+        "hopperAgitatorPin04"
+      ],
+      "triangles": 116
+    },
+    {
+      "mesh": "pivotrowUnit01_metal",
+      "anchor": "pivotrowUnit01",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "seedMeterHousing01",
+        "seedMeterFace01",
+        "seedMeterServiceFace01",
+        "seedMeterServiceCap01",
+        "parallelLink01Upper",
+        "parallelLink01Lower",
+        "parallelPin01-1",
+        "parallelPin01-2",
+        "parallelPin01-3",
+        "parallelPin01-4",
+        "rowSupportArm01Left",
+        "rowSupportArm01Right",
+        "rowGuideArm01Left",
+        "rowGuideArm01Right",
+        "rowFabricationRail01",
+        "rowDetailLinkPlate01",
+        "rowFastener01",
+        "rowClosingBridge01",
+        "rowCarrierPlate01",
+        "rowCarrierCrossbar01",
+        "closingCarrierPlate01",
+        "rowCarrierFastener01",
+        "rowGuard01",
+        "rowHose01Ribs",
+        "seedTubeRib01-1",
+        "seedTubeRib01-2",
+        "seedTubeRib01-3",
+        "meterGuard01",
+        "openerCarrier01",
+        "openerCarrierBolt01-1",
+        "openerCarrierBolt01-2",
+        "gaugeArm01",
+        "closingArm01Left",
+        "closingArm01Right",
+        "rowDepthLeverStem01",
+        "rowDepthLeverKnob01",
+        "rowSpring01",
+        "rowSpringCoil01-1",
+        "rowSpringCoil01-2",
+        "rowSpringCoil01-3",
+        "rowSpringCoil01-4",
+        "rowSpringCoil01-5",
+        "rowSpringCoil01-6",
+        "rowSpringCoil01-7",
+        "rowSpringVisible01",
+        "rowSpringVisibleCoil01-1",
+        "rowSpringVisibleCoil01-2",
+        "rowSpringVisibleCoil01-3",
+        "rowSpringVisibleCoil01-4",
+        "rowSpringVisibleCoil01-5",
+        "rowSpringVisibleCoil01-6",
+        "rowSpringVisibleCoil01-7"
+      ],
+      "triangles": 7616
+    },
+    {
+      "mesh": "pivotrowUnit01_rubber",
+      "anchor": "pivotrowUnit01",
+      "material": "seeder.fixed-palette-rubber",
+      "absorbed": [
+        "rowHose01",
+        "seedTube01"
+      ],
+      "triangles": 152
+    },
+    {
+      "mesh": "openerDisc01Left_metal",
+      "anchor": "openerDisc01Left",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "openerPlate",
+        "openerDiscRim",
+        "openerWearFace",
+        "openerHub",
+        "openerHubCap",
+        "openerBolt1",
+        "openerBolt2",
+        "openerBolt3",
+        "openerBolt4"
+      ],
+      "triangles": 568
+    },
+    {
+      "mesh": "openerDisc01Right_metal",
+      "anchor": "openerDisc01Right",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "openerPlate_1",
+        "openerDiscRim_1",
+        "openerWearFace_1",
+        "openerHub_1",
+        "openerHubCap_1",
+        "openerBolt1_1",
+        "openerBolt2_1",
+        "openerBolt3_1",
+        "openerBolt4_1"
+      ],
+      "triangles": 568
+    },
+    {
+      "mesh": "gaugeWheel01_rubber",
+      "anchor": "gaugeWheel01",
+      "material": "seeder.fixed-palette-rubber",
+      "absorbed": [
+        "tire",
+        "sidewall"
+      ],
+      "triangles": 336
+    },
+    {
+      "mesh": "gaugeWheel01_metal",
+      "anchor": "gaugeWheel01",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "hub",
+        "hubCap"
+      ],
+      "triangles": 88
+    },
+    {
+      "mesh": "closingWheel01Left_rubber",
+      "anchor": "closingWheel01Left",
+      "material": "seeder.fixed-palette-rubber",
+      "absorbed": [
+        "tire_1",
+        "sidewall_1"
+      ],
+      "triangles": 336
+    },
+    {
+      "mesh": "closingWheel01Left_metal",
+      "anchor": "closingWheel01Left",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "hub_1",
+        "hubCap_1"
+      ],
+      "triangles": 88
+    },
+    {
+      "mesh": "closingWheel01Right_rubber",
+      "anchor": "closingWheel01Right",
+      "material": "seeder.fixed-palette-rubber",
+      "absorbed": [
+        "tire_2",
+        "sidewall_2"
+      ],
+      "triangles": 336
+    },
+    {
+      "mesh": "closingWheel01Right_metal",
+      "anchor": "closingWheel01Right",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "hub_2",
+        "hubCap_2"
+      ],
+      "triangles": 88
+    },
+    {
+      "mesh": "pivotrowUnit02_metal",
+      "anchor": "pivotrowUnit02",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "seedMeterHousing02",
+        "seedMeterFace02",
+        "seedMeterServiceFace02",
+        "seedMeterServiceCap02",
+        "parallelLink02Upper",
+        "parallelLink02Lower",
+        "parallelPin02-1",
+        "parallelPin02-2",
+        "parallelPin02-3",
+        "parallelPin02-4",
+        "rowSupportArm02Left",
+        "rowSupportArm02Right",
+        "rowGuideArm02Left",
+        "rowGuideArm02Right",
+        "rowFabricationRail02",
+        "rowDetailLinkPlate02",
+        "rowFastener02",
+        "rowClosingBridge02",
+        "rowCarrierPlate02",
+        "rowCarrierCrossbar02",
+        "closingCarrierPlate02",
+        "rowCarrierFastener02",
+        "rowGuard02",
+        "rowHose02Ribs",
+        "seedTubeRib02-1",
+        "seedTubeRib02-2",
+        "seedTubeRib02-3",
+        "meterGuard02",
+        "openerCarrier02",
+        "openerCarrierBolt02-1",
+        "openerCarrierBolt02-2",
+        "gaugeArm02",
+        "closingArm02Left",
+        "closingArm02Right",
+        "rowDepthLeverStem02",
+        "rowDepthLeverKnob02",
+        "rowSpring02",
+        "rowSpringCoil02-1",
+        "rowSpringCoil02-2",
+        "rowSpringCoil02-3",
+        "rowSpringCoil02-4",
+        "rowSpringCoil02-5",
+        "rowSpringCoil02-6",
+        "rowSpringCoil02-7",
+        "rowSpringVisible02",
+        "rowSpringVisibleCoil02-1",
+        "rowSpringVisibleCoil02-2",
+        "rowSpringVisibleCoil02-3",
+        "rowSpringVisibleCoil02-4",
+        "rowSpringVisibleCoil02-5",
+        "rowSpringVisibleCoil02-6",
+        "rowSpringVisibleCoil02-7"
+      ],
+      "triangles": 7616
+    },
+    {
+      "mesh": "pivotrowUnit02_rubber",
+      "anchor": "pivotrowUnit02",
+      "material": "seeder.fixed-palette-rubber",
+      "absorbed": [
+        "rowHose02",
+        "seedTube02"
+      ],
+      "triangles": 152
+    },
+    {
+      "mesh": "openerDisc02Left_metal",
+      "anchor": "openerDisc02Left",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "openerPlate_2",
+        "openerDiscRim_2",
+        "openerWearFace_2",
+        "openerHub_2",
+        "openerHubCap_2",
+        "openerBolt1_2",
+        "openerBolt2_2",
+        "openerBolt3_2",
+        "openerBolt4_2"
+      ],
+      "triangles": 568
+    },
+    {
+      "mesh": "openerDisc02Right_metal",
+      "anchor": "openerDisc02Right",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "openerPlate_3",
+        "openerDiscRim_3",
+        "openerWearFace_3",
+        "openerHub_3",
+        "openerHubCap_3",
+        "openerBolt1_3",
+        "openerBolt2_3",
+        "openerBolt3_3",
+        "openerBolt4_3"
+      ],
+      "triangles": 568
+    },
+    {
+      "mesh": "gaugeWheel02_rubber",
+      "anchor": "gaugeWheel02",
+      "material": "seeder.fixed-palette-rubber",
+      "absorbed": [
+        "tire_3",
+        "sidewall_3"
+      ],
+      "triangles": 336
+    },
+    {
+      "mesh": "gaugeWheel02_metal",
+      "anchor": "gaugeWheel02",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "hub_3",
+        "hubCap_3"
+      ],
+      "triangles": 88
+    },
+    {
+      "mesh": "closingWheel02Left_rubber",
+      "anchor": "closingWheel02Left",
+      "material": "seeder.fixed-palette-rubber",
+      "absorbed": [
+        "tire_4",
+        "sidewall_4"
+      ],
+      "triangles": 336
+    },
+    {
+      "mesh": "closingWheel02Left_metal",
+      "anchor": "closingWheel02Left",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "hub_4",
+        "hubCap_4"
+      ],
+      "triangles": 88
+    },
+    {
+      "mesh": "closingWheel02Right_rubber",
+      "anchor": "closingWheel02Right",
+      "material": "seeder.fixed-palette-rubber",
+      "absorbed": [
+        "tire_5",
+        "sidewall_5"
+      ],
+      "triangles": 336
+    },
+    {
+      "mesh": "closingWheel02Right_metal",
+      "anchor": "closingWheel02Right",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "hub_5",
+        "hubCap_5"
+      ],
+      "triangles": 88
+    },
+    {
+      "mesh": "pivotrowUnit03_metal",
+      "anchor": "pivotrowUnit03",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "seedMeterHousing03",
+        "seedMeterFace03",
+        "seedMeterServiceFace03",
+        "seedMeterServiceCap03",
+        "parallelLink03Upper",
+        "parallelLink03Lower",
+        "parallelPin03-1",
+        "parallelPin03-2",
+        "parallelPin03-3",
+        "parallelPin03-4",
+        "rowSupportArm03Left",
+        "rowSupportArm03Right",
+        "rowGuideArm03Left",
+        "rowGuideArm03Right",
+        "rowFabricationRail03",
+        "rowDetailLinkPlate03",
+        "rowFastener03",
+        "rowClosingBridge03",
+        "rowCarrierPlate03",
+        "rowCarrierCrossbar03",
+        "closingCarrierPlate03",
+        "rowCarrierFastener03",
+        "rowGuard03",
+        "rowHose03Ribs",
+        "seedTubeRib03-1",
+        "seedTubeRib03-2",
+        "seedTubeRib03-3",
+        "meterGuard03",
+        "openerCarrier03",
+        "openerCarrierBolt03-1",
+        "openerCarrierBolt03-2",
+        "gaugeArm03",
+        "closingArm03Left",
+        "closingArm03Right",
+        "rowDepthLeverStem03",
+        "rowDepthLeverKnob03",
+        "rowSpring03",
+        "rowSpringCoil03-1",
+        "rowSpringCoil03-2",
+        "rowSpringCoil03-3",
+        "rowSpringCoil03-4",
+        "rowSpringCoil03-5",
+        "rowSpringCoil03-6",
+        "rowSpringCoil03-7",
+        "rowSpringVisible03",
+        "rowSpringVisibleCoil03-1",
+        "rowSpringVisibleCoil03-2",
+        "rowSpringVisibleCoil03-3",
+        "rowSpringVisibleCoil03-4",
+        "rowSpringVisibleCoil03-5",
+        "rowSpringVisibleCoil03-6",
+        "rowSpringVisibleCoil03-7"
+      ],
+      "triangles": 7616
+    },
+    {
+      "mesh": "pivotrowUnit03_rubber",
+      "anchor": "pivotrowUnit03",
+      "material": "seeder.fixed-palette-rubber",
+      "absorbed": [
+        "rowHose03",
+        "seedTube03"
+      ],
+      "triangles": 152
+    },
+    {
+      "mesh": "openerDisc03Left_metal",
+      "anchor": "openerDisc03Left",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "openerPlate_4",
+        "openerDiscRim_4",
+        "openerWearFace_4",
+        "openerHub_4",
+        "openerHubCap_4",
+        "openerBolt1_4",
+        "openerBolt2_4",
+        "openerBolt3_4",
+        "openerBolt4_4"
+      ],
+      "triangles": 568
+    },
+    {
+      "mesh": "openerDisc03Right_metal",
+      "anchor": "openerDisc03Right",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "openerPlate_5",
+        "openerDiscRim_5",
+        "openerWearFace_5",
+        "openerHub_5",
+        "openerHubCap_5",
+        "openerBolt1_5",
+        "openerBolt2_5",
+        "openerBolt3_5",
+        "openerBolt4_5"
+      ],
+      "triangles": 568
+    },
+    {
+      "mesh": "gaugeWheel03_rubber",
+      "anchor": "gaugeWheel03",
+      "material": "seeder.fixed-palette-rubber",
+      "absorbed": [
+        "tire_6",
+        "sidewall_6"
+      ],
+      "triangles": 336
+    },
+    {
+      "mesh": "gaugeWheel03_metal",
+      "anchor": "gaugeWheel03",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "hub_6",
+        "hubCap_6"
+      ],
+      "triangles": 88
+    },
+    {
+      "mesh": "closingWheel03Left_rubber",
+      "anchor": "closingWheel03Left",
+      "material": "seeder.fixed-palette-rubber",
+      "absorbed": [
+        "tire_7",
+        "sidewall_7"
+      ],
+      "triangles": 336
+    },
+    {
+      "mesh": "closingWheel03Left_metal",
+      "anchor": "closingWheel03Left",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "hub_7",
+        "hubCap_7"
+      ],
+      "triangles": 88
+    },
+    {
+      "mesh": "closingWheel03Right_rubber",
+      "anchor": "closingWheel03Right",
+      "material": "seeder.fixed-palette-rubber",
+      "absorbed": [
+        "tire_8",
+        "sidewall_8"
+      ],
+      "triangles": 336
+    },
+    {
+      "mesh": "closingWheel03Right_metal",
+      "anchor": "closingWheel03Right",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "hub_8",
+        "hubCap_8"
+      ],
+      "triangles": 88
+    },
+    {
+      "mesh": "pivotrowUnit04_metal",
+      "anchor": "pivotrowUnit04",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "seedMeterHousing04",
+        "seedMeterFace04",
+        "seedMeterServiceFace04",
+        "seedMeterServiceCap04",
+        "parallelLink04Upper",
+        "parallelLink04Lower",
+        "parallelPin04-1",
+        "parallelPin04-2",
+        "parallelPin04-3",
+        "parallelPin04-4",
+        "rowSupportArm04Left",
+        "rowSupportArm04Right",
+        "rowGuideArm04Left",
+        "rowGuideArm04Right",
+        "rowFabricationRail04",
+        "rowDetailLinkPlate04",
+        "rowFastener04",
+        "rowClosingBridge04",
+        "rowCarrierPlate04",
+        "rowCarrierCrossbar04",
+        "closingCarrierPlate04",
+        "rowCarrierFastener04",
+        "rowGuard04",
+        "rowHose04Ribs",
+        "seedTubeRib04-1",
+        "seedTubeRib04-2",
+        "seedTubeRib04-3",
+        "meterGuard04",
+        "openerCarrier04",
+        "openerCarrierBolt04-1",
+        "openerCarrierBolt04-2",
+        "gaugeArm04",
+        "closingArm04Left",
+        "closingArm04Right",
+        "rowDepthLeverStem04",
+        "rowDepthLeverKnob04",
+        "rowSpring04",
+        "rowSpringCoil04-1",
+        "rowSpringCoil04-2",
+        "rowSpringCoil04-3",
+        "rowSpringCoil04-4",
+        "rowSpringCoil04-5",
+        "rowSpringCoil04-6",
+        "rowSpringCoil04-7",
+        "rowSpringVisible04",
+        "rowSpringVisibleCoil04-1",
+        "rowSpringVisibleCoil04-2",
+        "rowSpringVisibleCoil04-3",
+        "rowSpringVisibleCoil04-4",
+        "rowSpringVisibleCoil04-5",
+        "rowSpringVisibleCoil04-6",
+        "rowSpringVisibleCoil04-7"
+      ],
+      "triangles": 7616
+    },
+    {
+      "mesh": "pivotrowUnit04_rubber",
+      "anchor": "pivotrowUnit04",
+      "material": "seeder.fixed-palette-rubber",
+      "absorbed": [
+        "rowHose04",
+        "seedTube04"
+      ],
+      "triangles": 152
+    },
+    {
+      "mesh": "openerDisc04Left_metal",
+      "anchor": "openerDisc04Left",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "openerPlate_6",
+        "openerDiscRim_6",
+        "openerWearFace_6",
+        "openerHub_6",
+        "openerHubCap_6",
+        "openerBolt1_6",
+        "openerBolt2_6",
+        "openerBolt3_6",
+        "openerBolt4_6"
+      ],
+      "triangles": 568
+    },
+    {
+      "mesh": "openerDisc04Right_metal",
+      "anchor": "openerDisc04Right",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "openerPlate_7",
+        "openerDiscRim_7",
+        "openerWearFace_7",
+        "openerHub_7",
+        "openerHubCap_7",
+        "openerBolt1_7",
+        "openerBolt2_7",
+        "openerBolt3_7",
+        "openerBolt4_7"
+      ],
+      "triangles": 568
+    },
+    {
+      "mesh": "gaugeWheel04_rubber",
+      "anchor": "gaugeWheel04",
+      "material": "seeder.fixed-palette-rubber",
+      "absorbed": [
+        "tire_9",
+        "sidewall_9"
+      ],
+      "triangles": 336
+    },
+    {
+      "mesh": "gaugeWheel04_metal",
+      "anchor": "gaugeWheel04",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "hub_9",
+        "hubCap_9"
+      ],
+      "triangles": 88
+    },
+    {
+      "mesh": "closingWheel04Left_rubber",
+      "anchor": "closingWheel04Left",
+      "material": "seeder.fixed-palette-rubber",
+      "absorbed": [
+        "tire_10",
+        "sidewall_10"
+      ],
+      "triangles": 336
+    },
+    {
+      "mesh": "closingWheel04Left_metal",
+      "anchor": "closingWheel04Left",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "hub_10",
+        "hubCap_10"
+      ],
+      "triangles": 88
+    },
+    {
+      "mesh": "closingWheel04Right_rubber",
+      "anchor": "closingWheel04Right",
+      "material": "seeder.fixed-palette-rubber",
+      "absorbed": [
+        "tire_11",
+        "sidewall_11"
+      ],
+      "triangles": 336
+    },
+    {
+      "mesh": "closingWheel04Right_metal",
+      "anchor": "closingWheel04Right",
+      "material": "seeder.fixed-palette-metal",
+      "absorbed": [
+        "hub_11",
+        "hubCap_11"
+      ],
+      "triangles": 88
+    }
+  ],
+  "unsharedGeometries": 3,
+  "prunedEmptyNodes": 37,
+  "after": {
+    "meshes": 51,
+    "drawnTriangles": 52066,
+    "groundMinYmm": 0
+  }
+}

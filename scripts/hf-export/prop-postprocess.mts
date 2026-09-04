@@ -12,8 +12,26 @@
  *   2. THE LADDER GOES NOWHERE. Two 40 x 1792 x 40 mm rails run up to y 2.248,
  *      110 mm proud of the barrel rim at 2.048, and stop in mid-air with no top
  *      rung between them. They are cut off level with the rim.
- *   Left alone on instruction: the barrel is 1.55 m across and the prop 2.33 m
- *   tall. That is Harvest Frontier's own scale and it is reported, not changed.
+ *   Left alone in the first pass, on instruction: the barrel was 1.55 m across
+ *   and the prop 2.33 m tall.
+ *
+ *   2026-09-03: that is no longer left alone, because it is the defect. A rain
+ *   butt 2.3255 m tall is a silo, not a butt -- it stood 174 mm short of the
+ *   catalogue's own farmhand (2.4992 m) and TALLER than its market stall
+ *   (2.2563 m). The whole prop is scaled about the ground plane to 1.000 m
+ *   tall (0.667 m across), which is the size a garden water butt actually is,
+ *   and the listed real-world size follows it everywhere it is shown.
+ *
+ *   4. THE BARREL IS A SMOOTH CYLINDER. `waterButtStaves` was an 18-sided
+ *      extrusion of constant radius: no staves, no bulge, nothing that says
+ *      "coopered". It is rebuilt as 18 staves -- a ridge down the middle of
+ *      each and a 22 mm groove at every seam, so a flat-shaded surface breaks
+ *      into 36 alternating light and dark strips -- on a barrel profile that
+ *      swells 10% from the ends to the waist. The file's three iron hoops are
+ *      kept and re-fitted radially to the new profile, so each one still
+ *      stands 25 mm proud of the wood it binds instead of hanging in the air
+ *      at the ends. The material is the one the staves already used and no
+ *      colour is introduced.
  *
  * WINDMILL (outputs/audit/hf/hf-windmill/):
  *   3. THE SAILS SCRAPE THE MILL. A first pass moved the hub 170 mm forward and
@@ -42,6 +60,28 @@
  *      averaged vertex colour, parented to the tilt node so it does not spin.
  *   4. IT STANDS 20.4 mm IN THE GROUND. The eight foot pads sit at y = -0.0204.
  *
+ *   2026-09-03:
+ *
+ *   5. THE SAILS ARE FOUR SOLID BOARDS. Each sail was one 440 x 1280 x 35 mm
+ *      panel with three 460 x 45 mm battens laid across it -- a white plank,
+ *      not a sail. Every panel and batten is removed and each sail is rebuilt
+ *      as a real lattice: two 75 mm stocks down the long edges in the battens'
+ *      own timber colour, seven 50 mm laths between them in the panel's own
+ *      cream, and 155 mm of open air between every pair of laths, so the sky
+ *      shows through the sail from any angle. The lattice is built INSIDE the
+ *      envelope the panel and its battens already occupied, so the swept disc
+ *      is unchanged and the measured blade-to-tower clearance stands.
+ *
+ *   6. THE DOOR IS BEHIND THE SAILS AND THERE IS ONE WINDOW. The mill does
+ *      have a door -- 540 x 924 mm on the +Z face -- and one window, and both
+ *      are on the same side as the sail disc, so on the storefront
+ *      three-quarter the sails cross them and the tower reads as a bare cone.
+ *      The door is rebuilt on the BACK of the tower (-Z), which is where a
+ *      miller's door belongs: you do not walk under a turning sail. A second
+ *      window, the same size as the one the file ships, is added on the +X
+ *      face so the tower is not blank from the shop's own camera angle. Every
+ *      new part takes its colour from the part it replaces or copies.
+ *
  * No material, colour or vertex colour is touched in either file.
  */
 import fs from 'node:fs';
@@ -50,7 +90,18 @@ import { fileURLToPath } from 'node:url';
 import {
   THREE, loadGlb, saveGlb, mesh, node, lumps, deleteLumps, scaleLump,
   meshes, triangleCount, worldBox, sizeMm, mm, seatOnGround, lowestY,
+  averageColour, buildBoxes,
 } from './fix-lib.mjs';
+
+/** How tall a rain butt is. */
+const BUTT_TARGET_HEIGHT = Number(process.env.BUTT_HEIGHT ?? 1.0);
+/** Staves around the barrel, and how deep the seam between two of them cuts. */
+const STAVES = 18;
+const STAVE_GROOVE = 0.022;
+/** How much narrower the barrel is at its ends than at its waist. */
+const BARREL_TAPER = 0.10;
+/** Vertical segments the profile is drawn in. */
+const STAVE_RINGS = 6;
 
 /** Windshaft inclination, degrees nose-up, and how far the assembly stands proud. */
 const SHAFT_TILT_DEG = Number(process.env.SHAFT_TILT_DEG ?? 10);
@@ -87,10 +138,141 @@ async function fixWaterButt(): Promise<unknown> {
   }
   scene.updateMatrixWorld(true);
 
+  // ------------------------------------------------- 4a. the coopered barrel
+  const shell = mesh(scene, 'waterButtStaves');
+  const shellBox = worldBox(shell);
+  const shellSize = shellBox.getSize(new THREE.Vector3());
+  const y0 = shellBox.min.y;
+  const y1 = shellBox.max.y;
+  const waist = Math.max(shellSize.x, shellSize.z) / 2;
+  /** The barrel's radius at height y: full at the waist, BARREL_TAPER narrower at both ends. */
+  const radiusAt = (y: number): number => {
+    const u = (y - y0) / (y1 - y0);
+    return waist * (1 - BARREL_TAPER * (2 * u - 1) ** 2);
+  };
+
+  const position: number[] = [];
+  // Every triangle carries its own three vertices, so the faces stay flat-shaded
+  // like the rest of this asset instead of being smoothed back into a tube.
+  const pushTriangle = (a: THREE.Vector3, b: THREE.Vector3, c: THREE.Vector3): void => {
+    position.push(a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z);
+  };
+  const point = (angle: number, radius: number, y: number): THREE.Vector3 =>
+    new THREE.Vector3(Math.sin(angle) * radius, y, Math.cos(angle) * radius);
+  const quad = (a: THREE.Vector3, b: THREE.Vector3, c: THREE.Vector3, d: THREE.Vector3): void => {
+    pushTriangle(a, b, c); pushTriangle(a, c, d);
+  };
+  const step = (Math.PI * 2) / STAVES;
+  for (let ring = 0; ring < STAVE_RINGS; ring += 1) {
+    const ya = y0 + ((y1 - y0) * ring) / STAVE_RINGS;
+    const yb = y0 + ((y1 - y0) * (ring + 1)) / STAVE_RINGS;
+    const ra = radiusAt(ya);
+    const rb = radiusAt(yb);
+    for (let s = 0; s < STAVES; s += 1) {
+      const seam0 = s * step;
+      const ridge = seam0 + step / 2;
+      const seam1 = seam0 + step;
+      // seam -> ridge, then ridge -> seam: two faces per stave, so the seam
+      // between two staves is a real V and reads as a joint under flat light.
+      quad(point(seam0, ra - STAVE_GROOVE, ya), point(ridge, ra, ya), point(ridge, rb, yb), point(seam0, rb - STAVE_GROOVE, yb));
+      quad(point(ridge, ra, ya), point(seam1, ra - STAVE_GROOVE, ya), point(seam1, rb - STAVE_GROOVE, yb), point(ridge, rb, yb));
+    }
+  }
+  // Caps, as fans over the same 2 x STAVES ring, so the rim follows the staves.
+  for (const [y, up] of [[y0, false], [y1, true]] as const) {
+    const r = radiusAt(y);
+    const centre = new THREE.Vector3(0, y, 0);
+    for (let s = 0; s < STAVES; s += 1) {
+      const seam0 = s * step;
+      const ridge = seam0 + step / 2;
+      const seam1 = seam0 + step;
+      const a = point(seam0, r - STAVE_GROOVE, y);
+      const b = point(ridge, r, y);
+      const c = point(seam1, r - STAVE_GROOVE, y);
+      if (up) { pushTriangle(centre, a, b); pushTriangle(centre, b, c); }
+      else { pushTriangle(centre, b, a); pushTriangle(centre, c, b); }
+    }
+  }
+  const inverse = new THREE.Matrix4().copy(shell.parent!.matrixWorld).invert();
+  const localPoint = new THREE.Vector3();
+  for (let i = 0; i < position.length; i += 3) {
+    localPoint.set(position[i], position[i + 1], position[i + 2]).applyMatrix4(inverse);
+    position[i] = localPoint.x; position[i + 1] = localPoint.y; position[i + 2] = localPoint.z;
+  }
+  const staveIndex = shell.geometry.getIndex();
+  const staveTrianglesBefore = (staveIndex ? staveIndex.count : shell.geometry.getAttribute('position').count) / 3;
+  const shellGeometry = new THREE.BufferGeometry();
+  shellGeometry.setAttribute('position', new THREE.Float32BufferAttribute(position, 3));
+  shellGeometry.computeVertexNormals();
+  shellGeometry.computeBoundingBox();
+  shellGeometry.computeBoundingSphere();
+  shell.geometry = shellGeometry;
+  shell.position.set(0, 0, 0);
+  shell.quaternion.identity();
+  shell.scale.set(1, 1, 1);
+  scene.updateMatrixWorld(true);
+
+  // ------------------------------------------------- 4b. the hoops re-fitted
+  const banded = mesh(scene, 'waterButtHardware');
+  const hoopFit: Record<string, number>[] = [];
+  for (const hoop of lumps(banded)) {
+    // A hoop is a wide, thin ring centred on the barrel's own axis and inside
+    // the barrel's height. The legs, the tap, the lid and the ladder are none
+    // of those things, so none of them is touched.
+    const wide = Math.max(hoop.size.x, hoop.size.z);
+    if (wide < waist * 1.5 || hoop.size.y > 0.15) continue;
+    if (Math.abs(hoop.centre.x) > 0.02 || Math.abs(hoop.centre.z) > 0.02) continue;
+    if (hoop.centre.y < y0 || hoop.centre.y > y1) continue;
+    // The hoop keeps EXACTLY the amount it stood proud of the old cylinder
+    // (797.9 - 774.6 = 23.3 mm), measured rather than chosen, so the barrel
+    // gains a profile without the ironwork changing character. On the old
+    // straight cylinder the three hoops all fitted; on the new profile the top
+    // and bottom ones would otherwise have hung 45-54 mm off the wood.
+    const beforeRadius = wide / 2;
+    const wood = radiusAt(hoop.centre.y);
+    const proud = beforeRadius - waist;
+    const factor = (wood + proud) / beforeRadius;
+    const axisLocal = new THREE.Vector3(0, hoop.box.getCenter(new THREE.Vector3()).y, 0);
+    scaleLump(banded, hoop, new THREE.Vector3(factor, 1, factor), axisLocal);
+    hoopFit.push({
+      centreYmm: mm(hoop.centre.y), beforeRadiusMm: mm(beforeRadius),
+      afterRadiusMm: mm(beforeRadius * factor), woodRadiusMm: mm(wood),
+      standsProudMm: mm(proud),
+    });
+  }
+  scene.updateMatrixWorld(true);
+
+  // ------------------------------------------------------ 4c. the real size
+  const tallBox = worldBox(scene);
+  const tallHeight = tallBox.max.y - tallBox.min.y;
+  const scaleFactor = BUTT_TARGET_HEIGHT / tallHeight;
+  const root = scene.children[0] ?? scene;
+  root.scale.multiplyScalar(scaleFactor);
+  scene.updateMatrixWorld(true);
+  const seated = seatOnGround(scene, root);
+  scene.updateMatrixWorld(true);
+
   const after = { triangles: triangleCount(scene), meshes: meshes(scene).length, boundsM: worldBox(scene).getSize(new THREE.Vector3()).toArray().map((v) => +v.toFixed(4)) };
   await saveGlb(OUT, butt);
   const report = {
     asset: 'hf-water-butt',
+    barrel: {
+      staves: STAVES,
+      grooveMm: mm(STAVE_GROOVE),
+      taper: BARREL_TAPER,
+      ringsHigh: STAVE_RINGS,
+      waistRadiusMm: mm(waist),
+      endRadiusMm: mm(waist * (1 - BARREL_TAPER)),
+      trianglesBefore: staveTrianglesBefore,
+      trianglesAfter: position.length / 9,
+    },
+    hoopsRefitted: hoopFit,
+    rescale: {
+      heightBeforeM: +tallHeight.toFixed(4),
+      heightAfterM: +(worldBox(scene).max.y - worldBox(scene).min.y).toFixed(4),
+      factor: +scaleFactor.toFixed(5),
+      seated,
+    },
     input: path.relative(REPO, IN).replace(/\\/g, '/'),
     output: path.relative(REPO, OUT).replace(/\\/g, '/'),
     puddleLumpsRemoved: puddles.length,
@@ -170,6 +352,119 @@ async function fixWindmill(): Promise<unknown> {
   }
   scene.updateMatrixWorld(true);
 
+  // ------------------------------------------------------ 5. lattice sails
+  /**
+   * `windmillBlades` is authored in its own frame with the disc lying in local
+   * XY and the four sails at 90 degrees to one another. A sail is a lump whose
+   * centre is off the hub (> 150 mm) -- that excludes the hub, its boss and
+   * the 3.3 m cross arms, all of which are centred on the axis and all of
+   * which stay exactly as they are.
+   */
+  const sailLumps = lumps(blades).filter((l) => Math.hypot(l.box.getCenter(new THREE.Vector3()).x, l.box.getCenter(new THREE.Vector3()).y) > 0.15);
+  const panels = sailLumps.filter((l) => Math.max(l.box.max.x - l.box.min.x, l.box.max.y - l.box.min.y) >= 1.0);
+  const STOCK = 0.075;          // the two long edge members of a sail
+  const LATH = 0.050;           // one cross lath
+  const LATHS = 7;
+  const SAIL_WIDEN = 0.010;     // the battens already stood 10 mm proud of the panel each side
+  const stockColour = averageColour(blades, sailLumps.filter((l) => !panels.includes(l)).flatMap((l) => l.indices));
+  const lathColour = averageColour(blades, panels.flatMap((l) => l.indices));
+
+  const latticePositions: number[] = [];
+  const latticeColours: number[] = [];
+  const latticeIndices: number[] = [];
+  const addBox = (min: THREE.Vector3, max: THREE.Vector3, colour: THREE.Color | null): void => {
+    const corners: [number, number, number][] = [
+      [min.x, min.y, min.z], [max.x, min.y, min.z], [max.x, max.y, min.z], [min.x, max.y, min.z],
+      [min.x, min.y, max.z], [max.x, min.y, max.z], [max.x, max.y, max.z], [min.x, max.y, max.z],
+    ];
+    const base = latticePositions.length / 3;
+    for (const [x, y, z] of corners) {
+      latticePositions.push(x, y, z);
+      if (colour) latticeColours.push(colour.r, colour.g, colour.b);
+    }
+    const face = (a: number, b: number, c: number, d: number): void => {
+      latticeIndices.push(base + a, base + b, base + c, base + a, base + c, base + d);
+    };
+    face(1, 0, 3, 2); face(4, 5, 6, 7); face(0, 4, 7, 3);
+    face(5, 1, 2, 6); face(0, 1, 5, 4); face(3, 7, 6, 2);
+  };
+  const sailReport: { longAxis: string; boxes: number; lengthMm: number; widthMm: number; openGapMm: number }[] = [];
+  for (const panel of panels) {
+    const box = panel.box;
+    const spanX = box.max.x - box.min.x;
+    const spanY = box.max.y - box.min.y;
+    const long: 'x' | 'y' = spanX > spanY ? 'x' : 'y';
+    const short: 'x' | 'y' = long === 'x' ? 'y' : 'x';
+    const sLo = box.min[short] - SAIL_WIDEN;
+    const sHi = box.max[short] + SAIL_WIDEN;
+    const lLo = box.min[long];
+    const lHi = box.max[long];
+    const at = (sa: number, sb: number, la: number, lb: number, za: number, zb: number): [THREE.Vector3, THREE.Vector3] => {
+      const min = new THREE.Vector3(); const max = new THREE.Vector3();
+      min[short] = sa; max[short] = sb; min[long] = la; max[long] = lb; min.z = za; max.z = zb;
+      return [min, max];
+    };
+    // the two stocks, full depth, so the sail has a frame that catches light
+    for (const [sa, sb] of [[sLo, sLo + STOCK], [sHi - STOCK, sHi]]) {
+      const [min, max] = at(sa, sb, lLo, lHi, -0.025, 0.025);
+      addBox(min, max, stockColour);
+    }
+    // the laths, strictly between the stocks and strictly inside their depth,
+    // so a lath BUTTS a stock and never crosses it
+    const pitch = (lHi - lLo - LATH) / (LATHS - 1);
+    for (let k = 0; k < LATHS; k += 1) {
+      const la = lLo + k * pitch;
+      const [min, max] = at(sLo + STOCK, sHi - STOCK, la, la + LATH, -0.0175, 0.0175);
+      addBox(min, max, lathColour);
+    }
+    sailReport.push({
+      longAxis: long, boxes: 2 + LATHS,
+      lengthMm: mm(lHi - lLo), widthMm: mm(sHi - sLo), openGapMm: mm(pitch - LATH),
+    });
+  }
+  const sailTrianglesRemoved = deleteLumps(blades, sailLumps);
+  const latticeGeometry = new THREE.BufferGeometry();
+  latticeGeometry.setAttribute('position', new THREE.Float32BufferAttribute(latticePositions, 3));
+  if (latticeColours.length) latticeGeometry.setAttribute('color', new THREE.Float32BufferAttribute(latticeColours, 3));
+  latticeGeometry.setIndex(latticeIndices);
+  latticeGeometry.computeVertexNormals();
+  latticeGeometry.computeBoundingBox();
+  latticeGeometry.computeBoundingSphere();
+  const lattice = new THREE.Mesh(latticeGeometry, blades.material);
+  lattice.name = 'windmillSailLattice';
+  blades.add(lattice);            // the sails' own frame, so it turns with them
+  scene.updateMatrixWorld(true);
+
+  // ---------------------------------------------- 6. the door and a window
+  const hardware = mesh(scene, 'windmillHardware');
+  const hardwareParent = node(scene, 'windmillHardware').parent!;
+  /** The tower is a 12-sided cone: circumradius 1180 mm at y 550, 720 mm at y 3450. */
+  const towerRadiusAt = (y: number): number => 1.180 + ((0.720 - 1.180) * (y - 0.550)) / 2.900;
+  const doorLumps = lumps(hardware).filter((l) => l.centre.z > 0.9 && l.centre.y < 1.6 && l.centre.y > 0.5 && l.size.y > 0.6);
+  const windowLumps = lumps(hardware).filter((l) => l.centre.z > 0.7 && l.centre.y > 2.2 && l.centre.y < 3.0);
+  const doorFrameColour = averageColour(hardware, doorLumps.length ? doorLumps[0].indices : undefined);
+  const doorLeafColour = averageColour(hardware, doorLumps.length > 1 ? doorLumps[1].indices : undefined);
+  const windowFrameColour = averageColour(hardware, windowLumps.length ? windowLumps[0].indices : undefined);
+  const windowGlassColour = averageColour(hardware, windowLumps.length > 1 ? windowLumps[1].indices : undefined);
+  const doorTrianglesRemoved = doorLumps.length ? deleteLumps(hardware, doorLumps) : 0;
+
+  const doorSurfaceZ = -towerRadiusAt(1.065);
+  const doorFrame = buildBoxes('windmillDoorFrame', [
+    { min: [-0.340, 0.550, doorSurfaceZ - 0.072], max: [0.340, 1.580, doorSurfaceZ + 0.068] },
+  ], hardware, hardwareParent, doorFrameColour);
+  const doorLeaf = buildBoxes('windmillDoorLeaf', [
+    { min: [-0.270, 0.570, doorSurfaceZ - 0.117], max: [0.270, 1.540, doorSurfaceZ - 0.072] },
+  ], hardware, hardwareParent, doorLeafColour);
+
+  // The second window is the file's own window, the same size, turned onto +X.
+  const windowFrame = buildBoxes('windmillWindowFrameX', [
+    { min: [0.7911, 2.3078, -0.1999], max: [0.9087, 2.7923, 0.1998] },
+  ], hardware, hardwareParent, windowFrameColour);
+  const windowGlass = buildBoxes('windmillWindowGlassX', [
+    { min: [0.8272, 2.3675, -0.1399], max: [0.9326, 2.7326, 0.1398] },
+  ], hardware, hardwareParent, windowGlassColour);
+  scene.updateMatrixWorld(true);
+
   const ground = seatOnGround(scene, scene.children[0] ?? scene);
   scene.updateMatrixWorld(true);
 
@@ -183,6 +478,27 @@ async function fixWindmill(): Promise<unknown> {
     shaftForwardMm: mm(SHAFT_FORWARD),
     tiltNode: 'blades_tilt (inserted above blades_pivot)',
     shaftSleeve: sleeve,
+    sails: {
+      panelsReplaced: panels.length,
+      lumpsRemoved: sailLumps.length,
+      trianglesRemoved: sailTrianglesRemoved,
+      latticeTriangles: latticeIndices.length / 3,
+      perSail: sailReport,
+      stockColour: stockColour ? `#${stockColour.getHexString()}` : null,
+      lathColour: lathColour ? `#${lathColour.getHexString()}` : null,
+    },
+    openings: {
+      doorLumpsRemovedFromFront: doorLumps.length,
+      doorTrianglesRemoved,
+      doorMovedTo: '-Z (the back of the tower, clear of the sail disc)',
+      doorSurfaceZmm: mm(doorSurfaceZ),
+      doorFrameBoundsMm: sizeMm(worldBox(doorFrame)),
+      doorLeafBoundsMm: sizeMm(worldBox(doorLeaf)),
+      secondWindowOn: '+X',
+      secondWindowFrameBoundsMm: sizeMm(worldBox(windowFrame)),
+      secondWindowGlassBoundsMm: sizeMm(worldBox(windowGlass)),
+      windowLumpsCopied: windowLumps.length,
+    },
     clearanceNote: 'verified separately by tmp/audit-hf/mindist.mjs at 24 phases; the hub boss and the sleeve are allowed to meet the roof, which is what a windshaft does',
     ground,
     before, after,

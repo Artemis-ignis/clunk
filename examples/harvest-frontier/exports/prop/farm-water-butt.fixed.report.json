@@ -1,5 +1,47 @@
 {
   "asset": "hf-water-butt",
+  "barrel": {
+    "staves": 18,
+    "grooveMm": 22,
+    "taper": 0.1,
+    "ringsHigh": 6,
+    "waistRadiusMm": 774.6,
+    "endRadiusMm": 697.1,
+    "trianglesBefore": 80,
+    "trianglesAfter": 504
+  },
+  "hoopsRefitted": [
+    {
+      "centreYmm": 672,
+      "beforeRadiusMm": 797.9,
+      "afterRadiusMm": 751.6,
+      "woodRadiusMm": 728.3,
+      "standsProudMm": 23.4
+    },
+    {
+      "centreYmm": 1349.6,
+      "beforeRadiusMm": 797.9,
+      "afterRadiusMm": 797.1,
+      "woodRadiusMm": 773.8,
+      "standsProudMm": 23.4
+    },
+    {
+      "centreYmm": 1920,
+      "beforeRadiusMm": 797.9,
+      "afterRadiusMm": 743.9,
+      "woodRadiusMm": 720.5,
+      "standsProudMm": 23.4
+    }
+  ],
+  "rescale": {
+    "heightBeforeM": 2.3255,
+    "heightAfterM": 1,
+    "factor": 0.43001,
+    "seated": {
+      "beforeMm": -1.7,
+      "afterMm": 0
+    }
+  },
   "input": "examples/harvest-frontier/exports/prop/farm-water-butt.glb",
   "output": "examples/harvest-frontier/exports/prop/farm-water-butt.fixed.glb",
   "puddleLumpsRemoved": 2,
@@ -30,7 +72,7 @@
   "notChanged": [
     "barrel diameter 1.55 m and total height 2.33 m are Harvest Frontier's own scale"
   ],
-  "groundMinYmm": -3.9,
+  "groundMinYmm": 0,
   "before": {
     "triangles": 1908,
     "meshes": 2,
@@ -41,12 +83,12 @@
     ]
   },
   "after": {
-    "triangles": 1848,
+    "triangles": 2272,
     "meshes": 2,
     "boundsM": [
-      1.5958,
-      2.3255,
-      1.8744
+      0.6856,
+      1,
+      0.806
     ]
   }
 }

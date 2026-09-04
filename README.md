@@ -1,5 +1,49 @@
 # Clunk
 
+**게임에 넣을 3D 모델과 2D 이미지를 만들고, 게임에 넣어도 되는지 검사하고, 마켓에서 골라 쓰는 곳.**
+
+라이브: **<https://clunk.games>** · 만든 곳: 아르테미스(개인사업자, 사업자등록번호 361-02-03814) ·
+코드는 MIT([LICENSE](LICENSE)), 마켓에서 파는 **에셋 파일은 별도 약관**([ASSETS-LICENSE.md](ASSETS-LICENSE.md))
+
+## 30초 요약
+
+| 화면 | 하는 일 | 지금 실제로 되는 것 |
+| --- | --- | --- |
+| [에셋 마켓](https://clunk.games/marketplace) | 게임에 바로 넣는 3D 모델·2D 텍스처 | 공개 상품 **31건**. 상품마다 폴리곤 수·재질 수·실제 크기(m)·용량을 **파일에서 잰 값**으로 표기 |
+| [에셋 검사](https://clunk.games/app) | GLB·glTF를 올리면 게임에 넣어도 되는지 판정 | **17가지 규칙** 검사 + Game-Ready 점수. 검사는 **브라우저 안에서** 돌고 파일은 서버로 올라가지 않습니다 |
+| [에셋 제작](https://clunk.games/studio) | 2D 이미지·3D 모델 만들기 | 2D는 Workers AI(`flux-1-schnell`), 3D는 **코드 템플릿 21종 × 색조합 6종**을 요청한 크기로 다시 구워 GLB로. 결과에 "코드 템플릿 조립 · AI 아님" 표기 |
+| [AI 도구 연결](https://clunk.games/agents) | Claude Code·Cursor·Codex 등에 붙이기 | 원격 MCP 도구 7개 · 로컬 stdio 7개, 클라이언트 7종 설정을 화면에서 생성 |
+| [브라우저 WebMCP](https://clunk.games/webmcp) | 사람이 보는 화면을 에이전트도 같이 조작 | 페이지 안에 **도구 23개** 등록 (비로그인 19 · 로그인 필요 4) → [아래 표](#webmcp-in-page-tools-for-agents) |
+
+지금은 **로그인만 하면 모든 에셋과 기능이 열립니다**(이유와 유료 전환
+순서: [docs/free-beta-plan.ko.md](docs/free-beta-plan.ko.md)).
+
+![에셋 마켓](docs/portfolio/images/marketplace.webp)
+
+![상품 상세 — 3D로 돌려 보고 잰 값을 확인한다](docs/portfolio/images/product-detail.webp)
+
+## 이 제품을 왜, 어떻게 만들었는지
+
+사업 관점 기록입니다 — 시장에서 본 문제, 판매 중인 에셋 30건 전수 감사(판매가 6 / 수정 16 /
+**내려야 함 8**), 사이트 문구 102개 대조(**틀림 22**), 1인 운영 방식과 비용 설계.
+
+→ **[포트폴리오: Clunk](docs/portfolio/clunk.ko.md)**
+
+## WebMCP 요약
+
+Clunk의 페이지들은 브라우저에 자기 도구를 등록합니다. 에이전트가 마켓을 훑거나 모델을
+와이어프레임으로 바꾸면, 사람이 보고 있던 화면이 그대로 따라 바뀝니다. 재지 않은 값은
+추측하지 않고 `null`로 돌려줍니다. 전체 도구표·테스트 방법은 아래
+[WebMCP (in-page tools for agents)](#webmcp-in-page-tools-for-agents) 절과 라이브
+[`/webmcp`](https://clunk.games/webmcp)에 있습니다.
+데모 영상 <https://youtu.be/kS_DPMRWo68> · 출품 <https://devpost.com/software/clunk-x16w5o>
+
+![WebMCP 매니페스트](docs/portfolio/images/webmcp.webp)
+
+---
+
+아래부터는 기술 문서입니다.
+
 Clunk는 게임 에셋을 아이디어와 생성 결과에서 Game Ready 근거까지 연결하는 AI Game Asset Foundry이자 AssetOps 제품입니다. Sprite, Atlas, Spine, motion, GLB/GLTF를 실제 바이트 기준으로 검사하고, 안전하게 정리하고, 다시 증명합니다.
 
 > 어디서 생성하든, Clunk를 거쳐 출시합니다.
