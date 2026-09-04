@@ -167,7 +167,7 @@ export function budgetRefusal(decision: Exclude<BudgetDecision, { status: "OK" }
     idempotent: false,
     error:
       decision.status === "GLOBAL_EXHAUSTED"
-        ? `오늘 서비스 전체의 이미지 생성 한도를 다 썼습니다. 한국 시간 ${resetKst}에 다시 열립니다. 크레딧은 차감되지 않았습니다.`
-        : `오늘 이 작업공간의 이미지 생성 한도(${WORKSPACE_IMAGES_PER_DAY}장)를 다 썼습니다. 한국 시간 ${resetKst}에 다시 열립니다. 크레딧은 차감되지 않았습니다.`,
+        ? `오늘 서비스 전체의 이미지 생성 한도를 다 썼습니다. 한국 시간 ${resetKst}에 다시 열립니다. 실행 횟수는 차감되지 않았습니다.`
+        : `오늘 이 작업공간의 이미지 생성 한도(${WORKSPACE_IMAGES_PER_DAY}장)를 다 썼습니다. 한국 시간 ${resetKst}에 다시 열립니다. 실행 횟수는 차감되지 않았습니다.`,
   };
 }

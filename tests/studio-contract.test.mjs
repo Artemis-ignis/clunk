@@ -125,7 +125,9 @@ test("price, progress and the result stage are read from the real response", asy
   // The button carries the cost and the balance, and the balance moves on the
   // credits the response reports rather than waiting for a refetch.
   assert.match(workbench, /\/api\/credits/);
-  assert.match(workbench, /크레딧<\/b> · 남은/);
+  // 2026-09-04: 단추가 든 값은 그대로이고 이름만 "실행 횟수"로 바뀌었다.
+  assert.match(workbench, /실행 \{CREDIT_COST\}회<\/b> · 남은/);
+  assert.doesNotMatch(workbench, /크레딧<\/b>/, "옛 크레딧 표기가 단추에 남아 있으면 안 된다");
   assert.match(workbench, /images_today/);
   assert.match(workbench, /typeof payload\.credits === "number"[\s\S]{0,140}setCredit/);
 

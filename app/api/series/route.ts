@@ -179,7 +179,7 @@ export async function POST(request: Request) {
           ok: false,
           schema: "clunk.series-result.v1",
           status: "TEMPLATE_LIBRARY_UNAVAILABLE",
-          error: "템플릿 보관소(R2 ASSETS)가 연결되어 있지 않습니다. 크레딧은 차감되지 않았습니다.",
+          error: "템플릿 보관소(R2 ASSETS)가 연결되어 있지 않습니다. 실행 횟수는 차감되지 않았습니다.",
           templates: [],
         }, { status: 503 });
       }
@@ -190,7 +190,7 @@ export async function POST(request: Request) {
           ok: false,
           schema: "clunk.series-result.v1",
           status: "TEMPLATE_LIBRARY_UNAVAILABLE",
-          error: "템플릿 라이브러리가 아직 업로드되지 않았습니다. 크레딧은 차감되지 않았습니다.",
+          error: "템플릿 라이브러리가 아직 업로드되지 않았습니다. 실행 횟수는 차감되지 않았습니다.",
           templates: [],
         }, { status: 503 });
       }
@@ -226,7 +226,7 @@ export async function POST(request: Request) {
             ok: false,
             schema: "clunk.series-result.v1",
             status: "TEMPLATE_FILE_MISSING",
-            error: `보관소에 ${selection.template.name}/${fileName} 파일이 없습니다. 크레딧은 차감되지 않았습니다.`,
+            error: `보관소에 ${selection.template.name}/${fileName} 파일이 없습니다. 실행 횟수는 차감되지 않았습니다.`,
           }, { status: 503 });
         }
         if (bytes.byteLength > MAX_TEMPLATE_BYTES) {
@@ -338,7 +338,7 @@ export async function POST(request: Request) {
         publication: { status: "DRAFT_ONLY", readiness: readinessLabel({ staticStatus: "NO_GO", visualRuntime: "UNAVAILABLE", playerFacing: "NOT_EVALUATED", humanDecision: "NOT_EVALUATED" }), publishable: false },
         credits: null,
         idempotent: false,
-        error: "실제 생성 결과를 보관하려면 R2 ASSETS 연결이 필요합니다. 크레딧은 차감되지 않았습니다.",
+        error: "실제 생성 결과를 보관하려면 R2 ASSETS 연결이 필요합니다. 실행 횟수는 차감되지 않았습니다.",
         limitations: job.limitations,
       }, { status: 503 });
     }

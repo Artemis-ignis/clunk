@@ -30,8 +30,13 @@ test("marketplace catalog defensively renders only published API rows with comme
 test("marketplace page describes the master-curated buyer model and exposes snap sections", async () => {
   const page = await source("app/marketplace/page.tsx");
 
-  assert.match(page, /마스터가 만든|구매/u);
-  assert.match(page, /크레딧/u);
+  // 누가 만든 물건인지는 그대로 말한다. 다만 "구매"라는 말은 낱개로 파는 구조와 함께
+  // 사라졌으므로(4c8bb6b), 이 자리는 지금 화면에 실제로 서 있는 문장으로 다시 고정한다.
+  assert.match(page, /Clunk가 <b>직접 만든 에셋<\/b>/u);
+  // 2026-09-04: 이 화면이 말하는 구매 모형이 바뀌었다. "크레딧으로 결제"가 아니라
+  // "무료 등급은 로그인, 그 밖은 구독"이다. 낱개로 값을 매기는 말이 되살아나면 안 된다.
+  assert.match(page, /무료 등급은 로그인만 하면 되고, 그 밖은 구독으로 열립니다/u);
+  assert.doesNotMatch(page, /크레딧/u, "낱개로 파는 말이 마켓 화면에 남아 있으면 안 된다");
   assert.match(page, /data-snap-section="hero"/u);
   assert.match(page, /data-snap-section="catalog"/u);
   assert.match(page, /data-snap-section="use-clunk"/u);

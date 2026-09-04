@@ -14,7 +14,10 @@ test("series API is authenticated, same-origin, and uses Clunk-native jobs", asy
   assert.match(source, /hasRuntimeAssets/);
   assert.match(source, /STORAGE_NOT_CONFIGURED/);
   assert.match(source, /storageStatus: "UNAVAILABLE"/);
-  assert.match(source, /크레딧은 차감되지 않았습니다/);
+  // 2026-09-04: 화면에 뜨는 이 실패 안내도 "실행 횟수"로 부른다. 화면은 실행 횟수라
+  // 부르는데 API 오류만 크레딧이라고 하면, 같은 것을 두 이름으로 말하는 셈이 된다.
+  assert.match(source, /실행 횟수는 차감되지 않았습니다/);
+  assert.doesNotMatch(source, /크레딧은 차감되지 않았습니다/, "옛 크레딧 표기가 남아 있으면 안 된다");
   const blockedGuard = source.indexOf('if (job.status === "BLOCKED")');
   const bundleCreation = source.indexOf("const bundle = createSeriesBundle(job)");
   const firstAssetPut = source.indexOf("bucket.put");

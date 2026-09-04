@@ -105,7 +105,9 @@ test("landing language covers the full 2D and 3D asset path", async () => {
   assert.match(html, /검사와 수정/);
   assert.match(html, /제작 에이전트/);
   assert.match(html, /스프라이트 시트[\s\S]*본 애니메이션/); // 2026-09-02: named in Korean
-  assert.match(html, /크레딧/);
+  // 2026-09-04: 푸터가 요금 화면을 가리키는 말이 "크레딧"에서 "실행 횟수"로 바뀌었다.
+  assert.match(html, /실행 횟수/);
+  assert.doesNotMatch(html, /크레딧/, "첫 화면에 옛 크레딧 표기가 남아 있으면 안 된다");
 });
 
 test("public navigation uses browser-native anchors on the Sites runtime", async () => {
