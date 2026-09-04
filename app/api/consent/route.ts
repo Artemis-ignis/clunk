@@ -6,6 +6,7 @@ import {
   privateJson,
   requireClunkContext,
 } from "../_lib/clunk";
+import { readConsentState } from "../_lib/reads";
 
 export const dynamic = "force-dynamic";
 
@@ -24,16 +25,8 @@ type ConsentBody = { terms?: unknown; privacy?: unknown; marketing?: unknown };
 export async function GET() {
   try {
     const { user } = await requireClunkContext();
-    const row = await getRuntimeDb()
-      .prepare(`SELECT consented_at AS consentedAt, marketing_opt_in AS marketingOptIn FROM clunk_users WHERE id = ?`)
-      .bind(user.userId)
-      .first<{ consentedAt: string | null; marketingOptIn: number | null }>();
-    return privateJson({
-      ok: true,
-      schema: "clunk.consent.v1",
-      consentedAt: row?.consentedAt ?? null,
-      marketingOptIn: Boolean(row?.marketingOptIn),
-    });
+    const consent = await readConsentState(user.userId);
+    return privateJson({ ok: true, schema: "clunk.consent.v1", ...consent });
   } catch (error) {
     return jsonError(error);
   }

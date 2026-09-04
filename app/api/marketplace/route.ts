@@ -165,6 +165,10 @@ export async function GET(request: Request) {
         aiGenerated: isGenerativeListing(String(row.slug)),
         palette: paletteFor(String(row.slug)) ?? null,
         facts: factsFor(String(row.slug)),
+        // 2026-09-04: 목록에도 clips 를 싣는다. 등급이 접근권이 된 뒤로, 이걸 빼면
+        // 카드는 움직임 없이 등급을 매기고 다운로드 문지기는 clipsFor 로 매겨 둘이
+        // 갈라진다 — 카드에 "무료"라 적힌 상품이 403 으로 막히는 자리였다.
+        clips: clipsFor(String(row.slug)),
       })),
       checkout: checkoutStatus(),
       access: accessFor({ authenticated: false }),
