@@ -58,3 +58,6 @@ node_modules/.nitro/
 /*.pdf
 .qa-key.local
 public/market/
+
+# scratch: 일회용 스크립트와 임시 산출물. tsconfig 도 여기를 제외한다.
+/tmp/

@@ -1,0 +1,270 @@
+{
+  "schema": "clunk.texture-seam-measurements.v1",
+  "measuredAt": "2026-09-03",
+  "method": "wrap-edge mean |Δ| per channel ÷ the same measure one pixel in from the tile's own middle. 1.0 = the join cannot be told from the interior; 1.15 or lower is what the shop calls seamless. Sharpness is the mean |Laplacian| over the tile. Tool: tmp/asset-repair/measure.mjs, transcribed from the 2026-09-03 catalogue audit.",
+  "bundleNote": "the bundle's figures are the worst axis and the lowest sharpness across its seven members",
+  "textures": {
+    "tex-wood-planks-v1": {
+      "resolution": "1024×1024",
+      "seamless": true,
+      "seamLeftRight": 1.09,
+      "seamTopBottom": 0.79,
+      "sharpness": 36.41,
+      "perTile": [
+        {
+          "file": "tex-wood-planks-v1.png",
+          "seamLeftRight": 1.09,
+          "seamTopBottom": 0.79,
+          "sharpness": 36.41
+        }
+      ],
+      "colourVariants": 1,
+      "maps": [
+        "normal",
+        "roughness"
+      ],
+      "files": 5,
+      "totalBytes": 5146595,
+      "before": {
+        "seamLeftRight": 2.75,
+        "seamTopBottom": 0.77,
+        "sharpness": 36.96
+      },
+      "changed": [
+        "offset-and-heal left/right (band 18px, context 24px, quilt 64px)"
+      ]
+    },
+    "tex-stone-wall-v1": {
+      "resolution": "1024×1024",
+      "seamless": true,
+      "seamLeftRight": 1.05,
+      "seamTopBottom": 0.99,
+      "sharpness": 26.07,
+      "perTile": [
+        {
+          "file": "tex-stone-wall-v1.png",
+          "seamLeftRight": 1.05,
+          "seamTopBottom": 0.88,
+          "sharpness": 26.88
+        },
+        {
+          "file": "tex-stone-wall-v1-b.png",
+          "seamLeftRight": 0.98,
+          "seamTopBottom": 0.99,
+          "sharpness": 26.12
+        },
+        {
+          "file": "tex-stone-wall-v1-c.png",
+          "seamLeftRight": 1,
+          "seamTopBottom": 0.96,
+          "sharpness": 26.07
+        }
+      ],
+      "colourVariants": 3,
+      "maps": [
+        "normal",
+        "roughness"
+      ],
+      "files": 11,
+      "totalBytes": 15571161,
+      "before": {
+        "seamLeftRight": 1.65,
+        "seamTopBottom": 1.23,
+        "sharpness": 27.16
+      },
+      "changed": [
+        "flatten low-frequency radius=200 strength=0.85",
+        "offset-and-heal left/right + top/bottom (band 18px, context 24px, quilt 64px)",
+        "3 mutually tileable variants (shared 64px border ring, rolled by (505,505) and (519,673))"
+      ]
+    },
+    "tex-roof-tiles-v2": {
+      "resolution": "1024×1024",
+      "seamless": true,
+      "seamLeftRight": 1.04,
+      "seamTopBottom": 1,
+      "sharpness": 31.34,
+      "perTile": [
+        {
+          "file": "tex-roof-tiles-v2.png",
+          "seamLeftRight": 1.01,
+          "seamTopBottom": 1,
+          "sharpness": 31.82
+        },
+        {
+          "file": "tex-roof-tiles-v2-b.png",
+          "seamLeftRight": 1.02,
+          "seamTopBottom": 0.87,
+          "sharpness": 31.39
+        },
+        {
+          "file": "tex-roof-tiles-v2-c.png",
+          "seamLeftRight": 1.04,
+          "seamTopBottom": 0.87,
+          "sharpness": 31.34
+        }
+      ],
+      "colourVariants": 3,
+      "maps": [
+        "normal",
+        "roughness"
+      ],
+      "files": 11,
+      "totalBytes": 16578046,
+      "before": {
+        "seamLeftRight": 1.64,
+        "seamTopBottom": 1.25,
+        "sharpness": 18.06
+      },
+      "changed": [
+        "unsharp r=1 amount=0.8",
+        "flatten low-frequency radius=200 strength=0.7",
+        "offset-and-heal left/right + top/bottom (band 18px, context 24px, quilt 64px)",
+        "3 mutually tileable variants (shared 64px border ring, rolled by (0,341) and (0,683))"
+      ]
+    },
+    "tex-soil-tilled-v2": {
+      "resolution": "1024×1024",
+      "seamless": true,
+      "seamLeftRight": 0.88,
+      "seamTopBottom": 0.85,
+      "sharpness": 29.83,
+      "perTile": [
+        {
+          "file": "tex-soil-tilled-v2.png",
+          "seamLeftRight": 0.88,
+          "seamTopBottom": 0.85,
+          "sharpness": 29.83
+        }
+      ],
+      "colourVariants": 1,
+      "maps": [
+        "normal",
+        "roughness"
+      ],
+      "files": 5,
+      "totalBytes": 5844747,
+      "before": {
+        "seamLeftRight": 1.31,
+        "seamTopBottom": 1.52,
+        "sharpness": 30.53
+      },
+      "changed": [
+        "offset-and-heal left/right + top/bottom (band 18px, context 24px, quilt 64px)"
+      ]
+    },
+    "tex-grass-meadow-v1": {
+      "resolution": "1024×1024",
+      "seamless": true,
+      "seamLeftRight": 0.95,
+      "seamTopBottom": 1.01,
+      "sharpness": 49.68,
+      "perTile": [
+        {
+          "file": "tex-grass-meadow-v1.png",
+          "seamLeftRight": 0.95,
+          "seamTopBottom": 1.01,
+          "sharpness": 49.68
+        }
+      ],
+      "colourVariants": 1,
+      "maps": [
+        "normal",
+        "roughness"
+      ],
+      "files": 5,
+      "totalBytes": 5996763,
+      "before": {
+        "seamLeftRight": 1.08,
+        "seamTopBottom": 1.27,
+        "sharpness": 52.94
+      },
+      "changed": [
+        "heal the tile's own centre cross (an internal join, not the wrap)",
+        "offset-and-heal left/right + top/bottom (band 18px, context 24px, quilt 64px)"
+      ]
+    },
+    "tex-dirt-path-v1": {
+      "resolution": "1024×1024",
+      "seamless": true,
+      "seamLeftRight": 1.05,
+      "seamTopBottom": 0.77,
+      "sharpness": 27.67,
+      "perTile": [
+        {
+          "file": "tex-dirt-path-v1.png",
+          "seamLeftRight": 1.05,
+          "seamTopBottom": 0.77,
+          "sharpness": 27.67
+        }
+      ],
+      "colourVariants": 1,
+      "maps": [
+        "normal",
+        "roughness"
+      ],
+      "files": 5,
+      "totalBytes": 5027181,
+      "before": {
+        "seamLeftRight": 1.28,
+        "seamTopBottom": 1.15,
+        "sharpness": 28.44
+      },
+      "changed": [
+        "offset-and-heal left/right + top/bottom (band 18px, context 24px, quilt 64px)"
+      ]
+    },
+    "tex-sand-dry-v1": {
+      "resolution": "1024×1024",
+      "seamless": true,
+      "seamLeftRight": 1.02,
+      "seamTopBottom": 0.83,
+      "sharpness": 32.69,
+      "perTile": [
+        {
+          "file": "tex-sand-dry-v1.png",
+          "seamLeftRight": 1.02,
+          "seamTopBottom": 0.83,
+          "sharpness": 32.69
+        }
+      ],
+      "colourVariants": 1,
+      "maps": [
+        "normal",
+        "roughness"
+      ],
+      "files": 5,
+      "totalBytes": 4572827,
+      "before": {
+        "seamLeftRight": 1.14,
+        "seamTopBottom": 0.84,
+        "sharpness": 33.06
+      },
+      "changed": [
+        "offset-and-heal left/right (band 18px, context 24px, quilt 64px)"
+      ]
+    },
+    "verified-seamless-textures-vol1": {
+      "resolution": "1024×1024",
+      "seamless": true,
+      "seamLeftRight": 1.09,
+      "seamTopBottom": 1.01,
+      "sharpness": 26.07,
+      "colourVariants": 11,
+      "maps": [
+        "normal",
+        "roughness"
+      ],
+      "files": 47,
+      "totalBytes": 58737320,
+      "before": {
+        "seamLeftRight": 2.75,
+        "seamTopBottom": 1.52,
+        "sharpness": 18.06
+      },
+      "changed": [
+        "every member re-measured after repair; the worst axis and the lowest sharpness of the seven are the figures above"
+      ]
+    }
+  }
+}
