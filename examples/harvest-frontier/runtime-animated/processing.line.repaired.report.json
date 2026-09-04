@@ -1,0 +1,425 @@
+{
+  "input": "examples\\harvest-frontier\\runtime-animated\\processing.line.fixed.m1.glb",
+  "output": "examples\\harvest-frontier\\runtime-animated\\processing.line.repaired.glb",
+  "before": {
+    "meshes": 142,
+    "drawnTriangles": 49084,
+    "groundMinYmm": 0
+  },
+  "foundation": {
+    "decision": "deleted",
+    "sizeMm": [
+      6600,
+      179.7,
+      3800
+    ],
+    "yRangeMm": [
+      109.2,
+      288.8
+    ],
+    "triangles": 528,
+    "colour": "#404f45",
+    "why": "a ground plane is the buyer's scene, not the machine; it stuck out past the machine on every side and read as a green rectangle glued under it"
+  },
+  "hiddenProxies": [],
+  "rollerStripes": {
+    "why": "a smooth untextured cylinder turning is indistinguishable from one standing still",
+    "rollers": [
+      {
+        "roller": "conveyorRollerA",
+        "axis": "y",
+        "radiusMm": 296.3,
+        "lengthMm": 2000,
+        "stripes": 3,
+        "colour": "#505b55"
+      },
+      {
+        "roller": "conveyorRollerB",
+        "axis": "y",
+        "radiusMm": 296.3,
+        "lengthMm": 2000,
+        "stripes": 3,
+        "colour": "#505b55"
+      }
+    ]
+  },
+  "mixerDriveHead": {
+    "why": "the blades turn inside an opaque tank, so nothing outside said the mixer was running",
+    "parts": [
+      "mixerDriveShaft",
+      "mixerDriveHub",
+      "mixerDriveCoupling"
+    ],
+    "onNode": "mixerPivot (the clip already turns it 8.30 s / revolution set)",
+    "tankApexYmm": 4864.9,
+    "couplingYmm": 5019.9
+  },
+  "instruments": [
+    {
+      "node": "gaugePointerPivot",
+      "part": "gaugePointer",
+      "motion": "sweeps -110 to +110 degrees, three times per clip"
+    },
+    {
+      "node": "valveWheelPivot",
+      "part": "valveWheel",
+      "motion": "one full turn about its own axle per clip"
+    }
+  ],
+  "lineDirection": {
+    "why": "the conveyor ran through the tank wall and the belt delivered nowhere; the conveyor moved clear, the belt now empties into a side inlet, and the hopper moved to the tail it should have been feeding",
+    "hopper": {
+      "wasOver": "the head of the belt, 34 mm clear, unsupported",
+      "nowOver": "the tail of the belt",
+      "mouthMm": [
+        820.2,
+        820.2
+      ],
+      "mouthAboveBeltMm": 60,
+      "clearedTankByMm": 183.6,
+      "mouthStillOverBelt": true,
+      "skirt": {
+        "walls": 4,
+        "gapToBeltMm": 25,
+        "why": "the belt rises 550 mm across the mouth, so a flat rim cannot clear it at one height"
+      },
+      "legs": [
+        "hopperLegLF",
+        "hopperLegLB",
+        "hopperLegRF",
+        "hopperLegRB"
+      ]
+    },
+    "conveyorInsideTank": {
+      "verticesBefore": 848,
+      "deepestMm": 293.4,
+      "verticesAfter": 0
+    },
+    "movedSidewaysMm": 343.4,
+    "delivery": {
+      "chute": "conveyorDeliveryChute",
+      "inlet": "tankSideInlet",
+      "lengthMm": 268,
+      "heightMm": 2502.8
+    },
+    "stillOpen": "the hopper sits where it was authored, above the belt it feeds; whether it should be a surge bin there or a feed bin at the tail is a design call, not a measurement"
+  },
+  "measuredDefects": {
+    "bottlingLegs": {
+      "why": "the table stood 40 mm clear of its own legs and the legs stopped 19 mm above the floor",
+      "legs": [
+        {
+          "name": "bottlingLegLB",
+          "wasMm": [
+            19,
+            1139
+          ],
+          "nowMm": [
+            0,
+            1179.1
+          ]
+        },
+        {
+          "name": "bottlingLegLF",
+          "wasMm": [
+            19,
+            1139
+          ],
+          "nowMm": [
+            0,
+            1179.1
+          ]
+        },
+        {
+          "name": "bottlingLegRB",
+          "wasMm": [
+            19,
+            1139
+          ],
+          "nowMm": [
+            0,
+            1179.1
+          ]
+        },
+        {
+          "name": "bottlingLegRF",
+          "wasMm": [
+            19,
+            1139
+          ],
+          "nowMm": [
+            0,
+            1179.1
+          ]
+        }
+      ]
+    },
+    "mixerDriveHead": {
+      "why": "the drive head added to show the mixer running stood inside pipeTopRise, invisible",
+      "liftedMm": 274.1
+    },
+    "pump": {
+      "why": "the pump casing and its motor stood inside the tank body, and its plinth floated 319 mm above the floor",
+      "movedMm": 225.9,
+      "plinth": {
+        "wasMm": [
+          319,
+          439
+        ],
+        "nowMm": [
+          0,
+          499
+        ]
+      }
+    }
+  },
+  "ground": {
+    "beforeMm": 0,
+    "afterMm": 0
+  },
+  "bakedInstances": [],
+  "merge": [
+    {
+      "mesh": "body_coated",
+      "anchor": "(scene)",
+      "material": "processing.line.fixed-palette-coated",
+      "absorbed": [
+        "tankBody",
+        "tankLowerCone",
+        "tankShoulder",
+        "tankCone",
+        "tankLid",
+        "tankSideInlet",
+        "hopperBody",
+        "hopperSkirt",
+        "hopperLegLF",
+        "hopperLegLB",
+        "hopperLegRF",
+        "hopperLegRB",
+        "pipeTopRise",
+        "pipeTopReturn",
+        "pipeTopDrop"
+      ],
+      "triangles": 1472
+    },
+    {
+      "mesh": "body_metal",
+      "anchor": "(scene)",
+      "material": "processing.line.fixed-palette-metal",
+      "absorbed": [
+        "tankOutletSpout",
+        "tankBand",
+        "tankLowerBand",
+        "tankUpperBand",
+        "tankLidRim",
+        "serviceFlange",
+        "serviceFace",
+        "serviceCap",
+        "gaugeBezel",
+        "gaugeCenter",
+        "gaugeHousing",
+        "valvePipe",
+        "valveBody",
+        "hopperLatch",
+        "pumpCover",
+        "pumpMotor",
+        "pipeFeed",
+        "pipeReturn",
+        "pipeTransfer",
+        "pipeUnionValve",
+        "pipeOverhead",
+        "pipeLowerLoopRise",
+        "bottlingTable",
+        "bottlingLegLB",
+        "bottlingLegLF",
+        "bottlingLegRB",
+        "bottlingLegRF",
+        "bottleRailTop",
+        "bottleRailSupportA",
+        "bottleRailSupportB",
+        "bottleStopper",
+        "controlBeaconBase",
+        "controlButton1"
+      ],
+      "triangles": 10480
+    },
+    {
+      "mesh": "body_rubber",
+      "anchor": "(scene)",
+      "material": "processing.line.fixed-palette-rubber",
+      "absorbed": [
+        "tankHatch",
+        "gaugeFace",
+        "conveyorDeliveryChute",
+        "conveyorBelt",
+        "controlButton2",
+        "crateSlat12",
+        "crateSlat42",
+        "crateSlat12_1",
+        "crateSlat42_1",
+        "crateSlat12_2",
+        "crateSlat42_2"
+      ],
+      "triangles": 3908
+    },
+    {
+      "mesh": "body_matte",
+      "anchor": "(scene)",
+      "material": "processing.line.fixed-palette-matte",
+      "absorbed": [
+        "tankLegLB",
+        "tankFootLB",
+        "tankLegLF",
+        "tankFootLF",
+        "tankLegRB",
+        "tankFootRB",
+        "tankLegRF",
+        "tankFootRF",
+        "hopperRimBar1",
+        "hopperRimBar2",
+        "hopperRimBar3",
+        "hopperRimBar4",
+        "grateBar1",
+        "grateBar2",
+        "grateBar3",
+        "grateBar4",
+        "grateBar5",
+        "hopperFrontLip",
+        "conveyorRailLeft",
+        "conveyorRailRight",
+        "conveyorBrace0",
+        "conveyorBrace8",
+        "conveyorBrace17",
+        "conveyorBrace25",
+        "conveyorFootLegL",
+        "conveyorFootPlateL",
+        "conveyorFootLegR",
+        "conveyorFootPlateR",
+        "pumpBase",
+        "pumpHousing",
+        "bottleCap",
+        "bottleLabel",
+        "bottleCap_1",
+        "bottleLabel_1",
+        "bottleCap_2",
+        "bottleLabel_2",
+        "bottleCap_3",
+        "bottleLabel_3",
+        "bottleCap_4",
+        "bottleLabel_4",
+        "bottleCap_5",
+        "bottleLabel_5",
+        "controlPole",
+        "controlFoot",
+        "controlPanelBody",
+        "controlDisplay",
+        "crateBody",
+        "crateBody_1",
+        "crateBody_2"
+      ],
+      "triangles": 23052
+    },
+    {
+      "mesh": "mixerPivot_metal",
+      "anchor": "mixerPivot",
+      "material": "processing.line.fixed-palette-metal",
+      "absorbed": [
+        "mixerShaft",
+        "mixerBladeUpper",
+        "mixerBladeLower",
+        "mixerDriveShaft",
+        "mixerDriveCoupling",
+        "mixerDriveHub"
+      ],
+      "triangles": 1204
+    },
+    {
+      "mesh": "conveyorRollerA_metal",
+      "anchor": "conveyorRollerA",
+      "material": "processing.line.fixed-palette-metal",
+      "absorbed": [
+        "mesh_39_instance_0",
+        "conveyorRollerAStripe1",
+        "conveyorRollerAStripe2",
+        "conveyorRollerAStripe3"
+      ],
+      "triangles": 116
+    },
+    {
+      "mesh": "conveyorRollerB_metal",
+      "anchor": "conveyorRollerB",
+      "material": "processing.line.fixed-palette-metal",
+      "absorbed": [
+        "mesh_39_instance_1",
+        "conveyorRollerBStripe1",
+        "conveyorRollerBStripe2",
+        "conveyorRollerBStripe3"
+      ],
+      "triangles": 116
+    },
+    {
+      "mesh": "pumpPivot_metal",
+      "anchor": "pumpPivot",
+      "material": "processing.line.fixed-palette-metal",
+      "absorbed": [
+        "pumpHub",
+        "pumpVane1",
+        "pumpVane2"
+      ],
+      "triangles": 1112
+    },
+    {
+      "mesh": "body_glass-0-540-0-320",
+      "anchor": "(scene)",
+      "material": "processing.line.fixed-palette-glass-0-540-0-320",
+      "absorbed": [
+        "bottleGlass",
+        "bottleShoulder",
+        "bottleNeck",
+        "bottleGlass_1",
+        "bottleShoulder_1",
+        "bottleNeck_1",
+        "bottleGlass_2",
+        "bottleShoulder_2",
+        "bottleNeck_2",
+        "bottleGlass_3",
+        "bottleShoulder_3",
+        "bottleNeck_3",
+        "bottleGlass_4",
+        "bottleShoulder_4",
+        "bottleNeck_4",
+        "bottleGlass_5",
+        "bottleShoulder_5",
+        "bottleNeck_5"
+      ],
+      "triangles": 1800
+    },
+    {
+      "mesh": "body_emissive-0-716-0-423-0-091-0-200",
+      "anchor": "(scene)",
+      "material": "processing.line.fixed-palette-emissive-0-716-0-423-0-091-0-200",
+      "absorbed": [
+        "controlBeacon",
+        "statusLamp1"
+      ],
+      "triangles": 224
+    },
+    {
+      "mesh": "body_emissive-0-009-0-020-0-014-0-050",
+      "anchor": "(scene)",
+      "material": "processing.line.fixed-palette-emissive-0-009-0-020-0-014-0-050",
+      "absorbed": [
+        "statusLamp2",
+        "statusLamp3"
+      ],
+      "triangles": 336
+    }
+  ],
+  "unsharedGeometries": 6,
+  "prunedEmptyNodes": 19,
+  "after": {
+    "meshes": 21,
+    "drawnTriangles": 48860,
+    "groundMinYmm": 0
+  }
+}

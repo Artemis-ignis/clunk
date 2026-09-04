@@ -1,5 +1,5 @@
 {
-  "builtAt": "2026-09-02T17:59:03.167Z",
+  "builtAt": "2026-09-03T08:12:49.809Z",
   "input": "examples/harvest-frontier/exports/building/barn.glb",
   "output": "examples/harvest-frontier/exports/building/barn.fixed.glb",
   "gablesClosed": [
@@ -46,6 +46,55 @@
   "duplicateDoorLumpsRemoved": 2,
   "doorTrianglesRemoved": 1176,
   "signboardTrianglesRemoved": 4,
+  "paneMoves": [
+    {
+      "pane": "windowPane",
+      "axis": "z",
+      "direction": 1,
+      "offsetMm": 6,
+      "beforeMm": 3280,
+      "afterMm": 3286,
+      "clearanceMm": 14,
+      "worstConsideredMm": 0
+    },
+    {
+      "pane": "windowPane_1",
+      "axis": "x",
+      "direction": 1,
+      "offsetMm": 10,
+      "beforeMm": 4260,
+      "afterMm": 4270,
+      "clearanceMm": 8.6,
+      "worstConsideredMm": 0
+    }
+  ],
+  "interior": {
+    "floorTopMm": 150,
+    "insideHalfWidthMm": 3940,
+    "rearWallInsideZmm": -2940,
+    "loft": {
+      "mesh": "barnHayLoft",
+      "triangles": 132,
+      "boundsMm": [
+        7709,
+        3130,
+        2039
+      ]
+    },
+    "bales": {
+      "mesh": "barnHayBales",
+      "triangles": 96,
+      "boundsMm": [
+        7350,
+        3570,
+        1140
+      ]
+    },
+    "colourDonors": {
+      "timber": "barnInteriorBeam",
+      "straw": "siloStaves"
+    }
+  },
   "coincidentMeshGroupsRemaining": [],
   "before": {
     "triangles": 15648,
@@ -57,8 +106,8 @@
     ]
   },
   "after": {
-    "triangles": 14852,
-    "meshes": 20,
+    "triangles": 15080,
+    "meshes": 22,
     "boundsMm": [
       11039.9,
       6390,

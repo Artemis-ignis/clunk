@@ -26,6 +26,8 @@ type Listing = {
   id: string;
   slug: string;
   title: string;
+  /** 같은 상품의 영어 이름. 아직 붙이지 않은 상품은 null. */
+  titleEn?: string | null;
   description: string;
 
   currency: string;
@@ -655,6 +657,9 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
           <span>{licenseLabel(listing.licenseStatus)}</span>
         </div>
         <h1>{name}</h1>
+        {/* 영어 이름. 한국인은 한국어로, 그 밖은 영어로 이 물건을 찾는다. 같은 물건에
+            두 이름이 붙어 있어야 어느 쪽으로 와도 같은 자리에 닿는다. */}
+        {listing.titleEn ? <p className={styles.detailTitleEn} lang="en">{listing.titleEn}</p> : null}
       </div>
 
       {/* The bench. A 3D product gets the tool rails; a tile and a sheet get the bench their
@@ -741,6 +746,17 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
           {/* Which set this belongs to, and how many pieces share its palette and its scale.
               A buyer furnishing a scene is choosing a family, not a file. */}
           {kit ? <p className={styles.kitLine}>{kit}</p> : null}
+          {/* "실제 게임에 들어간 파일"은 그 게임을 열어 볼 수 없으면 증거가 아니라 주장이다.
+              하베스트 프론티어는 브라우저에서 그대로 돌아가므로, 이 줄이 그 말을 확인할 수
+              있는 자리로 데려간다. */}
+          {listing.facts?.kit === "harvest-frontier" ? (
+            <p className={styles.playLine}>
+              이 에셋이 서 있는 게임을 브라우저에서 바로 해 볼 수 있습니다.{" "}
+              <a href="https://play.clunk.games" target="_blank" rel="noreferrer">
+                하베스트 프론티어 열기 <Icon name="arrowUpRight" size={13} />
+              </a>
+            </p>
+          ) : null}
           {/* The viewer parses the very bytes on sale, so agreeing with the recorded facts is
               the normal case and gets one quiet line. Disagreeing means the file served is not
               the file that was measured, and a buyer is entitled to be told that. */}

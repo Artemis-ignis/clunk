@@ -10,6 +10,72 @@
     "lengthMm": 610,
     "colour": "#4a5852"
   },
+  "sails": {
+    "panelsReplaced": 4,
+    "lumpsRemoved": 16,
+    "trianglesRemoved": 192,
+    "latticeTriangles": 432,
+    "perSail": [
+      {
+        "longAxis": "y",
+        "boxes": 9,
+        "lengthMm": 1280,
+        "widthMm": 460,
+        "openGapMm": 155
+      },
+      {
+        "longAxis": "x",
+        "boxes": 9,
+        "lengthMm": 1280,
+        "widthMm": 460,
+        "openGapMm": 155
+      },
+      {
+        "longAxis": "y",
+        "boxes": 9,
+        "lengthMm": 1280,
+        "widthMm": 460,
+        "openGapMm": 155
+      },
+      {
+        "longAxis": "x",
+        "boxes": 9,
+        "lengthMm": 1280,
+        "widthMm": 460,
+        "openGapMm": 155
+      }
+    ],
+    "stockColour": "#b9a97f",
+    "lathColour": "#e7dfc9"
+  },
+  "openings": {
+    "doorLumpsRemovedFromFront": 2,
+    "doorTrianglesRemoved": 24,
+    "doorMovedTo": "-Z (the back of the tower, clear of the sail disc)",
+    "doorSurfaceZmm": -1098.3,
+    "doorFrameBoundsMm": [
+      680,
+      1030,
+      140
+    ],
+    "doorLeafBoundsMm": [
+      540,
+      970,
+      45
+    ],
+    "secondWindowOn": "+X",
+    "secondWindowFrameBoundsMm": [
+      117.6,
+      484.5,
+      399.7
+    ],
+    "secondWindowGlassBoundsMm": [
+      105.4,
+      365.1,
+      279.7
+    ],
+    "windowLumpsCopied": 2
+  },
   "clearanceNote": "verified separately by tmp/audit-hf/mindist.mjs at 24 phases; the hub boss and the sleeve are allowed to meet the roof, which is what a windshaft does",
   "ground": {
     "beforeMm": -20.4,
@@ -25,8 +91,8 @@
     ]
   },
   "after": {
-    "triangles": 1392,
-    "meshes": 4,
+    "triangles": 1656,
+    "meshes": 9,
     "boundsM": [
       3.3537,
       5.0405,

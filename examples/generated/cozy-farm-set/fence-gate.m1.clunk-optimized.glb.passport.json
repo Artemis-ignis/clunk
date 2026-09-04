@@ -1,21 +1,21 @@
 {
   "schemaVersion": "1.0",
-  "passportId": "passport-9102e822f9f6-a7c3c710e2ed",
+  "passportId": "passport-69093d528daf-cc222f6c9950",
   "coreVersion": "0.1.0",
   "ruleSetId": "clunk-game-ready-v1",
   "ruleSetVersion": "1.0.0",
   "profileId": "web",
-  "sourceHash": "9102e822f9f6e292fda4773d301819e5ec8c22482479b1246dac0beb6d345505",
-  "outputHash": "a7c3c710e2edc5e158d00dbc9a32eaae270486f04e51ee7a50cd0449b0d3eb6c",
+  "sourceHash": "69093d528daf18860eb481010192012b137ae47b12deb8da3bcce379da40e90a",
+  "outputHash": "cc222f6c9950267a4e08a419e6e0334406c46b09939c0a70b44e736873104d0f",
   "sourceFileName": "fence-gate.m1.glb",
   "outputFileName": "fence-gate.m1.clunk-optimized.glb",
-  "sourceInspectionDigest": "a07606ca32435a98bcb6ed3f6995507997073655dc9d3fedcee7d3caa48f5655",
-  "outputInspectionDigest": "f100556c2cd6effa5e0cf6c31a20b5e81435aa6568277523fff91092d03115ff",
+  "sourceInspectionDigest": "1f54a22f9a68d179eaee9d3a6dec887aff5406bb6e23832dd1233d72258a07f2",
+  "outputInspectionDigest": "d072e3d1f76adc5d40673d930bcac2f712b92cf426a5f69e91f8701b42ab2396",
   "operations": [
     {
       "id": "clean-metadata",
-      "description": "Removed explicitly allowlisted non-runtime metadata: extras, asset.generator, and asset.copyright.",
-      "count": 3,
+      "description": "Removed explicitly allowlisted authoring provenance: asset.generator and asset.copyright. Every extras block is preserved because an engine can read it.",
+      "count": 1,
       "safety": "metadata-only"
     }
   ],
@@ -36,7 +36,7 @@
       "imageCount": 0,
       "textureMaxDimension": 0,
       "textureMemoryBytes": 0,
-      "animationCount": 0,
+      "animationCount": 1,
       "skinCount": 0,
       "missingNormalPrimitiveCount": 0,
       "missingUvPrimitiveCount": 0,
@@ -49,17 +49,17 @@
       "bounds": {
         "min": [
           -1.2000000476837158,
-          -0.03999999910593033,
+          -2.98023217215615e-10,
           -0.25999999046325684
         ],
         "max": [
-          1.4726130962371826,
+          1.2000000476837158,
           1.7100000381469727,
           0.25999999046325684
         ],
         "dimensions": [
-          2.6726131439208984,
-          1.750000037252903,
+          2.4000000953674316,
+          1.7100000384449958,
           0.5199999809265137
         ]
       }
@@ -98,7 +98,7 @@
       "imageCount": 0,
       "textureMaxDimension": 0,
       "textureMemoryBytes": 0,
-      "animationCount": 0,
+      "animationCount": 1,
       "skinCount": 0,
       "missingNormalPrimitiveCount": 0,
       "missingUvPrimitiveCount": 0,
@@ -111,17 +111,17 @@
       "bounds": {
         "min": [
           -1.2000000476837158,
-          -0.03999999910593033,
+          -2.98023217215615e-10,
           -0.25999999046325684
         ],
         "max": [
-          1.4726130962371826,
+          1.2000000476837158,
           1.7100000381469727,
           0.25999999046325684
         ],
         "dimensions": [
-          2.6726131439208984,
-          1.750000037252903,
+          2.4000000953674316,
+          1.7100000384449958,
           0.5199999809265137
         ]
       }

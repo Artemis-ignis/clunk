@@ -1,0 +1,14 @@
+{
+  "name": "harvest-frontier",
+  "compatibility_date": "2026-09-04",
+  "assets": {
+    "directory": "./public",
+    "not_found_handling": "single-page-application"
+  },
+  "routes": [
+    {
+      "pattern": "play.clunk.games",
+      "custom_domain": true
+    }
+  ]
+}

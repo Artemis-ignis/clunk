@@ -103,6 +103,12 @@ export function engineBasis(fit: EngineFit | null | undefined): string[] {
     lines.push("색이 파일 안에 함께 들어 있어 따로 챙길 텍스처가 없고, 기본 재질에 넣어도 색이 그대로 나옵니다.");
   } else if (fit.colour === "material") {
     lines.push("색이 재질에 들어 있어 따로 챙길 텍스처가 없습니다.");
+  } else if (fit.colour === "mixed") {
+    // 대부분을 그림으로 옮겼다고 해서 "기본 재질에 넣어도 나옵니다"라고 말하면, 남은
+    // 부분이 흰색으로 나오는 것을 사는 사람이 파일을 연 뒤에야 알게 된다.
+    lines.push(
+      "색이 대부분 파일 안 그림에 들어 있어 따로 챙길 텍스처가 없습니다. 다만 일부 부품은 정점 색인 채로 남아, 정점 색을 안 읽는 셰이더에서는 그 부분만 흰색으로 나옵니다.",
+    );
   } else {
     lines.push("색이 정점에 들어 있습니다. 정점 색을 읽는 셰이더에 넣어야 이 색이 나옵니다.");
   }

@@ -1,58 +1,95 @@
 {
-  "builtAt": "2026-09-02T17:54:11.515Z",
+  "builtAt": "2026-09-03T08:11:57.239Z",
   "input": "examples/harvest-frontier/exports/building/farmhouse.glb",
   "output": "examples/harvest-frontier/exports/building/farmhouse.fixed.glb",
-  "paneInsetMm": 1,
+  "paneInsetMm": 6,
   "panesMoved": [
     {
       "pane": "windowPane",
       "axis": "z",
+      "direction": 1,
       "beforeMm": 2820,
-      "afterMm": 2819
+      "afterMm": 2826,
+      "clearanceMm": 14,
+      "rejectedClearanceMm": 4
     },
     {
       "pane": "windowPane_1",
       "axis": "z",
+      "direction": 1,
       "beforeMm": 2820,
-      "afterMm": 2819
+      "afterMm": 2826,
+      "clearanceMm": 14,
+      "rejectedClearanceMm": 4
     },
     {
       "pane": "windowPane_2",
       "axis": "x",
+      "direction": 1,
       "beforeMm": 3620,
-      "afterMm": 3619
+      "afterMm": 3626,
+      "clearanceMm": 14,
+      "rejectedClearanceMm": 4
     },
     {
       "pane": "windowPane_3",
       "axis": "z",
+      "direction": 1,
       "beforeMm": 2810,
-      "afterMm": 2809
+      "afterMm": 2816,
+      "clearanceMm": 14,
+      "rejectedClearanceMm": 4
     },
     {
       "pane": "windowPane_4",
       "axis": "z",
+      "direction": -1,
       "beforeMm": -2820,
-      "afterMm": -2819
+      "afterMm": -2826,
+      "clearanceMm": 14,
+      "rejectedClearanceMm": 4
     },
     {
       "pane": "windowPane_5",
       "axis": "z",
+      "direction": -1,
       "beforeMm": -2820,
-      "afterMm": -2819
+      "afterMm": -2826,
+      "clearanceMm": 14,
+      "rejectedClearanceMm": 4
     },
     {
       "pane": "windowPane_6",
       "axis": "z",
+      "direction": -1,
       "beforeMm": -2815.6,
-      "afterMm": -2814.6
+      "afterMm": -2821.6,
+      "clearanceMm": 8.4,
+      "rejectedClearanceMm": 1.2
     },
     {
       "pane": "windowPane_7",
       "axis": "x",
+      "direction": -1,
       "beforeMm": -3620,
-      "afterMm": -3619
+      "afterMm": -3626,
+      "clearanceMm": 14,
+      "rejectedClearanceMm": 4
     }
   ],
+  "porch": {
+    "mesh": "porchRailAndSeats",
+    "boxes": 16,
+    "triangles": 192,
+    "deckTopMm": 570,
+    "wallFaceZmm": 2800,
+    "colourDonor": "porch",
+    "boundsMm": [
+      2220,
+      750,
+      1219
+    ]
+  },
   "notChanged": [
     "farmhouseFoundation stays 75.9 mm below y=0 - that is a foundation, not a fault",
     "no material, colour or vertex colour touched"
@@ -67,8 +104,8 @@
     ]
   },
   "after": {
-    "triangles": 12364,
-    "meshes": 23,
+    "triangles": 12556,
+    "meshes": 24,
     "boundsMm": [
       8565.1,
       6255.9,

@@ -222,8 +222,8 @@ const h145Measured = emptyFacts({
   viewYawDegrees: 40.3,
 });
 
-test("a listing the snapshot names but the manifest does not keeps its measured numbers", () => {
-  const built = buildFacts({ products: [] }, [h145Listing], [], MARKET_ROOT, {
+test("a listing the snapshot names but the manifest does not keeps its measured numbers", async () => {
+  const built = await buildFacts({ products: [] }, [h145Listing], [], MARKET_ROOT, {
     "clunk-heli-h145": h145Measured,
   });
   const h145 = built.facts["clunk-heli-h145"];
@@ -236,9 +236,9 @@ test("a listing the snapshot names but the manifest does not keeps its measured 
   assert.equal(h145.viewYawDegrees, 40.3);
 });
 
-test("the snapshot still wins where it actually speaks — the file's size and format", () => {
+test("the snapshot still wins where it actually speaks — the file's size and format", async () => {
   const resized = { ...h145Listing, byteLength: 3_400_000, entryFileName: "h145.m1.glb" };
-  const built = buildFacts({ products: [] }, [resized], [], MARKET_ROOT, {
+  const built = await buildFacts({ products: [] }, [resized], [], MARKET_ROOT, {
     "clunk-heli-h145": emptyFacts({ ...h145Measured, byteLength: 3_303_252, format: "PNG" }),
   });
   assert.equal(built.facts["clunk-heli-h145"].byteLength, 3_400_000, "the row the shop serves states the size");
@@ -248,17 +248,17 @@ test("the snapshot still wins where it actually speaks — the file's size and f
 // The same failure mode as the helicopter's, one field over: a snapshot row is allowed to omit
 // its size and its file name, and the minted record then carries a 0 and a "파일" that would
 // paper over a real measurement.
-test("a snapshot row that omits its size and file name keeps the previous size and format", () => {
+test("a snapshot row that omits its size and file name keeps the previous size and format", async () => {
   const silent = { slug: "clunk-heli-h145", title: "구조용 헬리콥터", entryFileName: "" };
-  const built = buildFacts({ products: [] }, [silent], [], MARKET_ROOT, {
+  const built = await buildFacts({ products: [] }, [silent], [], MARKET_ROOT, {
     "clunk-heli-h145": h145Measured,
   });
   assert.equal(built.facts["clunk-heli-h145"].byteLength, 3_303_252, "0 bytes is a silence, not a file");
   assert.equal(built.facts["clunk-heli-h145"].format, "GLB", UNKNOWN_FORMAT_LABEL + " is a shrug, not a format");
 });
 
-test("a D1 listing the previous index never saw still gets its size, format and grid", () => {
-  const built = buildFacts(
+test("a D1 listing the previous index never saw still gets its size, format and grid", async () => {
+  const built = await buildFacts(
     { products: [] },
     [{ slug: "cozy-fence-gate-swing", title: "울타리 문", entryFileName: "gate.sheet.png", format: "image/png", byteLength: 15_441 }],
     [],
@@ -272,7 +272,7 @@ test("a D1 listing the previous index never saw still gets its size, format and 
   assert.equal(sheet.triangles, null, "a sheet has no geometry to claim");
 });
 
-test("the manifest's record is whole — a model that lost its clips does not get them back", () => {
+test("the manifest's record is whole — a model that lost its clips does not get them back", async () => {
   const manifest = {
     products: [{
       slug: "a-gate", kind: "3d-model", title: "문",
@@ -280,7 +280,7 @@ test("the manifest's record is whole — a model that lost its clips does not ge
       measured: { triangleCount: 520, materialCount: 6 },
     }],
   };
-  const built = buildFacts(manifest, [{ slug: "a-gate", title: "문", entryFileName: "gate.glb", byteLength: 47_960 }], [], MARKET_ROOT, {
+  const built = await buildFacts(manifest, [{ slug: "a-gate", title: "문", entryFileName: "gate.glb", byteLength: 47_960 }], [], MARKET_ROOT, {
     "a-gate": emptyFacts({ animations: [{ name: "swing", seconds: 2 }], animatedParts: ["gate_pivot"], triangles: 99_999 }),
   });
   assert.deepEqual(built.facts["a-gate"].animations, [], "the pipeline re-measured it as still");
@@ -291,7 +291,7 @@ test("the manifest's record is whole — a model that lost its clips does not ge
 // main's half of this defect, kept: 4d4810e ("keep H145's numbers") guarded the case where the
 // manifest names a file the pipeline could not read. That entry is all-null too, and a 3D
 // product always has triangles, so it is a failed read rather than a measurement of nothing.
-test("a manifest record that measured nothing at all does not overwrite the real numbers", () => {
+test("a manifest record that measured nothing at all does not overwrite the real numbers", async () => {
   const unreadable = {
     products: [{
       slug: "a-gate", kind: "3d-model", title: "문",
@@ -299,7 +299,7 @@ test("a manifest record that measured nothing at all does not overwrite the real
       measured: {},
     }],
   };
-  const built = buildFacts(unreadable, [], [], MARKET_ROOT, {
+  const built = await buildFacts(unreadable, [], [], MARKET_ROOT, {
     "a-gate": emptyFacts({ triangles: 520, materials: 6, boundsMetres: [1.2, 2.4, 0.3], animatedParts: ["gate_pivot"] }),
   });
   const gate = built.facts["a-gate"];
@@ -310,8 +310,8 @@ test("a manifest record that measured nothing at all does not overwrite the real
   assert.equal(gate.byteLength, 47_960, "the size the manifest did state still wins");
 });
 
-test("a slug neither source mentions is still carried forward whole", () => {
-  const built = buildFacts({ products: [] }, [], [], MARKET_ROOT, { "gone-from-both": h145Measured });
+test("a slug neither source mentions is still carried forward whole", async () => {
+  const built = await buildFacts({ products: [] }, [], [], MARKET_ROOT, { "gone-from-both": h145Measured });
   assert.deepEqual(built.facts["gone-from-both"], h145Measured);
 });
 

@@ -50,7 +50,7 @@ export function isAuthIntent(value: unknown): value is AuthIntent {
 /** 처음 오는 사람이 받는 것 — 숫자는 전부 상수에서 온다. */
 const SIGNUP_FACTS = [
   "카드·비밀번호 없음",
-  `${SIGNUP_GRANT_CREDITS}크레딧 즉시`,
+  `실행 ${SIGNUP_GRANT_CREDITS}회 즉시`,
   `이미지 하루 ${WORKSPACE_IMAGES_PER_DAY}장까지`,
 ];
 
@@ -63,8 +63,8 @@ const LOGIN_PROVIDER_SMALL = "계정으로 로그인 ↗";
 export const DEFAULT_AUTH_COPY: AuthIntentCopy = {
   signup: {
     badge: "카드 없이 시작",
-    h1: `가입하면 ${SIGNUP_GRANT_CREDITS}크레딧`,
-    lede: `카드도 비밀번호도 묻지 않습니다. Google이나 GitHub 계정으로 한 번 들어오면 내 작업공간이 만들어지고, 매달 ${BETA_MONTHLY_GRANT_CREDITS}크레딧이 더 들어옵니다.`,
+    h1: `가입하면 바로 씁니다`,
+    lede: `카드도 비밀번호도 묻지 않습니다. Google이나 GitHub 계정으로 한 번 들어오면 내 작업공간이 만들어지고, 매달 ${BETA_MONTHLY_GRANT_CREDITS}회가 더 들어옵니다.`,
     facts: SIGNUP_FACTS,
     providerSmall: SIGNUP_PROVIDER_SMALL,
   },
@@ -75,7 +75,7 @@ export const DEFAULT_AUTH_COPY: AuthIntentCopy = {
     facts: LOGIN_FACTS,
     providerSmall: LOGIN_PROVIDER_SMALL,
   },
-  welcome: `${SIGNUP_GRANT_CREDITS}크레딧이 들어왔습니다 · 무엇을 만들지 골라 보세요`,
+  welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS}회가 들어왔습니다 · 무엇을 만들지 골라 보세요`,
 };
 
 export const INTENT_COPY: Record<AuthIntent, AuthIntentCopy> = {
@@ -83,7 +83,7 @@ export const INTENT_COPY: Record<AuthIntent, AuthIntentCopy> = {
     signup: {
       badge: "카드 없이 시작",
       h1: "첫 에셋 만들기부터",
-      lede: `계정 하나면 만들기 화면이 열립니다. 가입하는 그 자리에서 크레딧 ${SIGNUP_GRANT_CREDITS}개가 들어오고, 확인이 끝나면 만들던 화면으로 그대로 돌아갑니다.`,
+      lede: `계정 하나면 만들기 화면이 열립니다. 가입하는 그 자리에서 만들기·검사 ${SIGNUP_GRANT_CREDITS}회가 들어오고, 확인이 끝나면 만들던 화면으로 그대로 돌아갑니다.`,
       facts: SIGNUP_FACTS,
       providerSmall: SIGNUP_PROVIDER_SMALL,
     },
@@ -94,13 +94,13 @@ export const INTENT_COPY: Record<AuthIntent, AuthIntentCopy> = {
       facts: LOGIN_FACTS,
       providerSmall: LOGIN_PROVIDER_SMALL,
     },
-    welcome: `${SIGNUP_GRANT_CREDITS}크레딧이 들어왔습니다 · 첫 에셋을 만들어 보세요`,
+    welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS}회가 들어왔습니다 · 첫 에셋을 만들어 보세요`,
   },
   inspect: {
     signup: {
       badge: "카드 없이 시작",
       h1: "파일 검사부터",
-      lede: `파일 하나를 올리면 게임에 넣어도 되는지 확인해 드립니다. 가입하는 그 자리에서 크레딧 ${SIGNUP_GRANT_CREDITS}개가 들어오고, 확인이 끝나면 검사 화면으로 돌아갑니다.`,
+      lede: `파일 하나를 올리면 게임에 넣어도 되는지 확인해 드립니다. 가입하는 그 자리에서 만들기·검사 ${SIGNUP_GRANT_CREDITS}회가 들어오고, 확인이 끝나면 검사 화면으로 돌아갑니다.`,
       facts: SIGNUP_FACTS,
       providerSmall: SIGNUP_PROVIDER_SMALL,
     },
@@ -111,13 +111,13 @@ export const INTENT_COPY: Record<AuthIntent, AuthIntentCopy> = {
       facts: LOGIN_FACTS,
       providerSmall: LOGIN_PROVIDER_SMALL,
     },
-    welcome: `${SIGNUP_GRANT_CREDITS}크레딧이 들어왔습니다 · 파일 하나를 올려 검사해 보세요`,
+    welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS}회가 들어왔습니다 · 파일 하나를 올려 검사해 보세요`,
   },
   agents: {
     signup: {
       badge: "카드 없이 시작",
       h1: "에이전트 연결부터",
-      lede: `내 계정 전용 키를 하나 만들면 쓰던 AI 도구가 바로 Clunk를 부릅니다. 가입하는 그 자리에서 크레딧 ${SIGNUP_GRANT_CREDITS}개가 들어옵니다.`,
+      lede: `내 계정 전용 키를 하나 만들면 쓰던 AI 도구가 바로 Clunk를 부릅니다. 가입하는 그 자리에서 만들기·검사 ${SIGNUP_GRANT_CREDITS}회가 들어옵니다.`,
       facts: SIGNUP_FACTS,
       providerSmall: SIGNUP_PROVIDER_SMALL,
     },
@@ -128,13 +128,13 @@ export const INTENT_COPY: Record<AuthIntent, AuthIntentCopy> = {
       facts: LOGIN_FACTS,
       providerSmall: LOGIN_PROVIDER_SMALL,
     },
-    welcome: `${SIGNUP_GRANT_CREDITS}크레딧이 들어왔습니다 · 키를 만들면 바로 연결됩니다`,
+    welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS}회가 들어왔습니다 · 키를 만들면 바로 연결됩니다`,
   },
   market: {
     signup: {
       badge: "카드 없이 시작",
       h1: "에셋 받기부터",
-      lede: `마켓 에셋은 계정만 있으면 받습니다. 가입하는 그 자리에서 크레딧 ${SIGNUP_GRANT_CREDITS}개도 함께 들어옵니다.`,
+      lede: `마켓 에셋은 계정만 있으면 받습니다. 가입하는 그 자리에서 만들기·검사 ${SIGNUP_GRANT_CREDITS}회도 함께 들어옵니다.`,
       facts: SIGNUP_FACTS,
       providerSmall: SIGNUP_PROVIDER_SMALL,
     },
@@ -145,7 +145,7 @@ export const INTENT_COPY: Record<AuthIntent, AuthIntentCopy> = {
       facts: LOGIN_FACTS,
       providerSmall: LOGIN_PROVIDER_SMALL,
     },
-    welcome: `${SIGNUP_GRANT_CREDITS}크레딧이 들어왔습니다 · 마켓에서 에셋을 받아 보세요`,
+    welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS}회가 들어왔습니다 · 마켓에서 에셋을 받아 보세요`,
   },
 };
 

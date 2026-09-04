@@ -361,4 +361,143 @@ export function nearestNeighbour(root: THREE.Object3D, target: THREE.Mesh): { me
   return best;
 }
 
+
+/**
+ * The average COLOR_0 of a mesh, or of one welded lump of it.
+ *
+ * Every part these fix passes ADD takes its colour from a part the asset
+ * already ships, so no new colour enters the palette. Returns null for a mesh
+ * with no vertex colours, and the caller then adds none.
+ */
+export function averageColour(source: THREE.Mesh, indices?: readonly number[]): THREE.Color | null {
+  const attribute = source.geometry.getAttribute('color') as THREE.BufferAttribute | undefined;
+  if (!attribute) return null;
+  const list = indices ?? Array.from({ length: attribute.count }, (_, i) => i);
+  let r = 0; let g = 0; let b = 0;
+  for (const i of list) { r += attribute.getX(i); g += attribute.getY(i); b += attribute.getZ(i); }
+  return new THREE.Color(r / list.length, g / list.length, b / list.length);
+}
+
+export interface BoxSpec {
+  /** World-space minimum corner, metres. */
+  min: [number, number, number];
+  /** World-space maximum corner, metres. */
+  max: [number, number, number];
+}
+
+/**
+ * One mesh holding a set of axis-aligned boxes, built in WORLD space and then
+ * carried back into `parent`'s local frame.
+ *
+ * Each box keeps its own eight vertices, so the faces stay flat-shaded like the
+ * rest of these assets and no two boxes share a vertex. Boxes are expected to
+ * BUTT, never to overlap: a shared plane between two boxes has opposing
+ * normals and is therefore not a z-fighting candidate, while an overlap would
+ * add crossing triangles. The caller lays them out; this only builds them.
+ */
+export function buildBoxes(
+  name: string,
+  boxes: readonly BoxSpec[],
+  donor: THREE.Mesh,
+  parent: THREE.Object3D,
+  colour: THREE.Color | null = averageColour(donor),
+): THREE.Mesh {
+  const positions: number[] = [];
+  const colours: number[] = [];
+  const indices: number[] = [];
+  const inverse = new THREE.Matrix4().copy(parent.matrixWorld).invert();
+  const point = new THREE.Vector3();
+  for (const box of boxes) {
+    const [x0, y0, z0] = box.min;
+    const [x1, y1, z1] = box.max;
+    const corners: [number, number, number][] = [
+      [x0, y0, z0], [x1, y0, z0], [x1, y1, z0], [x0, y1, z0],
+      [x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1],
+    ];
+    const base = positions.length / 3;
+    for (const [x, y, z] of corners) {
+      point.set(x, y, z).applyMatrix4(inverse);
+      positions.push(point.x, point.y, point.z);
+      if (colour) colours.push(colour.r, colour.g, colour.b);
+    }
+    const quad = (a: number, b: number, c: number, d: number): void => {
+      indices.push(base + a, base + b, base + c, base + a, base + c, base + d);
+    };
+    quad(1, 0, 3, 2); // -Z
+    quad(4, 5, 6, 7); // +Z
+    quad(0, 4, 7, 3); // -X
+    quad(5, 1, 2, 6); // +X
+    quad(0, 1, 5, 4); // -Y
+    quad(3, 7, 6, 2); // +Y
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  if (colour) geometry.setAttribute('color', new THREE.Float32BufferAttribute(colours, 3));
+  geometry.setIndex(indices);
+  geometry.computeVertexNormals();
+  geometry.computeBoundingBox();
+  geometry.computeBoundingSphere();
+  const built = new THREE.Mesh(geometry, donor.material);
+  built.name = name;
+  parent.add(built);
+  built.updateMatrixWorld(true);
+  return built;
+}
+
+/**
+ * Push a thin part (a window pane) along its own thin axis, INTO the solid the
+ * asset's centre lies in, by `inset` metres.
+ *
+ * The move is decided in world space and carried back through the pane's own
+ * parent, because a pane can hang off a node that is yawed 90 or 180 degrees;
+ * adding to `position[axis]` directly sends half of them out through the wall.
+ */
+export function insetPane(root: THREE.Object3D, pane: THREE.Mesh, inset: number): { pane: string; axis: 'x' | 'z'; beforeMm: number; afterMm: number } {
+  const centre = worldBox(root).getCenter(new THREE.Vector3());
+  const box = worldBox(pane);
+  const size = box.getSize(new THREE.Vector3());
+  const axis: 'x' | 'z' = size.x < size.z ? 'x' : 'z';
+  const paneCentre = box.getCenter(new THREE.Vector3());
+  const inward = Math.sign(centre[axis] - paneCentre[axis]) || 1;
+  const before = paneCentre[axis];
+  const target = pane.getWorldPosition(new THREE.Vector3());
+  target[axis] += inward * inset;
+  pane.position.copy(pane.parent ? pane.parent.worldToLocal(target) : target);
+  root.updateMatrixWorld(true);
+  return { pane: pane.name, axis, beforeMm: mm(before), afterMm: mm(worldBox(pane).getCenter(new THREE.Vector3())[axis]) };
+}
+
+
+/**
+ * How far the nearest OTHER surface is from a pane's two faces, along the
+ * pane's own thin axis, once the pane is displaced by `offset` metres.
+ *
+ * Only vertices standing over the pane's own footprint count -- a face on the
+ * far side of the building shares the plane but never overlaps it in
+ * projection, and the z-fighting the panes were flagged for needs both. The
+ * figure returned is a real separation in metres, so a caller can pick a
+ * direction by measurement instead of by a rule of thumb about "inward".
+ */
+export function paneClearance(root: THREE.Object3D, pane: THREE.Mesh, axis: 'x' | 'y' | 'z', offset: number): number {
+  const box = worldBox(pane);
+  const others = ['x', 'y', 'z'].filter((a) => a !== axis) as ('x' | 'y' | 'z')[];
+  const faces = [box.min[axis] + offset, box.max[axis] + offset];
+  let best = Infinity;
+  const point = new THREE.Vector3();
+  for (const other of meshes(root)) {
+    if (other === pane) continue;
+    const position = other.geometry.getAttribute('position') as THREE.BufferAttribute;
+    for (let i = 0; i < position.count; i += 1) {
+      point.fromBufferAttribute(position, i).applyMatrix4(other.matrixWorld);
+      let inside = true;
+      for (const a of others) {
+        if (point[a] < box.min[a] - 1e-6 || point[a] > box.max[a] + 1e-6) { inside = false; break; }
+      }
+      if (!inside) continue;
+      for (const face of faces) best = Math.min(best, Math.abs(point[axis] - face));
+    }
+  }
+  return best;
+}
+
 export { THREE };

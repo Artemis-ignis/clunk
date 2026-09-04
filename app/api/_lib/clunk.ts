@@ -186,6 +186,9 @@ async function ensureSchemaUncached(db: D1Database): Promise<void> {
   // 살아 있어야 받는다. 예전에는 price_cents 가 0보다 큰지로 갈랐는데, 낱개로 파는
   // 값이 사라진 뒤로는 그 숫자가 아무도 청구하지 않는 가격이 되어 거짓이 된다.
   await ensureColumn(db, "clunk_marketplace_listings", "access_tier", "TEXT NOT NULL DEFAULT 'pro'");
+  // 상품 이름의 영어판. 한국인은 한국어와 국내 결제, 그 밖은 영어 — 이름부터 두 벌이어야
+  // 한다. 비어 있으면 화면은 한국어 이름 하나만 보여 준다.
+  await ensureColumn(db, "clunk_marketplace_listings", "title_en", "TEXT NOT NULL DEFAULT ''");
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_clunk_generation_project_created ON clunk_generation_jobs(project_id, created_at DESC)`).run();
   await db.batch([
     db.prepare(

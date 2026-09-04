@@ -89,7 +89,14 @@ export async function POST(request: Request) {
     const verifiedScore = verifiedReport.score as { score: number; hardBlockerCount: number; ready: boolean };
     const verifiedFindings = verifiedReport.findings as unknown[];
     const operations = payload.operations;
-    const allowedOperationIds = new Set(["prune-empty-nodes", "dedupe-materials", "clean-metadata", "repack"]);
+    const allowedOperationIds = new Set([
+      "prune-empty-nodes",
+      "dedupe-materials",
+      "clean-metadata",
+      "repack",
+      "bake-vertex-colour-palette",
+      "prune-orphan-data",
+    ]);
     if (
       !Array.isArray(operations) ||
       operations.some((operation) => {

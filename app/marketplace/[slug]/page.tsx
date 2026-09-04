@@ -67,6 +67,8 @@ function structuredData(listing: PublishedListingSummary) {
       "@context": "https://schema.org",
       "@type": "Product",
       name: listing.title,
+      // 같은 물건을 영어로 찾는 사람에게도 이 페이지가 걸리게 한다.
+      ...(listing.titleEn ? { alternateName: listing.titleEn } : {}),
       sku: listing.slug,
       description: listing.description,
       brand: { "@type": "Brand", name: "Clunk" },

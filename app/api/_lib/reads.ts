@@ -39,6 +39,8 @@ export async function readConsentState(userId: string): Promise<ConsentState> {
 export type PublishedListingSummary = {
   slug: string;
   title: string;
+  /** 같은 상품의 영어 이름. 아직 붙이지 않았으면 빈 문자열. */
+  titleEn: string;
   description: string;
   assetId: string;
   entryFileName: string;
@@ -59,7 +61,7 @@ export async function readPublishedListingBySlug(slug: string): Promise<Publishe
   await ensureSchema(db);
   const row = await db
     .prepare(
-      `SELECT l.slug, l.title, l.description, l.asset_id AS assetId, a.file_name AS entryFileName,
+      `SELECT l.slug, l.title, l.title_en AS titleEn, l.description, l.asset_id AS assetId, a.file_name AS entryFileName,
         (SELECT aa.file_name FROM clunk_asset_artifacts aa
            WHERE aa.asset_id = l.asset_id AND aa.role = 'preview' LIMIT 1) AS previewFileName
        FROM clunk_marketplace_listings l

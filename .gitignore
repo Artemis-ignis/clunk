@@ -61,3 +61,6 @@ public/market/
 
 # scratch: 일회용 스크립트와 임시 산출물. tsconfig 도 여기를 제외한다.
 /tmp/
+
+# 게임 웹 배포용 사본 — 게임 저장소의 dist 에서 복사해 온다
+deploy/harvest-frontier/public/

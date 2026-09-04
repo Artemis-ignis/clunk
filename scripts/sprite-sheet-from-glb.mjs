@@ -34,10 +34,7 @@ import { deflateSync } from "node:zlib";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
-import { NodeIO } from "@gltf-transform/core";
-import { ALL_EXTENSIONS } from "@gltf-transform/extensions";
-import { MeshoptDecoder as MeshoptWasmDecoder, MeshoptEncoder } from "meshoptimizer";
-import sharp from "sharp";
+import { unbakePalette } from "./lib/unbake-palette.mjs";
 
 // --- Arguments ---------------------------------------------------------------------------
 const positional = [];
@@ -155,54 +152,6 @@ function encodePngRgba(width, height, rgba) {
     chunk("IDAT", deflateSync(raw, { level: 9 })),
     chunk("IEND", Buffer.alloc(0)),
   ]);
-}
-
-/**
- * 색표 그림으로 구운 파일을 정점 색으로 되돌린다 — 굽기의 정확한 역과정.
- *
- * 왜 여기서. three 의 GLTFLoader 는 GLB 안에 든 그림을 브라우저 방식으로만 푼다
- * (`self.URL`, `document`). Node 에서는 텍스처가 하나라도 있으면 파일을 열다가 멈춘다.
- * 2026-09-04 정점 색을 색표로 옮기기 시작하면서 마켓의 모든 3D 상품에 그림이 생겼으므로,
- * 열기 전에 색을 정점으로 되돌려 이 스크립트가 늘 다뤄 온 모양으로 만든다. 아래 셈은
- * 손댈 필요가 없다.
- *
- * 그림은 sRGB 로 저장돼 있고 COLOR_0 는 선형이므로 되돌리며 변환한다.
- */
-async function unbakePalette(buffer) {
-  const io = new NodeIO()
-    .registerExtensions(ALL_EXTENSIONS)
-    .registerDependencies({ "meshopt.decoder": MeshoptWasmDecoder, "meshopt.encoder": MeshoptEncoder });
-  const doc = await io.readBinary(new Uint8Array(buffer));
-  const textures = doc.getRoot().listTextures();
-  if (textures.length !== 1) return buffer; // 색표가 아닌 파일은 건드리지 않는다
-  const { data, info } = await sharp(Buffer.from(textures[0].getImage()))
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-  const toLinear = (v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
-
-  let restored = 0;
-  for (const mesh of doc.getRoot().listMeshes()) {
-    for (const prim of mesh.listPrimitives()) {
-      const uv = prim.getAttribute("TEXCOORD_0");
-      if (!uv) continue;
-      const n = uv.getCount();
-      const colours = new Float32Array(n * 3);
-      for (let i = 0; i < n; i += 1) {
-        const [u, v] = uv.getElement(i, [0, 0]);
-        const x = Math.min(info.width - 1, Math.max(0, Math.floor(u * info.width)));
-        const y = Math.min(info.height - 1, Math.max(0, Math.floor(v * info.height)));
-        const at = (y * info.width + x) * info.channels;
-        for (let k = 0; k < 3; k += 1) colours[i * 3 + k] = toLinear(data[at + k] / 255);
-      }
-      prim.setAttribute("COLOR_0", doc.createAccessor().setType("VEC3").setArray(colours));
-      prim.setAttribute("TEXCOORD_0", null);
-      restored += 1;
-    }
-  }
-  if (!restored) return buffer;
-  for (const material of doc.getRoot().listMaterials()) material.setBaseColorTexture(null);
-  for (const texture of doc.getRoot().listTextures()) texture.dispose();
-  return Buffer.from(await io.writeBinary(doc));
 }
 
 // --- Scene -------------------------------------------------------------------------------

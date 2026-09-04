@@ -413,9 +413,15 @@ test("/login과 /signup은 서로 다른 문이고, 영문 라벨이 남아 있�
   const monthlyGrant = clunk.match(/export const BETA_MONTHLY_GRANT_CREDITS = (\d+);/)?.[1];
   const imagesPerDay = budget.match(/export const WORKSPACE_IMAGES_PER_DAY = (\d+);/)?.[1];
   assert.ok(signupGrant && monthlyGrant && imagesPerDay, "지급 상수를 읽지 못했습니다");
-  assert.ok(signup.includes(`가입하면 ${signupGrant}크레딧`), "가입 즉시 지급 크레딧이 화면에 없습니다");
-  assert.ok(signup.includes(`매달 ${monthlyGrant}크레딧`), "매월 지급 크레딧이 화면에 없습니다");
+  // 2026-09-04: 화면에서 "크레딧"이라는 말을 뺐다. 현금을 재화로 바꾸는 것처럼 읽혀
+  // 결제대행 심사가 반려한 개념이고, 실제로 이것은 만들기·검사를 몇 번 할 수 있는지다.
+  // 지켜야 할 것은 낱말이 아니라 "화면의 숫자가 원장이 집행하는 상수와 같다"는 것이다.
+  assert.ok(signup.includes(`${signupGrant}회`), "가입 즉시 쓸 수 있는 횟수가 화면에 없습니다");
+  assert.ok(signup.includes(`매달 ${monthlyGrant}회`), "매월 지급 횟수가 화면에 없습니다");
   assert.ok(signup.includes(`${imagesPerDay}장까지`), "하루 이미지 한도가 화면에 없습니다");
+  for (const [name, html] of [["가입", signup], ["로그인", login]]) {
+    assert.ok(!html.includes("크레딧"), `${name} 화면에 크레딧이라는 말이 되살아났습니다`);
+  }
 
   const signupSource = await source("app/signup/page.tsx");
   assert.match(signupSource, /SIGNUP_GRANT_CREDITS/);

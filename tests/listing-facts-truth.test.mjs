@@ -110,6 +110,90 @@ test("파일이 있는데 사양이 비어 있는 상품이 없다", async () =>
 });
 
 /**
+ * 카드에 "실제 크기"라고 적힌 숫자가 파일의 크기와 같은가.
+ *
+ * 상자를 겹쳐 재면 돌아가 있는 부품에서 상자가 부품보다 커진다. 헬리콥터가 10.60m 로
+ * 적혀 있었지만 꼭짓점을 재면 10.52m 다. 그래서 여기서는 꼭짓점을 하나씩 제자리로 옮겨
+ * 놓고 잰다 — 만드는 쪽(scripts/listing-facts-cli.ts)과 다른 코드로 재야 검사가 된다.
+ *
+ * 빗물통이 이 검사가 없어서 1.60×2.33×1.87m 로 팔리고 있었다. 실제로는 0.69×1.00×0.81m,
+ * 사람 허리 높이의 통이다. 세 배 큰 물건을 산다고 생각하고 장면에 넣으면 다시 짜야 한다.
+ */
+async function vertexBoundsOf(path) {
+  const { NodeIO } = await import("@gltf-transform/core");
+  const { ALL_EXTENSIONS } = await import("@gltf-transform/extensions");
+  const { MeshoptDecoder, MeshoptEncoder } = await import("meshoptimizer");
+  const io = new NodeIO()
+    .registerExtensions(ALL_EXTENSIONS)
+    .registerDependencies({ "meshopt.decoder": MeshoptDecoder, "meshopt.encoder": MeshoptEncoder });
+  const doc = await io.read(new URL(path, root).pathname.replace(/^\/([A-Za-z]:)/, "$1"));
+  const min = [Infinity, Infinity, Infinity];
+  const max = [-Infinity, -Infinity, -Infinity];
+  const walk = (node) => {
+    const m = node.getWorldMatrix();
+    for (const prim of node.getMesh()?.listPrimitives() ?? []) {
+      const pos = prim.getAttribute("POSITION");
+      if (!pos) continue;
+      for (let i = 0; i < pos.getCount(); i++) {
+        const p = pos.getElement(i, [0, 0, 0]);
+        for (let k = 0; k < 3; k++) {
+          const v = m[k] * p[0] + m[4 + k] * p[1] + m[8 + k] * p[2] + m[12 + k];
+          if (v < min[k]) min[k] = v;
+          if (v > max[k]) max[k] = v;
+        }
+      }
+    }
+    for (const child of node.listChildren()) walk(child);
+  };
+  for (const scene of doc.getRoot().listScenes()) for (const node of scene.listChildren()) walk(node);
+  return min.every(Number.isFinite) ? [0, 1, 2].map((i) => max[i] - min[i]) : null;
+}
+
+test("적힌 실제 크기가 파일의 크기와 같다", async () => {
+  const facts = await loadFacts();
+  const wrong = [];
+  let checked = 0;
+  for (const [slug, fact] of Object.entries(facts)) {
+    if (!fact?.boundsMetres) continue;
+    // 묶음은 한 파일에 여러 물건을 늘어놓은 것이라 파일의 크기가 물건의 크기가 아니다.
+    if ((fact.members ?? 0) > 1) continue;
+    const path = await entryGlb(slug);
+    if (!path) continue;
+    const measured = await vertexBoundsOf(path);
+    if (!measured) continue;
+    checked += 1;
+    // 1mm 까지 같아야 한다. 카드는 cm 단위로 보여 주므로 이보다 큰 차이는 화면에 나온다.
+    if (![0, 1, 2].every((i) => Math.abs(measured[i] - fact.boundsMetres[i]) < 0.001)) {
+      wrong.push(
+        `${slug}: 표기 ${fact.boundsMetres.map((v) => v.toFixed(3)).join("×")} / 실측 ${measured.map((v) => v.toFixed(3)).join("×")}`,
+      );
+    }
+  }
+  assert.ok(checked > 0, "크기를 재 본 상품이 하나도 없습니다");
+  assert.deepEqual(wrong, [], `상품 페이지의 실제 크기가 파일과 다릅니다:\n  ${wrong.join("\n  ")}`);
+});
+
+test("파일이 들고 있는 동작을 상품 페이지가 빠뜨리지 않는다", async () => {
+  // 헬리콥터가 로터와 문 동작 두 개를 파일에 갖고 있는데 사양은 "동작 없음"이었다.
+  // 같은 화면의 설명문은 두 동작을 자랑하고 있었다.
+  const facts = await loadFacts();
+  const wrong = [];
+  for (const [slug, fact] of Object.entries(facts)) {
+    const path = await entryGlb(slug);
+    if (!path) continue;
+    const bytes = await readFile(new URL(path, root));
+    if (bytes.byteLength < 20 || bytes.readUInt32LE(0) !== 0x46546c67) continue;
+    const json = JSON.parse(bytes.subarray(20, 20 + bytes.readUInt32LE(12)).toString("utf8"));
+    const inFile = (json.animations ?? []).map((clip, i) => clip.name ?? `animation_${i}`).sort();
+    const written = (fact?.animations ?? []).map((clip) => clip.name).sort();
+    if (inFile.join("|") !== written.join("|")) {
+      wrong.push(`${slug}: 표기 [${written.join(", ")}] / 파일 [${inFile.join(", ")}]`);
+    }
+  }
+  assert.deepEqual(wrong, [], `파일의 동작과 상품 페이지의 동작이 다릅니다:\n  ${wrong.join("\n  ")}`);
+});
+
+/**
  * 어느 엔진에서 열리는지를 상품 페이지가 말한다. 그 말의 근거는 파일이어야 한다.
  *
  * 호환성 표는 팔기 위해 적기 쉬운 종류의 문장이다. glTF 파일은 자기가 필요로 하는 확장을
@@ -150,7 +234,14 @@ test("적힌 요구 확장이 파일이 실제로 요구하는 것과 같다", a
     if (written.join("|") !== real.requires.join("|")) {
       wrong.push(`${slug}: 표기 [${written.join(", ")}] / 실제 [${real.requires.join(", ")}]`);
     }
-    const colour = real.hasBaseColourTexture ? "texture" : real.hasVertexColour ? "vertex" : "material";
+    const colour =
+      real.hasBaseColourTexture && real.hasVertexColour
+        ? "mixed"
+        : real.hasBaseColourTexture
+          ? "texture"
+          : real.hasVertexColour
+            ? "vertex"
+            : "material";
     if (fact.engine.colour !== colour) {
       wrong.push(`${slug}: 색 위치 표기 ${fact.engine.colour} / 실제 ${colour}`);
     }

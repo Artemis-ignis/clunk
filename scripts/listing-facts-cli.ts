@@ -22,9 +22,19 @@
  *   npm run asset:facts -- --listings tmp/listings-snapshot.json --out app/data/listing-facts.json
  */
 import { readFileSync, readdirSync, writeFileSync, mkdirSync } from "node:fs";
-import { inspectAsset } from "../packages/core/src/index";
 import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+
+import { NodeIO } from "@gltf-transform/core";
+import { ALL_EXTENSIONS } from "@gltf-transform/extensions";
+import { MeshoptDecoder, MeshoptEncoder } from "meshoptimizer";
+
+import { inspectAsset } from "../packages/core/src/index";
+
+/** 크기를 재려고 파일을 여는 쪽. 압축된 파일도 열려야 해서 meshopt 를 붙여 둔다. */
+const glbReader = new NodeIO()
+  .registerExtensions(ALL_EXTENSIONS)
+  .registerDependencies({ "meshopt.decoder": MeshoptDecoder, "meshopt.encoder": MeshoptEncoder });
 
 /** The three families whose members are meant to be bought together. */
 export type KitId = "cozy-farm-set" | "harvest-frontier" | "grove-tree-pack";
@@ -78,11 +88,15 @@ export type ListingFact = {
  *   material — flat colours on the materials themselves. Every reader shows it.
  *   vertex   — colour stored per corner with no picture. A shader that does not read corner
  *              colour draws the model white, and most engines' default one does not.
+ *   mixed    — both. Some parts point at a picture, others still carry corner colour, so a
+ *              plain material shows most of the model and draws the rest white. The
+ *              helicopter's cabin interior is the only one: its colour runs across each
+ *              triangle rather than sitting flat on it, which a colour chart cannot hold.
  */
 export type EngineFit = {
   requires: string[];
   uses: string[];
-  colour: "texture" | "material" | "vertex";
+  colour: "texture" | "material" | "vertex" | "mixed";
   /** glTF primitive modes present. 4 is triangles; anything else is unusual and worth saying. */
   modes: number[];
   /** Image types the file carries, so a reader needing an extra decoder is visible. */
@@ -118,10 +132,90 @@ export function measureEngineFit(bytes: Buffer): EngineFit | null {
   return {
     requires: [...required].sort(),
     uses: used.filter((name) => !required.includes(name)).sort(),
-    colour: hasBaseColourTexture ? "texture" : hasVertexColour ? "vertex" : "material",
+    colour: hasBaseColourTexture && hasVertexColour ? "mixed" : hasBaseColourTexture ? "texture" : hasVertexColour ? "vertex" : "material",
     modes: [...modes].sort((a, b) => a - b),
     imageTypes: [...new Set(images.map((image) => image.mimeType ?? "").filter(Boolean))].sort(),
   };
+}
+
+/**
+ * 파일이 들고 있는 동작. 이름과 길이, 그리고 그 동작이 실제로 움직이는 노드 이름.
+ *
+ * 왜 파일에서 다시 재는가. 헬리콥터가 로터와 문 동작 두 개를 파일 안에 갖고 있는데
+ * 사양에는 "동작 없음"으로 적혀 있었다. 설명문은 "로터가 도는 동작과 문이 열리는 동작이
+ * 들어 있어"라고 말하는 채로였다 — 한 화면에서 두 말이 어긋났다. 종이가 한 번 비면
+ * 아무도 채워 주지 않으므로 파일에서 읽는다.
+ */
+export function measureAnimations(bytes: Buffer): { animations: { name: string; seconds: number }[]; parts: string[] } | null {
+  if (bytes.byteLength < 20 || bytes.readUInt32LE(0) !== 0x46546c67) return null;
+  let json: {
+    animations?: Array<{ name?: string; channels?: Array<{ target?: { node?: number } }>; samplers?: Array<{ input?: number }> }>;
+    accessors?: Array<{ max?: number[] }>;
+    nodes?: Array<{ name?: string }>;
+  };
+  try {
+    json = JSON.parse(bytes.subarray(20, 20 + bytes.readUInt32LE(12)).toString("utf8"));
+  } catch {
+    return null;
+  }
+  const animations: { name: string; seconds: number }[] = [];
+  const parts = new Set<string>();
+  for (const [i, clip] of (json.animations ?? []).entries()) {
+    // 길이는 시간 축 accessor 의 최댓값이다. glTF 가 그 값을 파일에 적어 두므로
+    // 자료를 통째로 읽지 않아도 된다.
+    let seconds = 0;
+    for (const sampler of clip.samplers ?? []) {
+      const max = sampler.input === undefined ? undefined : json.accessors?.[sampler.input]?.max?.[0];
+      if (typeof max === "number") seconds = Math.max(seconds, max);
+    }
+    animations.push({ name: clip.name ?? `animation_${i}`, seconds: Math.round(seconds * 1000) / 1000 });
+    for (const channel of clip.channels ?? []) {
+      const name = channel.target?.node === undefined ? undefined : json.nodes?.[channel.target.node]?.name;
+      if (name) parts.add(name);
+    }
+  }
+  return { animations, parts: [...parts] };
+}
+
+/**
+ * 파일이 실제로 차지하는 크기. 꼭짓점을 하나씩 제자리로 옮겨 놓고 잰다.
+ *
+ * 왜 상자를 겹치는 방식으로는 안 되는가. 부품마다 상자를 씌우고 그 상자들을 합치면,
+ * 돌아가 있는 부품에서는 상자가 부품보다 커진다. 헬리콥터가 그래서 10.60m 로 적혀
+ * 있었는데 실제로는 10.52m 다 — 8cm 를 더 크다고 판 셈이다. 카드에 "실제 크기"라고
+ * 적는 이상 상자가 아니라 꼭짓점을 재야 한다.
+ */
+export async function measureBoundsMetres(bytes: Buffer): Promise<[number, number, number] | null> {
+  let doc;
+  try {
+    doc = await glbReader.readBinary(new Uint8Array(bytes));
+  } catch {
+    return null;
+  }
+  const min = [Infinity, Infinity, Infinity];
+  const max = [-Infinity, -Infinity, -Infinity];
+  const place = (m: number[] | Float32Array, p: number[]) =>
+    [0, 1, 2].map((i) => m[i]! * p[0]! + m[4 + i]! * p[1]! + m[8 + i]! * p[2]! + m[12 + i]!);
+  const walk = (node: ReturnType<typeof doc.createNode>) => {
+    const world = node.getWorldMatrix();
+    const mesh = node.getMesh();
+    if (mesh)
+      for (const prim of mesh.listPrimitives()) {
+        const pos = prim.getAttribute("POSITION");
+        if (!pos) continue;
+        for (let i = 0; i < pos.getCount(); i++) {
+          const at = place(world, pos.getElement(i, [0, 0, 0]));
+          for (let k = 0; k < 3; k++) {
+            if (at[k]! < min[k]!) min[k] = at[k]!;
+            if (at[k]! > max[k]!) max[k] = at[k]!;
+          }
+        }
+      }
+    for (const child of node.listChildren()) walk(child);
+  };
+  for (const scene of doc.getRoot().listScenes()) for (const node of scene.listChildren()) walk(node);
+  if (!min.every(Number.isFinite) || !max.every(Number.isFinite)) return null;
+  return [0, 1, 2].map((i) => Math.round((max[i]! - min[i]!) * 10000) / 10000) as [number, number, number];
 }
 
 export type ListingFactsFile = {
@@ -465,11 +559,11 @@ function entryFileNameFor(slug: string, marketRoot: string, fromManifest?: Map<s
   return null;
 }
 
-function remeasureFromServedFiles(
+async function remeasureFromServedFiles(
   facts: Record<string, ListingFact>,
   marketRoot: string,
   entryNames?: Map<string, string>,
-): { facts: Record<string, ListingFact>; corrected: string[] } {
+): Promise<{ facts: Record<string, ListingFact>; corrected: string[] }> {
   const corrected: string[] = [];
   for (const [slug, fact] of Object.entries(facts)) {
     const name = entryFileNameFor(slug, marketRoot, entryNames);
@@ -498,28 +592,53 @@ function remeasureFromServedFiles(
     if (triangles === null) continue; // 형상을 못 읽었으면 종이를 그대로 둔다
     const engine = measureEngineFit(bytes);
 
+    // 크기와 동작도 파일에서 읽는다. 못 읽었을 때만 종이를 남긴다.
+    //
+    // 묶음은 예외다. 나무 6종을 한 파일에 나란히 늘어놓은 것을 재면 38.4m 가 나오는데,
+    // 그것은 나무의 크기가 아니라 늘어놓은 간격이다. 카드에는 "실제 크기"라고 적히므로
+    // 사는 사람이 38m 짜리 나무를 상상하게 된다. 묶음의 크기는 재지 않는다.
+    const isKit = (fact.members ?? 0) > 1;
+    const boundsMetres = isKit ? fact.boundsMetres : ((await measureBoundsMetres(bytes)) ?? fact.boundsMetres);
+    const clips = measureAnimations(bytes);
+    const animations = clips ? clips.animations : fact.animations;
+    // 움직이는 부품은 파일이 말하는 것에 종이가 적어 둔 것을 더한다. 종이에는 동작이
+    // 걸려 있지 않지만 이름 붙어 굴릴 수 있는 축(트랙터 바퀴 같은 것)이 들어 있고,
+    // 파일의 동작 대상만 남기면 그것들이 사라진다.
+    const animatedParts = clips
+      ? [...(fact.animatedParts ?? []), ...clips.parts.filter((name) => !(fact.animatedParts ?? []).includes(name))]
+      : fact.animatedParts;
+
     const changed =
       fact.triangles !== triangles ||
       fact.materials !== materials ||
       fact.byteLength !== bytes.byteLength ||
+      JSON.stringify(fact.boundsMetres ?? null) !== JSON.stringify(boundsMetres ?? null) ||
+      JSON.stringify(fact.animations ?? null) !== JSON.stringify(animations ?? null) ||
+      JSON.stringify(fact.animatedParts ?? null) !== JSON.stringify(animatedParts ?? null) ||
       JSON.stringify(fact.engine ?? null) !== JSON.stringify(engine);
     if (!changed) continue;
     corrected.push(
       `${slug}: 폴리곤 ${fact.triangles ?? "-"}→${triangles}, 재질 ${fact.materials ?? "-"}→${materials}, 용량 ${fact.byteLength ?? "-"}→${bytes.byteLength}` +
-        (engine ? `, 요구 확장 ${engine.requires.length}개 · 색 ${engine.colour}` : ""),
+        (engine ? `, 요구 확장 ${engine.requires.length}개 · 색 ${engine.colour}` : "") +
+        (JSON.stringify(fact.animations ?? null) !== JSON.stringify(animations ?? null)
+          ? `, 동작 ${(fact.animations ?? []).length}→${(animations ?? []).length}개`
+          : "") +
+        (JSON.stringify(fact.boundsMetres ?? null) !== JSON.stringify(boundsMetres ?? null)
+          ? `, 크기 ${fact.boundsMetres ? fact.boundsMetres.join("×") : "-"}→${boundsMetres ? boundsMetres.join("×") : "-"}`
+          : ""),
     );
-    facts[slug] = { ...fact, triangles, materials, byteLength: bytes.byteLength, engine };
+    facts[slug] = { ...fact, triangles, materials, byteLength: bytes.byteLength, boundsMetres, animations, animatedParts, engine };
   }
   return { facts, corrected };
 }
 
-export function buildFacts(
+export async function buildFacts(
   manifest: ManifestFile,
   listings: ApiListing[],
   sources: string[],
   marketRoot: string,
   previous: Record<string, ListingFact> = {},
-): ListingFactsFile {
+): Promise<ListingFactsFile> {
   const fromManifest = factsFromManifest(manifest);
   const merged: Record<string, ListingFact> = {};
   // A manifest record speaks for itself unless it measured nothing at all — see `isShell`.
@@ -532,12 +651,15 @@ export function buildFacts(
 
   // Two layers, in this order on purpose. The previous index fills silences; the served file
   // then overrules them, because wherever the file can be opened it is the better authority
-  // (main's 2e2de33 — a note about a file goes stale, the file cannot). The underlay is still
-  // needed underneath it: `remeasureFromServedFiles` states triangles, materials and byte
-  // length and nothing else, so bounds, animated parts, clips and the view angle — the rest of
-  // what the H145 lost — have no other source, and a listing whose file is not in the checkout
-  // is never reached by it at all.
-  const { facts, corrected } = remeasureFromServedFiles(merged, marketRoot, entryNamesFromManifest(manifest));
+  // (main's 2e2de33 — a note about a file goes stale, the file cannot).
+  //
+  // The underlay is still needed underneath it, though it carries less than it used to: 9adca84
+  // taught `remeasureFromServedFiles` to read bounds, clips and animated parts off the file as
+  // well, so those now have a better source than the previous index. What is left to the
+  // underlay is what no GLB states — the view angle, the kit and its members, the sheet grid,
+  // the texture and inspection rows — and, more importantly, every listing the remeasure never
+  // reaches: one that is not a GLB, and one whose file is not in this checkout at all.
+  const { facts, corrected } = await remeasureFromServedFiles(merged, marketRoot, entryNamesFromManifest(manifest));
   for (const line of corrected) process.stdout.write(`  다시 잼 ${line}
 `);
 
@@ -562,7 +684,7 @@ export function buildFacts(
   };
 }
 
-function main() {
+async function main() {
   const argv = process.argv.slice(2);
   const flag = (name: string, fallback: string) => {
     const index = argv.indexOf(`--${name}`);
@@ -593,7 +715,7 @@ function main() {
     // No previous index to carry anything from.
   }
 
-  const built = buildFacts(manifest, listings, sources, resolve(root, "public/market"), previous);
+  const built = await buildFacts(manifest, listings, sources, resolve(root, "public/market"), previous);
 
   mkdirSync(dirname(outPath), { recursive: true });
   writeFileSync(outPath, `${JSON.stringify(built, null, 2)}\n`, "utf8");

@@ -61,7 +61,7 @@ export type ListingFacts = {
   engine: {
     requires: string[];
     uses: string[];
-    colour: "texture" | "material" | "vertex";
+    colour: "texture" | "material" | "vertex" | "mixed";
     modes: number[];
     imageTypes: string[];
   } | null;
