@@ -90,14 +90,31 @@ test("the pricing surface renders pack state from the API and never invents a pr
   assert.match(pricing, /priceKrw: 9_900,\s*annualKrw: 99_000/);
   assert.match(pricing, /priceKrw: 29_000,\s*annualKrw: 290_000/);
 
-  // 크레딧 팩 3종은 D1 정의(clunk_credit_packs)와 같은 id·크레딧 수를 쓰고, price_cents 가
-  // 0(=미정)이므로 화면에는 값을 지어내지 않고 "가격 미정" + 비활성 버튼으로 둔다.
-  for (const [id, credits] of [["pack-starter", "500"], ["pack-studio", "2_000"], ["pack-foundry", "6_000"]]) {
-    assert.ok(
-      pricing.includes(`id: "${id}", name:`) && pricing.includes(`credits: ${credits}, priceKrw: null`),
-      `페이지의 팩 ${id} 가 D1 정의와 다르다`,
+  // 2026-09-04: 크레딧 팩은 요금 화면에서 사라졌다.
+  //
+  // 페이에이드(결제대행) 심사에서 현금을 크레딧으로 바꿔 두었다가 쓰는 구조가
+  // 선불충전과 같은 환금성 코드로 분류되어 가맹점 승인이 거절됐다. 팩을 파는 자리가
+  // 화면에 남아 있으면 같은 판정을 다시 받으므로, 섹션과 데이터를 통째로 지웠다.
+  // 앞으로 요금 화면이 파는 것은 구독(기간 이용권) 하나뿐이다.
+  for (const id of ["pack-starter", "pack-studio", "pack-foundry"]) {
+    assert.doesNotMatch(
+      pricing,
+      new RegExp(id),
+      `요금 화면에 크레딧 팩 ${id} 가 남아 있으면 안 된다`,
     );
   }
-  assert.match(pricing, /가격 미정/);
-  assert.match(pricing, /결제 준비 중/);
+  assert.doesNotMatch(pricing, /크레딧만 따로 충전/, "크레딧 충전 섹션이 남아 있으면 안 된다");
+  assert.doesNotMatch(pricing, /const PACKS/, "팩 데이터 정의가 남아 있으면 안 된다");
+});
+
+test("에셋 결제에서 크레딧 레일이 닫혀 있다", async () => {
+  // 크레딧으로 상품을 살 수 있는 길이 하나라도 남으면 업종 심사 결과가 같으므로,
+  // 체크아웃은 credits 결제 수단을 받아도 정산하지 않고 거절한다.
+  const checkout = await source("app/api/marketplace/checkout/route.ts");
+  assert.match(checkout, /CREDIT_RAIL_CLOSED/, "크레딧 레일 거절 상태가 있어야 한다");
+  assert.doesNotMatch(
+    checkout,
+    /return await settleWithCredits\(/,
+    "크레딧으로 상품 대금을 정산하는 호출이 남아 있으면 안 된다",
+  );
 });

@@ -133,19 +133,24 @@ export async function POST(request: Request) {
       });
     }
 
-    // Credit rail: purchases paid from the workspace credit balance instead of
-    // a card. This used to be treated as exempt from the pre-launch lock
-    // because no payment provider is involved — but new workspaces are granted
-    // 25 credits, so a visitor could sign in and complete a real purchase with
-    // an entitlement while the footer said sales had not started.
+    // The credit rail is closed.
+    //
+    // 페이에이드(결제대행) 심사에서 이 구조가 두 번 걸렸다. 현금을 크레딧이라는
+    // 재화로 바꾼 뒤 그 재화로 상품을 사는 흐름은 선불충전과 같은 환금성 코드로
+    // 분류되어 가맹점 승인이 나지 않는다. 정기결제로 크레딧을 지급하는 형태도
+    // 같은 판정을 받는다. 크레딧으로 상품을 살 수 있는 길이 남아 있는 한 심사를
+    // 다시 받아도 결과가 같으므로, 레일 자체를 닫고 카드 결제만 남긴다.
+    //
+    // 크레딧은 앞으로 상품 대금이 아니라 생성·검사 사용 횟수로만 남는다.
     if (payload.paymentMethod === "credits") {
-      if (!areSalesOpen()) return Response.json(SALES_LOCKED_BODY, { status: 503 });
-      return await settleWithCredits(db, {
-        listing,
-        buyerUserId: user.id,
-        workspaceId,
-        idempotencyKey,
-      });
+      return privateJson({
+        ok: false,
+        schema: "clunk.marketplace-checkout.v1",
+        status: "CREDIT_RAIL_CLOSED",
+        ownershipGranted: false,
+        creditsCharged: false,
+        error: "크레딧으로는 에셋을 살 수 없습니다. 카드 결제만 지원합니다.",
+      }, { status: 400 });
     }
 
     const billingEnvironment = getBillingEnvironment(getRuntimeEnvironment());

@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "./NativeLink";
 import { BrandLockup } from "./BrandMark";
-import { CoinHud } from "./gacha/CoinHud";
 import { Icon } from "./Icon";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -131,8 +130,6 @@ export function SiteNav({ active }: { active?: ShellSection }) {
           </div>
 
           <div className="sitenav-actions">
-            {/* 크레딧 지갑. 첫 화면의 무대가 아니라 내비에 산다 — 어느 화면에서나 같은 자리다. */}
-            <CoinHud authenticated={authenticated} joinHref={signupHref} />
             <ThemeToggle />
             {session ? (
               <>

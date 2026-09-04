@@ -118,21 +118,6 @@ const PLANS: Plan[] = [
   },
 ];
 
-type Pack = { id: string; name: string; credits: number; priceKrw: number | null; note: string };
-
-/**
- * 크레딧 팩. 구독과 완전히 다른 물건이라 섹션을 나눕니다 — 한 번 사면 끝, 매달 나가지 않음.
- * 세 팩은 D1 에 이미 정의돼 있습니다(app/api/_lib/clunk.ts, clunk_credit_packs):
- * pack-starter 500 / pack-studio 2000 / pack-foundry 6000, price_cents 0, status DRAFT.
- * 값이 0 이라는 것은 "공짜"가 아니라 "아직 정해지지 않았다"는 뜻이므로 null 로 옮겨 적고
- * 화면에는 가격 미정으로 씁니다. 운영자가 값을 정하면 여기 숫자만 채우면 됩니다.
- */
-const PACKS: Pack[] = [
-  { id: "pack-starter", name: "Starter", credits: 500, priceKrw: null, note: "가볍게 한 번 채울 때" },
-  { id: "pack-studio", name: "Studio", credits: 2_000, priceKrw: null, note: "한 프로젝트를 끝까지" },
-  { id: "pack-foundry", name: "Foundry", credits: 6_000, priceKrw: null, note: "팀이 한 번에 채울 때" },
-];
-
 /** 크레딧이 오가는 모든 경우. 숫자는 위 상수와 원장 코드에서만 옵니다. */
 const USAGE = [
   { action: "가입", amount: `+${SIGNUP_GRANT_CREDITS}`, positive: true, detail: "계정을 만든 그 자리에서 한 번 들어옵니다." },
@@ -300,35 +285,6 @@ export default function PricingPage() {
                   );
                 })}
               </div>
-            </div>
-          </section>
-
-          {/* ------------------------------------------------------------ 크레딧 충전 */}
-          <section className={styles.section} data-snap-section="pricing-packs" aria-labelledby="packs-title">
-            <div className="cv5-frame">
-              <div className={styles.sectionHead}>
-                <h2 id="packs-title">크레딧만 따로 충전</h2>
-                <p>구독과는 별개입니다. 한 번 채워 두고 필요할 때 쓰며, 매달 나가는 돈이 없습니다.</p>
-              </div>
-              <div className={styles.packGrid}>
-                {PACKS.map((pack) => (
-                  <article className={styles.pack} key={pack.id} aria-labelledby={`pack-${pack.id}`}>
-                    <h3 id={`pack-${pack.id}`} className={styles.packName}>{pack.name}</h3>
-                    <p className={styles.packCredits}>
-                      <b>{pack.credits.toLocaleString("ko-KR")}</b> 크레딧
-                    </p>
-                    <PriceSlot priceKrw={pack.priceKrw} period="1회" />
-                    <p className={styles.packNote}>{pack.note}</p>
-                    {/* 결제가 붙으면 이 버튼이 결제 화면으로 이어질 자리입니다. */}
-                    <button type="button" className={styles.planBtn} disabled aria-disabled="true">
-                      준비 중
-                    </button>
-                  </article>
-                ))}
-              </div>
-              <p className={styles.packFoot}>
-                세 팩은 이미 정의돼 있고 값만 정해지지 않았습니다. 값이 정해지면 이 자리에 그대로 들어옵니다.
-              </p>
             </div>
           </section>
 
