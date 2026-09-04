@@ -67,7 +67,29 @@
     }
   ],
   "lineDirection": {
-    "why": "the conveyor ran through the tank wall and the belt delivered nowhere; the conveyor and the hopper it feeds moved clear together, and the belt now empties into a side inlet",
+    "why": "the conveyor ran through the tank wall and the belt delivered nowhere; the conveyor moved clear, the belt now empties into a side inlet, and the hopper moved to the tail it should have been feeding",
+    "hopper": {
+      "wasOver": "the head of the belt, 34 mm clear, unsupported",
+      "nowOver": "the tail of the belt",
+      "mouthMm": [
+        820.2,
+        820.2
+      ],
+      "mouthAboveBeltMm": 60,
+      "clearedTankByMm": 183.6,
+      "mouthStillOverBelt": true,
+      "skirt": {
+        "walls": 4,
+        "gapToBeltMm": 25,
+        "why": "the belt rises 550 mm across the mouth, so a flat rim cannot clear it at one height"
+      },
+      "legs": [
+        "hopperLegLF",
+        "hopperLegLB",
+        "hopperLegRF",
+        "hopperLegRB"
+      ]
+    },
     "conveyorInsideTank": {
       "verticesBefore": 848,
       "deepestMm": 293.4,
@@ -100,11 +122,16 @@
         "tankLid",
         "tankSideInlet",
         "hopperBody",
+        "hopperSkirt",
+        "hopperLegLF",
+        "hopperLegLB",
+        "hopperLegRF",
+        "hopperLegRB",
         "pipeTopRise",
         "pipeTopReturn",
         "pipeTopDrop"
       ],
-      "triangles": 1416
+      "triangles": 1472
     },
     {
       "mesh": "body_metal",
@@ -323,7 +350,7 @@
   "prunedEmptyNodes": 19,
   "after": {
     "meshes": 21,
-    "drawnTriangles": 48804,
+    "drawnTriangles": 48860,
     "groundMinYmm": 0
   }
 }

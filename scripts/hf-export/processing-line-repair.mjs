@@ -232,8 +232,10 @@ report.instruments = [
      reads as entering rather than touching; the flange is what it enters. */
   const belt = node(scene, 'conveyorBelt');
   const beltBox = worldBox(belt);
+  /** The tank wall's x at a given z, on the conveyor's side of the axis. */
+  const wallXOf = (a, r, z) => a.x - Math.sqrt(Math.max(0, r * r - (z - a.z) ** 2));
   const inletZ = (beltBox.min.z + axis.z) / 2;
-  const wallX = axis.x - Math.sqrt(Math.max(0, radius * radius - (inletZ - axis.z) ** 2));
+  const wallX = wallXOf(axis, radius, inletZ);
   const chuteY = beltBox.max.y - 0.080;
   const chuteFrom = beltBox.max.x;
   const chuteLength = (wallX + 0.090) - chuteFrom;
@@ -247,8 +249,139 @@ report.instruments = [
   inlet.rotation.z = Math.PI / 2;
   scene.updateMatrixWorld(true);
 
+  /* d. THE HOPPER FEEDS THE TAIL OF THE BELT.
+   *
+   * It was a 45-degree square funnel — mouth 820 mm, rim 2.44 m, both horizontal —
+   * hanging 34 mm over the belt's HEAD with nothing under it. Whatever it tipped out
+   * landed where the belt ends and was carried back down. It moves to the tail, where
+   * a feed hopper belongs.
+   *
+   * A horizontal mouth over a 33.9-degree belt cannot clear it at a constant gap: the
+   * belt rises 550 mm across the mouth's own 820 mm. That is what a skirt is for. The
+   * mouth sits 60 mm above the belt's HIGHEST point under it, and four walls drop from
+   * the mouth's outline to 25 mm above the belt — each wall's bottom edge computed from
+   * the belt's height at that corner's own z, so the skirt follows the incline exactly. */
+  const beltAt = (z) => beltBox.min.y
+    + ((beltBox.max.z - z) / (beltBox.max.z - beltBox.min.z)) * (beltBox.max.y - beltBox.min.y);
+  const hopperBody = node(scene, 'hopperBody');
+  const mouthCorners = () => {
+    const pos = hopperBody.geometry.getAttribute('position');
+    const all = [];
+    const v = new THREE.Vector3();
+    for (let i = 0; i < pos.count; i += 1) all.push(v.fromBufferAttribute(pos, i).applyMatrix4(hopperBody.matrixWorld).clone());
+    const floor = Math.min(...all.map((q) => q.y));
+    const low = all.filter((q) => q.y < floor + 0.02);
+    const unique = [];
+    for (const q of low) if (!unique.some((c) => c.distanceTo(q) < 0.02)) unique.push(q.clone());
+    const cx = unique.reduce((t, q) => t + q.x, 0) / unique.length;
+    const cz = unique.reduce((t, q) => t + q.z, 0) / unique.length;
+    /* The face is fan-triangulated, so its centre is a vertex too. A wall built from
+       the centre would be a flap hanging through the middle of the skirt. */
+    const reach = Math.max(...unique.map((q) => Math.hypot(q.x - cx, q.z - cz)));
+    const corners = unique.filter((q) => Math.hypot(q.x - cx, q.z - cz) > reach * 0.4);
+    corners.sort((a, b) => Math.atan2(a.z - cz, a.x - cx) - Math.atan2(b.z - cz, b.x - cx));
+    return corners;
+  };
+  const before4 = mouthCorners();
+  const mouth0 = new THREE.Box3(); for (const q of before4) mouth0.expandByPoint(q);
+  const halfZ = (mouth0.max.z - mouth0.min.z) / 2;
+  const tailZ = beltBox.max.z - halfZ - 0.150;          // clear of the tail roller
+  const beltMidX = (beltBox.min.x + beltBox.max.x) / 2;
+  const MOUTH_CLEAR = 0.060;
+  const wantY = beltAt(tailZ - halfZ) + MOUTH_CLEAR;    // the belt's highest point under the mouth
+  hopper.position.x += beltMidX - (mouth0.min.x + mouth0.max.x) / 2;
+  hopper.position.z += tailZ - (mouth0.min.z + mouth0.max.z) / 2;
+  hopper.position.y += wantY - mouth0.min.y;
+  scene.updateMatrixWorld(true);
+
+  /* Lowering the funnel brings its wide top grate down to the tank's mid-height, and
+     the grate overhangs 2.4 m — it reached 134 mm inside the wall. Move the whole
+     hopper further from the tank until nothing of it is inside, then check the mouth
+     is still over the belt it feeds; a hopper that clears the tank by leaving the belt
+     has traded one defect for another. */
+  const hopperInside = () => {
+    let deepest = 0;
+    const v2 = new THREE.Vector3();
+    const im2 = new THREE.Matrix4();
+    for (const mesh of meshes(hopper)) {
+      const pos = mesh.geometry.getAttribute('position');
+      const copies = mesh.isInstancedMesh ? mesh.count : 1;
+      for (let c = 0; c < copies; c += 1) {
+        const w = mesh.isInstancedMesh
+          ? new THREE.Matrix4().multiplyMatrices(mesh.matrixWorld, mesh.getMatrixAt(c, im2) ?? im2)
+          : mesh.matrixWorld;
+        for (let i = 0; i < pos.count; i += 1) {
+          v2.fromBufferAttribute(pos, i).applyMatrix4(w);
+          if (v2.y < tankBox.min.y || v2.y > tankBox.max.y) continue;
+          const d = Math.hypot(v2.x - axis.x, v2.z - axis.z);
+          if (d < radius) deepest = Math.max(deepest, radius - d);
+        }
+      }
+    }
+    return deepest;
+  };
+  const grateInside = hopperInside();
+  if (grateInside > 0) {
+    hopper.position.x -= grateInside + CLEARANCE;
+    scene.updateMatrixWorld(true);
+  }
+  const seated = new THREE.Box3();
+  for (const q of mouthCorners()) seated.expandByPoint(q);
+  const onBelt = seated.min.x >= beltBox.min.x && seated.max.x <= beltBox.max.x;
+  if (!onBelt) throw new Error('clearing the tank took the hopper mouth off the belt; the two constraints do not both fit');
+
+  const ring = mouthCorners();
+  const SKIRT_GAP = 0.025;
+  const skirtColour = colourOf(hopperBody).clone().multiplyScalar(0.86);
+  const skirt = new THREE.BufferGeometry();
+  const verts = [];
+  const index = [];
+  for (let i = 0; i < ring.length; i += 1) {
+    const a = ring[i];
+    const b = ring[(i + 1) % ring.length];
+    const base = verts.length / 3;
+    verts.push(a.x, a.y, a.z, b.x, b.y, b.z,
+      b.x, beltAt(b.z) + SKIRT_GAP, b.z, a.x, beltAt(a.z) + SKIRT_GAP, a.z);
+    index.push(base, base + 1, base + 2, base, base + 2, base + 3);
+  }
+  skirt.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+  skirt.setIndex(index);
+  skirt.computeVertexNormals();
+  const skirtColours = new Float32Array((verts.length / 3) * 3);
+  for (let i = 0; i < verts.length / 3; i += 1) {
+    skirtColours[i * 3] = skirtColour.r; skirtColours[i * 3 + 1] = skirtColour.g; skirtColours[i * 3 + 2] = skirtColour.b;
+  }
+  skirt.setAttribute('color', new THREE.BufferAttribute(skirtColours, 3));
+  const skirtMesh = addMesh(hopper, skirt, matOf(hopperBody), 'hopperSkirt');
+  /* The geometry was built in world space; carry it into the parent's frame. */
+  skirtMesh.applyMatrix4(new THREE.Matrix4().copy(hopper.matrixWorld).invert());
+
+  /* Legs, outside the belt on both sides and clear of the tank, up into the funnel's
+     flank where it is wide enough to meet them. */
+  const legColour = colourOf(hopperBody).clone().multiplyScalar(0.70);
+  const legTop = wantY + 0.50;
+  const legXs = [beltBox.min.x - 0.140, Math.min(beltBox.max.x + 0.140, wallXOf(axis, radius, tailZ) - 0.120)];
+  const legs = [];
+  for (const [side, x] of [['L', legXs[0]], ['R', legXs[1]]]) {
+    for (const [end, z] of [['F', tailZ + 0.470], ['B', tailZ - 0.470]]) {
+      const leg = addMesh(hopper, boxGeo(0.080, legTop, 0.080, legColour), matOf(hopperBody), `hopperLeg${side}${end}`);
+      hopper.worldToLocal(leg.position.set(x, legTop / 2, z));
+      legs.push(`hopperLeg${side}${end}`);
+    }
+  }
+
   report.lineDirection = {
-    why: 'the conveyor ran through the tank wall and the belt delivered nowhere; the conveyor and the hopper it feeds moved clear together, and the belt now empties into a side inlet',
+    why: 'the conveyor ran through the tank wall and the belt delivered nowhere; the conveyor moved clear, the belt now empties into a side inlet, and the hopper moved to the tail it should have been feeding',
+    hopper: {
+      wasOver: 'the head of the belt, 34 mm clear, unsupported',
+      nowOver: 'the tail of the belt',
+      mouthMm: [mm(mouth0.max.x - mouth0.min.x), mm(mouth0.max.z - mouth0.min.z)],
+      mouthAboveBeltMm: mm(MOUTH_CLEAR),
+      clearedTankByMm: mm(grateInside > 0 ? grateInside + CLEARANCE : 0),
+      mouthStillOverBelt: onBelt,
+      skirt: { walls: ring.length, gapToBeltMm: mm(SKIRT_GAP), why: 'the belt rises 550 mm across the mouth, so a flat rim cannot clear it at one height' },
+      legs,
+    },
     conveyorInsideTank: { verticesBefore: before.count, deepestMm: mm(before.deepest), verticesAfter: after.count },
     movedSidewaysMm: mm(shift),
     delivery: { chute: 'conveyorDeliveryChute', inlet: 'tankSideInlet', lengthMm: mm(chuteLength), heightMm: mm(chuteY) },

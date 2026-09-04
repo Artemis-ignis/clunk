@@ -1,6 +1,6 @@
 {
   "schema": "clunk.listing-facts.v1",
-  "generatedAt": "2026-09-04T09:26:11.849Z",
+  "generatedAt": "2026-09-04T09:38:58.142Z",
   "sources": [
     "outputs\\market-launch\\wave1\\upload-manifest.json",
     "tmp\\listings-snapshot.json",
@@ -967,14 +967,14 @@
       }
     },
     "hf-processing-line": {
-      "triangles": 48804,
+      "triangles": 48860,
       "materials": 8,
       "boundsMetres": [
         7.3753,
         5.2749,
         4.2804
       ],
-      "byteLength": 1193764,
+      "byteLength": 1198036,
       "format": "GLB",
       "animatedParts": [
         "mixerPivot",
