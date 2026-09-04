@@ -58,7 +58,71 @@ export type ListingFact = {
   viewYawDegrees: number | null;
   /** What the inspector found, so the evidence card can say it instead of the description. */
   inspection: { webScore: number; mobileScore: number; hardBlockers: number; note: string | null } | null;
+  /** What the file asks of whatever opens it. Null for a listing whose product is not a model. */
+  engine: EngineFit | null;
 };
+
+/**
+ * What a 3D file needs from the program that opens it.
+ *
+ * Read straight out of the glTF header, so it describes the file on sale rather than what
+ * anybody remembers about it. `requires` is glTF's own `extensionsRequired`: a reader that
+ * does not know one of those names is not allowed to open the file at all, which is the
+ * difference between "looks a bit different" and "will not import". `uses` is the rest of
+ * `extensionsUsed` — a reader that skips those still opens the file and falls back to plain
+ * material.
+ *
+ * `colour` says where the colour actually lives, because that decides whether a plain
+ * material shows the model in colour or in white:
+ *   texture  — a picture the material points at. Every reader shows it.
+ *   material — flat colours on the materials themselves. Every reader shows it.
+ *   vertex   — colour stored per corner with no picture. A shader that does not read corner
+ *              colour draws the model white, and most engines' default one does not.
+ */
+export type EngineFit = {
+  requires: string[];
+  uses: string[];
+  colour: "texture" | "material" | "vertex";
+  /** glTF primitive modes present. 4 is triangles; anything else is unusual and worth saying. */
+  modes: number[];
+  /** Image types the file carries, so a reader needing an extra decoder is visible. */
+  imageTypes: string[];
+};
+
+/** Reads the JSON chunk of a .glb. Everything above comes out of it. */
+export function measureEngineFit(bytes: Buffer): EngineFit | null {
+  if (bytes.byteLength < 20 || bytes.readUInt32LE(0) !== 0x46546c67) return null; // "glTF"
+  let json: Record<string, unknown>;
+  try {
+    json = JSON.parse(bytes.subarray(20, 20 + bytes.readUInt32LE(12)).toString("utf8")) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+  const required = (json.extensionsRequired as string[] | undefined) ?? [];
+  const used = (json.extensionsUsed as string[] | undefined) ?? [];
+  const meshes = (json.meshes as Array<{ primitives?: Array<{ mode?: number; attributes?: Record<string, number> }> }> | undefined) ?? [];
+  const materials = (json.materials as Array<Record<string, unknown>> | undefined) ?? [];
+  const images = (json.images as Array<{ mimeType?: string }> | undefined) ?? [];
+
+  const modes = new Set<number>();
+  let hasVertexColour = false;
+  for (const mesh of meshes)
+    for (const prim of mesh.primitives ?? []) {
+      modes.add(prim.mode ?? 4);
+      if (prim.attributes?.COLOR_0 !== undefined) hasVertexColour = true;
+    }
+  const hasBaseColourTexture = materials.some(
+    (m) => (m.pbrMetallicRoughness as { baseColorTexture?: unknown } | undefined)?.baseColorTexture !== undefined,
+  );
+
+  return {
+    requires: [...required].sort(),
+    uses: used.filter((name) => !required.includes(name)).sort(),
+    colour: hasBaseColourTexture ? "texture" : hasVertexColour ? "vertex" : "material",
+    modes: [...modes].sort((a, b) => a - b),
+    imageTypes: [...new Set(images.map((image) => image.mimeType ?? "").filter(Boolean))].sort(),
+  };
+}
 
 export type ListingFactsFile = {
   schema: "clunk.listing-facts.v1";
@@ -224,6 +288,7 @@ export function factsFromManifest(manifest: ManifestFile): Record<string, Listin
       texture: typeof measured.resolution === "string"
         ? { resolution: String(measured.resolution).replace("x", "×"), seamless: (measured.seam as { verdict?: string } | undefined)?.verdict === "SEAMLESS" }
         : null,
+      engine: null, // 배달 파일에서 다시 잰다
       inspection: scores?.web
         ? {
             webScore: scores.web.score,
@@ -264,6 +329,7 @@ export function factsFromListings(
       viewYawDegrees: null,
       sheet,
       texture: null,
+      engine: null, // 배달 파일에서 다시 잰다
       inspection: null,
     };
   }
@@ -308,14 +374,19 @@ function remeasureFromServedFiles(
     const triangles = numberOrNull(report?.metrics?.triangleCount);
     const materials = numberOrNull(report?.metrics?.materialCount);
     if (triangles === null) continue; // 형상을 못 읽었으면 종이를 그대로 둔다
+    const engine = measureEngineFit(bytes);
 
     const changed =
-      fact.triangles !== triangles || fact.materials !== materials || fact.byteLength !== bytes.byteLength;
+      fact.triangles !== triangles ||
+      fact.materials !== materials ||
+      fact.byteLength !== bytes.byteLength ||
+      JSON.stringify(fact.engine ?? null) !== JSON.stringify(engine);
     if (!changed) continue;
     corrected.push(
-      `${slug}: 폴리곤 ${fact.triangles ?? "-"}→${triangles}, 재질 ${fact.materials ?? "-"}→${materials}, 용량 ${fact.byteLength ?? "-"}→${bytes.byteLength}`,
+      `${slug}: 폴리곤 ${fact.triangles ?? "-"}→${triangles}, 재질 ${fact.materials ?? "-"}→${materials}, 용량 ${fact.byteLength ?? "-"}→${bytes.byteLength}` +
+        (engine ? `, 요구 확장 ${engine.requires.length}개 · 색 ${engine.colour}` : ""),
     );
-    facts[slug] = { ...fact, triangles, materials, byteLength: bytes.byteLength };
+    facts[slug] = { ...fact, triangles, materials, byteLength: bytes.byteLength, engine };
   }
   return { facts, corrected };
 }

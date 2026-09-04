@@ -29,7 +29,10 @@ test("Cloudflare worker applies the deployment security header contract", async 
   // 2026-09-04: connect-src 가 'https:' 였다. 스크립트가 한 번 주입되면 아무 https
   // 주소로나 데이터를 실어 보낼 수 있다는 뜻이라, 브라우저가 실제로 붙는 곳으로 좁혔다.
   assert.doesNotMatch(worker, /connect-src 'self' https:;/, "connect-src 가 다시 모든 https 를 엽니다");
-  assert.match(worker, /connect-src 'self' https:\/\/cloudflareinsights\.com/);
+  assert.match(worker, /connect-src 'self' blob: https:\/\/cloudflareinsights\.com/);
+  // blob: 이 빠지면 3D 뷰어가 GLB 안의 텍스처를 못 읽어 모델이 흰색으로 그려진다.
+  // 마켓의 3D 상품은 전부 색을 그림으로 들고 있으므로 이건 상품이 안 보이는 것과 같다.
+  assert.match(worker, /connect-src [^;]*blob:/, "connect-src 에서 blob: 이 빠지면 3D 뷰어의 텍스처가 막힙니다");
 
   // 강제하는 판과 재기만 하는 판이 script-src 한 줄만 다른지. 둘이 따로 자라면
   // report-only 로 관찰한 결과가 강제할 판을 대변하지 못한다.

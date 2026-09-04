@@ -14,6 +14,7 @@ import {
   reconcileMeasured,
   type ListingFacts,
 } from "./listing-facts-rows";
+import { engineRows, engineNotes } from "./engine-fit-rows";
 import styles from "../marketplace/marketplace.module.css";
 // 등급(S/A/B/C)은 마켓의 단일 규칙이다(catalog-facts.GRADE_RULE). 값이 아니라 크기와
 // 동작을 보고 매기므로 판매와 무관하고, 무엇을 받을 수 있는지는 등급이 아니라
@@ -637,6 +638,8 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
   const name = displayTitle(listing.slug, listing.title);
   const pictureSpec = describePicture(listing);
   const rows = listing.facts ? factRows(listing.facts) : [];
+  const engines = engineRows(listing.facts?.engine);
+  const engineCaveats = engineNotes(listing.facts?.engine);
   const kit = listing.facts ? kitLine(listing.facts) : null;
   const reconciled = reconcileMeasured(
     listing.facts,
@@ -717,6 +720,28 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
             <ul className={styles.specList} aria-label="이 파일의 사양">
               {pictureSpec.map((item) => <li key={item.head}><b>{item.head}</b> · {item.tail}</li>)}
             </ul>
+          ) : null}
+          {/* 어디서 열리는지. 사는 사람이 가장 먼저 알고 싶어 하는 것이고, 판정의 근거는
+              전부 파일 안에 있다 — glTF 파일은 자기가 필요로 하는 확장을 스스로 적어
+              두므로, 그 목록이 비어 있으면 glTF 를 읽는 프로그램이면 무엇이든 연다.
+              엔진마다 다른 것은 무엇으로 여느냐뿐이라 임포터 이름을 함께 적는다. */}
+          {engines.length ? (
+            <div className={styles.engineFit}>
+              <p className={styles.engineHead}>이 파일이 열리는 곳</p>
+              <ul className={styles.engineList} aria-label="이 파일을 열 수 있는 엔진">
+                {engines.map((row) => (
+                  <li key={row.id} data-opens={row.opens ? "yes" : "check"}>
+                    <Icon name={row.opens ? "check" : "info"} size={14} />
+                    <b>{row.engine}</b>
+                    <small>{row.importer}</small>
+                    {row.note ? <em>{row.note}</em> : null}
+                  </li>
+                ))}
+              </ul>
+              {engineCaveats.map((note) => (
+                <p key={note} className={styles.engineNote}>{note}</p>
+              ))}
+            </div>
           ) : null}
           {/* Which set this belongs to, and how many pieces share its palette and its scale.
               A buyer furnishing a scene is choosing a family, not a file. */}

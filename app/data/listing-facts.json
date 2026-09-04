@@ -1,10 +1,10 @@
 {
   "schema": "clunk.listing-facts.v1",
-  "generatedAt": "2026-09-04T06:37:03.361Z",
+  "generatedAt": "2026-09-04T07:41:59.379Z",
   "sources": [
     "outputs\\market-launch\\wave1\\upload-manifest.json",
     "tmp\\listings-snapshot.json",
-    "배달 파일에서 다시 잰 항목 10건",
+    "배달 파일에서 다시 잰 항목 20건",
     "이전 판에서 유지한 항목 7건"
   ],
   "facts": {
@@ -22,6 +22,21 @@
       "viewYawDegrees": null,
       "sheet": null,
       "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [
+          "KHR_materials_clearcoat",
+          "KHR_materials_emissive_strength",
+          "KHR_materials_ior",
+          "KHR_materials_transmission",
+          "KHR_materials_volume"
+        ],
+        "colour": "vertex",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
       "inspection": null
     },
     "cozy-crate-closed": {
@@ -32,7 +47,7 @@
         0.434,
         0.434
       ],
-      "byteLength": 79472,
+      "byteLength": 97800,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -42,6 +57,17 @@
       "viewYawDegrees": 40.3,
       "sheet": null,
       "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "texture",
+        "modes": [
+          4
+        ],
+        "imageTypes": [
+          "image/png"
+        ]
+      },
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -68,6 +94,7 @@
         "cuts": null
       },
       "texture": null,
+      "engine": null,
       "inspection": null
     },
     "cozy-crate-open": {
@@ -78,7 +105,7 @@
         0.41,
         0.434
       ],
-      "byteLength": 58772,
+      "byteLength": 72552,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -88,6 +115,17 @@
       "viewYawDegrees": 40.3,
       "sheet": null,
       "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "texture",
+        "modes": [
+          4
+        ],
+        "imageTypes": [
+          "image/png"
+        ]
+      },
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -114,6 +152,7 @@
         "cuts": null
       },
       "texture": null,
+      "engine": null,
       "inspection": null
     },
     "cozy-crate-produce": {
@@ -124,7 +163,7 @@
         0.5308,
         0.434
       ],
-      "byteLength": 99156,
+      "byteLength": 122528,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -134,6 +173,17 @@
       "viewYawDegrees": 40.3,
       "sheet": null,
       "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "texture",
+        "modes": [
+          4
+        ],
+        "imageTypes": [
+          "image/png"
+        ]
+      },
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -160,6 +210,7 @@
         "cuts": null
       },
       "texture": null,
+      "engine": null,
       "inspection": null
     },
     "cozy-farm-set-vol1": {
@@ -176,6 +227,7 @@
       "viewYawDegrees": null,
       "sheet": null,
       "texture": null,
+      "engine": null,
       "inspection": null
     },
     "cozy-farm-set-vol1-sprites": {
@@ -222,6 +274,15 @@
       "viewYawDegrees": 40.3,
       "sheet": null,
       "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -248,6 +309,7 @@
         "cuts": null
       },
       "texture": null,
+      "engine": null,
       "inspection": null
     },
     "cozy-fence-gate-swing-sprites": {
@@ -269,6 +331,7 @@
         "cuts": 64
       },
       "texture": null,
+      "engine": null,
       "inspection": null
     },
     "cozy-greenhouse": {
@@ -279,7 +342,7 @@
         4.24,
         6.5112
       ],
-      "byteLength": 623728,
+      "byteLength": 762688,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -289,6 +352,17 @@
       "viewYawDegrees": 40.3,
       "sheet": null,
       "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "texture",
+        "modes": [
+          4
+        ],
+        "imageTypes": [
+          "image/png"
+        ]
+      },
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -325,7 +399,7 @@
         1.4782,
         1.6796
       ],
-      "byteLength": 145928,
+      "byteLength": 180324,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -335,6 +409,17 @@
       "viewYawDegrees": 40.3,
       "sheet": null,
       "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "texture",
+        "modes": [
+          4
+        ],
+        "imageTypes": [
+          "image/png"
+        ]
+      },
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -371,7 +456,7 @@
         1.4706,
         1.5773
       ],
-      "byteLength": 155440,
+      "byteLength": 192068,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -381,6 +466,17 @@
       "viewYawDegrees": 40.3,
       "sheet": null,
       "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "texture",
+        "modes": [
+          4
+        ],
+        "imageTypes": [
+          "image/png"
+        ]
+      },
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -427,6 +523,15 @@
       "viewYawDegrees": 40.3,
       "sheet": null,
       "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -453,6 +558,7 @@
         "cuts": null
       },
       "texture": null,
+      "engine": null,
       "inspection": null
     },
     "cozy-storage-shed": {
@@ -476,6 +582,15 @@
       "viewYawDegrees": 40.3,
       "sheet": null,
       "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -549,6 +664,15 @@
       "viewYawDegrees": 40.3,
       "sheet": null,
       "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -591,6 +715,7 @@
       "viewYawDegrees": null,
       "sheet": null,
       "texture": null,
+      "engine": null,
       "inspection": null
     },
     "grove-tree-pack-vol1-sprites": {
@@ -612,6 +737,7 @@
         "cuts": null
       },
       "texture": null,
+      "engine": null,
       "inspection": null
     },
     "hf-barn": {
@@ -622,7 +748,7 @@
         6.39,
         7.8503
       ],
-      "byteLength": 260912,
+      "byteLength": 1407716,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -632,6 +758,20 @@
       "viewYawDegrees": 40.3,
       "sheet": null,
       "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [
+          "KHR_materials_emissive_strength",
+          "KHR_materials_transmission"
+        ],
+        "colour": "texture",
+        "modes": [
+          4
+        ],
+        "imageTypes": [
+          "image/png"
+        ]
+      },
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -647,7 +787,7 @@
         1.6899,
         3.35
       ],
-      "byteLength": 105244,
+      "byteLength": 513836,
       "format": "GLB",
       "animatedParts": [
         "gaugeWheelLeft",
@@ -678,6 +818,19 @@
       "viewYawDegrees": 40.3,
       "sheet": null,
       "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [
+          "KHR_materials_clearcoat"
+        ],
+        "colour": "texture",
+        "modes": [
+          4
+        ],
+        "imageTypes": [
+          "image/png"
+        ]
+      },
       "inspection": {
         "webScore": 99,
         "mobileScore": 99,
@@ -693,7 +846,7 @@
         6.2559,
         8.0883
       ],
-      "byteLength": 251768,
+      "byteLength": 1296944,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -703,6 +856,17 @@
       "viewYawDegrees": 40.3,
       "sheet": null,
       "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [
+          "KHR_materials_transmission"
+        ],
+        "colour": "vertex",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -718,7 +882,7 @@
         2.4992,
         0.8668
       ],
-      "byteLength": 245784,
+      "byteLength": 784032,
       "format": "GLB",
       "animatedParts": [
         "playerRig",
@@ -770,6 +934,15 @@
       "viewYawDegrees": 139.7,
       "sheet": null,
       "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "vertex",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
       "inspection": {
         "webScore": 97,
         "mobileScore": 97,
@@ -785,7 +958,7 @@
         5.2749,
         4.2804
       ],
-      "byteLength": 238844,
+      "byteLength": 1190476,
       "format": "GLB",
       "animatedParts": [
         "mixerPivot",
@@ -812,6 +985,22 @@
       "viewYawDegrees": 40.3,
       "sheet": null,
       "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [
+          "KHR_materials_clearcoat",
+          "KHR_materials_emissive_strength",
+          "KHR_materials_transmission",
+          "KHR_materials_volume"
+        ],
+        "colour": "texture",
+        "modes": [
+          4
+        ],
+        "imageTypes": [
+          "image/png"
+        ]
+      },
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -827,7 +1016,7 @@
         2.2592,
         3.8
       ],
-      "byteLength": 175284,
+      "byteLength": 1071472,
       "format": "GLB",
       "animatedParts": [
         "openerDisc01Left",
@@ -898,6 +1087,19 @@
       "viewYawDegrees": 40.3,
       "sheet": null,
       "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [
+          "KHR_materials_clearcoat"
+        ],
+        "colour": "texture",
+        "modes": [
+          4
+        ],
+        "imageTypes": [
+          "image/png"
+        ]
+      },
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -913,7 +1115,7 @@
         2.9143,
         3.35
       ],
-      "byteLength": 543376,
+      "byteLength": 1603204,
       "format": "GLB",
       "animatedParts": [
         "wheelFrontLeft",
@@ -957,6 +1159,22 @@
       "viewYawDegrees": 40.3,
       "sheet": null,
       "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [
+          "KHR_materials_clearcoat",
+          "KHR_materials_emissive_strength",
+          "KHR_materials_transmission",
+          "KHR_materials_volume"
+        ],
+        "colour": "texture",
+        "modes": [
+          4
+        ],
+        "imageTypes": [
+          "image/png"
+        ]
+      },
       "inspection": {
         "webScore": 99,
         "mobileScore": 99,
@@ -972,7 +1190,7 @@
         2.3255,
         1.8744
       ],
-      "byteLength": 49276,
+      "byteLength": 252220,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -982,6 +1200,17 @@
       "viewYawDegrees": 40.3,
       "sheet": null,
       "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "texture",
+        "modes": [
+          4
+        ],
+        "imageTypes": [
+          "image/png"
+        ]
+      },
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -997,7 +1226,7 @@
         5.0405,
         3.51
       ],
-      "byteLength": 51160,
+      "byteLength": 155288,
       "format": "GLB",
       "animatedParts": [
         "blades_pivot"
@@ -1014,6 +1243,15 @@
       "viewYawDegrees": 40.3,
       "sheet": null,
       "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "vertex",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -1038,6 +1276,7 @@
         "resolution": "1024×1024",
         "seamless": true
       },
+      "engine": null,
       "inspection": null
     },
     "tex-grass-meadow-v1": {
@@ -1057,6 +1296,7 @@
         "resolution": "1024×1024",
         "seamless": false
       },
+      "engine": null,
       "inspection": null
     },
     "tex-roof-tiles-v2": {
@@ -1076,6 +1316,7 @@
         "resolution": "1024×1024",
         "seamless": true
       },
+      "engine": null,
       "inspection": null
     },
     "tex-sand-dry-v1": {
@@ -1095,6 +1336,7 @@
         "resolution": "1024×1024",
         "seamless": true
       },
+      "engine": null,
       "inspection": null
     },
     "tex-soil-tilled-v2": {
@@ -1114,6 +1356,7 @@
         "resolution": "1024×1024",
         "seamless": true
       },
+      "engine": null,
       "inspection": null
     },
     "tex-stone-wall-v1": {
@@ -1133,6 +1376,7 @@
         "resolution": "1024×1024",
         "seamless": true
       },
+      "engine": null,
       "inspection": null
     },
     "tex-wood-planks-v1": {
@@ -1152,6 +1396,7 @@
         "resolution": "1024×1024",
         "seamless": false
       },
+      "engine": null,
       "inspection": null
     },
     "verified-seamless-textures-vol1": {
@@ -1168,6 +1413,7 @@
       "viewYawDegrees": null,
       "sheet": null,
       "texture": null,
+      "engine": null,
       "inspection": null
     }
   }

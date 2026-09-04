@@ -1371,6 +1371,58 @@
 }
 .specList li b { color: var(--v5-ink); font-weight: 700; }
 
+/* which engines open this file, and what they open it with */
+.engineFit {
+  margin: 18px 0 0;
+  padding: 14px 16px;
+  border: 1px solid var(--v5-line);
+  border-radius: var(--v5-r-lg);
+  background: #0f121f66;
+}
+.engineHead {
+  margin: 0 0 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--v5-ink-faint);
+}
+.engineList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 9px;
+}
+.engineList li {
+  display: grid;
+  grid-template-columns: 16px auto 1fr;
+  align-items: baseline;
+  column-gap: 8px;
+  row-gap: 2px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+.engineList li svg { grid-row: 1; align-self: center; }
+.engineList li[data-opens="yes"] svg { color: var(--v5-ok, #55d6a0); }
+.engineList li[data-opens="check"] svg { color: var(--v5-warn, #e8b155); }
+.engineList li b { color: var(--v5-ink); font-weight: 700; }
+.engineList li small { color: var(--v5-ink-faint); font-size: 0.82rem; }
+/* the qualifying clause sits under the engine it qualifies, across both text columns */
+.engineList li em {
+  grid-column: 2 / -1;
+  font-style: normal;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--v5-ink-dim);
+}
+.engineNote {
+  margin: 10px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--v5-ink-dim);
+}
+
 /* the set a product belongs to, and the browser's own reading of the file */
 .kitLine {
   margin: 10px 0 0;
