@@ -163,31 +163,35 @@ test("적힌 요구 확장이 파일이 실제로 요구하는 것과 같다", a
   );
 });
 
-test("확장을 요구하는 파일은 열린다고 표시하지 않는다", async () => {
-  const { engineRows } = await import("../app/components/engine-fit-rows.ts");
+test("확장을 요구하는 파일은 넣는 법 대신 그 사실을 말한다", async () => {
+  const { engineSteps } = await import("../app/components/engine-fit-rows.ts");
   const plain = { requires: [], uses: [], colour: "texture", modes: [4], imageTypes: ["image/png"] };
   const compressed = { ...plain, requires: ["EXT_meshopt_compression"] };
   const lines = { ...plain, modes: [1, 4] };
 
-  assert.ok(engineRows(plain).length >= 4, "엔진 줄이 나오지 않습니다");
-  assert.ok(engineRows(plain).every((row) => row.opens), "아무것도 요구하지 않는 파일이 열리지 않는다고 나옵니다");
+  assert.ok(engineSteps(plain).length >= 4, "엔진 줄이 나오지 않습니다");
+  assert.ok(engineSteps(plain).every((row) => row.opens), "아무것도 요구하지 않는 파일이 열리지 않는다고 나옵니다");
   assert.ok(
-    engineRows(compressed).every((row) => !row.opens && /meshopt/.test(row.note ?? "")),
-    "압축 확장을 요구하는 파일을 그냥 열린다고 표시합니다",
+    engineSteps(compressed).every((row) => !row.opens && /meshopt/.test(row.how)),
+    "압축 확장을 요구하는 파일에 그냥 끌어다 놓으라고 적습니다",
   );
-  assert.ok(engineRows(lines).every((row) => !row.opens), "삼각형이 아닌 도형이 든 파일을 그냥 열린다고 표시합니다");
-  assert.equal(engineRows(null).length, 0, "재지 않은 상품에 표를 만들어 냅니다");
+  assert.ok(engineSteps(lines).every((row) => !row.opens), "삼각형이 아닌 도형이 든 파일을 그냥 열린다고 표시합니다");
+  assert.equal(engineSteps(null).length, 0, "재지 않은 상품에 표를 만들어 냅니다");
 
   // Unity 만 임포터를 따로 깔아야 한다. 이 줄이 없으면 파일을 끌어다 놓고 아무 일도
   // 일어나지 않는 경험을 사는 사람이 한다.
-  const unity = engineRows(plain).find((row) => row.engine === "Unity");
-  assert.match(unity?.note ?? "", /glTFast/);
+  const unity = engineSteps(plain).find((row) => row.engine === "Unity");
+  assert.match(unity?.caution ?? "", /glTFast/);
+  // Godot·Unreal 은 준비할 것이 없다. 없는 준비를 적으면 어렵게 만든다.
+  assert.equal(engineSteps(plain).find((row) => row.id === "godot")?.caution, null);
 });
 
-test("색이 정점에만 있는 파일은 그 사실을 말한다", async () => {
-  const { engineNotes } = await import("../app/components/engine-fit-rows.ts");
+test("색이 어디에 들어 있는지를 파일대로 말한다", async () => {
+  const { engineBasis } = await import("../app/components/engine-fit-rows.ts");
   const vertex = { requires: [], uses: [], colour: "vertex", modes: [4], imageTypes: [] };
   const textured = { ...vertex, colour: "texture", imageTypes: ["image/png"] };
-  assert.match(engineNotes(vertex).join(" "), /정점/);
-  assert.equal(engineNotes(textured).length, 0, "말할 것이 없는 파일에 주의문을 답니다");
+  assert.match(engineBasis(vertex).join(" "), /정점 색을 읽는 셰이더/);
+  assert.match(engineBasis(textured).join(" "), /따로 챙길 텍스처가 없/);
+  assert.match(engineBasis(textured).join(" "), /확장을 하나도 요구하지 않습니다/);
+  assert.equal(engineBasis(null).length, 0, "재지 않은 상품에 근거를 지어냅니다");
 });
