@@ -101,3 +101,42 @@ test("파일이 압축을 쓰는지 헤더만 보고 가른다", async () => {
   // 읽을 수 없는 바이트는 "쓴다"로 본다. 없다고 잘못 보면 파일이 안 열린다.
   assert.equal(usesMeshopt(new Uint8Array(8)), false);
 });
+
+/**
+ * 뷰어의 껍데기가 사는 동안 바뀌지 않는가.
+ *
+ * 2026-09-04 첫 화면이 31,000px 짜리 검은 공백이 됐다. 뷰어가 조종 줄이 없으면 stage 를
+ * 그대로 돌려주고 있으면 감싸서 돌려주고 있었는데, 파일 안의 동작은 파일을 연 뒤에야
+ * 알 수 있으므로 그 전환이 로딩이 끝난 뒤에 일어난다. React 가 최상위 요소를 갈아 끼우면서
+ * 손으로 append 해 둔 <canvas> 가 stage 밖으로 밀려났고, 밖에서는 크기 규칙이 안 걸려
+ * canvas 가 자기 속성만큼 자리를 차지했다. ResizeObserver 가 그 자리를 다시 setSize 에
+ * 넣으면서 화면 배율만큼 배로 커졌다 — 12,575px 까지 갔다.
+ *
+ * 문구 검사(site:sweep)는 이걸 못 잡는다. 글자는 전부 제자리에 있었고 21개 화면이 모두
+ * "이상 없음" 이었다. 그래서 무너지지 않게 하는 두 가지를 여기에 못박는다.
+ */
+test("3D 뷰어의 껍데기가 로딩 뒤에 바뀌지 않는다", async () => {
+  const source = await readFile(new URL("app/components/review/EmbeddedGlbViewer.tsx", root), "utf8");
+
+  assert.doesNotMatch(
+    source,
+    /if\s*\(\s*!wantsControls\s*\)\s*return\s+stage\s*;/u,
+    "조종 줄 유무로 최상위 요소가 갈립니다. 로딩이 끝나 동작이 발견되는 순간 stage 가 다시 붙고 canvas 가 밖으로 밀려납니다",
+  );
+  assert.match(
+    source,
+    /passthrough:\s*\{\s*display:\s*"contents"\s*\}/u,
+    "조종 줄이 없을 때 껍데기를 레이아웃에서 지우는 style 이 없습니다 — 껍데기를 늘 그리려면 이것이 있어야 예전 모양이 나옵니다",
+  );
+  // 그래도 밖으로 나가면 스스로 되붙이고, 되먹임이 시작되면 그리지 않는다.
+  assert.match(
+    source,
+    /renderer\.domElement\.parentElement !== surfaceStage/u,
+    "canvas 가 stage 밖으로 나갔을 때 되붙이는 안전장치가 없습니다",
+  );
+  assert.match(
+    source,
+    /if \(height > cap\) return;/u,
+    "화면보다 훨씬 큰 높이를 그대로 그리면 되먹임이 한 번 시작될 때 멈추지 않습니다",
+  );
+});
