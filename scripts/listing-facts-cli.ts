@@ -22,6 +22,7 @@
  *   npm run asset:facts -- --listings tmp/listings-snapshot.json --out app/data/listing-facts.json
  */
 import { readFileSync, readdirSync, writeFileSync, mkdirSync } from "node:fs";
+import { inspectAsset } from "../packages/core/src/index";
 import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -269,6 +270,56 @@ export function factsFromListings(
   return facts;
 }
 
+/**
+ * 매니페스트가 아니라 **구매자가 실제로 받는 파일**에서 다시 잰다.
+ *
+ * 2026-09-04: 라이브 상품 8건의 표기 폴리곤이 파일과 달랐다. 파종기는 표기 10,880 에
+ * 실측 52,066 — 4.8배. 원인은 파이프라인이 GLB 를 다시 구웠는데 매니페스트의 `measured`
+ * 는 그대로 남은 것이다. 매니페스트는 한 번 잰 값을 적어 두는 종이라 파일이 바뀌면
+ * 조용히 거짓이 된다.
+ *
+ * 이 가게가 파는 주장이 "파일에서 직접 잰 값을 그대로 싣는다" 인 이상, 사실의 출처는
+ * 종이가 아니라 파일이어야 한다. 그래서 마지막에 한 번 더 연다. 못 읽은 파일은
+ * 손대지 않는다 — 지어내는 것보다 매니페스트 값을 남기는 편이 낫고, 그 어긋남은
+ * tests/listing-facts-truth.test.mjs 가 잡는다.
+ */
+function remeasureFromServedFiles(
+  facts: Record<string, ListingFact>,
+  marketRoot: string,
+): { facts: Record<string, ListingFact>; corrected: string[] } {
+  const corrected: string[] = [];
+  for (const [slug, fact] of Object.entries(facts)) {
+    // inspectAsset 은 번들 안의 상대 경로를 받는다. 파일 이름 하나면 충분하다.
+    let name: string | null = null;
+    try {
+      const names = readdirSync(resolve(marketRoot, slug)).filter((n) => n.toLowerCase().endsWith(".glb"));
+      if (names.length !== 1) continue; // 어느 것이 대표인지 여기서 정하지 않는다
+      name = names[0]!;
+    } catch {
+      continue; // 3D 가 아닌 상품
+    }
+    let bytes: Buffer;
+    try {
+      bytes = readFileSync(resolve(marketRoot, slug, name));
+    } catch {
+      continue;
+    }
+    const report = inspectAsset({ entry: name, files: new Map([[name, new Uint8Array(bytes)]]) });
+    const triangles = numberOrNull(report?.metrics?.triangleCount);
+    const materials = numberOrNull(report?.metrics?.materialCount);
+    if (triangles === null) continue; // 형상을 못 읽었으면 종이를 그대로 둔다
+
+    const changed =
+      fact.triangles !== triangles || fact.materials !== materials || fact.byteLength !== bytes.byteLength;
+    if (!changed) continue;
+    corrected.push(
+      `${slug}: 폴리곤 ${fact.triangles ?? "-"}→${triangles}, 재질 ${fact.materials ?? "-"}→${materials}, 용량 ${fact.byteLength ?? "-"}→${bytes.byteLength}`,
+    );
+    facts[slug] = { ...fact, triangles, materials, byteLength: bytes.byteLength };
+  }
+  return { facts, corrected };
+}
+
 export function buildFacts(
   manifest: ManifestFile,
   listings: ApiListing[],
@@ -276,11 +327,14 @@ export function buildFacts(
   marketRoot: string,
 ): ListingFactsFile {
   const fromManifest = factsFromManifest(manifest);
-  const facts = { ...fromManifest, ...factsFromListings(listings, fromManifest, marketRoot) };
+  const merged = { ...fromManifest, ...factsFromListings(listings, fromManifest, marketRoot) };
+  const { facts, corrected } = remeasureFromServedFiles(merged, marketRoot);
+  for (const line of corrected) process.stdout.write(`  다시 잼 ${line}
+`);
   return {
     schema: "clunk.listing-facts.v1",
     generatedAt: new Date().toISOString(),
-    sources,
+    sources: corrected.length ? [...sources, `배달 파일에서 다시 잰 항목 ${corrected.length}건`] : sources,
     facts: Object.fromEntries(Object.entries(facts).sort(([a], [b]) => a.localeCompare(b))),
   };
 }
