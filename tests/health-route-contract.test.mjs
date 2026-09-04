@@ -37,8 +37,15 @@ test("Cloudflare worker applies the deployment security header contract", async 
   assert.match(worker, /const REPORT_ONLY_CSP = `\$\{CSP_BASE\}; script-src 'self' 'unsafe-inline' /);
   const reportOnlyLine = worker.split(/\r?\n/u).find((line) => line.includes("const REPORT_ONLY_CSP"));
   assert.ok(reportOnlyLine, "REPORT_ONLY_CSP 선언을 찾지 못했습니다");
+  // 넓은 'unsafe-eval' 은 안 되고, WebAssembly 만 여는 'wasm-unsafe-eval' 이어야 한다.
+  // 2026-09-04 라이브 측정에서 three 의 MeshoptDecoder 가 압축 GLB 를 푸느라 WebAssembly
+  // 를 컴파일하는 것이 잡혔다 — 그냥 빼면 3D 뷰어가 조용히 죽는다.
   assert.ok(
-    !reportOnlyLine.includes("unsafe-eval"),
-    "재기만 하는 판에도 unsafe-eval 이 남으면 아무것도 재지 못합니다",
+    !reportOnlyLine.includes("'unsafe-eval'"),
+    "재기만 하는 판에 넓은 'unsafe-eval' 이 남으면 아무것도 재지 못합니다",
+  );
+  assert.ok(
+    reportOnlyLine.includes("'wasm-unsafe-eval'"),
+    "WebAssembly 를 여는 'wasm-unsafe-eval' 이 없으면 3D 뷰어가 죽습니다",
   );
 });

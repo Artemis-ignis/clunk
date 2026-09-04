@@ -43,7 +43,7 @@ export default function PrivacyPage() {
       <section aria-labelledby="privacy-officer">
         <h2 id="privacy-officer">개인정보보호책임자</h2>
         <p>
-          개인정보 보호법 제31조에 따른 개인정보보호책임자입니다. 운영자(주식회사 아르테미스)의
+          개인정보 보호법 제31조에 따른 개인정보보호책임자입니다. 운영자(아르테미스)의
           대표 박준성이 책임자를 맡으며, 열람·정정·삭제·처리정지 요구와 문의는 아래 연락처로
           받습니다.
         </p>

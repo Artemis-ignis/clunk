@@ -89,7 +89,7 @@ const CSP_BASE = "default-src 'self'; base-uri 'self'; object-src 'none'; frame-
   + " connect-src 'self' https://cloudflareinsights.com";
 
 const ENFORCED_CSP = `${CSP_BASE}; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com`;
-const REPORT_ONLY_CSP = `${CSP_BASE}; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com`;
+const REPORT_ONLY_CSP = `${CSP_BASE}; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://static.cloudflareinsights.com`;
 
 function withSecurityHeaders(response: Response): Response {
   const values: Record<string, string> = {
@@ -109,9 +109,12 @@ function withSecurityHeaders(response: Response): Response {
     // 호출은 전부 워커 안에서 일어나 connect-src 의 대상이 아닙니다. 남긴 하나는 Cloudflare
     // 웹 분석 비콘으로, 대시보드에서 켜면 그때부터 보고를 보냅니다.
     "Content-Security-Policy": ENFORCED_CSP,
-    // script-src 에서 'unsafe-eval' 을 뺀 판. 소스에는 eval 도 new Function 도 WebAssembly
-    // 도 없지만, 번들러가 런타임에 무엇을 넣는지는 실제 빌드를 돌려 봐야 압니다. 먼저
-    // 보고만 받아 위반이 0 인 것을 확인한 뒤 위쪽으로 옮깁니다.
+    // script-src 에서 'unsafe-eval' 을 뺀 판. 2026-09-04 라이브에서 보고를 받아 보니
+    // WebAssembly 컴파일 위반이 하나 잡혔습니다 — three 의 MeshoptDecoder 가 압축된
+    // GLB(EXT_meshopt_compression)를 푸는 데 씁니다(app/components/AssetPreview.tsx).
+    // 그래서 그냥 뺄 수는 없고, WebAssembly 만 허용하고 eval 과 new Function 은 계속
+    // 막는 'wasm-unsafe-eval' 로 좁힙니다. 이 값을 모르는 옛 브라우저(Safari 16.4 미만)
+    // 에서는 뷰어가 동작하지 않으므로, 보고가 0 인 것을 다시 확인한 뒤 강제로 옮깁니다.
     //
     // 'unsafe-inline' 은 여기서도 못 뺍니다. vinext 가 RSC 청크마다 인라인 스크립트를
     // 뿜어 첫 화면 한 장에 939 개가 실리고, 내용이 매번 달라 해시로 고정할 수 없습니다.

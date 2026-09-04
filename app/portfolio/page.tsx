@@ -124,7 +124,7 @@ export default function PortfolioPage() {
               기록</b>이 있습니다.
             </p>
             <p className="pf-byline">
-              박준성 · 주식회사 아르테미스(사업자등록번호 361-02-03814) · 2026-09-03 기준
+              박준성 · 아르테미스(사업자등록번호 361-02-03814) · 2026-09-03 기준
             </p>
             <div className="pf-links">
               <a className="pf-primary" href="https://clunk.games">
@@ -471,7 +471,7 @@ export default function PortfolioPage() {
               <code>tmp/copy-audit/claims.md</code>
             </span>
             <span>
-              박준성 · 주식회사 아르테미스 · <a href="https://clunk.games">clunk.games</a> ·{" "}
+              박준성 · 아르테미스 · <a href="https://clunk.games">clunk.games</a> ·{" "}
               <a href="https://github.com/Artemis-ignis/clunk">github.com/Artemis-ignis/clunk</a>
             </span>
           </footer>
