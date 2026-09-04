@@ -165,6 +165,97 @@ report.instruments = [
   { node: 'valveWheelPivot', part: 'valveWheel', motion: 'one full turn about its own axle per clip' },
 ];
 
+/* --------------------------------------------------- 5. the line has to make sense */
+/* 2026-09-04, measured on the file that was on sale:
+ *
+ *   a. THE CONVEYOR RUNS THROUGH THE TANK. `tankBody` is a cylinder of radius
+ *      1.000 m on the axis x -0.450, z -0.120, standing y 0.829..4.089.
+ *      `conveyorRailRight` puts 180 of its 335 vertices inside it, `conveyorBrace0`
+ *      162 of 332 and up to 293 mm deep, and the belt itself 84. A third of a metre
+ *      of steel passes through the wall of a sealed tank.
+ *
+ *   b. THE BELT DELIVERS NOWHERE. Its top end stopped in mid-air beside the tank,
+ *      so the hopper above it fed a belt that carried to nothing.
+ *
+ * The conveyor and the hopper it feeds move together, sideways, until the conveyor
+ * is clear of the cylinder — moving them apart would break the one relationship the
+ * model got right. Then the belt's top end is given a chute into a side inlet, so
+ * the line reads hopper -> belt -> tank. Every distance is measured off this file. */
+{
+  const tankBody = node(scene, 'tankBody');
+  const tankBox = worldBox(tankBody);
+  const axis = { x: (tankBox.min.x + tankBox.max.x) / 2, z: (tankBox.min.z + tankBox.max.z) / 2 };
+  const radius = Math.min(tankBox.max.x - tankBox.min.x, tankBox.max.z - tankBox.min.z) / 2;
+  const conveyor = node(scene, 'conveyor-module');
+  const hopper = node(scene, 'hopper-module');
+
+  /* Per vertex, not per box: a box over-measures a part that only clips a corner.
+     Instanced meshes are read through their instance matrices, or a rail whose
+     geometry sits at its own origin would look as if it were nowhere near the tank. */
+  const insideCount = (group) => {
+    let count = 0;
+    let deepest = 0;
+    const v = new THREE.Vector3();
+    const im = new THREE.Matrix4();
+    for (const mesh of meshes(group)) {
+      const pos = mesh.geometry.getAttribute('position');
+      const copies = mesh.isInstancedMesh ? mesh.count : 1;
+      for (let c = 0; c < copies; c += 1) {
+        const world = mesh.isInstancedMesh
+          ? new THREE.Matrix4().multiplyMatrices(mesh.matrixWorld, mesh.getMatrixAt(c, im) ?? im)
+          : mesh.matrixWorld;
+        for (let i = 0; i < pos.count; i += 1) {
+          v.fromBufferAttribute(pos, i).applyMatrix4(world);
+          if (v.y < tankBox.min.y || v.y > tankBox.max.y) continue;
+          const d = Math.hypot(v.x - axis.x, v.z - axis.z);
+          if (d < radius) { count += 1; deepest = Math.max(deepest, radius - d); }
+        }
+      }
+    }
+    return { count, deepest };
+  };
+
+  const before = insideCount(conveyor);
+  const CLEARANCE = 0.050;                        // 50 mm of daylight, not a shared surface
+  const shift = before.deepest > 0 ? before.deepest + CLEARANCE : 0;
+  conveyor.position.x -= shift;
+  hopper.position.x -= shift;                     // the hopper feeds this belt; it travels with it
+  /* The crates are staged under the conveyor, between its two feet. Left where they
+     were, the right foot lands inside `crateBody_1` — a fix that makes a new
+     collision is not a fix, so what stood in the conveyor's footprint travels with it. */
+  node(scene, 'shipping-crates').position.x -= shift;
+  scene.updateMatrixWorld(true);
+  const after = insideCount(conveyor);
+
+  /* b. The belt's top end empties through a side inlet at its own height. The chute
+     starts at the belt's top edge and runs to the tank wall, 90 mm into it so it
+     reads as entering rather than touching; the flange is what it enters. */
+  const belt = node(scene, 'conveyorBelt');
+  const beltBox = worldBox(belt);
+  const inletZ = (beltBox.min.z + axis.z) / 2;
+  const wallX = axis.x - Math.sqrt(Math.max(0, radius * radius - (inletZ - axis.z) ** 2));
+  const chuteY = beltBox.max.y - 0.080;
+  const chuteFrom = beltBox.max.x;
+  const chuteLength = (wallX + 0.090) - chuteFrom;
+  const tankModule = node(scene, 'tank-module');
+  const chute = addMesh(tankModule, boxGeo(chuteLength, 0.150, 0.520, colourOf(belt).clone().multiplyScalar(1.15)),
+    matOf(belt), 'conveyorDeliveryChute', [0, 0, 0]);
+  tankModule.worldToLocal(chute.position.set(chuteFrom + chuteLength / 2, chuteY, inletZ));
+  const inlet = addMesh(tankModule, cylGeo(0.190, 0.190, 0.070, 14, colourOf(tankBody).clone().multiplyScalar(0.82)),
+    matOf(tankBody), 'tankSideInlet', [0, 0, 0]);
+  tankModule.worldToLocal(inlet.position.set(wallX + 0.020, chuteY, inletZ));
+  inlet.rotation.z = Math.PI / 2;
+  scene.updateMatrixWorld(true);
+
+  report.lineDirection = {
+    why: 'the conveyor ran through the tank wall and the belt delivered nowhere; the conveyor and the hopper it feeds moved clear together, and the belt now empties into a side inlet',
+    conveyorInsideTank: { verticesBefore: before.count, deepestMm: mm(before.deepest), verticesAfter: after.count },
+    movedSidewaysMm: mm(shift),
+    delivery: { chute: 'conveyorDeliveryChute', inlet: 'tankSideInlet', lengthMm: mm(chuteLength), heightMm: mm(chuteY) },
+    stillOpen: 'the hopper sits where it was authored, above the belt it feeds; whether it should be a surge bin there or a feed bin at the tail is a design call, not a measurement',
+  };
+}
+
 /* ---------------------------------------------------------------- 6. ground contact */
 const root = node(scene, 'processing-root');
 const beforeGround = exactBox(scene).min.y;

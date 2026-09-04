@@ -1,5 +1,5 @@
 {
-  "input": "public\\market\\hf-processing-line\\processing.line.m1.glb",
+  "input": "examples\\harvest-frontier\\runtime-animated\\processing.line.fixed.m1.glb",
   "output": "examples\\harvest-frontier\\runtime-animated\\processing.line.repaired.glb",
   "before": {
     "meshes": 142,
@@ -66,6 +66,22 @@
       "motion": "one full turn about its own axle per clip"
     }
   ],
+  "lineDirection": {
+    "why": "the conveyor ran through the tank wall and the belt delivered nowhere; the conveyor and the hopper it feeds moved clear together, and the belt now empties into a side inlet",
+    "conveyorInsideTank": {
+      "verticesBefore": 848,
+      "deepestMm": 293.4,
+      "verticesAfter": 0
+    },
+    "movedSidewaysMm": 343.4,
+    "delivery": {
+      "chute": "conveyorDeliveryChute",
+      "inlet": "tankSideInlet",
+      "lengthMm": 268,
+      "heightMm": 2502.8
+    },
+    "stillOpen": "the hopper sits where it was authored, above the belt it feeds; whether it should be a surge bin there or a feed bin at the tail is a design call, not a measurement"
+  },
   "ground": {
     "beforeMm": 0,
     "afterMm": 0
@@ -82,12 +98,13 @@
         "tankShoulder",
         "tankCone",
         "tankLid",
+        "tankSideInlet",
         "hopperBody",
         "pipeTopRise",
         "pipeTopReturn",
         "pipeTopDrop"
       ],
-      "triangles": 1360
+      "triangles": 1416
     },
     {
       "mesh": "body_metal",
@@ -137,6 +154,7 @@
       "absorbed": [
         "tankHatch",
         "gaugeFace",
+        "conveyorDeliveryChute",
         "conveyorBelt",
         "controlButton2",
         "crateSlat12",
@@ -146,7 +164,7 @@
         "crateSlat12_2",
         "crateSlat42_2"
       ],
-      "triangles": 3896
+      "triangles": 3908
     },
     {
       "mesh": "body_matte",
@@ -305,7 +323,7 @@
   "prunedEmptyNodes": 19,
   "after": {
     "meshes": 21,
-    "drawnTriangles": 48736,
+    "drawnTriangles": 48804,
     "groundMinYmm": 0
   }
 }
