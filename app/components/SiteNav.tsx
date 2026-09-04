@@ -51,8 +51,6 @@ export function SiteNav({ active }: { active?: ShellSection }) {
   // (2026-08-31 review). The nav asks the same /api/me the workspace uses and
   // stays anonymous when it answers 401 — never guessing a session.
   const [session, setSession] = useState<{ displayName: string } | null>(null);
-  // 크레딧 지갑은 이름이 아니라 로그인 자체를 본다 — 표시 이름이 비어 있어도 잔액은 있다.
-  const [authenticated, setAuthenticated] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -61,7 +59,6 @@ export function SiteNav({ active }: { active?: ShellSection }) {
         if (!response.ok) return;
         const body = await response.json() as { authenticated?: boolean; displayName?: string };
         const displayName = body.displayName?.trim();
-        if (active && body.authenticated) setAuthenticated(true);
         if (active && body.authenticated && displayName) setSession({ displayName });
       })
       .catch(() => {});
