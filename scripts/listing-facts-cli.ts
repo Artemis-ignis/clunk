@@ -250,6 +250,19 @@ function sumOfPerItem(measured: Record<string, unknown> | undefined, key: string
   return found ? total : null;
 }
 
+/**
+ * 상품마다 매니페스트가 대표로 지목한 파일 이름. 묶음 상품은 대표가 첫 부품의 파일이라
+ * 상품 이름과 다르다 — 이름 규칙만으로는 찾을 수 없다.
+ */
+export function entryNamesFromManifest(manifest: ManifestFile): Map<string, string> {
+  const names = new Map<string, string>();
+  for (const product of manifest.products ?? []) {
+    const entry = product.files?.find((file) => file.role === "entry");
+    if (entry?.path) names.set(product.slug, entry.path.split("/").pop()!);
+  }
+  return names;
+}
+
 export function factsFromManifest(manifest: ManifestFile): Record<string, ListingFact> {
   const kitSizes = new Map<KitId, number>();
   for (const product of manifest.products) {
@@ -356,31 +369,45 @@ export function factsFromListings(
  * 1.2MB 인데 그 안의 나무 한 그루(198KB)를 재고 있었다. 상품 이름과 같은 이름의 파일이
  * 대표다. 그것이 없으면 GLB 가 하나뿐일 때만 그것을 쓴다.
  */
-function entryFileNameFor(slug: string, marketRoot: string): string | null {
-  let names: string[];
+function entryFileNameFor(slug: string, marketRoot: string, fromManifest?: Map<string, string>): string | null {
+  const declared = fromManifest?.get(slug);
+  let names: string[] = [];
   try {
     names = readdirSync(resolve(marketRoot, slug));
   } catch {
-    return null;
+    // 묶음 상품은 자기 폴더가 없다. 부품이 각자 자기 폴더에 있고 묶음은 그것을 건네준다.
   }
+  if (declared && names.includes(declared)) return `${slug}/${declared}`;
   const stem = (name: string) => name.replace(/\.[^.]+$/, "");
   const named = names.filter((name) => stem(name) === slug && !name.endsWith(".json"));
-  if (named.length === 1) return named[0]!;
+  if (named.length === 1) return `${slug}/${named[0]!}`;
   const glb = names.filter((name) => name.toLowerCase().endsWith(".glb"));
-  return glb.length === 1 ? glb[0]! : null;
+  if (glb.length === 1) return `${slug}/${glb[0]!}`;
+  // 묶음이 건네주는 첫 파일은 부품의 폴더에 있다. 이름으로 찾는다.
+  if (declared) {
+    for (const folder of readdirSync(marketRoot)) {
+      try {
+        if (readdirSync(resolve(marketRoot, folder)).includes(declared)) return `${folder}/${declared}`;
+      } catch {
+        // 폴더가 아닌 것
+      }
+    }
+  }
+  return null;
 }
 
 function remeasureFromServedFiles(
   facts: Record<string, ListingFact>,
   marketRoot: string,
+  entryNames?: Map<string, string>,
 ): { facts: Record<string, ListingFact>; corrected: string[] } {
   const corrected: string[] = [];
   for (const [slug, fact] of Object.entries(facts)) {
-    const name = entryFileNameFor(slug, marketRoot);
+    const name = entryFileNameFor(slug, marketRoot, entryNames);
     if (!name) continue;
     let bytes: Buffer;
     try {
-      bytes = readFileSync(resolve(marketRoot, slug, name));
+      bytes = readFileSync(resolve(marketRoot, name));
     } catch {
       continue;
     }
@@ -395,7 +422,8 @@ function remeasureFromServedFiles(
     }
 
     // inspectAsset 은 번들 안의 상대 경로를 받는다. 파일 이름 하나면 충분하다.
-    const report = inspectAsset({ entry: name, files: new Map([[name, new Uint8Array(bytes)]]) });
+    const bare = name.split("/").pop()!;
+    const report = inspectAsset({ entry: bare, files: new Map([[bare, new Uint8Array(bytes)]]) });
     const triangles = numberOrNull(report?.metrics?.triangleCount);
     const materials = numberOrNull(report?.metrics?.materialCount);
     if (triangles === null) continue; // 형상을 못 읽었으면 종이를 그대로 둔다
@@ -424,7 +452,7 @@ export function buildFacts(
 ): ListingFactsFile {
   const fromManifest = factsFromManifest(manifest);
   const merged = { ...fromManifest, ...factsFromListings(listings, fromManifest, marketRoot) };
-  const { facts, corrected } = remeasureFromServedFiles(merged, marketRoot);
+  const { facts, corrected } = remeasureFromServedFiles(merged, marketRoot, entryNamesFromManifest(manifest));
   for (const line of corrected) process.stdout.write(`  다시 잼 ${line}
 `);
   return {
