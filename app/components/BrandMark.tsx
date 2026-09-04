@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 /**
  * Single source of truth for the Clunk brand mark, v3.
  *
@@ -112,25 +114,42 @@ export function BrandMark({
 }
 
 /**
- * Brand mark plus wordmark, used by the site nav and the login top bar.
+ * 이름이 통째로 들어간 로고. 사이트 머리글과 로그인 화면 위쪽이 쓴다.
+ *
+ * 2026-09-04 마스터가 준 그림으로 갈았다. 이전에는 위의 등축 슬래브 SVG 옆에 "Clunk" 를
+ * 글자로 적었는데, 이제 이름까지 그림 한 장에 들어 있다.
+ *
+ * 그림의 배경은 빼 두었다(scripts/brand-cutout.mjs). 검은 배경이 칠해진 채로 두면 어두운
+ * 화면에서는 안 보이다가 밝은 화면과 브라우저 탭에서 로고가 든 검은 네모로 앉는다.
+ *
+ * 크기는 높이로 준다. 원본이 830×440 이라 너비는 거기서 나온다. `size` 는 예전 마크의
+ * 한 변이었고 지금은 로고의 높이다 — 부르는 쪽이 이미 그 뜻으로 쓰고 있었다.
  */
+const WORDMARK = { src: "/brand/clunk-wordmark.png", width: 830, height: 440 };
+
 export function BrandLockup({
   size = 30,
-  gradientId = "clunk-lockup",
   word = "Clunk",
-  shimmer = false,
 }: {
   size?: number;
-  gradientId?: string;
+  /** 로고를 못 읽는 사람이 듣는 이름. */
   word?: string;
+  /** 예전 SVG 마크의 인자들. 부르는 쪽을 한꺼번에 고치지 않으려고 받아만 둔다. */
+  gradientId?: string;
   shimmer?: boolean;
 }) {
+  // 예전 잠금 장치는 마크 한 변 + 옆 글자였다. 그림 하나로는 같은 무게가 나오려면
+  // 조금 더 커야 해서, 받은 값의 1.4배를 높이로 쓴다.
+  const height = Math.round(size * 1.4);
+  const width = Math.round((height * WORDMARK.width) / WORDMARK.height);
   return (
-    <>
-      <span className="brand-mark">
-        <BrandMark size={size} gradientId={gradientId} shimmer={shimmer} />
-      </span>
-      <span className="brand-word">{word}</span>
-    </>
+    <Image
+      className="brand-wordmark"
+      src={WORDMARK.src}
+      alt={word}
+      width={width}
+      height={height}
+      priority
+    />
   );
 }

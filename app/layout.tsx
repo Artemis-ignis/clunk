@@ -29,17 +29,20 @@ export const metadata: Metadata = {
     images: [`${SITE_ORIGIN}/og.png`],
   },
   icons: {
-    // ?v=4: browsers cache favicons hard; the query busts it whenever the mark changes.
+    // ?v=5: browsers cache favicons hard; the query busts it whenever the mark changes.
     // 2026-09-04: 파란 등축 슬래브(favicon.svg)를 운영자가 준 보라 C 마크로 갈았다.
     // .ico 가 없어 /favicon.ico 요청이 404 로 떨어지고 있었다 — 주소창을 직접 치는
     // 브라우저와 북마크가 그 자리를 먼저 본다.
+    // v5: 그 C 마크에 검은 배경이 칠해진 채로 들어가 있었다. 탭은 자기 색이 따로 있어서
+    // 마크가 아니라 마크가 든 검은 네모가 보였다. 배경을 빼고 한 벌을 다시 구웠다
+    // (scripts/brand-cutout.mjs).
     icon: [
-      { url: "/favicon.ico?v=4", sizes: "16x16 24x24 32x32 48x48 64x64" },
-      { url: "/icon-192.png?v=4", type: "image/png", sizes: "192x192" },
-      { url: "/icon-512.png?v=4", type: "image/png", sizes: "512x512" },
+      { url: "/favicon.ico?v=5", sizes: "16x16 24x24 32x32 48x48 64x64" },
+      { url: "/icon-192.png?v=5", type: "image/png", sizes: "192x192" },
+      { url: "/icon-512.png?v=5", type: "image/png", sizes: "512x512" },
     ],
-    shortcut: "/favicon.ico?v=4",
-    apple: "/apple-touch-icon.png?v=4",
+    shortcut: "/favicon.ico?v=5",
+    apple: "/apple-touch-icon.png?v=5",
   },
   manifest: "/manifest.webmanifest",
 };
