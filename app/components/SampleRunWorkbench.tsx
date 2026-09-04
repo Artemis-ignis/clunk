@@ -44,7 +44,7 @@ export function SampleRunWorkbench({ compact = false }: { compact?: boolean }) {
     <section className={`sample-workbench${compact ? " sample-workbench-compact" : ""}`} aria-label="예시 파일 검사 흐름">
       <div className="sample-workbench-topbar">
         <div><span className="sample-live-dot" /> 예시 검사 한 번 돌려보기</div>
-        <span>미리 준비된 예시 · 크레딧 안 듦</span>
+        <span>미리 준비된 예시 · 실행 횟수 안 듦</span>
       </div>
       <div className="sample-workbench-body">
         <div className="sample-workbench-preview">

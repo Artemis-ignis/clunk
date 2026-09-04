@@ -576,7 +576,7 @@ export function AssetCreationWorkbench({
       setMessage(
         payload.promptApplied === false && payload.promptNote
           ? payload.promptNote
-          : `파일 ${payload.artifacts.length}개를 만들었습니다.${typeof payload.credits === "number" ? ` 남은 크레딧 ${payload.credits}개.` : ""}`,
+          : `파일 ${payload.artifacts.length}개를 만들었습니다.${typeof payload.credits === "number" ? ` 남은 실행 횟수 ${payload.credits}회.` : ""}`,
       );
       await refreshLive();
       return {
@@ -788,7 +788,7 @@ export function AssetCreationWorkbench({
         <div className="studio-col-head">
           <Icon name="boxes" size={15} />
           <strong>만들 것</strong>
-          <small>크레딧 {CREDIT_COST}개</small>
+          <small>실행 {CREDIT_COST}회</small>
         </div>
         <div className="studio-col-body">
           <div className="studio-kind-tabs" role="tablist" aria-label="만들 종류">
@@ -940,7 +940,7 @@ export function AssetCreationWorkbench({
             <Icon name="arrowRight" size={15} />
           </button>
           <div className="studio-make-price">
-            <span><b>{CREDIT_COST} 크레딧</b> · 남은 {credit.credits === null ? "확인 중" : `${credit.credits}개`}</span>
+            <span><b>실행 {CREDIT_COST}회</b> · 남은 {credit.credits === null ? "확인 중" : `${credit.credits}회`}</span>
             {assetKind === "2d-image" && credit.imagesRemaining !== null ? (
               <span>오늘 이미지 <b>{credit.imagesRemaining}</b>/{credit.imagesPerDay ?? "?"}장</span>
             ) : null}

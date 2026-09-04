@@ -143,10 +143,10 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
       const nextReport = inspectAsset(createAssetBundle(name, bytes), activePolicy);
       produced = nextReport;
       setReport(nextReport);
-      if (isSample) setNotice("예시 파일입니다. 기록과 크레딧에 반영되지 않습니다.");
+      if (isSample) setNotice("예시 파일입니다. 기록과 실행 횟수에 반영되지 않습니다.");
       else if (isCustomActive)
         setNotice(
-          `내 기준(${customProfileName ?? "직접 올린 파일"})으로 검사했습니다. 저장과 크레딧 사용은 없습니다.`,
+          `내 기준(${customProfileName ?? "직접 올린 파일"})으로 검사했습니다. 저장과 실행 횟수 사용은 없습니다.`,
         );
       else await persistAnalysis(nextReport);
     } catch (caught) {
@@ -234,7 +234,7 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
       hardBlockerCount: nextReport.score.hardBlockerCount, findingCount: nextReport.findings.length, report: nextReport, evidenceV2,
     }) });
     const body = await response.json().catch(() => ({})) as { assetId?: string; idempotent?: boolean; error?: string };
-    if (!response.ok) throw new Error(body.error ?? "검사 결과를 저장하지 못했습니다. 크레딧은 사용되지 않았습니다.");
+    if (!response.ok) throw new Error(body.error ?? "검사 결과를 저장하지 못했습니다. 실행 횟수는 쓰이지 않았습니다.");
     return { assetId: body.assetId ?? null, idempotent: body.idempotent === true };
   }
 
@@ -243,8 +243,8 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
     setAssetId(saved.assetId);
     setNotice(
       saved.idempotent
-        ? "같은 파일을 이미 검사했습니다. 크레딧은 사용되지 않았습니다."
-        : "워크스페이스에 검사를 저장했습니다. 크레딧 1개를 사용했습니다.",
+        ? "같은 파일을 이미 검사했습니다. 실행 횟수는 쓰이지 않았습니다."
+        : "워크스페이스에 검사를 저장했습니다. 실행 횟수 1회를 썼습니다.",
     );
   }
 
@@ -272,7 +272,7 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
     );
     setQueue((prev) => [...prev, ...items]);
     setError(null);
-    setNotice(`${items.length}개 파일이 큐에 올라왔습니다. 시작 버튼을 누르기 전에는 크레딧을 쓰지 않습니다.`);
+    setNotice(`${items.length}개 파일이 큐에 올라왔습니다. 시작 버튼을 누르기 전에는 실행 횟수를 쓰지 않습니다.`);
   }
 
   async function runBatch() {
@@ -307,8 +307,8 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
     const reused = okCount - debitCount;
     setNotice(
       isCustomActive
-        ? `일괄 검사 완료(커스텀 프로파일 · 로컬 전용): 성공 ${okCount}건, 실패 ${failCount}건 · 크레딧 차감 없음`
-        : `${okCount}개 검사 완료, ${failCount}개 실패 · 크레딧 ${debitCount}개 사용${
+        ? `일괄 검사 완료(커스텀 프로파일 · 로컬 전용): 성공 ${okCount}건, 실패 ${failCount}건 · 실행 횟수 차감 없음`
+        : `${okCount}개 검사 완료, ${failCount}개 실패 · 실행 횟수 ${debitCount}회 사용${
             reused > 0 ? ` · 이미 검사한 ${reused}개는 차감 없음` : ""
           }`,
     );
@@ -370,9 +370,9 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
       setOptimization(result);
       setDownloadGate("verified");
       if (sampleMode) {
-        setNotice("데모 샘플을 로컬에서 최적화했습니다. 크레딧과 워크스페이스 이력은 변하지 않습니다.");
+        setNotice("데모 샘플을 로컬에서 최적화했습니다. 실행 횟수와 워크스페이스 이력은 변하지 않습니다.");
       } else if (isCustomActive) {
-        setNotice("내 기준으로 정리했습니다. 크레딧은 사용되지 않았습니다. 파일은 아래에서 받으세요.");
+        setNotice("내 기준으로 정리했습니다. 실행 횟수는 쓰이지 않았습니다. 파일은 아래에서 받으세요.");
       } else {
         const response = await fetch("/api/optimizations", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
           optimizationId: `optimization-${result.inputHash.slice(0, 12)}-${result.outputHash.slice(0, 12)}`,
@@ -381,7 +381,7 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
         }) });
         const body = await response.json().catch(() => ({})) as { error?: string };
         if (!response.ok) throw new Error(body.error ?? "정리한 파일을 저장하지 못했습니다. 아래에서 바로 받을 수 있습니다.");
-        setNotice("최적화를 저장했습니다. 크레딧 1개를 사용했습니다. 검사 증명서를 받을 수 있습니다.");
+        setNotice("최적화를 저장했습니다. 실행 횟수 1회를 썼습니다. 검사 증명서를 받을 수 있습니다.");
       }
     } catch (caught) { setError(caught instanceof Error ? caught.message : "파일을 정리하지 못했습니다. 원본은 그대로 있습니다."); }
     finally { setBusy("idle"); }
@@ -475,12 +475,12 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
             <p>
               {isCustomActive ? (
                 <>
-                  커스텀 프로파일 모드 — <strong>로컬 검사 전용</strong>이라 저장과 크레딧 차감이
+                  커스텀 프로파일 모드 — <strong>로컬 검사 전용</strong>이라 저장과 실행 횟수 차감이
                   없습니다.
                 </>
               ) : (
                 <>
-                  파일당 크레딧 <strong>1개</strong>를 <strong>성공한 검사에만</strong>{" "}
+                  파일당 실행 횟수 <strong>1회</strong>를 <strong>성공한 검사에만</strong>{" "}
                   차감됩니다. 시작 버튼을 누르기 전에는 아무것도 차감되지 않습니다.
                 </>
               )}
@@ -516,7 +516,7 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
                   ? "순차 검사 중"
                   : isCustomActive
                     ? "일괄 검사 시작 · 로컬 전용"
-                    : `일괄 검사 시작 · ${queue.filter((q) => q.status === "queued").length} 크레딧`}
+                    : `일괄 검사 시작 · ${queue.filter((q) => q.status === "queued").length}회`}
               </button>
             </div>
           </div>
@@ -633,7 +633,7 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
               >
                 <strong>커스텀</strong>
                 <span>{customProfileName ?? "프로젝트 프로파일 JSON을 불러오면 활성화됩니다"}</span>
-                {customProfile ? <small className="num">로컬 검사 전용 · 저장·크레딧 없음</small> : null}
+                {customProfile ? <small className="num">로컬 검사 전용 · 저장·실행 횟수 없음</small> : null}
               </button>
             </div>
             <label className="button button-quiet button-xs profile-upload">

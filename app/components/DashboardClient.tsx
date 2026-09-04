@@ -154,7 +154,7 @@ const PRIMARY_ACTIONS = [
     icon: "boxes" as const,
     title: "에셋 만들기",
     detail: "문장으로 2D 이미지를, 코드로 3D 모델과 스프라이트 시트를 만듭니다.",
-    cost: "1크레딧",
+    cost: "실행 1회",
     costNote: "성공했을 때만 차감",
   },
   {
@@ -162,7 +162,7 @@ const PRIMARY_ACTIONS = [
     icon: "scan" as const,
     title: "내 파일 검사하기",
     detail: "GLB·PNG를 올리면 게임에 넣어도 되는지 알려 줍니다. 원본은 그대로 둡니다.",
-    cost: "1크레딧",
+    cost: "실행 1회",
     costNote: "결과를 저장할 때 차감",
   },
   {
@@ -201,7 +201,7 @@ export function DashboardClient({ welcome }: { welcome?: string | null }) {
         if (!me.ok) {
           if (me.status === 401 || me.status === 403) {
             setConnection("auth-required");
-            setMessage("로그인하면 내가 만든 파일과 크레딧을 불러옵니다.");
+            setMessage("로그인하면 내가 만든 파일과 실행 횟수를 불러옵니다.");
           } else {
             setConnection("error");
             setMessage("로그인 확인이 " + me.status + " 상태를 돌려주었습니다.");
@@ -223,7 +223,7 @@ export function DashboardClient({ welcome }: { welcome?: string | null }) {
           ? ((await generationResponse.json()) as { jobs?: GenerationJob[] })
           : { jobs: [] };
         if (typeof creditBody.credits !== "number" || !Number.isFinite(creditBody.credits)) {
-          throw new Error("크레딧 잔액을 숫자로 받지 못했습니다.");
+          throw new Error("남은 실행 횟수를 숫자로 받지 못했습니다.");
         }
         if (cancelled) return;
         setConnection("connected");
@@ -300,15 +300,15 @@ export function DashboardClient({ welcome }: { welcome?: string | null }) {
         </div>
         <div className="home-meter" role="group" aria-label="내 잔여량">
           <div className="home-meter-item">
-            <span>남은 크레딧</span>
-            <strong aria-label="사용 가능한 크레딧">
+            <span>남은 실행 횟수</span>
+            <strong aria-label="쓸 수 있는 실행 횟수">
               {connection === "error"
                 ? "불러오지 못함"
                 : credits === null
                   ? "확인 중"
                   : `${credits.toLocaleString("ko-KR")}`}
             </strong>
-            <small>검사 1회, 만들기 1회에 각각 1크레딧</small>
+            <small>검사 1회, 만들기 1회에 각각 실행 1회</small>
           </div>
           <div className="home-meter-item">
             <span>오늘 만들 수 있는 이미지</span>

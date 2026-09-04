@@ -148,17 +148,17 @@ export default async function MarketplaceListingPage({ params }: { params: Promi
                   <h2 id="detail-buyer-heading">
                     에셋은 계정에 남고,
                     <br />
-                    <em>Clunk 기능은 크레딧으로</em>
+                    <em>Clunk 기능은 실행 횟수로</em>
                   </h2>
                   <p>
                     한 번 받은 파일은 계정에 남아 언제든 다시 받을 수 있습니다. 검사·최적화 같은
-                    Clunk 기능은 쓴 만큼 크레딧으로 계산합니다.
+                    Clunk 기능은 쓴 만큼 실행 횟수로 계산합니다.
                   </p>
                 </div>
                 <div className={styles.detailBuyerActions}>
                   <Link className="cv5-btn cv5-btn-primary" href="/marketplace">다른 에셋 둘러보기 <Icon name="arrowLeft" size={15} /></Link>
                   <Link className="cv5-btn cv5-btn-ghost" href="/app">Clunk 제품 사용하기 <Icon name="arrowUpRight" size={15} /></Link>
-                  <Link className={styles.textLink} href="/pricing">크레딧 정책 보기 <Icon name="arrowRight" size={14} /></Link>
+                  <Link className={styles.textLink} href="/pricing">실행 횟수 정책 보기 <Icon name="arrowRight" size={14} /></Link>
                 </div>
               </div>
             </div>

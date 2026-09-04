@@ -216,8 +216,8 @@ export function CapsuleMachine() {
 
   const creditLine = authenticated
     ? credits === null
-      ? "크레딧을 확인하는 중입니다"
-      : `크레딧 ${credits.toLocaleString("ko-KR")}개 · 뽑기에는 차감되지 않습니다`
+      ? "실행 횟수를 확인하는 중입니다"
+      : `실행 횟수 ${credits.toLocaleString("ko-KR")}회 · 뽑기에는 차감되지 않습니다`
     : "결제 없이 뽑습니다 · 동전 필요 없음";
 
   /* 연출 -------------------------------------------------------------------- */
