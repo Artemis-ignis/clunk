@@ -89,12 +89,42 @@ export function clusterSamples(samples: ColourSample[]): PaletteEntry[] {
 }
 
 /**
+ * 색표 그림에서 픽셀을 꺼내 둔다.
+ *
+ * 2026-09-04: 정점 색을 작은 색표 그림으로 옮기기 시작했다(scripts/bake-vertex-colour-palette.mjs).
+ * 정점 색을 안 읽는 셰이더에서도 색이 남게 하려는 것인데, 그러면 COLOR_0 만 보던 이
+ * 함수가 모든 상품을 흰색으로 보고한다. 그림은 32×1 정도라 한 번 읽어 두면 삼각형마다
+ * 좌표로 바로 찾을 수 있다.
+ */
+function readTexels(map: import("three").Texture | null | undefined): { data: Uint8ClampedArray; width: number } | null {
+  const image = map?.image as (HTMLImageElement | ImageBitmap | HTMLCanvasElement | undefined);
+  const width = (image as { width?: number } | undefined)?.width ?? 0;
+  const height = (image as { height?: number } | undefined)?.height ?? 0;
+  if (!image || !width || !height) return null;
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return null;
+    ctx.drawImage(image as CanvasImageSource, 0, 0);
+    return { data: ctx.getImageData(0, 0, width, height).data, width };
+  } catch {
+    // 다른 출처에서 온 그림은 픽셀을 읽지 못한다. 그 경우 재질색만으로 답한다.
+    return null;
+  }
+}
+
+const srgbToLinearChannel = (v: number) => (v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+
+/**
  * Read the palette out of the loaded scene.
  *
- * Our catalogue carries colour two ways: as named flat materials, and as a COLOR_0
- * attribute under a white material. A reader that only looks at material.color reports a
- * white model for half the shop, so both paths are handled and multiplied together the
- * way a renderer does.
+ * Our catalogue carries colour three ways: as named flat materials, as a COLOR_0 attribute
+ * under a white material, and — since 2026-09-04 — as a small palette texture the vertex
+ * colours were baked into so that shaders which ignore COLOR_0 still show the model in
+ * colour. A reader that only looks at material.color reports a white model for most of the
+ * shop, so all three paths are handled and multiplied together the way a renderer does.
  *
  * three.js keeps material colours in linear space; the hex a buyer pastes into their own
  * editor is sRGB, so each channel is converted back before it is written out.
@@ -104,6 +134,7 @@ export function readPalette(
   model: import("three").Object3D,
 ): PaletteEntry[] {
   const samples: ColourSample[] = [];
+  const texels = new Map<import("three").Texture, { data: Uint8ClampedArray; width: number } | null>();
   const a = new THREE.Vector3();
   const b = new THREE.Vector3();
   const c = new THREE.Vector3();
@@ -119,6 +150,7 @@ export function readPalette(
     const position = geometry.getAttribute("position");
     if (!position) return;
     const colour = geometry.getAttribute("color");
+    const uv = geometry.getAttribute("uv");
     const index = geometry.getIndex();
     const count = index ? index.count : position.count;
     const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
@@ -151,6 +183,21 @@ export function readPalette(
           r *= (colour.getX(i0) + colour.getX(i1) + colour.getX(i2)) / 3;
           g *= (colour.getY(i0) + colour.getY(i1) + colour.getY(i2)) / 3;
           bl *= (colour.getZ(i0) + colour.getZ(i1) + colour.getZ(i2)) / 3;
+        }
+        // 색이 그림으로 옮겨진 파일. 세 꼭짓점이 같은 칸을 가리키므로 하나만 봐도 된다.
+        const map = material?.map;
+        if (!colour && map && uv) {
+          if (!texels.has(map)) texels.set(map, readTexels(map));
+          const sheet = texels.get(map);
+          if (sheet) {
+            const u = (uv.getX(i0) + uv.getX(i1) + uv.getX(i2)) / 3;
+            const x = Math.min(sheet.width - 1, Math.max(0, Math.floor(u * sheet.width)));
+            const at = x * 4;
+            // 그림은 sRGB 로 저장돼 있고 이 함수는 선형으로 셈한다.
+            r *= srgbToLinearChannel(sheet.data[at] / 255);
+            g *= srgbToLinearChannel(sheet.data[at + 1] / 255);
+            bl *= srgbToLinearChannel(sheet.data[at + 2] / 255);
+          }
         }
         samples.push({ r, g: g, b: bl, size });
       }
