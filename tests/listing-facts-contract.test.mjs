@@ -105,13 +105,15 @@ test("a sheet's grid comes from the baker's manifest, never from the product nam
 // parsed out of a name would now be null on every sheet. These are the published files.
 test("every published sheet still has a manifest that states its grid", () => {
   const marketRoot = fileURLToPath(new URL("public/market", root));
+  // Re-baked 2026-09-03: 64 px cells broke the gate's rails into dotted fragments and left
+  // the tree as an 18 px smudge, so the cells are 128 px (256 px for the trees) now.
   assert.deepEqual(
     sheetSpecFromManifests(sheetManifestsFor("cozy-fence-gate-swing-sprites", marketRoot)),
-    { cell: 64, directions: 8, frames: 8, cuts: 64 },
+    { cell: 128, directions: 8, frames: 8, cuts: 64 },
   );
   assert.deepEqual(
     sheetSpecFromManifests(sheetManifestsFor("grove-tree-pack-vol1-sprites", marketRoot)),
-    { cell: 64, directions: 8, frames: null, cuts: null },
+    { cell: 256, directions: 8, frames: null, cuts: null },
   );
   assert.equal(sheetSpecFromManifests(sheetManifestsFor("hf-barn", marketRoot)), null, "a 3D listing has no sheet");
 });

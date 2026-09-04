@@ -41,7 +41,7 @@ export async function GET(request: Request) {
         return Response.json({ ok: false, error: "A valid listing slug is required." }, { status: 400 });
       }
       const listing = await db.prepare(
-        `SELECT l.id, l.slug, l.title, l.description, l.price_cents AS priceCents, l.access_tier AS accessTier, l.currency,
+        `SELECT l.id, l.slug, l.title, l.description, l.price_cents AS priceCents, l.currency,
           l.license_status AS licenseStatus, l.status, l.asset_id AS assetId,
           l.created_at AS createdAt, l.published_at AS publishedAt,
           a.file_name AS entryFileName, a.format, a.byte_length AS byteLength,
@@ -52,7 +52,7 @@ export async function GET(request: Request) {
          LEFT JOIN clunk_users u ON u.id = (SELECT owner_user_id FROM clunk_workspaces WHERE id = l.workspace_id)
          WHERE l.status = 'PUBLISHED' AND l.slug = ? LIMIT 1`,
       ).bind(slug).first<{
-        id: string; slug: string; title: string; description: string; priceCents: number; accessTier: string; currency: string;
+        id: string; slug: string; title: string; description: string; priceCents: number; currency: string;
         licenseStatus: string; status: string; assetId: string; createdAt: string; publishedAt: string | null;
         entryFileName: string; format: string; byteLength: number; sellerName: string | null; previewFileName: string | null;
       }>();
@@ -111,7 +111,7 @@ export async function GET(request: Request) {
       }, { headers: { "cache-control": "public, max-age=30" } });
     }
     const rows = await db.prepare(
-      `SELECT l.id, l.slug, l.title, l.description, l.price_cents AS priceCents, l.access_tier AS accessTier, l.currency,
+      `SELECT l.id, l.slug, l.title, l.description, l.price_cents AS priceCents, l.currency,
         l.license_status AS licenseStatus, l.status, l.asset_id AS assetId,
         l.created_at AS createdAt, l.published_at AS publishedAt,
         a.file_name AS entryFileName, a.format, a.byte_length AS byteLength,
@@ -135,8 +135,6 @@ export async function GET(request: Request) {
         slug: row.slug,
         title: row.title,
         priceCents: row.priceCents,
-        // 무료 등급인가 구독 전용인가. 낱개 가격이 사라진 뒤로 구매자가 알아야 할
-        // 것은 값이 아니라 "지금 받을 수 있는가"다.
         currency: row.currency,
         assetId: row.assetId,
         entryFileName: row.entryFileName,
@@ -167,6 +165,10 @@ export async function GET(request: Request) {
         aiGenerated: isGenerativeListing(String(row.slug)),
         palette: paletteFor(String(row.slug)) ?? null,
         facts: factsFor(String(row.slug)),
+        // 2026-09-04: 목록에도 clips 를 싣는다. 등급이 접근권이 된 뒤로, 이걸 빼면
+        // 카드는 움직임 없이 등급을 매기고 다운로드 문지기는 clipsFor 로 매겨 둘이
+        // 갈라진다 — 카드에 "무료"라 적힌 상품이 403 으로 막히는 자리였다.
+        clips: clipsFor(String(row.slug)),
       })),
       checkout: checkoutStatus(),
       access: accessFor({ authenticated: false }),

@@ -71,13 +71,6 @@ const TOOL_HOMES = {
   clunk_asset_facts: "app/webmcp/global-tools.ts",
   clunk_navigate: "app/webmcp/global-tools.ts",
   clunk_site_map: "app/webmcp/global-tools.ts",
-  gacha_state: "app/components/gacha/useGachaWebMcp.ts",
-  gacha_list_themes: "app/components/gacha/useGachaWebMcp.ts",
-  gacha_set_theme: "app/components/gacha/useGachaWebMcp.ts",
-  gacha_pull: "app/components/gacha/useGachaWebMcp.ts",
-  gacha_open: "app/components/gacha/useGachaWebMcp.ts",
-  gacha_again: "app/components/gacha/useGachaWebMcp.ts",
-  gacha_claim: "app/components/gacha/useGachaWebMcp.ts",
   viewer_set: "app/webmcp/useViewerWebMcp.ts",
   viewer_play_clip: "app/webmcp/useViewerWebMcp.ts",
   viewer_stop: "app/webmcp/useViewerWebMcp.ts",
@@ -91,7 +84,7 @@ const TOOL_HOMES = {
 };
 
 /** Modules that define tools. None of them may touch the browser API itself. */
-const TOOL_NAME_COUNT = 23;
+const TOOL_NAME_COUNT = 16;
 
 const TOOL_MODULES = [
   "app/webmcp/global-tools.ts",
@@ -99,7 +92,6 @@ const TOOL_MODULES = [
   "app/webmcp/useProductWebMcp.ts",
   "app/webmcp/useStudioWebMcp.ts",
   "app/webmcp/useInspectorWebMcp.ts",
-  "app/components/gacha/useGachaWebMcp.ts",
 ];
 
 /** Modules that put tools on the page. The global set is registered by the bridge. */
@@ -109,7 +101,6 @@ const REGISTRARS = [
   "app/webmcp/useProductWebMcp.ts",
   "app/webmcp/useStudioWebMcp.ts",
   "app/webmcp/useInspectorWebMcp.ts",
-  "app/components/gacha/useGachaWebMcp.ts",
 ];
 
 test("every tool named in the human manifest is actually defined where it says", async () => {
@@ -150,22 +141,19 @@ test("every surface registers through the shared registrar rather than touching 
   }
 });
 
-test("the gacha tools drive the machine the human is watching, not a private copy", async () => {
-  const hook = await source("app/components/gacha/useGachaWebMcp.ts");
-  const machine = await source("app/components/gacha/GachaMachine3D.tsx");
-  // The hook calls the screen's own handles; it does not re-implement a draw.
-  assert.match(hook, /live\.current\.turn\(\)/);
-  assert.match(hook, /live\.current\.openCapsule\(\)/);
-  assert.match(hook, /live\.current\.chooseTheme\(/);
-  assert.match(hook, /now\.collect\(\)/);
-  // The film scrolls to the lever shot before pulling, so the human sees it happen.
-  assert.match(hook, /scrollToShot\(LEVER_SHOT\)/);
-  assert.match(hook, /SCROLL_PULL/);
-  // A pull waits for the capsule to actually land instead of reporting "pressed".
-  assert.match(hook, /waitFor\(\(\) => live\.current\.stage === "capsule", 12_000\)/);
-  // Signed out, claiming hands back the sign-up URL — an agent never signs anyone in.
-  assert.match(hook, /needsSignIn: true/);
-  assert.match(machine, /useGachaWebMcp\(\{/);
+test("no tool draws, shuffles, or opens a capsule", async () => {
+  // 2026-09-04: the seven gacha_* tools drove a capsule machine on the landing page —
+  // set the theme, pull the lever, open the capsule, draw again, claim the prize. The
+  // card processor read that machine as gambling and refused the account over it, so
+  // the machine and its tool surface are gone. The requirement did not loosen: it
+  // reversed. An agent may read this shop and move the screen; it may not roll dice.
+  const manifest = await source("app/webmcp/tool-manifest.ts");
+  assert.doesNotMatch(manifest, /gacha/iu, "app/webmcp/tool-manifest.ts: 뽑기 도구가 되살아났습니다");
+  assert.doesNotMatch(manifest, /capsule machine|캡슐 자판기|뽑기 기계/u, "app/webmcp/tool-manifest.ts: 뽑기 화면이 도구 면으로 되살아났습니다");
+  assert.doesNotMatch(manifest, /"[a-z_]*(?:draw|pull|roll|spin)[a-z_]*"/u, "app/webmcp/tool-manifest.ts: 무작위로 뽑는 도구 이름이 있습니다");
+  for (const module of [...TOOL_MODULES, ...REGISTRARS]) {
+    assert.doesNotMatch(await source(module), /gacha/iu, `${module}: 뽑기 도구가 되살아났습니다`);
+  }
 });
 
 test("the viewer tools move the same bench the buttons move", async () => {

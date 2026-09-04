@@ -93,6 +93,14 @@ test("사업자 표시사항은 등록증 실값과 정확히 일치하고, 미�
     );
     // 호스팅은 확정 사실이라 플레이스홀더가 아니다(방침이 이미 D1·R2를 명시한다).
     assert.ok(html.includes("Cloudflare, Inc. (미국)"), `${pathname}에 호스팅 제공자 실값이 없습니다`);
+    // 2026-09-04: 화면 네 곳이 "주식회사 아르테미스"라고 적고 있었다. 등록증의 상호는
+    // 「아르테미스」이고 대표자 주민등록번호가 찍힌 개인사업자다. 법인이 아닌 곳을 법인으로
+    // 적는 것은 전자상거래법 제10조가 요구하는 상호 표시가 틀린 것이고, 결제대행 심사에서
+    // 등록증과 대조되는 값이다.
+    assert.ok(
+      !html.includes("주식회사"),
+      `${pathname}이 개인사업자를 법인으로 적고 있습니다 — 등록증의 상호는 「아르테미스」입니다`,
+    );
     // 등록번호 형태의 숫자는 등록증의 실번호 하나만 존재해야 한다(지어낸 번호 금지).
     const registrationLike = html.match(/\b\d{3}-\d{2}-\d{5}\b/g) ?? [];
     assert.ok(registrationLike.length > 0, `${pathname}에 사업자등록번호가 없습니다`);
@@ -109,9 +117,13 @@ test("이용약관이 실제 서비스 실체와 디지털 콘텐츠 특칙을 �
   assert.ok(html.includes("전자상거래"));
   assert.ok(html.includes("청약철회"), "청약철회 고지가 없습니다");
   assert.ok(html.includes("제17조 제2항 제5호"), "디지털 콘텐츠 특칙 근거 조문이 없습니다");
-  assert.ok(html.includes("크레딧"));
+  assert.ok(html.includes("실행 횟수"), "실행 단위 정의가 없습니다");
+  assert.ok(
+    html.includes("실행 횟수는 판매 대상이 아닙니다"),
+    "실행 단위를 팔지 않는다는 조항이 없습니다 — 있어야 선충전 재화로 읽히지 않습니다",
+  );
   assert.ok(html.includes("clunk_auth_session"), "세션 쿠키 계약이 고지되지 않았습니다");
-  assert.ok(html.includes("Stripe"));
+  assert.ok(html.includes("외부 결제대행사"), "결제 처리 주체 고지가 없습니다");
   assert.ok(html.includes("/privacy") && html.includes("/refunds"));
 });
 
@@ -126,7 +138,7 @@ test("개인정보처리방침이 실제 저장 항목과 책임자 플레이스
   assert.ok(html.includes("clunk_oauth_tx_"), "OAuth 트랜잭션 쿠키 항목이 없습니다");
   assert.ok(html.includes("SHA-256"), "저장하는 에셋 메타데이터 항목이 없습니다");
   assert.ok(html.includes("Cloudflare D1"), "메타데이터 보관 장소가 없습니다");
-  assert.ok(html.includes("Stripe"), "결제 처리위탁 예정 고지가 없습니다");
+  assert.ok(html.includes("외부 결제대행사"), "결제 처리위탁 예정 고지가 없습니다");
   assert.ok(html.includes("열람"), "정보주체 권리 항목이 없습니다");
 });
 
@@ -138,12 +150,12 @@ test("취소·환불정책이 청약철회 제한과 결제 전 동의 구조를
   assert.ok(html.includes("동의 체크"), "동의 획득 방식이 명시되지 않았습니다");
   // 2026-09-02: 화면에는 한국어로 적는다. REFUNDED·REVOKED는 데이터베이스의 사정이지
   // 구매자가 읽어야 할 말이 아니다.
-  assert.ok(html.includes("환불 완료") && html.includes("회수됨"), "환불 반영 결과가 한국어로 적혀 있지 않습니다");
+  assert.ok(html.includes("환불 완료"), "환불 반영 결과가 한국어로 적혀 있지 않습니다");
   assert.ok(!html.includes("REFUNDED") && !html.includes("REVOKED"), "영문 상태값이 화면에 남아 있습니다");
   // 전자상거래법상 절차는 번호가 붙어야 "제2단계"라고 가리킬 수 있다. 전역 리셋이
   // 목록 표식을 지워 버려서 법정 문서의 절차가 그냥 문장 나열로 보였다.
   assert.ok(html.includes("<ol>"), "번호 있는 절차 목록이 없습니다");
-  assert.ok(html.includes("차감하지 않습니다"), "실패 실행 크레딧 규칙이 없습니다");
+  assert.ok(html.includes("줄어들지 않습니다") || html.includes("되돌립니다"), "실패한 실행의 처리 규칙이 없습니다");
 });
 
 test("랜딩과 SiteShell 푸터가 세 법적 문서를 모두 링크한다", async () => {
@@ -348,9 +360,26 @@ test("이용약관과 개인정보처리방침이 호스팅과 구독 여부에 
   for (const [name, html] of [["/terms", terms], ["/privacy", privacy]]) {
     assert.ok(html.includes("Cloudflare, Inc. (미국)"), `${name}의 호스팅 제공자 표기가 다릅니다`);
   }
-  const noSubscription = "정기 결제(구독) 상품은 제공하지 않습니다";
-  assert.ok(terms.includes(noSubscription), "약관이 구독 없음을 말하지 않습니다");
-  assert.ok(refunds.includes(noSubscription), "환불정책이 구독 없음을 말하지 않습니다");
+  // 2026-09-04: 파는 것이 기간제 구독 하나로 바뀌었다. 결제대행 심사가 크레딧 선충전과
+  // 낱개 판매를 환금성으로 반려했으므로, 두 문서가 그 둘을 다시 정의하면 같은 판정을 받는다.
+  assert.ok(terms.includes("기간제 구독"), "약관이 구독 상품을 정의하지 않습니다");
+  assert.ok(refunds.includes("기간제 구독"), "환불정책이 구독 상품을 정의하지 않습니다");
+  for (const [name, html] of [["/terms", terms], ["/refunds", refunds], ["/privacy", privacy]]) {
+    assert.ok(!html.includes("크레딧"), `${name}이 크레딧을 다시 정의합니다 — 선충전 재화로 읽힙니다`);
+    assert.ok(!html.includes("단건 구매"), `${name}이 낱개 판매를 정의합니다`);
+  }
+  assert.ok(
+    terms.includes("이미 내려받은 파일은 그대로 쓸 수 있습니다"),
+    "약관이 해지 뒤 받은 파일의 처분을 밝히지 않습니다",
+  );
+  assert.ok(
+    refunds.includes("일할 계산해 환불"),
+    "환불정책이 잔여기간 일할 환불 기준을 적지 않습니다",
+  );
+  assert.ok(
+    refunds.includes("실행 횟수는 구독에 포함된 사용 한도일 뿐 따로 팔지 않으므로"),
+    "환불정책이 실행 횟수를 팔지 않는다는 사실을 적지 않습니다",
+  );
 });
 
 test("/login과 /signup은 서로 다른 문이고, 영문 라벨이 남아 있지 않다", async () => {
@@ -470,6 +499,7 @@ const SPEC_SURFACES = [
   "app/components/LandingMarketShowcase.tsx",
   "app/components/review/GlbReviewer.tsx",
   "app/components/listing-facts-rows.ts",
+  "app/portfolio/page.tsx",
 ];
 
 /** 화면 문구만 남긴다: 블록 주석과 줄 주석을 걷어낸다(URL 의 `//` 는 건드리지 않는다). */

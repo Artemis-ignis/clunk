@@ -1,5 +1,8 @@
 import { notFound } from "next/navigation";
-import { getRuntimeDb, ensureSchema } from "../../api/_lib/clunk";
+import { readPublishedListingBySlug, type PublishedListingSummary } from "../../api/_lib/reads";
+import { factsFor } from "../../api/_lib/listing-facts";
+import { clipsFor } from "../../api/_lib/listing-variants";
+import { gradeOf, isFreeGrade } from "../../components/catalog-facts";
 import { createPageMetadata, SITE_ORIGIN } from "../../components/site-metadata";
 import { SiteShell } from "../../components/SiteShell";
 import { ForceDarkTheme } from "../../components/ForceDarkTheme";
@@ -27,40 +30,14 @@ export const metadata = createPageMetadata({
  */
 async function readListing(slug: string): Promise<{
   found: boolean;
-  listing: {
-    slug: string;
-    title: string;
-    description: string;
-    priceCents: number;
-    currency: string;
-    assetId: string;
-    previewFileName: string | null;
-  } | null;
+  listing: PublishedListingSummary | null;
 }> {
-  if (!/^[a-z0-9가-힣][a-z0-9가-힣-]{0,95}$/i.test(slug)) return { found: false, listing: null };
   try {
-    const db = getRuntimeDb();
-    await ensureSchema(db);
-    const row = await db
-      .prepare(
-        `SELECT l.slug, l.title, l.description, l.price_cents AS priceCents, l.currency, l.asset_id AS assetId,
-          (SELECT aa.file_name FROM clunk_asset_artifacts aa
-             WHERE aa.asset_id = l.asset_id AND aa.role = 'preview' LIMIT 1) AS previewFileName
-         FROM clunk_marketplace_listings l
-         WHERE l.slug = ? AND l.status = 'PUBLISHED' LIMIT 1`,
-      )
-      .bind(slug)
-      .first<{
-        slug: string;
-        title: string;
-        description: string;
-        priceCents: number;
-        currency: string;
-        assetId: string;
-        previewFileName: string | null;
-      }>();
-    return { found: Boolean(row), listing: row ?? null };
+    const listing = await readPublishedListingBySlug(slug);
+    return { found: Boolean(listing), listing };
   } catch {
+    // 저장소가 닿지 않는 것은 상품이 없다는 뜻이 아니다. 404 를 내지 않고 화면이
+    // 실제 오류를 말하게 둔다.
     return { found: true, listing: null };
   }
 }
@@ -71,8 +48,16 @@ async function readListing(slug: string): Promise<{
  * carry a price. Only fields read from the row are emitted: an absent preview means no
  * image key rather than a guessed path.
  */
-function structuredData(listing: NonNullable<Awaited<ReturnType<typeof readListing>>["listing"]>) {
+function structuredData(listing: PublishedListingSummary) {
   const url = `${SITE_ORIGIN}/marketplace/${encodeURIComponent(listing.slug)}`;
+  const free = isFreeGrade(gradeOf({
+    title: listing.title,
+    description: listing.description,
+    entryFileName: listing.entryFileName,
+    variants: null,
+    clips: clipsFor(listing.slug),
+    facts: factsFor(listing.slug),
+  }).letter);
   const image = listing.previewFileName
     ? `${SITE_ORIGIN}/api/marketplace/assets/${encodeURIComponent(listing.assetId)}`
       + `?file=${encodeURIComponent(listing.previewFileName)}&preview=1`
@@ -87,15 +72,20 @@ function structuredData(listing: NonNullable<Awaited<ReturnType<typeof readListi
       brand: { "@type": "Brand", name: "Clunk" },
       url,
       ...(image ? { image: [image] } : {}),
-      offers: {
-        "@type": "Offer",
-        price: (listing.priceCents / 100).toFixed(0),
-        priceCurrency: /^[A-Z]{3}$/u.test(listing.currency) ? listing.currency : "KRW",
-        url,
-        // Sales open when the mail-order filing completes. Until then the listing is
-        // browsable and the offer says so, rather than claiming it can be bought today.
-        availability: "https://schema.org/PreOrder",
-      },
+      // 2026-09-04: 낱개 가격을 검색엔진에 내보내던 자리다. 그 값(price_cents)은 아무도
+      // 청구하지 않으므로 내보내면 거짓 표시가 된다. 무료 등급만 값이 0 인 제안을 싣고,
+      // 구독으로 열리는 등급은 제안 자체를 적지 않는다 — 낱개로 파는 물건이 아니다.
+      ...(free
+        ? {
+            offers: {
+              "@type": "Offer",
+              price: "0",
+              priceCurrency: "KRW",
+              url,
+              availability: "https://schema.org/InStock",
+            },
+          }
+        : {}),
     },
     {
       "@context": "https://schema.org",

@@ -10,7 +10,7 @@
 
 export type Bilingual = { en: string; ko: string };
 
-export type ToolSurface = "global" | "capsule machine" | "product page" | "studio" | "inspector";
+export type ToolSurface = "global" | "product page" | "studio" | "inspector";
 
 export type ToolDoc = {
   name: string;
@@ -120,83 +120,6 @@ export const TOOL_DOCS: readonly ToolDoc[] = [
       { name: "slug", note: { en: "open that product page instead", ko: "그 상품 화면으로 갑니다" } },
     ],
     returns: { en: "The address the screen moved to.", ko: "옮겨 간 주소." },
-  },
-  {
-    name: "gacha_state",
-    surface: "capsule machine",
-    page: "/",
-    purpose: {
-      en: "Read the machine: its animation stage, the dial's theme, what is left this round, and the drawn prize.",
-      ko: "기계가 지금 어느 단계인지, 어떤 갈래인지, 몇 개 남았는지 봅니다.",
-    },
-    inputs: [],
-    returns: {
-      en: "Stage, theme, how many are left in this round, and the prize's measured facts when one has been drawn.",
-      ko: "단계·테마·이번 바퀴 남은 개수, 뽑힌 것이 있으면 그 잰 값.",
-    },
-  },
-  {
-    name: "gacha_list_themes",
-    surface: "capsule machine",
-    page: "/",
-    purpose: {
-      en: "List the dial's themes and how many assets each really holds.",
-      ko: "다이얼에 걸린 갈래와 각 갈래의 실제 개수를 봅니다.",
-    },
-    inputs: [],
-    returns: {
-      en: "Theme ids and counts. A count is the length of the catalogue list, not a claim.",
-      ko: "갈래와 개수. 개수는 목록의 길이입니다.",
-    },
-  },
-  {
-    name: "gacha_set_theme",
-    surface: "capsule machine",
-    page: "/",
-    purpose: { en: "Turn the dial to one theme.", ko: "다이얼을 돌려 뽑을 갈래를 고릅니다." },
-    inputs: [{ name: "theme", note: { en: "all / structure / prop / tree / texture", ko: "all / structure / prop / tree / texture" } }],
-    returns: { en: "The chosen theme and how many assets it holds.", ko: "고른 갈래와 그 갈래의 개수." },
-  },
-  {
-    name: "gacha_pull",
-    surface: "capsule machine",
-    page: "/",
-    purpose: {
-      en: "Pull the lever. The page scrolls to the lever shot first, so the human watches the machine work.",
-      ko: "레버를 당깁니다. 화면이 그 장면으로 스크롤되고, 캡슐이 떨어질 때까지 기다립니다.",
-    },
-    inputs: [],
-    returns: {
-      en: "The drawn asset's measured facts, its grade, and the part of the published rule that produced that grade.",
-      ko: "떨어진 상품의 잰 값과 등급, 그 등급이 나온 근거.",
-    },
-  },
-  {
-    name: "gacha_open",
-    surface: "capsule machine",
-    page: "/",
-    purpose: { en: "Crack the capsule that landed in the tray.", ko: "떨어진 캡슐을 엽니다." },
-    inputs: [],
-    returns: { en: "What came out, with its measured facts.", ko: "안에서 나온 상품의 잰 값." },
-  },
-  {
-    name: "gacha_again",
-    surface: "capsule machine",
-    page: "/",
-    purpose: { en: "Reset the machine so the lever can be pulled again.", ko: "기계를 처음 상태로 돌립니다." },
-    inputs: [],
-    returns: { en: "The stage it returned to.", ko: "돌아간 단계." },
-  },
-  {
-    name: "gacha_claim",
-    surface: "capsule machine",
-    page: "/",
-    purpose: {
-      en: "Receive the drawn file. Signed out, it hands back the sign-up URL instead — an agent never signs in for the human.",
-      ko: "뽑은 파일을 받습니다. 로그아웃 상태면 가입 주소를 알려 줍니다.",
-    },
-    inputs: [],
-    returns: { en: "The download outcome, or the sign-up address.", ko: "받기 결과, 또는 로그인 주소." },
   },
   {
     name: "viewer_set",
@@ -332,17 +255,13 @@ export const TOOL_DOCS: readonly ToolDoc[] = [
 /** Every tool name in this manifest. The tests check the code against this. */
 export const TOOL_NAMES: readonly string[] = TOOL_DOCS.map((doc) => doc.name);
 
-export const SURFACES: readonly ToolSurface[] = ["global", "capsule machine", "product page", "studio", "inspector"];
+export const SURFACES: readonly ToolSurface[] = ["global", "product page", "studio", "inspector"];
 
 /** What each surface is, in one line, on the manifest page. */
 export const SURFACE_TITLES: Readonly<Record<ToolSurface, Bilingual>> = {
   "global": {
     en: "Global — registered on every page. Read the catalogue, move the screen.",
     ko: "전역 — 어느 화면에서나 걸립니다. 카탈로그를 읽고, 화면을 옮깁니다.",
-  },
-  "capsule machine": {
-    en: "Capsule machine — the home page. The agent pulls the lever; the page scrolls to that shot so the human sees it happen.",
-    ko: "뽑기 기계 — 첫 화면. 에이전트가 레버를 당기면 화면이 그 장면으로 스크롤되고, 사람이 그대로 봅니다.",
   },
   "product page": {
     en: "Product page — registered only while one product is open. The bench's own controls become the agent's handles.",
@@ -366,16 +285,16 @@ export const SURFACE_TITLES: Readonly<Record<ToolSurface, Bilingual>> = {
  */
 export const EXAMPLE_PROMPTS: readonly Bilingual[] = [
   {
-    en: "Pull a capsule from the tree theme and tell me the grade and why it got that grade.",
-    ko: "나무 테마에서 캡슐을 하나 뽑고, 등급과 그 등급이 나온 까닭을 알려 줘.",
+    en: "Show me the tree assets in this shop and tell me each one's grade and why it got that grade.",
+    ko: "이 가게의 나무 에셋을 보여 주고, 각각의 등급과 그 등급이 나온 까닭을 알려 줘.",
   },
   {
     en: "Search this shop for assets that carry animation and are under 2,000 polygons.",
     ko: "이 가게에서 움직임이 있고 폴리곤 2,000개 미만인 에셋을 찾아 줘.",
   },
   {
-    en: "Open the cheapest S-grade asset's product page, switch the viewer to wireframe, then play its motion.",
-    ko: "S 등급 중 가장 싼 상품 화면을 열고, 뷰어를 와이어프레임으로 바꾼 다음 동작을 재생해 줘.",
+    en: "Open the lightest S-grade asset's product page, switch the viewer to wireframe, then play its motion.",
+    ko: "S 등급 중 가장 가벼운 상품 화면을 열고, 뷰어를 와이어프레임으로 바꾼 다음 동작을 재생해 줘.",
   },
   {
     en: "On this product page, swing every named moving part one at a time and tell me which ones really move.",

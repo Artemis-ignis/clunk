@@ -1,44 +1,25 @@
 {
   "schema": "clunk.listing-facts.v1",
-  "generatedAt": "2026-09-03T14:46:37.215Z",
+  "generatedAt": "2026-09-04T06:37:03.361Z",
   "sources": [
     "outputs\\market-launch\\wave1\\upload-manifest.json",
     "tmp\\listings-snapshot.json",
-    "이전 판에서 유지한 항목 8건"
+    "배달 파일에서 다시 잰 항목 10건",
+    "이전 판에서 유지한 항목 7건"
   ],
   "facts": {
     "clunk-heli-h145": {
       "triangles": 85150,
       "materials": 9,
-      "boundsMetres": [
-        10.605,
-        3.95,
-        13.64
-      ],
+      "boundsMetres": null,
       "byteLength": 3303252,
       "format": "GLB",
-      "animatedParts": [
-        "main_rotor_hub",
-        "fenestron_rotor",
-        "door_left_slide",
-        "door_right_slide",
-        "door_rear_left",
-        "door_rear_right"
-      ],
-      "animations": [
-        {
-          "name": "rotor_spin",
-          "seconds": 1
-        },
-        {
-          "name": "doors_open",
-          "seconds": 2.4
-        }
-      ],
+      "animatedParts": [],
+      "animations": [],
       "kit": null,
       "kitSize": 0,
       "members": null,
-      "viewYawDegrees": 40.3,
+      "viewYawDegrees": null,
       "sheet": null,
       "texture": null,
       "inspection": null
@@ -226,7 +207,7 @@
         1.71,
         0.52
       ],
-      "byteLength": 47960,
+      "byteLength": 46004,
       "format": "GLB",
       "animatedParts": [
         "post_hinge_pintles",
@@ -634,14 +615,14 @@
       "inspection": null
     },
     "hf-barn": {
-      "triangles": 14852,
+      "triangles": 15080,
       "materials": 5,
       "boundsMetres": [
         11.04,
         6.39,
         7.8503
       ],
-      "byteLength": 256532,
+      "byteLength": 260912,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -659,14 +640,14 @@
       }
     },
     "hf-cultivator-compact": {
-      "triangles": 10892,
-      "materials": 5,
+      "triangles": 27668,
+      "materials": 4,
       "boundsMetres": [
         1.5447,
         1.6899,
         3.35
       ],
-      "byteLength": 201892,
+      "byteLength": 105244,
       "format": "GLB",
       "animatedParts": [
         "gaugeWheelLeft",
@@ -705,14 +686,14 @@
       }
     },
     "hf-farmhouse": {
-      "triangles": 11954,
+      "triangles": 12146,
       "materials": 4,
       "boundsMetres": [
         8.5651,
         6.2559,
         8.0883
       ],
-      "byteLength": 249132,
+      "byteLength": 251768,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -797,14 +778,14 @@
       }
     },
     "hf-processing-line": {
-      "triangles": 24156,
+      "triangles": 48736,
       "materials": 8,
       "boundsMetres": [
         7.3753,
         5.2749,
         4.2804
       ],
-      "byteLength": 257888,
+      "byteLength": 238844,
       "format": "GLB",
       "animatedParts": [
         "mixerPivot",
@@ -839,14 +820,14 @@
       }
     },
     "hf-seeder-compact": {
-      "triangles": 10880,
+      "triangles": 52066,
       "materials": 4,
       "boundsMetres": [
         1.9611,
         2.2592,
         3.8
       ],
-      "byteLength": 283604,
+      "byteLength": 175284,
       "format": "GLB",
       "animatedParts": [
         "openerDisc01Left",
@@ -925,14 +906,14 @@
       }
     },
     "hf-tractor-compact": {
-      "triangles": 32300,
-      "materials": 9,
+      "triangles": 58156,
+      "materials": 8,
       "boundsMetres": [
         5.2396,
         2.9143,
         3.35
       ],
-      "byteLength": 855480,
+      "byteLength": 543376,
       "format": "GLB",
       "animatedParts": [
         "wheelFrontLeft",
@@ -984,14 +965,14 @@
       }
     },
     "hf-water-butt": {
-      "triangles": 1848,
+      "triangles": 2272,
       "materials": 2,
       "boundsMetres": [
         1.5959,
         2.3255,
         1.8744
       ],
-      "byteLength": 40456,
+      "byteLength": 49276,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -1009,14 +990,14 @@
       }
     },
     "hf-windmill": {
-      "triangles": 1392,
+      "triangles": 1656,
       "materials": 2,
       "boundsMetres": [
         3.3537,
         5.0405,
         3.51
       ],
-      "byteLength": 44740,
+      "byteLength": 51160,
       "format": "GLB",
       "animatedParts": [
         "blades_pivot"

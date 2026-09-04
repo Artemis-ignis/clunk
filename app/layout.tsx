@@ -29,10 +29,19 @@ export const metadata: Metadata = {
     images: [`${SITE_ORIGIN}/og.png`],
   },
   icons: {
-    // ?v=3: browsers cache favicons hard; the query busts it whenever the mark changes.
-    icon: "/favicon.svg?v=3",
-    shortcut: "/favicon.svg?v=3",
+    // ?v=4: browsers cache favicons hard; the query busts it whenever the mark changes.
+    // 2026-09-04: 파란 등축 슬래브(favicon.svg)를 운영자가 준 보라 C 마크로 갈았다.
+    // .ico 가 없어 /favicon.ico 요청이 404 로 떨어지고 있었다 — 주소창을 직접 치는
+    // 브라우저와 북마크가 그 자리를 먼저 본다.
+    icon: [
+      { url: "/favicon.ico?v=4", sizes: "16x16 24x24 32x32 48x48 64x64" },
+      { url: "/icon-192.png?v=4", type: "image/png", sizes: "192x192" },
+      { url: "/icon-512.png?v=4", type: "image/png", sizes: "512x512" },
+    ],
+    shortcut: "/favicon.ico?v=4",
+    apple: "/apple-touch-icon.png?v=4",
   },
+  manifest: "/manifest.webmanifest",
 };
 
 /**

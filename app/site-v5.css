@@ -81,9 +81,9 @@ html:has(.cv5) body { background: var(--v5-bg0, #06070f); }
 .cv5 > main, .cv5 > footer { position: relative; z-index: 1; }
 
 /* ---------------------------------------------------------------- nav */
-/* 내비는 첫 화면의 어떤 무대보다도 위에 선다. 가챠 무대의 글줄(z 4)·카드(z 5)와
-   3D 캔버스는 main(z 1) 안에 살지만, 그 안에서 층이 올라가도 메뉴를 덮지 못하게
-   못을 박아 둔다(2026-09-03 운영자: "기계가 위 메뉴를 가린다"). */
+/* 내비는 첫 화면의 어떤 무대보다도 위에 선다. 첫 화면이 무엇을 얹든 main(z 1) 안에
+   살지만, 그 안에서 층이 올라가도 메뉴를 덮지 못하게 못을 박아 둔다
+   (2026-09-03 운영자: "기계가 위 메뉴를 가린다"). */
 .cv5 .sitenav-dock { position: fixed; inset: 0 0 auto 0; z-index: 80; }
 .cv5 .sitenav-dock::before {
   content: ""; position: absolute; inset: 0;

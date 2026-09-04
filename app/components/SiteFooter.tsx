@@ -46,7 +46,7 @@ export function SiteFooter() {
       {/* 전자상거래법 제10조 표시사항 — 사업자등록증명 값 그대로. 한 블록, 한 줄. */}
       <div className="cv5-frame cv5-footer-legal">
         <div className="cv5-footer-biz">
-          <strong>주식회사 아르테미스</strong>
+          <strong>아르테미스</strong>
           <span>대표: 박준성</span>
           <span>사업자등록번호: 361-02-03814</span>
           <span>사업장 주소: 인천광역시 제물포구 화도진로 16</span>

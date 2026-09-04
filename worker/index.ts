@@ -83,6 +83,14 @@ const worker = {
   },
 };
 
+const CSP_BASE = "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none';"
+  + " form-action 'self' https://accounts.google.com https://github.com;"
+  + " img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:;"
+  + " connect-src 'self' https://cloudflareinsights.com";
+
+const ENFORCED_CSP = `${CSP_BASE}; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com`;
+const REPORT_ONLY_CSP = `${CSP_BASE}; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://static.cloudflareinsights.com`;
+
 function withSecurityHeaders(response: Response): Response {
   const values: Record<string, string> = {
     // Without HSTS the first visit to clunk.games can still be answered over plain
@@ -93,7 +101,26 @@ function withSecurityHeaders(response: Response): Response {
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "X-Frame-Options": "DENY",
     "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
-    "Content-Security-Policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self' https://accounts.google.com https://github.com; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com; connect-src 'self' https:; font-src 'self' data:",
+    // CSP. 두 벌을 함께 보냅니다 — 지금 강제하는 것과, 다음에 강제할 것을 미리 재는 것.
+    //
+    // connect-src 는 'https:' 였습니다. 스크립트가 한 번 주입되면 아무 https 주소로나
+    // 데이터를 실어 보낼 수 있다는 뜻입니다. 브라우저가 실제로 붙는 곳은 자기 자신뿐이고
+    // (marketplace 를 열어 resource timing 으로 확인), OAuth 토큰 교환처럼 바깥으로 나가는
+    // 호출은 전부 워커 안에서 일어나 connect-src 의 대상이 아닙니다. 남긴 하나는 Cloudflare
+    // 웹 분석 비콘으로, 대시보드에서 켜면 그때부터 보고를 보냅니다.
+    "Content-Security-Policy": ENFORCED_CSP,
+    // script-src 에서 'unsafe-eval' 을 뺀 판. 2026-09-04 라이브에서 보고를 받아 보니
+    // WebAssembly 컴파일 위반이 하나 잡혔습니다 — three 의 MeshoptDecoder 가 압축된
+    // GLB(EXT_meshopt_compression)를 푸는 데 씁니다(app/components/AssetPreview.tsx).
+    // 그래서 그냥 뺄 수는 없고, WebAssembly 만 허용하고 eval 과 new Function 은 계속
+    // 막는 'wasm-unsafe-eval' 로 좁힙니다. 이 값을 모르는 옛 브라우저(Safari 16.4 미만)
+    // 에서는 뷰어가 동작하지 않으므로, 보고가 0 인 것을 다시 확인한 뒤 강제로 옮깁니다.
+    //
+    // 'unsafe-inline' 은 여기서도 못 뺍니다. vinext 가 RSC 청크마다 인라인 스크립트를
+    // 뿜어 첫 화면 한 장에 939 개가 실리고, 내용이 매번 달라 해시로 고정할 수 없습니다.
+    // 길은 nonce 뿐인데(vinext 가 options.scriptNonce 를 받습니다) 요청마다 값을 만들어
+    // SSR 진입점과 이 헤더에 함께 넣어야 하므로 따로 다룹니다.
+    "Content-Security-Policy-Report-Only": REPORT_ONLY_CSP,
   };
   try {
     for (const [name, value] of Object.entries(values)) response.headers.set(name, value);

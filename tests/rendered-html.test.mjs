@@ -23,31 +23,30 @@ test("server-renders the Clunk landing page", async () => {
   assert.match(html, /<title>[^<]*게임 에셋[^<]*\| Clunk<\/title>/i);
   assert.doesNotMatch(html, /파운드리|Foundry/i);
   assert.match(html, /단 하나의 AI 슈퍼앱/);
-  // 2026-09-02: the first viewport is one capsule machine — the operator's own picture
-  // of the product ("들어가자마자 자판기가 나와서 레버 당기라고 되어 있고 … 게임 속
-  // 캐릭터 뽑히면 나오는 가챠 연출처럼"). The headline says what to do, the line under it
-  // says what happens, and the machine explains the brand's name where the capsule lands.
-  // The old four-cabinet hall ("자판기 홀", "마켓에 올라와 있는 에셋") went with it.
-  // 2026-09-02 (2): the headline reads like a game's own UI — short and big — and the
-  // handle is one you pull, not one you turn.
-  // 2026-09-03 (운영자 목업): 제목은 왼쪽 칸에서 두 줄로 서고 "뽑기" 가 강조색을 갖는다.
-  assert.match(html, /게임 에셋<br\/?>\s*<em>뽑기<\/em>/);
-  assert.match(html, /레버를 당기면 마켓의 에셋이 캡슐로 떨어집니다/);
-  // The machine is already standing in the server's first paint: the canvas host and the
-  // lever's own line ship in the HTML, and nothing says the machine is still filling up.
-  assert.match(html, /gc3-canvas/);
-  assert.match(html, /레버를 당기세요/);
-  assert.doesNotMatch(html, /머신에 캡슐을 채우는 중/);
-  // 2026-09-02: WebGL 이 첫 프레임을 내기 전(그리고 스크립트가 아예 돌지 않을 때)에도
-  // 같은 기계가 같은 자리에 서 있어야 한다 — 서버가 그린 SVG 포스터가 HTML 에 실린다.
-  assert.match(html, /gc3-poster/);
-  assert.match(html, /유리 돔에 캡슐이 가득 든 CLUNK 뽑기 기계/);
-  // 무대 위에는 값이나 베타 이야기가 붙지 않는다. 그 말은 뽑은 뒤 카드에서만 읽는다.
+  // 2026-09-04: the capsule machine was never the landing. It replaced one -- headline,
+  // three numbered sections, a live market shelf, a closing call -- and the card processor
+  // read the machine as gambling and refused the account over it. The landing was restored
+  // from add0989, the last commit before the vending hall, so the headline pinned here is
+  // the one that stood before. The retired wording ("뽑기", "레버", "캡슐", "자판기 홀") is
+  // pinned out across every screen in tests/no-gacha-contract.test.mjs.
+  assert.match(html, /게임 제작의 모든 과정을<br\/?>\s*<em>CLUNK 하나로<\/em>/);
+  // 깎여 나갔던 자리들 — 섹션 01(제작)과 마무리 부름이 다시 서 있는지 본다. "가챠가
+  // 없다"만 검사하면 지금 없는 것은 잡아도 있어야 할 것이 사라진 것은 못 잡는다.
+  assert.match(html, /게임 에셋 제작/);
+  assert.match(html, /필요한 에셋부터/);
+  assert.match(html, /무료로 시작하기/);
+  // The shelf itself ships in the first paint, and it is the live catalogue's own grid.
+  assert.match(html, /cv5-showcase-live/);
+  assert.match(html, /마켓 에셋 미리보기/);
+  assert.match(html, /마켓 둘러보기/);
+  // 값을 파는 화면이 아니다 — 낱개 가격도, 베타 무료 이야기도 붙지 않는다.
   assert.doesNotMatch(html, /베타 무료/);
-  assert.doesNotMatch(html, /손잡이를 돌리/);
   assert.match(html, /게임 에셋 검사 및 수정/);
   assert.match(html, /게임 제작 에이전트/);
-  assert.doesNotMatch(html, /자판기 홀|마켓에 올라와 있는 에셋</);
+  assert.doesNotMatch(html, /뽑기|캡슐|자판기|가챠|레버/);
+  // "마켓에 올라와 있는 에셋" 은 원래 진열장 제목이라 금지어에서 뺐다 — 기계를 치우던
+  // 동안 잠깐 사라졌을 뿐이고, 지금은 있어야 하는 자리다.
+  assert.doesNotMatch(html, /자판기 홀/);
   assert.doesNotMatch(html, /DEMO MODE|실제 제작부터|에셋 만들기|CONTRACT_FIXTURE|SAMPLE/);
   assert.doesNotMatch(html, /Your site is taking shape|react-loading-skeleton|codex-preview/);
 });
@@ -96,7 +95,7 @@ test("landing language covers the full 2D and 3D asset path", async () => {
   // reader what the number is for. The contract follows the fact, not the slogan.
   // 2026-09-02 (2): the long hero paragraph became a machine's own name plate. The
   // contract is still that the landing names all three kinds it actually sells.
-  assert.match(html, /3D 모델 · 스프라이트 시트 · 이어붙는 텍스처/);
+  assert.match(html, /3D 모델, 2D 스프라이트 시트, 이어 붙여도 이음매가 안 보이는 텍스처/);
   assert.match(html, /게임 적합도/);
   // 2026-09-01: the three section labels are Korean now — the Korean reference
   // sites the master gave (meshy.ai/ko, aetherforgeai.com/ko) use no English

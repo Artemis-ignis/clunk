@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { requireUser } from "../auth";
-import { ensureSchema, getRuntimeDb } from "../api/_lib/clunk";
+import { readConsentState } from "../api/_lib/reads";
 import { safeOAuthReturnPath } from "../oauth";
 import { SiteNav } from "../components/SiteNav";
 import { SiteFooter } from "../components/SiteFooter";
@@ -34,13 +34,8 @@ export default async function ConsentPage({
   const returnTo = safeOAuthReturnPath(params.return_to ?? "/dashboard");
   const user = await requireUser(`/consent?return_to=${encodeURIComponent(returnTo)}`);
 
-  const db = getRuntimeDb();
-  await ensureSchema(db);
-  const row = await db
-    .prepare(`SELECT consented_at AS consentedAt FROM clunk_users WHERE id = ? LIMIT 1`)
-    .bind(user.id)
-    .first<{ consentedAt: string | null }>();
-  if (row?.consentedAt) redirect(returnTo);
+  const consent = await readConsentState(user.id);
+  if (consent.consentedAt) redirect(returnTo);
 
   return (
     <div className="cv5 cv5-auth-shell">

@@ -25,7 +25,30 @@ export type ListingFacts = {
   members: number | null;
   viewYawDegrees?: number | null;
   sheet: { cell: number; directions: number; frames: number | null; cuts: number | null } | null;
-  texture: { resolution: string; seamless: boolean } | null;
+  /**
+   * Tile facts, for a listing whose product is a texture.
+   *
+   * `seamless` is not a word taken from the title: it is the measurement below passing
+   * the shop's bar. `seamLeftRight` / `seamTopBottom` are the wrap-edge pixel difference
+   * divided by the same measure inside the tile, so 1.0 means the join cannot be told
+   * from the interior and anything at or under 1.15 is what the shop calls seamless.
+   * `sharpness` is the mean |Laplacian| over the tile. Measured by
+   * scripts/texture-seam-cli.mjs into app/data/texture-seam-measurements.json.
+   */
+  texture: {
+    resolution: string;
+    seamless: boolean;
+    seamLeftRight?: number;
+    seamTopBottom?: number;
+    sharpness?: number;
+    /** Colour tiles in this listing. More than one means variants that share a border and may be mixed. */
+    colourVariants?: number;
+    /** The extra map kinds that ship beside each colour tile. */
+    maps?: string[];
+    /** Every file the buyer receives, and what they weigh together. */
+    files?: number;
+    totalBytes?: number;
+  } | null;
   inspection: { webScore: number; mobileScore: number; hardBlockers: number; note: string | null } | null;
 };
 
@@ -85,7 +108,16 @@ export function fileRow(facts: ListingFacts): FactRow {
     return { id: "file", head, tail: grid };
   }
   if (facts.texture) {
-    return { id: "file", head, tail: `${facts.texture.resolution} · 이어붙는 타일` };
+    const t = facts.texture;
+    /* A tile product is no longer one PNG: the colour comes with a normal and a
+       roughness map, and two of them come as three mixable colour variants. The row
+       says how many files and what they weigh together, because that is what the
+       buyer is actually handed. */
+    const parts = [`${t.resolution} · 이어붙는 타일`];
+    if (t.colourVariants && t.colourVariants > 1) parts.push(`섞어 깔 수 있는 변형 ${t.colourVariants}장`);
+    if (t.files && t.totalBytes) parts.push(`파일 ${t.files}장 합계 ${formatBytes(t.totalBytes)}`);
+    else if (t.maps?.length) parts.push("노멀·러프니스 맵 포함");
+    return { id: "file", head, tail: parts.join(" · ") };
   }
   return {
     id: "file",
@@ -112,6 +144,16 @@ export function factRows(facts: ListingFacts): FactRow[] {
     rows.push({ id: "size", head: `${x.toFixed(2)} × ${y.toFixed(2)} × ${z.toFixed(2)} m`, tail: "실제 크기" });
   }
   rows.push(fileRow(facts));
+  /* The one claim a tile listing lives or dies on, stated as the number rather than
+     as the adjective. It is only shown when the tile was actually measured. */
+  if (facts.texture?.seamLeftRight !== undefined && facts.texture.seamTopBottom !== undefined) {
+    const t = facts.texture;
+    rows.push({
+      id: "seam",
+      head: `이음매 좌우 ×${t.seamLeftRight!.toFixed(2)} · 상하 ×${t.seamTopBottom!.toFixed(2)}`,
+      tail: `타일 안쪽 인접 픽셀차 대비 배율입니다. 1.0이면 이은 자리를 타일 내부와 구분할 수 없고, 1.15 이하를 이어붙는 것으로 봅니다${t.sharpness !== undefined ? ` · 선명도 ${t.sharpness}` : ""}`,
+    });
+  }
   const moving = movingRow(facts);
   if (moving) rows.push(moving);
   rows.push({
@@ -140,7 +182,11 @@ export function cardSpec(facts: ListingFacts | null | undefined): string | null 
       ? `${facts.sheet.cell}×${facts.sheet.cell} · ${facts.sheet.directions}방향`
       : `${facts.sheet.cell}×${facts.sheet.cell} · ${facts.sheet.cuts}컷`;
   }
-  if (facts.texture) return `${facts.texture.resolution} · 이어붙는 타일`;
+  if (facts.texture) {
+    return facts.texture.colourVariants && facts.texture.colourVariants > 1
+      ? `${facts.texture.resolution} · 이어붙는 타일 ${facts.texture.colourVariants}장`
+      : `${facts.texture.resolution} · 이어붙는 타일`;
+  }
   return null;
 }
 
