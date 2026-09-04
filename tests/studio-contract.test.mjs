@@ -109,7 +109,15 @@ test("each lane says what it really produces before the credit is spent", async 
 
   // 2D is the ONLY lane on /api/generation, because that is the only route that
   // asks Workers AI and the only one that enforces the daily image budget.
-  assert.match(workbench, /assetKind === "2d-image"[\s\S]{0,80}"\/api\/generation"[\s\S]{0,20}"\/api\/series"/);
+  //
+  // 2026-09-04: the branch reads the kind captured for this run (assetKindNow) and
+  // names the endpoint on the next line, so the pin follows the two statements that
+  // actually decide it instead of a single expression that no longer exists.
+  assert.match(
+    workbench,
+    /const isImage = assetKindNow === "2d-image";[\s\S]{0,160}const endpoint = isImage \? "\/api\/generation" : "\/api\/series";/,
+    "app/components/AssetCreationWorkbench.tsx: 2D만 /api/generation 으로 가고 나머지는 /api/series 로 간다",
+  );
   assert.match(workbench, /promptApplied/);
   assert.match(workbench, /promptNote/);
 
