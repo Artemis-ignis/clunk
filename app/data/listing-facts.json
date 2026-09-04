@@ -1,10 +1,10 @@
 {
   "schema": "clunk.listing-facts.v1",
-  "generatedAt": "2026-09-04T07:41:59.379Z",
+  "generatedAt": "2026-09-04T08:11:36.551Z",
   "sources": [
     "outputs\\market-launch\\wave1\\upload-manifest.json",
     "tmp\\listings-snapshot.json",
-    "배달 파일에서 다시 잰 항목 20건",
+    "배달 파일에서 다시 잰 항목 28건",
     "이전 판에서 유지한 항목 7건"
   ],
   "facts": {
@@ -703,9 +703,9 @@
     },
     "grove-tree-pack-vol1": {
       "triangles": 11008,
-      "materials": 12,
+      "materials": 2,
       "boundsMetres": null,
-      "byteLength": 198464,
+      "byteLength": 1201644,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -715,7 +715,15 @@
       "viewYawDegrees": null,
       "sheet": null,
       "texture": null,
-      "engine": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "vertex",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
       "inspection": null
     },
     "grove-tree-pack-vol1-sprites": {
@@ -1263,7 +1271,7 @@
       "triangles": null,
       "materials": null,
       "boundsMetres": null,
-      "byteLength": 2551409,
+      "byteLength": 2341119,
       "format": "PNG",
       "animatedParts": [],
       "animations": [],
@@ -1283,7 +1291,7 @@
       "triangles": null,
       "materials": null,
       "boundsMetres": null,
-      "byteLength": 3056773,
+      "byteLength": 2709425,
       "format": "PNG",
       "animatedParts": [],
       "animations": [],
@@ -1303,7 +1311,7 @@
       "triangles": null,
       "materials": null,
       "boundsMetres": null,
-      "byteLength": 2871751,
+      "byteLength": 2846591,
       "format": "PNG",
       "animatedParts": [],
       "animations": [],
@@ -1323,7 +1331,7 @@
       "triangles": null,
       "materials": null,
       "boundsMetres": null,
-      "byteLength": 2787486,
+      "byteLength": 2448734,
       "format": "PNG",
       "animatedParts": [],
       "animations": [],
@@ -1343,7 +1351,7 @@
       "triangles": null,
       "materials": null,
       "boundsMetres": null,
-      "byteLength": 2884300,
+      "byteLength": 2584770,
       "format": "PNG",
       "animatedParts": [],
       "animations": [],
@@ -1363,7 +1371,7 @@
       "triangles": null,
       "materials": null,
       "boundsMetres": null,
-      "byteLength": 2554900,
+      "byteLength": 2259654,
       "format": "PNG",
       "animatedParts": [],
       "animations": [],
@@ -1383,7 +1391,7 @@
       "triangles": null,
       "materials": null,
       "boundsMetres": null,
-      "byteLength": 2679667,
+      "byteLength": 2471942,
       "format": "PNG",
       "animatedParts": [],
       "animations": [],

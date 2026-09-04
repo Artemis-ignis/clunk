@@ -349,27 +349,52 @@ export function factsFromListings(
  * 손대지 않는다 — 지어내는 것보다 매니페스트 값을 남기는 편이 낫고, 그 어긋남은
  * tests/listing-facts-truth.test.mjs 가 잡는다.
  */
+/**
+ * 사는 사람이 실제로 받는 파일 하나.
+ *
+ * 폴더에 여러 파일이 있을 때 아무거나 재면 다른 물건을 설명하게 된다 — 나무 묶음이
+ * 1.2MB 인데 그 안의 나무 한 그루(198KB)를 재고 있었다. 상품 이름과 같은 이름의 파일이
+ * 대표다. 그것이 없으면 GLB 가 하나뿐일 때만 그것을 쓴다.
+ */
+function entryFileNameFor(slug: string, marketRoot: string): string | null {
+  let names: string[];
+  try {
+    names = readdirSync(resolve(marketRoot, slug));
+  } catch {
+    return null;
+  }
+  const stem = (name: string) => name.replace(/\.[^.]+$/, "");
+  const named = names.filter((name) => stem(name) === slug && !name.endsWith(".json"));
+  if (named.length === 1) return named[0]!;
+  const glb = names.filter((name) => name.toLowerCase().endsWith(".glb"));
+  return glb.length === 1 ? glb[0]! : null;
+}
+
 function remeasureFromServedFiles(
   facts: Record<string, ListingFact>,
   marketRoot: string,
 ): { facts: Record<string, ListingFact>; corrected: string[] } {
   const corrected: string[] = [];
   for (const [slug, fact] of Object.entries(facts)) {
-    // inspectAsset 은 번들 안의 상대 경로를 받는다. 파일 이름 하나면 충분하다.
-    let name: string | null = null;
-    try {
-      const names = readdirSync(resolve(marketRoot, slug)).filter((n) => n.toLowerCase().endsWith(".glb"));
-      if (names.length !== 1) continue; // 어느 것이 대표인지 여기서 정하지 않는다
-      name = names[0]!;
-    } catch {
-      continue; // 3D 가 아닌 상품
-    }
+    const name = entryFileNameFor(slug, marketRoot);
+    if (!name) continue;
     let bytes: Buffer;
     try {
       bytes = readFileSync(resolve(marketRoot, slug, name));
     } catch {
       continue;
     }
+
+    // 3D 가 아닌 상품(타일 그림, 시트)도 크기는 다시 잰다. 크기가 어긋나면 상품 머리글과
+    // 사양 줄이 한 화면에서 서로 다른 숫자를 말한다.
+    if (!name.toLowerCase().endsWith(".glb")) {
+      if (fact.byteLength === bytes.byteLength) continue;
+      corrected.push(`${slug}: 용량 ${fact.byteLength ?? "-"}→${bytes.byteLength} (${name})`);
+      facts[slug] = { ...fact, byteLength: bytes.byteLength };
+      continue;
+    }
+
+    // inspectAsset 은 번들 안의 상대 경로를 받는다. 파일 이름 하나면 충분하다.
     const report = inspectAsset({ entry: name, files: new Map([[name, new Uint8Array(bytes)]]) });
     const triangles = numberOrNull(report?.metrics?.triangleCount);
     const materials = numberOrNull(report?.metrics?.materialCount);
