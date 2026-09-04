@@ -1,6 +1,6 @@
 {
   "schema": "clunk.listing-facts.v1",
-  "generatedAt": "2026-09-04T08:21:24.639Z",
+  "generatedAt": "2026-09-04T08:22:59.298Z",
   "sources": [
     "outputs\\market-launch\\wave1\\upload-manifest.json",
     "tmp\\listings-snapshot.json",
@@ -710,10 +710,10 @@
       "inspection": null
     },
     "grove-tree-pack-vol1": {
-      "triangles": 1810,
+      "triangles": 11008,
       "materials": 2,
       "boundsMetres": null,
-      "byteLength": 198464,
+      "byteLength": 1201644,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],

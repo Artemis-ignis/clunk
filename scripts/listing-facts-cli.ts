@@ -377,10 +377,12 @@ function entryFileNameFor(slug: string, marketRoot: string, fromManifest?: Map<s
   } catch {
     // 묶음 상품은 자기 폴더가 없다. 부품이 각자 자기 폴더에 있고 묶음은 그것을 건네준다.
   }
-  if (declared && names.includes(declared)) return `${slug}/${declared}`;
+  // 상품 이름을 그대로 단 파일이 대표다. 매니페스트보다 먼저 보는 이유는, 나무 묶음처럼
+  // 부품을 하나로 합쳐 다시 낸 상품에서 매니페스트가 아직 부품 하나를 가리키기 때문이다.
   const stem = (name: string) => name.replace(/\.[^.]+$/, "");
   const named = names.filter((name) => stem(name) === slug && !name.endsWith(".json"));
   if (named.length === 1) return `${slug}/${named[0]!}`;
+  if (declared && names.includes(declared)) return `${slug}/${declared}`;
   const glb = names.filter((name) => name.toLowerCase().endsWith(".glb"));
   if (glb.length === 1) return `${slug}/${glb[0]!}`;
   // 묶음이 건네주는 첫 파일은 부품의 폴더에 있다. 이름으로 찾는다.
