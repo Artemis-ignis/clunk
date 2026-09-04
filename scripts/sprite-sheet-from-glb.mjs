@@ -34,6 +34,10 @@ import { deflateSync } from "node:zlib";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
+import { NodeIO } from "@gltf-transform/core";
+import { ALL_EXTENSIONS } from "@gltf-transform/extensions";
+import { MeshoptDecoder as MeshoptWasmDecoder, MeshoptEncoder } from "meshoptimizer";
+import sharp from "sharp";
 
 // --- Arguments ---------------------------------------------------------------------------
 const positional = [];
@@ -153,8 +157,56 @@ function encodePngRgba(width, height, rgba) {
   ]);
 }
 
+/**
+ * 색표 그림으로 구운 파일을 정점 색으로 되돌린다 — 굽기의 정확한 역과정.
+ *
+ * 왜 여기서. three 의 GLTFLoader 는 GLB 안에 든 그림을 브라우저 방식으로만 푼다
+ * (`self.URL`, `document`). Node 에서는 텍스처가 하나라도 있으면 파일을 열다가 멈춘다.
+ * 2026-09-04 정점 색을 색표로 옮기기 시작하면서 마켓의 모든 3D 상품에 그림이 생겼으므로,
+ * 열기 전에 색을 정점으로 되돌려 이 스크립트가 늘 다뤄 온 모양으로 만든다. 아래 셈은
+ * 손댈 필요가 없다.
+ *
+ * 그림은 sRGB 로 저장돼 있고 COLOR_0 는 선형이므로 되돌리며 변환한다.
+ */
+async function unbakePalette(buffer) {
+  const io = new NodeIO()
+    .registerExtensions(ALL_EXTENSIONS)
+    .registerDependencies({ "meshopt.decoder": MeshoptWasmDecoder, "meshopt.encoder": MeshoptEncoder });
+  const doc = await io.readBinary(new Uint8Array(buffer));
+  const textures = doc.getRoot().listTextures();
+  if (textures.length !== 1) return buffer; // 색표가 아닌 파일은 건드리지 않는다
+  const { data, info } = await sharp(Buffer.from(textures[0].getImage()))
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const toLinear = (v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+
+  let restored = 0;
+  for (const mesh of doc.getRoot().listMeshes()) {
+    for (const prim of mesh.listPrimitives()) {
+      const uv = prim.getAttribute("TEXCOORD_0");
+      if (!uv) continue;
+      const n = uv.getCount();
+      const colours = new Float32Array(n * 3);
+      for (let i = 0; i < n; i += 1) {
+        const [u, v] = uv.getElement(i, [0, 0]);
+        const x = Math.min(info.width - 1, Math.max(0, Math.floor(u * info.width)));
+        const y = Math.min(info.height - 1, Math.max(0, Math.floor(v * info.height)));
+        const at = (y * info.width + x) * info.channels;
+        for (let k = 0; k < 3; k += 1) colours[i * 3 + k] = toLinear(data[at + k] / 255);
+      }
+      prim.setAttribute("COLOR_0", doc.createAccessor().setType("VEC3").setArray(colours));
+      prim.setAttribute("TEXCOORD_0", null);
+      restored += 1;
+    }
+  }
+  if (!restored) return buffer;
+  for (const material of doc.getRoot().listMaterials()) material.setBaseColorTexture(null);
+  for (const texture of doc.getRoot().listTextures()) texture.dispose();
+  return Buffer.from(await io.writeBinary(doc));
+}
+
 // --- Scene -------------------------------------------------------------------------------
-const bytes = await readFile(resolve(glbPath));
+const bytes = await unbakePalette(await readFile(resolve(glbPath)));
 const arrayBuffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
 const loader = new GLTFLoader();
 loader.setMeshoptDecoder(MeshoptDecoder);
@@ -167,19 +219,6 @@ root.updateMatrixWorld(true);
  * Re-run per pose: a rotated pivot changes matrixWorld, and the triangles are what the
  * rasteriser sees, so a cached list would draw every frame in the rest pose.
  */
-/**
- * 색표 그림의 픽셀을 꺼낸다.
- *
- * 이 스크립트는 three.js 로 그리지 않고 직접 삼각형을 칠하기 때문에, 텍스처가 있어도
- * 저절로 반영되지 않는다. 색표는 32×1 처럼 아주 작아 통째로 읽어 두면 된다.
- */
-function readPaletteTexels(map) {
-  const image = map?.image;
-  if (!image || !image.width || !image.height) return null;
-  const data = image.data ?? image.__data;
-  if (!data) return null;
-  return { data, width: image.width };
-}
 function collectTriangles() {
   const triangles = [];
   const a = new THREE.Vector3();
@@ -194,11 +233,6 @@ function collectTriangles() {
     // attribute with a white material over it. Reading only the material turns every
     // vertex-coloured model — every tree and crate in this catalogue — into a white blob.
     const vertexColour = node.geometry.attributes.color;
-    // 2026-09-04: 정점 색을 작은 색표 그림으로 옮긴 파일이 생겼다
-    // (scripts/bake-vertex-colour-palette.mjs). 그 파일에는 COLOR_0 이 없고 색이 텍스처에
-    // 들어 있으므로, 여기서 읽지 않으면 시트가 통째로 흰색이 된다.
-    const uvAttr = node.geometry.attributes.uv;
-    const palette = readPaletteTexels(node.material?.map);
     const colour = node.material?.color?.getHex(THREE.SRGBColorSpace) ?? 0xcccccc;
     const materialRgb = [((colour >> 16) & 255) / 255, ((colour >> 8) & 255) / 255, (colour & 255) / 255];
     // glTF stores COLOR_0 linear; the material path above came back through sRGB, so the
@@ -219,13 +253,7 @@ function collectTriangles() {
       b.fromBufferAttribute(position, i1).applyMatrix4(node.matrixWorld);
       c.fromBufferAttribute(position, i2).applyMatrix4(node.matrixWorld);
       let rgb = materialRgb;
-      if (!vertexColour && palette && uvAttr) {
-        // 세 꼭짓점이 같은 칸을 가리키므로 하나만 읽어도 된다. 그림은 sRGB 로 저장돼
-        // 있고 아래 셈은 sRGB 로 하므로 변환이 필요 없다.
-        const u = (uvAttr.getX(i0) + uvAttr.getX(i1) + uvAttr.getX(i2)) / 3;
-        const x = Math.min(palette.width - 1, Math.max(0, Math.floor(u * palette.width)));
-        rgb = [0, 1, 2].map((k) => (palette.data[x * 4 + k] / 255) * materialRgb[k]);
-      } else if (vertexColour) {
+      if (vertexColour) {
         // Flat shading already treats the face as one colour, so the face takes the mean
         // of its three vertices rather than interpolating across it.
         const v0 = readVertexColour(i0);

@@ -96,7 +96,9 @@ export function clusterSamples(samples: ColourSample[]): PaletteEntry[] {
  * 함수가 모든 상품을 흰색으로 보고한다. 그림은 32×1 정도라 한 번 읽어 두면 삼각형마다
  * 좌표로 바로 찾을 수 있다.
  */
-function readTexels(map: import("three").Texture | null | undefined): { data: Uint8ClampedArray; width: number } | null {
+function readTexels(
+  map: import("three").Texture | null | undefined,
+): { data: Uint8ClampedArray; width: number; height: number } | null {
   const image = map?.image as (HTMLImageElement | ImageBitmap | HTMLCanvasElement | undefined);
   const width = (image as { width?: number } | undefined)?.width ?? 0;
   const height = (image as { height?: number } | undefined)?.height ?? 0;
@@ -108,7 +110,7 @@ function readTexels(map: import("three").Texture | null | undefined): { data: Ui
     const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return null;
     ctx.drawImage(image as CanvasImageSource, 0, 0);
-    return { data: ctx.getImageData(0, 0, width, height).data, width };
+    return { data: ctx.getImageData(0, 0, width, height).data, width, height };
   } catch {
     // 다른 출처에서 온 그림은 픽셀을 읽지 못한다. 그 경우 재질색만으로 답한다.
     return null;
@@ -134,7 +136,10 @@ export function readPalette(
   model: import("three").Object3D,
 ): PaletteEntry[] {
   const samples: ColourSample[] = [];
-  const texels = new Map<import("three").Texture, { data: Uint8ClampedArray; width: number } | null>();
+  const texels = new Map<
+    import("three").Texture,
+    { data: Uint8ClampedArray; width: number; height: number } | null
+  >();
   const a = new THREE.Vector3();
   const b = new THREE.Vector3();
   const c = new THREE.Vector3();
@@ -191,8 +196,10 @@ export function readPalette(
           const sheet = texels.get(map);
           if (sheet) {
             const u = (uv.getX(i0) + uv.getX(i1) + uv.getX(i2)) / 3;
+            const v = (uv.getY(i0) + uv.getY(i1) + uv.getY(i2)) / 3;
             const x = Math.min(sheet.width - 1, Math.max(0, Math.floor(u * sheet.width)));
-            const at = x * 4;
+            const y = Math.min(sheet.height - 1, Math.max(0, Math.floor(v * sheet.height)));
+            const at = (y * sheet.width + x) * 4;
             // 그림은 sRGB 로 저장돼 있고 이 함수는 선형으로 셈한다.
             r *= srgbToLinearChannel(sheet.data[at] / 255);
             g *= srgbToLinearChannel(sheet.data[at + 1] / 255);
