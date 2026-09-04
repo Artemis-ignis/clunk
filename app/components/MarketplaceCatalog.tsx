@@ -15,8 +15,10 @@ import {
   type ListingFacts,
 } from "./listing-facts-rows";
 import styles from "../marketplace/marketplace.module.css";
-// 뽑기 화면과 같은 등급(S/A/B/C) — 같은 규칙, 같은 색. 가게 안의 진열대와 기계가 한 가게다.
-import { gradeOf } from "./gacha/gacha-catalog";
+// 등급(S/A/B/C)은 마켓의 단일 규칙이다(catalog-facts.GRADE_RULE). 값이 아니라 크기와
+// 동작을 보고 매기므로 판매와 무관하고, 무엇을 받을 수 있는지는 등급이 아니라
+// 접근권(무료 등급 / 구독)이 정한다.
+import { gradeOf, isFreeGrade } from "./catalog-facts";
 import { useProductWebMcp } from "../webmcp/useProductWebMcp";
 
 type Listing = {
@@ -25,7 +27,7 @@ type Listing = {
   title: string;
   description: string;
   priceCents: number;
-  accessTier?: "free" | "pro";
+
   currency: string;
   licenseStatus: string;
   status: string;
@@ -66,7 +68,7 @@ type ListingVariant = {
   slug: string;
   title: string;
   priceCents: number;
-  accessTier?: "free" | "pro";
+
   currency: string;
   assetId: string;
   entryFileName: string;
@@ -105,8 +107,15 @@ type CheckoutResponse = {
  * 구독이 살아 있어야 받는다. 값을 보여 줄 자리가 아니라 받을 수 있는지를
  * 보여 줄 자리다.
  */
-function isFreeTier(listing: { accessTier?: "free" | "pro" }): boolean {
-  return listing.accessTier !== "pro";
+/**
+ * 이 상품을 로그인만으로 받을 수 있는가.
+ *
+ * 저장해 둔 컬럼(access_tier)이 아니라 등급에서 바로 계산한다. 컬럼은 등급과 어긋날 수
+ * 있고, 어긋난 순간 카드는 "무료"라고 적는데 문은 잠기거나 그 반대가 된다. 다운로드
+ * 문지기(app/api/marketplace/assets/[assetId]/route.ts)도 같은 두 함수를 부른다.
+ */
+function isFreeTier(listing: { title: string; description: string; entryFileName: string; variants?: unknown; clips?: unknown; facts?: unknown }): boolean {
+  return isFreeGrade(cardGrade(listing));
 }
 
 const SNIPPET_TABS = [
@@ -988,14 +997,14 @@ function getPreviewUrl(listing: Pick<Listing, "assetId" | "previewFileName">): s
  * not the way the HTTP layer does. "MODEL/GLTF-BINARY" is a content-type header
  * and nobody shops by content-type header.
  */
-/** 카드 위 캡슐 칩의 등급. 뽑기 화면의 gradeOf 와 같은 규칙을 같은 사실(facts)로 돌린다. */
-function cardGrade(listing: { title: string; description: string; entryFileName: string; variants?: unknown; facts?: unknown }): "S" | "A" | "B" | "C" {
+/** 카드 위 등급 칩. 마켓의 단 하나의 규칙(catalog-facts.gradeOf)을 같은 사실(facts)로 돌린다. */
+function cardGrade(listing: { title: string; description: string; entryFileName: string; variants?: unknown; clips?: unknown; facts?: unknown }): "S" | "A" | "B" {
   return gradeOf({
     title: listing.title,
     description: listing.description ?? "",
     entryFileName: listing.entryFileName ?? "",
     variants: (listing.variants ?? null) as never,
-    clips: null,
+    clips: (listing.clips ?? null) as never,
     facts: (listing.facts ?? null) as never,
   } as never).letter;
 }

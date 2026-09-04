@@ -1,7 +1,7 @@
 "use client";
 
 import { GRADE_RULE_EN, factsOf, findListing, loadCatalog, searchAssets } from "./catalog";
-import { GACHA_THEMES, GRADE_RULE } from "../components/gacha/gacha-catalog";
+import { CATALOG_THEMES, GRADE_RULE } from "../components/catalog-facts";
 import {
   asRecord,
   boolProp,
@@ -41,7 +41,7 @@ export function createGlobalTools(): WebMcpTool[] {
       inputSchema: objectSchema({
         query: stringProp("Free text. Matched against the slug, title and description."),
         theme: enumProp("Restrict to one theme of the shop's dial.", ["all", "structure", "prop", "tree", "texture"]),
-        grade: enumProp("Restrict to one grade.", ["S", "A", "B", "C"]),
+        grade: enumProp("Restrict to one grade.", ["S", "A", "B"]),
         maxPolygons: numberProp("Only assets whose measured triangle count is at most this.", { minimum: 1 }),
         minPolygons: numberProp("Only assets whose measured triangle count is at least this.", { minimum: 1 }),
         hasAnimation: boolProp("Only assets that carry animation clips or named moving parts."),
@@ -126,8 +126,8 @@ export function createGlobalTools(): WebMcpTool[] {
       inputSchema: objectSchema(),
       execute: () => ({
         ok: true,
-        site: "Clunk — a game-asset shop: draw an asset from the capsule machine, inspect it, and make new ones",
-        site_ko: "Clunk — 게임 에셋 뽑기 · 마켓 · 만들기 · 검사",
+        site: "Clunk — a game-asset shop: browse the catalogue, inspect an asset, and make new ones",
+        site_ko: "Clunk — 게임 에셋 마켓 · 만들기 · 검사",
         here: typeof window === "undefined" ? null : window.location.pathname,
         registeredHere: registeredTools().map((tool) => ({ name: tool.name, surface: tool.surface })),
         pages: Object.entries(PAGES).map(([id, path]) => ({
@@ -141,7 +141,7 @@ export function createGlobalTools(): WebMcpTool[] {
           purpose: doc.purpose.en,
           signedIn: doc.signedIn === true,
         })),
-        themes: GACHA_THEMES.map((theme) => ({ id: theme.id, name_ko: theme.name })),
+        themes: CATALOG_THEMES.map((theme) => ({ id: theme.id, name_ko: theme.name })),
         gradeRule: GRADE_RULE_EN,
         gradeRule_ko: GRADE_RULE,
         signIn: {
@@ -149,7 +149,7 @@ export function createGlobalTools(): WebMcpTool[] {
           how_ko: "브라우저에서 /signup 또는 /login 을 열고 ChatGPT 계정으로 들어옵니다. 에이전트는 사람 대신 로그인하지 않습니다.",
           signupUrl: "/signup",
           loginUrl: "/login",
-          needsSignIn: ["studio_create", "studio_templates", "studio_my_generations", "inspect_url", "gacha_claim"],
+          needsSignIn: ["studio_create", "studio_templates", "studio_my_generations", "inspect_url"],
         },
         manifestPage: "/webmcp",
         serverMcp: "/api/mcp — the same contracts called from a server. Separate from these in-page tools; it does not move this screen.",

@@ -137,7 +137,6 @@ export async function GET(request: Request) {
         priceCents: row.priceCents,
         // 무료 등급인가 구독 전용인가. 낱개 가격이 사라진 뒤로 구매자가 알아야 할
         // 것은 값이 아니라 "지금 받을 수 있는가"다.
-        accessTier: row.accessTier === "free" ? "free" : "pro",
         currency: row.currency,
         assetId: row.assetId,
         entryFileName: row.entryFileName,

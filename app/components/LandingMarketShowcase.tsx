@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "./NativeLink";
 import { isVariantSlug } from "../api/_lib/listing-variants";
+import { categoryOf, gradeOf, isFreeGrade, type CatalogListing, type CategoryId } from "./catalog-facts";
 
 /**
  * The landing used to carry a hand-written copy of the catalogue: twelve slugs,
@@ -13,6 +14,12 @@ import { isVariantSlug } from "../api/_lib/listing-variants";
  *
  * It reads the live catalogue now. One source, so a card cannot show a name the
  * shop does not use or point at a page that is not the thing in the picture.
+ *
+ * 2026-09-04: this is the landing's first viewport again. The capsule machine that stood
+ * here for two days was read as gambling by the card processor and is gone; a shelf shows
+ * what it has and lets the visitor pick. The card says whether the asset is free-tier or
+ * subscription-only, because that is what decides whether the visitor can take it — the
+ * per-asset price it used to print is a number nobody charges any more.
  */
 
 type Listing = {
@@ -25,9 +32,11 @@ type Listing = {
   assetId: string;
   entryFileName: string;
   previewFileName?: string | null;
+  /** 등급을 매기는 잰 값. 목록 응답이 factsFor(slug)로 실어 준다. */
+  facts?: CatalogListing["facts"];
 };
 
-export type ShowcaseCategory = "all" | "structure" | "tree" | "prop" | "texture";
+export type ShowcaseCategory = "all" | CategoryId;
 
 const CATEGORIES: readonly { id: ShowcaseCategory; label: string }[] = [
   { id: "all", label: "전체" },
@@ -37,16 +46,8 @@ const CATEGORIES: readonly { id: ShowcaseCategory; label: string }[] = [
   { id: "texture", label: "텍스처" },
 ];
 
-/** Categories come from the slug the shop already uses, not a second hand list. */
-function categoryOf(listing: Listing): Exclude<ShowcaseCategory, "all"> {
-  const s = listing.slug;
-  if (s.startsWith("tex-") || s.includes("seamless-textures")) return "texture";
-  if (s.includes("tree") || s.includes("grove")) return "tree";
-  if (s.includes("stall") || s.includes("shed") || s.includes("greenhouse") || s.includes("gate") || s.includes("farm-set")) {
-    return "structure";
-  }
-  return "prop";
-}
+/* Categories come from the slug the shop already uses (catalog-facts.categoryOf) — the
+   same rule the shop grid and the agent tools apply, not a second hand-kept list. */
 
 /**
  * The measured head clause the pipeline wrote, or nothing. Never a guess.
@@ -66,16 +67,25 @@ function trisOf(listing: Listing): string | null {
   return null;
 }
 
-function priceOf(listing: Listing, beta: boolean): string {
-  // While there is no payment rail a signed-in visitor is given the file; a price here would be a lie.
+/**
+ * 이 카드를 지금 받을 수 있는가.
+ *
+ * 낱개로 값을 매겨 파는 길이 없어졌으므로 값을 적을 자리도 없다. 남은 축은 등급 하나다 —
+ * 무료 등급은 로그인만 하면 받고, 그 밖은 구독이 살아 있어야 받는다. 결제가 아직 열리지
+ * 않은 동안에는 어느 쪽이든 로그인만으로 받으므로 전부 무료라고 적는다.
+ */
+function accessOf(listing: Listing, beta: boolean): string {
   if (beta) return "무료";
-  if (listing.priceCents === 0) return "무료";
-  try {
-    return new Intl.NumberFormat("ko-KR", { style: "currency", currency: /^[A-Z]{3}$/u.test(listing.currency) ? listing.currency : "KRW" })
-      .format(listing.priceCents / 100);
-  } catch {
-    return `${(listing.priceCents / 100).toLocaleString("ko-KR")}원`;
-  }
+  // 등급에서 바로 계산한다 — 저장해 둔 값은 등급과 어긋날 수 있다(MarketplaceCatalog.isFreeTier와 같은 규칙).
+  const free = isFreeGrade(gradeOf({
+    title: listing.title,
+    description: listing.description ?? "",
+    entryFileName: listing.entryFileName ?? "",
+    variants: null,
+    clips: null,
+    facts: (listing.facts ?? null) as never,
+  } as never).letter);
+  return free ? "무료" : "구독";
 }
 
 function previewOf(listing: Listing): string | null {
@@ -167,7 +177,7 @@ export function LandingMarketShowcase({ limit = 12 }: { limit?: number }) {
                 <span className="cv5-showcase-meta">
                   <b>{listing.title}</b>
                   <span>{tris ?? listing.entryFileName.split(".").pop()?.toUpperCase()}</span>
-                  <i>{priceOf(listing, beta)}</i>
+                  <i>{accessOf(listing, beta)}</i>
                 </span>
               </Link>
             </li>

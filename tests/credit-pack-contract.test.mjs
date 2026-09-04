@@ -153,20 +153,25 @@ test("유료 에셋의 문은 낱개 구매가 아니라 구독으로 열린다"
   assert.match(lib, /CatalogAccess = "free" \| "full"/, "접근권은 두 갈래뿐이다");
 });
 
-test("무료·구독 구분은 가격이 아니라 등급으로 판정한다", async () => {
-  // 낱개로 청구하는 값이 사라졌으므로 price_cents 로 무료 여부를 가르면
-  // 아무도 청구하지 않는 가격이 판정 기준이 되는 셈이다. 등급을 따로 적는다.
-  const lib = await source("app/api/_lib/clunk.ts");
-  assert.match(lib, /clunk_marketplace_listings", "access_tier"/, "리스팅에 등급 컬럼이 있어야 한다");
+test("무료·구독 구분은 저장한 값이 아니라 등급에서 계산한다", async () => {
+  // 2026-09-04. 세 자리가 같은 규칙 하나(catalog-facts.isFreeGrade)를 불러야 한다.
+  // 어느 하나가 저장해 둔 값을 읽기 시작하면 그 값은 언젠가 등급과 어긋나고, 어긋난
+  // 순간 카드는 "무료"라 적는데 문은 잠기거나 구독 전용이 그냥 나간다.
+  const facts = await source("app/components/catalog-facts.ts");
+  assert.match(facts, /export function isFreeGrade/, "등급→접근권 규칙이 있어야 한다");
+  assert.match(facts, /letter === "B"/, "무료로 여는 등급은 B 하나다");
+  assert.doesNotMatch(facts, /GradeLetter = "S" \| "A" \| "B" \| "C"/, "등급은 S·A·B 셋이다");
 
   const route = await source("app/api/marketplace/assets/[assetId]/route.ts");
-  assert.match(route, /access_tier = 'free'/, "게이트가 등급을 읽어야 한다");
-  assert.doesNotMatch(
-    route,
-    /const paid = Number\(listing\.priceCents\) > 0/,
-    "가격으로 무료 여부를 가르던 판정이 남아 있으면 안 된다",
-  );
+  assert.match(route, /isFreeGrade\(gradeOf\(/, "다운로드 문지기가 등급으로 판정해야 한다");
+  assert.doesNotMatch(route, /access_tier|priceCents/, "문지기가 저장해 둔 값을 읽으면 안 된다");
+
+  const catalog = await source("app/components/MarketplaceCatalog.tsx");
+  assert.match(catalog, /return isFreeGrade\(cardGrade\(listing\)\)/, "마켓 카드가 등급으로 판정해야 한다");
+
+  const showcase = await source("app/components/LandingMarketShowcase.tsx");
+  assert.match(showcase, /isFreeGrade\(gradeOf\(/, "첫 화면 진열장도 같은 규칙을 써야 한다");
 
   const catalogue = await source("app/api/marketplace/route.ts");
-  assert.match(catalogue, /accessTier/, "목록 응답이 등급을 실어야 한다");
+  assert.doesNotMatch(catalogue, /accessTier: row\.accessTier/, "응답이 아무도 읽지 않는 등급 값을 실어 나르면 안 된다");
 });

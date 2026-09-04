@@ -1,5 +1,8 @@
 import { getCurrentUser } from "../../../../auth";
 import { getRuntimeAssets, getRuntimeDb, ensureSchema, getCatalogAccessForUser, isSafeRecordId, jsonError, privateJson } from "../../../_lib/clunk";
+import { gradeOf, isFreeGrade } from "../../../../components/catalog-facts";
+import { factsFor } from "../../../_lib/listing-facts";
+import { clipsFor, variantSlugsOf } from "../../../_lib/listing-variants";
 
 export const dynamic = "force-dynamic";
 
@@ -35,19 +38,38 @@ export async function GET(request: Request, context: RouteContext) {
     }
     const db = getRuntimeDb();
     await ensureSchema(db);
-    // 등급으로 가른다. 예전에는 price_cents 가 0보다 큰지로 갈랐지만 낱개로 파는
-    // 값이 사라졌으므로 그 숫자는 아무도 청구하지 않는 가격이다. 같은 에셋이 여러
-    // 상품에 걸려 있으면 가장 넓은 쪽(free)을 따른다 — 한 곳에서 무료로 공개한
-    // 파일을 다른 곳 때문에 막지 않는다.
-    const listing = await db.prepare(
-      `SELECT MIN(CASE WHEN access_tier = 'free' THEN 0 ELSE 1 END) AS proOnly
-       FROM clunk_marketplace_listings
-       WHERE asset_id = ? AND status = 'PUBLISHED'`,
-    ).bind(assetId).first<{ proOnly: number | string | null }>();
-    if (listing?.proOnly === null || listing?.proOnly === undefined) {
+    // 등급이 곧 접근권이다(catalog-facts.isFreeGrade): B는 로그인만 하면 받고, A와 S는
+    // 구독자만 받는다. 저장해 둔 컬럼을 읽지 않는 이유는 그 값이 등급과 어긋날 수 있고,
+    // 어긋난 순간 구독 전용 에셋이 조용히 무료로 나가기 때문이다. 카드 위의 칩과 이
+    // 문지기가 같은 함수를 부르므로 화면과 문이 갈라질 수 없다.
+    //
+    // 같은 에셋이 여러 상품에 걸려 있으면 가장 넓은 쪽(무료)을 따른다 — 한 곳에서 무료로
+    // 공개한 파일을 다른 곳 때문에 막지 않는다.
+    const listings = await db.prepare(
+      `SELECT l.slug, l.title, l.description, a.file_name AS entryFileName
+       FROM clunk_marketplace_listings l
+       JOIN clunk_assets a ON a.id = l.asset_id
+       WHERE l.asset_id = ? AND l.status = 'PUBLISHED'`,
+    ).bind(assetId).all<{ slug: string; title: string; description: string; entryFileName: string }>();
+    if (!listings.results.length) {
       return missing("ASSET_NOT_PUBLISHED", "공개된 상품 중에 이 에셋이 없습니다.", "초안이거나 내려간 상품일 수 있습니다. 목록에서 현재 공개 중인 에셋을 확인하세요.", url.origin);
     }
-    const paid = Number(listing.proOnly) === 1;
+    // 움직임 판정은 이 모델에서 구운 시트의 제목도 본다(hasMotionOf). 제목은 공개된
+    // 상품에서만 읽는다 — 내려간 상품이 등급을 올리면 안 된다.
+    const publishedTitles = await db.prepare(
+      `SELECT slug, title FROM clunk_marketplace_listings WHERE status = 'PUBLISHED'`,
+    ).all<{ slug: string; title: string }>();
+    const titleBySlug = new Map(publishedTitles.results.map((row) => [row.slug, row.title]));
+    const paid = !listings.results.some((row) => isFreeGrade(gradeOf({
+      title: row.title,
+      description: row.description,
+      entryFileName: row.entryFileName,
+      facts: factsFor(row.slug),
+      clips: clipsFor(row.slug),
+      variants: variantSlugsOf(row.slug)
+        .filter((slug) => titleBySlug.has(slug))
+        .map((slug) => ({ slug, title: titleBySlug.get(slug) })),
+    }).letter));
     const artifact = await db.prepare(
       `SELECT aa.file_name AS fileName, aa.content_type AS contentType, aa.object_key AS objectKey, aa.role
        FROM clunk_asset_artifacts aa
