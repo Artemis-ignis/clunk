@@ -238,7 +238,7 @@ const LANE_VALUE_LABELS: Record<string, string> = {
   NOT_RUN: "아직 실행 안 함",
 };
 
-/** 만들기 한 번에 빠지는 크레딧. 두 라우트 모두 amount: -1 로 차감합니다. */
+/** 만들기 한 번에 줄어드는 실행 횟수. 두 라우트 모두 amount: -1 로 기록합니다. */
 const CREDIT_COST = 1;
 
 const SHEET_FRAME_OPTIONS = [4, 6, 8] as const;

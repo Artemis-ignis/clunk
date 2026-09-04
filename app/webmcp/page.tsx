@@ -38,7 +38,7 @@ export default function WebMcpPage() {
             </p>
             <p className={styles.ko}>
               보통 에이전트는 사람이 보는 화면과 다른 곳(서버)에 말을 겁니다. 이 사이트는 화면 자신이
-              도구를 내줍니다. 에이전트가 레버를 당기면 사람이 보고 있던 그 기계가 돌아가고, 모델을
+              도구를 내줍니다. 에이전트가 마켓을 걸러 보면 사람이 보고 있던 그 목록이 그대로 바뀌고, 모델을
               선으로 바꾸면 사람이 보던 모델이 그 자리에서 바뀝니다. 도구가 돌려주는 숫자는 전부 이
               사이트가 실제로 잰 값입니다 — 지어낸 값은 하나도 없습니다.
             </p>
@@ -66,9 +66,8 @@ export default function WebMcpPage() {
 
             <h3 className={styles.subhead}>Without signing in</h3>
             <p>
-              Search the catalogue, read any asset&apos;s measured facts, navigate the site, run the
-              whole capsule machine (set the theme, pull the lever, open the capsule, draw again),
-              and drive the 3D bench on any product page — wireframe, background, grid, shadows,
+              Search the catalogue, read any asset&apos;s measured facts, navigate the site, and drive
+              the 3D bench on any product page — wireframe, background, grid, shadows,
               auto-rotate, motion clips, and the ±30° part test. Asking for the file itself returns
               the sign-up address instead of a download.
             </p>

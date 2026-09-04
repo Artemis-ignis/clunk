@@ -5,8 +5,8 @@
  *
  * 브라우저가 노출하는 명령형 API(`navigator.modelContext.registerTool`, 옛 문서에서는
  * `document.modelContext`)에 도구를 등록한다. 서버 MCP(/api/mcp)와 다른 점은 하나다 —
- * 여기 등록된 도구는 **지금 이 화면**을 움직인다. 에이전트가 레버를 당기면 사람이 보고
- * 있는 그 기계가 돌아가고, 와이어프레임을 켜면 사람이 보던 모델이 그 자리에서 바뀐다.
+ * 여기 등록된 도구는 **지금 이 화면**을 움직인다. 에이전트가 마켓을 걸러 보면 사람이 보고
+ * 있는 그 목록이 그대로 바뀌고, 와이어프레임을 켜면 사람이 보던 모델이 그 자리에서 바뀐다.
  *
  * 규칙 셋:
  *  1. 도구는 평범한 JSON 만 돌려준다. DOM 노드도, undefined 도 내보내지 않는다.
@@ -44,7 +44,7 @@ export type WebMcpStatusDetail = {
 export type RegisteredTool = {
   name: string;
   description: string;
-  /** 어느 화면이 등록했는지 — 전역, 뽑기, 상품, 스튜디오, 검사. */
+  /** 어느 화면이 등록했는지 — 전역, 상품, 스튜디오, 검사. */
   surface: string;
 };
 

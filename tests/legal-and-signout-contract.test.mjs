@@ -491,6 +491,7 @@ const SPEC_SURFACES = [
   "app/components/LandingMarketShowcase.tsx",
   "app/components/review/GlbReviewer.tsx",
   "app/components/listing-facts-rows.ts",
+  "app/portfolio/page.tsx",
 ];
 
 /** 화면 문구만 남긴다: 블록 주석과 줄 주석을 걷어낸다(URL 의 `//` 는 건드리지 않는다). */
