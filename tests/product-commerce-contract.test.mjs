@@ -109,9 +109,6 @@ test("paid checkout requires an explicit withdrawal-waiver consent before any or
   const marketplaceCheckout = await source("app/api/marketplace/checkout/route.ts");
   assert.match(marketplaceCheckout, /withdrawalConsent \!== true/);
   assert.match(marketplaceCheckout, /WITHDRAWAL_CONSENT_REQUIRED/);
-  const creditCheckout = await source("app/api/credits/checkout/route.ts");
-  assert.match(creditCheckout, /withdrawalConsent \!== true/);
-  assert.match(creditCheckout, /WITHDRAWAL_CONSENT_REQUIRED/);
   const catalog = await source("app/components/MarketplaceCatalog.tsx");
   assert.match(catalog, /withdrawalConsent/);
   assert.match(catalog, /청약철회가 제한/);

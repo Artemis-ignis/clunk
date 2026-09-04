@@ -22,7 +22,6 @@ export const SALES_LOCKED_BODY = {
   ok: false as const,
   schema: "clunk.sales-lock.v1" as const,
   status: "SALES_NOT_OPEN" as const,
-  // The lock used to explain itself as paperwork, which read as a broken product. The fact is
-  // simpler: payment is not built yet, so nothing is sold, on purpose.
-  error: "결제 기능이 아직 없어 결제를 받지 않습니다. 지금은 모든 기능을 결제 없이 씁니다.",
+  // 무엇이 없는지가 아니라 지금 무엇이 되는지를 말한다. 읽는 사람에게 필요한 것은 그쪽이다.
+  error: "지금은 로그인만 하면 모든 에셋과 기능이 열립니다.",
 };

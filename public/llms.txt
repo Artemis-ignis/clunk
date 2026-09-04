@@ -9,12 +9,12 @@ Status: Korea first, free open beta since 2026-09-02. Nothing is sold right now.
 - **Marketplace files are granted, not sold.** A signed-in visitor who checks out any listing
   gets `status: "BETA_GRANTED"` and a download URL. No price, no card, no consent-to-waive-
   withdrawal step, because there is no sale. An unauthenticated caller still has to sign in.
-- **Credits are granted, not bought.** A new account receives 25 credits at signup and 30 more
-  each month. There is no credit pack for sale; every pack row is `DRAFT` at price 0 and the
-  checkout refuses it. One successful billable run costs 1 credit; a failed or refused run
-  costs nothing; the same request sent twice is recorded once.
+- **Runs are granted, never bought.** A new account receives 25 runs at signup and 30 more each
+  month. There is nothing to top up: the endpoints that sold credit packs were removed on
+  2026-09-04, and no surface states a price per run. One successful billable run costs 1; a
+  failed or refused run costs nothing; the same request sent twice is recorded once.
 - **Image generation is capped per day.** 8 images per workspace per day. Over the cap the API
-  answers with the Korea-time reset, and no credit is taken.
+  answers with the Korea-time reset, and no run is taken.
 - **Consent is recorded on first sign-in.** After OAuth, before the first workspace page, the
   visitor confirms the terms and the privacy policy on /consent; the answer is written to the
   user row with a timestamp. Every workspace route is gated on that row.
@@ -22,8 +22,10 @@ Status: Korea first, free open beta since 2026-09-02. Nothing is sold right now.
   from a model carries `variantOf: "<parent listing slug>"` in the marketplace API and is kept
   out of the catalogue grid; the parent listing's page is where it is offered. A listing with
   `variantOf: null` is a product of its own. Do not present a sheet as another asset to get.
-- Prices that will apply after the beta are published in advance on https://clunk.games/pricing.
-  Do not quote a per-credit price as if it were in force today.
+- **A listing is free or subscriber-only. There is no per-asset price.** The grade decides:
+  B opens to anyone signed in, A and S open with a subscription. The marketplace API carries no
+  price field, so do not quote one. Subscription prices that will apply after the beta are
+  published in advance on https://clunk.games/pricing.
 
 ## Public surfaces
 

@@ -41,7 +41,7 @@ export async function GET(request: Request) {
         return Response.json({ ok: false, error: "A valid listing slug is required." }, { status: 400 });
       }
       const listing = await db.prepare(
-        `SELECT l.id, l.slug, l.title, l.description, l.price_cents AS priceCents, l.currency,
+        `SELECT l.id, l.slug, l.title, l.description,
           l.license_status AS licenseStatus, l.status, l.asset_id AS assetId,
           l.created_at AS createdAt, l.published_at AS publishedAt,
           a.file_name AS entryFileName, a.format, a.byte_length AS byteLength,
@@ -52,7 +52,7 @@ export async function GET(request: Request) {
          LEFT JOIN clunk_users u ON u.id = (SELECT owner_user_id FROM clunk_workspaces WHERE id = l.workspace_id)
          WHERE l.status = 'PUBLISHED' AND l.slug = ? LIMIT 1`,
       ).bind(slug).first<{
-        id: string; slug: string; title: string; description: string; priceCents: number; currency: string;
+        id: string; slug: string; title: string; description: string;
         licenseStatus: string; status: string; assetId: string; createdAt: string; publishedAt: string | null;
         entryFileName: string; format: string; byteLength: number; sellerName: string | null; previewFileName: string | null;
       }>();
@@ -111,7 +111,7 @@ export async function GET(request: Request) {
       }, { headers: { "cache-control": "public, max-age=30" } });
     }
     const rows = await db.prepare(
-      `SELECT l.id, l.slug, l.title, l.description, l.price_cents AS priceCents, l.currency,
+      `SELECT l.id, l.slug, l.title, l.description,
         l.license_status AS licenseStatus, l.status, l.asset_id AS assetId,
         l.created_at AS createdAt, l.published_at AS publishedAt,
         a.file_name AS entryFileName, a.format, a.byte_length AS byteLength,
@@ -134,8 +134,6 @@ export async function GET(request: Request) {
         id: row.id,
         slug: row.slug,
         title: row.title,
-        priceCents: row.priceCents,
-        currency: row.currency,
         assetId: row.assetId,
         entryFileName: row.entryFileName,
         byteLength: row.byteLength,
@@ -193,8 +191,6 @@ export async function POST(request: Request) {
       slug?: unknown;
       title?: unknown;
       description?: unknown;
-      priceCents?: unknown;
-      currency?: unknown;
       licenseStatus?: unknown;
       status?: unknown;
     }>(request, 128 * 1024);
@@ -202,12 +198,13 @@ export async function POST(request: Request) {
     const title = text(payload.title, "title", 120);
     const description = text(payload.description, "description", 2_000);
     const slug = slugify(typeof payload.slug === "string" ? payload.slug : title);
-    const priceCents = Number(payload.priceCents ?? 0);
-    const currency = typeof payload.currency === "string" && /^[A-Z]{3}$/.test(payload.currency) ? payload.currency : "KRW";
+    // 에셋은 낱개로 팔지 않는다. 무료 등급은 로그인만 하면 받고, 그 위는 구독으로 열린다.
+    // 값을 받는 입구가 있으면 언젠가 값이 들어오고, 그 값은 아무도 청구하지 않는 거짓이 된다.
+    const priceCents = 0;
+    const currency = "KRW";
     const licenseStatus = payload.licenseStatus;
     const status = typeof payload.status === "string" ? payload.status : "DRAFT";
     if (!slug || slug.length > 96) return privateJson({ ok: false, error: "A valid listing slug is required." }, { status: 400 });
-    if (!Number.isSafeInteger(priceCents) || priceCents < 0 || priceCents > 10_000_000) return privateJson({ ok: false, error: "priceCents must be between 0 and 10,000,000." }, { status: 400 });
     if (!isProductLicenseStatus(licenseStatus)) return privateJson({ ok: false, error: "A license status is required." }, { status: 400 });
     if (!LISTING_STATUSES.has(status)) return privateJson({ ok: false, error: "Unsupported listing status." }, { status: 400 });
 
@@ -252,7 +249,7 @@ export async function POST(request: Request) {
     return privateJson({
       ok: true,
       schema: "clunk.marketplace-listing.v1",
-      listing: { id: listingId, assetId: asset.id, slug, title, description, priceCents, currency, licenseStatus, status, seller: user.displayName },
+      listing: { id: listingId, assetId: asset.id, slug, title, description, licenseStatus, status, seller: user.displayName },
       publicationGate: { ...gate, readiness: publicationReadiness(gate), publishable: canPublishListing(gate) },
       checkout: checkoutStatus(),
       access: accessFor({ authenticated: false }),
@@ -270,20 +267,20 @@ export async function POST(request: Request) {
  * rather than the model. Nothing here is computed: every number is the row's own column.
  */
 async function readVariants(db: D1Database, parentSlug: string): Promise<Array<{
-  id: string; slug: string; title: string; priceCents: number; currency: string;
+  id: string; slug: string; title: string;
   assetId: string; entryFileName: string; format: string; byteLength: number;
 }>> {
   const slugs = variantSlugsOf(parentSlug);
   if (!slugs.length) return [];
   const placeholders = slugs.map(() => "?").join(", ");
   const rows = await db.prepare(
-    `SELECT l.id, l.slug, l.title, l.price_cents AS priceCents, l.currency, l.asset_id AS assetId,
+    `SELECT l.id, l.slug, l.title, l.asset_id AS assetId,
        a.file_name AS entryFileName, a.format, a.byte_length AS byteLength
      FROM clunk_marketplace_listings l
      JOIN clunk_assets a ON a.id = l.asset_id
      WHERE l.status = 'PUBLISHED' AND l.slug IN (${placeholders})`,
   ).bind(...slugs).all<{
-    id: string; slug: string; title: string; priceCents: number; currency: string;
+    id: string; slug: string; title: string;
     assetId: string; entryFileName: string; format: string; byteLength: number;
   }>();
   const order = new Map(slugs.map((slug, index) => [slug, index]));

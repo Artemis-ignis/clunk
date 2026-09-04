@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     const payload = await parseJson<{ action?: string }>(request);
     if (payload.action !== "simulate-upgrade") {
       return privateJson(
-        { ok: false, error: "크레딧 충전은 /api/credits/checkout 으로 진행합니다." },
+        { ok: false, error: "실행 횟수는 사서 채우는 것이 아닙니다. 무료 등급은 로그인만 하면 받고, 그 위는 구독으로 열립니다." },
         { status: 400 },
       );
     }
@@ -58,8 +58,7 @@ export async function POST(request: Request) {
       return privateJson(
         {
           ok: false,
-          error: "데모 크레딧 지급은 종료되었습니다. 크레딧 충전은 /api/credits/checkout 으로 진행합니다.",
-          checkoutEndpoint: "/api/credits/checkout",
+          error: "데모 지급은 종료되었습니다. 실행 횟수는 사서 채우는 것이 아니라 가입·구독으로 열립니다.",
         },
         { status: 410 },
       );

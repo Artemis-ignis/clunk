@@ -38,7 +38,6 @@ export function GET(request: Request) {
     endpoints: {
       "GET /api/marketplace": "every published listing; add ?slug= for one, with its artifacts and evidence",
       "GET /api/marketplace/assets/{assetId}?file=": "the bytes of one artifact; free ones are open, paid ones need an entitlement",
-      "GET /api/credits/packs": "credit packs and whether each is purchasable right now",
       "GET /api/providers": "which generation and inspection rails are actually wired, and which are declared but unavailable",
       "GET /api/health": "liveness",
     },
