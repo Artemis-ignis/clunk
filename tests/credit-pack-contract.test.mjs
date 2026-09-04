@@ -139,3 +139,21 @@ test("유료 에셋의 문은 낱개 구매가 아니라 구독으로 열린다"
   assert.match(lib, /catalog_access/, "플랜에 카탈로그 접근권 컬럼이 있어야 한다");
   assert.match(lib, /CatalogAccess = "free" \| "full"/, "접근권은 두 갈래뿐이다");
 });
+
+test("무료·구독 구분은 가격이 아니라 등급으로 판정한다", async () => {
+  // 낱개로 청구하는 값이 사라졌으므로 price_cents 로 무료 여부를 가르면
+  // 아무도 청구하지 않는 가격이 판정 기준이 되는 셈이다. 등급을 따로 적는다.
+  const lib = await source("app/api/_lib/clunk.ts");
+  assert.match(lib, /clunk_marketplace_listings", "access_tier"/, "리스팅에 등급 컬럼이 있어야 한다");
+
+  const route = await source("app/api/marketplace/assets/[assetId]/route.ts");
+  assert.match(route, /access_tier = 'free'/, "게이트가 등급을 읽어야 한다");
+  assert.doesNotMatch(
+    route,
+    /const paid = Number\(listing\.priceCents\) > 0/,
+    "가격으로 무료 여부를 가르던 판정이 남아 있으면 안 된다",
+  );
+
+  const catalogue = await source("app/api/marketplace/route.ts");
+  assert.match(catalogue, /accessTier/, "목록 응답이 등급을 실어야 한다");
+});

@@ -35,15 +35,19 @@ export async function GET(request: Request, context: RouteContext) {
     }
     const db = getRuntimeDb();
     await ensureSchema(db);
+    // 등급으로 가른다. 예전에는 price_cents 가 0보다 큰지로 갈랐지만 낱개로 파는
+    // 값이 사라졌으므로 그 숫자는 아무도 청구하지 않는 가격이다. 같은 에셋이 여러
+    // 상품에 걸려 있으면 가장 넓은 쪽(free)을 따른다 — 한 곳에서 무료로 공개한
+    // 파일을 다른 곳 때문에 막지 않는다.
     const listing = await db.prepare(
-      `SELECT MAX(price_cents) AS priceCents
+      `SELECT MIN(CASE WHEN access_tier = 'free' THEN 0 ELSE 1 END) AS proOnly
        FROM clunk_marketplace_listings
        WHERE asset_id = ? AND status = 'PUBLISHED'`,
-    ).bind(assetId).first<{ priceCents: number | string | null }>();
-    if (listing?.priceCents === null || listing?.priceCents === undefined) {
+    ).bind(assetId).first<{ proOnly: number | string | null }>();
+    if (listing?.proOnly === null || listing?.proOnly === undefined) {
       return missing("ASSET_NOT_PUBLISHED", "공개된 상품 중에 이 에셋이 없습니다.", "초안이거나 내려간 상품일 수 있습니다. 목록에서 현재 공개 중인 에셋을 확인하세요.", url.origin);
     }
-    const paid = Number(listing.priceCents) > 0;
+    const paid = Number(listing.proOnly) === 1;
     const artifact = await db.prepare(
       `SELECT aa.file_name AS fileName, aa.content_type AS contentType, aa.object_key AS objectKey, aa.role
        FROM clunk_asset_artifacts aa

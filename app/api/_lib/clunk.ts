@@ -182,6 +182,10 @@ async function ensureSchemaUncached(db: D1Database): Promise<void> {
   // 크레딧으로 상품을 사던 구조를 대체하는 축이라, 플랜이 주는 것은 재화가 아니라
   // 구독 기간 동안의 접근 범위다.
   await ensureColumn(db, "clunk_plans", "catalog_access", "TEXT NOT NULL DEFAULT 'free'");
+  // 리스팅이 어느 등급에 속하는가. 'free' 는 로그인만 하면 받고, 'pro' 는 구독이
+  // 살아 있어야 받는다. 예전에는 price_cents 가 0보다 큰지로 갈랐는데, 낱개로 파는
+  // 값이 사라진 뒤로는 그 숫자가 아무도 청구하지 않는 가격이 되어 거짓이 된다.
+  await ensureColumn(db, "clunk_marketplace_listings", "access_tier", "TEXT NOT NULL DEFAULT 'pro'");
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_clunk_generation_project_created ON clunk_generation_jobs(project_id, created_at DESC)`).run();
   await db.batch([
     db.prepare(
@@ -207,7 +211,7 @@ async function ensureSchemaUncached(db: D1Database): Promise<void> {
 
 async function ensureColumn(
   db: D1Database,
-  table: "clunk_collaboration_threads" | "clunk_collaboration_messages" | "clunk_generation_jobs" | "clunk_marketplace_orders" | "clunk_users" | "clunk_plans",
+  table: "clunk_collaboration_threads" | "clunk_collaboration_messages" | "clunk_generation_jobs" | "clunk_marketplace_orders" | "clunk_users" | "clunk_plans" | "clunk_marketplace_listings",
   column = "evidence_json",
   definition = "TEXT",
 ): Promise<void> {
