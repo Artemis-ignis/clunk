@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "./NativeLink";
-import { BrandMark } from "./BrandMark";
+import { BrandLockup } from "./BrandMark";
 import { Icon, type IconName } from "./Icon";
 import { ThemeToggle } from "./ThemeToggle";
 import { SnapRoot } from "./SnapRoot";
@@ -57,13 +57,10 @@ export function WorkspaceShell({
   const rail = (idSuffix: string) => (
     <div className="rail-body">
       <Link className="rail-brand" href="/" prefetch={false}>
-        <span className="brand-mark">
-          <BrandMark size={30} gradientId={`clunk-rail-${idSuffix}`} />
-        </span>
-        <span>
-          <strong>Clunk</strong>
-          <small>내 작업공간</small>
-        </span>
+        {/* 머리글과 같은 로고를 쓴다. 2026-09-04 로고를 갈면서 여기만 옛 마크가 남아,
+            같은 사이트 안에서 두 개의 로고가 돌아다녔다. */}
+        <BrandLockup size={26} word="Clunk" />
+        <small>내 작업공간</small>
       </Link>
 
       <nav className="rail-nav" aria-label="작업공간 메뉴">

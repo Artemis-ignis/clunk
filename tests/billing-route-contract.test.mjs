@@ -75,3 +75,32 @@ test("paid artifact delivery requires active entitlement while free listing deli
   assert.doesNotMatch(route, /artifactStored|storageAvailable/);
   assert.match(route, /private, no-store/);
 });
+
+/**
+ * 베타에서 받은 것이 영구 소유가 되면 안 된다.
+ *
+ * 2026-09-04: 무료 계정이 구독자 전용 헬리콥터를 받았다. 문지기에는 구멍이 없었다 —
+ * 무료 베타에서 "받기"를 누르면 marketplace/checkout 이 그 에셋에 ACTIVE 기록을
+ * 하나 남기는데(provider 'beta', 0원), 문지기가 그것을 "값을 치른 사람"으로 읽었다.
+ * 그대로 두면 구독을 여는 날 베타에 눌러 본 사람 전원이 그 유료 에셋을 영구 무료로
+ * 갖는다. 실제로 마스터 계정에 그날 13:30 헬리콥터 기록이 남아 있었다.
+ */
+test("베타에서 눌러 생긴 기록은 판매가 열린 뒤 유료 에셋을 열지 않는다", async () => {
+  const route = await source("app/api/marketplace/assets/[assetId]/route.ts");
+  assert.match(route, /areSalesOpen/, "문지기가 지금 판매 중인지 알아야 베타 기록을 가릴 수 있다");
+  assert.match(
+    route,
+    /clunk_marketplace_orders/,
+    "기록이 베타 것인지 값을 치른 것인지는 주문의 provider 에만 남아 있다",
+  );
+  assert.match(
+    route,
+    /payment_provider <> 'beta'/,
+    "베타 provider 를 걸러내지 않으면 0원 기록이 유료 에셋의 문을 연다",
+  );
+
+  // 베타 기록을 만드는 쪽도 그대로여야 짝이 맞는다.
+  const checkout = await source("app/api/marketplace/checkout/route.ts");
+  assert.match(checkout, /'beta'/, "베타 지급은 자기 provider 로 남아야 나중에 가려낼 수 있다");
+  assert.match(checkout, /amount_cents.*0|0, \?\)/u, "베타 지급은 0원으로 남아야 한다");
+});

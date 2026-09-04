@@ -26,7 +26,10 @@ test("marketplace catalog defensively renders only published API rows with comme
   // (4c8bb6b). 다시 고정하는 것은 "카드가 상거래 사실을 말한다"는 요구 그대로이고,
   // 그 사실이 값에서 등급으로 바뀌었을 뿐이다 — 무료 등급인지 구독 전용인지.
   assert.match(catalog, /function isFreeTier/u, "app/components/MarketplaceCatalog.tsx: 등급으로 가르는 판정이 사라졌다");
-  assert.match(catalog, /cardFree \? "무료" : "구독"/u, "app/components/MarketplaceCatalog.tsx: 카드 배지가 무료/구독을 말하지 않는다");
+  // 카드는 지금 되는 일을 말해야 한다. 판매가 닫혀 있는 동안에는 유료 등급도 로그인만
+  // 하면 받으므로 "구독자 전용" 이라고만 적으면 눌러 보는 순간 라벨이 거짓이 된다
+  // (2026-09-04 마스터가 그 모순을 짚었다).
+  assert.match(catalog, /cardFree \? "무료" : salesOpen \? "구독자 전용" : "베타 무료"/u, "app/components/MarketplaceCatalog.tsx: 카드 배지가 지금 되는 일을 말하지 않는다");
   assert.doesNotMatch(catalog, /formatPrice/u, "app/components/MarketplaceCatalog.tsx: 아무도 청구하지 않는 값을 카드에 되살리지 않는다");
   assert.match(catalog, /listing\.format|formatLabel\(listing\)/u);
   assert.match(catalog, /listing\.licenseStatus/u);
@@ -67,7 +70,7 @@ test("listing detail names an unconfigured payment provider without seller CTAs"
   assert.match(page, /MarketplaceListingDetail/u);
   assert.match(catalog, /function MarketplaceListingDetail/u);
   // 상세도 값이 아니라 받을 수 있는지를 말한다.
-  assert.match(catalog, /freeTier \? "무료" : "구독"/u, "app/components/MarketplaceCatalog.tsx: 상세가 값 대신 접근권을 말하지 않는다");
+  assert.match(catalog, /freeTier \? "무료" : beta \? "베타 무료" : "구독자 전용"/u, "app/components/MarketplaceCatalog.tsx: 상세가 지금 되는 일을 말하지 않는다");
   assert.match(catalog, /구독하고 전체 받기/u, "app/components/MarketplaceCatalog.tsx: 구독으로 여는 버튼이 사라졌다");
   assert.match(catalog, /preview=1/u);
   assert.match(catalog, /listing\.status !== ["']PUBLISHED["']/u);
@@ -82,7 +85,10 @@ test("public marketplace UI is aligned with the published listing and checkout c
   const delivery = await source("app/api/marketplace/assets/[assetId]/route.ts");
 
   assert.match(route, /WHERE l\.status = 'PUBLISHED'/u);
-  assert.match(route, /price_cents AS priceCents/u);
+  // 2026-09-04: 낱개 가격을 없앴다. 이 검사는 예전에 가격 컬럼이 실려 오기를 요구했는데,
+  // 지금 지켜야 하는 것은 그 반대다 — 아무도 청구하지 않는 값이 응답에 실리면 화면이
+  // 다시 값을 말하기 시작한다.
+  assert.doesNotMatch(route, /price_cents AS priceCents/u, "낱개 가격 컬럼이 카탈로그 응답에 돌아왔습니다");
   assert.match(route, /license_status AS licenseStatus/u);
   assert.match(route, /previewFileName/u);
   assert.match(route, /status: 404/u);

@@ -3,6 +3,8 @@ import test from "node:test";
 
 import {
   CATALOG_THEMES,
+  GRADE_ACCESS,
+  GRADE_ROWS,
   GRADE_RULE,
   boundsOf,
   categoryOf,
@@ -269,11 +271,25 @@ test("등급은 눈에 보이는 품질로 가르고, 규칙을 그대로 적는
   assert.equal(isFreeGrade("A"), false, "A 는 구독자만 받는다");
   assert.equal(isFreeGrade("S"), false, "S 는 구독자만 받는다");
 
-  // 화면에 적히는 규칙과 코드가 매기는 규칙은 같은 문장이어야 한다.
-  assert.equal(
-    GRADE_RULE,
-    "등급 기준: S 움직이는 동작 포함(폴리곤 1,500개 이상) 또는 폴리곤 4,000개 이상 · A 움직이는 동작 포함 또는 1,500개 이상 또는 묶음 · B 그 외 · B는 무료, A 이상은 구독",
-  );
+  // 화면에 적히는 규칙과 코드가 매기는 규칙은 같은 것이어야 한다.
+  //
+  // 2026-09-04: 예전에는 이 자리에서 문장 하나를 글자까지 맞춰 봤다. 그런데 그 문장은
+  // 가운뎃점 다섯 개가 붙은 한 덩어리라 요금 화면에서 아무도 읽지 않았고, 마스터가 그걸
+  // 짚었다. 지금은 등급마다 한 줄(GRADE_ROWS)로 두고 한 줄짜리가 필요한 자리에서만 이어
+  // 붙인다. 그래서 글자가 아니라 규칙이 담고 있어야 하는 값을 못박는다 — 문장은 다시
+  // 다듬을 수 있어야 하고, 규칙은 조용히 바뀌면 안 된다.
+  assert.deepEqual(GRADE_ROWS.map((row) => row.letter), ["S", "A", "B"], "등급은 S·A·B 셋이다");
+  const asOneLine = GRADE_ROWS.map((row) => row.when).join(" ");
+  assert.match(asOneLine, /1,500개 이상/u, "A 와 S 를 가르는 1,500 이 규칙에서 사라졌다");
+  assert.match(asOneLine, /4,000개 이상/u, "S 를 만드는 4,000 이 규칙에서 사라졌다");
+  assert.match(asOneLine, /움직이는 동작/u, "움직임이 등급을 올린다는 것이 규칙에서 사라졌다");
+  assert.match(asOneLine, /묶은 것|묶음/u, "묶음이 A 가 된다는 것이 규칙에서 사라졌다");
+  // 등급과 접근권은 다른 이야기이고, 둘 다 적혀 있어야 한다.
+  assert.match(GRADE_ACCESS, /B .*로그인/u, "B 가 로그인만으로 열린다는 말이 없다");
+  assert.match(GRADE_ACCESS, /A와 S.*구독/u, "A·S 가 구독자용이라는 말이 없다");
+  // 한 줄짜리는 그 셋을 그대로 담고 있어야 한다 — 화면과 에이전트가 같은 말을 하도록.
+  for (const row of GRADE_ROWS) assert.ok(GRADE_RULE.includes(row.when), `한 줄 규칙에 ${row.letter} 조건이 빠졌다`);
+  assert.ok(GRADE_RULE.includes(GRADE_ACCESS), "한 줄 규칙에 접근권 문장이 빠졌다");
   // 규칙이 말하지 않는 것은 규칙이 되지 못한다: 확률·값·희귀도는 여기 없다.
   assert.doesNotMatch(GRADE_RULE, /확률|%|원|희귀/u, "등급 규칙은 확률도 값도 말하지 않는다");
 });

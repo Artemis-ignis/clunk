@@ -45,12 +45,26 @@ const FLOW = ["생성", "검사", "수정", "게시", "에이전트"] as const;
  * The record's draw-call count is not shown: a buyer cannot act on it. What they need
  * to know -- will this run in my game -- is the polygon count against the ceiling.
  */
+import landingFacts from "./data/landing-facts.json";
+
+/**
+ * 첫 화면이 보여 주는 파일의 숫자. 손으로 적지 않는다.
+ *
+ * 2026-09-04 이 자리의 GLB 를 파는 트랙터로 갈면서 코드에 박힌 숫자를 같이 못 고쳤고,
+ * 화면은 58,156 삼각형짜리 모델 옆에 "39,320개"라고 적고 있었다. 파일에서 재서 내려놓은
+ * 값만 읽는다(scripts/landing-facts.mjs).
+ */
+const LANDING = landingFacts.facts;
+
 const FEATURED_MODEL = {
   src: "/landing/tractor.compact.m1.glb",
   poster: "/landing/tractor-hero.png",
   name: "트랙터",
-  fileName: "tractor.compact.m1.glb",
-  measured: { faces: "39,320", size: "840 KB" },
+  fileName: LANDING.tractor.fileName,
+  measured: {
+    faces: LANDING.tractor.triangles.toLocaleString("ko-KR"),
+    size: `${Math.round(LANDING.tractor.bytes / 1024).toLocaleString("ko-KR")} KB`,
+  },
 } as const;
 
 /**
@@ -64,8 +78,14 @@ const INSPECTED_MODEL = {
   src: "/landing/tractor.compact.m1.glb",
   poster: "/landing/tractor-hero.png",
   name: "트랙터",
-  fileName: "tractor.glb",
-  measured: { faces: "39,320", size: "840 KB", faceLimit: "40,000", limitPercent: "98" },
+  fileName: LANDING.tractor.fileName,
+  measured: {
+    faces: LANDING.tractor.triangles.toLocaleString("ko-KR"),
+    size: `${Math.round(LANDING.tractor.bytes / 1024).toLocaleString("ko-KR")} KB`,
+    faceLimit: LANDING.tractor.faceLimit.toLocaleString("ko-KR"),
+    limitPercent: String(LANDING.tractor.limitPercent),
+    overLimit: LANDING.tractor.triangles > LANDING.tractor.faceLimit,
+  },
 } as const;
 
 /**
@@ -289,7 +309,15 @@ export default function Home() {
                     <div className="cv5-find">
                       <div data-tone="warn">
                         <b>폴리곤</b>
-                        <span><em>{INSPECTED_MODEL.measured.faces}개</em> · 웹 게임 권장 상한 {INSPECTED_MODEL.measured.faceLimit}개의 {INSPECTED_MODEL.measured.limitPercent}%</span>
+                        {/* 상한을 넘는 파일에 "상한의 98%" 같은 말을 붙이면 검사기가 아니라
+                            광고가 된다. 넘으면 넘었다고 적는다 — 사는 사람이 알아야 하는 것은
+                            우리 파일이 예쁘다는 말이 아니라 자기 게임에 들어가는지다. */}
+                        <span>
+                          <em>{INSPECTED_MODEL.measured.faces}개</em>
+                          {INSPECTED_MODEL.measured.overLimit
+                            ? ` · 웹 게임 권장 상한 ${INSPECTED_MODEL.measured.faceLimit}개를 넘습니다 (${INSPECTED_MODEL.measured.limitPercent}%) — 모바일에서는 줄여 쓰세요`
+                            : ` · 웹 게임 권장 상한 ${INSPECTED_MODEL.measured.faceLimit}개의 ${INSPECTED_MODEL.measured.limitPercent}%`}
+                        </span>
                       </div>
                       <div>
                         <b>파일 크기</b>

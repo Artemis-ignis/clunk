@@ -1,33 +1,58 @@
 /* ============================================================================
    CLUNK cv5 — unified public design system (2026-08-31 master reference rebuild)
-   Reference direction: deep-navy ground, indigo→violet gradient accent, glass
-   product-UI mockups inside every section, floating real-asset cards.
+   Reference direction: near-neutral dark ground, indigo을 강조에만 쓰는 배색,
+   glass product-UI mockups inside every section, floating real-asset cards.
    Scope: .cv5 pages. All numbers rendered inside mockups are REAL measurements
    (tractor 100/100 reinspection, wave1 renderer-measured tris) — never staged.
    Dark-committed system: cv5 pages force data-theme=dark via <ForceDarkTheme/>.
+
+   2026-09-04 배색 재조정 — 운영자 지적: "전체적으로 색감이 이상함, 너무 어둡고
+   보라색 계열이 심함". 원인은 강조색이 보라라서가 아니라 '중립색 자체가 보라'
+   였다는 것. 옛 값을 재보면(HSL/OKLCH 실측):
+     bg0 #06070f  H233 S42.9% L4.1%   okC 0.019
+     bg1 #0a0c16  H230 S37.5% L6.3%   okC 0.022
+     bg2 #10121e  H231 S30.4% L9.0%   okC 0.025
+     bg3 #151830  H233 S39.1% L13.5%  okC 0.047  ← 눈으로도 보라
+   바닥이 거의 검정(L 4.1%)인데 그 위에 보라 강조를 얹으니, 강조가 대비될 바탕이
+   없어 화면 전체가 보라로 읽혔다. 그래서 두 가지를 동시에 고쳤다.
+     1) 중립색을 진짜 중립으로: 모든 배경·경계 토큰 HSL 채도 8% 이하(okC ≤ 0.010).
+        차가운 기색만 남기고(H 214~225) 보라 성분은 뺀다.
+     2) 바닥을 올린다: bg0 L 4.1% → 9.8%(okL 13.2 → 20.9). 이제 판·카드·페이지가
+        보라 기색이 아니라 밝기 차이로 구분된다(단 대비 1.031 → 1.075).
+   보라는 여기서부터 '강조'로만 산다 — 기본 버튼, 활성 내비, 링크, 포커스 링.
    ========================================================================= */
 
 .cv5 {
-  /* ground */
-  --v5-bg0: #06070f;
-  --v5-bg1: #0a0c16;
-  --v5-bg2: #10121e;
-  --v5-bg3: #151830;
-  --v5-panel: rgba(255, 255, 255, 0.03);
-  --v5-line: rgba(255, 255, 255, 0.08);
-  --v5-line-strong: rgba(255, 255, 255, 0.15);
+  /* ground — 채도 8% 이하의 차가운 회색 사다리(위 주석의 실측 근거) */
+  --v5-bg0: #17181b; /* H225 S8.0% L9.8%  okC 0.006 — 페이지 바닥 */
+  --v5-bg1: #1d1f22; /* H216 S7.9% L12.4% okC 0.006 — 패널 */
+  --v5-bg2: #24262a; /* H220 S7.7% L15.3% okC 0.008 — 카드 */
+  --v5-bg3: #2c2f33; /* H214 S7.4% L18.6% okC 0.008 — 카드 위의 칩 */
+  /* 바닥이 밝아진 만큼 흰 알파 경계선의 상대 대비가 줄어, 옛 경계 가시성을
+     유지하려고 알파를 올렸다(bg0 위 대비 1.17 → 1.33 / 1.45 → 1.76). */
+  --v5-panel: rgba(255, 255, 255, 0.035);
+  --v5-line: rgba(255, 255, 255, 0.1);
+  --v5-line-strong: rgba(255, 255, 255, 0.18);
 
-  /* ink */
-  --v5-ink: #f4f5fa;
-  --v5-ink-dim: rgba(233, 236, 248, 0.66);
-  --v5-ink-faint: rgba(233, 236, 248, 0.42);
+  /* ink — 옛 잉크는 밑색이 보라(#e9ecf8 H228 S51.7%)였다. 같은 밝기의 중립으로
+     바꾸고, 바닥이 밝아진 만큼 알파를 올려 대비를 오히려 키웠다.
+     bg0 위 WCAG: ink 16.11:1 · ink-dim 8.61:1 · ink-faint 6.07:1
+     bg3 위 최악값도 ink 12.21:1 · ink-dim 6.96:1 · ink-faint 5.14:1 (본문 4.5 통과) */
+  --v5-ink: #f2f4f7;
+  --v5-ink-dim: rgba(232, 236, 241, 0.74);
+  --v5-ink-faint: rgba(232, 236, 241, 0.6);
 
-  /* brand */
-  --v5-indigo: #6366f1;
-  --v5-violet: #a855f7;
-  --v5-grad: linear-gradient(96deg, #6366f1 4%, #8b5cf6 52%, #a855f7 96%);
-  --v5-grad-soft: linear-gradient(96deg, rgba(99, 102, 241, 0.16), rgba(168, 85, 247, 0.16));
-  --v5-glow: 0 12px 44px -12px rgba(124, 93, 250, 0.55);
+  /* brand — 강조로만 쓰는 색. 바닥이 밝아졌으므로 강조도 같이 밝혀 대비를
+     지킨다(indigo 4.50:1 → 5.19:1, violet 5.08:1 → 5.78:1 on bg0).
+     그라데이션의 색상 호(arc)도 좁힌다: OKLCH 277°→304°(27°)는 한 버튼 안에서
+     남보라가 자보라로 변해 '무지개'로 읽혔다. 278°→287°(9°)면 한 색으로 읽힌다. */
+  --v5-indigo: #7b7ff0;
+  --v5-violet: #a97bf5;
+  --v5-grad: linear-gradient(96deg, #6c6ff2 6%, #8b7bf4 94%);
+  --v5-grad-soft: linear-gradient(96deg, rgba(123, 127, 240, 0.15), rgba(139, 123, 244, 0.15));
+  /* 옛 글로우는 0.55 짜리 보라가 44px 번져 버튼 주변 바닥까지 물들였다.
+     기본 버튼 하나를 띄우는 데 필요한 만큼만 남긴다. */
+  --v5-glow: 0 10px 26px -14px rgba(108, 111, 242, 0.5);
   --v5-cyan: #59d9ff;
   --v5-green: #34d399;
   --v5-amber: #fbbf24;
@@ -59,12 +84,17 @@
 }
 
 html:has(.cv5),
-html:has(.cv5) body { background: var(--v5-bg0, #06070f); }
+html:has(.cv5) body { background: var(--v5-bg0, #17181b); }
 
 /* legacy bare-element rules (globals.css h1/p colors) must never win here */
 :where(.cv5) h1, :where(.cv5) h2, :where(.cv5) h3, :where(.cv5) h4 { color: var(--v5-ink); }
 :where(.cv5) p, :where(.cv5) li, :where(.cv5) dd, :where(.cv5) dt { color: var(--v5-ink-dim); }
 .cv5 .theme-toggle { display: none; }
+
+/* 2026-09-04: 보라를 장식에서 빼는 대신 "누르는 곳"에 몰아준다 — 기본 버튼, 활성 내비,
+   링크, 그리고 여기 초점 링. globals.css 의 기본 초점색(--accent, 청록)은 cv5 위에서
+   브랜드와 무관한 색으로 떠 보였다. 새 indigo 는 bg0 대비 5.19:1 로 3:1 기준을 넘는다. */
+.cv5 :focus-visible { outline: 2px solid var(--v5-indigo); outline-offset: 3px; }
 
 .cv5-frame { width: min(var(--v5-frame), calc(100% - clamp(28px, 5vw, 88px))); margin-inline: auto; }
 
@@ -74,9 +104,13 @@ html:has(.cv5) body { background: var(--v5-bg0, #06070f); }
   /* 2026-09-02: the six white 1px "stars" that used to sit here were fixed to the viewport,
      so they followed the reader down every page and read as dust on the screen. Only the
      two soft glows remain. */
+  /* 2026-09-04: 남은 두 개가 보라(rgba(124,93,250,.16) / rgba(99,102,241,.10))였고,
+     이건 뷰포트 전체를 덮는 fixed 레이어다 — 화면의 모든 픽셀이 보라 필터를 통과했다.
+     운영자가 "전체적으로 보라색 계열이 심하다"고 한 것의 절반은 이 두 줄이다.
+     빛의 방향만 남기고 색은 뺀다: 흰색 저알파라 색조가 없다. */
   background:
-    radial-gradient(1200px 700px at 78% -8%, rgba(124, 93, 250, 0.16), transparent 62%),
-    radial-gradient(900px 560px at 12% 8%, rgba(99, 102, 241, 0.1), transparent 60%);
+    radial-gradient(1200px 700px at 78% -8%, rgba(255, 255, 255, 0.038), transparent 62%),
+    radial-gradient(900px 560px at 12% 8%, rgba(255, 255, 255, 0.022), transparent 60%);
 }
 .cv5 > main, .cv5 > footer { position: relative; z-index: 1; }
 
@@ -85,11 +119,22 @@ html:has(.cv5) body { background: var(--v5-bg0, #06070f); }
    살지만, 그 안에서 층이 올라가도 메뉴를 덮지 못하게 못을 박아 둔다
    (2026-09-03 운영자: "기계가 위 메뉴를 가린다"). */
 .cv5 .sitenav-dock { position: fixed; inset: 0 0 auto 0; z-index: 80; }
+/* 내비 바의 바닥.
+   0.78 불투명 + 1px 실선이었다. 그 조합에서는 아래로 지나가는 패널의 모서리가 바를 통해
+   비쳐 세로 이음매로 보이고, 그 위에 실선이 하나 더 그어져 경계가 두 겹으로 읽힌다.
+   2026-09-04 마스터가 그 어색함을 짚었다.
+   바탕을 거의 불투명하게 올려 밑이 안 비치게 하고, 실선 대신 짧은 그라데이션 꼬리로
+   페이지에 이어 붙인다. 흐림은 남긴다 — 스크롤 중에 색이 은은히 배어 나오는 편이 좋다. */
 .cv5 .sitenav-dock::before {
   content: ""; position: absolute; inset: 0;
-  background: rgba(6, 7, 15, 0.78);
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--v5-line);
+  background: rgba(23, 24, 27, 0.96);
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  border-bottom: 0;
+}
+.cv5 .sitenav-dock::after {
+  content: ""; position: absolute; top: 100%; left: 0; right: 0; height: 26px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(23, 24, 27, 0.96), rgba(23, 24, 27, 0));
 }
 .cv5 .sitenav-inner { position: relative; width: min(var(--v5-frame), calc(100% - clamp(24px, 4vw, 72px))); margin-inline: auto; }
 .cv5 .sitenav { display: flex; align-items: center; gap: 10px; height: 68px; background: none; border: 0; box-shadow: none; padding: 0; }
@@ -167,28 +212,31 @@ html:has(.cv5) body { background: var(--v5-bg0, #06070f); }
 .cv5-hv-panel {
   position: relative; margin-left: auto; width: min(480px, 100%);
   border: 1px solid var(--v5-line-strong); border-radius: var(--v5-r-lg);
-  background: linear-gradient(178deg, #131628, #0c0e1a 68%);
-  box-shadow: 0 40px 90px -38px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(124, 93, 250, 0.12), 0 24px 80px -30px rgba(124, 93, 250, 0.35);
+  background: linear-gradient(178deg, #232529, #1b1c1f 68%);
+  /* 2026-09-04: 이 판은 첫 화면에서 가장 큰 면이다. 그 둘레에 보라 링(1px .12)과
+     보라 광채(80px .35)를 둘렀으니 큰 면 전체가 보라로 물들었다. 깊이는 검정
+     그림자가 내고, 테두리는 중립 흰 실선이 낸다 — 보라는 뺀다. */
+  box-shadow: 0 40px 90px -38px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.06);
   padding: 18px; z-index: 2;
 }
 .cv5-hv-head { display: flex; justify-content: space-between; align-items: center; padding: 2px 4px 14px; }
 .cv5-hv-head span { font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; color: var(--v5-ink-faint); }
 .cv5-hv-head b { color: var(--v5-cyan); }
 .cv5-hv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.cv5-hv-cell { position: relative; border: 1px solid var(--v5-line); border-radius: 12px; overflow: hidden; background: #191c2e; }
+.cv5-hv-cell { position: relative; border: 1px solid var(--v5-line); border-radius: 12px; overflow: hidden; background: #2a2d31; }
 .cv5-hv-cell img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
 .cv5-hv-cell span {
   position: absolute; inset: auto 0 0 0; padding: 14px 8px 6px; text-align: left;
   font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.07em; color: rgba(255, 255, 255, 0.85);
-  background: linear-gradient(180deg, transparent, rgba(5, 6, 12, 0.88) 72%);
+  background: linear-gradient(180deg, transparent, rgba(10, 11, 13, 0.88) 72%);
 }
-.cv5-hv-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding: 12px 12px; border: 1px solid var(--v5-line); border-radius: 12px; background: rgba(99, 102, 241, 0.07); }
+.cv5-hv-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding: 12px 12px; border: 1px solid var(--v5-line); border-radius: 12px; background: rgba(255, 255, 255, 0.045); }
 .cv5-hv-foot span { font-size: 0.78rem; color: var(--v5-ink-dim); }
 .cv5-hv-foot b { font-family: var(--v5-label); font-size: 0.78rem; color: var(--v5-green); letter-spacing: 0.05em; }
 
 .cv5-float {
   position: absolute; border: 1px solid var(--v5-line-strong); border-radius: 14px; overflow: hidden;
-  background: #171a2c; box-shadow: 0 28px 60px -24px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(124, 93, 250, 0.14);
+  background: #26282c; box-shadow: 0 28px 60px -24px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.07);
   z-index: 3; animation: cv5-drift 7s ease-in-out infinite;
 }
 .cv5-float img { display: block; width: 100%; height: 100%; object-fit: cover; }
@@ -221,20 +269,23 @@ html:has(.cv5) body { background: var(--v5-bg0, #06070f); }
 .cv5-points li { display: flex; gap: 10px; font-size: 0.92rem; line-height: 1.6; }
 /* 2026-09-04 운영자 지적: 보라 알약 체크 표시가 캡슐처럼 보여 이 화면과 겉돌았다.
    목록 표시는 조용해야 한다 — 가는 세로선 하나만 두고 읽는 힘은 굵은 앞말이 갖는다. */
+/* 2026-09-04: 이 세로선은 한 화면에 열댓 개가 깔린다. 그게 전부 보라면 강조가 아니라
+   무늬가 된다(운영자: "보라색 계열이 심함"). 목록 표시는 위치만 알리면 되므로
+   중립으로 내리고, 보라는 누르는 것(버튼·활성 탭·초점 링)에만 남긴다. */
 .cv5-points li::before {
   content: ""; flex: 0 0 auto; width: 2px; height: 1.05em; border-radius: 1px;
-  background: rgba(139, 92, 246, 0.55); margin-top: 0.34em;
+  background: rgba(255, 255, 255, 0.28); margin-top: 0.34em;
 }
 .cv5-sec[data-tone="green"] .cv5-points li::before { background: rgba(52, 211, 153, 0.6); }
 .cv5-more { display: inline-flex; align-items: center; gap: 8px; margin-top: 26px; color: var(--v5-ink); font-weight: 700; font-size: 0.92rem; border-bottom: 1px solid transparent; }
-.cv5-more:hover { color: #cdb7ff; }
+.cv5-more:hover { color: #c0b3fb; }
 .cv5-more + .cv5-more { margin-left: 22px; }
 
 /* mockup shells */
 .cv5-mock {
   border: 1px solid var(--v5-line-strong); border-radius: var(--v5-r-lg);
-  background: linear-gradient(178deg, #12152699, #0b0d18) , var(--v5-bg1);
-  box-shadow: 0 36px 90px -40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(124, 93, 250, 0.08);
+  background: linear-gradient(178deg, #23252999, #1b1c1f) , var(--v5-bg1);
+  box-shadow: 0 36px 90px -40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.05);
   overflow: hidden;
 }
 .cv5-mock-bar { display: flex; align-items: center; justify-content: space-between; padding: 13px 18px; border-bottom: 1px solid var(--v5-line); }
@@ -248,7 +299,7 @@ html:has(.cv5) body { background: var(--v5-bg0, #06070f); }
 .cv5-market-side span { padding: 8px 11px; border-radius: 9px; font-size: 0.76rem; color: var(--v5-ink-faint); }
 .cv5-market-side span.on { background: var(--v5-grad-soft); color: var(--v5-ink); border: 1px solid rgba(139, 92, 246, 0.3); font-weight: 600; }
 .cv5-market-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.cv5-market-card { position: relative; border: 1px solid var(--v5-line); border-radius: 11px; overflow: hidden; background: #191c2e; transition: transform .2s, border-color .2s; }
+.cv5-market-card { position: relative; border: 1px solid var(--v5-line); border-radius: 11px; overflow: hidden; background: #2a2d31; transition: transform .2s, border-color .2s; }
 .cv5-market-card:hover { transform: translateY(-2px); border-color: rgba(139, 92, 246, 0.5); }
 .cv5-market-card img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
 .cv5-market-card figcaption {
@@ -265,7 +316,7 @@ html:has(.cv5) body { background: var(--v5-bg0, #06070f); }
 .cv5-inspect-panel { display: grid; gap: 10px; align-content: start; }
 .cv5-score { display: flex; align-items: center; gap: 14px; border: 1px solid var(--v5-line); border-radius: 12px; padding: 12px 14px; background: rgba(52, 211, 153, 0.06); }
 .cv5-score-ring { width: 58px; height: 58px; border-radius: 50%; background: conic-gradient(var(--v5-green) 360deg, rgba(255,255,255,0.08) 0); display: grid; place-items: center; }
-.cv5-score-ring i { width: 46px; height: 46px; border-radius: 50%; background: #0d1420; display: grid; place-items: center; font-style: normal; font-family: var(--v5-label); font-weight: 700; font-size: 0.86rem; color: var(--v5-green); }
+.cv5-score-ring i { width: 46px; height: 46px; border-radius: 50%; background: #1d1f22; display: grid; place-items: center; font-style: normal; font-family: var(--v5-label); font-weight: 700; font-size: 0.86rem; color: var(--v5-green); }
 .cv5-score div span { display: block; font-family: var(--v5-label); font-size: 0.72rem; letter-spacing: 0.12em; color: var(--v5-ink-faint); }
 .cv5-score div b { font-size: 0.92rem; color: var(--v5-ink); }
 .cv5-find { display: grid; gap: 6px; }
@@ -292,8 +343,8 @@ html:has(.cv5) body { background: var(--v5-bg0, #06070f); }
 .cv5-agent-assets header { font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; color: var(--v5-ink-faint); padding-bottom: 9px; }
 .cv5-agent-assets div { display: flex; gap: 8px; }
 .cv5-agent-assets img { width: 56px; height: 56px; border-radius: 9px; border: 1px solid var(--v5-line); object-fit: cover; }
-.cv5-code { border: 1px solid var(--v5-line); border-radius: 12px; background: #0a0d18; padding: 13px 14px; overflow-x: auto; }
-.cv5-code pre { margin: 0; font-family: var(--v5-label); font-size: 0.72rem; line-height: 1.66; color: #9fb3d9; white-space: pre; }
+.cv5-code { border: 1px solid var(--v5-line); border-radius: 12px; background: #1a1b1e; padding: 13px 14px; overflow-x: auto; }
+.cv5-code pre { margin: 0; font-family: var(--v5-label); font-size: 0.72rem; line-height: 1.66; color: #b4bcc8; white-space: pre; }
 .cv5-code pre b { color: var(--v5-cyan); font-weight: 500; }
 
 /* ---------------------------------------------------------------- stats */
@@ -314,11 +365,13 @@ html:has(.cv5) body { background: var(--v5-bg0, #06070f); }
 .cv5-eyebrow { display: inline-flex; align-items: center; gap: 9px; font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.16em; color: var(--v5-ink-faint); }
 .cv5-eyebrow::before { content: ""; width: 22px; height: 1.5px; background: var(--v5-grad); }
 .cv5-showcase-grid { margin: clamp(26px, 4vw, 40px) 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 13px; }
-.cv5-showcase-card a { display: block; position: relative; border: 1px solid var(--v5-line); border-radius: var(--v5-r); overflow: hidden; background: #171a2c; transition: transform .22s, border-color .22s, box-shadow .22s; }
-.cv5-showcase-card a:hover { transform: translateY(-4px); border-color: rgba(139, 92, 246, 0.55); box-shadow: 0 20px 44px -20px rgba(0, 0, 0, 0.85), 0 0 24px -6px rgba(124, 93, 250, 0.35); }
+.cv5-showcase-card a { display: block; position: relative; border: 1px solid var(--v5-line); border-radius: var(--v5-r); overflow: hidden; background: #26282c; transition: transform .22s, border-color .22s, box-shadow .22s; }
+/* 2026-09-04: 호버마다 24px 보라 광채가 카드 밖으로 번져 격자 전체가 보라로 깜빡였다.
+   강조는 테두리 한 줄이면 충분하다 — 광채는 검정 그림자로만 남긴다. */
+.cv5-showcase-card a:hover { transform: translateY(-4px); border-color: rgba(139, 92, 246, 0.5); box-shadow: 0 20px 44px -20px rgba(0, 0, 0, 0.85); }
 .cv5-showcase-card img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; transition: transform .3s; }
 .cv5-showcase-card a:hover img { transform: scale(1.05); }
-.cv5-showcase-meta { position: absolute; inset: auto 0 0 0; display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 20px 10px 8px; background: linear-gradient(180deg, transparent, rgba(5, 6, 12, 0.9) 66%); }
+.cv5-showcase-meta { position: absolute; inset: auto 0 0 0; display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 20px 10px 8px; background: linear-gradient(180deg, transparent, rgba(10, 11, 13, 0.9) 66%); }
 .cv5-showcase-meta b { color: #fff; font-size: 0.78rem; font-weight: 650; }
 .cv5-showcase-meta span { font-family: var(--v5-label); font-size: 0.72rem; letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.72); white-space: nowrap; }
 .cv5-showcase-foot { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 20px; }
@@ -326,7 +379,9 @@ html:has(.cv5) body { background: var(--v5-bg0, #06070f); }
 
 /* ---------------------------------------------------------------- closer */
 .cv5-closer { position: relative; margin-top: clamp(72px, 10vw, 128px); padding: clamp(72px, 9vw, 120px) 0; text-align: center; overflow: hidden; }
-.cv5-closer::before { content: ""; position: absolute; inset: -40% -20%; background: radial-gradient(46% 60% at 50% 62%, rgba(124, 93, 250, 0.22), transparent 70%); pointer-events: none; }
+/* 2026-09-04: 이 원은 마지막 섹션(화면 한 판)을 통째로 덮는 보라 0.22 짜리였다.
+   마무리 문구가 보라 안개 위에 얹혀 읽혔다. 밝기만 남기고 색은 뺀다. */
+.cv5-closer::before { content: ""; position: absolute; inset: -40% -20%; background: radial-gradient(46% 60% at 50% 62%, rgba(255, 255, 255, 0.05), transparent 70%); pointer-events: none; }
 .cv5-closer .cv5-frame { position: relative; }
 .cv5-closer h2 { margin: 16px 0 0; font-size: clamp(2rem, 4.4vw, 3.2rem); font-weight: 860; letter-spacing: -0.04em; line-height: 1.12; }
 .cv5-closer h2 em { font-style: normal; background: var(--v5-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -419,14 +474,14 @@ html:has(.cv5) body { background: var(--v5-bg0, #06070f); }
 .cv5 .landing-mcp-tabs button.is-active {
   color: var(--v5-ink); border-color: rgba(139, 92, 246, 0.5); background: var(--v5-grad-soft);
 }
-.cv5 .landing-mcp-code { border: 1px solid var(--v5-line); border-radius: 12px; background: #0a0d18; overflow: hidden; }
+.cv5 .landing-mcp-code { border: 1px solid var(--v5-line); border-radius: 12px; background: #1a1b1e; overflow: hidden; }
 .cv5 .landing-terminal-head {
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
   padding: 8px 8px 8px 13px; border-bottom: 1px solid var(--v5-line);
   font-family: var(--v5-label); font-size: 0.72rem; letter-spacing: 0.12em; color: var(--v5-ink-faint);
 }
 .cv5 .landing-mcp-copy { height: 28px; padding: 0 11px; border-radius: 8px; border: 0; background: var(--v5-grad); color: #fff; font-size: 0.72rem; font-weight: 700; }
-.cv5 .landing-mcp-code pre { margin: 0; padding: 12px 14px; overflow-x: auto; font-family: var(--v5-label); font-size: 0.72rem; line-height: 1.66; color: #9fb3d9; }
+.cv5 .landing-mcp-code pre { margin: 0; padding: 12px 14px; overflow-x: auto; font-family: var(--v5-label); font-size: 0.72rem; line-height: 1.66; color: #b4bcc8; }
 .cv5 .landing-mcp-note { margin: 0; padding: 9px 13px 11px; font-size: 0.72rem; color: var(--v5-ink-faint); border-top: 1px solid var(--v5-line); }
 
 @media (max-width: 640px) {
@@ -486,13 +541,18 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
 
 .cv5-agent-live .cv5-chat { min-height: 320px; }
 
+/* 2026-09-04: 모델이 서는 무대 세 곳(에이전트 무대·상품 3D 뷰어·검사 미리보기)의
+   바닥이 rgba(99,102,241,.12~.14) 보라 조명 + 거의 검정(#0d1017)이었다. 파는 물건이
+   3D 에셋인데 그 색을 보라 조명이 덮으면 손님이 보는 색이 파일의 색이 아니다.
+   (운영자: 경쟁사는 밝은 배경에 그림자만 두고 있더라.) 무대를 중립 회색으로 올리고
+   빛은 흰색 저알파로만 준다 — 밝기 대비는 유지하고 색은 에셋이 갖는다. */
 .cv5-agent-stage {
   position: relative;
   border: 1px solid var(--v5-line);
   border-radius: 12px;
   background:
-    radial-gradient(120% 90% at 50% 110%, rgba(99, 102, 241, 0.14), transparent 60%),
-    #0d1017;
+    radial-gradient(120% 90% at 50% 110%, rgba(255, 255, 255, 0.06), transparent 60%),
+    #26282c;
   min-height: 320px;
   overflow: hidden;
 }
@@ -501,7 +561,7 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
 .cv5-agent-stage-tag {
   position: absolute; left: 10px; top: 10px; z-index: 2;
   font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
-  color: var(--v5-ink-faint); background: rgba(6, 7, 15, 0.72); border: 1px solid var(--v5-line);
+  color: var(--v5-ink-faint); background: rgba(23, 24, 27, 0.82); border: 1px solid var(--v5-line);
   border-radius: 7px; padding: 4px 8px;
 }
 
@@ -548,13 +608,18 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
 /* ============================================================================
    Embedded product 3D viewer (marketplace detail, polyfork-style)
    ========================================================================= */
+/* 2026-09-04: 모델이 서는 무대 세 곳(에이전트 무대·상품 3D 뷰어·검사 미리보기)의
+   바닥이 rgba(99,102,241,.12~.14) 보라 조명 + 거의 검정(#0d1017)이었다. 파는 물건이
+   3D 에셋인데 그 색을 보라 조명이 덮으면 손님이 보는 색이 파일의 색이 아니다.
+   (운영자: 경쟁사는 밝은 배경에 그림자만 두고 있더라.) 무대를 중립 회색으로 올리고
+   빛은 흰색 저알파로만 준다 — 밝기 대비는 유지하고 색은 에셋이 갖는다. */
 .cv5-embed3d {
   position: relative;
   border-radius: 14px;
   overflow: hidden;
   background:
-    radial-gradient(120% 90% at 50% 115%, rgba(99, 102, 241, 0.12), transparent 62%),
-    #0d1017;
+    radial-gradient(120% 90% at 50% 115%, rgba(255, 255, 255, 0.06), transparent 62%),
+    #26282c;
   border: 1px solid var(--v5-line-strong);
   min-height: 420px;
 }
@@ -562,7 +627,7 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
 .cv5-embed3d-hint {
   position: absolute; left: 12px; bottom: 12px; z-index: 2;
   font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
-  color: var(--v5-ink-dim); background: rgba(6, 7, 15, 0.72); border: 1px solid var(--v5-line);
+  color: var(--v5-ink-dim); background: rgba(23, 24, 27, 0.82); border: 1px solid var(--v5-line);
   border-radius: 8px; padding: 6px 10px;
 }
 .cv5-embed3d-anim {
@@ -592,14 +657,14 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
       Move them outside the panel's content box and darken the frame so they
       read as depth, not as pasted white stickers. */
 .cv5-float {
-  background: #10131f;
+  background: #26282c;
   border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 22px 50px -26px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(124, 93, 250, 0.1);
+  box-shadow: 0 22px 50px -26px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.07);
 }
 .cv5-float-a { left: -18px; top: 6px; }
 .cv5-float-b { left: 4px; bottom: 96px; }
 .cv5-float-c { right: -18px; bottom: 96px; }
-.cv5-hv-foot { position: relative; z-index: 4; background: #12162a; }
+.cv5-hv-foot { position: relative; z-index: 4; background: #232529; }
 
 /* 2. Flipped rows put the VISUAL in the narrow column (order swaps position,
       not track width), so the inspector mock was squeezed with dead space
@@ -609,10 +674,10 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
 /* 3. The tractor render is alpha-cut, so it does not need a light plate —
       a dark studio ground keeps it from reading as a stray white card. */
 .cv5-inspect-preview {
-  background: radial-gradient(120% 90% at 50% 115%, rgba(99, 102, 241, 0.14), transparent 62%), #0f1320;
+  background: radial-gradient(120% 90% at 50% 115%, rgba(255, 255, 255, 0.06), transparent 62%), #2a2c30;
 }
 .cv5-inspect-preview small {
-  background: rgba(6, 7, 15, 0.72);
+  background: rgba(23, 24, 27, 0.82);
   color: var(--v5-ink-dim);
   border: 1px solid var(--v5-line);
 }
@@ -705,7 +770,7 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
 --------------------------------------------------------------------------- */
 .cv5 {
   letter-spacing: 0;
-  --v5-ink-faint: rgba(233, 236, 248, 0.58);
+  --v5-ink-faint: rgba(232, 236, 241, 0.6);
 }
 
 .cv5 h1,
@@ -797,8 +862,8 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
 .cv5-showcase-tab.is-on i { color: var(--v5-cyan); }
 
 .cv5-showcase-live .cv5-showcase-grid { margin-top: clamp(16px, 2.4vw, 22px); }
-.cv5-showcase-card.is-loading { aspect-ratio: 1; border: 1px solid var(--v5-line); border-radius: var(--v5-r); background: #171a2c; }
-.cv5-showcase-noart { display: block; aspect-ratio: 1; background: radial-gradient(circle at 50% 34%, rgba(124, 93, 250, 0.18), transparent 60%), #14172a; }
+.cv5-showcase-card.is-loading { aspect-ratio: 1; border: 1px solid var(--v5-line); border-radius: var(--v5-r); background: #26282c; }
+.cv5-showcase-noart { display: block; aspect-ratio: 1; background: radial-gradient(circle at 50% 34%, rgba(255, 255, 255, 0.05), transparent 60%), #26282c; }
 .cv5-showcase-meta { flex-wrap: wrap; }
 .cv5-showcase-meta i {
   font-style: normal; font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700;
@@ -832,7 +897,7 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
 .cv5-make { display: grid; gap: 12px; }
 .cv5-make-stage {
   position: relative; border: 1px solid var(--v5-line); border-radius: 12px;
-  overflow: hidden; background: #14172a; min-height: 260px;
+  overflow: hidden; background: #26282c; min-height: 260px;
 }
 .cv5-make-stage > div { width: 100%; height: 100%; min-height: 260px; }
 .cv5-make-stage canvas { display: block; width: 100%; height: 100%; }
@@ -966,7 +1031,7 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
 .cv5-footer-legal {
   font-size: 0.78rem;
   line-height: 1.6;
-  color: rgba(233, 236, 248, 0.72);
+  color: rgba(232, 236, 241, 0.76);
   justify-content: flex-start;
 }
 .cv5-footer-beta { color: var(--v5-ink-dim); }

@@ -35,7 +35,16 @@ test("sprite and scene review APIs are explicit, stateless, and preserve review 
   const spriteRoute = await source("app/api/sprite-review/route.ts");
   const sceneRoute = await source("app/api/scene-review/route.ts");
   const localMcp = await source("integrations/mcp/server.ts");
-  const remoteMcp = await source("app/mcp/route.ts");
+  // 2026-08-26(54762bd) 정정: 원격 HTTP MCP 라우트가 /mcp 에서 /api/mcp 로 옮겨졌고
+  // 이 계약만 옛 경로를 읽다가 ENOENT 로 죽고 있었다. 지금 app/mcp 에는 설명 페이지
+  // (page.tsx)만 남아 있고, 라우트는 app/api/mcp/route.ts(핸들러 재수출) 하나다.
+  // 도구 이름을 실제로 들고 있는 쪽은 handler.ts 이므로 둘을 나눠서 읽는다.
+  const remoteMcpRoute = await source("app/api/mcp/route.ts");
+  const remoteMcp = await source("app/api/mcp/handler.ts");
+  // 옛 경로가 되살아나면 같은 MCP 엔드포인트가 두 곳이 된다 — 공개 링크가 어느 쪽을
+  // 가리키는지 아무도 모르게 되므로, 사라진 사실 자체를 계약으로 잠근다.
+  await assert.rejects(access(new URL("app/mcp/route.ts", root)), /ENOENT/);
+  assert.match(remoteMcpRoute, /export \{[^}]*POST[^}]*\} from "\.\/handler"/);
 
   assert.match(spriteRoute, /normalizeSpriteSheetReview/);
   assert.match(spriteRoute, /DECLARED_METADATA_ONLY/);

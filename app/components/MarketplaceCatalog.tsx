@@ -235,7 +235,13 @@ const CATALOG_FILTERS: readonly { id: CatalogFilter; label: string }[] = [
   { id: "motion", label: "움직임 있음" },
 ];
 
-export function MarketplaceCatalog() {
+/**
+ * `salesOpen` 은 서버가 알려 준다(app/api/_lib/sales-lock.areSalesOpen). 지금은 판매가
+ * 닫혀 있어 로그인만 하면 무엇이든 받는데, 카드는 유료 등급에 "구독자 전용" 이라고만
+ * 적고 있었다 — 2026-09-04 마스터: "지금 구독자 전용이라고 표시해놓고 무료로 다운받게
+ * 해놨으니깐 문제임". 지금 되는 일과 나중에 될 일을 둘 다 적는다.
+ */
+export function MarketplaceCatalog({ salesOpen = false }: { salesOpen?: boolean }) {
   const [listings, setListings] = useState<Listing[]>([]);
   const [state, setState] = useState<CatalogState>("loading");
   const [catalogCheckout, setCatalogCheckout] = useState<CheckoutState | null>(null);
@@ -369,9 +375,13 @@ export function MarketplaceCatalog() {
             <span className={styles.count} aria-live="polite">에셋 {filteredListings.length}개</span>
           </div>
           {filteredListings.length === 0 ? <NoResults /> : null}
+          {/* 베타(결제 미설정) 상태는 카드에 칠하지 않는다. 예전에는 베타면 모든 카드의
+              접근권 칩이 "무료" 색으로 칠해져, 글자는 "구독자 전용"인데 색은 무료인
+              칩이 스물몇 장 깔렸다 — 두 상태를 색으로 구분할 수 없던 진짜 까닭이다.
+              지금 무엇이 열려 있는지는 위의 CheckoutNotice 가 한 번만 말한다. */}
           <div className={styles.grid}>
             {filteredListings.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} colour={colour} beta={catalogCheckout?.status === "PAYMENT_PROVIDER_NOT_CONFIGURED"} />
+              <ListingCard key={listing.id} listing={listing} colour={colour} salesOpen={salesOpen} />
             ))}
           </div>
         </>
@@ -390,16 +400,17 @@ export function MarketplaceCatalog() {
  * /api/marketplace); a listing with no facts shows its format instead of a guess.
  */
 
-function ListingCard({ listing, colour, beta }: { listing: Listing; colour?: string; beta?: boolean }) {
+function ListingCard({ listing, colour, salesOpen = false }: { listing: Listing; colour?: string; salesOpen?: boolean }) {
   const previewUrl = getPreviewUrl(listing);
   const cardFree = isFreeTier(listing);
+  const grade = cardGrade(listing);
   const spec = cardSpec(listing.facts);
   const motion = motionNote(listing.facts);
   const colourShare = colour ? carriesColour(listing, colour) : null;
 
   // One card, one link. A grid is for choosing what to open, so the card carries
-  // the picture, the name, the number that decides fit, and the price — the buy
-  // decision belongs on the page the card opens.
+  // the picture, the name, the number that decides fit, and whether it can be had —
+  // the buy decision belongs on the page the card opens.
   return (
     <Link className={styles.card} href={`/marketplace/${encodeURIComponent(listing.slug)}`}>
       <span className={styles.cardArt}>
@@ -408,21 +419,40 @@ function ListingCard({ listing, colour, beta }: { listing: Listing; colour?: str
         ) : (
           <PreviewUnavailable listing={listing} />
         )}
+        {/* 그림 위에 뜨는 것은 접근권 하나다.
+            2026-09-04 마스터: "무료랑 구독자 전용은 버튼형태로 만들던가 해야지 색감 저따구로
+            하면 어케 보라고 … 그리고 PNG 애들은 뭐냐". 재 보니 맞는 말이었다 —
+            public/market 의 히어로 PNG 30장에서 칩이 앉는 띠(위 5~20%)를 픽셀째 읽어 WCAG
+            대비를 계산했더니, 옛 무료 칩(16% 민트 위의 #34d399 글자)은 밝은 미리보기 위에서
+            1.21:1 이었다. 글자와 배경을 구분할 수 있는 값이 아니다. 지금은 불투명하게 칠해
+            무료 9.76:1 / 구독자 전용 8.24:1 이고, 뒤에 어떤 그림이 오든 그 값이 유지된다.
+            등급과 형식은 카드 본문의 사실줄로 내렸다 — 그림 위에 홀로 뜬 "PNG" 는 무엇을
+            가리키는지 말해 주지 않지만, "PNG · 1024×1024 · 이어붙는 타일" 은 스스로 말한다. */}
         <span className={styles.cardBadges} aria-hidden="true">
           {/* Why this card is where it is. Reordering a grid without saying what reordered
-              it reads as the shop shuffling itself. */}
+              it reads as the shop shuffling itself. Only here while a colour is picked. */}
           {colourShare !== null ? (
             <span className={styles.colourBadge}>이 색 {Math.round(colourShare * 100)}%</span>
           ) : null}
-          <span className={styles.gradeBadge} data-grade={cardGrade(listing)}>{cardGrade(listing)}</span>
-          <span className={styles.formatBadge}>{formatLabel(listing)}</span>
-          <span className={`${styles.priceBadge}${cardFree || beta ? ` ${styles.priceBadgeFree}` : ""}`}>{cardFree ? "무료" : "구독자 전용"}</span>
+          {/* 판매가 열리기 전에는 유료 등급도 로그인만 하면 받는다. 그 사실을 숨기고
+              "구독자 전용" 이라고만 적으면, 눌러서 받아지는 순간 라벨이 거짓이 된다. */}
+          <span className={`${styles.accessBadge} ${cardFree || !salesOpen ? styles.accessFree : styles.accessSub}`}>
+            {cardFree ? "무료" : salesOpen ? "구독자 전용" : "베타 무료"}
+          </span>
         </span>
       </span>
       <span className={styles.cardBody}>
         <span className={styles.cardTitle}>{displayTitle(listing.slug, listing.title)}</span>
         <span className={styles.cardSpec}>
-          {spec ?? formatLabel(listing)}
+          {/* 등급은 값이 아니라 크기와 동작을 보고 매기는 분류다(catalog-facts.GRADE_RULE).
+              그림 위에 홀로 뜬 낱글자 "S" 는 무엇의 S 인지 말하지 않아 여기서 "S 등급" 으로
+              적는다. 카드 본문은 불투명해서 대비가 그림에 좌우되지 않는다 — 가장 나쁜
+              등급색(A, #c084fc)이 6.01:1(돌고 있는 화면에서 다시 재면 6.03:1)이고,
+              그림 위에서는 밝은 미리보기를 만나면 3.15:1 까지 떨어졌다. */}
+          <span className={styles.gradeBadge} data-grade={grade}>{grade} 등급</span>
+          {/* 형식과 잰 값은 한 줄이다. "PNG" 만 따로 떠 있으면 무엇을 가리키는 말인지 알 수
+              없지만, 잰 값 앞에 붙으면 그 값이 무엇의 값인지를 형식이 말해 준다. */}
+          <span>{spec ? `${formatLabel(listing)} · ${spec}` : formatLabel(listing)}</span>
           {/* Only when the file itself carries a clip or a named hinge, and it says how many
               of each. Never read off a title, so a card cannot promise motion the download
               does not have.
@@ -769,10 +799,17 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
         </div>
 
         <div className={styles.detailBuy}>
-          <div className={styles.priceRow}><strong>{freeTier ? "무료" : "구독자 전용"}</strong><small>{listing.sellerName ?? "Clunk"} · {formatBytes(listing.byteLength)} · {listing.entryFileName}</small></div>
+          {/* 상세도 카드와 같은 알약을 쓴다. 이 자리의 글자는 브랜드 그라디언트를 글자에
+              클립해 그린 것이라 칠이 곧 대비였고, 재 보니 그라디언트 세 정거장 모두
+              3.76~4.24:1 로 4.5:1 아래였다. 무엇보다 무료와 구독자 전용이 같은 보라로
+              나와, 두 상태를 색으로는 가릴 수 없었다. */}
+          {/* 지금 되는 일을 먼저 적는다. 판매가 열리기 전에는 유료 등급도 로그인만 하면
+              받는데 "구독자 전용" 이라고만 적혀 있었고, 눌러 보면 그대로 받아졌다 —
+              2026-09-04 마스터가 그 모순을 짚었다. 나중에 무엇이 달라지는지는 아래 줄이 말한다. */}
+          <div className={styles.priceRow}><strong className={`${styles.accessBadge} ${styles.accessLarge} ${freeTier || beta ? styles.accessFree : styles.accessSub}`}>{freeTier ? "무료" : beta ? "베타 무료" : "구독자 전용"}</strong><small>{listing.sellerName ?? "Clunk"} · {formatBytes(listing.byteLength)} · {listing.entryFileName}</small></div>
           {!freeTier && paymentUnavailable ? (
             <p className={styles.payState} data-payment-state={checkout?.status ?? "UNKNOWN"} role="status">
-              구독하면 이 에셋을 포함해 마켓의 모든 에셋을 받습니다. 앞으로 올라오는 것도 같이 열립니다.
+              지금은 로그인만 하면 이 에셋을 받습니다. 구독이 시작되면 이 에셋은 구독자 전용이 되고, 구독하면 마켓의 모든 에셋과 앞으로 올라오는 것까지 함께 열립니다.
             </p>
           ) : null}
           {!freeTier && !beta ? (

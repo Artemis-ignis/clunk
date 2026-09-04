@@ -1,0 +1,13 @@
+{
+  "schema": "clunk.landing-facts.v1",
+  "generatedAt": "2026-09-04T13:44:40.384Z",
+  "facts": {
+    "tractor": {
+      "fileName": "tractor.compact.m1.glb",
+      "triangles": 58156,
+      "bytes": 578376,
+      "faceLimit": 40000,
+      "limitPercent": 145
+    }
+  }
+}

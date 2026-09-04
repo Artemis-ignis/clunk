@@ -111,7 +111,7 @@ export default function MarketplacePage() {
                 </h2>
                 <p>얼마나 무거운지, 파일 크기는 얼마인지, 라이선스(어디까지 써도 되는지)를 상품마다 적어 두었습니다.</p>
               </div>
-              <MarketplaceCatalog />
+              <MarketplaceCatalog salesOpen={salesOpen} />
             </div>
           </section>
 

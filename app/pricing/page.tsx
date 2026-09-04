@@ -6,7 +6,7 @@ import { RevealObserver } from "../components/Reveal";
 import { createPageMetadata } from "../components/site-metadata";
 import { signUpPath } from "../auth";
 import { BETA_MONTHLY_GRANT_CREDITS } from "../api/_lib/clunk";
-import { GRADE_RULE } from "../components/catalog-facts";
+import { GRADE_ACCESS, GRADE_ROWS } from "../components/catalog-facts";
 import { WORKSPACE_IMAGES_PER_DAY } from "../api/_lib/ai-budget";
 import { areSalesOpen } from "../api/_lib/sales-lock";
 import styles from "./pricing.module.css";
@@ -191,8 +191,17 @@ export default function PricingPage() {
                   : "지금은 로그인만 하면 마켓의 모든 에셋이 열립니다. 아래는 구독이 시작되면 적용될 값입니다."}
               </p>
               {/* 무료의 기준을 숫자로 적는다. 카드에 붙은 등급과 같은 규칙이라 방문자가
-                  마켓에서 바로 확인할 수 있다 — 규칙을 숨긴 무료는 미끼로 읽힌다. */}
-              <p className={styles.headRule}>{GRADE_RULE}</p>
+                  마켓에서 바로 확인할 수 있다 — 규칙을 숨긴 무료는 미끼로 읽힌다.
+                  한 문장으로 이어 붙이면 아무도 안 읽어서, 등급마다 한 줄로 나눠 적는다. */}
+              <dl className={styles.headRule}>
+                {GRADE_ROWS.map((row) => (
+                  <div key={row.letter} className={styles.headRuleRow}>
+                    <dt>{row.letter}</dt>
+                    <dd>{row.when}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p className={styles.headAccess}>{GRADE_ACCESS}</p>
             </div>
           </header>
 

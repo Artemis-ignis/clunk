@@ -1,4 +1,5 @@
 import { getCurrentUser } from "../../../../auth";
+import { areSalesOpen } from "../../../_lib/sales-lock";
 import { getRuntimeAssets, getRuntimeDb, ensureSchema, getCatalogAccessForUser, isSafeRecordId, jsonError, privateJson } from "../../../_lib/clunk";
 import { gradeOf, isFreeGrade } from "../../../../components/catalog-facts";
 import { factsFor } from "../../../_lib/listing-facts";
@@ -105,10 +106,22 @@ export async function GET(request: Request, context: RouteContext) {
       // 이미 값을 치른 사람에게서 받은 것을 거두지 않는다.
       const access = await getCatalogAccessForUser(db, user.id);
       if (access !== "full") {
+        // 값을 치른 기록만 문을 연다. 베타에서 "받기"를 누르면 그 에셋에 ACTIVE
+        // 기록이 하나 생기는데(marketplace/checkout, provider 'beta', 0원), 그것까지
+        // 영구 소유로 인정하면 구독을 여는 날 베타에 눌러 본 사람은 그 유료 에셋을
+        // 영원히 무료로 갖는다. 2026-09-04 마스터의 무료 계정이 구독자 전용 헬리콥터를
+        // 그렇게 받았다 — 그날 13:30 에 눌러 생긴 기록 하나 때문이었다.
+        //
+        // 베타 중에는 그 기록이 곧 베타의 무료 개방이므로 그대로 인정하고, 판매가
+        // 열린 뒤에는 인정하지 않는다. 실제로 값을 치른 기록(provider 가 beta 가
+        // 아닌 것)은 판매가 열린 뒤에도 그대로 인정한다 — 받은 것을 거두지 않는다.
         const entitlement = await db.prepare(
-          `SELECT id FROM clunk_marketplace_entitlements
-           WHERE buyer_user_id = ? AND asset_id = ? AND status = 'ACTIVE' LIMIT 1`,
-        ).bind(user.id, assetId).first<{ id: string }>();
+          `SELECT e.id FROM clunk_marketplace_entitlements e
+             JOIN clunk_marketplace_orders o ON o.id = e.order_id
+            WHERE e.buyer_user_id = ? AND e.asset_id = ? AND e.status = 'ACTIVE'
+              AND (? = 1 OR o.payment_provider <> 'beta')
+            LIMIT 1`,
+        ).bind(user.id, assetId, areSalesOpen() ? 0 : 1).first<{ id: string }>();
         if (!entitlement) {
           return privateJson({
             ok: false,

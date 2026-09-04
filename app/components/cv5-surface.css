@@ -33,15 +33,19 @@
 :root[data-theme]:has(.cv5-surface) {
   color-scheme: dark;
 
-  /* --- globals.css ramp → cv5 navy ground (values mirror app/site-v5.css) --- */
-  --ink-0: #06070f;
-  --ink-1: #0a0c16;
-  --ink-2: #10121e;
-  --ink-3: #151830;
-  --ink-4: #1b1f3e;
-  --ink-inverse: #0a0d18;
-  --line: rgba(255, 255, 255, 0.08);
-  --line-strong: rgba(255, 255, 255, 0.15);
+  /* 2026-09-04: 이 파일이 globals 의 램프를 다시 선언해 덮어쓰고 있어서, 팔레트를
+     중성으로 내린 뒤에도 /agents · /series · /webmcp · /portfolio · 작업공간만 옛
+     보라 남색으로 남아 있었다. site-v5.css 와 같은 값으로 맞춘다 — 채도 30~50% 에서
+     7~8% 로, 가장 어두운 면은 밝기 4.1% 에서 9.8% 로. */
+  /* --- globals.css ramp → cv5 중성 지면 (values mirror app/site-v5.css) --- */
+  --ink-0: #17181b;
+  --ink-1: #1d1f22;
+  --ink-2: #222427;
+  --ink-3: #282b2f;
+  --ink-4: #34383d;
+  --ink-inverse: #1a1b1e;
+  --line: rgba(255, 255, 255, 0.10);
+  --line-strong: rgba(255, 255, 255, 0.18);
 
   --tint-1: rgba(255, 255, 255, 0.03);
   --tint-2: rgba(255, 255, 255, 0.05);
@@ -82,7 +86,8 @@
   --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.44), 0 4px 14px rgba(0, 0, 0, 0.36);
   --shadow-panel: 0 2px 4px rgba(0, 0, 0, 0.4), 0 18px 44px rgba(0, 0, 0, 0.5);
   --shadow-lift: 0 4px 12px rgba(0, 0, 0, 0.46), 0 30px 70px rgba(0, 0, 0, 0.6);
-  --shadow-accent: 0 12px 44px -12px rgba(124, 93, 250, 0.55);
+  /* 큰 면에 얹던 보라 광. 강조는 버튼과 초점에만 남긴다. */
+  --shadow-accent: 0 10px 26px -14px rgba(108, 111, 242, 0.5);
 
   /* Literal stacks only. A nested var() whose inner variable is undefined is
      guaranteed-invalid and silently drops the whole page to the system font —
@@ -97,16 +102,16 @@
   --font-geist-mono: "Space Grotesk V", "Space Grotesk", ui-monospace, "Cascadia Mono", monospace;
 
   /* --- foundry.css warm-paper ramp → the same navy ground --- */
-  --foundry-paper: #06070f;
-  --foundry-paper-strong: #0a0c16;
-  --foundry-paper-deep: #04050b;
+  --foundry-paper: #17181b;
+  --foundry-paper-strong: #1d1f22;
+  --foundry-paper-deep: #131416;
   --foundry-ink: #f4f5fa;
   --foundry-ink-soft: rgba(233, 236, 248, 0.7);
   --foundry-ink-faint: rgba(233, 236, 248, 0.46);
-  --foundry-graphite: #0a0c16;
-  --foundry-graphite-soft: #151830;
-  --foundry-line: rgba(255, 255, 255, 0.08);
-  --foundry-line-strong: rgba(255, 255, 255, 0.15);
+  --foundry-graphite: #1d1f22;
+  --foundry-graphite-soft: #282b2f;
+  --foundry-line: rgba(255, 255, 255, 0.10);
+  --foundry-line-strong: rgba(255, 255, 255, 0.18);
   --foundry-amber: #c084fc;
   --foundry-amber-deep: #a5a8ff;
   --foundry-amber-soft: rgba(139, 92, 246, 0.16);
@@ -295,7 +300,7 @@
 .cv5-surface .sample-workbench {
   border: 1px solid var(--v5-line-strong);
   border-radius: var(--v5-r-lg);
-  box-shadow: 0 36px 90px -40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(124, 93, 250, 0.08);
+  box-shadow: 0 36px 90px -40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.07);
 }
 .cv5-surface .sample-workbench-topbar {
   border-bottom-color: var(--v5-line);
@@ -341,7 +346,7 @@
 .cv5-surface .live-evidence-showcase {
   border: 1px solid var(--v5-line-strong);
   border-radius: var(--v5-r-lg);
-  box-shadow: 0 36px 90px -40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(124, 93, 250, 0.08);
+  box-shadow: 0 36px 90px -40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.07);
 }
 .cv5-surface .live-evidence-showcase-detail {
   background: linear-gradient(178deg, rgba(19, 22, 40, 0.85), rgba(11, 13, 24, 0.95)), var(--v5-bg1);
@@ -387,7 +392,7 @@
   border: 1px solid var(--v5-line-strong);
   border-radius: var(--v5-r-lg);
   background: linear-gradient(178deg, #131628, #0c0e1a 68%);
-  box-shadow: 0 36px 90px -40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(124, 93, 250, 0.1);
+  box-shadow: 0 36px 90px -40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.09);
 }
 .cv5-surface .agent-connection-toolbar {
   border-bottom-color: var(--v5-line);

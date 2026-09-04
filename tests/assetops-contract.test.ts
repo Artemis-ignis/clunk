@@ -37,12 +37,20 @@ test("Harvest Frontier target profile exposes all declared 2D and 3D asset kinds
   assert.deepEqual(profile.assetKinds, ["3d-model", "animation-clip", "2d-image", "sprite-atlas", "spine-project"]);
   assert.ok(profile.acceptedFormats.includes("json"));
   assert.ok(profile.acceptedFormats.includes("atlas"));
+  // 2026-08-24(441a6f5) 정정: 이 계약은 텍스처 두 예산이 0 이던 시절을 얼려 두고 있었다.
+  // resolvePolicy 는 이 값을 `?? base` 로 읽기 때문에 0 은 "미설정"이 아니라 "예산 0" 이고,
+  // 그래서 텍스처가 든 GLB 는 전부 자동 BLOCK 됐다 — 하필 텍스처를 검사하라고 만든 게임
+  // 이름의 프로필에서(packages/core/src/assetops-profiles.ts:50-54 주석이 그 사고를 기록).
+  // 제품은 바로 위 texturePolicy 가 이미 선언한 4096 / 128MB 를 그대로 쓰도록 고쳤다.
+  // 아래 두 줄은 그 숫자를 texturePolicy 와 맞물려 못 박아, 누가 다시 0 을 넣으면 깨진다.
   assert.deepEqual(profile.inspectionPolicy, {
     maxTriangles: 40000,
     maxMaterials: 64,
-    maxTextureMemoryBytes: 0,
-    maxTextureDimension: 0,
+    maxTextureMemoryBytes: 128 * 1024 * 1024,
+    maxTextureDimension: 4096,
   });
+  assert.equal(profile.inspectionPolicy?.maxTextureDimension, profile.texturePolicy.maxDimension);
+  assert.equal(profile.inspectionPolicy?.maxTextureMemoryBytes, profile.texturePolicy.memoryBudgetBytes);
 });
 
 test("Yeongheoge Pixi profile scopes 2D authoring and keeps runtime approval separate", () => {

@@ -222,7 +222,11 @@ export function EmbeddedGlbViewer({
   const [mirror, setMirror] = useState(false);
   const [dimensions, setDimensions] = useState(false);
   const [flatShading, setFlatShading] = useState(false);
-  const [background, setBackground] = useState<Background>("dark");
+  // 밝은 바탕이 기본이다. 에셋을 보는 화면에서 어두운 바탕은 흰 물건을 지운다 — 흰 도장의
+  // 헬리콥터가 검은 판 위에서 형태만 남았다(2026-09-04 마스터 지적). 사는 사람이 판단하는
+  // 것은 우리 화면의 분위기가 아니라 물건의 색과 모양이므로, 바닥 그림자가 있는 밝은 판을
+  // 기본으로 두고 어둡게 보고 싶은 사람은 도구 줄에서 바꾼다.
+  const [background, setBackground] = useState<Background>("light");
   const [lighting, setLighting] = useState<LightingPreset>("studio");
   const [grid, setGrid] = useState(false);
   const [shadows, setShadows] = useState(true);
@@ -609,6 +613,9 @@ export function EmbeddedGlbViewer({
         let current: BoundClip | null = null;
         let clipSeconds = 0;
         let running = true;
+        // 자동 회전을 두 곳에서 끈다 — 도구 줄의 자동 회전 버튼과, 멈춤 버튼. 어느 쪽이든
+        // 꺼져 있으면 돌지 않고, 둘 다 켜져 있을 때만 돈다.
+        let autoRotateWanted = true;
         let rate = 1;
 
         // The parts under test. More than one at a time on purpose: a tractor is not
@@ -664,6 +671,11 @@ export function EmbeddedGlbViewer({
           setPlaying(next) {
             running = next;
             if (mixerAction) mixerAction.paused = !next;
+            // 멈춤은 멈춤이어야 한다. 예전에는 클립만 멈추고 카메라 자동 회전은 계속
+            // 돌아서, 눌러도 물건이 계속 도는 것으로 보였다 — 2026-09-04 마스터:
+            // "멈춤하거나 가만히 놔두면 멈춰야하는데 왜 자꾸 에셋들이 지 멋대로 돌아가냐".
+            // 다시 재생하면 자동 회전도 함께 돌아온다.
+            controls.autoRotate = next && autoRotateWanted;
           },
           setSpeed(next) {
             rate = next;
@@ -722,7 +734,10 @@ export function EmbeddedGlbViewer({
             ground.visible = on;
             for (const item of benchMaterials) item.material.needsUpdate = true;
           },
-          setAutoRotate(on) { controls.autoRotate = on; },
+          setAutoRotate(on) {
+            autoRotateWanted = on;
+            controls.autoRotate = on && running;
+          },
           resetCamera() { frame(referenceGroup.visible); controls.update(); },
           setMaterialColour(id, hex) {
             const item = benchMaterials[id];

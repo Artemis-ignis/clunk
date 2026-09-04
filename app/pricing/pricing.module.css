@@ -36,14 +36,40 @@
 }
 
 /* 무료의 기준 한 줄. 카드에 붙은 등급과 같은 규칙이라 방문자가 대조할 수 있다. */
+/* 등급 규칙. 한 문장으로 이어 붙였을 때 가운뎃점 다섯 개짜리 한 덩어리가 되어 아무도
+   안 읽었다. 등급 글자를 왼쪽에 세우고 조건을 오른쪽에 두면 세 줄로 한눈에 읽힌다. */
 .headRule {
   margin: 14px 0 0;
-  padding: 12px 16px;
+  padding: 14px 18px;
+  display: grid;
+  gap: 8px;
   border-left: 2px solid var(--v5-line-strong);
+  max-width: 68ch;
+}
+.headRuleRow {
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  align-items: baseline;
+  gap: 12px;
   font-size: 0.86rem;
   line-height: 1.6;
   color: var(--v5-ink-dim);
-  max-width: 72ch;
+}
+.headRuleRow dt {
+  margin: 0;
+  font-family: var(--v5-label);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--v5-ink);
+}
+.headRuleRow dd { margin: 0; }
+.headAccess {
+  margin: 10px 0 0;
+  padding-left: 20px;
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: var(--v5-ink-dim);
+  max-width: 68ch;
 }
 
 .lede {

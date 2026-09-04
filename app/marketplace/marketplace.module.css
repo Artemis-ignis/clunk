@@ -334,7 +334,7 @@
   background: #191c2e;
 }
 
-/* A grid row is scanned, not read: the name, then the number that decides
+/* A grid row is scanned, not read: the name, then the numbers that decide
    whether the file fits the budget. Nothing else earns a line here. */
 .cardTitle {
   display: block;
@@ -345,15 +345,19 @@
   color: var(--v5-ink);
 }
 
+/* 사실줄. 그림 위에 떠 있던 등급과 형식이 여기로 내려왔으므로, 스쳐 보는 글씨가 아니라
+   읽는 글씨다 — 옛 --v5-ink-faint 는 카드 본문 위에서 3.30:1 로 4.5:1 에 못 미쳤다.
+   --v5-ink-dim 은 같은 자리에서 6.87:1(토큰 알파 0.66 기준), 돌고 있는 화면에서 직접
+   재면 8.67:1 이다. 토큰이 흐려지면 이 값도 같이 떨어지므로 바꿀 때 다시 재야 한다. */
 .cardSpec {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   flex-wrap: wrap;
   font-family: var(--v5-label);
   font-size: 0.72rem;
   font-variant-numeric: tabular-nums;
-  color: var(--v5-ink-faint);
+  color: var(--v5-ink-dim);
 }
 
 .previewUnavailable {
@@ -397,56 +401,75 @@
   transform: scale(1.04);
 }
 
+/* 그림 위에 뜨는 줄. 접근권 알약은 늘 오른쪽 위 같은 자리에 있어야 눈이 찾아가므로,
+   색 배지가 있든 없든 끝에 붙인다(색 배지는 스스로 왼쪽으로 밀려난다). */
 .cardBadges {
   position: absolute;
   top: 10px;
   left: 10px;
   right: 10px;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: flex-start;
   gap: 8px;
   pointer-events: none;
 }
 
-.formatBadge {
+/* ── 접근권 알약 (2026-09-04) ───────────────────────────────────────────────
+   여기서 파는 것은 낱개가 아니라 접근권이므로, 카드 위에서 읽어야 하는 사실은
+   "무료인가, 구독자 전용인가" 하나다.
+
+   대비는 눈으로 고르지 않고 쟀다. 칩이 그림 위에 뜨는 이상 "뒤에 있는 것"은 카드
+   이미지라, public/market 의 히어로 PNG 30장에서 칩이 앉는 띠(세로 5~20%)를 픽셀째
+   읽어 WCAG 2.1 대비를 계산했다.
+
+     옛 무료 칩   #34d399 글자 / rgba(52,211,153,0.16)
+                  카드 아트 바탕 위 6.15:1 · 밝은 미리보기 위 1.21:1  ← 못 읽는다
+     옛 구독 칩   #fff 글자 / var(--v5-grad)  4.47 / 4.23 / 3.96:1    ← 셋 다 미달
+     지금 무료    #04241a 글자 / #3ee0a6                     9.76:1
+     지금 구독    #f4ecff 글자 / #4c2ba8                     8.24:1
+
+   알파를 쓰지 않는 것이 요점이다. 반투명 칠은 뒤 그림이 대비를 정하게 두는 것이고,
+   밝은 렌더 위에서 1.21:1 이 나온 까닭이 정확히 그것이었다. 꽉 찬 칠은 뒤에 무엇이
+   오든 위 값을 그대로 유지한다.
+
+   두 상태는 색상만이 아니라 명암이 뒤집혀 있다 — 무료는 밝은 바탕에 어두운 글자,
+   구독자 전용은 어두운 바탕에 밝은 글자다. 색을 구분하지 못해도 갈라진다. */
+.accessBadge {
   display: inline-flex;
   align-items: center;
-  height: 24px;
-  padding: 0 9px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 7px;
-  background: rgba(5, 6, 12, 0.72);
-  backdrop-filter: blur(6px);
-  color: rgba(255, 255, 255, 0.88);
+  justify-content: center;
+  height: 28px;
+  padding: 0 13px;
+  border-radius: 999px;
   font-family: var(--v5-label);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
   white-space: nowrap;
+  /* 그림 위에서 알약의 윤곽이 사라지지 않도록 얇은 테두리와 그림자만. 칠 자체는
+     아래 두 규칙이 불투명하게 덮는다. */
+  box-shadow: 0 0 0 1px rgba(4, 3, 10, 0.55), 0 6px 18px -8px rgba(0, 0, 0, 0.9);
 }
 
-.priceBadge {
-  display: inline-flex;
-  align-items: center;
-  height: 26px;
-  padding: 0 11px;
-  border-radius: 8px;
-  background: var(--v5-grad);
-  box-shadow: 0 8px 22px -8px rgba(124, 93, 250, 0.65);
-  color: #fff;
-  font-family: var(--v5-label);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  white-space: nowrap;
+/* 로그인만 하면 받는 것 — 9.76:1 */
+.accessFree {
+  background: #3ee0a6;
+  color: #04241a;
 }
 
-.priceBadgeFree {
-  background: rgba(52, 211, 153, 0.16);
-  border: 1px solid rgba(52, 211, 153, 0.45);
-  box-shadow: none;
-  color: var(--v5-green);
+/* 구독이 살아 있어야 받는 것 — 8.24:1 */
+.accessSub {
+  background: #4c2ba8;
+  color: #f4ecff;
+}
+
+/* 상세 화면의 같은 알약. 카드보다 크지만 칠과 글자는 같은 것이라 대비도 같다. */
+.accessLarge {
+  height: 34px;
+  padding: 0 17px;
+  font-size: 0.94rem;
+  letter-spacing: 0.01em;
 }
 
 .cardBody {
@@ -938,16 +961,12 @@
   background: rgba(99, 102, 241, 0.07);
 }
 
+/* 이 자리는 .accessBadge + .accessLarge 알약이 칠한다. 예전에는 브랜드 그라디언트를
+   글자에 클립해 그렸는데, 그러면 "무료"와 "구독자 전용"이 같은 보라로 나와 두 상태를
+   색으로 가릴 수 없었고 대비도 3.76~4.24:1 로 셋 다 4.5:1 아래였다.
+   여기서는 자리만 잡는다 — grid 칸을 가득 채우면 알약이 아니라 띠가 된다. */
 .priceRow strong {
-  font-family: var(--v5-label);
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  background: var(--v5-grad);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  font-variant-numeric: tabular-nums;
+  justify-self: start;
 }
 
 .priceRow small {
@@ -1716,18 +1735,18 @@
   font-size: 0.72rem;
   color: var(--v5-ink-dim);
 }
+/* 색을 고른 동안에만 뜬다. 접근권 알약과 같은 이유로 칠을 불투명하게 두었다 — 반투명일
+   때는 뒤 그림이 대비를 정했다(가장 밝은 미리보기 위에서 9.6:1, 지금은 어디서나 16.97:1).
+   알약이 늘 오른쪽 끝에 있도록 이 배지가 스스로 왼쪽으로 밀려난다. */
 .colourBadge {
-  padding: 3px 7px;
+  margin-right: auto;
+  padding: 4px 9px;
   border-radius: 999px;
-  background: #0b0d18cc;
+  background: #11131f;
   border: 1px solid var(--v5-line-strong);
   font-size: 0.72rem;
   color: var(--v5-ink);
 }
-
-/* The struck price beside "무료": the number people will pay later, shown now so the
-   beta reads as a gift with a stated value rather than a product with no price. */
-.priceStruck { opacity: 0.55; font-weight: 500; margin-right: 6px; }
 
 /* A file row before the visitor holds the entitlement: the same slot the link uses, muted. */
 .fileLocked { font-size: 0.78rem; color: var(--v5-ink-faint); white-space: nowrap; }
@@ -2247,21 +2266,25 @@
 }
 
 /* how many things move, on the card. The generative-AI badge that used to sit beside it
-   is gone: a legal disclosure belongs once on the product page, not on every tile. */
+   is gone: a legal disclosure belongs once on the product page, not on every tile.
+
+   등급 칩과 같은 줄에 서므로 높이와 모서리를 맞춘다 — 크기가 제각각인 칩이 줄줄이
+   서 있는 것이 마스터가 "보기 싫다" 고 한 그 줄이었다. 칠은 카드 본문 위라 그림에
+   좌우되지 않고, #bfeeff 글자가 14.86:1 이다. */
 .motionChip {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  height: 24px;
-  padding: 0 9px;
+  height: 20px;
+  padding: 0 8px;
   border: 1px solid rgba(89, 217, 255, 0.4);
-  border-radius: 7px;
+  border-radius: 6px;
   background: rgba(8, 20, 28, 0.78);
   color: #bfeeff;
   font-family: var(--v5-label);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   white-space: nowrap;
 }
 
@@ -2270,47 +2293,51 @@
    가게 테마 (2026-09-03) — 카드는 진열장
    ========================================================================= */
 .card {
-  border-color: rgba(206, 190, 255, 0.2);
+  /* 2026-09-04: 이 판이 사이트에서 제일 보라였다. 재 보니 채도 43.8~48.6%,
+     밝기 6.9~12.5% — 배경이 아니라 보라 사각형이었고, 그리드에 30장이 깔려 있었다.
+     마스터: "너무 어둡고 보라색계열이 심함". 바탕 램프와 같은 중성으로 내린다. */
+  border-color: rgba(255, 255, 255, 0.12);
   border-radius: 18px;
-  background: linear-gradient(180deg, #19122e 0%, #100c1f 60%, #0c091a 100%);
+  background: linear-gradient(180deg, #26282c 0%, #1d1f22 60%, #17181b 100%);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 26px 60px -36px rgba(0, 0, 0, 0.95);
   transform-style: preserve-3d;
 }
 .card:hover {
   transform: perspective(900px) rotateX(2deg) translateY(-6px);
-  border-color: rgba(233, 213, 255, 0.5);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 30px 64px -26px rgba(0, 0, 0, 0.95), 0 0 36px -8px rgba(168, 85, 247, 0.55);
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 30px 64px -26px rgba(0, 0, 0, 0.95);
 }
-.cardArt { background: radial-gradient(80% 70% at 50% 30%, #241b46, #140f26 70%); }
-.cardBody { border-top-color: rgba(206, 190, 255, 0.14); }
-.formatBadge { border-radius: 999px; border-color: rgba(214, 220, 236, 0.3); background: linear-gradient(180deg, rgba(40, 32, 70, 0.9), rgba(12, 9, 26, 0.9)); }
-.priceBadge { border-radius: 999px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 0 1px rgba(216, 180, 254, 0.22), 0 8px 24px -8px rgba(168, 85, 247, 0.75); }
-.priceBadgeFree { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08); }
+/* 그림 뒤판. 미리보기가 뜨기 전 가장 먼저 보이는 면이라 여기가 보라면 목록 전체가
+   보라로 열린다. 그리고 에셋의 색을 판단하는 자리에 색을 얹으면 안 된다. */
+.cardArt { background: radial-gradient(80% 70% at 50% 30%, #2c2f33, #232529 70%); }
+.cardBody { border-top-color: rgba(255, 255, 255, 0.10); }
 
 /* 등급 칩 (2026-09-04)
    이 배지는 위 반구·아래 반구·가운데 크롬 이음선을 가진 캡슐로 그려져 있었다 — 캡슐
    자판기의 알 그대로다. 등급 자체는 크기와 동작을 보고 매기는 분류라 남지만, 뽑기의
-   알을 흉내 내는 모양은 남기지 않는다. 같은 등급색을 쓰는 납작한 칩 하나다. */
+   알을 흉내 내는 모양은 남기지 않는다. 같은 등급색을 쓰는 납작한 칩 하나다.
+
+   같은 날 저녁, 이 칩은 그림 위에서 카드 본문의 사실줄로 내려왔다. 까닭 둘 —
+   첫째, 그림 위의 낱글자 "S" 는 무엇의 S 인지 말하지 않는다(이제 "S 등급" 으로 적는다).
+   둘째, rgba(10,8,20,0.72) 반투명 칠은 뒤 그림이 대비를 정했다: 밝은 미리보기 위에서
+   A 등급이 3.15:1 이었다. 불투명한 본문 위에서는 가장 나쁜 A 가 6.01:1 이고, 돌고 있는
+   화면에서 다시 재면 6.03:1 이다. S 는 9.80:1, B 는 10.74:1. */
 .gradeBadge {
   display: inline-flex; align-items: center; justify-content: center;
-  min-width: 26px; height: 22px; padding: 0 7px; border-radius: 7px;
-  font-family: var(--v5-label); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.04em;
+  height: 20px; padding: 0 8px; border-radius: 6px;
+  font-family: var(--v5-label); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.03em;
   color: var(--grade-ink, #e6dcc6);
-  background: rgba(10, 8, 20, 0.72);
-  border: 1px solid var(--grade-ink, #e6dcc6);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--v5-line-strong);
+  white-space: nowrap;
 }
 .gradeBadge[data-grade="S"] { --grade-ink: #f5c542; }
 .gradeBadge[data-grade="A"] { --grade-ink: #c084fc; }
 .gradeBadge[data-grade="B"] { --grade-ink: #5eead4; }
 @media (prefers-reduced-motion: reduce) { .card:hover { transform: none; } }
-
-/* 카드 위 값 칩 — 좁은 칩 안의 취소선 값은 읽히지 않는다. 카드에서는 "무료"만, 값은 상세에서. */
-.cardBadges .priceStruck { display: none; }
-.cardBadges .priceBadge { white-space: nowrap; }
 /* 마켓 첫 화면의 진열 판과 상세의 판들도 같은 캐비닛이다. */
 .heroPanel, .detailSection, .detailBuy, .evidenceCard, .variantRow {
-  border-color: rgba(206, 190, 255, 0.2);
-  background: linear-gradient(180deg, #19122e 0%, #100c1f 60%, #0c091a 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 30px 70px -40px rgba(0, 0, 0, 0.95), 0 0 40px -18px rgba(168, 85, 247, 0.3);
+  border-color: rgba(255, 255, 255, 0.12);
+  background: linear-gradient(180deg, #26282c 0%, #1d1f22 60%, #17181b 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 30px 70px -40px rgba(0, 0, 0, 0.95);
 }
