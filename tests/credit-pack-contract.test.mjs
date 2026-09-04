@@ -173,5 +173,5 @@ test("무료·구독 구분은 저장한 값이 아니라 등급에서 계산한
   assert.match(showcase, /isFreeGrade\(gradeOf\(/, "첫 화면 진열장도 같은 규칙을 써야 한다");
 
   const catalogue = await source("app/api/marketplace/route.ts");
-  assert.doesNotMatch(catalogue, /accessTier: row\.accessTier/, "응답이 아무도 읽지 않는 등급 값을 실어 나르면 안 된다");
+  assert.doesNotMatch(catalogue, /accessTier/, "응답이 아무도 읽지 않는 등급 값을 실어 나르면 안 된다 — ...row 스프레드가 SQL 별칭을 그대로 흘린다");
 });
