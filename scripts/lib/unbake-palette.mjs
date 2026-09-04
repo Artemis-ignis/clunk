@@ -38,7 +38,13 @@ export async function unbakePalette(buffer) {
   let restored = 0;
   for (const mesh of doc.getRoot().listMeshes()) {
     for (const prim of mesh.listPrimitives()) {
-      const uv = prim.getAttribute("TEXCOORD_0");
+      // 색표가 어느 좌표에 있는지는 재질이 말한다. 원래 UV 가 있던 파일에서는 그것을
+      // 덮지 않으려고 색표가 두 번째 자리에 들어간다(헬리콥터). 첫 자리를 가정하고 읽으면
+      // 산 사람이 자기 그림을 입히려고 남겨 둔 좌표에서 색을 집어 오게 된다.
+      const material = prim.getMaterial();
+      if (!material?.getBaseColorTexture()) continue; // 정점 색인 채로 남긴 부품
+      const slot = material.getBaseColorTextureInfo()?.getTexCoord() ?? 0;
+      const uv = prim.getAttribute(`TEXCOORD_${slot}`);
       if (!uv) continue;
       const n = uv.getCount();
       const colours = new Float32Array(n * 3);
@@ -50,7 +56,13 @@ export async function unbakePalette(buffer) {
         for (let k = 0; k < 3; k += 1) colours[i * 3 + k] = toLinear(data[at + k] / 255);
       }
       prim.setAttribute("COLOR_0", doc.createAccessor().setType("VEC3").setArray(colours));
-      prim.setAttribute("TEXCOORD_0", null);
+      prim.setAttribute(`TEXCOORD_${slot}`, null);
+      // 두 번째 자리를 비우면 첫 자리만 남아 규격에 맞다. 첫 자리를 비웠는데 두 번째가
+      // 남으면 좌표 번호가 건너뛰어 읽는 쪽이 경고를 낸다.
+      if (slot === 0 && prim.getAttribute("TEXCOORD_1")) {
+        prim.setAttribute("TEXCOORD_0", prim.getAttribute("TEXCOORD_1"));
+        prim.setAttribute("TEXCOORD_1", null);
+      }
       restored += 1;
     }
   }

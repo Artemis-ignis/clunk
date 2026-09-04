@@ -276,11 +276,22 @@ export interface InspectionReport {
   qualityPolicy?: QualityPolicy;
 }
 
+/**
+ * What a passport is allowed to say was done to a file.
+ *
+ * The first four are `optimizeAsset`'s own. The last two happen after it, in the shop's
+ * publishing step, and they are here because a passport that cannot name them stops
+ * describing the file it ships beside: three crates were on sale with a passport whose
+ * `outputHash` no longer matched the GLB next to it, because the colour bake ran afterwards.
+ * A provenance document that does not match its file is worse than none.
+ */
 export type RepairOperationId =
   | "prune-empty-nodes"
   | "dedupe-materials"
   | "clean-metadata"
-  | "repack";
+  | "repack"
+  | "bake-vertex-colour-palette"
+  | "prune-orphan-data";
 
 export interface RepairOperation {
   id: RepairOperationId;

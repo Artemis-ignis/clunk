@@ -56,6 +56,10 @@ export const REPAIR_OPERATIONS = [
   { id: "dedupe-materials", label: "똑같은 재질 합치기", safety: "lossless" },
   { id: "clean-metadata", label: "메타데이터 정리", safety: "metadata-only" },
   { id: "repack", label: "새 파일로 다시 묶기", safety: "lossless" },
+  // 아래 둘은 파이프라인 뒤, 가게가 내보내면서 하는 일이다. 여권이 이름을 못 대면
+  // 여권의 해시가 옆에 놓인 파일과 어긋나 증거가 아니게 된다.
+  { id: "bake-vertex-colour-palette", label: "정점 색을 색표 그림으로", safety: "lossless" },
+  { id: "prune-orphan-data", label: "안 쓰는 자료 지우기", safety: "lossless" },
 ] as const;
 
 /** Fields written into every Passport by `createPassport`. */

@@ -1,6 +1,6 @@
 {
   "schema": "clunk.listing-facts.v1",
-  "generatedAt": "2026-09-04T09:38:58.142Z",
+  "generatedAt": "2026-09-04T12:06:40.104Z",
   "sources": [
     "outputs\\market-launch\\wave1\\upload-manifest.json",
     "tmp\\listings-snapshot.json",
@@ -11,11 +11,31 @@
     "clunk-heli-h145": {
       "triangles": 85150,
       "materials": 9,
-      "boundsMetres": null,
-      "byteLength": 3303252,
+      "boundsMetres": [
+        10.5249,
+        3.95,
+        13.64
+      ],
+      "byteLength": 2833568,
       "format": "GLB",
-      "animatedParts": [],
-      "animations": [],
+      "animatedParts": [
+        "main_rotor_hub",
+        "fenestron_rotor",
+        "door_left_slide",
+        "door_right_slide",
+        "door_rear_left",
+        "door_rear_right"
+      ],
+      "animations": [
+        {
+          "name": "rotor_spin",
+          "seconds": 1
+        },
+        {
+          "name": "doors_open",
+          "seconds": 2.4
+        }
+      ],
       "kit": null,
       "kitSize": 0,
       "members": null,
@@ -31,11 +51,13 @@
           "KHR_materials_transmission",
           "KHR_materials_volume"
         ],
-        "colour": "vertex",
+        "colour": "mixed",
         "modes": [
           4
         ],
-        "imageTypes": []
+        "imageTypes": [
+          "image/png"
+        ]
       },
       "inspection": null
     },
@@ -47,7 +69,7 @@
         0.434,
         0.434
       ],
-      "byteLength": 97800,
+      "byteLength": 72304,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -105,7 +127,7 @@
         0.41,
         0.434
       ],
-      "byteLength": 72552,
+      "byteLength": 53760,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -163,7 +185,7 @@
         0.5308,
         0.434
       ],
-      "byteLength": 122528,
+      "byteLength": 90476,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -275,7 +297,12 @@
         "gate_pivot",
         "gate_hinge_straps"
       ],
-      "animations": [],
+      "animations": [
+        {
+          "name": "swing",
+          "seconds": 1
+        }
+      ],
       "kit": "cozy-farm-set",
       "kitSize": 3,
       "members": null,
@@ -350,7 +377,7 @@
         4.24,
         6.5112
       ],
-      "byteLength": 762688,
+      "byteLength": 555256,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -407,7 +434,7 @@
         1.4782,
         1.6796
       ],
-      "byteLength": 180324,
+      "byteLength": 132432,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -464,7 +491,7 @@
         1.4706,
         1.5773
       ],
-      "byteLength": 192068,
+      "byteLength": 141004,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -713,7 +740,7 @@
       "triangles": 11008,
       "materials": 2,
       "boundsMetres": null,
-      "byteLength": 1201644,
+      "byteLength": 954352,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -726,11 +753,13 @@
       "engine": {
         "requires": [],
         "uses": [],
-        "colour": "vertex",
+        "colour": "texture",
         "modes": [
           4
         ],
-        "imageTypes": []
+        "imageTypes": [
+          "image/png"
+        ]
       },
       "inspection": null
     },
@@ -764,7 +793,7 @@
         6.39,
         7.8503
       ],
-      "byteLength": 1407716,
+      "byteLength": 1275524,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -799,11 +828,11 @@
       "triangles": 27668,
       "materials": 4,
       "boundsMetres": [
-        1.5447,
-        1.6899,
-        3.35
+        1.3495,
+        1.6869,
+        3.16
       ],
-      "byteLength": 513836,
+      "byteLength": 485340,
       "format": "GLB",
       "animatedParts": [
         "gaugeWheelLeft",
@@ -894,9 +923,9 @@
       "triangles": 7040,
       "materials": 2,
       "boundsMetres": [
-        1.0751,
-        2.4992,
-        0.8668
+        1.0393,
+        2.4129,
+        0.7793
       ],
       "byteLength": 784032,
       "format": "GLB",
@@ -970,11 +999,11 @@
       "triangles": 48860,
       "materials": 8,
       "boundsMetres": [
-        7.3753,
-        5.2749,
-        4.2804
+        6.997,
+        5.4762,
+        3.9716
       ],
-      "byteLength": 1198036,
+      "byteLength": 1121780,
       "format": "GLB",
       "animatedParts": [
         "mixerPivot",
@@ -987,7 +1016,9 @@
         "beltMark4",
         "beltMark5",
         "beltMark6",
-        "beltMark7"
+        "beltMark7",
+        "gaugePointerPivot",
+        "valveWheelPivot"
       ],
       "animations": [
         {
@@ -1028,11 +1059,11 @@
       "triangles": 52066,
       "materials": 4,
       "boundsMetres": [
-        1.9611,
-        2.2592,
+        1.9572,
+        2.2454,
         3.8
       ],
-      "byteLength": 1071472,
+      "byteLength": 1019340,
       "format": "GLB",
       "animatedParts": [
         "openerDisc01Left",
@@ -1089,7 +1120,11 @@
         "pivotclosingWheel04Right",
         "pivothitchTopLink",
         "pivothitchLowerLeft",
-        "pivothitchLowerRight"
+        "pivothitchLowerRight",
+        "hopperAgitatorPivot01",
+        "hopperAgitatorPivot02",
+        "hopperAgitatorPivot03",
+        "hopperAgitatorPivot04"
       ],
       "animations": [
         {
@@ -1128,10 +1163,10 @@
       "materials": 8,
       "boundsMetres": [
         5.2396,
-        2.9143,
-        3.35
+        2.9149,
+        3.1601
       ],
-      "byteLength": 1603204,
+      "byteLength": 1528692,
       "format": "GLB",
       "animatedParts": [
         "wheelFrontLeft",
@@ -1202,11 +1237,11 @@
       "triangles": 2272,
       "materials": 2,
       "boundsMetres": [
-        1.5959,
-        2.3255,
-        1.8744
+        0.6855,
+        1,
+        0.806
       ],
-      "byteLength": 252220,
+      "byteLength": 231500,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -1239,7 +1274,7 @@
       "materials": 2,
       "boundsMetres": [
         3.3537,
-        5.0405,
+        5.0014,
         3.51
       ],
       "byteLength": 155288,

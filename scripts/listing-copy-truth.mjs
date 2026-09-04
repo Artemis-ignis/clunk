@@ -61,11 +61,16 @@ for (const row of rows) {
   // 색이 어디에 들어 있는지. 색표 그림으로 옮긴 파일에 "재질에 들어 있다"고 적혀 있으면
   // 사는 사람이 텍스처를 빼고 써도 된다고 읽는다.
   const colour = fact.engine?.colour;
+  const WHERE = { texture: "그림", material: "재질", vertex: "정점", mixed: "그림과 정점 양쪽" };
   if (colour && /색(이|은)\s*재질에 들어 있/.test(text) && colour !== "material") {
-    problems.push(`${row.slug}: 설명문은 색이 재질에 있다고 하는데 파일은 ${colour === "texture" ? "그림" : "정점"}에 들고 있습니다`);
+    problems.push(`${row.slug}: 설명문은 색이 재질에 있다고 하는데 파일은 ${WHERE[colour]}에 들고 있습니다`);
   }
-  if (colour === "vertex" && /텍스처 파일 없이 바로/.test(text)) {
-    problems.push(`${row.slug}: 색이 정점에만 있는데 설명문은 바로 쓸 수 있다고 합니다`);
+  if ((colour === "vertex" || colour === "mixed") && /텍스처 파일 없이 바로/.test(text)) {
+    problems.push(`${row.slug}: 색이 ${WHERE[colour]}에 있는데 설명문은 바로 쓸 수 있다고 합니다`);
+  }
+  // 일부만 옮긴 파일은 남은 부분이 흰색으로 나온다. 설명문이 전부 나온다고 하면 안 된다.
+  if (colour === "mixed" && /기본 재질에 넣어도 색이 그대로/.test(text)) {
+    problems.push(`${row.slug}: 일부 부품이 정점 색인데 설명문은 기본 재질에서 색이 그대로 나온다고 합니다`);
   }
 }
 
