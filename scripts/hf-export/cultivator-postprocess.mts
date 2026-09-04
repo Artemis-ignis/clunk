@@ -171,14 +171,19 @@ const scan = (step: number, upFrom: number, upTo: number, inFrom: number, inTo: 
     }
   }
 };
+const requireGaugeMove = (): { up: number; inboard: number } => {
+  if (!gaugeMove) throw new Error('no lift/inboard move within 250 mm frees the gauge wheels');
+  return gaugeMove;
+};
 scan(0.01, 0, 0.25, 0, 0.25);
-if (!gaugeMove) throw new Error('no lift/inboard move within 250 mm frees the gauge wheels');
-scan(0.002, gaugeMove.up - 0.01, gaugeMove.up + 0.001, gaugeMove.inboard - 0.01, gaugeMove.inboard + 0.001);
+const coarse = requireGaugeMove();
+scan(0.002, coarse.up - 0.01, coarse.up + 0.001, coarse.inboard - 0.01, coarse.inboard + 0.001);
+const move = requireGaugeMove();
 const GAUGE_MARGIN = 0.002;
 for (const g of GAUGE) {
   const pivot = node(scene, g.pivot);
-  pivot.position.y += gaugeMove.up + GAUGE_MARGIN;
-  pivot.position.z += (g.pivot.endsWith('Left') ? 1 : -1) * gaugeMove.inboard;
+  pivot.position.y += move.up + GAUGE_MARGIN;
+  pivot.position.z += (g.pivot.endsWith('Left') ? 1 : -1) * move.inboard;
 }
 scene.updateMatrixWorld(true);
 samples = resample();
@@ -186,7 +191,7 @@ const gaugeAfter = gaugeContactAt(0, 0);
 const gaugeAfterAll = gaugeContactAt(0, 0, true);
 report.gaugeWheel = {
   movedNodes: GAUGE.map((g) => g.pivot),
-  upMm: mm(gaugeMove.up + GAUGE_MARGIN), inboardMm: mm(gaugeMove.inboard),
+  upMm: mm(move.up + GAUGE_MARGIN), inboardMm: mm(move.inboard),
   shareContactTrianglePairsBefore: gaugeBefore.pairs, shareContactPartsBefore: gaugeBefore.where,
   shareContactTrianglePairsAfter: gaugeAfter.pairs, shareContactPartsAfter: gaugeAfter.where,
   everythingElseStillTouchedAfter: gaugeAfterAll.where,

@@ -61,7 +61,7 @@ export default async function ConsentPage({
             {/* 아래 세 줄은 개인정보처리방침의 문장을 그대로 옮긴 것입니다. 동의 화면과
                 방침이 다른 말을 하면 어느 쪽도 믿을 수 없게 됩니다. */}
             <p className="cv5-auth-lede">
-              {`${user.displayName}님, 반갑습니다. Clunk는 로그인 제공자가 준 이메일과 표시 이름, 그리고 여기서 만드는 에셋과 크레딧 기록만 보관합니다. 원본 파일은 브라우저에서 열리고 서버에 올라가지 않습니다. 비밀번호는 만들지도 보관하지도 않습니다.`}
+              {`${user.displayName}님, 반갑습니다. Clunk는 로그인 제공자가 준 이메일과 표시 이름, 그리고 여기서 만드는 에셋과 실행 기록만 보관합니다. 원본 파일은 브라우저에서 열리고 서버에 올라가지 않습니다. 비밀번호는 만들지도 보관하지도 않습니다.`}
             </p>
             <div className="cv5-auth-facts">
               <div className="cv5-auth-fact">

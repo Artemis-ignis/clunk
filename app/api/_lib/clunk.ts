@@ -178,6 +178,14 @@ async function ensureSchemaUncached(db: D1Database): Promise<void> {
   // Recorded consent (2026-09-02). Null until the person ticks the boxes on /consent.
   await ensureColumn(db, "clunk_users", "consented_at");
   await ensureColumn(db, "clunk_users", "marketing_opt_in", "INTEGER NOT NULL DEFAULT 0");
+  // 카탈로그 접근권. 'free' 는 무료 등급만, 'full' 은 전체 카탈로그를 받는다.
+  // 크레딧으로 상품을 사던 구조를 대체하는 축이라, 플랜이 주는 것은 재화가 아니라
+  // 구독 기간 동안의 접근 범위다.
+  await ensureColumn(db, "clunk_plans", "catalog_access", "TEXT NOT NULL DEFAULT 'free'");
+  // 리스팅이 어느 등급에 속하는가. 'free' 는 로그인만 하면 받고, 'pro' 는 구독이
+  // 살아 있어야 받는다. 예전에는 price_cents 가 0보다 큰지로 갈랐는데, 낱개로 파는
+  // 값이 사라진 뒤로는 그 숫자가 아무도 청구하지 않는 가격이 되어 거짓이 된다.
+  await ensureColumn(db, "clunk_marketplace_listings", "access_tier", "TEXT NOT NULL DEFAULT 'pro'");
   await db.prepare(`CREATE INDEX IF NOT EXISTS idx_clunk_generation_project_created ON clunk_generation_jobs(project_id, created_at DESC)`).run();
   await db.batch([
     db.prepare(
@@ -203,7 +211,7 @@ async function ensureSchemaUncached(db: D1Database): Promise<void> {
 
 async function ensureColumn(
   db: D1Database,
-  table: "clunk_collaboration_threads" | "clunk_collaboration_messages" | "clunk_generation_jobs" | "clunk_marketplace_orders" | "clunk_users",
+  table: "clunk_collaboration_threads" | "clunk_collaboration_messages" | "clunk_generation_jobs" | "clunk_marketplace_orders" | "clunk_users" | "clunk_plans" | "clunk_marketplace_listings",
   column = "evidence_json",
   definition = "TEXT",
 ): Promise<void> {
@@ -367,6 +375,42 @@ export function readIdempotencyKey(
 
 export function scopedStorageId(prefix: string, workspaceId: string, publicId: string): string {
   return `${prefix}-${sha256Hex(new TextEncoder().encode(`${workspaceId}:${publicId}`))}`;
+}
+
+/**
+ * 이 워크스페이스가 카탈로그를 어디까지 받을 수 있는가.
+ *
+ * 예전에는 에셋마다 값을 매기고 크레딧 잔액에서 깎았다. 결제대행 심사에서 그
+ * 구조가 환금성으로 걸려 승인이 나지 않았으므로, 파는 것을 재화에서 기간
+ * 접근권으로 바꿨다. 이제 판정은 두 갈래뿐이다.
+ *
+ *   free  무료 등급 에셋만 받는다. 로그인만 하면 된다.
+ *   full  전체 카탈로그를 받는다. 구독이 살아 있는 동안.
+ *
+ * 이미 받은 파일은 구독이 끝나도 회수하지 않는다. 접근이 닫히는 것은 앞으로의
+ * 다운로드이지 과거의 것이 아니다.
+ */
+export type CatalogAccess = "free" | "full";
+
+export async function getCatalogAccessForUser(
+  db: D1Database,
+  userId: string | null | undefined,
+): Promise<CatalogAccess> {
+  if (!userId) return "free";
+  // 워크스페이스를 소유자로 거슬러 읽기만 한다. 다운로드는 조회이므로 여기서
+  // 워크스페이스를 만들지 않는다.
+  const row = await db
+    .prepare(
+      `SELECT p.catalog_access AS access
+         FROM clunk_subscriptions s
+         JOIN clunk_plans p ON p.id = s.plan_id
+         JOIN clunk_workspaces w ON w.id = s.workspace_id
+        WHERE w.owner_user_id = ? AND s.status IN ('active', 'demo')
+        ORDER BY s.created_at DESC LIMIT 1`,
+    )
+    .bind(userId)
+    .first<{ access: string | null }>();
+  return row?.access === "full" ? "full" : "free";
 }
 
 export async function getCredits(db: D1Database, workspaceId: string): Promise<number> {

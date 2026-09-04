@@ -31,7 +31,7 @@ export const dynamic = "force-dynamic";
 export const metadata = createPageMetadata({
   title: "가입",
   description:
-    `Google이나 GitHub 계정으로 가입하면 ${SIGNUP_GRANT_CREDITS}크레딧이 바로 들어오고, 매달 ${BETA_MONTHLY_GRANT_CREDITS}크레딧이 더 들어옵니다. 이미지 만들기는 하루 ${WORKSPACE_IMAGES_PER_DAY}장까지이고, 결제 수단은 묻지 않습니다.`,
+    `Google이나 GitHub 계정으로 가입하면 실행 횟수 ${SIGNUP_GRANT_CREDITS}회가 바로 들어오고, 매달 ${BETA_MONTHLY_GRANT_CREDITS}회가 더 들어옵니다. 이미지 만들기는 하루 ${WORKSPACE_IMAGES_PER_DAY}장까지이고, 결제 수단은 묻지 않습니다.`,
   path: "/signup",
 });
 

@@ -286,6 +286,28 @@ test("the manifest's record is whole — a model that lost its clips does not ge
   assert.equal(built.facts["a-gate"].triangles, 520, "the manifest's own count, not the stale one");
 });
 
+// main's half of this defect, kept: 4d4810e ("keep H145's numbers") guarded the case where the
+// manifest names a file the pipeline could not read. That entry is all-null too, and a 3D
+// product always has triangles, so it is a failed read rather than a measurement of nothing.
+test("a manifest record that measured nothing at all does not overwrite the real numbers", () => {
+  const unreadable = {
+    products: [{
+      slug: "a-gate", kind: "3d-model", title: "문",
+      files: [{ path: "assets/a-gate/gate.glb", role: "entry", contentType: "model/gltf-binary", byteLength: 47_960 }],
+      measured: {},
+    }],
+  };
+  const built = buildFacts(unreadable, [], [], MARKET_ROOT, {
+    "a-gate": emptyFacts({ triangles: 520, materials: 6, boundsMetres: [1.2, 2.4, 0.3], animatedParts: ["gate_pivot"] }),
+  });
+  const gate = built.facts["a-gate"];
+  assert.equal(gate.triangles, 520, "a read that failed is not a model without geometry");
+  assert.equal(gate.materials, 6);
+  assert.deepEqual(gate.boundsMetres, [1.2, 2.4, 0.3]);
+  assert.deepEqual(gate.animatedParts, ["gate_pivot"]);
+  assert.equal(gate.byteLength, 47_960, "the size the manifest did state still wins");
+});
+
 test("a slug neither source mentions is still carried forward whole", () => {
   const built = buildFacts({ products: [] }, [], [], MARKET_ROOT, { "gone-from-both": h145Measured });
   assert.deepEqual(built.facts["gone-from-both"], h145Measured);

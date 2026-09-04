@@ -297,10 +297,20 @@ export function factsFromListings(
  * a shrug rather than a format. Both are silences, and the previous measurement shows through
  * them too. A row that states a size or a file name still overrides, as it should.
  *
- * Manifest records never pass through here. There the pipeline re-measured the file, so an
- * empty `animations` means the model genuinely lost its clips; reviving a stale value would
- * make the shop promise motion the file no longer has.
+ * A manifest record normally does not pass through here. There the pipeline re-measured the
+ * file, so an empty `animations` means the model genuinely lost its clips; reviving a stale
+ * value would make the shop promise motion the file no longer has.
+ *
+ * The one exception is `isShell`, from main: a run that finds the file but cannot read its
+ * geometry still writes an entry, and that entry is all-null too. A 3D product always has
+ * triangles, so a record with no triangles, no materials and no bounds is a failed read rather
+ * than a measurement, and it must not overwrite the real numbers either. An empty list on a
+ * record that did measure its geometry stays a real absence.
  */
+export function isShell(fact: ListingFact): boolean {
+  return fact.triangles == null && fact.materials == null && fact.boundsMetres == null;
+}
+
 export function underlayPrevious(fresh: ListingFact, previous: ListingFact | undefined): ListingFact {
   if (!previous) return fresh;
   return {
@@ -334,7 +344,11 @@ export function buildFacts(
   previous: Record<string, ListingFact> = {},
 ): ListingFactsFile {
   const fromManifest = factsFromManifest(manifest);
-  const facts: Record<string, ListingFact> = { ...fromManifest };
+  const facts: Record<string, ListingFact> = {};
+  // A manifest record speaks for itself unless it measured nothing at all — see `isShell`.
+  for (const [slug, fact] of Object.entries(fromManifest)) {
+    facts[slug] = isShell(fact) ? underlayPrevious(fact, previous[slug]) : fact;
+  }
   for (const [slug, fact] of Object.entries(factsFromListings(listings, fromManifest, marketRoot))) {
     facts[slug] = underlayPrevious(fact, previous[slug]);
   }

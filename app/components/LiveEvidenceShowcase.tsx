@@ -67,7 +67,7 @@ export function LiveEvidenceShowcase({ variant = "landing", compact = false }: {
     >
       <div className="live-evidence-showcase-topbar">
         <span><i /> {VARIANT_LABELS[variant]}</span>
-        <span>미리 준비된 예시 · 크레딧 안 듦</span>
+        <span>미리 준비된 예시 · 실행 횟수 안 듦</span>
       </div>
 
       <div className="live-evidence-showcase-controls">

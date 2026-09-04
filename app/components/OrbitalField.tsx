@@ -41,7 +41,7 @@ export function OrbitalField({
     { key: "ready", value: readyCount, label: "준비 완료", tone: "success" },
     { key: "passport", value: passportCount, label: "Passport", tone: "accent" },
     { key: "finding", value: findingCount, label: "finding", tone: "warning" },
-    { key: "credit", value: credits, label: "크레딧", tone: "muted" },
+    { key: "credit", value: credits, label: "실행 횟수", tone: "muted" },
   ];
 
   const summary = `저장된 검사 ${runCount}건, 준비 완료 ${readyCount}건, Passport ${passportCount}건, finding ${findingCount}건`;

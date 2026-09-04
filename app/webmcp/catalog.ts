@@ -11,14 +11,14 @@ import {
   polygonCountOf,
   previewImageUrlOf,
   themeById,
-  type GachaListing,
-} from "../components/gacha/gacha-catalog";
+  type CatalogListing,
+} from "../components/catalog-facts";
 
 /**
  * What the tools read.
  *
- * One source: GET /api/marketplace — the same response the gacha machine and the shop
- * render. Grades follow the shop's single published rule (gacha-catalog.gradeOf) so a
+ * One source: GET /api/marketplace — the same response the shop renders. Grades follow
+ * the shop's single published rule (catalog-facts.gradeOf) so a
  * tool and a card can never disagree, and polygons, materials, size and bytes come only
  * from the `facts` the pipeline measured. Nothing here computes a figure of its own.
  *
@@ -31,7 +31,7 @@ import {
 export const GRADE_RULE_EN =
   "Grade rule: S = motion included on a model of at least 1,500 polygons, or at least 4,000 polygons on its own · "
   + "A = motion included, or at least 1,500 polygons, or a bundle of several models · "
-  + "B = at least 700 polygons · C = everything else";
+  + "B = everything else · B is free to any signed-in visitor, A and above need a subscription";
 
 /** The dial's themes, in the shop's own ids. */
 const THEME_EN: Readonly<Record<string, string>> = {
@@ -43,7 +43,7 @@ const THEME_EN: Readonly<Record<string, string>> = {
 };
 
 /** The Korean basis sentence the card prints, said in English. Same rule, same trigger. */
-function gradeBasisEn(listing: GachaListing): string | null {
+function gradeBasisEn(listing: CatalogListing): string | null {
   const grade = gradeOf(listing);
   if (grade.basis === "motion") return "motion included";
   if (grade.basis === "bundle") return "several models in one bundle";
@@ -66,7 +66,7 @@ export type AssetFacts = {
   theme: string;
   themeLabel: string;
   themeLabel_ko: string;
-  grade: "S" | "A" | "B" | "C";
+  grade: "S" | "A" | "B";
   /** Why that grade — the rule that actually fired, not a summary. */
   gradeBasis: string | null;
   gradeBasis_ko: string | null;
@@ -99,12 +99,12 @@ export type AssetFacts = {
 
 type CatalogPayload = {
   ok?: boolean;
-  listings?: GachaListing[];
+  listings?: CatalogListing[];
   checkout?: { status?: string };
   factsMeasuredAt?: string;
 };
 
-type Snapshot = { listings: GachaListing[]; beta: boolean; measuredAt: string | null; at: number };
+type Snapshot = { listings: CatalogListing[]; beta: boolean; measuredAt: string | null; at: number };
 
 let cache: Snapshot | null = null;
 let inFlight: Promise<Snapshot> | null = null;
@@ -139,7 +139,7 @@ export function cachedCatalog(): Snapshot | null {
 }
 
 /** One listing's measured facts. A field the pipeline could not measure stays null. */
-export function factsOf(listing: GachaListing): AssetFacts {
+export function factsOf(listing: CatalogListing): AssetFacts {
   const grade = gradeOf(listing);
   const facts = listing.facts ?? null;
   const bounds = facts?.boundsMetres ?? null;
@@ -173,7 +173,7 @@ export function factsOf(listing: GachaListing): AssetFacts {
 }
 
 /** Find one listing by slug. Sprite sheets can be looked up by their own slug too. */
-export async function findListing(slug: string): Promise<GachaListing | null> {
+export async function findListing(slug: string): Promise<CatalogListing | null> {
   const { listings } = await loadCatalog();
   return listings.find((row) => row.slug === slug) ?? null;
 }

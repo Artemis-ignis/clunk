@@ -104,7 +104,7 @@ export async function POST(request: Request) {
         storageStatus: "UNAVAILABLE",
         credits: null,
         idempotent: false,
-        error: "실제 생성 결과를 보관하려면 R2 ASSETS 연결이 필요합니다. 크레딧은 차감되지 않았습니다.",
+        error: "실제 생성 결과를 보관하려면 R2 ASSETS 연결이 필요합니다. 실행 횟수는 차감되지 않았습니다.",
       }, { status: 503 });
     }
     const targetProfileId = typeof payload.targetProfileId === "string" && payload.targetProfileId.trim()

@@ -93,7 +93,7 @@ export default function SeriesPage() {
             <p>
               여섯 가지 도구가 모두 같은 규칙을 씁니다. 파일을 직접 열어 읽는 데서 시작해,
               검사 기록을 남기고, 팀에 넘길 수 있게 묶는 데까지 이어집니다.
-              공개된 에셋을 받아 쓰거나, 로그인한 뒤 크레딧으로 직접 만들 수 있습니다.
+              공개된 에셋을 받아 쓰거나, 로그인한 뒤 실행 횟수로 직접 만들 수 있습니다.
             </p>
             <div className="series-hero-actions">
               <a className="button button-primary" href="#series-catalog">제품군 둘러보기</a>

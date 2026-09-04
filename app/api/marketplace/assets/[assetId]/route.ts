@@ -1,5 +1,8 @@
 import { getCurrentUser } from "../../../../auth";
-import { getRuntimeAssets, getRuntimeDb, ensureSchema, isSafeRecordId, jsonError, privateJson } from "../../../_lib/clunk";
+import { getRuntimeAssets, getRuntimeDb, ensureSchema, getCatalogAccessForUser, isSafeRecordId, jsonError, privateJson } from "../../../_lib/clunk";
+import { gradeOf, isFreeGrade } from "../../../../components/catalog-facts";
+import { factsFor } from "../../../_lib/listing-facts";
+import { clipsFor, variantSlugsOf } from "../../../_lib/listing-variants";
 
 export const dynamic = "force-dynamic";
 
@@ -35,15 +38,38 @@ export async function GET(request: Request, context: RouteContext) {
     }
     const db = getRuntimeDb();
     await ensureSchema(db);
-    const listing = await db.prepare(
-      `SELECT MAX(price_cents) AS priceCents
-       FROM clunk_marketplace_listings
-       WHERE asset_id = ? AND status = 'PUBLISHED'`,
-    ).bind(assetId).first<{ priceCents: number | string | null }>();
-    if (listing?.priceCents === null || listing?.priceCents === undefined) {
+    // 등급이 곧 접근권이다(catalog-facts.isFreeGrade): B는 로그인만 하면 받고, A와 S는
+    // 구독자만 받는다. 저장해 둔 컬럼을 읽지 않는 이유는 그 값이 등급과 어긋날 수 있고,
+    // 어긋난 순간 구독 전용 에셋이 조용히 무료로 나가기 때문이다. 카드 위의 칩과 이
+    // 문지기가 같은 함수를 부르므로 화면과 문이 갈라질 수 없다.
+    //
+    // 같은 에셋이 여러 상품에 걸려 있으면 가장 넓은 쪽(무료)을 따른다 — 한 곳에서 무료로
+    // 공개한 파일을 다른 곳 때문에 막지 않는다.
+    const listings = await db.prepare(
+      `SELECT l.slug, l.title, l.description, a.file_name AS entryFileName
+       FROM clunk_marketplace_listings l
+       JOIN clunk_assets a ON a.id = l.asset_id
+       WHERE l.asset_id = ? AND l.status = 'PUBLISHED'`,
+    ).bind(assetId).all<{ slug: string; title: string; description: string; entryFileName: string }>();
+    if (!listings.results.length) {
       return missing("ASSET_NOT_PUBLISHED", "공개된 상품 중에 이 에셋이 없습니다.", "초안이거나 내려간 상품일 수 있습니다. 목록에서 현재 공개 중인 에셋을 확인하세요.", url.origin);
     }
-    const paid = Number(listing.priceCents) > 0;
+    // 움직임 판정은 이 모델에서 구운 시트의 제목도 본다(hasMotionOf). 제목은 공개된
+    // 상품에서만 읽는다 — 내려간 상품이 등급을 올리면 안 된다.
+    const publishedTitles = await db.prepare(
+      `SELECT slug, title FROM clunk_marketplace_listings WHERE status = 'PUBLISHED'`,
+    ).all<{ slug: string; title: string }>();
+    const titleBySlug = new Map(publishedTitles.results.map((row) => [row.slug, row.title]));
+    const paid = !listings.results.some((row) => isFreeGrade(gradeOf({
+      title: row.title,
+      description: row.description,
+      entryFileName: row.entryFileName,
+      facts: factsFor(row.slug),
+      clips: clipsFor(row.slug),
+      variants: variantSlugsOf(row.slug)
+        .filter((slug) => titleBySlug.has(slug))
+        .map((slug) => ({ slug, title: titleBySlug.get(slug) })),
+    }).letter));
     const artifact = await db.prepare(
       `SELECT aa.file_name AS fileName, aa.content_type AS contentType, aa.object_key AS objectKey, aa.role
        FROM clunk_asset_artifacts aa
@@ -69,12 +95,28 @@ export async function GET(request: Request, context: RouteContext) {
       if (!user) {
         return privateJson({ ok: false, schema: "clunk.marketplace-download.v1", status: "AUTHENTICATION_REQUIRED", error: "유료 에셋을 받으려면 로그인해야 합니다." }, { status: 401 });
       }
-      const entitlement = await db.prepare(
-        `SELECT id FROM clunk_marketplace_entitlements
-         WHERE buyer_user_id = ? AND asset_id = ? AND status = 'ACTIVE' LIMIT 1`,
-      ).bind(user.id, assetId).first<{ id: string }>();
-      if (!entitlement) {
-        return privateJson({ ok: false, schema: "clunk.marketplace-download.v1", status: "ENTITLEMENT_REQUIRED", error: "결제가 완료된 계정만 유료 에셋을 다운로드할 수 있습니다." }, { status: 403 });
+      // 구독이 살아 있으면 전체 카탈로그를 받는다.
+      //
+      // 낱개로 값을 매겨 크레딧으로 팔던 구조는 결제대행 심사에서 환금성으로
+      // 걸렸다. 파는 것을 기간 접근권 하나로 바꿨으므로, 유료 에셋의 문은
+      // "이 에셋을 샀는가"가 아니라 "지금 구독 중인가"로 열린다.
+      //
+      // 과거에 낱개로 산 기록(clunk_marketplace_entitlements)은 그대로 인정한다.
+      // 이미 값을 치른 사람에게서 받은 것을 거두지 않는다.
+      const access = await getCatalogAccessForUser(db, user.id);
+      if (access !== "full") {
+        const entitlement = await db.prepare(
+          `SELECT id FROM clunk_marketplace_entitlements
+           WHERE buyer_user_id = ? AND asset_id = ? AND status = 'ACTIVE' LIMIT 1`,
+        ).bind(user.id, assetId).first<{ id: string }>();
+        if (!entitlement) {
+          return privateJson({
+            ok: false,
+            schema: "clunk.marketplace-download.v1",
+            status: "SUBSCRIPTION_REQUIRED",
+            error: "구독하면 전체 에셋을 받을 수 있습니다. 무료 등급 에셋은 로그인만 하면 받습니다.",
+          }, { status: 403 });
+        }
       }
     }
     // "asset:/<path>" object keys point at files bundled into the Worker's

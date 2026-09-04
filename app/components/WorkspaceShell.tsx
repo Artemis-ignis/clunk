@@ -32,7 +32,7 @@ const PRIMARY_NAV: { section: WorkspaceSection; label: string; href: string; ico
 ];
 
 const SECONDARY_NAV: { section: WorkspaceSection; label: string; href: string; icon: IconName }[] = [
-  { section: "pricing", label: "크레딧·요금제", href: "/pricing", icon: "credit" },
+  { section: "pricing", label: "실행 횟수·요금제", href: "/pricing", icon: "credit" },
   { section: "docs", label: "도움말", href: "/docs", icon: "book" },
 ];
 

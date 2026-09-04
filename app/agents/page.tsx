@@ -62,7 +62,7 @@ export default async function AgentsPage() {
 
         <section className="agent-asset-strip" aria-label="에이전트가 검사할 수 있는 에셋 종류"><div className="agent-asset-strip-copy"><span className="eyebrow">한 번 연결하면 다섯 종류</span><strong>에이전트가 부르면<br />이 흐름으로 들어옵니다.</strong><small>파일은 내 컴퓨터에서 열거나, 직접 올려서 시작합니다.</small></div><div className="agent-asset-strip-items">{AGENT_ASSETS.map((item) => <div key={item.kind}><AssetFamilyVisual kind={item.kind} compact /><span>{item.label}</span></div>)}</div></section>
 
-        <section className="agents-v4-section agents-v4-product-loop" aria-labelledby="agent-product-loop-heading"><div className="agents-v4-heading agents-v4-heading-wide"><div><span className="eyebrow">연결하기 전에 결과부터</span><h2 id="agent-product-loop-heading">에이전트가 부르면<br /><em>이 결과가 돌아옵니다.</em></h2></div><p>아래는 미리 준비된 예시라 크레딧이 들지 않습니다. 엔진 화면과 사람의 검토는 따로 남습니다.</p></div><SampleRunWorkbench compact /></section>
+        <section className="agents-v4-section agents-v4-product-loop" aria-labelledby="agent-product-loop-heading"><div className="agents-v4-heading agents-v4-heading-wide"><div><span className="eyebrow">연결하기 전에 결과부터</span><h2 id="agent-product-loop-heading">에이전트가 부르면<br /><em>이 결과가 돌아옵니다.</em></h2></div><p>아래는 미리 준비된 예시라 실행 횟수가 들지 않습니다. 엔진 화면과 사람의 검토는 따로 남습니다.</p></div><SampleRunWorkbench compact /></section>
 
         <section className="agents-v4-section agents-v4-setup"><div className="agents-v4-heading"><span className="eyebrow">네 단계면 끝납니다</span><h2>연결은 짧고,<br /><em>결과는 실제여야 합니다.</em></h2><p>키를 발급하고, 설정을 복사하고, 서버가 실제로 응답하는지까지 확인합니다.</p></div><ol className="agents-v4-steps agent-journey">{setupSteps.map(([number, title, detail]) => <li key={number}><span>{number}</span><strong>{title}</strong><small>{detail}</small></li>)}</ol></section>
 

@@ -29,8 +29,8 @@ export const metadata = createPageMetadata({
 const BUYER_STEPS = (salesOpen: boolean) =>
   [
     { index: "01", label: "고르기", detail: "폴리곤 수와 파일 크기를 보고, 모델은 돌려 보고 텍스처는 이어 붙여 보세요." },
-    { index: "02", label: salesOpen ? "결제하기" : "로그인하기", detail: salesOpen ? "크레딧으로 바로 결제합니다." : "로그인만 하면 됩니다. 카드는 묻지 않습니다." },
-    { index: "03", label: "받기", detail: salesOpen ? "결제 즉시 파일을 내려받습니다." : "바로 파일을 내려받습니다." },
+    { index: "02", label: "로그인하기", detail: salesOpen ? "무료 등급은 로그인만 하면 되고, 그 밖은 구독으로 열립니다." : "로그인만 하면 됩니다. 카드는 묻지 않습니다." },
+    { index: "03", label: "받기", detail: "바로 파일을 내려받습니다." },
     { index: "04", label: "넣기", detail: "받은 파일(GLB 모델·PNG 텍스처)을 그대로 게임에 넣으세요." },
   ] as const;
 
@@ -67,7 +67,7 @@ export default function MarketplacePage() {
                 <div className="cv5-flow" aria-label="공개 마켓 원칙">
                   <span><b>GLB</b> 즉시 사용</span>
                   <span><b>3D</b> 미리보기</span>
-                  <span>{salesOpen ? <><b>크레딧</b> 결제</> : <><b>로그인</b> 무료</>}</span>
+                  <span>{salesOpen ? <><b>구독</b> 전체 열림</> : <><b>로그인</b> 무료</>}</span>
                 </div>
               </div>
 
@@ -95,7 +95,7 @@ export default function MarketplacePage() {
                         call this line used to state is an engine word a shopper cannot act on;
                         the material count replaced it on every buyer-facing surface. */}
                     <span>폴리곤 2,456개 · 재질 11개 · 실제 크기 2.44 m</span>
-                    <b>{salesOpen ? "₩6,900" : "무료"}</b>
+                    <b>무료</b>
                   </div>
                 </div>
               </div>
@@ -123,9 +123,9 @@ export default function MarketplacePage() {
                   <h2 id="marketplace-buyer-heading">
                     에셋도 검사도,
                     <br />
-                    <em>크레딧 하나로</em>
+                    <em>계정 하나로</em>
                   </h2>
-                  <p>{salesOpen ? "결제하면 바로 받습니다. 1 크레딧 = ₩100." : "로그인만 하면 바로 받습니다. 결제는 없습니다."}</p>
+                  <p>{salesOpen ? "무료 등급은 로그인만 하면 받고, 그 밖은 구독으로 열립니다." : "로그인만 하면 바로 받습니다. 결제는 없습니다."}</p>
                 </div>
                 <div className={styles.buyerActions}>
                   <Link className="cv5-btn cv5-btn-primary" href="/app" prefetch={false}>

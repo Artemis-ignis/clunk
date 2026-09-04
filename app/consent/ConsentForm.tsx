@@ -64,7 +64,7 @@ export function ConsentForm({ returnTo }: { returnTo: string }) {
             <input type="checkbox" checked={privacy} onChange={(event) => setPrivacy(event.target.checked)} required />
             <span>
               <b>(필수)</b> <Link href="/privacy" target="_blank" rel="noreferrer">개인정보처리방침</Link>에 따라 이메일·표시 이름·로그인 제공자 식별자를
-              수집·이용하는 데 동의합니다. 계정 운영과 크레딧 기록에만 씁니다.
+              수집·이용하는 데 동의합니다. 계정 운영과 실행 기록에만 씁니다.
             </span>
           </label>
         </li>

@@ -85,6 +85,10 @@ const worker = {
 
 function withSecurityHeaders(response: Response): Response {
   const values: Record<string, string> = {
+    // Without HSTS the first visit to clunk.games can still be answered over plain
+    // http and stripped before the redirect ever runs. One year, subdomains included,
+    // and preload-eligible.
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
     "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "X-Frame-Options": "DENY",

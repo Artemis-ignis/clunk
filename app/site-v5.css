@@ -219,8 +219,13 @@ html:has(.cv5) body { background: var(--v5-bg0, #06070f); }
 .cv5-sec-copy > p { margin: 16px 0 0; max-width: 480px; line-height: 1.74; }
 .cv5-points { margin: 20px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
 .cv5-points li { display: flex; gap: 10px; font-size: 0.92rem; line-height: 1.6; }
-.cv5-points li::before { content: "✓"; flex: 0 0 auto; width: 20px; height: 20px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800; color: var(--v5-ink); background: var(--v5-grad-soft); border: 1px solid rgba(139, 92, 246, 0.35); margin-top: 2px; }
-.cv5-sec[data-tone="green"] .cv5-points li::before { background: rgba(52, 211, 153, 0.12); border-color: rgba(52, 211, 153, 0.35); color: var(--v5-green); }
+/* 2026-09-04 운영자 지적: 보라 알약 체크 표시가 캡슐처럼 보여 이 화면과 겉돌았다.
+   목록 표시는 조용해야 한다 — 가는 세로선 하나만 두고 읽는 힘은 굵은 앞말이 갖는다. */
+.cv5-points li::before {
+  content: ""; flex: 0 0 auto; width: 2px; height: 1.05em; border-radius: 1px;
+  background: rgba(139, 92, 246, 0.55); margin-top: 0.34em;
+}
+.cv5-sec[data-tone="green"] .cv5-points li::before { background: rgba(52, 211, 153, 0.6); }
 .cv5-more { display: inline-flex; align-items: center; gap: 8px; margin-top: 26px; color: var(--v5-ink); font-weight: 700; font-size: 0.92rem; border-bottom: 1px solid transparent; }
 .cv5-more:hover { color: #cdb7ff; }
 .cv5-more + .cv5-more { margin-left: 22px; }
@@ -375,6 +380,18 @@ html:has(.cv5) body { background: var(--v5-bg0, #06070f); }
 @media (max-width: 880px) {
   .cv5 .sitenav-links, .cv5 .sitenav-utility { display: none; }
   .cv5-showcase-head { grid-template-columns: 1fr; align-items: start; }
+}
+/* 2026-09-03: 1024 폭에서 내비가 이미 87px 넘쳐 "로그아웃" 이 잘리고 CTA 가 화면 밖으로
+   나가 있었다(지갑을 넣기 전에 잰 값이다). 보조 메뉴 셋(검수 뷰어·문서·내 작업공간)은
+   서랍에도 그대로 있으므로, 자리가 모자라는 폭에서는 먼저 접는다 — 그러면 1024 에서도
+   기본 메뉴·지갑·로그인 상태·CTA 가 모두 한 줄에 들어온다. */
+@media (max-width: 1199px) {
+  .cv5 .sitenav-utility { display: none; }
+}
+/* 1440 에서 로그아웃 상태의 줄이 22px 넘쳤다 — 지갑이 "로그인하면 N크레딧" 한 문장을 들기
+   때문이다. 아무것도 감추지 않고 보조 메뉴의 좌우 여백만 줄여 그 22px 을 만든다. */
+@media (max-width: 1499px) {
+  .cv5 .sitenav-utility-link { padding: 0 7px; }
 }
 @media (max-width: 640px) {
   .cv5-hero { padding-top: 116px; }
@@ -972,8 +989,8 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
       bold noun and the clause were two independent columns, so on a phone the
       noun wrapped to two lines beside a clause that wrapped to two more and the
       row read as a broken table. Float the check and let the sentence flow. */
-.cv5-points li { display: block; position: relative; padding-left: 30px; }
-.cv5-points li::before { position: absolute; left: 0; top: 3px; margin-top: 0; }
+.cv5-points li { display: block; position: relative; padding-left: 16px; }
+.cv5-points li::before { position: absolute; left: 0; top: 0.38em; margin-top: 0; }
 .cv5-points li b { font-weight: 700; }
 
 /* The provenance chip must never grow into a two-line banner across the model. */
@@ -1001,4 +1018,3 @@ html:has(.cv5-snap) { scroll-snap-type: y proximity; }
 
 /* Section 01 facts: the moving-parts line is prose, so it takes the whole second row. */
 .cv5-make-facts div:last-child { grid-column: 1 / -1; }
-.cv5-make-facts div:last-child b { font-size: 0.82rem; font-variant-numeric: normal; }

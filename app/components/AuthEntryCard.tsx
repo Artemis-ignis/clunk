@@ -131,7 +131,7 @@ export function AuthEntryCard({
                 <Icon name="boxes" size={15} />
                 <span>
                   <strong>계정마다 워크스페이스가 분리됩니다</strong>
-                  검사 이력, 크레딧 원장, Passport가 사용자별로 나뉩니다.
+                  검사 이력, 실행 횟수 원장, Passport가 사용자별로 나뉩니다.
                 </span>
               </li>
               <li>

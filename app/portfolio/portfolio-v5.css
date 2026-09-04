@@ -1,0 +1,318 @@
+@import "../components/cv5-surface.css";
+
+/* /portfolio — 사업개발 지원용 한 장짜리 기록.
+   색·간격은 cv5 토큰(app/site-v5.css · components/cv5-surface.css)만 씁니다.
+   새 색을 만들지 않고, 이 파일의 규칙은 전부 .pf- 접두사 안에만 삽니다. */
+
+.pf-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 88px 24px 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 72px;
+}
+
+.pf-page h2 {
+  margin: 0;
+  font-size: clamp(22px, 3vw, 30px);
+  line-height: 1.28;
+  letter-spacing: -0.02em;
+  color: var(--text-strong);
+}
+
+.pf-page h3 {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.4;
+  color: var(--text-strong);
+}
+
+.pf-page p {
+  margin: 0;
+  font-size: 15.5px;
+  line-height: 1.8;
+  color: var(--text);
+}
+
+.pf-eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* ---------------------------------------------------------------- hero */
+
+.pf-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.pf-hero h1 {
+  margin: 0;
+  font-size: clamp(30px, 4.6vw, 48px);
+  line-height: 1.16;
+  letter-spacing: -0.025em;
+  color: var(--text-strong);
+}
+
+.pf-hero h1 em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.pf-lead {
+  max-width: 64ch;
+  font-size: 17px !important;
+  line-height: 1.8;
+}
+
+.pf-byline {
+  font-size: 13.5px;
+  color: var(--text-dim);
+  line-height: 1.8;
+}
+
+.pf-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.pf-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 15px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--tint-1);
+  color: var(--text-strong);
+  font-size: 13.5px;
+  text-decoration: none;
+}
+
+.pf-links a:hover {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+}
+
+.pf-links a.pf-primary {
+  border-color: transparent;
+  background: var(--accent-bright);
+  color: var(--accent-ink);
+}
+
+/* ---------------------------------------------------------------- numbers */
+
+.pf-figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.pf-figures div {
+  background: var(--ink-1);
+  padding: 18px 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.pf-figures b {
+  font-size: 26px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text-strong);
+}
+
+.pf-figures span {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.pf-figures div.pf-zero b {
+  color: var(--text-dim);
+}
+
+/* ---------------------------------------------------------------- sections */
+
+.pf-section {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.pf-section > p {
+  max-width: 70ch;
+}
+
+.pf-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+
+.pf-table {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.pf-table th,
+.pf-table td {
+  text-align: left;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+  line-height: 1.65;
+  color: var(--text);
+}
+
+.pf-table thead th {
+  background: var(--tint-1);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+}
+
+.pf-table tbody tr:last-child th,
+.pf-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.pf-table td b,
+.pf-table th b {
+  color: var(--text-strong);
+}
+
+.pf-table code {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  background: var(--tint-2);
+  border-radius: 5px;
+  padding: 1px 5px;
+}
+
+.pf-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.pf-card {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--tint-1);
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pf-card p {
+  font-size: 14.5px;
+}
+
+.pf-card .pf-num {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+}
+
+.pf-list {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pf-list li {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--text);
+}
+
+.pf-list li b {
+  color: var(--text-strong);
+}
+
+.pf-verdicts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pf-verdicts span {
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13.5px;
+  color: var(--text-muted);
+  background: var(--ink-1);
+}
+
+.pf-verdicts span b {
+  color: var(--text-strong);
+  font-size: 16px;
+  margin-right: 6px;
+}
+
+.pf-verdicts span.pf-good b { color: var(--success); }
+.pf-verdicts span.pf-warn b { color: var(--warning); }
+.pf-verdicts span.pf-bad b { color: var(--danger); }
+
+.pf-note {
+  border-left: 2px solid var(--accent-line);
+  padding: 4px 0 4px 16px;
+  font-size: 14.5px !important;
+  color: var(--text-muted) !important;
+  max-width: 68ch;
+}
+
+.pf-honest {
+  border: 1px solid var(--line-strong);
+  border-radius: 16px;
+  background: var(--ink-1);
+  padding: 24px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pf-honest h2 {
+  font-size: 20px;
+}
+
+.pf-foot {
+  border-top: 1px solid var(--line);
+  padding-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13.5px;
+  color: var(--text-dim);
+  line-height: 1.8;
+}
+
+.pf-foot a {
+  color: var(--accent);
+}
+
+@media (max-width: 640px) {
+  .pf-page {
+    padding: 64px 18px 88px;
+    gap: 56px;
+  }
+}

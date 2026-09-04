@@ -1,11 +1,48 @@
 {
   "schema": "clunk.listing-facts.v1",
-  "generatedAt": "2026-09-02T19:23:10.533Z",
+  "generatedAt": "2026-09-03T14:46:37.215Z",
   "sources": [
     "outputs\\market-launch\\wave1\\upload-manifest.json",
-    "tmp\\listings-snapshot.json"
+    "tmp\\listings-snapshot.json",
+    "이전 판에서 유지한 항목 8건"
   ],
   "facts": {
+    "clunk-heli-h145": {
+      "triangles": 85150,
+      "materials": 9,
+      "boundsMetres": [
+        10.605,
+        3.95,
+        13.64
+      ],
+      "byteLength": 3303252,
+      "format": "GLB",
+      "animatedParts": [
+        "main_rotor_hub",
+        "fenestron_rotor",
+        "door_left_slide",
+        "door_right_slide",
+        "door_rear_left",
+        "door_rear_right"
+      ],
+      "animations": [
+        {
+          "name": "rotor_spin",
+          "seconds": 1
+        },
+        {
+          "name": "doors_open",
+          "seconds": 2.4
+        }
+      ],
+      "kit": null,
+      "kitSize": 0,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": null
+    },
     "cozy-crate-closed": {
       "triangles": 700,
       "materials": 1,
@@ -35,7 +72,7 @@
       "triangles": null,
       "materials": null,
       "boundsMetres": null,
-      "byteLength": 5522,
+      "byteLength": 21893,
       "format": "PNG",
       "animatedParts": [],
       "animations": [],
@@ -44,7 +81,7 @@
       "members": null,
       "viewYawDegrees": null,
       "sheet": {
-        "cell": 64,
+        "cell": 128,
         "directions": 8,
         "frames": null,
         "cuts": null
@@ -81,7 +118,7 @@
       "triangles": null,
       "materials": null,
       "boundsMetres": null,
-      "byteLength": 5979,
+      "byteLength": 21362,
       "format": "PNG",
       "animatedParts": [],
       "animations": [],
@@ -90,7 +127,7 @@
       "members": null,
       "viewYawDegrees": null,
       "sheet": {
-        "cell": 64,
+        "cell": 128,
         "directions": 8,
         "frames": null,
         "cuts": null
@@ -127,7 +164,7 @@
       "triangles": null,
       "materials": null,
       "boundsMetres": null,
-      "byteLength": 5419,
+      "byteLength": 29033,
       "format": "PNG",
       "animatedParts": [],
       "animations": [],
@@ -136,7 +173,7 @@
       "members": null,
       "viewYawDegrees": null,
       "sheet": {
-        "cell": 64,
+        "cell": 128,
         "directions": 8,
         "frames": null,
         "cuts": null
@@ -215,7 +252,7 @@
       "triangles": null,
       "materials": null,
       "boundsMetres": null,
-      "byteLength": 3091,
+      "byteLength": 11640,
       "format": "PNG",
       "animatedParts": [],
       "animations": [],
@@ -224,7 +261,7 @@
       "members": null,
       "viewYawDegrees": null,
       "sheet": {
-        "cell": 64,
+        "cell": 128,
         "directions": 8,
         "frames": null,
         "cuts": null
@@ -236,7 +273,7 @@
       "triangles": null,
       "materials": null,
       "boundsMetres": null,
-      "byteLength": 15441,
+      "byteLength": 46429,
       "format": "PNG",
       "animatedParts": [],
       "animations": [],
@@ -245,7 +282,7 @@
       "members": null,
       "viewYawDegrees": null,
       "sheet": {
-        "cell": 64,
+        "cell": 128,
         "directions": 8,
         "frames": 8,
         "cuts": 64
@@ -420,7 +457,7 @@
       "triangles": null,
       "materials": null,
       "boundsMetres": null,
-      "byteLength": 4643,
+      "byteLength": 17686,
       "format": "PNG",
       "animatedParts": [],
       "animations": [],
@@ -429,7 +466,7 @@
       "members": null,
       "viewYawDegrees": null,
       "sheet": {
-        "cell": 64,
+        "cell": 128,
         "directions": 8,
         "frames": null,
         "cuts": null
@@ -579,7 +616,7 @@
       "triangles": null,
       "materials": null,
       "boundsMetres": null,
-      "byteLength": 4396,
+      "byteLength": 53113,
       "format": "PNG",
       "animatedParts": [],
       "animations": [],
@@ -588,7 +625,7 @@
       "members": null,
       "viewYawDegrees": null,
       "sheet": {
-        "cell": 64,
+        "cell": 256,
         "directions": 8,
         "frames": null,
         "cuts": null
@@ -1148,42 +1185,6 @@
       "kitSize": 0,
       "members": 7,
       "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
-      "inspection": null
-    },
-    "clunk-heli-h145": {
-      "triangles": 85150,
-      "materials": 9,
-      "boundsMetres": [
-        10.605,
-        3.95,
-        13.64
-      ],
-      "byteLength": 3303252,
-      "format": "GLB",
-      "animatedParts": [
-        "main_rotor_hub",
-        "fenestron_rotor",
-        "door_left_slide",
-        "door_right_slide",
-        "door_rear_left",
-        "door_rear_right"
-      ],
-      "animations": [
-        {
-          "name": "rotor_spin",
-          "seconds": 1
-        },
-        {
-          "name": "doors_open",
-          "seconds": 2.4
-        }
-      ],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": 40.3,
       "sheet": null,
       "texture": null,
       "inspection": null

@@ -109,7 +109,15 @@ test("each lane says what it really produces before the credit is spent", async 
 
   // 2D is the ONLY lane on /api/generation, because that is the only route that
   // asks Workers AI and the only one that enforces the daily image budget.
-  assert.match(workbench, /assetKind === "2d-image"[\s\S]{0,80}"\/api\/generation"[\s\S]{0,20}"\/api\/series"/);
+  //
+  // 2026-09-04: the branch reads the kind captured for this run (assetKindNow) and
+  // names the endpoint on the next line, so the pin follows the two statements that
+  // actually decide it instead of a single expression that no longer exists.
+  assert.match(
+    workbench,
+    /const isImage = assetKindNow === "2d-image";[\s\S]{0,160}const endpoint = isImage \? "\/api\/generation" : "\/api\/series";/,
+    "app/components/AssetCreationWorkbench.tsx: 2D만 /api/generation 으로 가고 나머지는 /api/series 로 간다",
+  );
   assert.match(workbench, /promptApplied/);
   assert.match(workbench, /promptNote/);
 
@@ -125,7 +133,9 @@ test("price, progress and the result stage are read from the real response", asy
   // The button carries the cost and the balance, and the balance moves on the
   // credits the response reports rather than waiting for a refetch.
   assert.match(workbench, /\/api\/credits/);
-  assert.match(workbench, /크레딧<\/b> · 남은/);
+  // 2026-09-04: 단추가 든 값은 그대로이고 이름만 "실행 횟수"로 바뀌었다.
+  assert.match(workbench, /실행 \{CREDIT_COST\}회<\/b> · 남은/);
+  assert.doesNotMatch(workbench, /크레딧<\/b>/, "옛 크레딧 표기가 단추에 남아 있으면 안 된다");
   assert.match(workbench, /images_today/);
   assert.match(workbench, /typeof payload\.credits === "number"[\s\S]{0,140}setCredit/);
 

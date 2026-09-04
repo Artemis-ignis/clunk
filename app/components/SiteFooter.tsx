@@ -27,7 +27,7 @@ export function SiteFooter() {
           <Link href="/studio" prefetch={false}>에셋 제작</Link>
           <Link href="/app" prefetch={false}>에셋 검사</Link>
           <Link href="/agents" prefetch={false}>제작 에이전트</Link>
-          <Link href="/pricing" prefetch={false}>요금 · 크레딧</Link>
+          <Link href="/pricing" prefetch={false}>요금 · 실행 횟수</Link>
         </nav>
         <nav className="cv5-footer-col" aria-label="리소스">
           <header>자료</header>

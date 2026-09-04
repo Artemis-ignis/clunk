@@ -15,8 +15,10 @@ import {
   type ListingFacts,
 } from "./listing-facts-rows";
 import styles from "../marketplace/marketplace.module.css";
-// 뽑기 화면과 같은 등급(S/A/B/C) — 같은 규칙, 같은 색. 가게 안의 진열대와 기계가 한 가게다.
-import { gradeOf } from "./gacha/gacha-catalog";
+// 등급(S/A/B/C)은 마켓의 단일 규칙이다(catalog-facts.GRADE_RULE). 값이 아니라 크기와
+// 동작을 보고 매기므로 판매와 무관하고, 무엇을 받을 수 있는지는 등급이 아니라
+// 접근권(무료 등급 / 구독)이 정한다.
+import { gradeOf, isFreeGrade } from "./catalog-facts";
 import { useProductWebMcp } from "../webmcp/useProductWebMcp";
 
 type Listing = {
@@ -25,6 +27,7 @@ type Listing = {
   title: string;
   description: string;
   priceCents: number;
+
   currency: string;
   licenseStatus: string;
   status: string;
@@ -65,6 +68,7 @@ type ListingVariant = {
   slug: string;
   title: string;
   priceCents: number;
+
   currency: string;
   assetId: string;
   entryFileName: string;
@@ -81,7 +85,7 @@ type ListingClip = { name: string; label: string; fps: number; tracks: Array<{ n
 type ColourMatch = { slug: string; title: string; distance: number; palette: Array<{ hex: string; share: number }> };
 
 type CatalogFilter = "all" | "2d" | "3d" | "motion";
-type CatalogSort = "newest" | "name" | "price-asc" | "price-desc" | "size-asc";
+type CatalogSort = "newest" | "name" | "size-asc";
 type CatalogState = "loading" | "ready" | "error";
 type CheckoutState = { status?: string; configured?: boolean; provider?: string | null };
 type CatalogPayload = { ok?: boolean; listings?: Listing[]; checkout?: CheckoutState };
@@ -95,10 +99,23 @@ type CheckoutResponse = {
   entitlementId?: string;
 };
 
-/** Mirrors billing.ts: 1 credit = ₩100, internal units are won×100. */
-function listingCreditPrice(priceCents: number, currency: string): number | null {
-  if (currency !== "KRW" || priceCents <= 0 || priceCents % 10_000 !== 0) return null;
-  return priceCents / 10_000;
+/**
+ * 이 상품을 지금 받을 수 있는가.
+ *
+ * 낱개로 값을 매겨 크레딧으로 팔던 구조가 결제대행 심사에서 환금성으로 걸려
+ * 없어졌다. 남은 축은 등급 하나다 — 무료 등급은 로그인만 하면 받고, 그 밖은
+ * 구독이 살아 있어야 받는다. 값을 보여 줄 자리가 아니라 받을 수 있는지를
+ * 보여 줄 자리다.
+ */
+/**
+ * 이 상품을 로그인만으로 받을 수 있는가.
+ *
+ * 저장해 둔 컬럼(access_tier)이 아니라 등급에서 바로 계산한다. 컬럼은 등급과 어긋날 수
+ * 있고, 어긋난 순간 카드는 "무료"라고 적는데 문은 잠기거나 그 반대가 된다. 다운로드
+ * 문지기(app/api/marketplace/assets/[assetId]/route.ts)도 같은 두 함수를 부른다.
+ */
+function isFreeTier(listing: { title: string; description: string; entryFileName: string; variants?: unknown; clips?: unknown; facts?: unknown }): boolean {
+  return isFreeGrade(cardGrade(listing));
 }
 
 const SNIPPET_TABS = [
@@ -210,7 +227,7 @@ type DetailListing = Listing & {
 type DetailPayload = { ok?: boolean; error?: string; listing?: DetailListing; checkout?: CheckoutState; matchesByColour?: ColourMatch[] };
 
 /** The sort ids the select offers; anything else in the URL falls back to newest. */
-const CATALOG_SORTS = new Set<string>(["newest", "name", "price-asc", "price-desc", "size-asc"]);
+const CATALOG_SORTS = new Set<string>(["newest", "name", "size-asc"]);
 
 const CATALOG_FILTERS: readonly { id: CatalogFilter; label: string }[] = [
   { id: "all", label: "전체" },
@@ -308,8 +325,7 @@ export function MarketplaceCatalog() {
     if (sort === "newest") return matched;
     return [...matched].sort((a, b) => {
       if (sort === "name") return a.title.localeCompare(b.title, "ko-KR");
-      if (sort === "price-asc") return a.priceCents - b.priceCents;
-      if (sort === "price-desc") return b.priceCents - a.priceCents;
+
       return (a.byteLength ?? 0) - (b.byteLength ?? 0);
     });
   }, [colour, filter, listings, query, sort]);
@@ -348,8 +364,6 @@ export function MarketplaceCatalog() {
               <select value={sort} onChange={(event) => setSort(event.target.value as CatalogSort)}>
                 <option value="newest">최신순</option>
                 <option value="name">이름순</option>
-                <option value="price-asc">가격 낮은순</option>
-                <option value="price-desc">가격 높은순</option>
                 <option value="size-asc">파일 작은순</option>
               </select>
             </label>
@@ -379,7 +393,7 @@ export function MarketplaceCatalog() {
 
 function ListingCard({ listing, colour, beta }: { listing: Listing; colour?: string; beta?: boolean }) {
   const previewUrl = getPreviewUrl(listing);
-  const price = formatPrice(listing.priceCents, listing.currency);
+  const cardFree = isFreeTier(listing);
   const spec = cardSpec(listing.facts);
   const motion = motionNote(listing.facts);
   const colourShare = colour ? carriesColour(listing, colour) : null;
@@ -403,7 +417,7 @@ function ListingCard({ listing, colour, beta }: { listing: Listing; colour?: str
           ) : null}
           <span className={styles.gradeBadge} data-grade={cardGrade(listing)}>{cardGrade(listing)}</span>
           <span className={styles.formatBadge}>{formatLabel(listing)}</span>
-          <span className={`${styles.priceBadge}${listing.priceCents === 0 || beta ? ` ${styles.priceBadgeFree}` : ""}`}>{beta && listing.priceCents > 0 ? <><s className={styles.priceStruck}>{price}</s> 무료</> : price}</span>
+          <span className={`${styles.priceBadge}${cardFree || beta ? ` ${styles.priceBadgeFree}` : ""}`}>{cardFree ? "무료" : "구독"}</span>
         </span>
       </span>
       <span className={styles.cardBody}>
@@ -533,7 +547,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
     // Withdrawal-limit consent is a condition of a paid digital sale. The beta grant is not a
     // sale, and its panel does not show the checkbox — so this guard, left as it was, made
     // the beta button return silently on every click.
-    if (paymentMethod !== "beta" && listing.priceCents > 0 && !withdrawalConsent) {
+    if (paymentMethod !== "beta" && !freeTier && !withdrawalConsent) {
       setMessage("결제를 시작하려면 청약철회 제한 동의가 필요합니다.");
       return;
     }
@@ -542,7 +556,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
       paymentMethod === "beta"
         ? "받는 중입니다…"
         : paymentMethod === "credits"
-          ? "크레딧 결제를 처리하는 중입니다…"
+          ? "결제를 처리하는 중입니다…"
           : "구매 연결 상태를 확인하는 중입니다…",
     );
     try {
@@ -570,15 +584,9 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
         setMessage(
           payload.status === "BETA_GRANTED"
               ? `${purchase.label} — 받았습니다. 결제 없이 드립니다. 내려받기가 시작됩니다. 시작되지 않으면 내려받기 버튼을 누르세요.`
-              : payload.status === "PAID_WITH_CREDITS"
-            ? `구매 완료 — ${payload.creditsCharged?.toLocaleString("ko-KR") ?? "?"} 크레딧 차감, 잔액 ${payload.balance?.toLocaleString("ko-KR") ?? "?"} 크레딧. 내려받기가 시작됩니다.`
-            : `${purchase.label} — 이미 받은 상품입니다. 내려받기가 시작됩니다.`,
+              : `${purchase.label} — 이미 받은 상품입니다. 내려받기가 시작됩니다.`,
         );
         triggerDownload(purchase.href, purchase.fileName);
-        return;
-      }
-      if (payload.status === "INSUFFICIENT_CREDITS") {
-        setMessage(`${payload.error ?? "크레딧이 부족합니다."} 요금 페이지에서 크레딧을 충전해 주세요.`);
         return;
       }
       if (payload.checkoutUrl) {
@@ -617,13 +625,13 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
     return <div className={styles.detailState} role="alert"><strong>공개 상품을 열 수 없습니다.</strong><small>{message}</small><Link className={`${styles.btn} ${styles.btnGhost}`} href="/marketplace">마켓으로 돌아가기 <Icon name="arrowLeft" size={14} /></Link></div>;
   }
 
+  const freeTier = isFreeTier(listing);
   const previewUrl = getPreviewUrl({ assetId: listing.artifact.assetId, previewFileName: listing.artifact.previewFileName });
-  const paymentUnavailable = listing.priceCents > 0 && checkout?.status === "PAYMENT_PROVIDER_NOT_CONFIGURED";
+  const paymentUnavailable = !freeTier && checkout?.status === "PAYMENT_PROVIDER_NOT_CONFIGURED";
   // Until sales open, the payment-provider gap is the beta: nothing is sold and every
   // signed-in visitor is granted the file.
   const beta = checkout?.status === "PAYMENT_PROVIDER_NOT_CONFIGURED";
   const downloadHref = `/api/marketplace/assets/${encodeURIComponent(listing.assetId)}?file=${encodeURIComponent(listing.entryFileName)}`;
-  const creditPrice = listingCreditPrice(listing.priceCents, listing.currency);
   const owned = ownedIds.has(listing.id);
   const isModel = isModelListing(listing);
   const name = displayTitle(listing.slug, listing.title);
@@ -676,7 +684,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
         ) : listing.facts?.sheet && previewUrl ? (
           <SheetBench src={previewUrl} alt={`${name} 스프라이트 시트`} sheet={listing.facts.sheet} />
         ) : previewUrl ? (
-          <TileBench src={previewUrl} alt={`${name} 타일 미리보기`} seamless={listing.facts?.texture?.seamless ?? false} />
+          <TileBench src={previewUrl} alt={`${name} 타일 미리보기`} texture={listing.facts?.texture ?? null} />
         ) : (
           <PreviewUnavailable listing={listing} />
         )}
@@ -725,13 +733,13 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
         </div>
 
         <div className={styles.detailBuy}>
-          <div className={styles.priceRow}><strong>{beta && listing.priceCents > 0 ? <><s className={styles.priceStruck}>{formatPrice(listing.priceCents, listing.currency)}</s> 무료</> : formatPrice(listing.priceCents, listing.currency)}</strong><small>{listing.sellerName ?? "Clunk"} · {formatBytes(listing.byteLength)} · {listing.entryFileName}</small></div>
-          {listing.priceCents > 0 && paymentUnavailable ? (
+          <div className={styles.priceRow}><strong>{freeTier ? "무료" : "구독"}</strong><small>{listing.sellerName ?? "Clunk"} · {formatBytes(listing.byteLength)} · {listing.entryFileName}</small></div>
+          {!freeTier && paymentUnavailable ? (
             <p className={styles.payState} data-payment-state={checkout?.status ?? "UNKNOWN"} role="status">
               로그인하면 이 에셋을 결제 없이 받을 수 있습니다. 표시된 가격은 결제를 시작한 뒤의 값입니다.
             </p>
           ) : null}
-          {listing.priceCents > 0 && !beta ? (
+          {!freeTier && !beta ? (
             <label className={styles.consent}>
               <input
                 type="checkbox"
@@ -746,29 +754,21 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
             </label>
           ) : null}
           <div className={styles.actions}>
-            {listing.priceCents === 0 ? (
+            {freeTier ? (
               <a className={`${styles.btn} ${styles.btnPrimary}`} href={downloadHref} download={listing.entryFileName}>무료 파일 받기 <Icon name="download" size={15} /></a>
             ) : owned ? (
-              <a className={`${styles.btn} ${styles.btnPrimary}`} href={downloadHref} download={listing.entryFileName}>{beta ? "받은 파일 내려받기" : "구매한 파일 받기"} <Icon name="download" size={15} /></a>
+              <a className={`${styles.btn} ${styles.btnPrimary}`} href={downloadHref} download={listing.entryFileName}>파일 받기 <Icon name="download" size={15} /></a>
             ) : beta ? (
-              // Without a payment rail there is one action. Consent to a withdrawal limit is a
-              // condition of a paid sale, and a card button that can never work is a broken button.
+              // 결제가 아직 열리지 않은 동안에는 구독 전용도 그대로 받는다. 살 수 없는
+              // 버튼을 그려 두는 것보다 지금 되는 일 하나를 그리는 편이 정직하다.
               <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => void startCheckout("beta")} disabled={buying}>
-                {signedIn === false ? "로그인하고 받기" : buying ? "받는 중…" : "무료로 받기"} <Icon name={signedIn === false ? "arrowUpRight" : "download"} size={15} />
+                {signedIn === false ? "로그인하고 받기" : buying ? "받는 중…" : "받기"} <Icon name={signedIn === false ? "arrowUpRight" : "download"} size={15} />
               </button>
             ) : (
-              <>
-                <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => void startCheckout("credits")} disabled={buying || !withdrawalConsent || creditPrice === null}>
-                  {creditPrice === null
-                    ? "크레딧 결제 불가 가격"
-                    : withdrawalConsent
-                      ? `크레딧으로 구매 · ${creditPrice.toLocaleString("ko-KR")} 크레딧`
-                      : "동의 후 구매 가능"} <Icon name="arrowUpRight" size={15} />
-                </button>
-                <button type="button" className={`${styles.btn} ${styles.btnGhost}`} onClick={() => void startCheckout("card")} disabled={buying || paymentUnavailable || !withdrawalConsent}>
-                  {paymentUnavailable ? "카드 결제 준비 중" : "카드로 결제"}
-                </button>
-              </>
+              // 낱개로 사는 길은 없앴다. 구독 전용 상품의 문은 구독으로만 열린다.
+              <Link className={`${styles.btn} ${styles.btnPrimary}`} href="/pricing">
+                구독하고 전체 받기 <Icon name="arrowUpRight" size={15} />
+              </Link>
             )}
           </div>
           {message ? <p className={styles.message} role="status">{message}</p> : null}
@@ -777,7 +777,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
               A download link that answers 401 in JSON is not a link, it is a trap: until the
               visitor holds the entitlement the row says what will open it instead. */}
           <div className={styles.detailFilesHead}>{beta ? "받으면 열리는 파일" : "결제하면 열리는 파일"}</div>
-          <div className={styles.files}>{listing.artifacts.filter((artifact) => !PAGE_IMAGE_ROLES.has(artifact.role.trim().toLowerCase())).map((artifact) => <article className={styles.fileRow} key={artifact.fileName}><div><Icon name={artifact.contentType === "image/png" ? "image" : artifact.contentType.includes("gltf") ? "box" : "fileJson"} size={17} /><strong>{artifact.fileName}</strong></div><span>{roleLabel(artifact.role)} · {formatBytes(artifact.byteLength)}</span><code>{artifact.sha256.slice(0, 16)}…</code>{owned || listing.priceCents === 0 ? <a href={`/api/marketplace/assets/${encodeURIComponent(listing.assetId)}?file=${encodeURIComponent(artifact.fileName)}`} download={artifact.fileName}>다운로드</a> : <span className={styles.fileLocked}>{beta ? "받기 버튼을 누르면 열립니다" : "결제 후 열립니다"}</span>}</article>)}</div>
+          <div className={styles.files}>{listing.artifacts.filter((artifact) => !PAGE_IMAGE_ROLES.has(artifact.role.trim().toLowerCase())).map((artifact) => <article className={styles.fileRow} key={artifact.fileName}><div><Icon name={artifact.contentType === "image/png" ? "image" : artifact.contentType.includes("gltf") ? "box" : "fileJson"} size={17} /><strong>{artifact.fileName}</strong></div><span>{roleLabel(artifact.role)} · {formatBytes(artifact.byteLength)}</span><code>{artifact.sha256.slice(0, 16)}…</code>{owned || freeTier ? <a href={`/api/marketplace/assets/${encodeURIComponent(listing.assetId)}?file=${encodeURIComponent(artifact.fileName)}`} download={artifact.fileName}>다운로드</a> : <span className={styles.fileLocked}>{beta ? "받기 버튼을 누르면 열립니다" : "구독하면 열립니다"}</span>}</article>)}</div>
         </div>
       </section>
 
@@ -819,14 +819,9 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
                       {signedIn === false ? "로그인하고 받기" : buying ? "받는 중…" : "무료로 받기"} <Icon name={signedIn === false ? "arrowUpRight" : "download"} size={14} />
                     </button>
                   ) : (
-                    <button
-                      type="button"
-                      className={`${styles.btn} ${styles.btnGhost} ${styles.variantBtn}`}
-                      disabled={buying || !withdrawalConsent}
-                      onClick={() => void startCheckout("credits", variantTarget)}
-                    >
-                      {formatPrice(variant.priceCents, variant.currency)} <Icon name="arrowUpRight" size={14} />
-                    </button>
+                    <Link className={`${styles.btn} ${styles.btnGhost} ${styles.variantBtn}`} href="/pricing">
+                      구독하고 받기 <Icon name="arrowUpRight" size={14} />
+                    </Link>
                   )}
                 </li>
               );
@@ -927,7 +922,7 @@ function CatalogEmpty() {
       <p>검사를 통과해 공개된 에셋만 이 목록에 올라옵니다. 상품을 열면 3D 미리보기와 라이선스, 가격을 함께 확인할 수 있습니다.</p>
       <div className={styles.emptyActions}>
         <Link className={`${styles.btn} ${styles.btnPrimary}`} href="/app">내 파일 검사하기 <Icon name="arrowUpRight" size={13} /></Link>
-        <Link className={`${styles.btn} ${styles.btnGhost}`} href="/pricing">크레딧 확인하기 <Icon name="credit" size={13} /></Link>
+        <Link className={`${styles.btn} ${styles.btnGhost}`} href="/pricing">요금 보기 <Icon name="credit" size={13} /></Link>
       </div>
     </section>
   );
@@ -953,7 +948,7 @@ function CatalogError() {
       <p>상품을 임의로 채우지 않았습니다. 잠시 후 다시 시도하거나 Clunk 제품 사용 안내를 확인해 주세요.</p>
       <div className={styles.emptyActions}>
         <Link className={`${styles.btn} ${styles.btnPrimary}`} href="/app">Clunk 제품 사용하기 <Icon name="arrowUpRight" size={13} /></Link>
-        <Link className={`${styles.btn} ${styles.btnGhost}`} href="/pricing">크레딧 확인하기 <Icon name="credit" size={13} /></Link>
+        <Link className={`${styles.btn} ${styles.btnGhost}`} href="/pricing">요금 보기 <Icon name="credit" size={13} /></Link>
       </div>
     </section>
   );
@@ -1002,14 +997,14 @@ function getPreviewUrl(listing: Pick<Listing, "assetId" | "previewFileName">): s
  * not the way the HTTP layer does. "MODEL/GLTF-BINARY" is a content-type header
  * and nobody shops by content-type header.
  */
-/** 카드 위 캡슐 칩의 등급. 뽑기 화면의 gradeOf 와 같은 규칙을 같은 사실(facts)로 돌린다. */
-function cardGrade(listing: { title: string; description: string; entryFileName: string; variants?: unknown; facts?: unknown }): "S" | "A" | "B" | "C" {
+/** 카드 위 등급 칩. 마켓의 단 하나의 규칙(catalog-facts.gradeOf)을 같은 사실(facts)로 돌린다. */
+function cardGrade(listing: { title: string; description: string; entryFileName: string; variants?: unknown; clips?: unknown; facts?: unknown }): "S" | "A" | "B" {
   return gradeOf({
     title: listing.title,
     description: listing.description ?? "",
     entryFileName: listing.entryFileName ?? "",
     variants: (listing.variants ?? null) as never,
-    clips: null,
+    clips: (listing.clips ?? null) as never,
     facts: (listing.facts ?? null) as never,
   } as never).letter;
 }
@@ -1099,16 +1094,6 @@ function licenseLabel(status: string): string {
   return status.trim().toLowerCase() === "cleared" ? "상업적 이용 가능" : status;
 }
 
-function formatPrice(priceCents: number, currency: string): string {
-  if (priceCents === 0) return "무료";
-  const safeCurrency = /^[A-Z]{3}$/u.test(currency) ? currency : "KRW";
-  try {
-    return new Intl.NumberFormat("ko-KR", { style: "currency", currency: safeCurrency }).format(priceCents / 100);
-  } catch {
-    return `${(priceCents / 100).toLocaleString("ko-KR")} ${safeCurrency}`;
-  }
-}
-
 function formatBytes(value: number): string {
   if (value < 1_000) return `${value} B`;
   if (value < 1_000_000) return `${(value / 1_000).toFixed(1)} KB`;
@@ -1143,7 +1128,8 @@ function listingFamily(listing: Listing): Exclude<CatalogFilter, "all"> {
  * What is being tiled is the public preview — the watermarked 512 downscale — because that
  * is the only image the shop may show before payment. The note says so.
  */
-function TileBench({ src, alt, seamless }: { src: string; alt: string; seamless: boolean }) {
+function TileBench({ src, alt, texture }: { src: string; alt: string; texture: ListingFacts["texture"] }) {
+  const seamless = texture?.seamless ?? false;
   const [repeat, setRepeat] = useState(1);
   const [zoom, setZoom] = useState(1);
   return (
@@ -1183,10 +1169,17 @@ function TileBench({ src, alt, seamless }: { src: string; alt: string; seamless:
         </label>
       </div>
       <p className={styles.flatNote}>
-        {seamless
-          ? "이어 붙인 경계를 재 봤을 때 자국이 남지 않았습니다. 위에서 직접 이어 붙여 확인해 보세요."
-          : "이어 붙인 경계에 옅은 자국이 남는 것으로 재졌습니다."}
-        {" 여기 보이는 그림은 공개용 미리보기이고, 받는 파일은 원본 해상도입니다."}
+        {texture?.seamLeftRight !== undefined && texture.seamTopBottom !== undefined
+          ? `이은 자리를 재 봤습니다 — 좌우 ×${texture.seamLeftRight.toFixed(2)}, 상하 ×${texture.seamTopBottom.toFixed(2)}. 타일 안쪽 인접 픽셀차 대비 배율이고 1.0이면 이은 자리를 내부와 구분할 수 없습니다. 위에서 직접 이어 붙여 확인해 보세요.`
+          : seamless
+            ? "이어 붙인 경계를 재 봤을 때 자국이 남지 않았습니다. 위에서 직접 이어 붙여 확인해 보세요."
+            : "이어 붙인 경계에 옅은 자국이 남는 것으로 재졌습니다."}
+        {/* Two of the tiles ship as three mixable variants, and their preview is the 2x2
+            those variants make — otherwise this bench would repeat one variant and show
+            exactly the grid the variants exist to break. */}
+        {texture?.colourVariants && texture.colourVariants > 1
+          ? ` 여기 보이는 그림은 섞어 깔 수 있는 변형 ${texture.colourVariants}장을 2×2로 배치한 공개용 미리보기이고, 받는 파일은 변형 ${texture.colourVariants}장이 각각 원본 해상도입니다.`
+          : " 여기 보이는 그림은 공개용 미리보기이고, 받는 파일은 원본 해상도입니다."}
       </p>
     </div>
   );

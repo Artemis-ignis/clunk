@@ -115,10 +115,24 @@ test("paid checkout requires an explicit withdrawal-waiver consent before any or
   const catalog = await source("app/components/MarketplaceCatalog.tsx");
   assert.match(catalog, /withdrawalConsent/);
   assert.match(catalog, /청약철회가 제한/);
-  // Both purchase instruments stay consent-gated: the credit button and the
-  // card button each carry !withdrawalConsent in their disabled expression.
-  assert.match(catalog, /disabled=\{buying \|\| \!withdrawalConsent \|\| creditPrice === null\}/);
-  assert.match(catalog, /disabled=\{buying \|\| paymentUnavailable \|\| \!withdrawalConsent\}/);
+  // 2026-09-04: 낱개 구매 단추 둘이 사라져 문지기가 선 자리가 바뀌었다.
+  //
+  // 전에는 크레딧 결제 단추와 카드 결제 단추가 각각 disabled 식에 !withdrawalConsent 를
+  // 달고 있었다. 낱개 판매를 없애면서 그 두 단추가 지워졌고, 구독 전용 상품에 남은 것은
+  // 요금 화면으로 가는 링크뿐이다. 그러므로 동의 문지기는 이제 단추의 disabled 가 아니라
+  // 요청을 보내는 자리(startCheckout)와 서버 라우트에 선다. 핀을 푸는 것이 아니라
+  // 문지기가 실제로 서 있는 자리에 다시 박는다 — 낱개 구매 길이 되살아나는 것도 함께 막는다.
+  assert.doesNotMatch(catalog, /creditPrice/u, "낱개 크레딧 가격이 되살아나 있으면 안 된다");
+  assert.doesNotMatch(
+    catalog,
+    /disabled=\{buying \|\| !withdrawalConsent/u,
+    "사라진 낱개 구매 단추가 되살아나 있으면 안 된다",
+  );
+  assert.match(
+    catalog,
+    /if \(paymentMethod !== "beta" && !freeTier && !withdrawalConsent\) \{\s*setMessage\("결제를 시작하려면 청약철회 제한 동의가 필요합니다\."\);\s*return;/u,
+    "동의 없이 유료 결제를 보내지 않는 문지기가 없습니다",
+  );
   // The server-side consent check runs before the credits branch can settle.
   const checkoutSource = await source("app/api/marketplace/checkout/route.ts");
   const consentIndex = checkoutSource.indexOf("WITHDRAWAL_CONSENT_REQUIRED");

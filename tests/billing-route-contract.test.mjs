@@ -62,7 +62,9 @@ test("credits route exposes only the explicit demo grant and cannot debit arbitr
 test("paid artifact delivery requires active entitlement while free listing delivery remains possible", async () => {
   const route = await source("app/api/marketplace/assets/[assetId]/route.ts");
   assert.match(route, /getCurrentUser|requireUser/);
-  assert.match(route, /price_cents/);
+  // 2026-09-04: 낱개 가격이 사라졌으므로 문지기는 값이 아니라 등급을 본다.
+  assert.match(route, /isFreeGrade\(gradeOf\(/, "문지기가 등급 규칙을 불러야 한다");
+  assert.doesNotMatch(route, /price_cents|access_tier/, "아무도 청구하지 않는 값이나 어긋날 수 있는 컬럼으로 가르면 안 된다");
   assert.match(route, /clunk_marketplace_entitlements/);
   assert.match(route, /ACTIVE/);
   assert.match(route, /401|403|PAYMENT/);
