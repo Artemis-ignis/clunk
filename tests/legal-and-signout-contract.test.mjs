@@ -459,8 +459,14 @@ test("요금 화면이 구독 시작 시점과 사전 공지를 FAQ 한 항목�
   // 이용약관 제221행의 "최소 30일 전" 조항 그대로다.
   const html = await (await render("/pricing")).text();
   assert.ok(html.includes("구독은 언제 시작하나요?"), "구독 시작 시점 질문이 없습니다");
-  assert.ok(html.includes("결제 기능이 붙는 날 시작합니다"), "구독 시작 조건 답이 없습니다");
   assert.ok(html.includes("최소 30일 전에"), "사전 공지 약속이 없습니다");
+  // 2026-09-04(마스터 지적): 화면은 방문자에게 하는 말이어야 한다. 우리 내부 사정을
+  // 설명하던 "결제 기능이 붙는 날 시작합니다"는 걷어냈다 — 지킬 것은 문구가 아니라
+  // 30일 전에 알린다는 약속이고, 그것은 위 줄이 지킨다.
+  assert.ok(
+    !html.includes("결제 기능이 아직") && !html.includes("결제 준비 중"),
+    "요금 화면이 방문자에게가 아니라 우리 사정을 설명하고 있습니다",
+  );
   // 용어집: 삼각형·드로우콜·엔진 예산도, 옛 대체어인 "그리기 횟수"도 화면에 쓰지 않는다.
   const pricing = await source("app/pricing/page.tsx");
   assert.doesNotMatch(pricing, /삼각형|드로우콜|엔진 예산/u, "내부 용어가 요금 화면에 남아 있습니다");

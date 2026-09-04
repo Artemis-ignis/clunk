@@ -19,7 +19,6 @@ export type ProductWebMcpInput = {
   downloadHref: string;
   entryFileName: string;
   byteLength: number;
-  priceWon: number;
   beta: boolean;
   /** 로그인 여부. 아직 확인 중이면 null. */
   signedIn: boolean | null;
@@ -57,7 +56,7 @@ export function useProductWebMcp(input: ProductWebMcpInput): void {
                 ? "This is the open beta: signing in is enough, nothing is charged."
                 : "The human has to sign in before this file can be received.",
               message_ko: now.beta
-                ? "로그인하면 결제 없이 받을 수 있습니다."
+                ? "로그인하면 받을 수 있습니다."
                 : "로그인해야 받을 수 있습니다.",
             };
           }
@@ -68,7 +67,6 @@ export function useProductWebMcp(input: ProductWebMcpInput): void {
             downloadUrl: new URL(now.downloadHref, origin).toString(),
             fileName: now.entryFileName,
             byteLength: now.byteLength,
-            priceWon: now.priceWon,
             beta: now.beta,
             note: now.signedIn === null
               ? "The sign-in check is still in flight; signed out, this address answers 401."

@@ -108,3 +108,90 @@ test("파일이 있는데 사양이 비어 있는 상품이 없다", async () =>
     `3D 파일이 있는데 사양이 전부 비어 있습니다. 사양이 비면 등급이 바닥으로 떨어지고, 등급이 곧 접근권입니다:\n  ${blank.join("\n  ")}`,
   );
 });
+
+/**
+ * 어느 엔진에서 열리는지를 상품 페이지가 말한다. 그 말의 근거는 파일이어야 한다.
+ *
+ * 호환성 표는 팔기 위해 적기 쉬운 종류의 문장이다. glTF 파일은 자기가 필요로 하는 확장을
+ * `extensionsRequired` 에 스스로 적어 두고, 규격상 그 이름을 모르는 프로그램은 파일을 여는
+ * 것 자체가 금지된다. 그래서 이 목록이 표의 유일한 근거다 — 여기 적힌 것과 파일이 어긋나면
+ * 우리는 열리지 않는 파일을 열린다고 팔고 있는 것이다.
+ */
+async function requiredExtensionsOf(path) {
+  const bytes = await readFile(new URL(path, root));
+  if (bytes.byteLength < 20 || bytes.readUInt32LE(0) !== 0x46546c67) return null;
+  const json = JSON.parse(bytes.subarray(20, 20 + bytes.readUInt32LE(12)).toString("utf8"));
+  return {
+    requires: [...(json.extensionsRequired ?? [])].sort(),
+    hasVertexColour: (json.meshes ?? []).some((mesh) =>
+      (mesh.primitives ?? []).some((prim) => prim.attributes?.COLOR_0 !== undefined),
+    ),
+    hasBaseColourTexture: (json.materials ?? []).some(
+      (material) => material.pbrMetallicRoughness?.baseColorTexture !== undefined,
+    ),
+  };
+}
+
+test("적힌 요구 확장이 파일이 실제로 요구하는 것과 같다", async () => {
+  const facts = await loadFacts();
+  const wrong = [];
+  let checked = 0;
+  for (const [slug, fact] of Object.entries(facts)) {
+    const path = await entryGlb(slug);
+    if (!path) continue;
+    const real = await requiredExtensionsOf(path);
+    if (!real) continue;
+    checked += 1;
+    if (!fact?.engine) {
+      wrong.push(`${slug}: 파일은 있는데 어디서 열리는지를 재지 않았습니다`);
+      continue;
+    }
+    const written = [...fact.engine.requires].sort();
+    if (written.join("|") !== real.requires.join("|")) {
+      wrong.push(`${slug}: 표기 [${written.join(", ")}] / 실제 [${real.requires.join(", ")}]`);
+    }
+    const colour = real.hasBaseColourTexture ? "texture" : real.hasVertexColour ? "vertex" : "material";
+    if (fact.engine.colour !== colour) {
+      wrong.push(`${slug}: 색 위치 표기 ${fact.engine.colour} / 실제 ${colour}`);
+    }
+  }
+  assert.ok(checked > 0, "재 본 파일이 하나도 없습니다");
+  assert.deepEqual(
+    wrong,
+    [],
+    `열리는 곳 표시가 파일과 다릅니다. 열리지 않는 파일을 열린다고 파는 셈입니다:\n  ${wrong.join("\n  ")}`,
+  );
+});
+
+test("확장을 요구하는 파일은 넣는 법 대신 그 사실을 말한다", async () => {
+  const { engineSteps } = await import("../app/components/engine-fit-rows.ts");
+  const plain = { requires: [], uses: [], colour: "texture", modes: [4], imageTypes: ["image/png"] };
+  const compressed = { ...plain, requires: ["EXT_meshopt_compression"] };
+  const lines = { ...plain, modes: [1, 4] };
+
+  assert.ok(engineSteps(plain).length >= 4, "엔진 줄이 나오지 않습니다");
+  assert.ok(engineSteps(plain).every((row) => row.opens), "아무것도 요구하지 않는 파일이 열리지 않는다고 나옵니다");
+  assert.ok(
+    engineSteps(compressed).every((row) => !row.opens && /meshopt/.test(row.how)),
+    "압축 확장을 요구하는 파일에 그냥 끌어다 놓으라고 적습니다",
+  );
+  assert.ok(engineSteps(lines).every((row) => !row.opens), "삼각형이 아닌 도형이 든 파일을 그냥 열린다고 표시합니다");
+  assert.equal(engineSteps(null).length, 0, "재지 않은 상품에 표를 만들어 냅니다");
+
+  // Unity 만 임포터를 따로 깔아야 한다. 이 줄이 없으면 파일을 끌어다 놓고 아무 일도
+  // 일어나지 않는 경험을 사는 사람이 한다.
+  const unity = engineSteps(plain).find((row) => row.engine === "Unity");
+  assert.match(unity?.caution ?? "", /glTFast/);
+  // Godot·Unreal 은 준비할 것이 없다. 없는 준비를 적으면 어렵게 만든다.
+  assert.equal(engineSteps(plain).find((row) => row.id === "godot")?.caution, null);
+});
+
+test("색이 어디에 들어 있는지를 파일대로 말한다", async () => {
+  const { engineBasis } = await import("../app/components/engine-fit-rows.ts");
+  const vertex = { requires: [], uses: [], colour: "vertex", modes: [4], imageTypes: [] };
+  const textured = { ...vertex, colour: "texture", imageTypes: ["image/png"] };
+  assert.match(engineBasis(vertex).join(" "), /정점 색을 읽는 셰이더/);
+  assert.match(engineBasis(textured).join(" "), /따로 챙길 텍스처가 없/);
+  assert.match(engineBasis(textured).join(" "), /확장을 하나도 요구하지 않습니다/);
+  assert.equal(engineBasis(null).length, 0, "재지 않은 상품에 근거를 지어냅니다");
+});

@@ -26,7 +26,6 @@ type Listing = {
   slug: string;
   title: string;
   description: string;
-  priceCents: number;
   currency: string;
   status: string;
   assetId: string;

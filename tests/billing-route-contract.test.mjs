@@ -54,7 +54,9 @@ test("credits route exposes only the explicit demo grant and cannot debit arbitr
   assert.match(credits, /simulate-upgrade/);
   assert.match(credits, /CLUNK_ENABLE_DEV_CREDIT_GRANT/);
   assert.match(credits, /410/);
-  assert.match(credits, /\/api\/credits\/checkout/);
+  // 2026-09-04: 크레딧을 파는 길을 없앴으므로 충전 창구를 가리키지 않는다. 실행 횟수는
+  // 가입과 구독으로만 열린다.
+  assert.doesNotMatch(credits, /\/api\/credits\/checkout/, "없앤 충전 창구를 아직 가리킵니다");
   assert.match(credits, /amount:\s*100/);
   assert.doesNotMatch(credits, /amount:\s*-/);
 });

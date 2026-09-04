@@ -14,6 +14,7 @@ import {
   reconcileMeasured,
   type ListingFacts,
 } from "./listing-facts-rows";
+import { engineSteps, engineBasis } from "./engine-fit-rows";
 import styles from "../marketplace/marketplace.module.css";
 // 등급(S/A/B/C)은 마켓의 단일 규칙이다(catalog-facts.GRADE_RULE). 값이 아니라 크기와
 // 동작을 보고 매기므로 판매와 무관하고, 무엇을 받을 수 있는지는 등급이 아니라
@@ -26,7 +27,6 @@ type Listing = {
   slug: string;
   title: string;
   description: string;
-  priceCents: number;
 
   currency: string;
   licenseStatus: string;
@@ -67,9 +67,6 @@ type ListingVariant = {
   id: string;
   slug: string;
   title: string;
-  priceCents: number;
-
-  currency: string;
   assetId: string;
   entryFileName: string;
   byteLength: number;
@@ -417,7 +414,7 @@ function ListingCard({ listing, colour, beta }: { listing: Listing; colour?: str
           ) : null}
           <span className={styles.gradeBadge} data-grade={cardGrade(listing)}>{cardGrade(listing)}</span>
           <span className={styles.formatBadge}>{formatLabel(listing)}</span>
-          <span className={`${styles.priceBadge}${cardFree || beta ? ` ${styles.priceBadgeFree}` : ""}`}>{cardFree ? "무료" : "구독"}</span>
+          <span className={`${styles.priceBadge}${cardFree || beta ? ` ${styles.priceBadgeFree}` : ""}`}>{cardFree ? "무료" : "구독자 전용"}</span>
         </span>
       </span>
       <span className={styles.cardBody}>
@@ -583,7 +580,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
         setOwnedIds((current) => new Set(current).add(purchase.id));
         setMessage(
           payload.status === "BETA_GRANTED"
-              ? `${purchase.label} — 받았습니다. 결제 없이 드립니다. 내려받기가 시작됩니다. 시작되지 않으면 내려받기 버튼을 누르세요.`
+              ? `${purchase.label} — 받았습니다. 내려받기가 시작됩니다. 시작되지 않으면 내려받기 버튼을 누르세요.`
               : `${purchase.label} — 이미 받은 상품입니다. 내려받기가 시작됩니다.`,
         );
         triggerDownload(purchase.href, purchase.fileName);
@@ -612,7 +609,6 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
       : "",
     entryFileName: listing?.entryFileName ?? "",
     byteLength: listing?.byteLength ?? 0,
-    priceWon: Math.round((listing?.priceCents ?? 0) / 100),
     beta: checkout?.status === "PAYMENT_PROVIDER_NOT_CONFIGURED",
     signedIn,
     signupUrl: `/signup?return_to=${encodeURIComponent(`/marketplace/${listing?.slug ?? ""}?intent=market`)}`,
@@ -637,6 +633,8 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
   const name = displayTitle(listing.slug, listing.title);
   const pictureSpec = describePicture(listing);
   const rows = listing.facts ? factRows(listing.facts) : [];
+  const engines = engineSteps(listing.facts?.engine);
+  const engineWhy = engineBasis(listing.facts?.engine);
   const kit = listing.facts ? kitLine(listing.facts) : null;
   const reconciled = reconcileMeasured(
     listing.facts,
@@ -718,6 +716,28 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
               {pictureSpec.map((item) => <li key={item.head}><b>{item.head}</b> · {item.tail}</li>)}
             </ul>
           ) : null}
+          {/* 어디서 열리는지. 사는 사람이 가장 먼저 알고 싶어 하는 것이고, 판정의 근거는
+              전부 파일 안에 있다 — glTF 파일은 자기가 필요로 하는 확장을 스스로 적어
+              두므로, 그 목록이 비어 있으면 glTF 를 읽는 프로그램이면 무엇이든 연다.
+              엔진마다 다른 것은 무엇으로 여느냐뿐이라 임포터 이름을 함께 적는다. */}
+          {engines.length ? (
+            <div className={styles.engineFit}>
+              <p className={styles.engineHead}>받아서 엔진에 넣기</p>
+              <ul className={styles.engineList} aria-label="엔진별로 이 파일을 넣는 방법">
+                {engines.map((row) => (
+                  <li key={row.id} data-opens={row.opens ? "yes" : "check"}>
+                    <Icon name={row.opens ? "check" : "info"} size={14} />
+                    <b>{row.engine}</b>
+                    <small>{row.how}</small>
+                    {row.caution ? <em>{row.caution}</em> : null}
+                  </li>
+                ))}
+              </ul>
+              {engineWhy.map((line) => (
+                <p key={line} className={styles.engineNote}>{line}</p>
+              ))}
+            </div>
+          ) : null}
           {/* Which set this belongs to, and how many pieces share its palette and its scale.
               A buyer furnishing a scene is choosing a family, not a file. */}
           {kit ? <p className={styles.kitLine}>{kit}</p> : null}
@@ -733,10 +753,10 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
         </div>
 
         <div className={styles.detailBuy}>
-          <div className={styles.priceRow}><strong>{freeTier ? "무료" : "구독"}</strong><small>{listing.sellerName ?? "Clunk"} · {formatBytes(listing.byteLength)} · {listing.entryFileName}</small></div>
+          <div className={styles.priceRow}><strong>{freeTier ? "무료" : "구독자 전용"}</strong><small>{listing.sellerName ?? "Clunk"} · {formatBytes(listing.byteLength)} · {listing.entryFileName}</small></div>
           {!freeTier && paymentUnavailable ? (
             <p className={styles.payState} data-payment-state={checkout?.status ?? "UNKNOWN"} role="status">
-              로그인하면 이 에셋을 결제 없이 받을 수 있습니다. 표시된 가격은 결제를 시작한 뒤의 값입니다.
+              구독하면 이 에셋을 포함해 마켓의 모든 에셋을 받습니다. 앞으로 올라오는 것도 같이 열립니다.
             </p>
           ) : null}
           {!freeTier && !beta ? (
@@ -776,7 +796,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
           {/* The files, beside the button that unlocks them rather than a screen below it.
               A download link that answers 401 in JSON is not a link, it is a trap: until the
               visitor holds the entitlement the row says what will open it instead. */}
-          <div className={styles.detailFilesHead}>{beta ? "받으면 열리는 파일" : "결제하면 열리는 파일"}</div>
+          <div className={styles.detailFilesHead}>{beta ? "받으면 열리는 파일" : "구독하면 열리는 파일"}</div>
           <div className={styles.files}>{listing.artifacts.filter((artifact) => !PAGE_IMAGE_ROLES.has(artifact.role.trim().toLowerCase())).map((artifact) => <article className={styles.fileRow} key={artifact.fileName}><div><Icon name={artifact.contentType === "image/png" ? "image" : artifact.contentType.includes("gltf") ? "box" : "fileJson"} size={17} /><strong>{artifact.fileName}</strong></div><span>{roleLabel(artifact.role)} · {formatBytes(artifact.byteLength)}</span><code>{artifact.sha256.slice(0, 16)}…</code>{owned || freeTier ? <a href={`/api/marketplace/assets/${encodeURIComponent(listing.assetId)}?file=${encodeURIComponent(artifact.fileName)}`} download={artifact.fileName}>다운로드</a> : <span className={styles.fileLocked}>{beta ? "받기 버튼을 누르면 열립니다" : "구독하면 열립니다"}</span>}</article>)}</div>
         </div>
       </section>
@@ -801,7 +821,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
                     <strong>{kind}</strong>
                   </div>
                   <span className={styles.variantFacts}>{facts.join(" · ")}</span>
-                  {has || variant.priceCents === 0 ? (
+                  {has || isFreeTier({ ...variant, description: "" }) ? (
                     <a
                       className={`${styles.btn} ${styles.btnGhost} ${styles.variantBtn}`}
                       href={variantHref}
@@ -919,7 +939,7 @@ function CatalogEmpty() {
     <section className={styles.emptyState} data-empty-state="marketplace" role="status" aria-live="polite">
       <Icon name="boxes" size={24} />
       <strong>현재 구매 가능한 공개 에셋이 없습니다.</strong>
-      <p>검사를 통과해 공개된 에셋만 이 목록에 올라옵니다. 상품을 열면 3D 미리보기와 라이선스, 가격을 함께 확인할 수 있습니다.</p>
+      <p>검사를 통과해 공개된 에셋만 이 목록에 올라옵니다. 상품을 열면 3D 미리보기와 라이선스, 어느 엔진에서 열리는지를 함께 확인할 수 있습니다.</p>
       <div className={styles.emptyActions}>
         <Link className={`${styles.btn} ${styles.btnPrimary}`} href="/app">내 파일 검사하기 <Icon name="arrowUpRight" size={13} /></Link>
         <Link className={`${styles.btn} ${styles.btnGhost}`} href="/pricing">요금 보기 <Icon name="credit" size={13} /></Link>
@@ -958,8 +978,8 @@ function CheckoutNotice() {
   return (
     <div className={styles.checkoutNotice} role="status">
       <Icon name="circleAlert" size={17} />
-      <strong>결제 없이 받습니다</strong>
-      <span>지금은 결제 없이 모든 기능을 쓸 수 있습니다. 로그인하면 모든 에셋을 결제 없이 받을 수 있고, 결제를 시작하기 전에 이 자리와 이메일로 먼저 알립니다.</span>
+      <strong>지금은 로그인만 하면 됩니다</strong>
+      <span>모든 에셋과 기능이 열려 있습니다. 이 자리와 이메일로 먼저 알린 뒤에 바뀝니다.</span>
     </div>
   );
 }

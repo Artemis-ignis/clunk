@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 export const metadata = createPageMetadata({
   title: "요금",
   description:
-    "Clunk 요금. 지금은 결제 없이 모든 기능을 쓸 수 있습니다. 무료 등급 에셋은 로그인만 하면 받고, 구독하면 전체 카탈로그를 받습니다.",
+    "Clunk 요금. 무료 등급 에셋은 로그인만 하면 받고, 구독하면 전체 카탈로그를 횟수 제한 없이 받습니다. 구독을 끊어도 받은 파일은 그대로 남습니다.",
   path: "/pricing",
 });
 
@@ -159,19 +159,19 @@ const COMPARISON: { label: string; value: (plan: Plan) => string }[] = [
 const FAQ = [
   {
     q: "결제 정보가 필요한가요?",
-    a: "아니요. 지금은 결제 기능 자체가 없어서 카드 번호도, 계좌도 묻지 않습니다. Google이나 GitHub 계정으로 한 번 들어오면 그걸로 끝입니다.",
+    a: "아니요. 카드 번호도 계좌도 묻지 않습니다. Google이나 GitHub 계정으로 한 번 들어오면 그걸로 끝입니다.",
   },
   {
     q: "실행 횟수를 다 쓰면 어떻게 되나요?",
     a: `달이 바뀐 뒤 처음 접속할 때 ${BETA_MONTHLY_GRANT_CREDITS}회가 자동으로 다시 채워집니다. 그 사이에도 에셋 내려받기, 3D 미리보기, 색 팔레트 보기는 실행 횟수를 쓰지 않고 그대로 됩니다.`,
   },
   {
-    q: "마켓 에셋은 왜 무료인가요?",
-    a: "결제 기능이 아직 붙지 않았기 때문입니다. 로그인하면 결제 없이 받습니다. 상품에 적힌 값은 결제를 시작한 뒤에 받을 값이고, 그전까지는 취소선으로만 보입니다.",
+    q: "지금 마켓에서 무엇을 받을 수 있나요?",
+    a: "로그인하면 전부 받습니다. 등급 제한도 횟수 제한도 지금은 걸리지 않습니다. 위에 적힌 값은 구독이 시작되면 적용될 값입니다.",
   },
   {
     q: "구독은 언제 시작하나요?",
-    a: "결제 기능이 붙는 날 시작합니다. 날짜는 아직 정해지지 않았고, 시작 최소 30일 전에 이 페이지와 이메일로 먼저 알립니다.",
+    a: "날짜는 아직 정해지지 않았습니다. 시작 최소 30일 전에 이 페이지와 이메일로 먼저 알려 드립니다. 그때까지 받은 파일은 그대로 두셔도 됩니다.",
     href: "/terms",
     hrefLabel: "이용약관에서 이 약속 보기",
   },
@@ -213,7 +213,7 @@ export default function PricingPage() {
               <p className={styles.lede}>
                 {salesOpen
                   ? "검사와 만들기는 성공한 실행만 1회로 셉니다. 실패한 실행은 세지 않습니다."
-                  : "지금은 결제 없이 모든 기능을 쓸 수 있습니다. 아래 구독은 결제 기능이 붙는 날 시작합니다."}
+                  : "로그인하면 마켓의 모든 에셋을 지금 바로 받습니다. 아래는 구독이 시작되면 적용될 값입니다."}
               </p>
               <ul className={styles.headFacts}>
                 <li>
@@ -268,16 +268,12 @@ export default function PricingPage() {
                         <p className={styles.planSummary}>{plan.summary}</p>
                       </div>
 
-                      {/* 결제가 붙으면 이 버튼이 결제 화면으로 이어질 자리입니다. */}
-                      {isFree ? (
-                        <Link className={`${styles.planBtn} ${styles.planBtnPrimary}`} href={startHref}>
-                          가입하고 시작하기 <Icon name="arrowUpRight" size={15} />
-                        </Link>
-                      ) : (
-                        <button type="button" className={styles.planBtn} disabled aria-disabled="true">
-                          결제 준비 중
-                        </button>
-                      )}
+                      {/* 결제가 열리면 유료 플랜의 이 버튼이 결제 화면으로 이어집니다. 그전까지는
+                          어느 플랜을 눌러도 할 수 있는 일이 같으므로(로그인하면 전부 받는다) 같은
+                          문을 엽니다. 눌리지 않는 버튼은 방문자에게 고장으로 읽힙니다. */}
+                      <Link className={`${styles.planBtn} ${isFree ? styles.planBtnPrimary : ""}`} href={startHref}>
+                        가입하고 시작하기 <Icon name="arrowUpRight" size={15} />
+                      </Link>
 
                       <ul className={styles.planList}>
                         <li className={styles.planListLead}>

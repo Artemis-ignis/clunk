@@ -92,7 +92,7 @@ export function MarketplaceDetail({ slug }: { slug: string }) {
           <span className="eyebrow">ASSET PRODUCT · EVIDENCE ATTACHED</span>
           <h1>{listing.title}</h1>
           <p>{listing.description}</p>
-          <div className="marketplace-detail-price"><strong>{listing.priceCents === 0 ? "무료" : `${listing.priceCents.toLocaleString()} ${listing.currency}`}</strong><small>{listing.sellerName ?? "Clunk creator"} · {formatBytes(listing.byteLength)} entry</small></div>
+          <div className="marketplace-detail-price"><strong>{listing.priceCents === 0 ? "무료" : "구독자 전용"}</strong><small>{listing.sellerName ?? "Clunk creator"} · {formatBytes(listing.byteLength)} entry</small></div>
           <div className="marketplace-detail-actions"><a className="button button-primary" href={downloadHref} download={listing.entryFileName}>파일 받기 <Icon name="download" size={15} /></a><button type="button" className="button button-quiet" onClick={() => void checkCheckout()}>구매 가능 여부 확인 <Icon name="arrowUpRight" size={15} /></button></div>
           {message ? <p className="marketplace-detail-message" role="status">{message}</p> : null}
         </div>

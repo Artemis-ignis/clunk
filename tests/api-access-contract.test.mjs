@@ -18,10 +18,12 @@ test("가입 지급 크레딧은 실제 원장 INSERT와 같은 상수를 쓴다
     "원장 INSERT가 금액을 리터럴로 박아두면 안 된다",
   );
   assert.match(clunk, /\.bind\(creditId, workspaceId, SIGNUP_GRANT_CREDITS\)/);
-  assert.match(access, /credits_on_signup: SIGNUP_GRANT_CREDITS,/);
+  // 2026-09-04: 공개 응답에서 "크레딧"이라는 말과 그 값을 뺐다. 남은 것은 몇 번 쓸 수
+  // 있는지뿐이고, 그 숫자는 여전히 원장이 실제로 넣는 상수와 같아야 한다.
+  assert.match(access, /runs_on_signup: SIGNUP_GRANT_CREDITS,/);
   assert.ok(
-    !/credits_on_signup:\s*\d/.test(access),
-    "access 블록이 가입 지급액을 숫자로 다시 적으면 안 된다",
+    !/runs_on_signup:\s*\d/.test(access),
+    "access 블록이 가입 지급량을 숫자로 다시 적으면 안 된다",
   );
 });
 
@@ -44,7 +46,7 @@ test("익명 access 블록은 잔액을 절대 담지 않는다", () => {
  * Every public listing/pricing response carries it, or an agent still has to guess.
  */
 test("공개 API 응답이 access 블록을 싣는다", () => {
-  for (const route of ["app/api/marketplace/route.ts", "app/api/credits/packs/route.ts"]) {
+  for (const route of ["app/api/marketplace/route.ts"]) {
     assert.match(readFileSync(route, "utf8"), /access: accessFor\(\{ authenticated: false \}\)/, route);
   }
   assert.match(

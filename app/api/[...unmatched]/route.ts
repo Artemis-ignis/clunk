@@ -15,7 +15,6 @@ const KNOWN = [
   "GET /api/marketplace",
   "GET /api/marketplace?slug={slug}",
   "GET /api/marketplace/assets/{assetId}?file={fileName}",
-  "GET /api/credits/packs",
   "GET /api/providers",
   "GET /api/health",
 ];

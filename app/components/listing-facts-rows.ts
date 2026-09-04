@@ -49,6 +49,20 @@ export type ListingFacts = {
     files?: number;
     totalBytes?: number;
   } | null;
+  /**
+   * 이 파일을 여는 프로그램에게 무엇을 요구하는지. 모델이 아닌 상품은 null.
+   *
+   * `requires` 는 glTF 의 `extensionsRequired` 그대로다 — 이름이 하나라도 있으면 그것을
+   * 모르는 프로그램은 파일을 열 수 없다. `uses` 는 몰라도 열리는 나머지. `colour` 는 색이
+   * 어디에 들어 있는지로, 기본 재질에서 색이 나오는지를 가른다.
+   */
+  engine: {
+    requires: string[];
+    uses: string[];
+    colour: "texture" | "material" | "vertex";
+    modes: number[];
+    imageTypes: string[];
+  } | null;
   inspection: { webScore: number; mobileScore: number; hardBlockers: number; note: string | null } | null;
 };
 

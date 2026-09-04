@@ -15,9 +15,6 @@ import { WORKSPACE_IMAGES_PER_DAY, type BudgetSnapshot } from "./ai-budget";
  * product. Nothing is a projection.
  */
 
-/** billing.ts: internal units are won x 100, and one credit is 100 KRW. */
-const CREDIT_KRW = 100;
-
 export type AccessBlock = Record<string, unknown>;
 
 export function accessFor(options: {
@@ -36,32 +33,29 @@ export function accessFor(options: {
         "read each listing's measured spec and evidence",
         "download the artifacts of a free listing",
       ],
-      cannot: ["author assets", "run an inspection", "spend or hold credits"],
-      // Naming the cost of the thing they cannot do yet is more useful than naming the
-      // thing itself: an agent can tell its user what a session would actually cost.
+      cannot: ["author assets", "run an inspection", "download a subscriber-only listing"],
+      // 실행 횟수는 값을 매겨 파는 물건이 아니다. 값을 적어 두면 그 값이 곧 가격이 되고,
+      // 우리가 파는 것은 기간제 구독 하나뿐이다. 몇 번 쓸 수 있는지만 말한다.
       a_signed_in_workspace_adds: {
         how: "Sign in at /login. A workspace is created on first sign-in.",
-        credits_on_signup: SIGNUP_GRANT_CREDITS,
-        credit_price_krw: CREDIT_KRW,
-        generate_cost_credits: 1,
+        runs_on_signup: SIGNUP_GRANT_CREDITS,
+        generate_cost_runs: 1,
         // Stated up front, because a beta limit discovered on the ninth picture is a
         // worse experience than one read before the first.
         images_per_day: WORKSPACE_IMAGES_PER_DAY,
       },
       sales_open: salesOpen,
-      ...(salesOpen ? {} : { sales_note: "결제 기능이 아직 없어 결제 없이 씁니다; 유료 전환은 미리 공지합니다." }),
+      ...(salesOpen ? {} : { sales_note: "지금은 로그인만 하면 모든 에셋과 기능이 열립니다." }),
     };
   }
 
   const credits = options.credits ?? 0;
   return {
     as: "workspace",
-    credits,
-    credit_price_krw: CREDIT_KRW,
-    costs: { generate: 1, inspect: 1, marketplace_asset: "the listing's own price" },
-    // Division, not a promise: it is how many generate calls the current balance covers,
-    // and it goes stale the moment one is spent.
-    generates_remaining: credits,
+    // 남은 실행 횟수. 값이 아니라 횟수다 — 에셋은 낱개로 팔지 않고, 무료 등급은 로그인만
+    // 하면 받으며 그 위는 구독으로 열린다.
+    runs_remaining: credits,
+    costs: { generate: 1, inspect: 1, marketplace_asset: "구독으로 열립니다" },
     // The image budget is the beta's real ceiling and it is measured, not asserted: the
     // number of images left is what the ledger says minus what has been recorded today.
     ...(options.imageBudget
@@ -78,8 +72,8 @@ export function accessFor(options: {
     ...(salesOpen
       ? { cannot: [] }
       : {
-          cannot: ["buy credits", "buy a paid listing"],
-          sales_note: "결제 기능이 아직 없습니다. 실행 횟수는 가입 지급분과 월 지급분으로 쓰고, 결제는 유료 전환 때 미리 공지한 뒤 엽니다.",
+          cannot: ["start a subscription"],
+          sales_note: "지금은 구독 없이 모든 에셋과 기능이 열립니다. 구독을 시작할 때 미리 공지합니다.",
         }),
   };
 }

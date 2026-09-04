@@ -86,7 +86,11 @@ const worker = {
 const CSP_BASE = "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none';"
   + " form-action 'self' https://accounts.google.com https://github.com;"
   + " img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:;"
-  + " connect-src 'self' https://cloudflareinsights.com";
+  // blob: 은 페이지가 스스로 만든 주소라 바깥으로 나가는 길이 아닙니다. three 의 glTF
+  // 로더가 GLB 안에 든 그림을 이 방식으로 꺼내므로, 빼면 3D 뷰어가 텍스처를 못 읽어
+  // 모델이 흰색으로 그려집니다. 2026-09-04 정점 색을 색표 그림으로 옮기면서 마켓의
+  // 모든 3D 상품에 그림이 생겼고, 그때 라이브 콘솔에서 실제로 막히는 것을 봤습니다.
+  + " connect-src 'self' blob: https://cloudflareinsights.com";
 
 const ENFORCED_CSP = `${CSP_BASE}; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com`;
 const REPORT_ONLY_CSP = `${CSP_BASE}; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://static.cloudflareinsights.com`;

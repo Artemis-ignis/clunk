@@ -324,7 +324,7 @@ export function DashboardClient({ welcome }: { welcome?: string | null }) {
           <div className="home-meter-item home-meter-beta">
             <span>지금 요금</span>
             <strong>무료</strong>
-            <small>결제 기능이 아직 없습니다</small>
+            <small>모든 기능이 열려 있습니다</small>
           </div>
           <Link className="home-meter-link" href="/pricing">
             이 숫자가 무슨 뜻인지 보기

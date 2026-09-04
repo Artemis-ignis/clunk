@@ -14,7 +14,7 @@ import styles from "../marketplace.module.css";
 export const dynamic = "force-dynamic";
 export const metadata = createPageMetadata({
   title: "에셋 상세",
-  description: "Clunk 공개 에셋의 실제 preview, 파일 구성, 포맷, 라이선스, 가격과 구매 상태를 확인합니다.",
+  description: "Clunk 공개 에셋의 실제 미리보기, 파일 구성, 포맷, 라이선스, 그리고 어느 게임 엔진에서 열리는지를 확인합니다.",
   path: "/marketplace",
 });
 

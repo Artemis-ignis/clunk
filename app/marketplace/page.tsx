@@ -125,7 +125,7 @@ export default function MarketplacePage() {
                     <br />
                     <em>계정 하나로</em>
                   </h2>
-                  <p>{salesOpen ? "무료 등급은 로그인만 하면 받고, 그 밖은 구독으로 열립니다." : "로그인만 하면 바로 받습니다. 결제는 없습니다."}</p>
+                  <p>{salesOpen ? "무료 등급은 로그인만 하면 받고, 그 밖은 구독으로 열립니다." : "로그인만 하면 마켓의 모든 에셋을 바로 받습니다."}</p>
                 </div>
                 <div className={styles.buyerActions}>
                   <Link className="cv5-btn cv5-btn-primary" href="/app" prefetch={false}>

@@ -1,42 +1,72 @@
 import assert from "node:assert/strict";
-import { access, readFile } from "node:fs/promises";
+import { access, readFile, readdir } from "node:fs/promises";
 import test from "node:test";
 import path from "node:path";
 
 const root = path.resolve(import.meta.dirname, "..");
 const source = (relativePath) => readFile(path.join(root, relativePath), "utf8");
+const gone = async (relativePath) => {
+  try {
+    await access(path.join(root, relativePath));
+    return false;
+  } catch {
+    return true;
+  }
+};
 
-test("credit packs ship DRAFT with no invented price and a public honest catalogue", async () => {
-  const lib = await source("app/api/_lib/clunk.ts");
-  assert.match(lib, /clunk_credit_packs/);
-  assert.match(lib, /clunk_credit_orders/);
-  assert.match(lib, /'pack-starter', 'Starter', 500, 0, 'KRW', 'DRAFT'/);
-  assert.match(lib, /'pack-studio', 'Studio', 2000, 0, 'KRW', 'DRAFT'/);
-  assert.match(lib, /'pack-foundry', 'Foundry', 6000, 0, 'KRW', 'DRAFT'/);
+/**
+ * 크레딧을 파는 길이 없다.
+ *
+ * 2026-09-04 마스터 지시: "크레딧이랑 이전 사행성 느낌나는거 한개당 얼마에 파는거 이런건
+ * 확실하게 빼두고 무료/유료 이 두개로만 놔둬라". 결제대행 심사가 크레딧을 환금성으로 보고
+ * 반려한 것도 같은 이유다.
+ *
+ * 화면에서 단추를 지우는 것으로는 부족하다. /api/credits/packs 는 아무 화면도 부르지
+ * 않는데 라이브에서 200 을 돌려주며 크레딧 팩 세 개와 "1개 100원"을 공표하고 있었다.
+ * 심사하는 사람은 화면이 아니라 주소를 연다.
+ */
+test("크레딧을 파는 경로가 없다", async () => {
+  assert.ok(await gone("app/api/credits/packs/route.ts"), "크레딧 팩 목록이 되살아났습니다");
+  assert.ok(await gone("app/api/credits/checkout/route.ts"), "크레딧 결제가 되살아났습니다");
 
-  await access(path.join(root, "app", "api", "credits", "packs", "route.ts"));
-  const packs = await source("app/api/credits/packs/route.ts");
-  // 2026-09-01: the pre-launch sales lock gates purchasability too. Three
-  // "(QA 임시가)" packs had reached the public pricing page with real prices and
-  // working buy buttons while the mail-order filing was still pending.
-  assert.match(packs, /purchasable: salesOpen && pack\.status === "ACTIVE" && Number\(pack\.priceCents\) > 0/);
-  assert.match(packs, /areSalesOpen/);
+  const index = await source("app/api/route.ts");
+  assert.doesNotMatch(index, /credits\/packs/, "API 안내가 아직 크레딧 팩을 가리킵니다");
+  const unmatched = await source("app/api/[...unmatched]/route.ts");
+  assert.doesNotMatch(unmatched, /credits\/packs/, "없는 주소 안내가 아직 크레딧 팩을 가리킵니다");
 });
 
-test("credit checkout mirrors the marketplace order state machine", async () => {
-  await access(path.join(root, "app", "api", "credits", "checkout", "route.ts"));
-  const checkout = await source("app/api/credits/checkout/route.ts");
-  assert.match(checkout, /assertSameOrigin/);
-  assert.match(checkout, /requireClunkContext/);
-  assert.match(checkout, /readIdempotencyKey/);
-  assert.match(checkout, /PACK_NOT_PURCHASABLE/);
-  assert.match(checkout, /status !== "ACTIVE" \|\| Number\(pack\.priceCents\) <= 0/);
-  assert.match(checkout, /PAYMENT_PROVIDER_NOT_CONFIGURED/);
-  assert.match(checkout, /scopedStorageId\("credit-order"/);
-  assert.match(checkout, /INSERT OR IGNORE INTO clunk_credit_orders/);
-  assert.match(checkout, /'CREATING'/);
-  assert.match(checkout, /credit-pack:\$\{pack\.id\}/);
-  assert.doesNotMatch(checkout, /fake|pretend/i);
+/**
+ * 크레딧에 값이 붙어 나가지 않는다.
+ *
+ * 값을 한 번 적어 두면 그 숫자가 곧 가격이 되고, 우리가 파는 것은 기간제 구독 하나뿐이다.
+ * 남은 실행 횟수는 몇 번 쓸 수 있는지일 뿐 얼마어치가 아니다.
+ */
+test("공개 응답이 크레딧 값을 말하지 않는다", async () => {
+  const accessBlock = await source("app/api/_lib/access.ts");
+  assert.doesNotMatch(accessBlock, /credit_price_krw/, "크레딧 단가가 공개 응답에 남아 있습니다");
+  assert.doesNotMatch(accessBlock, /CREDIT_KRW/, "크레딧 단가 상수가 남아 있습니다");
+  assert.match(accessBlock, /runs_remaining/, "남은 실행 횟수를 말하지 않습니다");
+});
+
+/**
+ * 에셋에 낱개 값이 붙어 나가지 않는다.
+ *
+ * 무료/유료 두 갈래이고 유료는 구독으로 열린다. 목록 응답이 priceCents 를 실어 보내면
+ * 그 값이 아무도 청구하지 않는 가격으로 화면과 검색엔진에 흘러간다 — 2026-09-04 라이브
+ * 목록이 ₩12,900 을 그렇게 내보내고 있었다.
+ */
+test("마켓 응답이 낱개 가격을 싣지 않는다", async () => {
+  const route = await source("app/api/marketplace/route.ts");
+  assert.doesNotMatch(route, /price_cents AS priceCents/, "목록 SQL 이 아직 낱개 가격을 꺼냅니다");
+  assert.doesNotMatch(route, /priceCents: row\.priceCents/, "목록 응답이 아직 낱개 가격을 싣습니다");
+  assert.doesNotMatch(route, /payload\.priceCents/, "상품을 만드는 입구가 아직 값을 받습니다");
+
+  for (const file of ["app/components/MarketplaceCatalog.tsx", "app/components/LandingMarketShowcase.tsx"]) {
+    const text = await source(file);
+    assert.doesNotMatch(text, /priceCents/, `${file} 에 낱개 가격이 남아 있습니다`);
+  }
+  const webmcp = await source("app/webmcp/useProductWebMcp.ts");
+  assert.doesNotMatch(webmcp, /priceWon/, "에이전트에게 낱개 가격을 넘기고 있습니다");
 });
 
 test("the provider webhook grants pack credits idempotently and never claws back silently", async () => {
@@ -54,124 +84,6 @@ test("the demo self-grant is gated off outside explicit local smoke runs", async
   const credits = await source("app/api/credits/route.ts");
   assert.match(credits, /CLUNK_ENABLE_DEV_CREDIT_GRANT/);
   assert.match(credits, /410/);
-  const files = await import("node:fs/promises").then(({ readdir }) => readdir(path.join(root, "app", "components")));
+  const files = await readdir(path.join(root, "app", "components"));
   assert.equal(files.includes("DemoUpgradeButton.tsx"), false, "the dead demo upgrade component must stay deleted");
-});
-
-test("the pricing surface renders pack state from the API and never invents a price", async () => {
-  // 2026-09-04: 팩을 파는 부품 자체가 사라졌다.
-  //
-  // 이 검사는 CreditPacksPanel.tsx 가 API 가 준 상태만 그리고 가격을 지어내지 않는지를
-  // 봤다. 그 부품은 요금 화면에서 떨어져 나온 뒤로 아무 화면도 걸지 않는, 크레딧 팩을
-  // 파는 자리 하나뿐이었다. 파는 길을 지운 개편에서 지우지 않고 두면 다음 사람이 다시
-  // 걸 수 있으므로 파일째 지웠다. 지금 지키는 것은 "값을 정직하게 그린다"가 아니라
-  // "그 자리가 없다"이다 — DemoUpgradeButton 을 지울 때와 같은 핀이다.
-  await assert.rejects(
-    () => access(path.join(root, "app", "components", "CreditPacksPanel.tsx")),
-    "크레딧 팩을 파는 부품이 되살아나 있으면 안 된다",
-  );
-  // 2026-09-02, free beta: the page no longer renders the pack panel — three cards with no
-  // price and no button read as a shop that had crashed. It states the PLANNED prices
-  // instead, labelled as such, and every grant figure is imported from the module that
-  // enforces it rather than typed on the page.
-  const pricing = await source("app/pricing/page.tsx");
-  assert.doesNotMatch(pricing, /CreditPacksPanel/, "요금 페이지는 팩 패널을 그리지 않는다");
-  assert.match(pricing, /SIGNUP_GRANT_CREDITS/);
-  assert.match(pricing, /BETA_MONTHLY_GRANT_CREDITS/);
-  assert.match(pricing, /WORKSPACE_IMAGES_PER_DAY/);
-  assert.doesNotMatch(pricing, /충전하기|구매하기/, "결제가 없는 동안 살 수 있는 것처럼 보이는 버튼이 없어야 한다");
-  // 2026-09-03(마스터 결정): 결제 자체가 없으므로 "베타"라는 말을 이 화면에서 쓰지 않는다.
-  assert.doesNotMatch(pricing, /베타/u, "요금 화면에 베타 표현이 남아 있으면 안 된다");
-  assert.doesNotMatch(pricing, /예정가|DEMO/u, "옛 예정가·DEMO 잔재가 남아 있으면 안 된다");
-  // 용어집(2026-09-04 마스터 지시로 다시 고정): 화면에는 "폴리곤 수"로 적는다.
-  //
-  // 옛 매핑은 삼각형→"면", 드로우콜→"그리기 횟수"였다. 둘 다 만드는 사람의 말을 한 겹
-  // 옮겨 적은 것뿐이라 구매자가 판단에 쓸 수 없었다 — "면 2,456개"를 보고 자기 게임에
-  // 넣어도 되는지 아는 사람은 없다. 새 기준은 구매자가 직접 읽을 수 있는 값(폴리곤 수,
-  // 파일 용량, 텍스처 크기)과 판정 결과로 말한다. 그러므로 내부 용어와 옛 대체어를
-  // 함께 막는다. 푸는 것이 아니라 기준이 바뀐 것이다.
-  assert.doesNotMatch(pricing, /삼각형|드로우콜|엔진 예산/u, "내부 용어가 요금 화면에 남아 있으면 안 된다");
-  assert.doesNotMatch(pricing, /그리기 횟수|그리기 [\d,]+회/u, "옛 대체어(그리기 횟수)가 요금 화면에 남아 있으면 안 된다");
-  // 2026-09-02: the gloss after the number was removed at the operator's request.
-  assert.match(pricing, /폴리곤 수, 재질 수/);
-
-  // 구독 카드의 값은 계획 문서가 기록한 숫자 그대로이고, 페이지의 PLANS 한 곳에서만 나온다.
-  const plan = await source("docs/free-beta-plan.ko.md");
-  for (const figure of ["₩9,900/월", "₩29,000/월"]) {
-    assert.ok(plan.includes(figure), `계획 문서에 ${figure} 이 없다`);
-  }
-  assert.match(pricing, /priceKrw: 9_900,\s*annualKrw: 99_000/);
-  assert.match(pricing, /priceKrw: 29_000,\s*annualKrw: 290_000/);
-
-  // 2026-09-04: 크레딧 팩은 요금 화면에서 사라졌다.
-  //
-  // 페이에이드(결제대행) 심사에서 현금을 크레딧으로 바꿔 두었다가 쓰는 구조가
-  // 선불충전과 같은 환금성 코드로 분류되어 가맹점 승인이 거절됐다. 팩을 파는 자리가
-  // 화면에 남아 있으면 같은 판정을 다시 받으므로, 섹션과 데이터를 통째로 지웠다.
-  // 앞으로 요금 화면이 파는 것은 구독(기간 이용권) 하나뿐이다.
-  for (const id of ["pack-starter", "pack-studio", "pack-foundry"]) {
-    assert.doesNotMatch(
-      pricing,
-      new RegExp(id),
-      `요금 화면에 크레딧 팩 ${id} 가 남아 있으면 안 된다`,
-    );
-  }
-  assert.doesNotMatch(pricing, /크레딧만 따로 충전/, "크레딧 충전 섹션이 남아 있으면 안 된다");
-  assert.doesNotMatch(pricing, /const PACKS/, "팩 데이터 정의가 남아 있으면 안 된다");
-});
-
-test("에셋 결제에서 크레딧 레일이 닫혀 있다", async () => {
-  // 크레딧으로 상품을 살 수 있는 길이 하나라도 남으면 업종 심사 결과가 같으므로,
-  // 체크아웃은 credits 결제 수단을 받아도 정산하지 않고 거절한다.
-  const checkout = await source("app/api/marketplace/checkout/route.ts");
-  assert.match(checkout, /CREDIT_RAIL_CLOSED/, "크레딧 레일 거절 상태가 있어야 한다");
-  assert.doesNotMatch(
-    checkout,
-    /return await settleWithCredits\(/,
-    "크레딧으로 상품 대금을 정산하는 호출이 남아 있으면 안 된다",
-  );
-});
-
-test("유료 에셋의 문은 낱개 구매가 아니라 구독으로 열린다", async () => {
-  // polyfork 와 같은 구조로 옮겼다: 무료 등급은 로그인만 하면 받고, 그 밖의 전부는
-  // 구독 기간 동안 무제한으로 받는다. 에셋마다 값을 매겨 파는 낱개 판매는 없앴다.
-  // 낱개로 값을 매기고 크레딧으로 결제하던 구조가 결제대행 심사에서 환금성으로
-  // 걸린 것이 이유이고, 파는 것을 기간 접근권 하나로 줄이면 그 판정을 받지 않는다.
-  const route = await source("app/api/marketplace/assets/[assetId]/route.ts");
-  assert.match(route, /getCatalogAccessForUser/, "구독 접근권으로 판정해야 한다");
-  assert.match(route, /SUBSCRIPTION_REQUIRED/, "거절은 구독을 요구한다고 말해야 한다");
-  assert.doesNotMatch(
-    route,
-    /ENTITLEMENT_REQUIRED/,
-    "결제 이력만으로 판정하던 옛 거절 상태가 남아 있으면 안 된다",
-  );
-  // 이미 낱개로 산 사람의 권리는 유지한다. 값을 치른 것을 회수하지 않는다.
-  assert.match(route, /clunk_marketplace_entitlements/, "과거 구매 기록은 계속 인정해야 한다");
-
-  const lib = await source("app/api/_lib/clunk.ts");
-  assert.match(lib, /catalog_access/, "플랜에 카탈로그 접근권 컬럼이 있어야 한다");
-  assert.match(lib, /CatalogAccess = "free" \| "full"/, "접근권은 두 갈래뿐이다");
-});
-
-test("무료·구독 구분은 저장한 값이 아니라 등급에서 계산한다", async () => {
-  // 2026-09-04. 세 자리가 같은 규칙 하나(catalog-facts.isFreeGrade)를 불러야 한다.
-  // 어느 하나가 저장해 둔 값을 읽기 시작하면 그 값은 언젠가 등급과 어긋나고, 어긋난
-  // 순간 카드는 "무료"라 적는데 문은 잠기거나 구독 전용이 그냥 나간다.
-  const facts = await source("app/components/catalog-facts.ts");
-  assert.match(facts, /export function isFreeGrade/, "등급→접근권 규칙이 있어야 한다");
-  assert.match(facts, /letter === "B"/, "무료로 여는 등급은 B 하나다");
-  assert.doesNotMatch(facts, /GradeLetter = "S" \| "A" \| "B" \| "C"/, "등급은 S·A·B 셋이다");
-
-  const route = await source("app/api/marketplace/assets/[assetId]/route.ts");
-  assert.match(route, /isFreeGrade\(gradeOf\(/, "다운로드 문지기가 등급으로 판정해야 한다");
-  assert.doesNotMatch(route, /access_tier|priceCents/, "문지기가 저장해 둔 값을 읽으면 안 된다");
-
-  const catalog = await source("app/components/MarketplaceCatalog.tsx");
-  assert.match(catalog, /return isFreeGrade\(cardGrade\(listing\)\)/, "마켓 카드가 등급으로 판정해야 한다");
-
-  const showcase = await source("app/components/LandingMarketShowcase.tsx");
-  assert.match(showcase, /isFreeGrade\(gradeOf\(/, "첫 화면 진열장도 같은 규칙을 써야 한다");
-
-  const catalogue = await source("app/api/marketplace/route.ts");
-  assert.doesNotMatch(catalogue, /accessTier/, "응답이 아무도 읽지 않는 등급 값을 실어 나르면 안 된다 — ...row 스프레드가 SQL 별칭을 그대로 흘린다");
 });

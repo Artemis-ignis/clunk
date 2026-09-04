@@ -111,7 +111,7 @@ export function WorkspaceShell({
         <div className="rail-plan">
           <span className="mono-label">지금 요금</span>
           <strong>무료</strong>
-          <small>결제 기능이 아직 없습니다</small>
+          <small>모든 기능이 열려 있습니다</small>
         </div>
       </div>
     </div>

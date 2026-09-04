@@ -58,7 +58,71 @@ export type ListingFact = {
   viewYawDegrees: number | null;
   /** What the inspector found, so the evidence card can say it instead of the description. */
   inspection: { webScore: number; mobileScore: number; hardBlockers: number; note: string | null } | null;
+  /** What the file asks of whatever opens it. Null for a listing whose product is not a model. */
+  engine: EngineFit | null;
 };
+
+/**
+ * What a 3D file needs from the program that opens it.
+ *
+ * Read straight out of the glTF header, so it describes the file on sale rather than what
+ * anybody remembers about it. `requires` is glTF's own `extensionsRequired`: a reader that
+ * does not know one of those names is not allowed to open the file at all, which is the
+ * difference between "looks a bit different" and "will not import". `uses` is the rest of
+ * `extensionsUsed` — a reader that skips those still opens the file and falls back to plain
+ * material.
+ *
+ * `colour` says where the colour actually lives, because that decides whether a plain
+ * material shows the model in colour or in white:
+ *   texture  — a picture the material points at. Every reader shows it.
+ *   material — flat colours on the materials themselves. Every reader shows it.
+ *   vertex   — colour stored per corner with no picture. A shader that does not read corner
+ *              colour draws the model white, and most engines' default one does not.
+ */
+export type EngineFit = {
+  requires: string[];
+  uses: string[];
+  colour: "texture" | "material" | "vertex";
+  /** glTF primitive modes present. 4 is triangles; anything else is unusual and worth saying. */
+  modes: number[];
+  /** Image types the file carries, so a reader needing an extra decoder is visible. */
+  imageTypes: string[];
+};
+
+/** Reads the JSON chunk of a .glb. Everything above comes out of it. */
+export function measureEngineFit(bytes: Buffer): EngineFit | null {
+  if (bytes.byteLength < 20 || bytes.readUInt32LE(0) !== 0x46546c67) return null; // "glTF"
+  let json: Record<string, unknown>;
+  try {
+    json = JSON.parse(bytes.subarray(20, 20 + bytes.readUInt32LE(12)).toString("utf8")) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+  const required = (json.extensionsRequired as string[] | undefined) ?? [];
+  const used = (json.extensionsUsed as string[] | undefined) ?? [];
+  const meshes = (json.meshes as Array<{ primitives?: Array<{ mode?: number; attributes?: Record<string, number> }> }> | undefined) ?? [];
+  const materials = (json.materials as Array<Record<string, unknown>> | undefined) ?? [];
+  const images = (json.images as Array<{ mimeType?: string }> | undefined) ?? [];
+
+  const modes = new Set<number>();
+  let hasVertexColour = false;
+  for (const mesh of meshes)
+    for (const prim of mesh.primitives ?? []) {
+      modes.add(prim.mode ?? 4);
+      if (prim.attributes?.COLOR_0 !== undefined) hasVertexColour = true;
+    }
+  const hasBaseColourTexture = materials.some(
+    (m) => (m.pbrMetallicRoughness as { baseColorTexture?: unknown } | undefined)?.baseColorTexture !== undefined,
+  );
+
+  return {
+    requires: [...required].sort(),
+    uses: used.filter((name) => !required.includes(name)).sort(),
+    colour: hasBaseColourTexture ? "texture" : hasVertexColour ? "vertex" : "material",
+    modes: [...modes].sort((a, b) => a - b),
+    imageTypes: [...new Set(images.map((image) => image.mimeType ?? "").filter(Boolean))].sort(),
+  };
+}
 
 export type ListingFactsFile = {
   schema: "clunk.listing-facts.v1";
@@ -193,6 +257,19 @@ function sumOfPerItem(measured: Record<string, unknown> | undefined, key: string
   return found ? total : null;
 }
 
+/**
+ * 상품마다 매니페스트가 대표로 지목한 파일 이름. 묶음 상품은 대표가 첫 부품의 파일이라
+ * 상품 이름과 다르다 — 이름 규칙만으로는 찾을 수 없다.
+ */
+export function entryNamesFromManifest(manifest: ManifestFile): Map<string, string> {
+  const names = new Map<string, string>();
+  for (const product of manifest.products ?? []) {
+    const entry = product.files?.find((file) => file.role === "entry");
+    if (entry?.path) names.set(product.slug, entry.path.split("/").pop()!);
+  }
+  return names;
+}
+
 export function factsFromManifest(manifest: ManifestFile): Record<string, ListingFact> {
   const kitSizes = new Map<KitId, number>();
   for (const product of manifest.products) {
@@ -231,6 +308,7 @@ export function factsFromManifest(manifest: ManifestFile): Record<string, Listin
       texture: typeof measured.resolution === "string"
         ? { resolution: String(measured.resolution).replace("x", "×"), seamless: (measured.seam as { verdict?: string } | undefined)?.verdict === "SEAMLESS" }
         : null,
+      engine: null, // 배달 파일에서 다시 잰다
       inspection: scores?.web
         ? {
             webScore: scores.web.score,
@@ -271,6 +349,7 @@ export function factsFromListings(
       viewYawDegrees: null,
       sheet,
       texture: null,
+      engine: null, // 배달 파일에서 다시 잰다
       inspection: null,
     };
   }
@@ -350,39 +429,86 @@ export function underlayPrevious(fresh: ListingFact, previous: ListingFact | und
  * 손대지 않는다 — 지어내는 것보다 매니페스트 값을 남기는 편이 낫고, 그 어긋남은
  * tests/listing-facts-truth.test.mjs 가 잡는다.
  */
+/**
+ * 사는 사람이 실제로 받는 파일 하나.
+ *
+ * 폴더에 여러 파일이 있을 때 아무거나 재면 다른 물건을 설명하게 된다 — 나무 묶음이
+ * 1.2MB 인데 그 안의 나무 한 그루(198KB)를 재고 있었다. 상품 이름과 같은 이름의 파일이
+ * 대표다. 그것이 없으면 GLB 가 하나뿐일 때만 그것을 쓴다.
+ */
+function entryFileNameFor(slug: string, marketRoot: string, fromManifest?: Map<string, string>): string | null {
+  const declared = fromManifest?.get(slug);
+  let names: string[] = [];
+  try {
+    names = readdirSync(resolve(marketRoot, slug));
+  } catch {
+    // 묶음 상품은 자기 폴더가 없다. 부품이 각자 자기 폴더에 있고 묶음은 그것을 건네준다.
+  }
+  // 상품 이름을 그대로 단 파일이 대표다. 매니페스트보다 먼저 보는 이유는, 나무 묶음처럼
+  // 부품을 하나로 합쳐 다시 낸 상품에서 매니페스트가 아직 부품 하나를 가리키기 때문이다.
+  const stem = (name: string) => name.replace(/\.[^.]+$/, "");
+  const named = names.filter((name) => stem(name) === slug && !name.endsWith(".json"));
+  if (named.length === 1) return `${slug}/${named[0]!}`;
+  if (declared && names.includes(declared)) return `${slug}/${declared}`;
+  const glb = names.filter((name) => name.toLowerCase().endsWith(".glb"));
+  if (glb.length === 1) return `${slug}/${glb[0]!}`;
+  // 묶음이 건네주는 첫 파일은 부품의 폴더에 있다. 이름으로 찾는다.
+  if (declared) {
+    for (const folder of readdirSync(marketRoot)) {
+      try {
+        if (readdirSync(resolve(marketRoot, folder)).includes(declared)) return `${folder}/${declared}`;
+      } catch {
+        // 폴더가 아닌 것
+      }
+    }
+  }
+  return null;
+}
+
 function remeasureFromServedFiles(
   facts: Record<string, ListingFact>,
   marketRoot: string,
+  entryNames?: Map<string, string>,
 ): { facts: Record<string, ListingFact>; corrected: string[] } {
   const corrected: string[] = [];
   for (const [slug, fact] of Object.entries(facts)) {
-    // inspectAsset 은 번들 안의 상대 경로를 받는다. 파일 이름 하나면 충분하다.
-    let name: string | null = null;
-    try {
-      const names = readdirSync(resolve(marketRoot, slug)).filter((n) => n.toLowerCase().endsWith(".glb"));
-      if (names.length !== 1) continue; // 어느 것이 대표인지 여기서 정하지 않는다
-      name = names[0]!;
-    } catch {
-      continue; // 3D 가 아닌 상품
-    }
+    const name = entryFileNameFor(slug, marketRoot, entryNames);
+    if (!name) continue;
     let bytes: Buffer;
     try {
-      bytes = readFileSync(resolve(marketRoot, slug, name));
+      bytes = readFileSync(resolve(marketRoot, name));
     } catch {
       continue;
     }
-    const report = inspectAsset({ entry: name, files: new Map([[name, new Uint8Array(bytes)]]) });
+
+    // 3D 가 아닌 상품(타일 그림, 시트)도 크기는 다시 잰다. 크기가 어긋나면 상품 머리글과
+    // 사양 줄이 한 화면에서 서로 다른 숫자를 말한다.
+    if (!name.toLowerCase().endsWith(".glb")) {
+      if (fact.byteLength === bytes.byteLength) continue;
+      corrected.push(`${slug}: 용량 ${fact.byteLength ?? "-"}→${bytes.byteLength} (${name})`);
+      facts[slug] = { ...fact, byteLength: bytes.byteLength };
+      continue;
+    }
+
+    // inspectAsset 은 번들 안의 상대 경로를 받는다. 파일 이름 하나면 충분하다.
+    const bare = name.split("/").pop()!;
+    const report = inspectAsset({ entry: bare, files: new Map([[bare, new Uint8Array(bytes)]]) });
     const triangles = numberOrNull(report?.metrics?.triangleCount);
     const materials = numberOrNull(report?.metrics?.materialCount);
     if (triangles === null) continue; // 형상을 못 읽었으면 종이를 그대로 둔다
+    const engine = measureEngineFit(bytes);
 
     const changed =
-      fact.triangles !== triangles || fact.materials !== materials || fact.byteLength !== bytes.byteLength;
+      fact.triangles !== triangles ||
+      fact.materials !== materials ||
+      fact.byteLength !== bytes.byteLength ||
+      JSON.stringify(fact.engine ?? null) !== JSON.stringify(engine);
     if (!changed) continue;
     corrected.push(
-      `${slug}: 폴리곤 ${fact.triangles ?? "-"}→${triangles}, 재질 ${fact.materials ?? "-"}→${materials}, 용량 ${fact.byteLength ?? "-"}→${bytes.byteLength}`,
+      `${slug}: 폴리곤 ${fact.triangles ?? "-"}→${triangles}, 재질 ${fact.materials ?? "-"}→${materials}, 용량 ${fact.byteLength ?? "-"}→${bytes.byteLength}` +
+        (engine ? `, 요구 확장 ${engine.requires.length}개 · 색 ${engine.colour}` : ""),
     );
-    facts[slug] = { ...fact, triangles, materials, byteLength: bytes.byteLength };
+    facts[slug] = { ...fact, triangles, materials, byteLength: bytes.byteLength, engine };
   }
   return { facts, corrected };
 }
@@ -411,7 +537,7 @@ export function buildFacts(
   // length and nothing else, so bounds, animated parts, clips and the view angle — the rest of
   // what the H145 lost — have no other source, and a listing whose file is not in the checkout
   // is never reached by it at all.
-  const { facts, corrected } = remeasureFromServedFiles(merged, marketRoot);
+  const { facts, corrected } = remeasureFromServedFiles(merged, marketRoot, entryNamesFromManifest(manifest));
   for (const line of corrected) process.stdout.write(`  다시 잼 ${line}
 `);
 
