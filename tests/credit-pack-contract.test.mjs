@@ -59,11 +59,17 @@ test("the demo self-grant is gated off outside explicit local smoke runs", async
 });
 
 test("the pricing surface renders pack state from the API and never invents a price", async () => {
-  const panel = await source("app/components/CreditPacksPanel.tsx");
-  assert.match(panel, /\/api\/credits\/packs/);
-  assert.match(panel, /가격 확정 전/);
-  assert.match(panel, /withdrawalConsent: consent/);
-  assert.doesNotMatch(panel, /₩\s?\d|\d+,\d+원/);
+  // 2026-09-04: 팩을 파는 부품 자체가 사라졌다.
+  //
+  // 이 검사는 CreditPacksPanel.tsx 가 API 가 준 상태만 그리고 가격을 지어내지 않는지를
+  // 봤다. 그 부품은 요금 화면에서 떨어져 나온 뒤로 아무 화면도 걸지 않는, 크레딧 팩을
+  // 파는 자리 하나뿐이었다. 파는 길을 지운 개편에서 지우지 않고 두면 다음 사람이 다시
+  // 걸 수 있으므로 파일째 지웠다. 지금 지키는 것은 "값을 정직하게 그린다"가 아니라
+  // "그 자리가 없다"이다 — DemoUpgradeButton 을 지울 때와 같은 핀이다.
+  await assert.rejects(
+    () => access(path.join(root, "app", "components", "CreditPacksPanel.tsx")),
+    "크레딧 팩을 파는 부품이 되살아나 있으면 안 된다",
+  );
   // 2026-09-02, free beta: the page no longer renders the pack panel — three cards with no
   // price and no button read as a shop that had crashed. It states the PLANNED prices
   // instead, labelled as such, and every grant figure is imported from the module that

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import test from "node:test";
 
 import {
@@ -446,8 +446,8 @@ test("로그아웃이어도 뽑기와 연출은 되고, 받기만 로그인을 �
   assert.match(machine, /if \(Date\.now\(\) - record\.at > LAST_PRIZE_TTL_MS\) return null/u);
   assert.match(machine, /intent=market/u);
   assert.match(machine, /setStage\("result"\)/u);
-  // 잔액은 이 화면이 들지 않는다 — 지갑이 내비로 올라갔고(CoinHud), 거기서 /api/credits 를
-  // 한 번만 부른다. 이 화면은 "받기" 단추 때문에 로그인 여부만 묻는다.
+  // 잔액은 이 화면이 들지 않는다 — 잔액을 들고 다니던 내비의 동전 지갑도 없어졌다
+  // (2026-09-04). 이 화면은 "받기" 단추 때문에 로그인 여부만 묻는다.
   assert.doesNotMatch(machine, /"\/api\/credits"/u);
   assert.match(machine, /void fetch\("\/api\/session", \{ cache: "no-store" \}\)/u);
   assert.doesNotMatch(machine, /Math\.random\(\)\s*\*\s*\d/u);
@@ -780,79 +780,47 @@ test("랜딩은 캡슐 머신 한 대를 렌더한다", async () => {
 
 
 /**
- * 크레딧 지갑 — 내비 안의 동전 알약 (2026-09-03, 운영자 2차 지시)
+ * 동전 지갑은 사라졌다 (2026-09-04, 마스터 결정)
  *
- * 처음에는 첫 화면 무대 오른쪽 위에 떠 있었다. 지갑은 첫 화면만의 물건이 아니므로 내비로
- * 올라왔고, 그래서 규칙도 첫 화면만 읽는 gacha.css 가 아니라 모든 화면이 읽는 site-v5.css 에
- * 산다. 여기서 지키는 것은 다섯이다 — 내비가 걸고, 숫자는 서버에서 오고, 모르는 동안 대시를
- * 적지 않고, 충전은 약속하지 않고, 움직임을 줄여 달라면 멈춘다.
+ * 내비 오른쪽에 잔액을 든 동전 알약이 서 있었다. 만든 이유는 "크레딧이 코인처럼 보여야
+ * 가챠 머신을 돌리는 느낌이 난다"였는데, 그 느낌이 정확히 결제대행 심사가 막은 것이다 —
+ * 현금으로 코인을 사서 상품과 바꾸는 그림. 그래서 fa657b7 에서 내비가 지갑을 내려놓았고,
+ * 그 뒤 CoinHud.tsx 는 아무 화면도 걸지 않는 채로 남아 있었다. 지금 지운다.
+ *
+ * 이 검사는 전에 "지갑이 내비에 있고 숫자는 서버에서 온다"를 지켰다. 그 요구가 사라졌으니
+ * 핀을 푸는 것이 아니라 뒤집어 다시 건다 — 부품도, 자리도, 규칙도 남아 있지 않을 것.
+ * 남기면 다음 사람이 "왜 안 걸려 있지" 하고 되살린다.
  */
-test("크레딧 지갑은 내비 안의 알약이고 숫자는 전부 서버가 준 값이다", async () => {
-  const hud = await readFile(new URL("../app/components/gacha/CoinHud.tsx", import.meta.url), "utf8");
+test("동전 지갑은 부품도 규칙도 남기지 않고 사라졌다", async () => {
   const nav = await readFile(new URL("../app/components/SiteNav.tsx", import.meta.url), "utf8");
   const machine = await readFile(new URL("../app/components/gacha/GachaMachine3D.tsx", import.meta.url), "utf8");
   const site = await readFile(new URL("../app/site-v5.css", import.meta.url), "utf8");
   const css = await readFile(new URL("../app/components/gacha/gacha.css", import.meta.url), "utf8");
 
-  // 지갑은 내비가 건다 — 어느 화면에서나 같은 자리다. 무대는 더 이상 들지 않는다.
-  assert.match(nav, /import \{ CoinHud \} from "\.\/gacha\/CoinHud";/u);
-  assert.match(nav, /<CoinHud authenticated=\{authenticated\} joinHref=\{signupHref\} \/>/u);
-  assert.doesNotMatch(machine, /<CoinHud/u);
-  assert.doesNotMatch(machine, /from "\.\/CoinHud"/u);
-  assert.doesNotMatch(machine, /gc-coin-hud/u);
-  assert.match(hud, /className="gc-coin-pill"/u);
-  // 모든 화면이 읽는 파일에 규칙이 있어야 마켓·요금·작업공간에서도 같은 알약이 선다.
-  assert.match(site, /\.gc-coin-pill \{/u);
-  assert.doesNotMatch(css, /\.gc-coin-pill \{/u);
-
-  // 숫자는 전부 서버에서 온다 — 이 파일에는 크레딧 숫자가 하나도 적혀 있지 않다.
-  assert.doesNotMatch(hud, /\d+\s*크레딧|크레딧\s*\d+/u);
-  assert.match(hud, /로그인하면 \{signupGrant\}크레딧/u);
-  assert.match(hud, /const payload = await response\.json\(\) as CreditsPayload;/u);
-  // 가입 지급분은 서버의 SIGNUP_GRANT_CREDITS 를 그대로 싣는 공개 접근 계약에서 읽는다.
-  assert.match(hud, /fetch\("\/api\/credits\/packs"\)/u);
-  assert.match(hud, /payload\.access\?\.a_signed_in_workspace_adds\?\.credits_on_signup/u);
-  const access = await readFile(new URL("../app/api/_lib/access.ts", import.meta.url), "utf8");
-  assert.match(access, /credits_on_signup: SIGNUP_GRANT_CREDITS,/u);
-  const packs = await readFile(new URL("../app/api/credits/packs/route.ts", import.meta.url), "utf8");
-  assert.match(packs, /access: accessFor\(\{ authenticated: false \}\)/u);
-  // 로그아웃일 때 /api/credits 를 부르지 않는다 — 401 을 콘솔에 남기지 않는다.
-  assert.match(hud, /if \(!authenticated\) return;\s*let alive = true;\s*void fetch\("\/api\/credits"/u);
-
-  // 자릿수가 흔들리지 않게 tabular-nums 로 서고, 화면 낭독기에게도 같은 값을 준다.
-  assert.match(site, /\.gc-coin-count \{[^}]*font-variant-numeric: tabular-nums;/u);
-  assert.match(hud, /aria-live="polite"/u);
-  assert.match(hud, /aria-label=\{known \? `보유 크레딧 \$\{credits\}` : "보유 크레딧 확인 중"\}/u);
-
-  // 잔액을 모르는 동안 대시를 적지 않는다 — 자리표시가 들어간다(운영자 2026-09-03).
-  assert.doesNotMatch(hud, /"—"/u);
-  assert.match(hud, /<span className="gc-coin-wait" aria-hidden="true" \/>/u);
-  assert.match(site, /\.gc-coin-wait \{/u);
-
-  // "+" 는 충전 단추가 아니다. 결제가 없으므로 요금 화면으로만 데려간다.
-  assert.match(hud, /className="gc-coin-plus"[\s\S]{0,120}href="\/pricing"/u);
-  assert.doesNotMatch(hud, /충전하기|결제하기/u);
-
-  // 실시간으로 돌고 반짝인다.
-  assert.match(site, /animation: gc-coin-breathe 3\.4s ease-in-out infinite;/u);
-  assert.match(site, /animation: gc-coin-sparkle 4s ease-in-out infinite;/u);
-  // 레버가 내려가는 동안 동전이 한 바퀴 넘어간다. 숫자는 그대로다(뽑기는 무료).
-  assert.match(css, /@keyframes gc-coin-insert/u);
-  assert.match(css, /html:has\(\.gc3\[data-stage="pull"\]\) \.gc-coin-spin/u);
-
-  // 움직임을 줄여 달라면 동전은 멈춰 선다.
-  assert.match(
-    site,
-    /@media \(prefers-reduced-motion: reduce\) \{\s*\.gc-coin-spin,\s*\.gc-coin-shine,\s*\.gc-coin-sparkle \{ animation: none !important; \}/u,
+  // 부품 자체가 없다.
+  await assert.rejects(
+    () => stat(new URL("../app/components/gacha/CoinHud.tsx", import.meta.url)),
+    "CoinHud.tsx 가 되살아나 있으면 안 된다",
   );
 
-  // 좁은 화면에서도 알약은 남고, 내비의 다른 것을 밀어내지 않는다.
-  assert.match(site, /@media \(max-width: 900px\) \{\s*\.gc-coin-pill \{ height: 32px;/u);
+  // 내비도 무대도 지갑을 들지 않는다.
+  for (const [name, text] of [["SiteNav.tsx", nav], ["GachaMachine3D.tsx", machine]]) {
+    assert.doesNotMatch(text, /CoinHud/u, `${name} 이 아직 지갑을 걸고 있습니다`);
+    assert.doesNotMatch(text, /gc-coin-pill|gc-coin-hud|gc3-coin-line/u, `${name} 에 지갑 자리가 남아 있습니다`);
+  }
+
+  // 알약의 규칙은 어느 CSS 에도 없다 — 죽은 규칙이 남으면 다시 걸 자리가 생긴다.
+  // 기계의 동전 투입구(.gc-coin / .gc-coin-label)는 그림이지 지갑이 아니므로 그대로 둔다.
+  for (const [name, text] of [["site-v5.css", site], ["gacha.css", css]]) {
+    for (const dead of ["gc-coin-pill", "gc-coin-spin", "gc-coin-wait", "gc-coin-plus", "gc-coin-join", "gc-coin-count", "gc-coin-insert"]) {
+      assert.ok(!text.includes(dead), `${name} 에 죽은 지갑 규칙 .${dead} 이 남아 있습니다`);
+    }
+  }
+  assert.match(css, /\.gc-coin-label \{/u, "기계의 동전 투입구까지 지우면 안 된다");
+
+  // 내비의 나머지 반응형 규칙은 지갑과 무관하므로 그대로 서 있다.
   assert.match(site, /@media \(max-width: 1199px\) \{\s*\.cv5 \.sitenav-utility \{ display: none; \}\s*\}/u);
   assert.match(site, /@media \(max-width: 1499px\) \{\s*\.cv5 \.sitenav-utility-link \{ padding: 0 7px; \}\s*\}/u);
-
-  // 아래 판의 잔액 글줄은 걷어냈다 — 같은 값을 두 번 말하지 않는다.
-  assert.doesNotMatch(machine, /gc3-coin-line/u);
 });
 
 
