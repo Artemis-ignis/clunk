@@ -104,6 +104,75 @@
     },
     "stillOpen": "the hopper sits where it was authored, above the belt it feeds; whether it should be a surge bin there or a feed bin at the tail is a design call, not a measurement"
   },
+  "measuredDefects": {
+    "bottlingLegs": {
+      "why": "the table stood 40 mm clear of its own legs and the legs stopped 19 mm above the floor",
+      "legs": [
+        {
+          "name": "bottlingLegLB",
+          "wasMm": [
+            19,
+            1139
+          ],
+          "nowMm": [
+            0,
+            1179.1
+          ]
+        },
+        {
+          "name": "bottlingLegLF",
+          "wasMm": [
+            19,
+            1139
+          ],
+          "nowMm": [
+            0,
+            1179.1
+          ]
+        },
+        {
+          "name": "bottlingLegRB",
+          "wasMm": [
+            19,
+            1139
+          ],
+          "nowMm": [
+            0,
+            1179.1
+          ]
+        },
+        {
+          "name": "bottlingLegRF",
+          "wasMm": [
+            19,
+            1139
+          ],
+          "nowMm": [
+            0,
+            1179.1
+          ]
+        }
+      ]
+    },
+    "mixerDriveHead": {
+      "why": "the drive head added to show the mixer running stood inside pipeTopRise, invisible",
+      "liftedMm": 274.1
+    },
+    "pump": {
+      "why": "the pump casing and its motor stood inside the tank body, and its plinth floated 319 mm above the floor",
+      "movedMm": 225.9,
+      "plinth": {
+        "wasMm": [
+          319,
+          439
+        ],
+        "nowMm": [
+          0,
+          499
+        ]
+      }
+    }
+  },
   "ground": {
     "beforeMm": 0,
     "afterMm": 0

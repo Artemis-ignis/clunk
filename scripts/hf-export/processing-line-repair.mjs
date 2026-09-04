@@ -261,8 +261,39 @@ report.instruments = [
    * mouth sits 60 mm above the belt's HIGHEST point under it, and four walls drop from
    * the mouth's outline to 25 mm above the belt — each wall's bottom edge computed from
    * the belt's height at that corner's own z, so the skirt follows the incline exactly. */
-  const beltAt = (z) => beltBox.min.y
-    + ((beltBox.max.z - z) / (beltBox.max.z - beltBox.min.z)) * (beltBox.max.y - beltBox.min.y);
+  /* 벨트의 윗면. 상자 두 귀퉁이를 잇는 직선은 슬래브의 두께만큼 낮아, 그 선에 맞춰
+     스커트를 내리면 스커트가 벨트에 잠긴다. 벨트 자신의 꼭짓점을 z 로 나눠 담고 각
+     칸에서 가장 높은 y 를 쓴다. */
+  const beltTop = (() => {
+    const bins = new Map();
+    const v3 = new THREE.Vector3();
+    const im3 = new THREE.Matrix4();
+    for (const mesh of meshes(belt)) {
+      const pos = mesh.geometry.getAttribute('position');
+      const copies = mesh.isInstancedMesh ? mesh.count : 1;
+      for (let c = 0; c < copies; c += 1) {
+        const w = mesh.isInstancedMesh
+          ? new THREE.Matrix4().multiplyMatrices(mesh.matrixWorld, mesh.getMatrixAt(c, im3) ?? im3)
+          : mesh.matrixWorld;
+        for (let i = 0; i < pos.count; i += 1) {
+          v3.fromBufferAttribute(pos, i).applyMatrix4(w);
+          const key = Math.round(v3.z * 20);
+          bins.set(key, Math.max(bins.get(key) ?? -Infinity, v3.y));
+        }
+      }
+    }
+    const keys = [...bins.keys()].sort((x, y) => x - y);
+    return (z) => {
+      const k = z * 20;
+      let below = keys[0];
+      let above = keys[keys.length - 1];
+      for (const key of keys) { if (key <= k) below = key; if (key >= k) { above = key; break; } }
+      if (below === above) return bins.get(below);
+      const t = (k - below) / (above - below);
+      return bins.get(below) + t * (bins.get(above) - bins.get(below));
+    };
+  })();
+  const beltAt = (z) => beltTop(z);
   const hopperBody = node(scene, 'hopperBody');
   const mouthCorners = () => {
     const pos = hopperBody.geometry.getAttribute('position');
@@ -332,6 +363,48 @@ report.instruments = [
 
   const ring = mouthCorners();
   const SKIRT_GAP = 0.025;
+  /* 벨트 윗면을 상자나 구간 보간으로 추정하면 슬래브 두께만큼 낮게 잡혀 스커트가 벨트에
+     잠긴다 — 두 번 다르게 추정했고 두 번 다 잠겼다. 추정을 그만두고, 벨트의 실제 면에
+     대고 광선을 쏘아 밖으로 나올 때까지 5 mm 씩 올린다. */
+  const beltFaces = (() => {
+    const tris = [];
+    const im4 = new THREE.Matrix4();
+    for (const mesh of meshes(belt)) {
+      const pos = mesh.geometry.getAttribute('position');
+      const idx = mesh.geometry.getIndex();
+      const copies = mesh.isInstancedMesh ? mesh.count : 1;
+      for (let c = 0; c < copies; c += 1) {
+        const w = mesh.isInstancedMesh
+          ? new THREE.Matrix4().multiplyMatrices(mesh.matrixWorld, mesh.getMatrixAt(c, im4) ?? im4)
+          : mesh.matrixWorld;
+        const n = idx ? idx.count : pos.count;
+        for (let i = 0; i < n; i += 3) {
+          tris.push([0, 1, 2].map((k) => new THREE.Vector3()
+            .fromBufferAttribute(pos, idx ? idx.getX(i + k) : i + k).applyMatrix4(w)));
+        }
+      }
+    }
+    return tris;
+  })();
+  const insideBelt = (x, y, z) => {
+    let crossings = 0;
+    for (const [a, b, c] of beltFaces) {
+      const d = (b.y - c.y) * (a.z - c.z) - (b.z - c.z) * (a.y - c.y);
+      if (Math.abs(d) < 1e-12) continue;
+      const u = ((b.y - c.y) * (z - c.z) - (b.z - c.z) * (y - c.y)) / d;
+      const v = ((c.y - a.y) * (z - c.z) - (c.z - a.z) * (y - c.y)) / d;
+      const w2 = 1 - u - v;
+      if (u < 0 || v < 0 || w2 < 0) continue;
+      if (u * a.x + v * b.x + w2 * c.x > x) crossings += 1;
+    }
+    return crossings % 2 === 1;
+  };
+  /** 벨트 밖에서 가장 낮은 자리. 스커트의 아래 모서리는 여기에 놓인다. */
+  const clearOfBelt = (x, z) => {
+    let y = beltAt(z) + SKIRT_GAP;
+    for (let step = 0; step < 200 && insideBelt(x, y, z); step += 1) y += 0.005;
+    return y;
+  };
   const skirtColour = colourOf(hopperBody).clone().multiplyScalar(0.86);
   const skirt = new THREE.BufferGeometry();
   const verts = [];
@@ -341,7 +414,7 @@ report.instruments = [
     const b = ring[(i + 1) % ring.length];
     const base = verts.length / 3;
     verts.push(a.x, a.y, a.z, b.x, b.y, b.z,
-      b.x, beltAt(b.z) + SKIRT_GAP, b.z, a.x, beltAt(a.z) + SKIRT_GAP, a.z);
+      b.x, clearOfBelt(b.x, b.z), b.z, a.x, clearOfBelt(a.x, a.z), a.z);
     index.push(base, base + 1, base + 2, base, base + 2, base + 3);
   }
   skirt.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
@@ -387,6 +460,82 @@ report.instruments = [
     delivery: { chute: 'conveyorDeliveryChute', inlet: 'tankSideInlet', lengthMm: mm(chuteLength), heightMm: mm(chuteY) },
     stillOpen: 'the hopper sits where it was authored, above the belt it feeds; whether it should be a surge bin there or a feed bin at the tail is a design call, not a measurement',
   };
+}
+
+/* ------------------------------------------------- 5b. three more measured defects */
+/* 2026-09-04, found by scripts/asset-geometry-audit.mjs once it had a narrow phase. */
+{
+  const report5b = {};
+
+  /* THE BOTTLING TABLE FLOATS ABOVE ITS OWN LEGS. The four legs top out at y 1.139 and
+     the table's underside is 1.179 — a 40 mm gap — and their feet stop 19 mm above the
+     floor. Each leg is stretched to span floor to table. */
+  const table = worldBox(node(scene, 'bottlingTable'));
+  const legFix = [];
+  for (const name of ['bottlingLegLB', 'bottlingLegLF', 'bottlingLegRB', 'bottlingLegRF']) {
+    const leg = node(scene, name);
+    const box = worldBox(leg);
+    const want = table.min.y;                       // up into the table, down to the floor
+    const factor = want / (box.max.y - box.min.y);
+    leg.scale.y *= factor;
+    leg.updateMatrixWorld(true);
+    const after = worldBox(leg);
+    leg.position.y -= after.min.y - 0;               // seat it on the floor
+    leg.updateMatrixWorld(true);
+    legFix.push({ name, wasMm: [mm(box.min.y), mm(box.max.y)], nowMm: [0, mm(want)] });
+  }
+  scene.updateMatrixWorld(true);
+  report5b.bottlingLegs = { why: 'the table stood 40 mm clear of its own legs and the legs stopped 19 mm above the floor', legs: legFix };
+
+  /* THE MIXER DRIVE HEAD IS INSIDE THE PIPE IT STANDS BESIDE. Pass 4 put a shaft and a
+     coupling on the tank apex so the mixer's turning could be seen from outside — and
+     `pipeTopRise` rises through exactly that spot, y 4.579..5.199, swallowing all of it.
+     A visible indicator nobody can see is the defect it was meant to cure. The head is
+     lifted until the coupling stands above the pipe. */
+  const rise = worldBox(node(scene, 'pipeTopRise'));
+  const coupling = node(scene, 'mixerDriveCoupling');
+  const couplingBox = worldBox(coupling);
+  const lift = (rise.max.y + 0.060) - couplingBox.min.y;
+  if (lift > 0) {
+    for (const name of ['mixerDriveShaft', 'mixerDriveHub', 'mixerDriveCoupling']) {
+      const part = node(scene, name);
+      if (name === 'mixerDriveShaft') part.scale.y *= (worldBox(part).max.y - worldBox(part).min.y + lift) / (worldBox(part).max.y - worldBox(part).min.y);
+      part.position.y += lift;
+    }
+    scene.updateMatrixWorld(true);
+  }
+  report5b.mixerDriveHead = { why: 'the drive head added to show the mixer running stood inside pipeTopRise, invisible', liftedMm: mm(Math.max(0, lift)) };
+
+  /* THE PUMP IS INSIDE THE TANK. `pumpHousing` puts 48 of its 383 vertices inside the
+     tank body, 180 mm deep, and `pumpMotor` 41. It moves along z, away from the tank's
+     axis, which keeps it inside `pipeFeed`'s own z span so the plumbing still meets it. */
+  const tankBox5b = worldBox(node(scene, 'tankBody'));
+  const axis5b = { x: (tankBox5b.min.x + tankBox5b.max.x) / 2, z: (tankBox5b.min.z + tankBox5b.max.z) / 2 };
+  const radius5b = Math.min(tankBox5b.max.x - tankBox5b.min.x, tankBox5b.max.z - tankBox5b.min.z) / 2;
+  const service = node(scene, 'service-network');
+  const pumpBox = worldBox(node(scene, 'pumpHousing'));
+  const nearest = Math.min(Math.abs(pumpBox.min.z - axis5b.z), Math.abs(pumpBox.max.z - axis5b.z));
+  const reach = Math.sqrt(Math.max(0, radius5b * radius5b - Math.max(
+    0, Math.min(Math.abs(pumpBox.min.x - axis5b.x), Math.abs(pumpBox.max.x - axis5b.x))) ** 2));
+  const pumpShift = Math.max(0, reach - nearest) + 0.050;
+  if (pumpShift > 0) { service.position.z += pumpShift; scene.updateMatrixWorld(true); }
+  /* And its plinth was floating: `pumpBase` sat 319 mm above the floor with a 60 mm gap
+     to the pump it was carrying. Stretched to stand on the floor and meet the pump. */
+  const base = node(scene, 'pumpBase');
+  const baseBox = worldBox(base);
+  const pumpAfter = worldBox(node(scene, 'pumpHousing'));
+  const baseWant = pumpAfter.min.y;
+  base.scale.y *= baseWant / (baseBox.max.y - baseBox.min.y);
+  base.updateMatrixWorld(true);
+  base.position.y -= worldBox(base).min.y;
+  scene.updateMatrixWorld(true);
+  report5b.pump = {
+    why: 'the pump casing and its motor stood inside the tank body, and its plinth floated 319 mm above the floor',
+    movedMm: mm(pumpShift),
+    plinth: { wasMm: [mm(baseBox.min.y), mm(baseBox.max.y)], nowMm: [0, mm(baseWant)] },
+  };
+
+  report.measuredDefects = report5b;
 }
 
 /* ---------------------------------------------------------------- 6. ground contact */
