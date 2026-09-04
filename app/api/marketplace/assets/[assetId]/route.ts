@@ -1,5 +1,5 @@
 import { getCurrentUser } from "../../../../auth";
-import { getRuntimeAssets, getRuntimeDb, ensureSchema, isSafeRecordId, jsonError, privateJson } from "../../../_lib/clunk";
+import { getRuntimeAssets, getRuntimeDb, ensureSchema, getCatalogAccessForUser, isSafeRecordId, jsonError, privateJson } from "../../../_lib/clunk";
 
 export const dynamic = "force-dynamic";
 
@@ -69,12 +69,28 @@ export async function GET(request: Request, context: RouteContext) {
       if (!user) {
         return privateJson({ ok: false, schema: "clunk.marketplace-download.v1", status: "AUTHENTICATION_REQUIRED", error: "유료 에셋을 받으려면 로그인해야 합니다." }, { status: 401 });
       }
-      const entitlement = await db.prepare(
-        `SELECT id FROM clunk_marketplace_entitlements
-         WHERE buyer_user_id = ? AND asset_id = ? AND status = 'ACTIVE' LIMIT 1`,
-      ).bind(user.id, assetId).first<{ id: string }>();
-      if (!entitlement) {
-        return privateJson({ ok: false, schema: "clunk.marketplace-download.v1", status: "ENTITLEMENT_REQUIRED", error: "결제가 완료된 계정만 유료 에셋을 다운로드할 수 있습니다." }, { status: 403 });
+      // 구독이 살아 있으면 전체 카탈로그를 받는다.
+      //
+      // 낱개로 값을 매겨 크레딧으로 팔던 구조는 결제대행 심사에서 환금성으로
+      // 걸렸다. 파는 것을 기간 접근권 하나로 바꿨으므로, 유료 에셋의 문은
+      // "이 에셋을 샀는가"가 아니라 "지금 구독 중인가"로 열린다.
+      //
+      // 과거에 낱개로 산 기록(clunk_marketplace_entitlements)은 그대로 인정한다.
+      // 이미 값을 치른 사람에게서 받은 것을 거두지 않는다.
+      const access = await getCatalogAccessForUser(db, user.id);
+      if (access !== "full") {
+        const entitlement = await db.prepare(
+          `SELECT id FROM clunk_marketplace_entitlements
+           WHERE buyer_user_id = ? AND asset_id = ? AND status = 'ACTIVE' LIMIT 1`,
+        ).bind(user.id, assetId).first<{ id: string }>();
+        if (!entitlement) {
+          return privateJson({
+            ok: false,
+            schema: "clunk.marketplace-download.v1",
+            status: "SUBSCRIPTION_REQUIRED",
+            error: "구독하면 전체 에셋을 받을 수 있습니다. 무료 등급 에셋은 로그인만 하면 받습니다.",
+          }, { status: 403 });
+        }
       }
     }
     // "asset:/<path>" object keys point at files bundled into the Worker's

@@ -118,3 +118,24 @@ test("에셋 결제에서 크레딧 레일이 닫혀 있다", async () => {
     "크레딧으로 상품 대금을 정산하는 호출이 남아 있으면 안 된다",
   );
 });
+
+test("유료 에셋의 문은 낱개 구매가 아니라 구독으로 열린다", async () => {
+  // polyfork 와 같은 구조로 옮겼다: 무료 등급은 로그인만 하면 받고, 그 밖의 전부는
+  // 구독 기간 동안 무제한으로 받는다. 에셋마다 값을 매겨 파는 낱개 판매는 없앴다.
+  // 낱개로 값을 매기고 크레딧으로 결제하던 구조가 결제대행 심사에서 환금성으로
+  // 걸린 것이 이유이고, 파는 것을 기간 접근권 하나로 줄이면 그 판정을 받지 않는다.
+  const route = await source("app/api/marketplace/assets/[assetId]/route.ts");
+  assert.match(route, /getCatalogAccessForUser/, "구독 접근권으로 판정해야 한다");
+  assert.match(route, /SUBSCRIPTION_REQUIRED/, "거절은 구독을 요구한다고 말해야 한다");
+  assert.doesNotMatch(
+    route,
+    /ENTITLEMENT_REQUIRED/,
+    "결제 이력만으로 판정하던 옛 거절 상태가 남아 있으면 안 된다",
+  );
+  // 이미 낱개로 산 사람의 권리는 유지한다. 값을 치른 것을 회수하지 않는다.
+  assert.match(route, /clunk_marketplace_entitlements/, "과거 구매 기록은 계속 인정해야 한다");
+
+  const lib = await source("app/api/_lib/clunk.ts");
+  assert.match(lib, /catalog_access/, "플랜에 카탈로그 접근권 컬럼이 있어야 한다");
+  assert.match(lib, /CatalogAccess = "free" \| "full"/, "접근권은 두 갈래뿐이다");
+});
