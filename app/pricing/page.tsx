@@ -5,7 +5,8 @@ import { ForceDarkTheme } from "../components/ForceDarkTheme";
 import { RevealObserver } from "../components/Reveal";
 import { createPageMetadata } from "../components/site-metadata";
 import { signUpPath } from "../auth";
-import { BETA_MONTHLY_GRANT_CREDITS, SIGNUP_GRANT_CREDITS } from "../api/_lib/clunk";
+import { BETA_MONTHLY_GRANT_CREDITS } from "../api/_lib/clunk";
+import { GRADE_RULE } from "../components/catalog-facts";
 import { WORKSPACE_IMAGES_PER_DAY } from "../api/_lib/ai-budget";
 import { areSalesOpen } from "../api/_lib/sales-lock";
 import styles from "./pricing.module.css";
@@ -84,76 +85,44 @@ const PLANS: Plan[] = [
     images: WORKSPACE_IMAGES_PER_DAY,
     seats: 1,
     features: [
-      "무료 등급 에셋 내려받기 — 로그인만 하면 됩니다",
-      `가입 즉시 실행 ${SIGNUP_GRANT_CREDITS}회`,
+      "B등급 에셋 전부 — 폴리곤 1,500개 미만이고 움직이는 동작이 없는 것",
       "3D 뷰어·색 팔레트·파일 검사",
       "AI 도구 연결(MCP)과 API",
       "받은 에셋은 상업적으로 써도 됩니다",
+      `만들기·검사는 매달 ${BETA_MONTHLY_GRANT_CREDITS}회, 이미지는 하루 ${WORKSPACE_IMAGES_PER_DAY}장까지`,
     ],
   },
   {
-    id: "maker",
-    name: "메이커",
+    id: "pro",
+    name: "구독",
     priceKrw: 9_900,
     annualKrw: 99_000,
-    summary: "혼자 꾸준히 만드는 사람을 위한 자리.",
+    summary: "마켓 전체를 여는 자리. 하나씩 사는 길은 없습니다.",
     credits: 300,
     images: 30,
     seats: 1,
     featured: true,
     features: [
-      "전체 에셋 내려받기 제한 없음",
-      "앞으로 올라오는 에셋도 포함",
-      "구독을 끊어도 받은 파일은 그대로 남습니다",
-      "무료 요금제에 있는 것 전부",
-      "1인 상업 라이선스 명시",
-    ],
-  },
-  {
-    id: "studio",
-    name: "스튜디오",
-    priceKrw: 29_000,
-    annualKrw: 290_000,
-    summary: "여럿이 함께 쓰는 팀을 위한 자리.",
-    credits: 1_200,
-    images: 100,
-    seats: 3,
-    features: [
-      "메이커에 있는 것 전부",
-      "작업공간 자리 3개",
-      "상업 라이선스 서면 발급",
-      "요청 시 결제·세금계산서 처리",
+      "A·S 등급까지 전체 카탈로그 — 내려받기 제한 없음",
+      "앞으로 올라오는 에셋도 그대로 포함",
+      "구독을 끊어도 받은 파일은 계정에 그대로 남습니다",
+      "무료에 있는 것 전부",
+      "만들기·검사 매달 300회, 이미지 하루 30장",
     ],
   },
 ];
-
-/** 실행 횟수가 오가는 모든 경우. 숫자는 위 상수와 원장 코드에서만 옵니다. */
-const USAGE = [
-  { action: "가입", amount: `+${SIGNUP_GRANT_CREDITS}`, positive: true, detail: "계정을 만든 그 자리에서 한 번 들어옵니다." },
-  { action: "매달 지급", amount: `+${BETA_MONTHLY_GRANT_CREDITS}`, positive: true, detail: "달이 바뀐 뒤 처음 접속할 때 자동으로 들어옵니다." },
-  { action: "에셋 검사", amount: `−${RUNS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "올린 GLB·glTF 파일을 열어 폴리곤 수, 재질 수, 크기, 규격을 확인합니다." },
-  { action: "안전 최적화", amount: `−${RUNS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "원본은 그대로 두고 정리한 새 파일을 만들어 다시 검사합니다." },
-  { action: "2D 이미지 만들기", amount: `−${RUNS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "문장으로 PNG 한 장을 만듭니다." },
-  { action: "3D·시트·클립 만들기", amount: `−${RUNS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "고른 템플릿으로 GLB, 스프라이트 시트, 애니메이션 클립을 만듭니다." },
-  { action: "마켓 에셋 받기", amount: "0", positive: true, detail: "무료 등급은 로그인만 하면, 그 밖은 구독으로 받습니다. 실행 횟수는 쓰지 않습니다." },
-  { action: "실패·거부된 작업", amount: "0", positive: true, detail: "입력 오류, 모델 거부, 저장 실패는 끝나지 않은 작업이라 차감하지 않습니다." },
-  { action: "같은 요청 두 번", amount: `합계 −${RUNS_PER_SUCCESSFUL_JOB}`, positive: false, detail: "같은 요청을 다시 보내도 한 번만 처리하고 한 번만 셉니다." },
-] as const;
 
 /** 요금제 비교표. 각 행의 값은 PLANS 와 상수에서 계산합니다. */
 const COMPARISON: { label: string; value: (plan: Plan) => string }[] = [
   { label: "월 요금", value: (p) => (p.priceKrw === null ? "가격 미정" : p.priceKrw === 0 ? "₩0" : `₩${p.priceKrw.toLocaleString("ko-KR")}`) },
   { label: "연 결제", value: (p) => (p.annualKrw === null ? "가격 미정" : p.annualKrw === 0 ? "없음" : `₩${p.annualKrw.toLocaleString("ko-KR")}`) },
-  { label: "가입 실행 횟수", value: () => `${SIGNUP_GRANT_CREDITS}회` },
-  { label: "매달 실행 횟수", value: (p) => `${p.credits.toLocaleString("ko-KR")}회` },
-  { label: "이미지 생성 / 하루", value: (p) => `${p.images}장` },
-  { label: "작업공간 자리", value: (p) => `${p.seats}자리` },
-  { label: "성공한 실행 1건", value: () => `${RUNS_PER_SUCCESSFUL_JOB}회` },
-  { label: "실패한 실행", value: () => "0회" },
-  { label: "마켓 에셋 내려받기", value: (p) => (p.id === "free" ? "로그인하면 무료" : "제한 없음") },
+  { label: "받을 수 있는 에셋", value: (p) => (p.id === "free" ? "B등급" : "전체 (B·A·S)") },
+  { label: "내려받기 횟수", value: () => "제한 없음" },
+  { label: "받은 파일", value: () => "계정에 영구 보관" },
+  { label: "상업적 이용", value: () => "허용" },
   { label: "AI 도구 연결(MCP)·API", value: () => "포함" },
-  { label: "작업 순서 우선 처리", value: (p) => (p.id === "free" ? "—" : "포함") },
-  { label: "상업 라이선스", value: (p) => (p.id === "studio" ? "서면 발급" : p.id === "maker" ? "1인 명시" : "허용") },
+  { label: "만들기·검사 / 달", value: (p) => `${p.credits.toLocaleString("ko-KR")}회` },
+  { label: "이미지 생성 / 하루", value: (p) => `${p.images}장` },
 ];
 
 const FAQ = [
@@ -162,12 +131,18 @@ const FAQ = [
     a: "아니요. 카드 번호도 계좌도 묻지 않습니다. Google이나 GitHub 계정으로 한 번 들어오면 그걸로 끝입니다.",
   },
   {
-    q: "실행 횟수를 다 쓰면 어떻게 되나요?",
-    a: `달이 바뀐 뒤 처음 접속할 때 ${BETA_MONTHLY_GRANT_CREDITS}회가 자동으로 다시 채워집니다. 그 사이에도 에셋 내려받기, 3D 미리보기, 색 팔레트 보기는 실행 횟수를 쓰지 않고 그대로 됩니다.`,
+    q: "무료와 구독은 무엇이 다른가요?",
+    a: "받을 수 있는 에셋이 다릅니다. B등급은 로그인만 하면 받고, A·S 등급은 구독으로 열립니다. 등급은 폴리곤 수와 움직이는 동작이 있는지로 정해지고, 그 기준은 상품 카드에 그대로 적혀 있습니다.",
+    href: "/marketplace",
+    hrefLabel: "마켓에서 등급 보기",
+  },
+  {
+    q: "에셋을 하나만 살 수는 없나요?",
+    a: `없습니다. 파는 것은 기간 구독 하나이고, 에셋마다 값이 붙어 있지 않습니다. 만들기와 검사는 무료가 매달 ${BETA_MONTHLY_GRANT_CREDITS}회, 구독이 300회이며 실패한 작업은 세지 않습니다.`,
   },
   {
     q: "지금 마켓에서 무엇을 받을 수 있나요?",
-    a: "로그인하면 전부 받습니다. 등급 제한도 횟수 제한도 지금은 걸리지 않습니다. 위에 적힌 값은 구독이 시작되면 적용될 값입니다.",
+    a: "로그인하면 전부 받습니다. 등급 제한은 지금 걸리지 않습니다. 위에 적힌 값은 구독이 시작되면 적용될 값입니다.",
   },
   {
     q: "구독은 언제 시작하나요?",
@@ -212,27 +187,12 @@ export default function PricingPage() {
               <h1 id="pricing-title">요금</h1>
               <p className={styles.lede}>
                 {salesOpen
-                  ? "검사와 만들기는 성공한 실행만 1회로 셉니다. 실패한 실행은 세지 않습니다."
-                  : "로그인하면 마켓의 모든 에셋을 지금 바로 받습니다. 아래는 구독이 시작되면 적용될 값입니다."}
+                  ? "무료와 구독 둘뿐입니다. 에셋을 하나씩 사는 길은 없습니다."
+                  : "지금은 로그인만 하면 마켓의 모든 에셋이 열립니다. 아래는 구독이 시작되면 적용될 값입니다."}
               </p>
-              <ul className={styles.headFacts}>
-                <li>
-                  <strong>{SIGNUP_GRANT_CREDITS}회</strong>
-                  <span>가입 즉시</span>
-                </li>
-                <li>
-                  <strong>+{BETA_MONTHLY_GRANT_CREDITS}</strong>
-                  <span>매달</span>
-                </li>
-                <li>
-                  <strong>{WORKSPACE_IMAGES_PER_DAY}장</strong>
-                  <span>이미지 / 하루</span>
-                </li>
-                <li>
-                  <strong>{RUNS_PER_SUCCESSFUL_JOB}회</strong>
-                  <span>성공한 실행 1건</span>
-                </li>
-              </ul>
+              {/* 무료의 기준을 숫자로 적는다. 카드에 붙은 등급과 같은 규칙이라 방문자가
+                  마켓에서 바로 확인할 수 있다 — 규칙을 숨긴 무료는 미끼로 읽힌다. */}
+              <p className={styles.headRule}>{GRADE_RULE}</p>
             </div>
           </header>
 
@@ -240,8 +200,8 @@ export default function PricingPage() {
           <section className={styles.section} data-snap-section="pricing-plans" aria-labelledby="plans-title">
             <div className="cv5-frame">
               <div className={styles.sectionHead}>
-                <h2 id="plans-title">월정액 구독</h2>
-                <p>매달 실행 횟수가 다시 채워지고, 남은 횟수는 다음 달로 넘어가지 않습니다.</p>
+                <h2 id="plans-title">무료로 시작하고, 필요하면 구독합니다</h2>
+                <p>구독은 마켓 전체를 여는 한 장이고, 받은 파일은 구독을 끊어도 계정에 남습니다.</p>
               </div>
               <div className={styles.planGrid}>
                 {PLANS.map((plan) => {
@@ -276,9 +236,6 @@ export default function PricingPage() {
                       </Link>
 
                       <ul className={styles.planList}>
-                        <li className={styles.planListLead}>
-                          매달 실행 <b>{plan.credits.toLocaleString("ko-KR")}회</b> · 이미지 하루 <b>{plan.images}장</b>
-                        </li>
                         {plan.features.map((feature) => (
                           <li key={feature}>
                             <Icon name="check" size={14} />
@@ -290,43 +247,6 @@ export default function PricingPage() {
                   );
                 })}
               </div>
-            </div>
-          </section>
-
-          {/* ---------------------------------------------------- 실행 횟수는 이렇게 씁니다 */}
-          <section className={styles.section} data-snap-section="pricing-usage" aria-labelledby="usage-title">
-            <div className="cv5-frame">
-              <div className={styles.sectionHead}>
-                <h2 id="usage-title">실행 횟수는 이렇게 씁니다</h2>
-                <p>에셋을 받는 데는 실행 횟수가 들지 않습니다. 만들고 검사하는 데만 씁니다.</p>
-              </div>
-              <div className={styles.tableWrap}>
-                <table className={styles.usageTable}>
-                  <caption className={styles.srOnly}>작업별 실행 횟수 증감</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">작업</th>
-                      <th scope="col" className={styles.numCol}>실행</th>
-                      <th scope="col">언제</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {USAGE.map((row) => (
-                      <tr key={row.action}>
-                        <th scope="row">{row.action}</th>
-                        <td className={styles.numCol}>
-                          <span className={row.positive ? styles.amountUp : styles.amountDown}>{row.amount}</span>
-                        </td>
-                        <td>{row.detail}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <p className={styles.tableFoot}>
-                이미지 생성은 하루 {WORKSPACE_IMAGES_PER_DAY}장까지입니다. 한도에 닿으면 한국 시간으로 언제
-                다시 열리는지 알려 드리고, 실행 횟수는 세지 않습니다.
-              </p>
             </div>
           </section>
 
@@ -401,8 +321,7 @@ export default function PricingPage() {
                 <div>
                   <h2 id="closer-title">먼저 써 보고 정하세요</h2>
                   <p>
-                    가입하면 실행 {SIGNUP_GRANT_CREDITS}회가 바로 들어오고, 매달 {BETA_MONTHLY_GRANT_CREDITS}회가
-                    더 들어옵니다. 결제 정보는 묻지 않습니다.
+                    지금은 로그인만 하면 마켓의 모든 에셋이 열립니다. 결제 정보는 묻지 않습니다.
                   </p>
                 </div>
                 <div className={styles.closerActions}>

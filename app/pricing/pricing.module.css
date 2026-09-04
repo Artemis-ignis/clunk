@@ -35,6 +35,17 @@
   color: var(--v5-ink);
 }
 
+/* 무료의 기준 한 줄. 카드에 붙은 등급과 같은 규칙이라 방문자가 대조할 수 있다. */
+.headRule {
+  margin: 14px 0 0;
+  padding: 12px 16px;
+  border-left: 2px solid var(--v5-line-strong);
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: var(--v5-ink-dim);
+  max-width: 72ch;
+}
+
 .lede {
   margin: 14px 0 0;
   max-width: 56ch;

@@ -34,6 +34,7 @@
     "billing:test": "tsx tests/billing-contract.test.ts && node --test tests/billing-route-contract.test.mjs tests/credit-pack-contract.test.mjs tests/api-access-contract.test.mjs",
     "asset:facts": "tsx scripts/listing-facts-cli.ts",
     "asset:copy-truth": "node scripts/listing-copy-truth.mjs",
+    "site:sweep": "node scripts/site-copy-sweep.mjs",
     "facts:test": "node --import tsx --test tests/listing-facts-contract.test.mjs tests/listing-facts-truth.test.mjs",
     "series:mesh": "tsx scripts/clunk-series-cli.ts",
     "api:smoke": "tsx scripts/api-credit-smoke.ts",
