@@ -746,6 +746,17 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
           {/* Which set this belongs to, and how many pieces share its palette and its scale.
               A buyer furnishing a scene is choosing a family, not a file. */}
           {kit ? <p className={styles.kitLine}>{kit}</p> : null}
+          {/* "실제 게임에 들어간 파일"은 그 게임을 열어 볼 수 없으면 증거가 아니라 주장이다.
+              하베스트 프론티어는 브라우저에서 그대로 돌아가므로, 이 줄이 그 말을 확인할 수
+              있는 자리로 데려간다. */}
+          {listing.facts?.kit === "harvest-frontier" ? (
+            <p className={styles.playLine}>
+              이 에셋이 서 있는 게임을 브라우저에서 바로 해 볼 수 있습니다.{" "}
+              <a href="https://play.clunk.games" target="_blank" rel="noreferrer">
+                하베스트 프론티어 열기 <Icon name="arrowUpRight" size={13} />
+              </a>
+            </p>
+          ) : null}
           {/* The viewer parses the very bytes on sale, so agreeing with the recorded facts is
               the normal case and gets one quiet line. Disagreeing means the file served is not
               the file that was measured, and a buyer is entitled to be told that. */}

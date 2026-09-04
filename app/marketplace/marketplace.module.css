@@ -1380,6 +1380,25 @@
   color: var(--v5-ink-faint);
 }
 
+/* the link that turns "it shipped in a real game" into something clickable */
+.playLine {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--v5-ink-dim);
+}
+.playLine a {
+  color: var(--v5-ink);
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid var(--v5-line-strong);
+  padding-bottom: 1px;
+  white-space: nowrap;
+}
+.playLine a:hover { border-bottom-color: currentColor; }
+.playLine a svg { vertical-align: -1px; margin-left: 2px; }
+
 /* which engines open this file, and what they open it with */
 .engineFit {
   margin: 18px 0 0;
