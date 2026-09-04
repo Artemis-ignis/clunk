@@ -145,7 +145,9 @@ test("collaboration UI keeps capture integrity, asset audit, and human visual re
   assert.match(agents, /파일 검사 통과와[\s\S]*화면 통과는 다릅니다/);
   assert.match(agents, /엔진 화면[\s\S]*증거 없음/);
   assert.match(agents, /사람 검토[\s\S]*대기/);
-  assert.match(agents, /게임에 넣어도 된다고 말하지 않습니다/);
+  // 2026-09-04(마스터 지적): 같은 구분을 부정문("…말하지 않습니다") 대신 방문자에게
+  // 무엇이 답을 주는지로 적는다. 지켜야 할 것은 문장 형태가 아니라 구분 자체다.
+  assert.match(agents, /파일 검사는 규격을 봅니다[\s\S]*엔진에서 찍은 최신 화면과 사람의 결정/);
   assert.match(panel, /inspectionRunId/);
   assert.match(facts, /fresh HF.*inspectionRunId/);
   assert.match(facts, /profileId is required for CURRENT/);
