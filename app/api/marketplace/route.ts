@@ -110,6 +110,9 @@ export async function GET(request: Request) {
         access: accessFor({ authenticated: false }),
       }, { headers: { "cache-control": "public, max-age=30" } });
     }
+    // 2026-09-05: 상한이 50 이었다. 키트 49종을 올리자 최신순 50 안에 키트만 들어와 원래
+    // 44종이 목록·첫 화면 진열에서 사라졌다(라이브 실측). 공개 상품 수(93)보다 넉넉하게 둔다;
+    // 500 을 넘기 전에 페이지네이션을 넣어야지 상한을 다시 올릴 일이 아니다.
     const rows = await db.prepare(
       `SELECT l.id, l.slug, l.title, l.title_en AS titleEn, l.description,
         l.license_status AS licenseStatus, l.status, l.asset_id AS assetId,
@@ -120,7 +123,7 @@ export async function GET(request: Request) {
        FROM clunk_marketplace_listings l
        JOIN clunk_assets a ON a.id = l.asset_id
        LEFT JOIN clunk_users u ON u.id = (SELECT owner_user_id FROM clunk_workspaces WHERE id = l.workspace_id)
-       WHERE l.status = 'PUBLISHED' ORDER BY l.published_at DESC, l.created_at DESC LIMIT 50`,
+       WHERE l.status = 'PUBLISHED' ORDER BY l.published_at DESC, l.created_at DESC LIMIT 500`,
     ).all();
     const queryMs = Date.now() - startedAt - schemaMs;
     // One product per 3D model. Every row still ships — a variant carries the slug of the
