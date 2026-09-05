@@ -36,7 +36,13 @@ test("server-renders the client connection guide", async () => {
   // 있었다. 지켜야 할 것은 "내 컴퓨터에서 도는 길이 따로 있다"는 사실이지 그 영문
   // 이름이 아니므로, 화면이 지금 그것을 부르는 말로 옮긴다.
   assert.match(html, /내 컴퓨터에서 쓰는 도구/);
-  assert.doesNotMatch(html, /(^|[^a-z])(stdio|endpoint|terminal)([^a-z]|$)/i, "방문자 화면에 영문 도구 낱말이 돌아왔습니다");
+  // 사람이 읽는 글만 본다. class 이름·data 속성·RSC 스크립트·<code> 안의 응답 필드 이름
+  // (connection, endpoint, workspaceId …)은 화면의 산문이 아니다.
+  const prose = html
+    .replace(/<script[sS]*?</script>/gi, " ")
+    .replace(/<code[^>]*>[sS]*?</code>/gi, " ")
+    .replace(/<[^>]+>/g, " ");
+  assert.doesNotMatch(prose, /(^|[^a-z])(stdio|endpoint|terminal)([^a-z]|$)/i, "방문자 화면에 영문 도구 낱말이 돌아왔습니다");
   assert.match(clientSource, /Clunk 연결 키 만들기/);
   assert.match(clientSource, /const \[endpoint, setEndpoint\] = useState\("\/api\/mcp"\)/);
   assert.match(clientSource, /fetch\(endpoint, \{[\s\S]*method: "POST"/);
