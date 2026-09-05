@@ -4,9 +4,9 @@
   "operation": "inspect",
   "evidenceKind": "MACHINE_VISUAL_CAPTURE",
   "identity": {
-    "inputHash": "c9aa2f456d9a5785a7b384aeecfb76fcc7b36c7081fddf80a116204521d39876",
-    "resultDigest": "1472d6d735ca4f3812e44d58712055871772cdcec56c3e6299a3441b92ec83a4",
-    "byteLength": 1431348,
+    "inputHash": "3870ac028aefdfcf2881e344cae1a0260c0e58a13902b656bbbf6eded3d767b9",
+    "resultDigest": "99735f10272f50618182854634850cf47f176d5fb7e418e5ad114db50f7a1d59",
+    "byteLength": 1345432,
     "coreBuildId": "0.1.0",
     "ruleSetId": "clunk-game-ready-v1",
     "ruleSetVersion": "1.0.0",
@@ -17,13 +17,13 @@
   "source": {
     "path": "/market/hf-tractor-compact/tractor.compact.m1.glb",
     "fileName": "tractor.compact.m1.glb",
-    "bytes": 1431348,
-    "sha256": "c9aa2f456d9a5785a7b384aeecfb76fcc7b36c7081fddf80a116204521d39876"
+    "bytes": 1345432,
+    "sha256": "3870ac028aefdfcf2881e344cae1a0260c0e58a13902b656bbbf6eded3d767b9"
   },
   "sourceOutputRelation": {
     "kind": "SOURCE",
-    "sourceHash": "c9aa2f456d9a5785a7b384aeecfb76fcc7b36c7081fddf80a116204521d39876",
-    "sourceInspectionDigest": "1472d6d735ca4f3812e44d58712055871772cdcec56c3e6299a3441b92ec83a4"
+    "sourceHash": "3870ac028aefdfcf2881e344cae1a0260c0e58a13902b656bbbf6eded3d767b9",
+    "sourceInspectionDigest": "99735f10272f50618182854634850cf47f176d5fb7e418e5ad114db50f7a1d59"
   },
   "report": {
     "schemaVersion": "1.0",
@@ -33,8 +33,8 @@
     "profileId": "web",
     "fileName": "tractor.compact.m1.glb",
     "format": "glb",
-    "byteLength": 1431348,
-    "inputHash": "c9aa2f456d9a5785a7b384aeecfb76fcc7b36c7081fddf80a116204521d39876",
+    "byteLength": 1345432,
+    "inputHash": "3870ac028aefdfcf2881e344cae1a0260c0e58a13902b656bbbf6eded3d767b9",
     "metrics": {
       "sceneCount": 1,
       "nodeCount": 90,
@@ -55,7 +55,7 @@
       "skinCount": 0,
       "missingNormalPrimitiveCount": 0,
       "missingUvPrimitiveCount": 0,
-      "nonUnitScaleNodeCount": 53,
+      "nonUnitScaleNodeCount": 0,
       "zeroScaleNodeCount": 0,
       "externalResourceCount": 0,
       "unresolvedResourceCount": 0,
@@ -63,19 +63,19 @@
       "extensionCount": 4,
       "bounds": {
         "min": [
-          -2.099998697927475,
-          -1.1760540319372126e-9,
-          -1.580070050711413
+          -2.0999986976385117,
+          -5.481007869789778e-10,
+          -1.5800700187683105
         ],
         "max": [
           3.1396311473846437,
-          2.914927929194377,
-          1.580070050711413
+          2.9149279594421387,
+          1.5800700187683105
         ],
         "dimensions": [
-          5.239629845312119,
-          2.914927930370431,
-          3.160140101422826
+          5.239629845023155,
+          2.9149279599902393,
+          3.160140037536621
         ]
       }
     },
@@ -105,29 +105,16 @@
         "threshold": "Preserve",
         "autoFixable": false,
         "action": "No action required."
-      },
-      {
-        "id": "SCENE-NONUNIT-SCALE:/nodes/*/scale",
-        "ruleId": "SCENE-NONUNIT-SCALE",
-        "category": "scene",
-        "severity": "WARNING",
-        "path": "/nodes/*/scale",
-        "title": "Non-unit scale transforms found",
-        "message": "The asset contains non-unit node scales that may differ across engines.",
-        "observed": 53,
-        "threshold": 0,
-        "autoFixable": false,
-        "action": "Confirm the target engine's transform and import policy."
       }
     ],
     "score": {
       "score": 100,
       "threshold": 90,
-      "ready": false,
+      "ready": true,
       "hardBlockerCount": 0,
       "breakdown": {
         "format": 100,
-        "scene": 97,
+        "scene": 100,
         "geometry": 100,
         "materials": 100,
         "textures": 100,
@@ -136,8 +123,8 @@
       "ruleSetId": "clunk-game-ready-v1",
       "ruleSetVersion": "1.0.0"
     },
-    "analysisId": "analysis-c9aa2f456d9a-1472d6d7",
-    "resultDigest": "1472d6d735ca4f3812e44d58712055871772cdcec56c3e6299a3441b92ec83a4"
+    "analysisId": "analysis-3870ac028aef-99735f10",
+    "resultDigest": "99735f10272f50618182854634850cf47f176d5fb7e418e5ad114db50f7a1d59"
   },
   "findings": [
     {
@@ -168,22 +155,6 @@
       "threshold": "Preserve",
       "rationale": "The finding is a structural contract observation; it does not prove player-facing quality.",
       "recommendation": "No action required.",
-      "ownership": "runtime",
-      "enforcement": "OFF",
-      "autoFixable": false
-    },
-    {
-      "id": "SCENE-NONUNIT-SCALE:/nodes/*/scale",
-      "code": "SCENE-NONUNIT-SCALE",
-      "category": "scene",
-      "severity": "WARNING",
-      "path": "/nodes/*/scale",
-      "title": "Non-unit scale transforms found",
-      "message": "The asset contains non-unit node scales that may differ across engines.",
-      "observed": 53,
-      "threshold": 0,
-      "rationale": "Non-unit transforms can be authored pivots or engine-import risks and need target-runtime context.",
-      "recommendation": "Confirm the target engine's transform and import policy.",
       "ownership": "runtime",
       "enforcement": "OFF",
       "autoFixable": false
@@ -271,7 +242,7 @@
       "path": "/metrics",
       "title": "OBS-NONUNIT-SCALE",
       "message": "Observation recorded; it is not visual approval.",
-      "observed": 53,
+      "observed": 0,
       "threshold": "not declared",
       "rationale": "Non-unit transforms can be an authored pivot contract or an engine import risk.",
       "recommendation": "Confirm the target engine import policy and preserve named pivots before changing source bytes.",
@@ -319,15 +290,15 @@
     {
       "media": "screenshot",
       "path": "/evidence/hf-tractor-compact/hf-tractor-compact__engine-three-quarter.png",
-      "sha256": "51c775885cec296d437b420aa1d7d85d3c0a1acc14851ae95e480528b2e397ff",
+      "sha256": "bbb2e79fc1e9ca84cf648bc963aa45cc090b6c4372bab4c445d8796f5002ceb5",
       "bytes": 70483,
       "renderer": "clunk-software-raster/1.1.0",
       "viewport": {
         "width": 512,
         "height": 512
       },
-      "cameraPoseHash": "dccc7b4065454119dcf07accb7ca1632426abb98c2210db3a55a698dd6cf5064",
-      "sourceTreeHash": "c095635f8891ce759941bf0a1d681a89b4139db8eb9915abe2d16e94111d3769",
+      "cameraPoseHash": "479b8214adbc39eee668d4211a680ee8073647ef0704c1a14fd848da342474ab",
+      "sourceTreeHash": "326d47a7a35fc30ea23f49ddd89fd7f64aff9f31005e2f1eeab39fd38425185d",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -345,8 +316,8 @@
         "width": 512,
         "height": 512
       },
-      "cameraPoseHash": "44aa675e0a7225c8249b4ffb01850a273fd896dc0b8b2f5801dce7ca87f64ab3",
-      "sourceTreeHash": "c095635f8891ce759941bf0a1d681a89b4139db8eb9915abe2d16e94111d3769",
+      "cameraPoseHash": "cbeb9ab120e69408331ab8e20942322209aaf0e9c8eff8a90936d18814b089a1",
+      "sourceTreeHash": "326d47a7a35fc30ea23f49ddd89fd7f64aff9f31005e2f1eeab39fd38425185d",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -364,8 +335,8 @@
         "width": 512,
         "height": 512
       },
-      "cameraPoseHash": "ccf1ed9e8706fa2df295c1f603805da739b0349433ee89fb169ac9c63590fdbc",
-      "sourceTreeHash": "c095635f8891ce759941bf0a1d681a89b4139db8eb9915abe2d16e94111d3769",
+      "cameraPoseHash": "1bb646076034b0e834fb2efef4dedec09052cf9518e727c5a4724d28a9353b6b",
+      "sourceTreeHash": "326d47a7a35fc30ea23f49ddd89fd7f64aff9f31005e2f1eeab39fd38425185d",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -376,15 +347,15 @@
     {
       "media": "screenshot",
       "path": "/evidence/hf-tractor-compact/hf-tractor-compact__engine-top.png",
-      "sha256": "278c1a92eb3ce283d96551e228f777d20c49dadf82e3563d8215dd26f9eea3b1",
-      "bytes": 66800,
+      "sha256": "7a26f421332d65bed0d1b7ed1c8ab0f4ff1764c79541d49afe85654c15fca520",
+      "bytes": 66795,
       "renderer": "clunk-software-raster/1.1.0",
       "viewport": {
         "width": 512,
         "height": 512
       },
-      "cameraPoseHash": "8831eca61675cb51110e405a4d2ca7c4e061ae86ef6f02c37bfa52b6fbe87f7f",
-      "sourceTreeHash": "c095635f8891ce759941bf0a1d681a89b4139db8eb9915abe2d16e94111d3769",
+      "cameraPoseHash": "180dd68962cb4505c001fd1471f7178502e8c47d4a22302680e49289207bb9de",
+      "sourceTreeHash": "326d47a7a35fc30ea23f49ddd89fd7f64aff9f31005e2f1eeab39fd38425185d",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -402,8 +373,8 @@
         "width": 640,
         "height": 360
       },
-      "cameraPoseHash": "1aaf90769b1401e08586a5fde07cb3f0c192b974cd784faa2efa1095622d7831",
-      "sourceTreeHash": "c095635f8891ce759941bf0a1d681a89b4139db8eb9915abe2d16e94111d3769",
+      "cameraPoseHash": "752226d630deee0aef9947ecc4ca120af1752b58a81e4729e43ccbbce4974ab7",
+      "sourceTreeHash": "326d47a7a35fc30ea23f49ddd89fd7f64aff9f31005e2f1eeab39fd38425185d",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -421,8 +392,8 @@
         "width": 640,
         "height": 360
       },
-      "cameraPoseHash": "4a7820b71bfe38d9ef719859cca71d6cc85ca4f98f3c7ed7aa0c19b80d5faac3",
-      "sourceTreeHash": "c095635f8891ce759941bf0a1d681a89b4139db8eb9915abe2d16e94111d3769",
+      "cameraPoseHash": "2ce36092d594ef6ba663599a30d8615477e74030680cd2bbb8130e0468e677e7",
+      "sourceTreeHash": "326d47a7a35fc30ea23f49ddd89fd7f64aff9f31005e2f1eeab39fd38425185d",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -435,14 +406,14 @@
   "byteVerification": {
     "method": "LOCAL_CLI_READ",
     "source": {
-      "sha256": "c9aa2f456d9a5785a7b384aeecfb76fcc7b36c7081fddf80a116204521d39876",
-      "bytes": 1431348,
+      "sha256": "3870ac028aefdfcf2881e344cae1a0260c0e58a13902b656bbbf6eded3d767b9",
+      "bytes": 1345432,
       "verified": true
     },
     "captures": [
       {
         "path": "/evidence/hf-tractor-compact/hf-tractor-compact__engine-three-quarter.png",
-        "sha256": "51c775885cec296d437b420aa1d7d85d3c0a1acc14851ae95e480528b2e397ff",
+        "sha256": "bbb2e79fc1e9ca84cf648bc963aa45cc090b6c4372bab4c445d8796f5002ceb5",
         "bytes": 70483,
         "verified": true
       },
@@ -460,8 +431,8 @@
       },
       {
         "path": "/evidence/hf-tractor-compact/hf-tractor-compact__engine-top.png",
-        "sha256": "278c1a92eb3ce283d96551e228f777d20c49dadf82e3563d8215dd26f9eea3b1",
-        "bytes": 66800,
+        "sha256": "7a26f421332d65bed0d1b7ed1c8ab0f4ff1764c79541d49afe85654c15fca520",
+        "bytes": 66795,
         "verified": true
       },
       {
@@ -480,7 +451,7 @@
     "audio": []
   },
   "statuses": {
-    "structural": "CONDITIONAL",
+    "structural": "PASS",
     "visualRuntime": "APPROVED",
     "playerFacing": "PASS",
     "humanDecision": "NOT_REQUIRED",
@@ -500,7 +471,7 @@
       "note": "A z-buffered software rasteriser with flat warm-key and cool-sky shading and one soft contact shadow. No PBR, no image-based lighting, no reflections, no ray-traced shadow, no ambient occlusion. It is not a screenshot from a game engine and must not be described as one.",
       "note_ko": "깊이 버퍼를 쓰는 소프트웨어 래스터라이저입니다. 따뜻한 주광과 차가운 하늘빛의 평면 음영, 바닥 접촉 그림자 하나가 전부입니다. PBR·환경광·반사·광선추적 그림자·주변광 차폐는 없습니다. 게임 엔진에서 찍은 화면이 아니며 그렇게 부르면 안 됩니다."
     },
-    "sceneDigest": "db4debd3ac13c8ed13f94430f39282bd9ecf4e3e328179adc5b6405db33e3bf5",
+    "sceneDigest": "a1e0efeb157577641a3b4242b3bc65a39692c8df0fc8cb696342526d45ea00fb",
     "cameraRigHash": "a4cf96074e15287802162c142a02e03a9c994df9d59153ac7fb7417d1bb1fb77",
     "sizeMetres": [
       5.2396,
@@ -515,26 +486,26 @@
         "label": "Engine render, three-quarter",
         "label_ko": "엔진 렌더 · 3/4",
         "path": "/evidence/hf-tractor-compact/hf-tractor-compact__engine-three-quarter.png",
-        "sha256": "51c775885cec296d437b420aa1d7d85d3c0a1acc14851ae95e480528b2e397ff",
+        "sha256": "bbb2e79fc1e9ca84cf648bc963aa45cc090b6c4372bab4c445d8796f5002ceb5",
         "bytes": 70483,
         "width": 512,
         "height": 512,
         "camera": {
           "eyeMetres": [
-            6.795642884469929,
-            5.480429828022723,
-            7.402257161957014
+            6.795642884219857,
+            5.480429828176398,
+            7.402257161662058
           ],
           "targetMetres": [
             0.5198161602020264,
-            1.4574639791330424,
+            1.457463979447019,
             0
           ],
           "fovYDeg": 30,
           "eyeHeightMetres": null,
           "groundDistanceMetres": null
         },
-        "cameraPoseHash": "dccc7b4065454119dcf07accb7ca1632426abb98c2210db3a55a698dd6cf5064",
+        "cameraPoseHash": "479b8214adbc39eee668d4211a680ee8073647ef0704c1a14fd848da342474ab",
         "cameraInsideAsset": false,
         "metrics": {
           "silhouetteFillRatio": 0.365,
@@ -572,19 +543,19 @@
         "camera": {
           "eyeMetres": [
             0.5198161602020264,
-            3.714675376781474,
-            10.260051807492871
+            3.7146753770055083,
+            10.260051807084043
           ],
           "targetMetres": [
             0.5198161602020264,
-            1.4574639791330424,
+            1.457463979447019,
             0
           ],
           "fovYDeg": 30,
           "eyeHeightMetres": null,
           "groundDistanceMetres": null
         },
-        "cameraPoseHash": "44aa675e0a7225c8249b4ffb01850a273fd896dc0b8b2f5801dce7ca87f64ab3",
+        "cameraPoseHash": "cbeb9ab120e69408331ab8e20942322209aaf0e9c8eff8a90936d18814b089a1",
         "cameraInsideAsset": false,
         "metrics": {
           "silhouetteFillRatio": 0.2621,
@@ -621,20 +592,20 @@
         "height": 512,
         "camera": {
           "eyeMetres": [
-            10.779867967694898,
-            3.714675376781474,
+            10.77986796728607,
+            3.7146753770055083,
             0
           ],
           "targetMetres": [
             0.5198161602020264,
-            1.4574639791330424,
+            1.457463979447019,
             0
           ],
           "fovYDeg": 30,
           "eyeHeightMetres": null,
           "groundDistanceMetres": null
         },
-        "cameraPoseHash": "ccf1ed9e8706fa2df295c1f603805da739b0349433ee89fb169ac9c63590fdbc",
+        "cameraPoseHash": "1bb646076034b0e834fb2efef4dedec09052cf9518e727c5a4724d28a9353b6b",
         "cameraInsideAsset": false,
         "metrics": {
           "silhouetteFillRatio": 0.3939,
@@ -665,26 +636,26 @@
         "label": "Engine render, top",
         "label_ko": "엔진 렌더 · 위",
         "path": "/evidence/hf-tractor-compact/hf-tractor-compact__engine-top.png",
-        "sha256": "278c1a92eb3ce283d96551e228f777d20c49dadf82e3563d8215dd26f9eea3b1",
-        "bytes": 66800,
+        "sha256": "7a26f421332d65bed0d1b7ed1c8ab0f4ff1764c79541d49afe85654c15fca520",
+        "bytes": 66795,
         "width": 512,
         "height": 512,
         "camera": {
           "eyeMetres": [
-            2.9324637681796517,
-            11.108054411043543,
-            3.377706651168675
+            2.9324637680835157,
+            11.108054410972976,
+            3.3777066510340847
           ],
           "targetMetres": [
             0.5198161602020264,
-            1.4574639791330424,
+            1.457463979447019,
             0
           ],
           "fovYDeg": 30,
           "eyeHeightMetres": null,
           "groundDistanceMetres": null
         },
-        "cameraPoseHash": "8831eca61675cb51110e405a4d2ca7c4e061ae86ef6f02c37bfa52b6fbe87f7f",
+        "cameraPoseHash": "180dd68962cb4505c001fd1471f7178502e8c47d4a22302680e49289207bb9de",
         "cameraInsideAsset": false,
         "metrics": {
           "silhouetteFillRatio": 0.3812,
@@ -727,14 +698,14 @@
           ],
           "targetMetres": [
             0.5198161602020264,
-            1.4574639791330424,
+            1.457463979447019,
             0
           ],
           "fovYDeg": 55,
           "eyeHeightMetres": 1.6,
           "groundDistanceMetres": 5
         },
-        "cameraPoseHash": "1aaf90769b1401e08586a5fde07cb3f0c192b974cd784faa2efa1095622d7831",
+        "cameraPoseHash": "752226d630deee0aef9947ecc4ca120af1752b58a81e4729e43ccbbce4974ab7",
         "cameraInsideAsset": false,
         "metrics": {
           "silhouetteFillRatio": 0.2486,
@@ -777,14 +748,14 @@
           ],
           "targetMetres": [
             0.5198161602020264,
-            1.4574639791330424,
+            1.457463979447019,
             0
           ],
           "fovYDeg": 55,
           "eyeHeightMetres": 1.6,
           "groundDistanceMetres": 15
         },
-        "cameraPoseHash": "4a7820b71bfe38d9ef719859cca71d6cc85ca4f98f3c7ed7aa0c19b80d5faac3",
+        "cameraPoseHash": "2ce36092d594ef6ba663599a30d8615477e74030680cd2bbb8130e0468e677e7",
         "cameraInsideAsset": false,
         "metrics": {
           "silhouetteFillRatio": 0.0207,
@@ -815,21 +786,21 @@
         "clip": "drive",
         "phase": 0,
         "path": "/evidence/hf-tractor-compact/hf-tractor-compact__motion-0.png",
-        "sha256": "76be809be7b62cb73438358750ba8ffaa0a770aa83102636b6bbecde4ec9f4e1",
+        "sha256": "436107977d4b6b13ef90c1552313578c0597f2e70fca21b458f09afc7c3b7191",
         "bytes": 13513
       },
       {
         "clip": "drive",
         "phase": 0.42857142857142855,
         "path": "/evidence/hf-tractor-compact/hf-tractor-compact__motion-1.png",
-        "sha256": "7a4fd0ab9a473650647042c15db76ca485ae581abff72a4c33d7fbab26ddf3ef",
-        "bytes": 13383
+        "sha256": "807902e1b8331e878024409f248eaebae0f1b3aba8e7a21712c5273f3f09a433",
+        "bytes": 13384
       },
       {
         "clip": "drive",
         "phase": 0.8571428571428571,
         "path": "/evidence/hf-tractor-compact/hf-tractor-compact__motion-2.png",
-        "sha256": "fea0272f45125d32b621086b298e27f98163a9d3d40bac38a5f3f38ccd641d09",
+        "sha256": "10a3f50364d837e91a1ed2cb532a36a2c1772769cd132257efa1f4a81116f27c",
         "bytes": 13716
       }
     ],
@@ -1044,12 +1015,12 @@
     "summary": "All 8 automated visual checks pass. No human review is required before this asset is used.",
     "summary_ko": "자동 화면 검사 8건이 모두 통과했습니다. 이 에셋을 쓰기 전에 사람이 따로 볼 필요는 없습니다.",
     "timings": {
-      "decodeMs": 152,
-      "poseMs": 55,
-      "renderMs": 1420,
-      "measureMs": 292,
-      "totalMs": 2892,
-      "peakHeapBytes": 30065000
+      "decodeMs": 146,
+      "poseMs": 52,
+      "renderMs": 1166,
+      "measureMs": 262,
+      "totalMs": 2484,
+      "peakHeapBytes": 28277504
     },
     "limits": [
       "The frames come from Clunk's own offline rasteriser, not from a game engine's rendering path.",
@@ -1071,7 +1042,7 @@
     "structuralValid": true,
     "qualityPolicyValid": true
   },
-  "readiness": "conditional",
+  "readiness": "ready",
   "limitation": "STRUCTURAL_SCORE_IS_NOT_VISUAL_APPROVAL",
   "captureLimitation": "OFFLINE_SOFTWARE_RASTER_IS_NOT_AN_ENGINE_SCREENSHOT"
 }

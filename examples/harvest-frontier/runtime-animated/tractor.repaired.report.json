@@ -1340,6 +1340,402 @@
   ],
   "unsharedGeometries": 16,
   "prunedEmptyNodes": 22,
+  "nodeScales": {
+    "why": "a node scale is an instruction, not geometry: every engine obeys it slightly differently, the parts a buyer detaches change size, and the sale gate reads it as SCENE-NONUNIT-SCALE. Multiplied into the vertices it was scaling, the picture is the same file",
+    "bakedNodes": 31,
+    "scaledNodesLeft": 0,
+    "clonedGeometries": 0,
+    "nonUniform": [],
+    "worstMeshBoxShiftMm": 0,
+    "worstMeshBoxShiftAt": "treadLugs",
+    "meshesThatMovedAtAll": [],
+    "nodes": [
+      {
+        "node": "beaconLens",
+        "scaleWas": 0.09,
+        "ownMesh": 48,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          0,
+          82,
+          0
+        ],
+        "animated": false
+      },
+      {
+        "node": "wheelFrontLeft",
+        "scaleWas": 0.665,
+        "ownMesh": 0,
+        "descendantMeshes": 4,
+        "descendants": [
+          "tread",
+          "treadLugs",
+          "wheelFrontLeft_metal",
+          "wheelFrontLeft_matte"
+        ],
+        "keptTranslationMm": [
+          0,
+          447.9,
+          0
+        ],
+        "animated": true
+      },
+      {
+        "node": "tread",
+        "scaleWas": 0.386631,
+        "ownMesh": 96,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          0,
+          0,
+          0
+        ],
+        "animated": false
+      },
+      {
+        "node": "treadLugs",
+        "scaleWas": 0.665,
+        "ownMesh": 576,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          0,
+          0,
+          0
+        ],
+        "animated": false
+      },
+      {
+        "node": "wheelFrontLeft_metal",
+        "scaleWas": 0.665,
+        "ownMesh": 184,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          0,
+          0,
+          0
+        ],
+        "animated": false
+      },
+      {
+        "node": "wheelFrontLeft_matte",
+        "scaleWas": 0.665,
+        "ownMesh": 768,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          0,
+          0,
+          0
+        ],
+        "animated": false
+      },
+      {
+        "node": "wheelFrontRight",
+        "scaleWas": 0.665,
+        "ownMesh": 0,
+        "descendantMeshes": 4,
+        "descendants": [
+          "tread_1",
+          "treadLugs_1",
+          "wheelFrontRight_metal",
+          "wheelFrontRight_matte"
+        ],
+        "keptTranslationMm": [
+          0,
+          447.9,
+          0
+        ],
+        "animated": true
+      },
+      {
+        "node": "tread_1",
+        "scaleWas": 0.386631,
+        "ownMesh": 96,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          0,
+          0,
+          0
+        ],
+        "animated": false
+      },
+      {
+        "node": "treadLugs_1",
+        "scaleWas": 0.665,
+        "ownMesh": 576,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          0,
+          0,
+          0
+        ],
+        "animated": false
+      },
+      {
+        "node": "wheelFrontRight_metal",
+        "scaleWas": 0.665,
+        "ownMesh": 184,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          0,
+          0,
+          0
+        ],
+        "animated": false
+      },
+      {
+        "node": "wheelFrontRight_matte",
+        "scaleWas": 0.665,
+        "ownMesh": 768,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          0,
+          0,
+          0
+        ],
+        "animated": false
+      },
+      {
+        "node": "tread_2",
+        "scaleWas": 0.7752,
+        "ownMesh": 96,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          0,
+          0,
+          0
+        ],
+        "animated": false
+      },
+      {
+        "node": "tread_3",
+        "scaleWas": 0.7752,
+        "ownMesh": 96,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          0,
+          0,
+          0
+        ],
+        "animated": false
+      },
+      {
+        "node": "tineBolt1-1",
+        "scaleWas": 0.12,
+        "ownMesh": 48,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          -55,
+          95,
+          0
+        ],
+        "animated": false
+      },
+      {
+        "node": "sweep1",
+        "scaleWas": 0.326816,
+        "ownMesh": 56,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          512.8,
+          -692.5,
+          -25.2
+        ],
+        "animated": false
+      },
+      {
+        "node": "tineBolt2-1",
+        "scaleWas": 0.12,
+        "ownMesh": 48,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          -55,
+          95,
+          0
+        ],
+        "animated": false
+      },
+      {
+        "node": "sweep2",
+        "scaleWas": 0.326816,
+        "ownMesh": 56,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          512.8,
+          -692.5,
+          -25.2
+        ],
+        "animated": false
+      },
+      {
+        "node": "tineBolt3-1",
+        "scaleWas": 0.12,
+        "ownMesh": 48,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          -55,
+          95,
+          0
+        ],
+        "animated": false
+      },
+      {
+        "node": "sweep3",
+        "scaleWas": 0.326816,
+        "ownMesh": 56,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          512.8,
+          -692.5,
+          -25.2
+        ],
+        "animated": false
+      },
+      {
+        "node": "tineBolt4-1",
+        "scaleWas": 0.12,
+        "ownMesh": 48,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          -55,
+          95,
+          0
+        ],
+        "animated": false
+      },
+      {
+        "node": "sweep4",
+        "scaleWas": 0.326816,
+        "ownMesh": 56,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          512.8,
+          -692.5,
+          -25.2
+        ],
+        "animated": false
+      },
+      {
+        "node": "tineBolt5-1",
+        "scaleWas": 0.12,
+        "ownMesh": 48,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          -55,
+          95,
+          0
+        ],
+        "animated": false
+      },
+      {
+        "node": "sweep5",
+        "scaleWas": 0.326816,
+        "ownMesh": 56,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          512.8,
+          -692.5,
+          -25.2
+        ],
+        "animated": false
+      },
+      {
+        "node": "tineBolt6-1",
+        "scaleWas": 0.12,
+        "ownMesh": 48,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          -55,
+          95,
+          0
+        ],
+        "animated": false
+      },
+      {
+        "node": "sweep6",
+        "scaleWas": 0.326816,
+        "ownMesh": 56,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          512.8,
+          -692.5,
+          -25.2
+        ],
+        "animated": false
+      },
+      {
+        "node": "tineBolt7-1",
+        "scaleWas": 0.12,
+        "ownMesh": 48,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          -55,
+          95,
+          0
+        ],
+        "animated": false
+      },
+      {
+        "node": "sweep7",
+        "scaleWas": 0.326816,
+        "ownMesh": 56,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          512.8,
+          -692.5,
+          -25.2
+        ],
+        "animated": false
+      },
+      {
+        "node": "gaugeWheelLefthub",
+        "scaleWas": 0.075,
+        "ownMesh": 48,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          0,
+          0,
+          0
+        ],
+        "animated": false
+      },
+      {
+        "node": "gaugeWheelLeftrim",
+        "scaleWas": 0.168,
+        "ownMesh": 216,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          0,
+          0,
+          0
+        ],
+        "animated": false
+      },
+      {
+        "node": "gaugeWheelRighthub",
+        "scaleWas": 0.075,
+        "ownMesh": 48,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          0,
+          0,
+          0
+        ],
+        "animated": false
+      },
+      {
+        "node": "gaugeWheelRightrim",
+        "scaleWas": 0.168,
+        "ownMesh": 216,
+        "descendantMeshes": 0,
+        "keptTranslationMm": [
+          0,
+          0,
+          0
+        ],
+        "animated": false
+      }
+    ]
+  },
   "after": {
     "meshes": 51,
     "drawnTriangles": 59232,

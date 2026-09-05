@@ -270,6 +270,159 @@ export function pruneEmpty(scene, animations) {
   return removed;
 }
 
+/**
+ * Put every node scale back to exactly 1, moving the number into the vertices.
+ *
+ * A scale on a node is not geometry, it is an instruction — and every engine
+ * obeys it slightly differently. Unity re-normalises non-uniform ones on import,
+ * physics bodies and colliders in most engines ignore the scale of a parent they
+ * are not parented under, and a buyer who detaches a part in their own editor
+ * gets a part that changes size. The inspector's `SCENE-NONUNIT-SCALE` is that
+ * warning. Nothing about the picture needs the instruction: multiply it into the
+ * numbers it was scaling and the rendered result is the same file.
+ *
+ * The bake walks top down. At a node whose scale is k:
+ *   - its own mesh's POSITION values are multiplied by k;
+ *   - every child's translation AND scale are multiplied by k, so the child's
+ *     own world placement does not move and the bake carries on into it;
+ *   - a GPU-instanced mesh's per-instance translations are multiplied by k as
+ *     well, since the instance matrix sits between the node and the vertices;
+ *   - the node's scale is then set to 1.
+ * Because k is uniform it commutes with the node's rotation, so NORMALS are left
+ * exactly as they are — untouched bytes, not recomputed ones. A non-uniform scale
+ * would not commute and would need its normals rebuilt, so it is reported and
+ * skipped rather than guessed at; `nonUniform` being non-empty is a defect.
+ *
+ * Two things that would silently break it, both checked:
+ *   - a shared geometry. Two nodes at different scales pointing at one POSITION
+ *     accessor would have the first bake corrupt the second, so a geometry used
+ *     by more than one mesh is cloned for the mesh being baked.
+ *   - a `.scale` track. Baking sets the rest pose to 1 and the clip would put the
+ *     old number straight back on the first frame, so a scale track on a node in
+ *     the bake throws.
+ * Rotation and translation tracks are untouched by design, and a wheel pivot that
+ * carries one keeps its own translation and rotation exactly: only its scale moves
+ * into its children.
+ *
+ * Returns the before/after measurement the report prints: every node baked, and
+ * the largest distance any mesh's world box moved (0 is the only right answer).
+ */
+export function bakeNodeScales(scene, animations = [], options = {}) {
+  const uniformTolerance = options.uniformTolerance ?? 1e-9;
+  scene.updateMatrixWorld(true);
+
+  const before = new Map();
+  for (const m of meshes(scene)) before.set(m, exactBox(m));
+
+  const users = new Map();
+  for (const m of meshes(scene)) users.set(m.geometry.uuid, (users.get(m.geometry.uuid) ?? 0) + 1);
+
+  const scaleTracks = new Set();
+  for (const clip of animations) {
+    for (const track of clip.tracks) {
+      if (track.name.endsWith('.scale')) scaleTracks.add(track.name.split('.')[0]);
+    }
+  }
+
+  const baked = [];
+  const nonUniform = [];
+  let clonedGeometries = 0;
+
+  const scalePositions = (mesh, k) => {
+    if (users.get(mesh.geometry.uuid) > 1) {
+      users.set(mesh.geometry.uuid, users.get(mesh.geometry.uuid) - 1);
+      mesh.geometry = mesh.geometry.clone();
+      users.set(mesh.geometry.uuid, 1);
+      clonedGeometries += 1;
+    }
+    const pos = mesh.geometry.getAttribute('position');
+    /* read through the accessors and write a fresh detached array: the packaged
+       inputs interleave position with normal and colour in ONE buffer that other
+       geometries can share, and multiplying that buffer in place would move
+       vertices that belong to another part. */
+    const out = new Float32Array(pos.count * 3);
+    for (let i = 0; i < pos.count; i += 1) {
+      out[i * 3] = pos.getX(i) * k;
+      out[i * 3 + 1] = pos.getY(i) * k;
+      out[i * 3 + 2] = pos.getZ(i) * k;
+    }
+    mesh.geometry.setAttribute('position', new THREE.BufferAttribute(out, 3));
+    mesh.geometry.boundingBox = null;
+    mesh.geometry.boundingSphere = null;
+  };
+
+  const walk = (object) => {
+    const { x, y, z } = object.scale;
+    if (x !== 1 || y !== 1 || z !== 1) {
+      if (Math.abs(x - y) > uniformTolerance || Math.abs(x - z) > uniformTolerance) {
+        nonUniform.push({ node: object.name || '(unnamed)', scale: [x, y, z] });
+      } else if (scaleTracks.has(object.name)) {
+        throw new Error(`${object.name} has a .scale track; baking its rest pose to 1 would be undone on the first frame`);
+      } else {
+        const k = x;
+        const descendants = [];
+        object.traverse((n) => { if (n !== object && n.isMesh) descendants.push(n.name || '(unnamed)'); });
+        if (object.isMesh) scalePositions(object, k);
+        if (object.isInstancedMesh) {
+          const m = new THREE.Matrix4();
+          for (let i = 0; i < object.count; i += 1) {
+            object.getMatrixAt(i, m);
+            m.elements[12] *= k; m.elements[13] *= k; m.elements[14] *= k;
+            object.setMatrixAt(i, m);
+          }
+          object.instanceMatrix.needsUpdate = true;
+        }
+        for (const child of object.children) {
+          child.position.multiplyScalar(k);
+          child.scale.multiplyScalar(k);
+        }
+        object.scale.set(1, 1, 1);
+        baked.push({
+          node: object.name || '(unnamed)',
+          scaleWas: +k.toFixed(6),
+          ownMesh: object.isMesh ? meshTris(object) : 0,
+          descendantMeshes: descendants.length,
+          descendants: descendants.length ? descendants : undefined,
+          keptTranslationMm: object.position.toArray().map(mm),
+          animated: animations.some((c) => c.tracks.some((t) => t.name.split('.')[0] === object.name)),
+        });
+      }
+    }
+    for (const child of [...object.children]) walk(child);
+  };
+  walk(scene);
+  scene.updateMatrixWorld(true);
+
+  let worstMm = 0;
+  let worstNode = null;
+  const moved = [];
+  for (const m of meshes(scene)) {
+    const was = before.get(m);
+    if (!was) continue;
+    const now = exactBox(m);
+    const delta = Math.max(
+      Math.abs(was.min.x - now.min.x), Math.abs(was.min.y - now.min.y), Math.abs(was.min.z - now.min.z),
+      Math.abs(was.max.x - now.max.x), Math.abs(was.max.y - now.max.y), Math.abs(was.max.z - now.max.z),
+    );
+    if (mm(delta) !== 0) moved.push({ mesh: m.name, deltaMm: mm(delta) });
+    if (delta > worstMm) { worstMm = delta; worstNode = m.name; }
+  }
+
+  let left = 0;
+  scene.traverse((n) => { if (n.scale.x !== 1 || n.scale.y !== 1 || n.scale.z !== 1) left += 1; });
+
+  return {
+    bakedNodes: baked.length,
+    scaledNodesLeft: left,
+    clonedGeometries,
+    nonUniform,
+    worstMeshBoxShiftMm: mm(worstMm),
+    worstMeshBoxShiftAt: worstNode,
+    meshesThatMovedAtAll: moved,
+    nodes: baked,
+  };
+}
+
 /* ------------------------------------------------------------ small builders */
 function paint(geometry, colour) {
   const n = geometry.getAttribute('position').count;

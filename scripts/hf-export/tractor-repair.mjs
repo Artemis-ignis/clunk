@@ -96,7 +96,30 @@
  *      sideways into the gap between the first two tines, the distance searched rather than
  *      written down, exactly as the standalone cultivator's pass does with the same meshes.
  *
- * THE FOUR COMMANDS THAT REBUILD THE FILE ON SALE. The default IN used to be the file in the
+ * 2026-09-05 transform pass. The in-browser inspector scored the delivered file 99 on one
+ * WARNING, `SCENE-NONUNIT-SCALE`, and it was reading something real:
+ *
+ *  14. 53 OF THE FILE'S 90 NODES CARRIED A SCALE. A scale on a node is an instruction, not
+ *      geometry, and it is the one part of a glTF engines disagree about: Unity re-normalises
+ *      non-uniform ones on import, a collider does not always inherit the transform of a node
+ *      it is not parented under, and a part a buyer detaches in their own editor changes size.
+ *      They came from two places and both are fixed:
+ *        - 31 were authored, and step 8 below multiplies each one into the vertices under it
+ *          (0.075 on a gauge-wheel hub up to 0.665 on the front wheel pivots). Every one is
+ *          uniform, so it commutes with its node's rotation and the normals are untouched;
+ *          the two wheel pivots carry rotation tracks and keep their translation and rotation
+ *          exactly — only their scale moves into their four children each.
+ *        - the other 22 were made by the packaging step, and cannot be reached from here:
+ *          `meshopt({level:'high'})` normalises every mesh into the [-1,1] box a 14-bit
+ *          integer holds and parks the size it took out on the node, and the `dequantize()`
+ *          in `finish.mjs` turns the integers back into float32 without putting the size
+ *          back. `scripts/hf-export/bake-node-scales.mjs` is the same bake over the finished
+ *          file, and it is the fourth command below.
+ *      Measured over both passes: 51 mesh nodes, the worst world box moved 0.0001 mm, the
+ *      59,232 triangles and 8 materials are the same numbers, and all 22 animation channels
+ *      hash to what they hashed to before.
+ *
+ * THE FIVE COMMANDS THAT REBUILD THE FILE ON SALE. The default IN used to be the file in the
  * shop, which was true the first time this pass ran and has not been since: the shop now
  * holds this pass's own output, whose `chassis` and the rest are merged into `body_metal`, so
  * that default threw at step 1. It is the packaged export now, and the chain from it is
@@ -105,6 +128,7 @@
  *   node scripts/hf-export/tractor-repair.mjs
  *   node scripts/hf-export/package-machine-glb.mjs examples/harvest-frontier/runtime-animated/tractor.repaired.glb
  *   node tmp/hf-speed/finish.mjs examples/harvest-frontier/runtime-animated/tractor.repaired.m1.glb public/market/hf-tractor-compact/tractor.compact.m1.glb
+ *   node scripts/hf-export/bake-node-scales.mjs public/market/hf-tractor-compact/tractor.compact.m1.glb
  *   # the landing page opens a lighter copy of the SAME file: re-package the sale file and copy it
  *   cp public/market/hf-tractor-compact/tractor.compact.m1.glb tmp/hf-speed/landing-tractor.glb
  *   node scripts/hf-export/package-machine-glb.mjs tmp/hf-speed/landing-tractor.glb
@@ -115,7 +139,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   THREE, loadGlb, saveGlb, meshes, node, worldBox, exactBox, mm, drawnTris, matOf, boxGeo, colourOf, addMesh,
-  mergeByAnchor, pruneEmpty, dropHiddenProxies, bakeInstances, unshareGeometry, quatTrack, setTrack,
+  mergeByAnchor, pruneEmpty, dropHiddenProxies, bakeInstances, unshareGeometry, bakeNodeScales, quatTrack, setTrack,
   axleHubJoint, boxSpan, moveBoxCentreTo, cylGeo, radiusAbout,
   wheelSymmetryDeg, retimeClip, solveGroundLoop,
 } from './machine-lib.mjs';
@@ -868,6 +892,30 @@ report.bakedInstances = bakeInstances(scene);
 report.merge = mergeByAnchor(scene, clips);
 report.unsharedGeometries = unshareGeometry(scene);
 report.prunedEmptyNodes = pruneEmpty(scene, clips);
+}
+
+/* ------------------------------------------------- 8. no node scales left (2026-09-05) */
+/* The bake goes LAST because everything above measures the machine — a wheel's rolling
+ * radius, a gauge wheel's lane, the ground line — and those measurements are world-space,
+ * which this step does not move. Running it here also means it sees the merged meshes, so
+ * there is one pass over the file the shop actually ships rather than one over the parts.
+ *
+ * `bakeNodeScales` does the arithmetic and reports it. Two checks are made here rather than
+ * inside it, because they are what makes this a repair and not a rewrite: every mesh's world
+ * box must be where it was, and no node may still carry a scale. */
+{
+  const bake = bakeNodeScales(scene, clips);
+  report.nodeScales = {
+    why: 'a node scale is an instruction, not geometry: every engine obeys it slightly differently, the parts a buyer detaches change size, and the sale gate reads it as SCENE-NONUNIT-SCALE. Multiplied into the vertices it was scaling, the picture is the same file',
+    ...bake,
+  };
+  if (bake.nonUniform.length) {
+    throw new Error(`${bake.nonUniform.length} node(s) carry a non-uniform scale, which would need their normals rebuilt: ${bake.nonUniform.map((n) => n.node).join(', ')}`);
+  }
+  if (bake.scaledNodesLeft) throw new Error(`${bake.scaledNodesLeft} node(s) still carry a scale after the bake`);
+  if (bake.worstMeshBoxShiftMm !== 0) {
+    throw new Error(`the bake moved ${bake.worstMeshBoxShiftAt} by ${bake.worstMeshBoxShiftMm} mm; it must move nothing`);
+  }
 }
 
 report.after = { meshes: meshes(scene).length, drawnTriangles: drawnTris(scene), groundMinYmm: mm(exactBox(scene).min.y) };
