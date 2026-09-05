@@ -116,7 +116,7 @@ export default function MarketplacePage() {
                 <h2 id="marketplace-catalog-heading">
                   지금 받을 수 있는 <em>에셋</em>
                 </h2>
-                <p>폴리곤 수와 파일 크기, 그리고 어디까지 써도 되는지를 상품마다 적어 두었습니다. 한 장면을 통째로 꾸미려면 목록 위의 “키트” 탭에서 한 벌씩 보실 수 있습니다.</p>
+                <p>폴리곤 수와 파일 크기, 라이선스(어디까지 써도 되는지)를 상품마다 적어 두었습니다. 한 장면을 통째로 꾸미려면 목록 위의 “키트” 탭에서 한 벌씩 보실 수 있습니다.</p>
               </div>
               <MarketplaceCatalog salesOpen={salesOpen} />
             </div>

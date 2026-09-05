@@ -138,8 +138,10 @@ can pick an asset without driving a browser. Search filters on free text, `theme
 listing whose polygon count was never measured is dropped from a polygon filter rather than
 assumed to be small. Each result carries a `downloadUrl` — the address the product page's
 own button opens. Grade is access, and the two grades behave differently for an agent: a grade B
-URL answers with the bytes to any caller (a 302 to the artifact; measured 2026-09-05), so an agent
-can fetch a free asset without a browser and without signing anyone in. A grade A or S URL answers
+URL answers with the bytes to a caller that sends the same `Authorization: Bearer clunk_live_…` header
+it uses for /api/mcp (a 302 to the artifact; a signed-in browser session works too), so an agent
+can fetch a free asset without a browser and without a human signing in — the key stands in for
+the sign-in. Anonymous requests get 401. A grade A or S URL answers
 401 to an API key and needs the human's own signed-in browser session plus a subscription — hand
 that human the product URL rather than trying to fetch it.
 
@@ -157,7 +159,11 @@ normalizes shipped frame metadata and `clunk_sprite_sheet_review` normalizes the
 manifest; HTTP remains `DECLARED_METADATA_ONLY` and never rehashes local paths. It never promotes
 `reviewStatus`, `visualRuntime`, `playerFacing`, or `humanDecision`.
 
-The local stdio surface contains 7 advertised tools, including `clunk_inspect`, `clunk_optimize`,
+The local stdio surface contains 8 advertised tools, including `clunk_inspect`, `clunk_optimize`,
+`clunk_visual_evidence` (renders the file offline from six cameras plus three animation phases, measures
+ground contact, readability, exposure, palette and silhouette, and writes a clunk.asset-inspection-evidence.v3
+whose visualRuntime and playerFacing lanes carry a machine verdict — humanDecision is NOT_REQUIRED or
+OPTIONAL_REVIEW, never a gate),
 `clunk_asset_author`, `clunk_scene_review`, and `clunk_sprite_sheet_review`. Legacy
 `clunk_validate` and `clunk_passport` calls remain backward-compatible handlers. These catalogs are
 intentionally different: HTTP agents upload bytes/evidence, while local stdio is the only path
@@ -218,7 +224,7 @@ Tools returned by local stdio `tools/list`:
   contract, motion, clipping, alpha spill, border, silhouette, runtime-size, and provenance gates.
 
 `clunk_validate` and `clunk_passport` remain backward-compatible calls in the local server but
-are not advertised by the current seven-tool catalog.
+are not advertised by the current eight-tool catalog.
 
 Typical agent loop over HTTP: `initialize` -> `tools/list` -> `clunk_search_assets` (pick by
 theme, polygon budget and `freeOnly`) -> `clunk_asset_facts` (confirm the one) -> fetch the

@@ -7,8 +7,8 @@ fetch this one; /llms.txt is the reference and is much longer.
 Clunk makes game assets, measures whether they can go in a game, and publishes the ones
 that pass. Korean product, KRW. Free open beta since 2026-09-02: nothing is sold. A
 signed-in visitor who checks out a marketplace listing gets `status: "BETA_GRANTED"` and a
-download URL at no cost, and a grade B artifact's bytes download without signing in at all
-(measured 2026-09-05). Runs are granted too — 25 at signup, 30 more each month — and one
+download URL at no cost, and a grade B artifact's bytes download with a signed-in session or with the agent's own
+clunk_live key sent as a Bearer header — never anonymously. Runs are granted too — 25 at signup, 30 more each month — and one
 successful billable job costs 1 run. Runs are never sold and cannot be topped up. Image
 generation is capped at 8 per workspace per day. Consent to the terms and the privacy policy is recorded on first sign-in, before
 the first workspace page. Prices that will apply after the beta are published in advance

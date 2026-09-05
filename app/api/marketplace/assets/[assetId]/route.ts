@@ -1,5 +1,6 @@
 import { getCurrentUser } from "../../../../auth";
 import { areSalesOpen } from "../../../_lib/sales-lock";
+import { requireMcpApiKey } from "../../../_lib/mcp-auth";
 import { getRuntimeAssets, getRuntimeDb, ensureSchema, getCatalogAccessForUser, isSafeRecordId, jsonError, privateJson } from "../../../_lib/clunk";
 import { gradeOf, isFreeGrade } from "../../../../components/catalog-facts";
 import { factsFor } from "../../../_lib/listing-facts";
@@ -87,6 +88,22 @@ export async function GET(request: Request, context: RouteContext) {
         url.origin,
       );
     }
+    // 무료 등급도 로그인(또는 Clunk API 키)이 있어야 받는다. 약관 제4조·요금·마켓 문구가 전부
+    // "B 등급은 로그인만 하면" 이라고 약속하는데, 2026-09-05 실측에서 이 문이 없어 B 등급이
+    // 로그인 없이 나가고 있었고 에이전트 문서까지 그 사고를 사실로 적고 있었다. 미리보기
+    // (preview=1)는 카드가 쓰므로 그대로 공개다. 헤드리스 에이전트는 /api/mcp 에 쓰는 것과
+    // 같은 Authorization: Bearer clunk_live_… 로 받는다 — 사람을 부르지 않는다.
+    if (!paid && !previewRequested) {
+      const user = await getCurrentUser();
+      if (!user && !(await hasClunkApiKey(request))) {
+        return privateJson({
+          ok: false,
+          schema: "clunk.marketplace-download.v1",
+          status: "AUTHENTICATION_REQUIRED",
+          error: "에셋을 받으려면 로그인하거나 Authorization: Bearer <Clunk API 키> 를 보내야 합니다. 무료 등급도 같습니다.",
+        }, { status: 401 });
+      }
+    }
     // A paid product's page/texture artifacts ARE the product bytes, so they
     // never ship as a public preview. Paid listings only expose an artifact
     // whose role is explicitly "preview"; free listings may preview anything.
@@ -169,5 +186,16 @@ export async function GET(request: Request, context: RouteContext) {
     });
   } catch (error) {
     return jsonError(error);
+  }
+}
+
+/** Authorization 헤더에 유효한 Clunk API 키가 있으면 true. 없거나 틀리면 false — 여기서는 던지지 않는다. */
+async function hasClunkApiKey(request: Request): Promise<boolean> {
+  if (!request.headers.get("authorization")) return false;
+  try {
+    await requireMcpApiKey(request);
+    return true;
+  } catch {
+    return false;
   }
 }

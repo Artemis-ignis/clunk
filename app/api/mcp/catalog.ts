@@ -149,12 +149,12 @@ export function factsOfListing(listing: CatalogListing, origin: string): McpAsse
     grade: grade.letter,
     gradeBasis: gradeBasisEn(listing),
     free,
-    // 2026-09-05 실측: B등급 downloadUrl은 세션도 키도 없이 302 뒤 실제 바이트(72,304 B,
-    // glTF 매직)를 내줍니다. A등급은 같은 조건에서 401 + "유료 에셋을 받으려면 로그인해야
-    // 합니다"로 막힙니다. 에이전트에게 "먼저 로그인시켜라"라고 잘못 말하면 받을 수 있는
-    // 파일을 못 받고 사람에게 떠넘깁니다.
+    // B등급 downloadUrl 은 이 호출에 쓴 것과 같은 Bearer 키를 보내면 302 뒤 실제 바이트를
+    // 내줍니다(2026-09-05 까지는 키도 세션도 없이 나갔다 — 약관·마켓 문구와 어긋나 문을
+    // 달았다). A·S 는 사람의 브라우저 세션이 필요합니다. 에이전트에게 "사람을 먼저
+    // 로그인시켜라"라고 말하면 받을 수 있는 파일을 사람에게 떠넘기게 됩니다.
     access: free
-      ? "Grade B: this downloadUrl answers with the bytes right now — no key, no sign-in. Follow the redirect and read the body."
+      ? "Grade B: this downloadUrl answers with the bytes when you send the same Authorization: Bearer clunk_live_… header you used for this call (a signed-in session works too; anonymous gets 401). Follow the redirect and read the body. No human needed."
       : "Grade A/S: this downloadUrl needs the human's own signed-in browser session and a subscription. It answers 401 to an API key. Hand the productUrl to the human instead of trying to fetch it.",
     polygons: polygonCountOf(listing),
     materials: typeof facts?.materials === "number" ? facts.materials : null,

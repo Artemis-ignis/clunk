@@ -33,7 +33,7 @@ export function GET(request: Request) {
     // 아니다 — `clunk_live_...` 키는 실재하고 /agents 에서 발급한다. 에이전트가 우리를
     // 처음 읽는 자리라 여기서 틀리면 그 뒤가 전부 어긋난다.
     auth: {
-      browse: "none — the published catalogue is readable without a key, and a B-grade asset's bytes download without one too",
+      browse: "none for browsing — the published catalogue is readable without a key. Downloading needs a signed-in session or a clunk_live key as Bearer; grade B needs only that, grade A and S also need a subscription once sales open.",
       apiKey:
         "Bearer clunk_live_… on POST /api/mcp. Issue one at https://clunk.games/agents. Needed for the tools that generate or inspect; browsing and B-grade downloads are not.",
       workspace: "session cookie; every workspace-scoped route requires it and same-origin",
@@ -42,7 +42,7 @@ export function GET(request: Request) {
 
     endpoints: {
       "GET /api/marketplace": "every published listing; add ?slug= for one, with its artifacts and evidence",
-      "GET /api/marketplace/assets/{assetId}?file=": "the bytes of one artifact; a grade B artifact answers to any caller, grade A and S need a signed-in session with a live subscription",
+      "GET /api/marketplace/assets/{assetId}?file=": "the bytes of one artifact; a grade B artifact answers to a signed-in session or a clunk_live Bearer key, grade A and S need a signed-in session with a live subscription",
       "GET /api/providers": "which generation and inspection rails are actually wired, and which are declared but unavailable",
       "GET /api/health": "liveness",
     },
