@@ -1,0 +1,1031 @@
+{
+  "schema": "clunk.asset-inspection-evidence.v3",
+  "schemaVersion": "3",
+  "operation": "inspect",
+  "evidenceKind": "MACHINE_VISUAL_CAPTURE",
+  "identity": {
+    "inputHash": "181473ff49e2a753b3c22198a0ef76f6052ab1efc38ac03a57c58bc62ae8fdf1",
+    "resultDigest": "91811095b6afed62aa9b396834ab660cda96ae3c031ff1275811319bf28177b1",
+    "byteLength": 1124,
+    "coreBuildId": "0.1.0",
+    "ruleSetId": "clunk-game-ready-v1",
+    "ruleSetVersion": "1.0.0",
+    "profileId": "pc",
+    "profileHash": "e2479d196be991e881513de4ee095d73d7c8b588b0188af372093263c5f7df30",
+    "inspectionRunId": "visual-evidence-clunk-messy-sample-01"
+  },
+  "source": {
+    "path": "/samples/clunk-messy-sample.glb",
+    "fileName": "clunk-messy-sample.glb",
+    "bytes": 1124,
+    "sha256": "181473ff49e2a753b3c22198a0ef76f6052ab1efc38ac03a57c58bc62ae8fdf1"
+  },
+  "sourceOutputRelation": {
+    "kind": "SOURCE",
+    "sourceHash": "181473ff49e2a753b3c22198a0ef76f6052ab1efc38ac03a57c58bc62ae8fdf1",
+    "sourceInspectionDigest": "91811095b6afed62aa9b396834ab660cda96ae3c031ff1275811319bf28177b1"
+  },
+  "report": {
+    "schemaVersion": "1.0",
+    "coreVersion": "0.1.0",
+    "ruleSetId": "clunk-game-ready-v1",
+    "ruleSetVersion": "1.0.0",
+    "profileId": "pc",
+    "fileName": "clunk-messy-sample.glb",
+    "format": "glb",
+    "byteLength": 1124,
+    "inputHash": "181473ff49e2a753b3c22198a0ef76f6052ab1efc38ac03a57c58bc62ae8fdf1",
+    "metrics": {
+      "sceneCount": 1,
+      "nodeCount": 2,
+      "maxDepth": 1,
+      "emptyNodeCount": 1,
+      "meshCount": 1,
+      "primitiveCount": 1,
+      "vertexCount": 4,
+      "triangleCount": 2,
+      "drawCallCount": 1,
+      "materialCount": 2,
+      "duplicateMaterialCount": 1,
+      "textureCount": 0,
+      "imageCount": 0,
+      "textureMaxDimension": 0,
+      "textureMemoryBytes": 0,
+      "animationCount": 0,
+      "skinCount": 0,
+      "missingNormalPrimitiveCount": 1,
+      "missingUvPrimitiveCount": 1,
+      "nonUnitScaleNodeCount": 0,
+      "zeroScaleNodeCount": 0,
+      "externalResourceCount": 0,
+      "unresolvedResourceCount": 0,
+      "remoteResourceCount": 0,
+      "extensionCount": 0,
+      "bounds": {
+        "min": [
+          -0.8,
+          -0.8,
+          0
+        ],
+        "max": [
+          0.8,
+          0.8,
+          0
+        ],
+        "dimensions": [
+          1.6,
+          1.6,
+          0
+        ]
+      }
+    },
+    "findings": [
+      {
+        "id": "FORMAT-GLTF2:/asset",
+        "ruleId": "FORMAT-GLTF2",
+        "category": "format",
+        "severity": "INFO",
+        "path": "/asset",
+        "title": "glTF 2.0 parsed",
+        "message": "GLB is a supported glTF 2.0 container.",
+        "observed": "GLB",
+        "threshold": "GLB or GLTF 2.0",
+        "autoFixable": false,
+        "action": "No action required."
+      },
+      {
+        "id": "GEO-MISSING-NORMALS:/meshes/*/primitives/*/attributes",
+        "ruleId": "GEO-MISSING-NORMALS",
+        "category": "geometry",
+        "severity": "WARNING",
+        "path": "/meshes/*/primitives/*/attributes",
+        "title": "Normals are missing",
+        "message": "One or more primitives do not provide NORMAL attributes.",
+        "observed": 1,
+        "threshold": 0,
+        "autoFixable": false,
+        "action": "Generate or author normals in the source asset and re-import."
+      },
+      {
+        "id": "MAT-DUPLICATES:/materials",
+        "ruleId": "MAT-DUPLICATES",
+        "category": "materials",
+        "severity": "WARNING",
+        "path": "/materials",
+        "title": "Duplicate materials found",
+        "message": "Materials with identical render properties can be deduplicated losslessly.",
+        "observed": 1,
+        "threshold": 0,
+        "autoFixable": true,
+        "action": "Run the allowlisted material deduplication and recheck the output."
+      },
+      {
+        "id": "SCENE-EMPTY-NODES:/nodes",
+        "ruleId": "SCENE-EMPTY-NODES",
+        "category": "scene",
+        "severity": "WARNING",
+        "path": "/nodes",
+        "title": "Empty nodes found",
+        "message": "Identity-only nodes without a mesh, camera, skin, or child are present.",
+        "observed": 1,
+        "threshold": 0,
+        "autoFixable": true,
+        "action": "Run the allowlisted empty-node cleanup and recheck the output."
+      }
+    ],
+    "score": {
+      "score": 99,
+      "threshold": 90,
+      "ready": false,
+      "hardBlockerCount": 0,
+      "breakdown": {
+        "format": 100,
+        "scene": 97,
+        "geometry": 97,
+        "materials": 97,
+        "textures": 100,
+        "runtime": 100
+      },
+      "ruleSetId": "clunk-game-ready-v1",
+      "ruleSetVersion": "1.0.0"
+    },
+    "analysisId": "analysis-181473ff49e2-91811095",
+    "resultDigest": "91811095b6afed62aa9b396834ab660cda96ae3c031ff1275811319bf28177b1"
+  },
+  "findings": [
+    {
+      "id": "FORMAT-GLTF2:/asset",
+      "code": "FORMAT-GLTF2",
+      "category": "format",
+      "severity": "INFO",
+      "path": "/asset",
+      "title": "glTF 2.0 parsed",
+      "message": "GLB is a supported glTF 2.0 container.",
+      "observed": "GLB",
+      "threshold": "GLB or GLTF 2.0",
+      "rationale": "The finding is a structural contract observation; it does not prove player-facing quality.",
+      "recommendation": "No action required.",
+      "ownership": "asset",
+      "enforcement": "OFF",
+      "autoFixable": false
+    },
+    {
+      "id": "GEO-MISSING-NORMALS:/meshes/*/primitives/*/attributes",
+      "code": "GEO-MISSING-NORMALS",
+      "category": "geometry",
+      "severity": "WARNING",
+      "path": "/meshes/*/primitives/*/attributes",
+      "title": "Normals are missing",
+      "message": "One or more primitives do not provide NORMAL attributes.",
+      "observed": 1,
+      "threshold": 0,
+      "rationale": "Normals affect lighting, but flat-shaded or procedural source authoring can intentionally omit them.",
+      "recommendation": "Generate or author normals in the source asset and re-import.",
+      "ownership": "unknown",
+      "enforcement": "OFF",
+      "autoFixable": false
+    },
+    {
+      "id": "MAT-DUPLICATES:/materials",
+      "code": "MAT-DUPLICATES",
+      "category": "materials",
+      "severity": "WARNING",
+      "path": "/materials",
+      "title": "Duplicate materials found",
+      "message": "Materials with identical render properties can be deduplicated losslessly.",
+      "observed": 1,
+      "threshold": 0,
+      "rationale": "The finding is a structural contract observation; it does not prove player-facing quality.",
+      "recommendation": "Run the allowlisted material deduplication and recheck the output.",
+      "ownership": "asset",
+      "enforcement": "OFF",
+      "autoFixable": true
+    },
+    {
+      "id": "SCENE-EMPTY-NODES:/nodes",
+      "code": "SCENE-EMPTY-NODES",
+      "category": "scene",
+      "severity": "WARNING",
+      "path": "/nodes",
+      "title": "Empty nodes found",
+      "message": "Identity-only nodes without a mesh, camera, skin, or child are present.",
+      "observed": 1,
+      "threshold": 0,
+      "rationale": "Empty nodes may carry pivots, sockets or collider semantics.",
+      "recommendation": "Run the allowlisted empty-node cleanup and recheck the output.",
+      "ownership": "asset",
+      "enforcement": "OFF",
+      "autoFixable": true
+    },
+    {
+      "id": "OBS-DRAW-CALLS:/metrics",
+      "code": "OBS-DRAW-CALLS",
+      "category": "quality",
+      "severity": "INFO",
+      "path": "/metrics",
+      "title": "OBS-DRAW-CALLS",
+      "message": "Observation recorded; it is not visual approval.",
+      "observed": 1,
+      "threshold": "not declared",
+      "rationale": "Draw calls are a runtime cost observation, not a visual approval signal.",
+      "recommendation": "Compare against the shipped renderer budget and capture the affected camera.",
+      "ownership": "runtime",
+      "enforcement": "OFF"
+    },
+    {
+      "id": "OBS-TRIANGLES:/metrics",
+      "code": "OBS-TRIANGLES",
+      "category": "quality",
+      "severity": "INFO",
+      "path": "/metrics",
+      "title": "OBS-TRIANGLES",
+      "message": "Observation recorded; it is not visual approval.",
+      "observed": 2,
+      "threshold": "not declared",
+      "rationale": "Triangle count describes static geometry complexity only.",
+      "recommendation": "Review the target camera, LOD and frame cost before changing source bytes.",
+      "ownership": "asset",
+      "enforcement": "OFF"
+    },
+    {
+      "id": "OBS-MISSING-NORMALS:/metrics",
+      "code": "OBS-MISSING-NORMALS",
+      "category": "quality",
+      "severity": "INFO",
+      "path": "/metrics",
+      "title": "OBS-MISSING-NORMALS",
+      "message": "Observation recorded; it is not visual approval.",
+      "observed": 1,
+      "threshold": "not declared",
+      "rationale": "Missing normals can be intentional flat-shaded or procedural authoring; renderer ownership must be confirmed.",
+      "recommendation": "Confirm source shading and the target renderer before generating normals.",
+      "ownership": "unknown",
+      "enforcement": "OFF"
+    },
+    {
+      "id": "OBS-MISSING-UVS:/metrics",
+      "code": "OBS-MISSING-UVS",
+      "category": "quality",
+      "severity": "INFO",
+      "path": "/metrics",
+      "title": "OBS-MISSING-UVS",
+      "message": "Observation recorded; it is not visual approval.",
+      "observed": 1,
+      "threshold": "not declared",
+      "rationale": "Missing UVs may be valid for runtime-generated materials and are not automatically a texture defect.",
+      "recommendation": "Trace material ownership; add UVs only when the shipped material contract requires them.",
+      "ownership": "unknown",
+      "enforcement": "OFF"
+    },
+    {
+      "id": "OBS-TEXTURE-COUNT:/metrics",
+      "code": "OBS-TEXTURE-COUNT",
+      "category": "quality",
+      "severity": "INFO",
+      "path": "/metrics",
+      "title": "OBS-TEXTURE-COUNT",
+      "message": "Observation recorded; it is not visual approval.",
+      "observed": 0,
+      "threshold": "not declared",
+      "rationale": "A zero texture count can describe procedural/material authoring and is not a visual failure by itself.",
+      "recommendation": "Link the runtime material and a shipped frame before deciding whether a texture is missing.",
+      "ownership": "unknown",
+      "enforcement": "OFF"
+    },
+    {
+      "id": "OBS-NONUNIT-SCALE:/metrics",
+      "code": "OBS-NONUNIT-SCALE",
+      "category": "quality",
+      "severity": "INFO",
+      "path": "/metrics",
+      "title": "OBS-NONUNIT-SCALE",
+      "message": "Observation recorded; it is not visual approval.",
+      "observed": 0,
+      "threshold": "not declared",
+      "rationale": "Non-unit transforms can be an authored pivot contract or an engine import risk.",
+      "recommendation": "Confirm the target engine import policy and preserve named pivots before changing source bytes.",
+      "ownership": "runtime",
+      "enforcement": "OFF"
+    },
+    {
+      "id": "OBS-BOUNDS-ABS:/metrics",
+      "code": "OBS-BOUNDS-ABS",
+      "category": "quality",
+      "severity": "INFO",
+      "path": "/metrics",
+      "title": "OBS-BOUNDS-ABS",
+      "message": "Observation recorded; it is not visual approval.",
+      "observed": 0.8,
+      "threshold": "not declared",
+      "rationale": "Extreme accessor bounds can be quantized/raw bounds and require decode-aware runtime context.",
+      "recommendation": "Compare decoded runtime bounds and scene scale; do not optimize blindly.",
+      "ownership": "unknown",
+      "enforcement": "OFF"
+    },
+    {
+      "id": "OBS-RUNTIME-EVIDENCE:/metrics",
+      "code": "OBS-RUNTIME-EVIDENCE",
+      "category": "quality",
+      "severity": "INFO",
+      "path": "/metrics",
+      "title": "OBS-RUNTIME-EVIDENCE",
+      "message": "Observation recorded; it is not visual approval.",
+      "observed": false,
+      "threshold": "not declared",
+      "rationale": "A static inspection cannot prove that an asset is loaded or visible in a shipped frame.",
+      "recommendation": "Attach a shipped-path capture with renderer, viewport, camera and source-tree provenance.",
+      "ownership": "runtime",
+      "enforcement": "OFF"
+    }
+  ],
+  "qualityPolicy": {
+    "declared": null,
+    "status": "OFF",
+    "blockingViolationCount": 0,
+    "advisoryViolationCount": 0
+  },
+  "captureEvidence": [
+    {
+      "media": "screenshot",
+      "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\evidence\\clunk-messy-sample\\clunk-messy-sample__engine-three-quarter.png",
+      "sha256": "737514b67add844af3df6c77665df3f972696069f7557d0ee4a1330dac0497a3",
+      "bytes": 2992,
+      "renderer": "clunk-software-raster/1.0.0",
+      "viewport": {
+        "width": 512,
+        "height": 512
+      },
+      "cameraPoseHash": "6e2fcdd863d2e9aec50c07b5c569609b9750d6530996bee985decb8884b7680d",
+      "sourceTreeHash": "85e4b35abeb2f29bf2cc46f35a5f222d18bf27d738a9804f32131f2d23356088",
+      "shippedPath": false,
+      "renderKind": "clunk-software-raster",
+      "console": {
+        "errors": 0,
+        "warnings": 0
+      }
+    },
+    {
+      "media": "screenshot",
+      "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\evidence\\clunk-messy-sample\\clunk-messy-sample__engine-front.png",
+      "sha256": "4bdd0dff43b1a18b6695f00e1b7280e1f5e3871caafcbe90ac4427cb20ffb47c",
+      "bytes": 2369,
+      "renderer": "clunk-software-raster/1.0.0",
+      "viewport": {
+        "width": 512,
+        "height": 512
+      },
+      "cameraPoseHash": "208396df2aad22e20beb36b860781fab4c27df86e2f9e4e16ab980dcae595459",
+      "sourceTreeHash": "85e4b35abeb2f29bf2cc46f35a5f222d18bf27d738a9804f32131f2d23356088",
+      "shippedPath": false,
+      "renderKind": "clunk-software-raster",
+      "console": {
+        "errors": 0,
+        "warnings": 0
+      }
+    },
+    {
+      "media": "screenshot",
+      "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\evidence\\clunk-messy-sample\\clunk-messy-sample__engine-side.png",
+      "sha256": "e3c7e8b818473a4bd21c08d3ea63c5edfc40fb584105f138e98bfcdf1140f1b0",
+      "bytes": 1496,
+      "renderer": "clunk-software-raster/1.0.0",
+      "viewport": {
+        "width": 512,
+        "height": 512
+      },
+      "cameraPoseHash": "913a0dc4908005e1760cafceaf4c8cfe2f1564dc1ace57f9223373d5b72b3df1",
+      "sourceTreeHash": "85e4b35abeb2f29bf2cc46f35a5f222d18bf27d738a9804f32131f2d23356088",
+      "shippedPath": false,
+      "renderKind": "clunk-software-raster",
+      "console": {
+        "errors": 0,
+        "warnings": 0
+      }
+    },
+    {
+      "media": "screenshot",
+      "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\evidence\\clunk-messy-sample\\clunk-messy-sample__engine-top.png",
+      "sha256": "d6d75dfbdd28f6b8799646e58267e4c64cf923ec9516b009b3222067bf99c9bf",
+      "bytes": 3292,
+      "renderer": "clunk-software-raster/1.0.0",
+      "viewport": {
+        "width": 512,
+        "height": 512
+      },
+      "cameraPoseHash": "bb1bb6ad98bef6599baf74a78328f5def652a8866081f944d03031f0cd867f91",
+      "sourceTreeHash": "85e4b35abeb2f29bf2cc46f35a5f222d18bf27d738a9804f32131f2d23356088",
+      "shippedPath": false,
+      "renderKind": "clunk-software-raster",
+      "console": {
+        "errors": 0,
+        "warnings": 0
+      }
+    },
+    {
+      "media": "screenshot",
+      "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\evidence\\clunk-messy-sample\\clunk-messy-sample__player-5m.png",
+      "sha256": "1a8aa941e9bfdecb8b87eab3d3782064fb296b669248e862476dcdda119d8cb6",
+      "bytes": 1544,
+      "renderer": "clunk-software-raster/1.0.0",
+      "viewport": {
+        "width": 640,
+        "height": 360
+      },
+      "cameraPoseHash": "d04c847a2957c1504e7d625e0d6a69b4636d59fa8d6c5478025bb037e8b00296",
+      "sourceTreeHash": "85e4b35abeb2f29bf2cc46f35a5f222d18bf27d738a9804f32131f2d23356088",
+      "shippedPath": false,
+      "renderKind": "clunk-software-raster",
+      "console": {
+        "errors": 0,
+        "warnings": 0
+      }
+    },
+    {
+      "media": "screenshot",
+      "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\evidence\\clunk-messy-sample\\clunk-messy-sample__player-15m.png",
+      "sha256": "c40799a9a4c14771b286c4212068fe5b73b3b7f96d4fa4de8f1b6323332650a9",
+      "bytes": 1313,
+      "renderer": "clunk-software-raster/1.0.0",
+      "viewport": {
+        "width": 640,
+        "height": 360
+      },
+      "cameraPoseHash": "3a24486f161705ddd712b0b9738b6a1448f4bd76eb667d72802197d9583fc1a9",
+      "sourceTreeHash": "85e4b35abeb2f29bf2cc46f35a5f222d18bf27d738a9804f32131f2d23356088",
+      "shippedPath": false,
+      "renderKind": "clunk-software-raster",
+      "console": {
+        "errors": 0,
+        "warnings": 0
+      }
+    }
+  ],
+  "audioEvidence": [],
+  "byteVerification": {
+    "method": "LOCAL_CLI_READ",
+    "source": {
+      "sha256": "181473ff49e2a753b3c22198a0ef76f6052ab1efc38ac03a57c58bc62ae8fdf1",
+      "bytes": 1124,
+      "verified": true
+    },
+    "captures": [
+      {
+        "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\evidence\\clunk-messy-sample\\clunk-messy-sample__engine-three-quarter.png",
+        "sha256": "737514b67add844af3df6c77665df3f972696069f7557d0ee4a1330dac0497a3",
+        "bytes": 2992,
+        "verified": true
+      },
+      {
+        "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\evidence\\clunk-messy-sample\\clunk-messy-sample__engine-front.png",
+        "sha256": "4bdd0dff43b1a18b6695f00e1b7280e1f5e3871caafcbe90ac4427cb20ffb47c",
+        "bytes": 2369,
+        "verified": true
+      },
+      {
+        "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\evidence\\clunk-messy-sample\\clunk-messy-sample__engine-side.png",
+        "sha256": "e3c7e8b818473a4bd21c08d3ea63c5edfc40fb584105f138e98bfcdf1140f1b0",
+        "bytes": 1496,
+        "verified": true
+      },
+      {
+        "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\evidence\\clunk-messy-sample\\clunk-messy-sample__engine-top.png",
+        "sha256": "d6d75dfbdd28f6b8799646e58267e4c64cf923ec9516b009b3222067bf99c9bf",
+        "bytes": 3292,
+        "verified": true
+      },
+      {
+        "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\evidence\\clunk-messy-sample\\clunk-messy-sample__player-5m.png",
+        "sha256": "1a8aa941e9bfdecb8b87eab3d3782064fb296b669248e862476dcdda119d8cb6",
+        "bytes": 1544,
+        "verified": true
+      },
+      {
+        "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\evidence\\clunk-messy-sample\\clunk-messy-sample__player-15m.png",
+        "sha256": "c40799a9a4c14771b286c4212068fe5b73b3b7f96d4fa4de8f1b6323332650a9",
+        "bytes": 1313,
+        "verified": true
+      }
+    ],
+    "audio": []
+  },
+  "statuses": {
+    "structural": "CONDITIONAL",
+    "visualRuntime": "GAP",
+    "playerFacing": "NO_GO",
+    "humanDecision": "NOT_REQUIRED",
+    "reviewStatus": "EVALUATED",
+    "autoVerdict": "FAIL",
+    "decisionAuthority": "MACHINE"
+  },
+  "visualEvidence": {
+    "schema": "clunk.visual-evidence.v1",
+    "toolVersion": "clunk-visual-evidence/1.0.0",
+    "renderer": {
+      "id": "clunk-software-raster",
+      "version": "1.0.0",
+      "kind": "software-rasteriser",
+      "gpu": false,
+      "shading": "flat warm key + cool sky hemisphere + soft contact shadow",
+      "note": "A z-buffered software rasteriser with flat warm-key and cool-sky shading and one soft contact shadow. No PBR, no image-based lighting, no reflections, no ray-traced shadow, no ambient occlusion. It is not a screenshot from a game engine and must not be described as one.",
+      "note_ko": "깊이 버퍼를 쓰는 소프트웨어 래스터라이저입니다. 따뜻한 주광과 차가운 하늘빛의 평면 음영, 바닥 접촉 그림자 하나가 전부입니다. PBR·환경광·반사·광선추적 그림자·주변광 차폐는 없습니다. 게임 엔진에서 찍은 화면이 아니며 그렇게 부르면 안 됩니다."
+    },
+    "sceneDigest": "2575eaa4a8ec08feff5fd3565bed4855fd840ba80b837b69067edae1b608ea57",
+    "cameraRigHash": "100d7c6d46b331a6db62116fc1d3036b1ec7a1e0352a041f4ba489efd4b4d4b5",
+    "sizeMetres": [
+      1.6,
+      1.6,
+      0
+    ],
+    "triangleCount": 2,
+    "captures": [
+      {
+        "id": "engine-three-quarter",
+        "lane": "visualRuntime",
+        "label": "Engine render, three-quarter",
+        "label_ko": "엔진 렌더 · 3/4",
+        "path": "/evidence/clunk-messy-sample/clunk-messy-sample__engine-three-quarter.png",
+        "sha256": "737514b67add844af3df6c77665df3f972696069f7557d0ee4a1330dac0497a3",
+        "bytes": 2992,
+        "width": 512,
+        "height": 512,
+        "camera": {
+          "eyeMetres": [
+            2.095195581116866,
+            1.3430740904595293,
+            2.4712563264455345
+          ],
+          "targetMetres": [
+            0,
+            0,
+            0
+          ],
+          "fovYDeg": 30,
+          "eyeHeightMetres": null,
+          "groundDistanceMetres": null
+        },
+        "cameraPoseHash": "6e2fcdd863d2e9aec50c07b5c569609b9750d6530996bee985decb8884b7680d",
+        "cameraInsideAsset": false,
+        "metrics": {
+          "silhouetteFillRatio": 0.4176,
+          "boundingFillRatio": 0.8789,
+          "clippedEdgeCount": 0,
+          "subjectMeanLuma": 0.4931,
+          "subjectLumaP05": 0.4919,
+          "subjectLumaP95": 0.4919,
+          "subjectLumaRange": 0,
+          "crushedBlackRatio": 0,
+          "blownWhiteRatio": 0,
+          "paletteColorCount": 2,
+          "backgroundSeparationDeltaE76": 45.84,
+          "groundContactColumnRatio": null,
+          "groundMedianGapRatio": null,
+          "groundMaxGapRatio": null,
+          "readability46": {
+            "luminanceRange": 0.4108,
+            "edgeDensity": 0.0751,
+            "meanGradient": 0.0188,
+            "localContrastCoverage": 0.2102
+          }
+        }
+      },
+      {
+        "id": "engine-front",
+        "lane": "visualRuntime",
+        "label": "Engine render, front",
+        "label_ko": "엔진 렌더 · 정면",
+        "path": "/evidence/clunk-messy-sample/clunk-messy-sample__engine-front.png",
+        "sha256": "4bdd0dff43b1a18b6695f00e1b7280e1f5e3871caafcbe90ac4427cb20ffb47c",
+        "bytes": 2369,
+        "width": 512,
+        "height": 512,
+        "camera": {
+          "eyeMetres": [
+            0,
+            0.7535739200242673,
+            3.425336000110306
+          ],
+          "targetMetres": [
+            0,
+            0,
+            0
+          ],
+          "fovYDeg": 30,
+          "eyeHeightMetres": null,
+          "groundDistanceMetres": null
+        },
+        "cameraPoseHash": "208396df2aad22e20beb36b860781fab4c27df86e2f9e4e16ab980dcae595459",
+        "cameraInsideAsset": false,
+        "metrics": {
+          "silhouetteFillRatio": 0.6865,
+          "boundingFillRatio": 0.8809,
+          "clippedEdgeCount": 0,
+          "subjectMeanLuma": 0.4934,
+          "subjectLumaP05": 0.4919,
+          "subjectLumaP95": 0.4919,
+          "subjectLumaRange": 0,
+          "crushedBlackRatio": 0,
+          "blownWhiteRatio": 0,
+          "paletteColorCount": 2,
+          "backgroundSeparationDeltaE76": 45.81,
+          "groundContactColumnRatio": null,
+          "groundMedianGapRatio": null,
+          "groundMaxGapRatio": null,
+          "readability46": {
+            "luminanceRange": 0.1793,
+            "edgeDensity": 0.0277,
+            "meanGradient": 0.0077,
+            "localContrastCoverage": 0.0671
+          }
+        }
+      },
+      {
+        "id": "engine-side",
+        "lane": "visualRuntime",
+        "label": "Engine render, side",
+        "label_ko": "엔진 렌더 · 측면",
+        "path": "/evidence/clunk-messy-sample/clunk-messy-sample__engine-side.png",
+        "sha256": "e3c7e8b818473a4bd21c08d3ea63c5edfc40fb584105f138e98bfcdf1140f1b0",
+        "bytes": 1496,
+        "width": 512,
+        "height": 512,
+        "camera": {
+          "eyeMetres": [
+            3.425336000110306,
+            0.7535739200242673,
+            0
+          ],
+          "targetMetres": [
+            0,
+            0,
+            0
+          ],
+          "fovYDeg": 30,
+          "eyeHeightMetres": null,
+          "groundDistanceMetres": null
+        },
+        "cameraPoseHash": "913a0dc4908005e1760cafceaf4c8cfe2f1564dc1ace57f9223373d5b72b3df1",
+        "cameraInsideAsset": false,
+        "metrics": {
+          "silhouetteFillRatio": 0,
+          "boundingFillRatio": 0,
+          "clippedEdgeCount": 0,
+          "subjectMeanLuma": 0,
+          "subjectLumaP05": 0,
+          "subjectLumaP95": 0,
+          "subjectLumaRange": 0,
+          "crushedBlackRatio": 0,
+          "blownWhiteRatio": 0,
+          "paletteColorCount": 0,
+          "backgroundSeparationDeltaE76": 0,
+          "groundContactColumnRatio": null,
+          "groundMedianGapRatio": null,
+          "groundMaxGapRatio": null,
+          "readability46": {
+            "luminanceRange": 0,
+            "edgeDensity": 0,
+            "meanGradient": 0,
+            "localContrastCoverage": 0
+          }
+        }
+      },
+      {
+        "id": "engine-top",
+        "lane": "visualRuntime",
+        "label": "Engine render, top",
+        "label_ko": "엔진 렌더 · 위",
+        "path": "/evidence/clunk-messy-sample/clunk-messy-sample__engine-top.png",
+        "sha256": "d6d75dfbdd28f6b8799646e58267e4c64cf923ec9516b009b3222067bf99c9bf",
+        "bytes": 3292,
+        "width": 512,
+        "height": 512,
+        "camera": {
+          "eyeMetres": [
+            0.8054665670548093,
+            3.2218662682192374,
+            1.1276531938767331
+          ],
+          "targetMetres": [
+            0,
+            0,
+            0
+          ],
+          "fovYDeg": 30,
+          "eyeHeightMetres": null,
+          "groundDistanceMetres": null
+        },
+        "cameraPoseHash": "bb1bb6ad98bef6599baf74a78328f5def652a8866081f944d03031f0cd867f91",
+        "cameraInsideAsset": false,
+        "metrics": {
+          "silhouetteFillRatio": 0.2564,
+          "boundingFillRatio": 0.8789,
+          "clippedEdgeCount": 0,
+          "subjectMeanLuma": 0.4931,
+          "subjectLumaP05": 0.4919,
+          "subjectLumaP95": 0.4919,
+          "subjectLumaRange": 0,
+          "crushedBlackRatio": 0,
+          "blownWhiteRatio": 0,
+          "paletteColorCount": 1,
+          "backgroundSeparationDeltaE76": 45.84,
+          "groundContactColumnRatio": null,
+          "groundMedianGapRatio": null,
+          "groundMaxGapRatio": null,
+          "readability46": {
+            "luminanceRange": 0.4108,
+            "edgeDensity": 0.0853,
+            "meanGradient": 0.0183,
+            "localContrastCoverage": 0.2188
+          }
+        }
+      },
+      {
+        "id": "player-5m",
+        "lane": "playerFacing",
+        "label": "Player camera, 1.6 m eye height, 5 m away",
+        "label_ko": "게임 시점 · 눈높이 1.6 m · 5 m",
+        "path": "/evidence/clunk-messy-sample/clunk-messy-sample__player-5m.png",
+        "sha256": "1a8aa941e9bfdecb8b87eab3d3782064fb296b669248e862476dcdda119d8cb6",
+        "bytes": 1544,
+        "width": 640,
+        "height": 360,
+        "camera": {
+          "eyeMetres": [
+            0,
+            1.6,
+            5
+          ],
+          "targetMetres": [
+            0,
+            0,
+            0
+          ],
+          "fovYDeg": 55,
+          "eyeHeightMetres": 1.6,
+          "groundDistanceMetres": 5
+        },
+        "cameraPoseHash": "d04c847a2957c1504e7d625e0d6a69b4636d59fa8d6c5478025bb037e8b00296",
+        "cameraInsideAsset": false,
+        "metrics": {
+          "silhouetteFillRatio": 0.0461,
+          "boundingFillRatio": 0.3056,
+          "clippedEdgeCount": 0,
+          "subjectMeanLuma": 0.4959,
+          "subjectLumaP05": 0.4919,
+          "subjectLumaP95": 0.4919,
+          "subjectLumaRange": 0,
+          "crushedBlackRatio": 0,
+          "blownWhiteRatio": 0,
+          "paletteColorCount": 2,
+          "backgroundSeparationDeltaE76": 45.55,
+          "groundContactColumnRatio": 0.9636,
+          "groundMedianGapRatio": 0,
+          "groundMaxGapRatio": 0.3195,
+          "readability46": {
+            "luminanceRange": 0.137,
+            "edgeDensity": 0.0254,
+            "meanGradient": 0.0071,
+            "localContrastCoverage": 0.058
+          }
+        }
+      },
+      {
+        "id": "player-15m",
+        "lane": "playerFacing",
+        "label": "Player camera, 1.6 m eye height, 15 m away",
+        "label_ko": "게임 시점 · 눈높이 1.6 m · 15 m",
+        "path": "/evidence/clunk-messy-sample/clunk-messy-sample__player-15m.png",
+        "sha256": "c40799a9a4c14771b286c4212068fe5b73b3b7f96d4fa4de8f1b6323332650a9",
+        "bytes": 1313,
+        "width": 640,
+        "height": 360,
+        "camera": {
+          "eyeMetres": [
+            0,
+            1.6,
+            15
+          ],
+          "targetMetres": [
+            0,
+            0,
+            0
+          ],
+          "fovYDeg": 55,
+          "eyeHeightMetres": 1.6,
+          "groundDistanceMetres": 15
+        },
+        "cameraPoseHash": "3a24486f161705ddd712b0b9738b6a1448f4bd76eb667d72802197d9583fc1a9",
+        "cameraInsideAsset": false,
+        "metrics": {
+          "silhouetteFillRatio": 0.0059,
+          "boundingFillRatio": 0.1028,
+          "clippedEdgeCount": 0,
+          "subjectMeanLuma": 0.5071,
+          "subjectLumaP05": 0.4919,
+          "subjectLumaP95": 0.6992,
+          "subjectLumaRange": 0.2072,
+          "crushedBlackRatio": 0,
+          "blownWhiteRatio": 0,
+          "paletteColorCount": 2,
+          "backgroundSeparationDeltaE76": 44.38,
+          "groundContactColumnRatio": null,
+          "groundMedianGapRatio": null,
+          "groundMaxGapRatio": null,
+          "readability46": {
+            "luminanceRange": 0.2072,
+            "edgeDensity": 0.0536,
+            "meanGradient": 0.0069,
+            "localContrastCoverage": 0.1105
+          }
+        }
+      }
+    ],
+    "motionPhases": [],
+    "motion": null,
+    "checks": [
+      {
+        "id": "silhouette",
+        "lane": "visualRuntime",
+        "status": "FAIL",
+        "observed": {
+          "minSilhouetteFillRatio": 0,
+          "minBoundingFillRatio": 0,
+          "maxBoundingFillRatio": 0.8809
+        },
+        "threshold": "minSilhouetteFillRatio >= 0.005 and boundingFillRatio in [0.75, 0.98] on every engine view",
+        "reason": "The asset covers 0.00% of at least one engine view; the camera was fitted to it, so almost nothing was drawn.",
+        "reason_ko": "엔진 렌더에서 에셋이 화면의 0.00% 밖에 덮지 않습니다. 카메라를 에셋에 맞춰 놓았으므로 그려진 것이 거의 없다는 뜻입니다.",
+        "captureIds": [
+          "engine-three-quarter",
+          "engine-front",
+          "engine-side",
+          "engine-top"
+        ]
+      },
+      {
+        "id": "framing",
+        "lane": "visualRuntime",
+        "status": "PASS",
+        "observed": {
+          "clippedEdgeCount": 0
+        },
+        "threshold": "clippedEdgeCount == 0 summed over the engine views",
+        "reason": "No engine view cuts the asset at the frame edge.",
+        "reason_ko": "엔진 렌더 어느 각도에서도 에셋이 화면 가장자리에서 잘리지 않습니다.",
+        "captureIds": [
+          "engine-three-quarter",
+          "engine-front",
+          "engine-side",
+          "engine-top"
+        ]
+      },
+      {
+        "id": "exposure",
+        "lane": "visualRuntime",
+        "status": "FAIL",
+        "observed": {
+          "maxCrushedBlackRatio": 0,
+          "maxBlownWhiteRatio": 0,
+          "maxSubjectLumaRange": 0
+        },
+        "threshold": "crushedBlackRatio <= 0.15 and blownWhiteRatio <= 0.15 and subjectLumaRange >= 0.12 (fail past 0.5 / 0.5 / below 0.05)",
+        "reason": "0.0% solid black, 0.0% solid white, widest luminance span 0.000.",
+        "reason_ko": "검정으로 뭉개진 부분 0.0%, 흰색으로 날아간 부분 0.0%, 가장 넓은 밝기 폭 0.000.",
+        "captureIds": [
+          "engine-three-quarter",
+          "engine-front",
+          "engine-side",
+          "engine-top"
+        ]
+      },
+      {
+        "id": "palette",
+        "lane": "visualRuntime",
+        "status": "REVIEW",
+        "observed": {
+          "paletteColorCount": 2,
+          "backgroundSeparationDeltaE76": 45.84
+        },
+        "threshold": "paletteColorCount >= 5 and backgroundSeparationDeltaE76 >= 12 (fail below 2 / 5)",
+        "reason": "2 colours after quantisation, 45.8 delta E from the ground colour.",
+        "reason_ko": "색을 뭉뚱그리면 2가지, 배경과의 색 차이 ΔE 45.8.",
+        "captureIds": [
+          "engine-three-quarter",
+          "engine-front",
+          "engine-side",
+          "engine-top"
+        ]
+      },
+      {
+        "id": "motion",
+        "lane": "visualRuntime",
+        "status": "NOT_APPLICABLE",
+        "observed": {
+          "declaredClipCount": 0,
+          "movedPixelRatio": null
+        },
+        "threshold": "not evaluated when the file declares no animation clip",
+        "reason": "The file declares no animation clip, so there is no motion to show.",
+        "reason_ko": "파일에 동작(애니메이션)이 없어 볼 움직임이 없습니다.",
+        "captureIds": []
+      },
+      {
+        "id": "silhouette",
+        "lane": "playerFacing",
+        "status": "PASS",
+        "observed": {
+          "boundingFillRatio": 0.1028
+        },
+        "threshold": "boundingFillRatio >= 0.02 at the farthest player camera (fail below 0.005)",
+        "reason": "From the farthest player camera the asset still spans 10.3% of the frame height.",
+        "reason_ko": "가장 먼 게임 시점에서도 에셋이 화면 높이의 10.3% 를 차지합니다.",
+        "captureIds": [
+          "player-15m"
+        ]
+      },
+      {
+        "id": "readability46",
+        "lane": "playerFacing",
+        "status": "PASS",
+        "observed": {
+          "luminanceRange": 0.2072,
+          "edgeDensity": 0.0536,
+          "localContrastCoverage": 0.1105,
+          "meanGradient": 0.0069
+        },
+        "threshold": "at 46 px: luminanceRange >= 0.18, edgeDensity >= 0.015, localContrastCoverage >= 0.04 (fail below 0.12 / 0.01 / 0.02)",
+        "reason": "Shrunk to 46 px the asset keeps 0.207 of luminance range, 0.054 edge density and 0.111 local contrast, so it is still legible small.",
+        "reason_ko": "46픽셀로 줄여도 밝기 폭 0.207, 테두리 밀도 0.054, 국소 대비 0.111 이 남아 작게도 읽힙니다.",
+        "captureIds": [
+          "player-15m"
+        ]
+      },
+      {
+        "id": "groundContact",
+        "lane": "playerFacing",
+        "status": "FAIL",
+        "observed": {
+          "originGroundOffsetRatio": -0.5,
+          "groundContactColumnRatio": 0.9636,
+          "groundMedianGapRatio": 0,
+          "groundMaxGapRatio": 0.3195
+        },
+        "threshold": "|bounds.min.y / height| <= 0.02 (fail past 0.25); a capture with contactColumnRatio 0 and medianGapRatio > 0.5 also asks for review",
+        "reason": "The asset's lowest point sits 50.0% of its own height below the engine floor at y = 0; dropped at the origin it will hang there.",
+        "reason_ko": "에셋의 가장 낮은 점이 엔진 바닥(y = 0)에서 자기 높이의 50.0% 만큼 아래로 묻혀 있습니다. 원점에 놓으면 그 상태로 뜹니다.",
+        "captureIds": [
+          "player-5m"
+        ]
+      }
+    ],
+    "lanes": {
+      "visualRuntime": {
+        "verdict": "FAIL",
+        "checkIds": [
+          "silhouette",
+          "framing",
+          "exposure",
+          "palette",
+          "motion"
+        ]
+      },
+      "playerFacing": {
+        "verdict": "FAIL",
+        "checkIds": [
+          "silhouette",
+          "readability46",
+          "groundContact"
+        ]
+      }
+    },
+    "verdict": "FAIL",
+    "summary": "3 of 7 automated visual checks fail: silhouette, exposure, groundContact. The asset is rejected on the captures, not on a pending opinion.",
+    "summary_ko": "자동 화면 검사 7건 가운데 3건이 떨어졌습니다: silhouette, exposure, groundContact. 판정 대기가 아니라, 찍은 화면을 근거로 떨어진 것입니다.",
+    "timings": {
+      "decodeMs": 10,
+      "renderMs": 420,
+      "measureMs": 206,
+      "totalMs": 679,
+      "peakHeapBytes": 32747424
+    },
+    "limits": [
+      "The frames come from Clunk's own offline rasteriser, not from a game engine's rendering path.",
+      "Materials are read as vertex colour times base colour; metal, roughness, transparency and emission are not simulated.",
+      "The ground-contact measurement reads one silhouette per camera. It cannot see a part that floats behind a part that is itself grounded.",
+      "Motion is sampled at three phases (0, 3/7, 6/7) of the first declared clip only; a clip that loops exactly seven times would still alias."
+    ],
+    "limits_ko": [
+      "여기 찍힌 화면은 Clunk 자체 오프라인 래스터라이저의 결과이지, 게임 엔진이 그린 화면이 아닙니다.",
+      "재질은 정점 색 × 기본 색으로만 읽습니다. 금속·거칠기·투명·발광은 계산하지 않습니다.",
+      "바닥 접지 측정은 카메라마다 실루엣 하나를 읽습니다. 바닥에 닿은 부품 뒤에 숨어 떠 있는 부품은 보지 못합니다.",
+      "움직임은 첫 번째 동작의 세 위상(0, 3/7, 6/7)만 표본으로 봅니다. 동작이 정확히 일곱 번 반복하는 경우에는 여전히 겹쳐 보일 수 있습니다."
+    ]
+  },
+  "validation": {
+    "valid": true,
+    "structuralValid": true,
+    "qualityPolicyValid": true
+  },
+  "readiness": "blocked",
+  "limitation": "STRUCTURAL_SCORE_IS_NOT_VISUAL_APPROVAL",
+  "captureLimitation": "OFFLINE_SOFTWARE_RASTER_IS_NOT_AN_ENGINE_SCREENSHOT"
+}

@@ -168,7 +168,10 @@ test("the product showroom makes the file-to-decision loop interactive on public
  */
 test("the showroom ships the exact capture bytes the evidence envelope hashed", async () => {
   const { createHash } = await import("node:crypto");
-  for (const slug of ["hf-tractor-compact", "cozy-crate-closed", "clunk-heli-h145"]) {
+  // 2026-09-05: 같은 규약을 쓰는 자리가 하나 늘었다. /agents 의 "예시 검사 한 번 돌려보기"
+  // 도 이제 지어낸 상태 대신 clunk-messy-sample 의 기계 판정 기록을 읽고, 그 화면 두 장을
+  // 그대로 건다. 옮기면서 다시 굽지 않았는지를 쇼룸과 같은 검사로 본다.
+  for (const slug of ["hf-tractor-compact", "cozy-crate-closed", "clunk-heli-h145", "clunk-messy-sample"]) {
     const record = JSON.parse(await source(path.join("app", "data", "evidence", `${slug}.visual-evidence.json`)));
     assert.equal(record.schema, "clunk.asset-inspection-evidence.v3");
     assert.equal(record.evidenceKind, "MACHINE_VISUAL_CAPTURE");

@@ -152,6 +152,16 @@ test("collaboration UI keeps capture integrity, asset audit, and human visual re
   assert.match(agents, /게임 시점[\s\S]*눈높이 5 m · 15 m/);
   assert.match(agents, /판정[\s\S]*기계가 냅니다/);
   assert.doesNotMatch(agents, /사람이 직접 보고 판단해야 합니다|증거 없음/);
+  // 2026-09-05: 같은 /agents 화면 안에서 예시 데모가 반대말을 하고 있었다 — 위 쇼룸은
+  // 기계 판정을, 아래 데모는 "증거 없음 / 판정 대기 / 판정 요청하기"를. 그 데모는 이제
+  // 증거 기록을 읽어 기계 판정으로 끝나므로, 사람에게 판정을 미루는 낱말이 없어야 한다.
+  const sampleRun = await source("app/components/SampleRunWorkbench.tsx");
+  // 주석은 옛 문구를 인용해 왜 바뀌었는지 적어 두므로, 방문자에게 나가는 쪽만 본다.
+  const sampleRunCopy = sampleRun.replace(/\/\*[\s\S]*?\*\//gu, "").replace(/^\s*\/\/.*$/gmu, "");
+  assert.doesNotMatch(sampleRunCopy, /증거 없음|판정 요청|판정 대기/);
+  assert.match(sampleRun, /SAMPLE_RUN_EVIDENCE/);
+  assert.match(sampleRun, /rendererNoteKo/);
+  assert.match(sampleRun, /decisionAuthority/);
   // 2026-09-04(마스터 지적): 같은 구분을 부정문("…말하지 않습니다") 대신 방문자에게
   // 무엇이 답을 주는지로 적는다. 지켜야 할 것은 문장 형태가 아니라 구분 자체다.
   assert.match(agents, /파일 검사는 규격을 봅니다[\s\S]*엔진 렌더와 게임 시점까지 Clunk가 직접 그려 측정한 뒤 판정합니다/);
