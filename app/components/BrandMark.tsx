@@ -125,7 +125,13 @@ export function BrandMark({
  * 크기는 높이로 준다. 원본이 830×440 이라 너비는 거기서 나온다. `size` 는 예전 마크의
  * 한 변이었고 지금은 로고의 높이다 — 부르는 쪽이 이미 그 뜻으로 쓰고 있었다.
  */
-const WORDMARK = { src: "/brand/clunk-wordmark.png", width: 830, height: 440 };
+/**
+ * 2026-09-05: 원본 PNG 에는 글자 둘레로 화면 거의 전부를 덮는 보라 후광(알파 6~95)이 구워져
+ * 있었다. 어두운 바닥에서는 안 보이다가 화이트 테마에서 로고 뒤에 회색 네모로 떠올랐다. 후광을
+ * 잘라 낸 판(scripts/brand-cutout.mjs 와 같은 원본에서 알파 128 미만을 비움)만 쓰고, 어두운 두
+ * 테마의 후광은 app/theme.css 가 drop-shadow 로 얹는다 — 그림 한 장, 테마마다 바닥에 맞는 후광.
+ */
+const WORDMARK = { src: "/brand/clunk-wordmark-flat.png", width: 830, height: 440 };
 
 export function BrandLockup({
   size = 30,

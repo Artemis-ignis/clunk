@@ -232,7 +232,7 @@
 }
 
 /* ---- 측정 항목 펼치기 ---- */
-.live-evidence-checks {
+:root:not([data-theme="light"]) .live-evidence-checks {
   margin-top: 11px;
   border: 1px solid var(--t-fx-grey-91);
   border-radius: 8px;
@@ -301,9 +301,9 @@
   line-height: 1.5;
 }
 
-.live-evidence-check-pass strong { color: var(--t-fx-mint-49); }
-.live-evidence-check-review strong { color: var(--t-lg-bronze); }
-.live-evidence-check-gap strong { color: var(--t-lg-rust); }
+:root:not([data-theme="light"]) .live-evidence-check-pass strong { color: var(--t-fx-mint-49); }
+:root:not([data-theme="light"]) .live-evidence-check-review strong { color: var(--t-lg-bronze); }
+:root:not([data-theme="light"]) .live-evidence-check-gap strong { color: var(--t-lg-rust); }
 .live-evidence-check-off strong { color: var(--t-lg-ink-faint); }
 
 /* ---- 그림에 대한 고지 ---- */
@@ -333,23 +333,23 @@
 }
 
 /* ---- 판정 톤: pass / review / gap ---- */
-.live-evidence-showcase-status-review strong { color: var(--t-fx-amber-49-2); }
-.live-evidence-showcase-status-gap strong { color: var(--t-lg-rust); }
+:root:not([data-theme="light"]) .live-evidence-showcase-status-review strong { color: var(--t-fx-amber-49-2); }
+:root:not([data-theme="light"]) .live-evidence-showcase-status-gap strong { color: var(--t-lg-rust); }
 
 .live-evidence-checks {
   border-color: var(--line);
   background: var(--ink-2);
 }
 
-.live-evidence-checks > summary { color: var(--text-muted); }
-.live-evidence-checks li { border-color: var(--line); }
-.live-evidence-checks li p,
-.live-evidence-measures b { color: var(--text-muted); }
-.live-evidence-check-pass strong { color: var(--t-fx-mint-79); }
-.live-evidence-check-review strong { color: var(--t-lg-amber); }
-.live-evidence-check-gap strong { color: var(--t-lg-coral); }
-.live-evidence-showcase-status-review strong { color: var(--t-fx-amber-77); }
-.live-evidence-showcase-status-gap strong { color: var(--t-lg-coral); }
+:root:not([data-theme="light"]) .live-evidence-checks > summary { color: var(--text-muted); }
+:root:not([data-theme="light"]) .live-evidence-checks li { border-color: var(--line); }
+:root:not([data-theme="light"]) .live-evidence-checks li p,
+:root:not([data-theme="light"]) .live-evidence-measures b { color: var(--text-muted); }
+:root:not([data-theme="light"]) .live-evidence-check-pass strong { color: var(--t-fx-mint-79); }
+:root:not([data-theme="light"]) .live-evidence-check-review strong { color: var(--t-lg-amber); }
+:root:not([data-theme="light"]) .live-evidence-check-gap strong { color: var(--t-lg-coral); }
+:root:not([data-theme="light"]) .live-evidence-showcase-status-review strong { color: var(--t-fx-amber-77); }
+:root:not([data-theme="light"]) .live-evidence-showcase-status-gap strong { color: var(--t-lg-coral); }
 
 .cv5-surface .live-evidence-checks {
   border-color: var(--v5-line);

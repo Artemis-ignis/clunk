@@ -10619,25 +10619,25 @@ html.snap-y .docs-page-redesign .docs-final-card {
 .live-evidence-showcase-compact .live-evidence-showcase-statuses { margin-top: 13px; }
 .live-evidence-showcase-compact .live-evidence-showcase-detail h2 { font-size: clamp(1.3rem, 2.2vw, 1.8rem); }
 
-.live-evidence-showcase-detail { background: var(--t-fx-navy-10); }
-.live-evidence-showcase-file { border-color: var(--line); }
-.live-evidence-showcase-file-icon { border-color: var(--t-fx-teal-79-a32); background: var(--t-fx-navy-74-a12); color: var(--accent-bright); }
-.live-evidence-showcase-file strong,
-.live-evidence-showcase-detail h2 { color: var(--text-strong); }
-.live-evidence-showcase-file small,
-.live-evidence-showcase-detail > p,
-.live-evidence-showcase-status small { color: var(--text-muted); }
-.live-evidence-showcase-status { border-color: var(--line); background: var(--ink-2); }
-.live-evidence-showcase-status.is-active { border-color: var(--accent-line); background: var(--accent-soft); }
-.live-evidence-showcase-status span { color: var(--text-dim); }
-.live-evidence-showcase-status strong { color: var(--text-muted); }
-.live-evidence-showcase-proof span { color: var(--text-dim); }
+:root:not([data-theme="light"]) .live-evidence-showcase-detail { background: var(--t-fx-navy-10); }
+:root:not([data-theme="light"]) .live-evidence-showcase-file { border-color: var(--line); }
+:root:not([data-theme="light"]) .live-evidence-showcase-file-icon { border-color: var(--t-fx-teal-79-a32); background: var(--t-fx-navy-74-a12); color: var(--accent-bright); }
+:root:not([data-theme="light"]) .live-evidence-showcase-file strong,
+:root:not([data-theme="light"]) .live-evidence-showcase-detail h2 { color: var(--text-strong); }
+:root:not([data-theme="light"]) .live-evidence-showcase-file small,
+:root:not([data-theme="light"]) .live-evidence-showcase-detail > p,
+:root:not([data-theme="light"]) .live-evidence-showcase-status small { color: var(--text-muted); }
+:root:not([data-theme="light"]) .live-evidence-showcase-status { border-color: var(--line); background: var(--ink-2); }
+:root:not([data-theme="light"]) .live-evidence-showcase-status.is-active { border-color: var(--accent-line); background: var(--accent-soft); }
+:root:not([data-theme="light"]) .live-evidence-showcase-status span { color: var(--text-dim); }
+:root:not([data-theme="light"]) .live-evidence-showcase-status strong { color: var(--text-muted); }
+:root:not([data-theme="light"]) .live-evidence-showcase-proof span { color: var(--text-dim); }
 /* 2026-09-05: --accent-bright(#8b5cf6)는 채우는 색이라 글자로 쓰면 이 패널 바닥
    (#101d2b) 위에서 4.02:1 — 11.52px 코드에 필요한 4.5:1 미달이었다(/agents 실측).
    --accent 는 애초에 "남색 지면 위에서 본문 크기로 읽히는 인디고"로 갈라 둔 값이고,
    같은 바닥에서 7.75:1 이다. */
-.live-evidence-showcase-proof code { color: var(--accent); }
-.live-evidence-showcase-progress { background: var(--ink-4); }
+:root:not([data-theme="light"]) .live-evidence-showcase-proof code { color: var(--accent); }
+:root:not([data-theme="light"]) .live-evidence-showcase-progress { background: var(--ink-4); }
 
 @media (max-width: 1100px) {
   .live-evidence-showcase-controls { grid-template-columns: 1fr 1fr; }
