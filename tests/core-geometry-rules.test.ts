@@ -59,6 +59,7 @@ test("the physical rule registry is separate from the legacy structural registry
     "GEO-GROUND-CONTACT",
     "GEO-FLOATING-PART",
     "GEO-PART-INTERSECTION",
+    "GEO-PART-PENETRATION",
     "GEO-THIN-SHELL",
     "GEO-INVERTED-WINDING",
     "SCENE-ANIMATED-SCALE",
@@ -180,13 +181,18 @@ test("a declared required extension says which engine cannot open the file", asy
 });
 
 /**
- * 무엇이 hard 인가. 어느 물리 규칙도 아니다.
+ * 무엇이 hard 인가. `GEO-PART-PENETRATION` 의 바퀴 관통 하나뿐이다.
  *
- * 같은 측정이 어떤 파일에서는 결함이고 다른 파일에서는 의도이기 때문이다 — 땅 밑으로
- * 내려간 나무 뿌리, 베어링을 지나는 축, 옷 안에 든 몸, 잎사귀 카드. 렌더를 보지 않은
- * 검사가 그 넷과 진짜 결함을 가를 수 없으므로 값과 이름을 대는 데까지만 한다.
+ * 나머지 아홉은 같은 측정이 어떤 파일에서는 결함이고 다른 파일에서는 의도이기 때문이다 —
+ * 땅 밑으로 내려간 나무 뿌리, 베어링을 지나는 축, 옷 안에 든 몸, 잎사귀 카드. 렌더를
+ * 보지 않은 검사가 그 넷과 진짜 결함을 가를 수 없으므로 값과 이름을 대는 데까지만 한다.
+ * 바퀴만 다르다: 굴리면 그 자리를 지나가므로 의도된 바퀴 관통이라는 것이 없다(파일 아래
+ * "규칙 9" 묶음 참고).
+ *
+ * 아래 일곱 픽스처에는 바퀴 관통이 없다. 그래서 이 일곱은 전과 똑같이 valid 여야 한다 —
+ * 새 규칙이 기존 파일의 판정을 조용히 뒤집지 않았다는 것을 이 시험이 지킨다.
  */
-test("no physical rule ever becomes a hard blocker or flips validate to invalid", async () => {
+test("the nine measuring rules stay soft: these files keep their valid verdict", async () => {
   for (const name of [
     "floating-part.glb",
     "ground-offset.glb",
@@ -195,6 +201,8 @@ test("no physical rule ever becomes a hard blocker or flips validate to invalid"
     "tilted-parent.glb",
     "animated-swing.glb",
     "required-extension.glb",
+    "layout-pack.glb",
+    "caged-lamp.glb",
   ]) {
     const bundle = await fixture(name);
     const { valid, report } = validateAsset(bundle);
@@ -569,4 +577,144 @@ test("splitting merged batches does not dissolve the joinery findings of small p
   assert.match(pintles.message, /post_timbers/);
   // 조각 번호가 붙지 않는다 — 이 노드들은 쪼개지 않는다.
   assert.doesNotMatch(pintles.message, /#\d/);
+});
+
+/*
+ * ------------------------------------------------ 규칙 9 — 이름 붙은 부품끼리의 관통
+ *
+ * 왜 이 규칙이 따로 있나. 2026-09-05 밤, 파는 트랙터 파일을 상품 뷰어에 띄운 마스터가
+ * 컬티베이터의 게이지 휠이 첫 타인을 뚫고 그려지는 것을 눈으로 잡았다. 그때 검사기는
+ * 그 파일에 지오메트리 지적을 한 건도 내지 않았다(점수 100). `GEO-PART-INTERSECTION`
+ * 이 두 걸름망에 각각 걸려 못 본 것이다 — `NOT_A_PART` 가 `_rubber$`·`_metal$` 로
+ * 끝나는 이름을 재질 묶음으로 보고 빼고, `BODY_VOLUME_SHARE`(4%) 가 게이지 휠을
+ * "몸통이 아니다"로 걸렀다. 그래서 크기를 묻지 않고 재질 접미사로 부품을 지우지 않는
+ * 규칙을 따로 두었다.
+ *
+ * 픽스처는 그날 판 파일을 그대로 복사해 둔 것이다. 마켓 파일이 고쳐지면 그 파일은
+ * 조용해지지만, 이 사본은 결함을 영원히 들고 있어야 규칙이 아직 도는지 알 수 있다.
+ */
+test("the gauge wheel through the cultivator tine is caught in the file that shipped", async () => {
+  const report = inspectAsset(await fixture("tractor-gauge-wheel-in-tine.glb"));
+  const hits = byRule(report.findings, "GEO-PART-PENETRATION");
+  assert.equal(hits.length, 4, hits.map((hit) => hit.message).join("\n"));
+
+  const pairs = hits.map((hit) => hit.message.split(" 을(를)")[0].replace(" 이(가) ", " × "));
+  assert.deepEqual(pairs.sort(), [
+    "gaugeWheelLeft_rubber × pivottine01_metal",
+    "gaugeWheelLeft_rubber × sweep1",
+    "gaugeWheelRight_rubber × pivottine07_metal",
+    "gaugeWheelRight_rubber × sweep7",
+  ]);
+
+  // 굴러야 하는 부품이 낀 쌍이므로 넷 다 ERROR 이고, 이 파일은 hard blocker 를 얻는다.
+  for (const hit of hits) assert.equal(hit.severity, "ERROR", hit.message);
+  assert.equal(report.score.hardBlockerCount, 4);
+
+  const shank = hits.find((hit) => hit.message.includes("pivottine01_metal"));
+  assert.ok(shank);
+  // 겹친 구간의 상자 214.8 × 233 × 65 mm — 가장 긴 축을 사람이 읽는 "겹침"으로 낸다.
+  assert.equal(shank.observed, "233 mm");
+  assert.match(shank.message, /겹친 구간 214\.8 × 233 × 65 mm/);
+  assert.match(shank.message, /가장 얕은 축 65 mm/);
+  assert.match(shank.message, /굴러야 하는 부품입니다/);
+
+  // 좌우 대칭 모델이므로 왼쪽과 오른쪽이 같은 값으로 나와야 한다.
+  const left = hits.find((hit) => hit.message.startsWith("gaugeWheelLeft_rubber 이(가) sweep1"));
+  const right = hits.find((hit) => hit.message.startsWith("gaugeWheelRight_rubber 이(가) sweep7"));
+  assert.equal(left?.observed, "421.5 mm");
+  assert.equal(right?.observed, "421.5 mm");
+});
+
+/**
+ * 같은 파일에서 조립은 지적하지 않는다. 이 넷이 걸리면 이 규칙은 쓸 수 없다 —
+ * 타이어는 림에 끼우고, 볼트는 생크를 지나고, 스위프는 생크 발에 물린다.
+ */
+test("a wheel's own rim, its bolts and its shank are not called a penetration", async () => {
+  const report = inspectAsset(await fixture("tractor-gauge-wheel-in-tine.glb"));
+  const messages = byRule(report.findings, "GEO-PART-PENETRATION").map((hit) => hit.message);
+  for (const pair of [
+    ["gaugeWheelLefthub", "gaugeWheelLeft_rubber"], // 같은 조립품(gaugeWheelLeft)의 조각.
+    ["tineBolt1-1", "pivottine01_metal"], // 볼트는 지나라고 있는 것이다.
+    ["sweep1", "pivottine01_metal"], // 스위프는 생크 발에 물린다.
+    ["tread", "wheelFrontLeft_matte"], // 트레드는 그 바퀴의 겉이다.
+  ]) {
+    const both = messages.find((message) => message.includes(pair[0]) && message.includes(pair[1]));
+    assert.equal(both, undefined, `${pair.join(" × ")} 가 조립인데 관통으로 나왔습니다: ${both}`);
+  }
+});
+
+/**
+ * 세 경우를 한 픽스처에 넣어 두었다. 떨어진 둘·면을 맞댄 둘은 조용하고, 가로지르는
+ * 둘만 걸린다. 면을 맞댄 쪽이 중요하다 — 맞닿은 면의 삼각형은 공면이라 Möller 판정이
+ * 참이 되므로, 깊이를 안 보면 상자를 쌓아 만든 모든 파일이 관통으로 나온다.
+ */
+test("separated boxes and flush boxes are not a penetration; crossing boxes are", async () => {
+  const report = inspectAsset(await fixture("crossing-parts.glb"));
+  const hits = byRule(report.findings, "GEO-PART-PENETRATION");
+  const messages = hits.map((hit) => hit.message).join("\n");
+
+  assert.doesNotMatch(messages, /loneBarrel|farCrate/, "상자가 300 mm 떨어진 둘이 걸렸습니다");
+  assert.doesNotMatch(messages, /stoneBlock|deckPlank/, "면을 맞댄 둘이 걸렸습니다");
+  assert.equal(hits.length, 2, messages);
+
+  const rail = hits.find((hit) => hit.message.includes("ladderRail"));
+  assert.ok(rail);
+  // 바퀴가 아닌 쌍은 INFO — 2026-09-05 감사에서 그런 쌍 169건이 전부 의도된 조립이었다.
+  assert.equal(rail.severity, "INFO");
+  assert.equal(rail.observed, "600 mm");
+  assert.match(rail.message, /ladderRail 이\(가\) waterTrough 을\(를\) 관통합니다/);
+  assert.match(rail.message, /겹친 구간 600 × 100 × 100 mm/);
+});
+
+/**
+ * 등급 정책. 같은 모양이라도 한쪽 이름이 바퀴면 ERROR 다 — 바퀴는 굴러야 하고, 굴리면
+ * 그 자리를 지나가므로 의도된 바퀴 관통이라는 것은 없다. 이 규칙만 hard blocker 를
+ * 만들 수 있고, 그래서 `validateAsset` 의 valid 가 뒤집힌다.
+ */
+test("a rolling part raises the pair to ERROR and that is the one physical hard blocker", async () => {
+  const bundle = await fixture("crossing-parts.glb");
+  const report = inspectAsset(bundle);
+  const wheel = byRule(report.findings, "GEO-PART-PENETRATION").find((hit) => hit.message.includes("cartWheel"));
+  assert.ok(wheel);
+  assert.equal(wheel.severity, "ERROR");
+  assert.equal(wheel.observed, "800 mm");
+  assert.match(wheel.message, /cartWheel 은\(는\) 굴러야 하는 부품입니다/);
+  assert.equal(report.score.hardBlockerCount, 1);
+  assert.equal(validateAsset(bundle).valid, false);
+
+  // 프로파일이 끄면 hard blocker 도 같이 사라진다 — 판정은 프로젝트가 정한다.
+  const quiet = createCustomProfile({
+    id: "penetration-quiet-test",
+    version: "1.0.0",
+    rules: { "GEO-PART-PENETRATION": { enabled: false } },
+  });
+  const silenced = inspectAsset(bundle, { customProfile: quiet });
+  assert.deepEqual(byRule(silenced.findings, "GEO-PART-PENETRATION"), []);
+  assert.equal(silenced.score.hardBlockerCount, 0);
+});
+
+/**
+ * 스킨드 메시는 재지 않는다. 픽스처는 같은 모양을 두 번 넣어 두었다 — 왼쪽 천만
+ * 스킨드다. 스킨드 쪽이 조용하고 스킨 없는 쪽이 걸려야 "모양이 원래 안 걸린다"가
+ * 아니라 "스킨이라서 뺐다"가 증명된다.
+ */
+test("a skinned mesh is left alone: its POSITION is the bind pose, not the pose on screen", async () => {
+  const report = inspectAsset(await fixture("skinned-crossing.glb"));
+  const hits = byRule(report.findings, "GEO-PART-PENETRATION");
+  assert.equal(hits.length, 1, hits.map((hit) => hit.message).join("\n"));
+  assert.match(hits[0].message, /plainRope 이\(가\) kerbStone/);
+  assert.doesNotMatch(hits[0].message, /capeCloth|standingStone/);
+});
+
+/**
+ * 시간. 게이지 휠을 잡느라 파는 파일 하나를 몇 초씩 붙잡고 있으면 검사 API 가 못 쓴다.
+ * 삼각형 59,232 개짜리 트랙터에서 전체 검사가 5 초 예산 안에 들어야 한다.
+ */
+test("the penetration rule stays inside the time budget on a 59k-triangle sale file", async () => {
+  const bundle = await fixture("tractor-gauge-wheel-in-tine.glb");
+  const started = Date.now();
+  const report = inspectAsset(bundle);
+  const elapsed = Date.now() - started;
+  assert.equal(byRule(report.findings, "GEO-PART-PENETRATION").length, 4);
+  assert.ok(elapsed < 5_000, `${elapsed} ms, over the 5 s budget`);
 });

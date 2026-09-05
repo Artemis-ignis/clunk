@@ -74,6 +74,7 @@ Clunk의 기본 정책은 `web` / `mobile` / `pc` 세 가지 내장 프로파일
 | `GEO-GROUND-CONTACT` | geometry | WARNING | 장면 최저점이 y = 0 에서 몇 mm인가 |
 | `GEO-FLOATING-PART` | geometry | WARNING | 바닥에도 다른 부품에도 닿지 않는 부품과 가장 가까운 것까지의 간격(mm) |
 | `GEO-PART-INTERSECTION` | geometry | WARNING (겹침 ≤ 5 mm 는 INFO) | 삼각형이 실제로 교차하는 부품 쌍과 관통 깊이(mm)·애니메이션 위상 |
+| `GEO-PART-PENETRATION` | geometry | INFO(점수에 안 들어감), 바퀴·타이어·롤러가 낀 쌍은 ERROR | 이름이 다른 부품 둘이 서로를 뚫고 지나간 자리 — 쌍 이름, 겹친 구간(x·y·z mm), 실제로 교차한 삼각형 쌍의 수 |
 | `GEO-THIN-SHELL` | geometry | WARNING (전부 doubleSided 면 INFO) | 두께 0.5 mm 미만인 판의 수와 단면 여부 |
 | `GEO-INVERTED-WINDING` | geometry | WARNING (전부 doubleSided 면 INFO) | 닫힌 메시의 부호 있는 부피 Σ a·(b×c)/6 가 음수인 것 = 면이 안쪽을 봄 |
 | `SCENE-ANIMATED-SCALE` | scene | INFO | scale 채널을 모는 클립과 노드 이름 |
@@ -82,7 +83,9 @@ Clunk의 기본 정책은 `web` / `mobile` / `pc` 세 가지 내장 프로파일
 | `FORMAT-EXTENSION-REQUIRED` | format | WARNING | `extensionsRequired` 에 선언된 확장 |
 | `GEO-ANALYSIS-LIMIT` | geometry | INFO | 상한에 걸려 못 잰 부분이 있다는 사실 |
 
-이 묶음은 어느 것도 ERROR/CRITICAL이 아닙니다. 같은 측정이 어떤 파일에서는 결함이고 다른 파일에서는 의도이기 때문입니다 — 땅 밑으로 내려간 나무 뿌리, 베어링을 지나는 축, 옷 안에 든 몸, 잎사귀 카드. 그래서 `hardBlockerCount` 와 `validateAsset` 의 `valid` 는 이 묶음 때문에 바뀌지 않습니다. 프로파일에서 `severity` 를 ERROR로 올리면 그때부터는 바뀝니다.
+이 묶음에서 ERROR가 될 수 있는 것은 `GEO-PART-PENETRATION` 하나뿐입니다. 나머지 아홉은 같은 측정이 어떤 파일에서는 결함이고 다른 파일에서는 의도이기 때문입니다 — 땅 밑으로 내려간 나무 뿌리, 베어링을 지나는 축, 옷 안에 든 몸, 잎사귀 카드. 그래서 `hardBlockerCount` 와 `validateAsset` 의 `valid` 는 그 아홉 때문에 바뀌지 않습니다. 프로파일에서 `severity` 를 ERROR로 올리면 그때부터는 바뀝니다.
+
+**`GEO-PART-PENETRATION` 만 예외인 이유.** 바퀴·타이어·롤러가 다른 부품과 같은 부피를 쓰고 있으면 그것은 의도일 수 없습니다. 바퀴는 굴러야 하고, 굴리면 그 자리를 지나가므로 어느 위상에서도 그 부품을 뚫습니다. 그래서 그 쌍만 ERROR로 내고, 굴러야 하는 부품이 끼지 않은 쌍은 WARNING입니다. 반대로 지나라고 만든 것 — 볼트·핀·나사, 그리고 같은 조립품 안의 조각(림과 허브, 생크와 스위프) — 은 이름 줄기와 노드 계보로 걸러 아예 지적하지 않고, 면을 맞대기만 한 것(겹친 두께 5 mm 이하)도 내지 않습니다. 스킨드 메시(JOINTS_0)는 POSITION이 바인드 포즈라 재지 않습니다. 프로파일에서 `{"GEO-PART-PENETRATION": {"severity": "INFO"}}` 로 내리거나 `{"enabled": false}` 로 끌 수 있습니다.
 
 **`GEO-INVERTED-WINDING` 이 보는 것과 보지 않는 것.** 닫힌 메시(붙인 꼭짓점 기준으로 모든 모서리가 정방향 한 번·역방향 한 번씩만 쓰인 것)만 잽니다. 열린 면(잎사귀 카드, 천, 벽 한 장)에서는 부호 있는 부피가 원점 위치에 따라 부호가 바뀌어 아무 뜻이 없으므로 아예 재지 않습니다. glTF 규격대로 노드 전역 변환의 행렬식이 음수인 거울 인스턴스는 감김이 뒤집혀 그려지므로 결함이 아니며, 판정은 그 부호를 되돌린 뒤에 합니다.
 

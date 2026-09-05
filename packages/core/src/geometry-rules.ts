@@ -28,6 +28,7 @@ export type PhysicalRuleId =
   | "GEO-GROUND-CONTACT"
   | "GEO-FLOATING-PART"
   | "GEO-PART-INTERSECTION"
+  | "GEO-PART-PENETRATION"
   | "GEO-THIN-SHELL"
   | "GEO-INVERTED-WINDING"
   | "SCENE-ANIMATED-SCALE"
@@ -43,16 +44,23 @@ export interface PhysicalRuleDescriptor {
 }
 
 /**
- * 새 규칙의 등급. 어느 것도 ERROR/CRITICAL 이 아니다 — 그래서 `hardBlockerCount` 와
- * `validateAsset` 의 valid 는 이 묶음 때문에 바뀌지 않는다. 근거는 파일마다 의도가
- * 갈리기 때문이다: 뿌리가 땅 밑으로 내려가는 나무 팩, 옷 안에 든 몸, 베어링을 지나는
- * 축, 잎사귀 카드는 전부 여기 규칙에 걸리지만 결함이 아니다. 렌더를 보지 않은 검사가
- * 그 넷과 진짜 결함을 가를 수 없으므로, 재서 이름과 mm 를 대는 데까지만 한다.
+ * 새 규칙의 등급. `GEO-PART-PENETRATION` 하나를 빼면 어느 것도 ERROR/CRITICAL 이
+ * 아니다 — 그래서 `hardBlockerCount` 와 `validateAsset` 의 valid 는 나머지 아홉 때문에
+ * 바뀌지 않는다. 근거는 파일마다 의도가 갈리기 때문이다: 뿌리가 땅 밑으로 내려가는
+ * 나무 팩, 옷 안에 든 몸, 베어링을 지나는 축, 잎사귀 카드는 전부 여기 규칙에 걸리지만
+ * 결함이 아니다. 렌더를 보지 않은 검사가 그 넷과 진짜 결함을 가를 수 없으므로, 재서
+ * 이름과 mm 를 대는 데까지만 한다.
+ *
+ * `GEO-PART-PENETRATION` 만 예외인 이유는 그 규칙 문단(analysePenetration)에 적었다.
+ * 기본 등급은 WARNING 이고, 굴러야 하는 부품이 낀 쌍에서만 ERROR 로 올라간다.
  */
 export const PHYSICAL_RULE_CATALOG: readonly PhysicalRuleDescriptor[] = [
   { id: "GEO-GROUND-CONTACT", category: "geometry", defaultSeverity: "WARNING" },
   { id: "GEO-FLOATING-PART", category: "geometry", defaultSeverity: "WARNING" },
   { id: "GEO-PART-INTERSECTION", category: "geometry", defaultSeverity: "WARNING" },
+  // 2026-09-05 감사: 바퀴가 아닌 쌍 169건은 전부 의도된 조립(널판이 벽에, 광맥이 모암에)이었고 깊이로도
+  // 갈리지 않았다(가장 얕은 축 2~1,050 mm 고루 분포). 그래서 바퀴가 아닌 쌍은 INFO — 목록에는 남기되 점수는 깎지 않는다.
+  { id: "GEO-PART-PENETRATION", category: "geometry", defaultSeverity: "INFO" },
   { id: "GEO-THIN-SHELL", category: "geometry", defaultSeverity: "WARNING" },
   { id: "GEO-INVERTED-WINDING", category: "geometry", defaultSeverity: "WARNING" },
   { id: "SCENE-ANIMATED-SCALE", category: "scene", defaultSeverity: "INFO" },
@@ -213,6 +221,33 @@ export interface PhysicalIntersectionMeasurement {
   bDetail: string | null;
 }
 
+/**
+ * 이름 붙은 부품 둘이 서로를 뚫고 지나간 자리. `GEO-PART-PENETRATION` 의 증거다.
+ *
+ * `PhysicalIntersectionMeasurement` 과 무엇이 다른가. 저쪽은 "몸통"을 지나는 것만
+ * 보고, 이름이 재질을 가리키는 부품(`*_metal` · `*_rubber` · `body_*`)을 통째로
+ * 판정에서 뺀다. 그 두 걸름망이 겹치는 자리가 이 규칙이 생긴 이유다 — 아래
+ * analysePenetration 문단 참고.
+ */
+export interface PhysicalPenetrationMeasurement {
+  aName: string;
+  bName: string;
+  aNodeIndex: number;
+  bNodeIndex: number;
+  /** 실제로 교차한 삼각형 쌍의 수. 상자가 아니라 면끼리 만난 횟수다. */
+  trianglePairs: number;
+  /** 교차한 삼각형들이 겹친 구간의 상자 크기(월드 mm, x·y·z). */
+  overlapMm: readonly [number, number, number];
+  /** overlapMm 의 가장 긴 축. 화면에서 보이는 겹침의 크기다. */
+  extentMm: number;
+  /** overlapMm 의 가장 짧은 축. 빼내려면 얼마나 밀어야 하는가. */
+  depthMm: number;
+  /** 굴러야 하는 부품(바퀴·타이어·롤러·스프로킷)이 낀 쌍인가. */
+  rolling: boolean;
+  /** 그 굴러야 하는 부품의 이름. 아니면 null. */
+  rollingName: string | null;
+}
+
 export interface PhysicalInvertedMeshMeasurement {
   name: string;
   nodeIndex: number;
@@ -262,6 +297,14 @@ export interface PhysicalMetrics {
   suppressedIntersections: number;
   floatingParts: readonly PhysicalFloatingMeasurement[];
   intersections: readonly PhysicalIntersectionMeasurement[];
+  /** 이름 붙은 부품끼리의 관통. 깊은 것부터 MAX_PENETRATION_FINDINGS 개까지. */
+  penetrations: readonly PhysicalPenetrationMeasurement[];
+  /** 관통 검사에 들어간 이름 붙은 부품의 수(스킨·무명·부스러기를 뺀 뒤). */
+  penetrationPartCount: number;
+  /** 상자가 겹쳐 삼각형까지 본 부품 쌍의 수. */
+  penetrationPairsTested: number;
+  /** 걸러 내고도 남았지만 상한 때문에 싣지 못한 관통 쌍의 수. */
+  suppressedPenetrations: number;
   thinShellPrimitiveCount: number;
   thinShellSingleSidedCount: number;
   thinShellNames: readonly string[];
@@ -372,6 +415,10 @@ export function inspectPhysicalPlausibility(source: PhysicalInspectionSource): P
     groundOffsetMm: null,
     floatingParts: [],
     intersections: [],
+    penetrations: [],
+    penetrationPartCount: 0,
+    penetrationPairsTested: 0,
+    suppressedPenetrations: 0,
     thinShellPrimitiveCount: 0,
     thinShellSingleSidedCount: 0,
     thinShellNames: [],
@@ -651,6 +698,72 @@ export function inspectPhysicalPlausibility(source: PhysicalInspectionSource): P
         analysis.intersections.length,
         false,
         "실린 것부터 고치고 다시 검사하십시오.",
+      ),
+    );
+  }
+
+  /*
+   * 규칙 9 — 이름 붙은 부품끼리의 관통.
+   *
+   * 노드 단위 부품(`parts`)을 쓴다. 쪼갠 조각이 아니라 사는 사람이 아웃라이너에서 보는
+   * 이름이 이 규칙의 단위다. 왜 규칙 3 과 따로 도는지는 analysePenetration 문단에 적었다.
+   */
+  const penetration = analysePenetration(parts, nodeNames, skinnedMeshIndices(json));
+  metrics.penetrations = penetration.penetrations;
+  metrics.penetrationPartCount = penetration.partCount;
+  metrics.penetrationPairsTested = penetration.pairsTested;
+  metrics.suppressedPenetrations = penetration.suppressed;
+  for (const hit of penetration.penetrations) {
+    const size = `${hit.overlapMm[0]} × ${hit.overlapMm[1]} × ${hit.overlapMm[2]} mm`;
+    findings.push(
+      makeFinding(
+        "GEO-PART-PENETRATION",
+        hit.rolling ? "ERROR" : "INFO",
+        `/nodes/${hit.aNodeIndex}|/nodes/${hit.bNodeIndex}`,
+        hit.rolling ? "굴러야 하는 부품이 다른 부품을 관통함" : "부품이 다른 부품을 관통함",
+        `${hit.aName} 이(가) ${hit.bName} 을(를) 관통합니다 — 겹침 약 ${hit.extentMm} mm(겹친 구간 ${size}, 가장 얕은 축 ${hit.depthMm} mm), 실제로 교차한 삼각형 ${hit.trianglePairs}쌍. ${
+          hit.rolling
+            ? `${hit.rollingName} 은(는) 굴러야 하는 부품입니다. 굴리면 그 자리를 지나가므로 어느 위상에서도 ${hit.bName} 을(를) 뚫습니다 — 게임에 그대로 넣을 수 있는 상태가 아닙니다.`
+            : "관이 벽을 지나거나 손잡이가 문에 박히는 것처럼 일부러 겹쳐 만드는 자리일 수 있습니다. 렌더를 보고 판단하십시오."
+        }`,
+        `${hit.extentMm} mm`,
+        // observed 는 겹친 구간의 가장 긴 축(사람이 화면에서 보는 크기)이고, 문턱은 가장
+        // 얕은 축에 걸린다. 같은 축의 비교가 아니므로 문턱 쪽에 어느 축인지 적어 둔다.
+        `가장 얕은 축 ≤ ${SEAM_DEPTH_MM} mm`,
+        false,
+        hit.rolling
+          ? `원본에서 ${hit.aName} 을(를) ${hit.bName} 밖으로 옮겨 다시 내보내십시오.`
+          : "의도한 겹침이 아니면 원본에서 부품 위치를 고쳐 다시 내보내십시오.",
+      ),
+    );
+  }
+  if (penetration.suppressed > 0) {
+    findings.push(
+      makeFinding(
+        "GEO-ANALYSIS-LIMIT",
+        "INFO",
+        "/meshes/penetrations",
+        "부품 관통 지적을 큰 것부터 잘라 실었음",
+        `이름 붙은 부품끼리의 관통이 ${penetration.suppressed + penetration.penetrations.length}쌍이라 겹침이 큰 것부터 ${penetration.penetrations.length}쌍만 실었습니다.`,
+        penetration.suppressed + penetration.penetrations.length,
+        penetration.penetrations.length,
+        false,
+        "실린 것부터 고치고 다시 검사하십시오.",
+      ),
+    );
+  }
+  if (penetration.truncated) {
+    findings.push(
+      makeFinding(
+        "GEO-ANALYSIS-LIMIT",
+        "INFO",
+        "/meshes/penetration-budget",
+        "부품 관통 검사가 상한에서 잘림",
+        `상자가 겹치는 부품 쌍이 상한 ${MAX_PENETRATION_PAIRS.toLocaleString()}쌍을 넘어 일부를 보지 못했습니다. 여기 실린 관통은 실제로 찾은 것이고, 못 본 쌍이 남아 있을 수 있습니다.`,
+        penetration.pairsTested,
+        MAX_PENETRATION_PAIRS,
+        false,
+        "부품 수가 적은 LOD 로 다시 검사하십시오.",
       ),
     );
   }
@@ -1842,6 +1955,387 @@ function groupOf(part: PhysicalPart, nodeNames: readonly string[]): string | nul
   return ancestors.length ? ancestors[ancestors.length - 1] || null : null;
 }
 
+/* ------------------------------------------------- 규칙 9 — 이름 붙은 부품끼리의 관통
+ *
+ * 이 규칙이 왜 따로 있는가. 2026-09-05 밤, 파는 파일
+ * public/market/hf-tractor-compact/tractor.compact.m1.glb 를 상품 뷰어에 띄운 마스터가
+ * 컬티베이터의 게이지 휠이 첫 번째 타인을 뚫고 그려지는 것을 눈으로 잡았다. 검사기는
+ * 그 파일에 지오메트리 지적을 한 건도 내지 않았다(점수 100). 실측한 월드 상자(mm):
+ *
+ *   gaugeWheelLeft_rubber  x 2217..2703  y   6..491  z -1290..-1150
+ *   pivottine01_metal      x 1990..2860  y  17..827  z -1405..-1155
+ *   sweep1                 x 2276..2930  y   0.. 89  z -1434..-1176
+ *
+ * 왜 GEO-PART-INTERSECTION 이 이것을 못 봤나. 두 걸름망에 각각 걸렸다.
+ *   (1) `NOT_A_PART` 가 `_rubber$` · `_metal$` 로 끝나는 이름을 재질 묶음으로 보고
+ *       판정에서 뺀다. 이 파일은 재질 이름을 부품 이름에 붙여 내보낸 파일이라
+ *       게이지 휠도 타인도 통째로 빠졌다.
+ *   (2) 살아남았더라도 `BODY_VOLUME_SHARE`(4%) 가 막는다. 트랙터 전체 상자는
+ *       4.93 m × 2.92 m × 3.16 m 이고 게이지 휠 림은 그 0.008% 다.
+ * 두 걸름망 다 근거가 있다(볼트가 브래킷을 지나는 것을 367건 쏟아내지 않으려고 넣었다).
+ * 그래서 그 규칙을 느슨하게 푸는 대신, "이름이 다른 부품 둘이 서로를 뚫었는가"만 보는
+ * 규칙을 따로 만든다 — 크기를 묻지 않고, 재질 접미사로 부품을 지우지 않는다.
+ *
+ * 대신 조립을 결함이라 부르지 않도록 계보로 거른다(아래 `sameAssembly`). 실측으로 고른
+ * 기준은 "부품 이름이 두 부품의 최소 공통 조상 이름과 같은 줄기면 그 둘은 한 조립품"
+ * 이다. 트랙터에서:
+ *   sweep1 × pivottine01_metal → 공통 조상 `pivottine01`, 줄기 일치 → 조립
+ *   tread  × wheelFrontLeft_matte → 공통 조상 `wheelFrontLeft`, 줄기 일치 → 조립
+ *   gaugeWheelLeft_rubber × pivottine01_metal → 공통 조상 `cultivatorRoot` → 남 → 지적
+ *
+ * 등급 정책 (마스터 지시 2026-09-05, 근거를 여기 적어 둔다).
+ *
+ *   굴러야 하는 부품(바퀴·타이어·롤러·스프로킷·트레드)이 낀 쌍은 ERROR 다. 다른 물리
+ *   규칙이 전부 WARNING 이하인 이유 — "재는 것과 판정하는 것은 다르다", 뿌리는 땅에
+ *   묻히고 축은 베어링을 지난다 — 가 여기엔 적용되지 않는다. 바퀴는 굴러야 하고, 굴리면
+ *   그 자리를 지나간다. 다른 부품과 같은 부피를 쓰는 바퀴는 어느 위상에서도 그 부품을
+ *   뚫으므로, 의도된 바퀴 관통이라는 것은 없다. 게임에 넣을 수 있는 차량이 아니다.
+ *   사는 사람이 뷰어를 돌려 보기 전에 이것을 알아야 하므로 hard blocker 로 낸다.
+ *
+ *   바퀴가 아닌 쌍은 WARNING 이다. 관은 벽을 지나고, 못은 판을 지나고, 손잡이는 문에
+ *   박힌다 — 그 셋을 렌더 없이 진짜 결함과 가를 수 없다. 이름과 mm 를 대는 데까지만 한다.
+ *
+ *   `SEAM_DEPTH_MM`(5 mm) 이하로 얕게 만난 것은 아예 내지 않는다. 상자 두 개를 맞대면
+ *   맞닿은 면의 삼각형이 공면으로 교차하므로 Möller 판정은 참이 되지만 겹친 두께는 0 이다.
+ *   그건 관통이 아니라 접촉이고, 접촉은 조립의 정의다.
+ */
+
+/**
+ * 굴러야 하는 부품. 이 이름이 낀 관통은 ERROR 다.
+ *
+ * `drum`·`barrel`·`roll`(두루마리) 은 일부러 뺐다 — 기름통과 건초 롤은 굴러야 하는
+ * 부품이 아니라 소품이고, 그것이 다른 것과 겹치는 것은 배치의 문제이지 조립의 문제가
+ * 아니다. `rim`·`hub` 도 뺐다: 그 둘은 언제나 타이어와 겹치도록 만드는 부품이고,
+ * 타이어 쪽이 이미 이 목록에 있어서 진짜 결함은 그쪽으로 잡힌다.
+ */
+const ROLLING_PART = /wheel|tyre|tire|roller|caster|castor|sprocket|pulley|tread|cogwheel/i;
+/**
+ * 축을 함께 담은 이름. 이런 이름은 바퀴로 치지 않는다.
+ *
+ * 실측(2026-09-05): mine-cart 는 메시 노드가 넷뿐이고 그 가운데 `axle_front_wheels` 는
+ * 굴대 하나와 바퀴 둘을 한 노드에 담은 것이다. 그것이 `ironwork`(차대)를 지나는 자리를
+ * 재면 겹친 구간이 44 × 44 mm 단면으로 455 mm 뻗은 막대 — 축이 베어링을 지나는 자리다.
+ * 축은 지나라고 있는 것인데 이름에 `wheels` 가 들어 있다는 이유로 ERROR 가 되면, 파는
+ * 광차 세 종이 hard blocker 를 얻는다(그래서 tests/mcp-http-contract 의
+ * "valid 가 evidence 와 어긋나지 않는다" 시험이 깨졌다).
+ *
+ * 어느 삼각형이 바퀴 것이고 어느 것이 축 것인지 이 규칙은 모른다. 모르는 것을 ERROR 로
+ * 내지 않는다 — 그런 쌍은 등급을 올리지 않고 WARNING 층에 남긴다.
+ */
+const SHAFT_PART = /axle|shaft|spindle|arbor|axis/i;
+
+/** 굴러야 하는 부품인가. 축을 함께 담은 이름은 아니다(위 SHAFT_PART 문단). */
+function isRollingPart(name: string): boolean {
+  return ROLLING_PART.test(name) && !SHAFT_PART.test(name);
+}
+/**
+ * 지나가라고 만든 부품. 어느 쌍에서든 이쪽이 끼면 지적하지 않는다.
+ *
+ * 마스터가 지목한 `tineBolt1-1` × `pivottine01` 이 여기 해당한다. 그 쌍은 계보로도
+ * 걸러지지만(공통 조상 `tine01`), 이름만 있고 계층이 평평한 파일에서는 이 목록이
+ * 유일한 방어선이다.
+ */
+const FASTENER_PART = /bolt|screw|rivet|washer|\bnut\b|stud|dowel|nail|tack|\bpin\b|\bpeg\b|weld/i;
+/**
+ * 부품 이름이 아니라 재질 묶음의 이름인 것.
+ *
+ * `NOT_A_PART` 와 무엇이 다른가. 저쪽은 `_metal$` · `_rubber$` 처럼 *접미사*까지 걸러서
+ * `gaugeWheelLeft_rubber` 같은 진짜 부품을 통째로 지운다 — 트랙터를 놓친 원인 (1) 이
+ * 그것이다. 여기서는 이름이 오직 재질만 가리키는 것(`body_matte`,
+ * `body_glass-0-760-0-120`, `barnbatch0`)과 부품이 아닌 것(콜라이더·프록시)만 뺀다.
+ *
+ * 왜 빼야 하는가. 2026-09-05 실측: 이 걸름망 없이 트랙터를 돌리면 관통 36쌍이 나오고
+ * 그 가운데 11쌍이 `treadLugs_2 × body_matte` 꼴이다. `body_matte` 는 매트 재질을 쓰는
+ * 모든 삼각형을 한 노드에 몰아넣은 것이라 "무엇이 무엇을 뚫었다"고 말할 부품이 없다.
+ * 그 안쪽은 용접 성분으로 쪼개 보는 `GEO-PART-INTERSECTION` 의 일이다.
+ */
+const MATERIAL_BATCH_NAME = /^body[_-]|^mesh_\d+_instance_|collider|proxy|batch\d*$/i;
+/**
+ * 떨어진 덩어리 이 개수를 넘으면 그 노드는 한 덩이가 아니라 여러 물건의 묶음이다.
+ *
+ * 이름으로는 못 가린다 — `deck_ironwork` · `crate_slats` · `siloStaves` ·
+ * `wall_lap_siding` 은 전부 평범한 부품 이름인데 실제로는 볼트 수십 개, 널판 스무 장,
+ * 통널 열여섯 장을 한 노드에 담은 묶음이다.
+ *
+ * 그런데 이것 하나로 부품을 지우면 안 된다. 실측(2026-09-05): 트랙터의
+ * `gaugeWheelLeft_rubber` 는 트레드 블록 14개로 만든 타이어라 덩어리가 14개다 —
+ * 묶음 기준만 보면 잡아야 할 바로 그 바퀴가 지워진다. 그래서 *양쪽 다* 묶음일 때만
+ * 뺀다(`bothGroups`): 어느 쪽도 한 덩이가 아니면 무엇이 무엇을 뚫었는지 이 파일에
+ * 이름이 없다는 뜻이고, 그때는 지적할 대상 자체가 없다.
+ *
+ * 4 로 정한 근거. 이 걸름망 없이 마켓 GLB 87개를 돌리면 67개가 걸리고 그 대부분이
+ * `deck_bearers × deck_ironwork` 꼴이다. 양쪽 묶음 기준을 넣으면 그 꼴이 빠지고,
+ * 잡아야 할 것(게이지 휠 × 타인, 광차 바퀴 × 철물)은 그대로 남는다.
+ */
+const PART_ISLAND_LIMIT = 4;
+/** 이름 줄기를 견줄 때 이보다 짧은 조각은 우연히 겹칠 수 있으므로 같은 줄기로 보지 않는다. */
+const STEM_MIN_LENGTH = 3;
+/** 한 파일에서 낼 관통 지적의 최대 수. */
+const MAX_PENETRATION_FINDINGS = 12;
+/** 상자가 겹쳐 삼각형까지 볼 부품 쌍의 상한. 넘으면 잘렸다고 말한다. */
+const MAX_PENETRATION_PAIRS = 20_000;
+/**
+ * 한 쌍에서 모을 교차 삼각형 쌍의 수. 겹침 상자를 이 표본으로 만든다.
+ *
+ * 접촉 분석의 48 개보다 크게 잡는다. 저쪽은 "겹쳤나"만 알면 되지만 이 규칙은 겹친
+ * 구간의 크기를 사람에게 mm 로 읽어 주므로, 표본이 적으면 그 상자가 실제보다 작게
+ * 나온다 — 실측(트랙터, gaugeWheelLeft_rubber × sweep1): 48 개면 325.4 mm, 512 개면
+ * 421.5 mm 이고, 뒤엣것이라야 좌우 대칭인 이 모델에서 왼쪽과 오른쪽이 같은 값으로
+ * 나온다(48 개에서는 325.4 mm 대 140.5 mm 로 갈렸다). 후보 쌍이 몇십 개뿐이라 열 배로
+ * 올려도 시간은 거의 그대로다(59,232 삼각형 파일 전체 검사가 0.85 초).
+ */
+const MAX_PENETRATION_TRIANGLE_PAIRS = 512;
+
+/**
+ * 한 부품 안에서 역할을 가리키는 꼬리말. 이것까지 떼야 같은 부품의 조각이 한 줄기가 된다.
+ *
+ * 실측으로 고른 목록이다. 이것이 없으면 cozy-tractor 의 `wheel_fl_tyre` 와
+ * `wheel_fl_hub` 이 남남으로 남아 "타이어가 허브를 260 mm 관통한다"는 가짜 지적이
+ * 네 바퀴에서 여덟 건 난다 — 타이어는 허브에 끼우는 것이다.
+ */
+const PART_ROLE_SUFFIX =
+  /[._\- ](tyre|tire|rim|hub|hubcap|spokes?|treads?|lugs?|discs?|disks?|cap|shell|core|inner|outer|left|right|front|rear|back|upper|lower|top|bottom|fl|fr|rl|rr)$|[._\- ]*\d+$/;
+/**
+ * 색·명암으로 한 물건을 갈라 놓은 이름의 꼬리말(`fountain_basin_stoneLight` ·
+ * `...stoneShadow` · `...stoneBody`). 붙여쓴 대문자로 오므로 소문자로 내리기 전에 뗀다.
+ */
+const COLOUR_SPLIT_SUFFIX = /(?:Light|Dark|Shadow|Body|Mid|Tint|Accent)$/;
+
+/**
+ * 이름을 줄기로 줄인다. 재질 접미사·역할 꼬리말·사본 번호·대소문자를 지운다.
+ *
+ * `gaugeWheelLeft_rubber` → `gaugewheelleft`, `pivottine01_metal` → `pivottine`,
+ * `tread_2` → `tread`, `wheel_fl_tyre` → `wheel`, `well_drum_stoneLight` → `well_drum_stone`.
+ */
+function nameStem(name: string): string {
+  let stem = name.trim().replace(COLOUR_SPLIT_SUFFIX, "").toLowerCase();
+  stem = stem.replace(/[._\- ](metal|matte|rubber|coated|glass|gloss|emissive|mat|mesh|geo|lod\d*)\b.*$/, "");
+  // 꼬리말은 겹쳐 붙는다(`wheel_fl_tyre`, `openerDisc04Left`). 안 줄어들 때까지 뗀다.
+  for (let round = 0; round < 4; round += 1) {
+    const next = stem.replace(PART_ROLE_SUFFIX, "");
+    if (next === stem) break;
+    stem = next;
+  }
+  return stem.replace(/[._\- ]+$/, "");
+}
+
+/** 두 줄기가 같은 부품 계열인가. 짧은 쪽이 긴 쪽의 앞머리이면 같은 계열로 본다. */
+function sameStem(a: string, b: string): boolean {
+  if (!a || !b) return false;
+  const short = a.length <= b.length ? a : b;
+  const long = a.length <= b.length ? b : a;
+  if (short.length < STEM_MIN_LENGTH) return false;
+  return long.startsWith(short);
+}
+
+/**
+ * 두 부품이 한 조립품의 조각인가.
+ *
+ * 최소 공통 조상의 이름 줄기가 어느 한쪽 부품의 줄기와 같으면 그 부품이 곧 그 조립품의
+ * 몸통이고, 나머지 하나는 그 몸통에 붙은 조각이다. 바퀴의 림·허브·트레드, 타인의 생크와
+ * 스위프와 볼트가 전부 여기서 걸린다. 반대로 게이지 휠과 타인의 공통 조상은
+ * `cultivatorRoot` 이고 어느 쪽 줄기와도 안 맞아 남남으로 남는다.
+ */
+function sameAssembly(a: PhysicalPart, b: PhysicalPart, nodeNames: readonly string[]): boolean {
+  let common = -1;
+  const limit = Math.min(a.nodeChain.length, b.nodeChain.length);
+  for (let depth = 0; depth < limit; depth += 1) {
+    if (a.nodeChain[depth] !== b.nodeChain[depth]) break;
+    common = a.nodeChain[depth];
+  }
+  if (common < 0) return false;
+  const ancestor = nameStem(nodeNames[common] ?? "");
+  if (!ancestor) return false;
+  return sameStem(ancestor, nameStem(a.name)) || sameStem(ancestor, nameStem(b.name));
+}
+
+interface PenetrationAnalysis {
+  penetrations: PhysicalPenetrationMeasurement[];
+  partCount: number;
+  pairsTested: number;
+  suppressed: number;
+  truncated: boolean;
+}
+
+/**
+ * 이름 붙은 부품 둘이 서로를 뚫고 지나가는가.
+ *
+ * 노드 단위 부품을 그대로 쓴다(용접 성분으로 쪼개지 않는다). 이 규칙이 말하는 "부품"은
+ * 사는 사람이 아웃라이너에서 보는 그 이름이고, 쪼갠 조각에는 그 이름이 없다 — 재질별로
+ * 합쳐 놓은 메시 안쪽은 `GEO-PART-INTERSECTION` 이 본다.
+ *
+ * 값은 결정적이다. 부품 순서는 장면 순회 순서이고, 지적은 (겹침 크기, 이름) 으로만 정렬한다.
+ */
+function analysePenetration(
+  parts: readonly PhysicalPart[],
+  nodeNames: readonly string[],
+  skinnedMeshes: ReadonlySet<number>,
+): PenetrationAnalysis {
+  /*
+   * 검사 대상. 이름이 있고, 스킨드가 아니고, 부스러기가 아닌 부품.
+   *
+   * 스킨드 메시를 빼는 이유. glTF 의 스킨드 메시는 POSITION 이 바인드 포즈이고 실제
+   * 자세는 관절 행렬이 정한다. 여기서 재는 월드 좌표는 노드 변환만 합성한 값이라
+   * 캐릭터의 팔이 몸통을 뚫었다고 나와도 그것은 자세가 아니라 바인드 포즈의 이야기다.
+   * examples/generated/kits/harvest-folk/product-gaps.md 가 적어 둔 그대로다.
+   */
+  const whole = bodyReferenceVolumes(parts, false);
+  const candidates: number[] = [];
+  parts.forEach((part, index) => {
+    if (!part.named) return;
+    if (part.meshIndex >= 0 && skinnedMeshes.has(part.meshIndex)) return;
+    if (part.triangleCount < COMPONENT_MIN_TRIANGLES) return;
+    if (volumeOf(part) <= 1e-9) return;
+    if (MATERIAL_BATCH_NAME.test(part.name)) return;
+    /* 이름이 멀쩡해도 모양이 묶음이면 뺀다: 파일의 4분의 1보다 크고 다른 부품 둘 이상을
+       자기 상자에 통째로 품은 노드는 조립을 논할 단위가 아니다. */
+    if (swallowsOtherParts(parts, index, whole(index))) return;
+    candidates.push(index);
+  });
+
+  const empty: PenetrationAnalysis = {
+    penetrations: [],
+    partCount: candidates.length,
+    pairsTested: 0,
+    suppressed: 0,
+    truncated: false,
+  };
+  if (candidates.length < 2) return empty;
+
+  /*
+   * 상자 앞걸름. 삼각형까지 가는 쌍은 월드 상자가 실제로 겹치고 위의 걸름망을 다 지난
+   * 쌍뿐이다. 트랙터는 메시 노드 51개 가운데 재질 묶음 6개를 뺀 45개가 후보이고 그
+   * 조합이 990쌍인데, 삼각형까지 가는 것은 그 가운데 수십 쌍이다. 격자는 그 뒤에 만든다.
+   */
+  const allowed = new Set<number>();
+  const count = parts.length;
+  let pairsTested = 0;
+  let truncated = false;
+  const islandCache = new Map<number, boolean>();
+  const isPartGroup = (index: number): boolean => {
+    /* 굴러야 하는 부품은 덩어리가 몇 개든 부품이다. 트랙터의 타이어는 트레드 블록
+       14개로 만든 하나의 바퀴이고, 이 규칙이 존재하는 이유가 바로 그 바퀴다. */
+    if (isRollingPart(parts[index].name)) return false;
+    const cached = islandCache.get(index);
+    if (cached !== undefined) return cached;
+    const value = weldedComponents(parts[index]).length > PART_ISLAND_LIMIT;
+    islandCache.set(index, value);
+    return value;
+  };
+  for (let i = 0; i < candidates.length; i += 1) {
+    for (let j = i + 1; j < candidates.length; j += 1) {
+      const a = candidates[i];
+      const b = candidates[j];
+      if (!boxesOverlap(parts[a], parts[b])) continue;
+      if (parts[a].nodeIndex === parts[b].nodeIndex) continue; // 같은 노드의 인스턴스끼리.
+      if (relatedParts(parts[a], parts[b])) continue; // 부모–자식.
+      if (FASTENER_PART.test(parts[a].name) || FASTENER_PART.test(parts[b].name)) continue;
+      if (sameStem(nameStem(parts[a].name), nameStem(parts[b].name))) continue;
+      if (sameAssembly(parts[a], parts[b], nodeNames)) continue;
+      /* 덩어리 세기는 비싸다. 위의 값싼 걸름망을 다 지난 쌍에 대해서만 세고 답을 기억한다. */
+      if (isPartGroup(a) && isPartGroup(b)) continue;
+      if (pairsTested >= MAX_PENETRATION_PAIRS) {
+        truncated = true;
+        continue;
+      }
+      pairsTested += 1;
+      allowed.add(Math.min(a, b) * count + Math.max(a, b));
+    }
+  }
+  if (!allowed.size) return { ...empty, pairsTested, truncated };
+
+  /* 격자는 후보로 남은 부품의 삼각형만 담는다. 다른 부품의 면은 이 규칙과 상관없다. */
+  const touched = new Set<number>();
+  for (const key of allowed) {
+    touched.add(Math.floor(key / count));
+    touched.add(key % count);
+  }
+  const subset = [...touched].sort((a, b) => a - b);
+  const subParts = subset.map((index) => parts[index]);
+  const grid = buildTriangleGrid(subParts);
+  const budget = { tests: 0, truncated: false };
+
+  const hits: PhysicalPenetrationMeasurement[] = [];
+  intersectAll(
+    subParts,
+    grid,
+    budget,
+    (a, b) => allowed.has(Math.min(subset[a], subset[b]) * count + Math.max(subset[a], subset[b])),
+    (a, b, depthMm, trianglePairs, box) => {
+      if (depthMm <= SEAM_DEPTH_MM) return; // 맞닿은 면은 조립이다.
+      const overlapMm: [number, number, number] = [
+        round1((box.max[0] - box.min[0]) * 1000),
+        round1((box.max[1] - box.min[1]) * 1000),
+        round1((box.max[2] - box.min[2]) * 1000),
+      ];
+      const first = subParts[a];
+      const second = subParts[b];
+      const rollingFirst = isRollingPart(first.name);
+      const rollingSecond = isRollingPart(second.name);
+      /*
+       * 어느 쪽을 먼저 적는가. 굴러야 하는 쪽이 있으면 그쪽 — 메시지가 "바퀴가 무엇을
+       * 뚫었다"로 읽혀야 한다. 없으면 작은 쪽을 먼저 적는다: 뚫고 지나가는 것은 대개
+       * 가느다란 쪽이고, "물통이 사다리를 뚫었다"보다 "사다리가 물통을 뚫었다"가
+       * 사는 사람이 화면에서 찾는 순서다.
+       */
+      const swap = rollingFirst === rollingSecond
+        ? volumeOf(second) < volumeOf(first)
+        : rollingSecond;
+      const [through, into] = swap ? [second, first] : [first, second];
+      hits.push({
+        aName: through.name,
+        bName: into.name,
+        aNodeIndex: through.nodeIndex,
+        bNodeIndex: into.nodeIndex,
+        trianglePairs,
+        overlapMm,
+        extentMm: Math.max(overlapMm[0], overlapMm[1], overlapMm[2]),
+        depthMm,
+        rolling: rollingFirst || rollingSecond,
+        rollingName: rollingFirst ? first.name : rollingSecond ? second.name : null,
+      });
+    },
+    MAX_PENETRATION_TRIANGLE_PAIRS,
+  );
+
+  /* 정렬은 결정적이어야 한다: 바퀴가 낀 것 먼저, 그다음 겹침이 큰 것, 마지막은 이름. */
+  hits.sort(
+    (a, b) =>
+      Number(b.rolling) - Number(a.rolling) ||
+      b.extentMm - a.extentMm ||
+      b.depthMm - a.depthMm ||
+      a.aName.localeCompare(b.aName) ||
+      a.bName.localeCompare(b.bName),
+  );
+  return {
+    penetrations: hits.slice(0, MAX_PENETRATION_FINDINGS),
+    partCount: candidates.length,
+    pairsTested,
+    suppressed: Math.max(0, hits.length - MAX_PENETRATION_FINDINGS),
+    truncated: truncated || budget.truncated,
+  };
+}
+
+function boxesOverlap(a: PhysicalPart, b: PhysicalPart): boolean {
+  return [0, 1, 2].every((axis) => a.min[axis] <= b.max[axis] && b.min[axis] <= a.max[axis]);
+}
+
+/** JOINTS_0 을 가진 메시의 번호. 스킨드 메시는 바인드 포즈라 관통을 재지 않는다. */
+function skinnedMeshIndices(json: GltfDocument): Set<number> {
+  const meshes: GltfDocument[] = Array.isArray(json.meshes) ? json.meshes : [];
+  const skinned = new Set<number>();
+  meshes.forEach((mesh, index) => {
+    if (!Array.isArray(mesh?.primitives)) return;
+    for (const primitive of mesh.primitives) {
+      if (primitive?.attributes?.JOINTS_0 !== undefined) {
+        skinned.add(index);
+        return;
+      }
+    }
+  });
+  return skinned;
+}
+
 interface PhaseHit {
   a: number;
   b: number;
@@ -2268,7 +2762,16 @@ function intersectAll(
   grid: TriangleGrid,
   budget: { tests: number; truncated: boolean },
   allow: (a: number, b: number) => boolean,
-  report: (a: number, b: number, depthMm: number, trianglePairs: number) => void,
+  report: (
+    a: number,
+    b: number,
+    depthMm: number,
+    trianglePairs: number,
+    /** 교차한 삼각형들이 겹친 구간의 상자(월드 m). 깊이는 이 상자의 가장 짧은 축이다. */
+    box: { min: readonly number[]; max: readonly number[] },
+  ) => void,
+  /** 한 부품 쌍에서 모을 교차 삼각형 쌍의 상한. 겹침 상자의 크기가 여기에 달려 있다. */
+  maxPairsPerPartPair = MAX_PAIRS_PER_PART_PAIR,
 ): void {
   const pairHits = new Map<number, { count: number; min: [number, number, number]; max: [number, number, number] }>();
   const allowed = new Map<number, boolean>();
@@ -2295,7 +2798,7 @@ function intersectAll(
         }
         if (!permitted) continue;
         const hit = pairHits.get(key);
-        if (hit && hit.count >= MAX_PAIRS_PER_PART_PAIR) continue;
+        if (hit && hit.count >= maxPairsPerPartPair) continue;
         if (budget.tests >= MAX_TRIANGLE_PAIR_TESTS) {
           budget.truncated = true;
           continue;
@@ -2320,7 +2823,7 @@ function intersectAll(
     const low = Math.floor(key / partCount);
     const high = key % partCount;
     const depth = Math.min(hit.max[0] - hit.min[0], hit.max[1] - hit.min[1], hit.max[2] - hit.min[2]);
-    report(low, high, round1(depth * 1000), hit.count);
+    report(low, high, round1(depth * 1000), hit.count, hit);
   }
 }
 

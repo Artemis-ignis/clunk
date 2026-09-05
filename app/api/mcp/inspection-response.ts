@@ -156,12 +156,20 @@ export function buildAssetInspectionPayload(
              * 같은 측정이 어떤 파일에서는 결함이고 다른 파일에서는 의도이기 때문입니다 —
              * 땅 밑으로 내려간 나무 뿌리, 베어링을 지나는 축, 옷 안에 든 몸, 잎사귀 카드.
              * 그래서 값과 노드 이름을 실어 보내고 판단은 사람이나 에이전트가 합니다.
+             *
+             * 하나만 예외입니다. GEO-PART-PENETRATION 이 바퀴·타이어·롤러가 다른 부품과
+             * 같은 부피를 쓰고 있다고 말할 때는 ERROR 이고, 그때는 이 숫자가 올라갑니다 —
+             * 바퀴는 굴러야 하고 굴리면 그 자리를 지나가므로 의도된 바퀴 관통이 없습니다.
              */
             physicalPlausibility: structural
               ? {
-                  countedInHardBlockers: false,
+                  countedInHardBlockers: structural.findings.some(
+                    (item) =>
+                      PHYSICAL_RULE_ID_SET.has(item.ruleId) &&
+                      (item.severity === "ERROR" || item.severity === "CRITICAL"),
+                  ),
                   reason:
-                    "GEO-GROUND-CONTACT, GEO-FLOATING-PART, GEO-PART-INTERSECTION and GEO-THIN-SHELL are WARNING or INFO by design: the same measurement is a defect in one file and the author's intent in the next (roots under the ground, a shaft through its bearing, a body inside a jacket, a leaf card). They carry the measured millimetres and the node names instead of a verdict.",
+                    "GEO-GROUND-CONTACT, GEO-FLOATING-PART, GEO-PART-INTERSECTION and GEO-THIN-SHELL are WARNING or INFO by design: the same measurement is a defect in one file and the author's intent in the next (roots under the ground, a shaft through its bearing, a body inside a jacket, a leaf card). They carry the measured millimetres and the node names instead of a verdict. GEO-PART-PENETRATION is the one exception: it is ERROR when a wheel, tyre, roller or sprocket shares a volume with another part, because a wheel has to turn and turning takes it through that part in every phase.",
                   findings: structural.findings.filter((item) => PHYSICAL_RULE_ID_SET.has(item.ruleId)),
                 }
               : null,

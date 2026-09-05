@@ -120,6 +120,46 @@ class GlbBuilder {
     return this.json.accessors.length - 1;
   }
 
+  /** VEC4 USHORT 접근자. JOINTS_0 에 쓴다. */
+  jointAccessor(values) {
+    const array = Uint16Array.from(values);
+    const view = this.#push(new Uint8Array(array.buffer, array.byteOffset, array.byteLength), 34962);
+    this.json.accessors.push({
+      bufferView: view,
+      componentType: 5123,
+      count: values.length / 4,
+      type: "VEC4",
+    });
+    return this.json.accessors.length - 1;
+  }
+
+  /** 이 메시를 스킨드로 만든다. 뼈 하나에 전부 매달아 두면 규칙이 보는 JOINTS_0 이 생긴다. */
+  skinnedMesh(name, geometry, material) {
+    const vertexCount = geometry.positions.length / 3;
+    const position = this.floatAccessor(geometry.positions, "VEC3");
+    const indices = this.indexAccessor(geometry.indices);
+    const joints = this.jointAccessor(new Array(vertexCount * 4).fill(0));
+    const weights = this.floatAccessor(
+      Array.from({ length: vertexCount * 4 }, (_, slot) => (slot % 4 === 0 ? 1 : 0)),
+      "VEC4",
+    );
+    const primitive = {
+      attributes: { POSITION: position, JOINTS_0: joints, WEIGHTS_0: weights },
+      indices,
+      mode: 4,
+    };
+    if (material !== undefined) primitive.material = material;
+    this.json.meshes.push({ name, primitives: [primitive] });
+    return this.json.meshes.length - 1;
+  }
+
+  /** 뼈 하나짜리 스킨. inverseBindMatrices 는 선택이라 빼면 단위행렬로 본다. */
+  skin(jointNode) {
+    if (!this.json.skins) this.json.skins = [];
+    this.json.skins.push({ joints: [jointNode] });
+    return this.json.skins.length - 1;
+  }
+
   material(name, doubleSided = false) {
     this.json.materials.push({ name, doubleSided, pbrMetallicRoughness: { baseColorFactor: [0.6, 0.6, 0.6, 1] } });
     return this.json.materials.length - 1;
@@ -409,4 +449,66 @@ function invertedBox(center, half) {
   glb.write("caged-lamp.glb");
 }
 
-process.stdout.write("tests/fixtures/geometry: 14 fixtures written\n");
+/*
+ * 15. 부품 관통(GEO-PART-PENETRATION)의 세 경우를 한 파일에 넣었다. 이름은 서로
+ *     줄기가 겹치지 않게 골랐고, 전부 장면 뿌리 바로 밑에 두어 계보로 걸러지지
+ *     않게 했다 — 걸러야 하는 것은 오직 "닿기만 한" 쌍이어야 한다.
+ *
+ *     (a) 떨어진 둘 — loneBarrel(x -1.7..-1.3) 과 farCrate(x -1.0..-0.6).
+ *         상자가 300 mm 떨어져 있어 삼각형까지 가지도 않는다. 지적 없음.
+ *     (b) 면을 맞댄 둘 — stoneBlock(y 0..0.3) 위에 deckPlank(y 0.30..0.40) 를
+ *         정확히 올렸다. 맞닿은 면은 공면이라 Möller 판정이 참이 되지만 겹친
+ *         두께가 0 이다. 그건 접촉이고, 접촉은 조립이다. 지적 없음.
+ *     (c) 가로지르는 둘 — waterTrough(x 0.9..1.5) 를 ladderRail 이 통째로 지난다.
+ *         겹친 구간 600 × 100 × 100 mm. WARNING 하나.
+ *     (d) 굴러야 하는 부품 — pivotArm 이 cartWheel 을 지난다. 같은 형태인데
+ *         이름 하나가 바퀴라서 ERROR 로 올라간다. 등급 정책이 도는지 보는 자리다.
+ */
+{
+  const glb = new GlbBuilder();
+  const solid = glb.material("solid", false);
+  const add = (name, geometry) => glb.root(glb.node({ name, mesh: glb.mesh(`${name}Mesh`, geometry, solid) }));
+  // (a) 떨어진 둘.
+  add("loneBarrel", boxMesh([-1.5, 0.2, 0], [0.2, 0.2, 0.2]));
+  add("farCrate", boxMesh([-0.8, 0.2, 0], [0.2, 0.2, 0.2]));
+  // (b) 면을 맞댄 둘.
+  add("stoneBlock", boxMesh([0, 0.15, 0], [0.3, 0.15, 0.3]));
+  add("deckPlank", boxMesh([0, 0.35, 0], [0.25, 0.05, 0.25]));
+  // (c) 가로지르는 둘.
+  add("waterTrough", boxMesh([1.2, 0.3, 0], [0.3, 0.3, 0.3]));
+  add("ladderRail", boxMesh([1.2, 0.3, 0], [0.8, 0.05, 0.05]));
+  // (d) 굴러야 하는 부품이 낀 같은 형태.
+  add("cartWheel", boxMesh([3.0, 0.4, 0], [0.4, 0.4, 0.08]));
+  add("pivotArm", boxMesh([3.0, 0.4, 0], [0.7, 0.05, 0.05]));
+  glb.write("crossing-parts.glb");
+}
+
+/*
+ * 16. 스킨드 메시는 관통을 재지 않는다.
+ *
+ *     glTF 의 스킨드 메시는 POSITION 이 바인드 포즈이고 화면에 서는 자세는 관절
+ *     행렬이 정한다. 이 검사기가 재는 월드 좌표는 노드 변환만 합성한 값이라,
+ *     캐릭터의 팔이 몸통을 뚫었다고 나와도 그것은 자세가 아니라 바인드 포즈의
+ *     이야기다.
+ *
+ *     같은 모양을 두 번 넣었다. 왼쪽(x -1.2) 은 천이 스킨드라 조용해야 하고,
+ *     오른쪽(x 1.2) 은 똑같이 생겼는데 스킨이 없어 지적이 나야 한다. 그래야
+ *     "원래 안 걸리는 모양"이 아니라 "스킨 때문에 뺐다"가 증명된다.
+ */
+{
+  const glb = new GlbBuilder();
+  const solid = glb.material("solid", false);
+  const joint = glb.node({ name: "spineJoint" });
+  glb.root(joint);
+  glb.skin(joint);
+
+  const skinnedCloth = glb.skinnedMesh("capeClothMesh", boxMesh([-1.2, 0.4, 0], [0.7, 0.05, 0.05]), solid);
+  glb.root(glb.node({ name: "capeCloth", mesh: skinnedCloth, skin: 0 }));
+  glb.root(glb.node({ name: "standingStone", mesh: glb.mesh("standingStoneMesh", boxMesh([-1.2, 0.3, 0], [0.3, 0.3, 0.3]), solid) }));
+
+  glb.root(glb.node({ name: "plainRope", mesh: glb.mesh("plainRopeMesh", boxMesh([1.2, 0.4, 0], [0.7, 0.05, 0.05]), solid) }));
+  glb.root(glb.node({ name: "kerbStone", mesh: glb.mesh("kerbStoneMesh", boxMesh([1.2, 0.3, 0], [0.3, 0.3, 0.3]), solid) }));
+  glb.write("skinned-crossing.glb");
+}
+
+process.stdout.write("tests/fixtures/geometry: 16 fixtures written\n");
