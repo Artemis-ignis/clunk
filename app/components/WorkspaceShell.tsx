@@ -60,7 +60,7 @@ export function WorkspaceShell({
         {/* 머리글과 같은 로고를 쓴다. 2026-09-04 로고를 갈면서 여기만 옛 마크가 남아,
             같은 사이트 안에서 두 개의 로고가 돌아다녔다. */}
         <BrandLockup size={26} word="Clunk" />
-        <small>내 작업공간</small>
+        <small>대시보드</small>
       </Link>
 
       <nav className="rail-nav" aria-label="작업공간 메뉴">

@@ -215,7 +215,7 @@ export function DashboardClient({ welcome }: { welcome?: string | null }) {
           setCredits(null);
           setImagesLeft(null);
           setConnection("error");
-          setMessage("내 작업공간 정보를 불러오지 못했습니다. 서버가 " + failed.status + " 를 돌려주었습니다.");
+          setMessage("대시보드 정보를 불러오지 못했습니다. 서버가 " + failed.status + " 를 돌려주었습니다.");
           return;
         }
         const meBody = (await me.json()) as MeResponse;
@@ -277,7 +277,7 @@ export function DashboardClient({ welcome }: { welcome?: string | null }) {
   return (
     <WorkspaceShell
       active="overview"
-      title="내 작업공간"
+      title="대시보드"
       userLabel={userLabel}
       status={
         <>
@@ -338,7 +338,7 @@ export function DashboardClient({ welcome }: { welcome?: string | null }) {
       {connection === "checking" ? (
         <div className="banner banner-info ws-banner" role="status" aria-live="polite">
           <span className="spinner" />
-          <p>내 작업공간을 불러오는 중입니다.</p>
+          <p>대시보드를 불러오는 중입니다.</p>
         </div>
       ) : null}
       {connection === "auth-required" ? (

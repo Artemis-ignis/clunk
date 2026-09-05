@@ -41,7 +41,7 @@ test("signup is a first-class route and links back to login", async () => {
   assert.match(html, /ChatGPT 계정으로 시작하기/);
   // 2026-09-03: 가입 문은 가운데 카드 하나다. 카드가 말하는 것은 "여기서 계정이
   // 만들어진다"는 사실 하나뿐이다.
-  assert.match(html, /내 작업공간이 만들어지고/);
+  assert.match(html, /대시보드가 생기고/);
   assert.match(html, /로그인하기/);
   assert.match(html, /href="\/login/);
 });

@@ -34,7 +34,7 @@ export function SiteFooter() {
           <Link href="https://clunk.gitbook.io/docs" prefetch={false}>문서</Link>
           <Link href="/review" prefetch={false}>검수 뷰어</Link>
           <Link href="/webmcp" prefetch={false}>브라우저 도구(WebMCP)</Link>
-          <Link href="/dashboard" prefetch={false}>내 작업공간</Link>
+          <Link href="/dashboard" prefetch={false}>대시보드</Link>
         </nav>
         <nav className="cv5-footer-col" aria-label="약관">
           <header>약관</header>

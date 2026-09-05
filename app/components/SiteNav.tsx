@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "./NativeLink";
 import { BrandLockup } from "./BrandMark";
@@ -31,7 +31,8 @@ const UTILITY_NAV_LINKS: { label: string; href: string; section: ShellSection }[
   { label: "검수 뷰어", href: "/review", section: "review" },
   // Docs live on GitBook since 2026-09-01; /docs redirects there too.
   { label: "문서", href: "https://clunk.gitbook.io/docs", section: "docs" },
-  { label: "내 작업공간", href: "/dashboard", section: "dashboard" },
+  // 2026-09-05 마스터: "내 작업공간이 마이 페이지냐? 차라리 대시보드라고 해놔라 알기 쉽게."
+  { label: "대시보드", href: "/dashboard", section: "dashboard" },
 ];
 
 export function SiteNav({ active }: { active?: ShellSection }) {
@@ -48,7 +49,6 @@ export function SiteNav({ active }: { active?: ShellSection }) {
   // 처음 오는 사람의 "Clunk 사용하기"는 만들기 화면으로 가는 가입 문입니다.
   const startHref = "/signup?return_to=%2Fstudio%3Fintent%3Dcreate";
   const [scrolled, setScrolled] = useState(false);
-  const scrollSentinelRef = useRef<HTMLSpanElement>(null);
   // Signed-in visitors used to still see 로그인/회원가입 on every public page
   // (2026-08-31 review). The nav asks the same /api/me the workspace uses and
   // stays anonymous when it answers 401 — never guessing a session.
@@ -78,20 +78,29 @@ export function SiteNav({ active }: { active?: ShellSection }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
+  // 2026-09-05: 스크롤 감지가 사이트 밖 1px 표식(sentinel)을 IntersectionObserver 로 보는
+  // 방식이었는데, 휴대폰에서 스크롤해도 data-scrolled 가 켜지지 않아 메뉴 뒤로 본문 글자가
+  // 그대로 비쳤다(마스터 스크린샷). 창의 scrollY 를 직접 읽는다 — 이 사이트의 모든 화면은
+  // 창이 스크롤하고(랜딩의 스냅도 html 에 걸려 있다), 이 값은 어느 브라우저에서나 같다.
   useEffect(() => {
-    const sentinel = scrollSentinelRef.current;
-    if (!sentinel || typeof IntersectionObserver === "undefined") return;
-
-    const observer = new IntersectionObserver(([entry]) => {
-      setScrolled(!entry.isIntersecting);
-    }, { threshold: 0 });
-    observer.observe(sentinel);
-    return () => observer.disconnect();
+    let frame = 0;
+    const read = () => {
+      frame = 0;
+      setScrolled(window.scrollY > 8);
+    };
+    const onScroll = () => {
+      if (!frame) frame = window.requestAnimationFrame(read);
+    };
+    read();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
   }, []);
 
   return (
     <>
-      <span ref={scrollSentinelRef} className="sitenav-scroll-sentinel" aria-hidden="true" />
       <div className="sitenav-dock" data-scrolled={scrolled ? "true" : "false"}>
       <div className="sitenav-inner">
         <nav className={`sitenav${scrolled ? " sitenav-scrolled" : ""}`} aria-label="주요 메뉴">

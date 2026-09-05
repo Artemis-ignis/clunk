@@ -56,7 +56,7 @@ const SIGNUP_FACTS = [
   `이미지 하루 ${WORKSPACE_IMAGES_PER_DAY}장`,
 ];
 
-const LOGIN_FACTS = ["비밀번호 없음", "보던 화면으로 복귀", "내 파일은 내 작업공간에만"];
+const LOGIN_FACTS = ["비밀번호 없음", "보던 화면으로 복귀", "내 파일은 내 대시보드에만"];
 
 const SIGNUP_PROVIDER_SMALL = "계정으로 시작 ↗";
 const LOGIN_PROVIDER_SMALL = "계정으로 로그인 ↗";
@@ -66,12 +66,12 @@ export const DEFAULT_AUTH_COPY: AuthIntentCopy = {
   signup: {
     badge: "카드 없이 시작",
     h1: `가입하면 바로 씁니다`,
-    lede: `카드도 비밀번호도 묻지 않습니다. Google이나 GitHub 계정으로 한 번 들어오면 내 작업공간이 만들어지고, 만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 바로 들어옵니다. 그 뒤로는 매달 ${BETA_MONTHLY_GRANT_CREDITS}회가 채워집니다.`,
+    lede: `카드도 비밀번호도 묻지 않습니다. Google이나 GitHub 계정으로 한 번 들어오면 대시보드가 생기고, 만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 바로 들어옵니다. 그 뒤로는 매달 ${BETA_MONTHLY_GRANT_CREDITS}회가 채워집니다.`,
     facts: SIGNUP_FACTS,
     providerSmall: SIGNUP_PROVIDER_SMALL,
   },
   login: {
-    badge: "내 작업공간",
+    badge: "대시보드",
     h1: "다시 오셨군요",
     lede: "Clunk는 비밀번호를 만들지도 보관하지도 않습니다. 쓰던 계정으로 들어오면 보던 화면으로 그대로 돌아갑니다.",
     facts: LOGIN_FACTS,
@@ -176,7 +176,7 @@ export function intentFromReturnTo(returnTo: string): AuthIntent | null {
 
 /** 눈썹에 날 것의 경로("/app")를 찍지 않기 위한 이름표. 사람은 경로로 가지 않는다. */
 export function returnLabel(path: string): string {
-  if (path.startsWith("/dashboard")) return "내 작업공간";
+  if (path.startsWith("/dashboard")) return "대시보드";
   if (path.startsWith("/app")) return "에셋 검사";
   if (path.startsWith("/studio")) return "에셋 제작";
   if (path.startsWith("/marketplace")) return "에셋 마켓";

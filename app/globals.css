@@ -1004,7 +1004,11 @@ pre {
 }
 
 .sitenav-drawer[data-open="true"] {
-  max-height: 420px;
+  /* 420px 고정이었다. 주 메뉴가 여섯 줄(키트 추가)이 되자 드로어 내용이 525px 가 되어 맨 아래
+     계정 줄(로그인·회원가입·시작 버튼)이 잘려 나갔다 — 휴대폰에서 로그인 문이 사라진 것이다
+     (2026-09-05 마스터). 화면 높이만큼 열고, 그보다 길면 드로어 안에서 스크롤한다. */
+  max-height: calc(100dvh - 84px);
+  overflow-y: auto;
   opacity: 1;
   visibility: visible;
   transition: max-height var(--dur-2) var(--ease), opacity var(--dur-2) var(--ease),

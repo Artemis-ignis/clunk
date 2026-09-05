@@ -57,8 +57,8 @@ export default async function SettingsPage() {
   const rows = [
     { label: "계정", value: user.email, note: auth.accountNote },
     {
-      label: "내 작업공간",
-      value: `${user.displayName}님의 작업공간`,
+      label: "대시보드",
+      value: `${user.displayName}님의 대시보드`,
       note: "처음 로그인할 때 자동으로 만들어졌습니다. 여기에 만든 파일과 검사 결과가 쌓입니다.",
     },
     { label: "로그인 방식", value: auth.label, note: "Clunk는 따로 아이디와 비밀번호를 만들지 않습니다." },
