@@ -221,7 +221,14 @@ export interface AssetMetrics {
   unresolvedResourceCount: number;
   remoteResourceCount: number;
   extensionCount: number;
+  /** Accessor-space AABB merged across primitives with no node transforms applied. */
   bounds: AssetBounds;
+  /**
+   * Scene-graph AABB: each primitive's accessor bounds transformed by its node's world matrix.
+   * This is the dimension a runtime actually renders (and it decodes KHR_mesh_quantization,
+   * whose dequantization lives in the node transform). Excluded from resultDigest on purpose.
+   */
+  worldBounds: AssetBounds;
 }
 
 export interface Finding {
@@ -495,7 +502,7 @@ export function inspectAsset(
       score,
       ...(defaults.qualityPolicy ? { qualityPolicy: defaults.qualityPolicy } : {}),
     };
-    const resultDigest = sha256Hex(utf8(stableStringify(canonical)));
+    const resultDigest = resultDigestOf(canonical);
     const analysisId = `analysis-${inputHash.slice(0, 12)}-${resultDigest.slice(0, 8)}`;
     return {
       ...canonical,
@@ -967,6 +974,7 @@ function collectMetrics(parsed: ParsedAsset): AssetMetrics {
       ...(json.extensionsRequired ?? []),
     ]).size,
     bounds: { min, max, dimensions },
+    worldBounds: computeWorldBounds(parsed),
   };
 }
 
@@ -1314,7 +1322,7 @@ function makeFailureReport(
     score,
     ...(policy.qualityPolicy ? { qualityPolicy: policy.qualityPolicy } : {}),
   };
-  const resultDigest = sha256Hex(utf8(stableStringify(canonical)));
+  const resultDigest = resultDigestOf(canonical);
   return {
     ...canonical,
     analysisId: `analysis-failed-${resultDigest.slice(0, 12)}`,
@@ -1350,6 +1358,7 @@ function emptyMetrics(): AssetMetrics {
     remoteResourceCount: 0,
     extensionCount: 0,
     bounds: { min: null, max: null, dimensions: null },
+    worldBounds: { min: null, max: null, dimensions: null },
   };
 }
 
@@ -1854,6 +1863,149 @@ function mergeBounds(
     mode === "min" ? Math.min(existing[0], incoming[0]) : Math.max(existing[0], incoming[0]),
     mode === "min" ? Math.min(existing[1], incoming[1]) : Math.max(existing[1], incoming[1]),
     mode === "min" ? Math.min(existing[2], incoming[2]) : Math.max(existing[2], incoming[2]),
+  ];
+}
+
+/**
+ * Hash the canonical inspection result. worldBounds is stripped from the metrics first so that
+ * digests recorded before world-space bounds existed stay byte-for-byte valid: worldBounds is a
+ * deterministic function of the asset bytes and coreVersion, both already covered by the digest,
+ * so excluding it loses no fingerprinting power. If its computation ever changes, bump
+ * CORE_VERSION so downstream caches invalidate.
+ */
+function resultDigestOf(canonical: Record<string, unknown>): string {
+  const metricsForDigest: Record<string, unknown> = { ...(canonical.metrics as AssetMetrics) };
+  delete metricsForDigest.worldBounds;
+  return sha256Hex(utf8(stableStringify({ ...canonical, metrics: metricsForDigest })));
+}
+
+const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+
+/**
+ * World-space AABB. Walks every scene root, accumulates each node's world matrix, and grows the
+ * box by the eight transformed corners of each referenced mesh's accessor bounds. Because the
+ * node transform is applied, this reflects the size a runtime actually renders and it decodes
+ * KHR_mesh_quantization (whose dequantization scale/offset lives in the node transform), unlike
+ * the accessor-space `bounds` field which merges raw local geometry.
+ */
+function computeWorldBounds(parsed: ParsedAsset): AssetBounds {
+  const json = parsed.json;
+  const nodes: GltfDocument[] = Array.isArray(json.nodes) ? json.nodes : [];
+  const scenes: GltfDocument[] = Array.isArray(json.scenes) ? json.scenes : [];
+  const meshes: GltfDocument[] = Array.isArray(json.meshes) ? json.meshes : [];
+  if (!nodes.length || !meshes.length) return { min: null, max: null, dimensions: null };
+
+  // Accessor-space AABB per mesh (unioned across its primitives), computed once and reused for
+  // every node that instances the mesh.
+  const localByMesh = new Map<number, { min: [number, number, number]; max: [number, number, number] }>();
+  meshes.forEach((mesh: GltfDocument, meshIndex: number) => {
+    let min: [number, number, number] | null = null;
+    let max: [number, number, number] | null = null;
+    for (const primitive of mesh.primitives ?? []) {
+      const primitiveBounds = accessorBounds(json, primitive.attributes?.POSITION, parsed);
+      if (!primitiveBounds) continue;
+      min = mergeBounds(min, primitiveBounds.min, "min");
+      max = mergeBounds(max, primitiveBounds.max, "max");
+    }
+    if (min && max) localByMesh.set(meshIndex, { min, max });
+  });
+  if (!localByMesh.size) return { min: null, max: null, dimensions: null };
+
+  let worldMin: [number, number, number] | null = null;
+  let worldMax: [number, number, number] | null = null;
+  const expand = (point: [number, number, number]): void => {
+    worldMin = mergeBounds(worldMin, point, "min");
+    worldMax = mergeBounds(worldMax, point, "max");
+  };
+
+  const roots = new Set<number>();
+  for (const scene of scenes) {
+    for (const node of scene.nodes ?? []) roots.add(Number(node));
+  }
+  if (!roots.size) roots.add(0);
+
+  const visit = (index: number, parentWorld: number[], seen: Set<number>): void => {
+    if (seen.has(index)) return;
+    const node = nodes[index];
+    if (!node) return;
+    const nextSeen = new Set(seen).add(index);
+    const world = multiplyMatrices(parentWorld, nodeLocalMatrix(node));
+    if (node.mesh !== undefined) {
+      const local = localByMesh.get(Number(node.mesh));
+      if (local) {
+        for (let cornerX = 0; cornerX < 2; cornerX += 1) {
+          for (let cornerY = 0; cornerY < 2; cornerY += 1) {
+            for (let cornerZ = 0; cornerZ < 2; cornerZ += 1) {
+              expand(
+                transformPoint(
+                  world,
+                  cornerX ? local.max[0] : local.min[0],
+                  cornerY ? local.max[1] : local.min[1],
+                  cornerZ ? local.max[2] : local.min[2],
+                ),
+              );
+            }
+          }
+        }
+      }
+    }
+    for (const child of node.children ?? []) visit(Number(child), world, nextSeen);
+  };
+  for (const root of roots) visit(root, IDENTITY_MATRIX, new Set());
+
+  const dimensions: [number, number, number] | null =
+    worldMin && worldMax
+      ? [worldMax[0] - worldMin[0], worldMax[1] - worldMin[1], worldMax[2] - worldMin[2]]
+      : null;
+  return { min: worldMin, max: worldMax, dimensions };
+}
+
+/** glTF node local transform as a column-major 4x4, from an explicit matrix or composed TRS. */
+function nodeLocalMatrix(node: GltfDocument): number[] {
+  if (Array.isArray(node.matrix) && node.matrix.length === 16) {
+    return node.matrix.map(Number);
+  }
+  const translation = Array.isArray(node.translation) ? node.translation.map(Number) : [0, 0, 0];
+  const rotation = Array.isArray(node.rotation) ? node.rotation.map(Number) : [0, 0, 0, 1];
+  const scale = Array.isArray(node.scale) ? node.scale.map(Number) : [1, 1, 1];
+  return composeTRS(translation, rotation, scale);
+}
+
+/** Compose a column-major TRS matrix (translation * rotation(quaternion) * scale). */
+function composeTRS(translation: number[], rotation: number[], scale: number[]): number[] {
+  const [x, y, z, w] = rotation;
+  const [sx, sy, sz] = scale;
+  const x2 = x + x, y2 = y + y, z2 = z + z;
+  const xx = x * x2, xy = x * y2, xz = x * z2;
+  const yy = y * y2, yz = y * z2, zz = z * z2;
+  const wx = w * x2, wy = w * y2, wz = w * z2;
+  return [
+    (1 - (yy + zz)) * sx, (xy + wz) * sx, (xz - wy) * sx, 0,
+    (xy - wz) * sy, (1 - (xx + zz)) * sy, (yz + wx) * sy, 0,
+    (xz + wy) * sz, (yz - wx) * sz, (1 - (xx + yy)) * sz, 0,
+    translation[0], translation[1], translation[2], 1,
+  ];
+}
+
+/** Multiply two column-major 4x4 matrices: result = a * b. */
+function multiplyMatrices(a: number[], b: number[]): number[] {
+  const out = new Array<number>(16).fill(0);
+  for (let col = 0; col < 4; col += 1) {
+    for (let row = 0; row < 4; row += 1) {
+      let sum = 0;
+      for (let k = 0; k < 4; k += 1) sum += a[k * 4 + row] * b[col * 4 + k];
+      out[col * 4 + row] = sum;
+    }
+  }
+  return out;
+}
+
+/** Transform a point by a column-major 4x4 matrix (w assumed 1, perspective divide ignored). */
+function transformPoint(m: number[], x: number, y: number, z: number): [number, number, number] {
+  return [
+    m[0] * x + m[4] * y + m[8] * z + m[12],
+    m[1] * x + m[5] * y + m[9] * z + m[13],
+    m[2] * x + m[6] * y + m[10] * z + m[14],
   ];
 }
 
