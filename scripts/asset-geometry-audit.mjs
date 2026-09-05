@@ -304,7 +304,7 @@ let total = 0;
 for (const file of files) total += await auditFile(file.split(/[\\/]/).pop(), file);
 for (const slug of (slugs.length || files.length ? slugs : readdirSync("public/market").sort())) {
   let names;
-  try { names = readdirSync(`public/market/${slug}`); } catch { continue; }
+  try { names = readdirSync(`public/market/${slug}`).filter((n) => !/^preview-.*.glb$/i.test(n)) /* 비로그인 뷰어용 미리보기 GLB(preview-*.glb)는 판매 파일이 아니다 */; } catch { continue; }
   const glb = names.find((n) => n.replace(/\.[^.]+$/, "") === slug && n.endsWith(".glb"))
     ?? (names.filter((n) => n.toLowerCase().endsWith(".glb")).length === 1
       ? names.find((n) => n.toLowerCase().endsWith(".glb")) : null);

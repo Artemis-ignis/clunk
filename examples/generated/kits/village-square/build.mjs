@@ -129,19 +129,56 @@ function quaternionFor(axis, degrees) {
 }
 
 /**
- * A real glTF animation on a socket a factory published in `root.userData.clips`.
+ * The tracks a clip spec asks for, in one shape.
  *
- * The rotation is authored on top of whatever the pivot already holds, which for every socket
- * in this kit is identity by contract, so key 0 is the model's shipped rest pose. Rotation
- * tracks only: nothing in this kit animates scale, and the quality contract says so.
+ * The first cut of this kit gave every clip exactly one rotating node, so a spec was
+ * `{ node, axis, keys }`. Two mechanisms outgrew that: a bell needs a clapper that swings
+ * INSIDE the bell on a track of its own (a clapper welded to the bell can never strike), and a
+ * winch needs the bucket to travel while the drum turns. So a spec may now carry `tracks`, a
+ * list of the same thing. The one-node form is still accepted and is normalised to a list here,
+ * because fourteen of the fifteen parts have nothing more to say than "turn this".
+ */
+function clipTracksOf(spec) {
+  return spec.tracks ?? [{ node: spec.node, axis: spec.axis, keys: spec.keys }];
+}
+
+/**
+ * A real glTF animation on the sockets a factory published in `root.userData.clips`.
+ *
+ * Rotation is authored on top of whatever the pivot already holds, which for every socket in
+ * this kit is identity by contract, so key 0 is the model's shipped rest pose. Translation is
+ * authored as an OFFSET from the node's rest position for the same reason — a factory moves a
+ * pivot to where the mechanism actually is, and a clip that wrote absolute positions would
+ * silently tear the part off its mount the day that number changed.
+ *
+ * Rotation and translation channels only. Nothing in this kit animates scale, and the quality
+ * contract below checks that rather than trusting this sentence.
  */
 function buildClip(root, spec) {
-  const node = root.getObjectByName(spec.node);
-  if (!node) throw new Error(`Clip node ${spec.node} is not in the exported model.`);
-  const times = spec.keys.map((key) => key.time);
-  const values = spec.keys.flatMap((key) => quaternionFor(spec.axis, key.degrees));
-  const track = new THREE.QuaternionKeyframeTrack(`${spec.node}.quaternion`, times, values);
-  return new THREE.AnimationClip(spec.name, times[times.length - 1], [track]);
+  const tracks = [];
+  let duration = 0;
+  for (const track of clipTracksOf(spec)) {
+    const node = root.getObjectByName(track.node);
+    if (!node) throw new Error(`Clip node ${track.node} is not in the exported model.`);
+    if (track.keys) {
+      const times = track.keys.map((key) => key.time);
+      const values = track.keys.flatMap((key) => quaternionFor(track.axis, key.degrees));
+      tracks.push(new THREE.QuaternionKeyframeTrack(`${track.node}.quaternion`, times, values));
+      duration = Math.max(duration, times[times.length - 1]);
+    }
+    if (track.offsets) {
+      const times = track.offsets.map((key) => key.time);
+      const values = track.offsets.flatMap((key) => [
+        node.position.x + (key.x ?? 0),
+        node.position.y + (key.y ?? 0),
+        node.position.z + (key.z ?? 0),
+      ]);
+      tracks.push(new THREE.VectorKeyframeTrack(`${track.node}.position`, times, values));
+      duration = Math.max(duration, times[times.length - 1]);
+    }
+  }
+  if (!tracks.length) throw new Error(`Clip ${spec.name} has no tracks.`);
+  return new THREE.AnimationClip(spec.name, duration, tracks);
 }
 
 /** Triangles, meshes, materials, bounds, node scales and the lowest vertex, off the scene. */
@@ -298,7 +335,16 @@ async function main() {
       primitiveModes: [...new Set((json.meshes ?? []).flatMap((mesh) => (mesh.primitives ?? []).map((p) => p.mode ?? 4)))],
       imageCount: (json.images ?? []).length,
       animations: (json.animations ?? []).map((clip) => ({ name: clip.name, channels: (clip.channels ?? []).length })),
-      clipSpecs: clipSpecs.map((spec) => ({ name: spec.name, koreanName: spec.koreanName, node: spec.node, axis: spec.axis, loop: Boolean(spec.loop) })),
+      clipSpecs: clipSpecs.map((spec) => ({
+        name: spec.name,
+        koreanName: spec.koreanName,
+        loop: Boolean(spec.loop),
+        tracks: clipTracksOf(spec).map((track) => ({
+          node: track.node,
+          axis: track.axis ?? null,
+          paths: [track.keys ? "rotation" : null, track.offsets ? "translation" : null].filter(Boolean),
+        })),
+      })),
       sockets: root.userData?.sockets ?? [],
       images: images && { heroBytes: images.hero.byteLength, previewBytes: images.preview.byteLength, subjectFillFraction: images.subjectFillFraction, clipped: images.clipped },
     });

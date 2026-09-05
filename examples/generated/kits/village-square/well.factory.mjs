@@ -17,6 +17,28 @@
  * axle passes through the +X post to reach the crank, which is how a winch is actually hung;
  * that is the one place in this model where two parts share space on purpose.
  *
+ * THE ROPE REACHES THE BUCKET, AND THE BUCKET TRAVELS (2026-09-05 mechanism audit)
+ * -------------------------------------------------------------------------------
+ * The first cut stopped the rope at the drum and stood the bucket on the coping 560 mm off the
+ * axis: 544.4 mm of nothing between a winch and the thing it is supposed to lift, so turning
+ * the crank moved no water. Three measured changes fix it.
+ *
+ *   1. `winch_rope_fall` runs from the wound rope down to the bucket's bail bar, on the drum's
+ *      own axis (x = 0, z = 0), and the bucket hangs from it over the well's mouth instead of
+ *      standing beside it.
+ *   2. `bucket_pivot` carries the bucket AND that falling rope, and the clip translates it.
+ *      Half a turn of the drum is more rope than the drum can hide, so the clip is a QUARTER
+ *      turn each way: 90 degrees of drum at a rope radius of 0.115 m is 0.115 * pi/2 =
+ *      0.1806 m of travel, and every key below is that arithmetic and nothing else.
+ *   3. That 0.1806 m of falling rope has to go somewhere as it winds in, and it goes where the
+ *      real rope goes — into the coil. The coil's lowest line is y = 1.485 and its highest is
+ *      y = 1.715; the fall's top sits at 1.497, so it starts 12 mm inside the wound rope and
+ *      ends 180.6 mm further in, still 37.4 mm clear of the top. No part of it is ever outside
+ *      the drum, which is why the drum can swallow it without the rope having to stretch.
+ *
+ * 90 degrees in 1.8 s is 8.3 rpm and the rope leaves the drum at 0.100 m/s — a person winding
+ * a full bucket up by hand, which is what the crank's 0.240 m throw is sized for.
+ *
  * NOTHING FLOATS, NOTHING IS HOLLOW
  * ---------------------------------
  * The shaft is filled with a solid stone plug from the ground to the water, so looking down
@@ -42,27 +64,36 @@ const APRON_BLOCKS = 16;
 
 // --- Water --------------------------------------------------------------------------------
 /*
- * 480 mm below the coping, not 780.
+ * 150 mm above the ground, 640 mm below the coping.
  *
- * A real draw-well's water is metres down. A game asset's has to be VISIBLE, and the first
- * cut put it at 0.340 where the parapet hid it from every camera angle this world uses — so
- * the well shipped a `water` material nobody could ever see. 0.480 is the depth at which the
- * storefront's own three-quarter view (22.5 degrees above the horizon) clears the near coping
- * and lands on the surface.
+ * This number went the wrong way once already. The first cut put the surface at 0.340, then it
+ * was raised to 0.480 so the storefront's three-quarter view (22.5 degrees above the horizon)
+ * would clear the near coping and land on it — which bought visibility at the price of a well
+ * 480 mm deep, and the 2026-09-05 mechanism audit measured exactly that and called it a
+ * puddle. The bucket now hangs over the mouth where it belongs, so it covers the shaft from
+ * that camera anyway and the trade was buying nothing. 0.150 is a 640 mm shaft under the
+ * coping: what you see down the hole is dark stone, which is what depth looks like.
  */
-const WATER_TOP = 0.48;
+const WATER_TOP = 0.15;
 const WATER_T = 0.05;
 /*
  * The shaft fill is NARROWER than the drum's bore, and by a measured amount.
  *
  * A drum block is a wedge whose inner face is a chord: its corners sit at r = 0.440 but the
- * middle of that face dips in to 0.440 * cos(180/14 deg) = 0.4290. A 16-sided cylinder of
- * radius 0.440 therefore pushes its own corners 11 mm INTO the stone, and the first build
- * shipped exactly that — scripts/asset-geometry-audit.mjs found 105 of the fill's 192
- * sampled vertices inside the drum. 0.415 clears the chord by 14 mm, which is still inside
- * the 25 mm the same audit counts as touching, so the fill is supported and not intersecting.
+ * middle of that face dips in to 0.440 * cos(180/14 deg) = 0.42897, and the apron's sixteen
+ * blocks dip to 0.440 * cos(180/16) = 0.43155. A 16-sided cylinder of radius 0.440 therefore
+ * pushes its own corners 11 mm INTO the stone, and the first build shipped exactly that —
+ * scripts/asset-geometry-audit.mjs found 105 of the fill's 192 sampled vertices inside the
+ * drum. The fix then was 0.415, which cleared the stone by 14 mm and left the plug and the
+ * water hanging in the middle of the shaft touching nothing — a well that says "nothing
+ * floats" with a floating floor in it.
+ *
+ * 0.4285 is the number that answers both. It is below the tightest point of the masonry
+ * (0.42897) by 0.5 mm, so no vertex of the fill can be inside any block at any angle; and the
+ * fill's own corners come within 0.5 mm of a course block and 3.1 mm of an apron block, which
+ * is inside the 5 mm the inspector counts as contact. Supported, and not intersecting.
  */
-const FILL_R = 0.415;
+const FILL_R = 0.4285;
 const WATER_R = 0.41;
 
 // --- Frame ---------------------------------------------------------------------------------
@@ -83,6 +114,15 @@ const BARREL_R = 0.09;
 const ROPE_R = 0.115;
 const ROPE_HALF = 0.22;
 const BARREL_HALF = 0.53; // 20 mm into each post's inner face at 0.51
+
+// --- Rope fall and bucket ---------------------------------------------------------------
+/** Where the falling rope's top sits: 12 mm inside the wound rope's lowest line (y = 1.485). */
+const FALL_TOP = 1.497;
+const FALL_R = 0.018;
+const BUCKET_R = 0.13;
+const BUCKET_H = 0.22;
+/** How far the bucket travels: one quarter turn of a 0.115 m rope radius, and nothing else. */
+const LIFT = ROPE_R * (Math.PI / 2);
 
 // --- Roof -----------------------------------------------------------------------------------
 const RIDGE_Y = 2.52;
@@ -141,25 +181,41 @@ export function createVillageWell(THREE) {
     assetId: "village-square.well.m1",
     upAxis: "+Y",
     scaleMeters: 1,
-    sockets: ["winch_pivot"],
+    sockets: ["winch_pivot", "bucket_pivot"],
     socketNotes: {
-      winch_pivot: "Winch barrel axis at y = 1.600, running along X. Rotate about +X; one full turn winds the rope once. Zero is the shipped rest pose with the crank hanging down.",
+      winch_pivot: "Winch barrel axis at y = 1.600, running along X. Rotate about +X to wind in; the rope radius is 0.115 m, so a radian of drum is 0.115 m of rope. Zero is the shipped rest pose with the crank hanging down and the bucket at the bottom of its travel.",
+      bucket_pivot: "The bucket's bail bar at y = 1.190 on the drum's axis, carrying the bucket and the falling rope. Translate it along +Y by exactly 0.115 * (drum radians) and the rope stays the rope.",
     },
     clips: [
       {
         name: "winch-crank",
         koreanName: "두레박 손잡이 돌리기",
-        node: "winch_pivot",
-        axis: "x",
         loop: true,
-        // Quarter turns, so LINEAR quaternion interpolation takes the short way round each
-        // time instead of collapsing a 360-degree key pair into no motion at all.
-        keys: [
-          { time: 0, degrees: 0 },
-          { time: 0.9, degrees: 90 },
-          { time: 1.8, degrees: 180 },
-          { time: 2.7, degrees: 270 },
-          { time: 3.6, degrees: 360 },
+        tracks: [
+          {
+            // Quarter turns, so LINEAR quaternion interpolation takes the short way round each
+            // time instead of collapsing a 180-degree key pair into an undefined direction.
+            node: "winch_pivot",
+            axis: "x",
+            keys: [
+              { time: 0, degrees: 0 },
+              { time: 0.9, degrees: 45 },
+              { time: 1.8, degrees: 90 },
+              { time: 2.7, degrees: 45 },
+              { time: 3.6, degrees: 0 },
+            ],
+          },
+          {
+            // The same rotation read as rope: 45 degrees is 0.115 * pi/4 = 0.0903 m of it.
+            node: "bucket_pivot",
+            offsets: [
+              { time: 0, y: 0 },
+              { time: 0.9, y: LIFT / 2 },
+              { time: 1.8, y: LIFT },
+              { time: 2.7, y: LIFT / 2 },
+              { time: 3.6, y: 0 },
+            ],
+          },
         ],
       },
     ],
@@ -304,27 +360,48 @@ export function createVillageWell(THREE) {
   );
 
   // --- Bucket ------------------------------------------------------------------------------
-  // Standing on the coping, not hanging from the rope: a bucket on a rope has to travel when
-  // the winch turns, and a shipped model that cheats that reads as a bug the first time
-  // somebody plays the clip.
-  const bucketGroup = kit.group("bucket");
+  /*
+   * Hanging from the rope over the mouth, not standing on the coping beside it.
+   *
+   * The first cut stood the bucket at z = 0.560 and said so out loud: a bucket on a rope has
+   * to travel when the winch turns, and it was not going to. The answer was not to move the
+   * bucket further from the winch but to give the winch a rope — so the bucket now hangs on
+   * `bucket_pivot`, 40 mm clear of the coping, on the drum's own axis, and the clip lifts it.
+   *
+   * Everything below is authored relative to the bail bar, which is where the rope ends and
+   * where the pivot is, so the bucket cannot come apart from the rope by arithmetic.
+   */
+  const BUCKET_BASE = PARAPET + 0.04;
+  const BAIL_Y = BUCKET_BASE + BUCKET_H + 0.14;
+  const bucketGroup = kit.group("bucket_pivot", [0, BAIL_Y, 0]);
+  bucketGroup.userData = { socket: "bucket_pivot", axis: "+Y", ropeRadius: ROPE_R, liftMetres: LIFT };
   root.add(bucketGroup);
-  const BUCKET_R = 0.13;
-  const BUCKET_H = 0.22;
-  const BUCKET_Z = 0.56;
+  const local = (y) => y - BAIL_Y;
   bucketGroup.add(
     kit.merged("well_bucket", mat.woodPlank, [
-      place(kit.cyl(BUCKET_R, BUCKET_R * 0.86, BUCKET_H, 10), [0, PARAPET + BUCKET_H / 2, BUCKET_Z]),
+      place(kit.cyl(BUCKET_R, BUCKET_R * 0.86, BUCKET_H, 10), [0, local(BUCKET_BASE + BUCKET_H / 2), 0]),
     ]),
   );
   bucketGroup.add(
     kit.merged("well_bucket_hardware", mat.iron, [
-      place(kit.cyl(BUCKET_R + 0.008, BUCKET_R + 0.008, 0.022, 10), [0, PARAPET + BUCKET_H - 0.03, BUCKET_Z]),
-      place(kit.cyl(BUCKET_R * 0.9, BUCKET_R * 0.9, 0.022, 10), [0, PARAPET + 0.04, BUCKET_Z]),
+      place(kit.cyl(BUCKET_R + 0.008, BUCKET_R + 0.008, 0.022, 10), [0, local(BUCKET_BASE + BUCKET_H - 0.03), 0]),
+      place(kit.cyl(BUCKET_R * 0.9, BUCKET_R * 0.9, 0.022, 10), [0, local(BUCKET_BASE + 0.04), 0]),
       // Bail handle: two uprights and a bar across, resting on the rim.
-      place(kit.box(0.018, 0.16, 0.018), [BUCKET_R - 0.01, PARAPET + BUCKET_H + 0.06, BUCKET_Z]),
-      place(kit.box(0.018, 0.16, 0.018), [-(BUCKET_R - 0.01), PARAPET + BUCKET_H + 0.06, BUCKET_Z]),
-      place(kit.box(BUCKET_R * 2 - 0.02, 0.018, 0.018), [0, PARAPET + BUCKET_H + 0.14, BUCKET_Z]),
+      place(kit.box(0.018, 0.16, 0.018), [BUCKET_R - 0.01, local(BUCKET_BASE + BUCKET_H + 0.06), 0]),
+      place(kit.box(0.018, 0.16, 0.018), [-(BUCKET_R - 0.01), local(BUCKET_BASE + BUCKET_H + 0.06), 0]),
+      place(kit.box(BUCKET_R * 2 - 0.02, 0.018, 0.018), [0, 0, 0]),
+    ]),
+  );
+  /*
+   * The falling rope. A child of the bucket, so winding in retracts it into the coil rather
+   * than stretching it: at rest 1.184 -> 1.497, and 0.1806 m shorter in view at the top of the
+   * lift. Its lower end runs 6 mm into the bail bar; its upper end 12 mm into the wound rope.
+   */
+  bucketGroup.add(
+    kit.solo("winch_rope_fall", mat.woodPale, kit.cyl(FALL_R, FALL_R, FALL_TOP - (BAIL_Y - 0.006), 6), [
+      0,
+      local((FALL_TOP + BAIL_Y - 0.006) / 2),
+      0,
     ]),
   );
 

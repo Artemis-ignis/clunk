@@ -17,6 +17,23 @@
  * about Z over 2.4 s with a still moment at each end of the arc. Rotation channel only. The
  * post and the arm are baked flat and do not move, which is the point of hanging the lamp off
  * a separate node instead of animating the whole asset.
+ *
+ * HANGING FROM SOMETHING (2026-09-05 mechanism audit)
+ * ---------------------------------------------------
+ * The first cut ended the bracket in a straight iron peg whose bottom was at y = 1.6975 and
+ * put the lamp's bail top at y = 1.664 — 33.5 mm of air between a hook and the thing it was
+ * meant to hold, with the swing pivot 56.0 mm above the lamp in a place where no geometry
+ * existed at all. Two measured changes:
+ *
+ *   - The peg is now a hook: it turns at y = 1.700 into a 50 mm foot running along Z and back
+ *     up into a 28 mm tip, so it has a bight with a bearing surface at y = 1.714.
+ *   - The lamp's bail is a loop in the XY plane — two uprights at x = +-0.050 and a bar across
+ *     them — so the foot passes THROUGH it along Z. That is what makes Z the axis this thing
+ *     can turn about, which is the axis the clip has always used; before, the loop lay in the
+ *     other plane and the clip's axis was a claim the geometry did not support.
+ *
+ * `lantern_body` therefore sits at the bight, y = 1.714, on iron. The bail bar's underside is
+ * 2 mm into the foot's top face at rest and stays in contact through the whole swing.
  */
 import {
   beam,
@@ -39,8 +56,10 @@ const POST = 0.12;
 const ARM_LENGTH = 0.4;
 const HOOK_X = 0.34;
 const HOOK_Y = 1.72;
-/** Top of the lamp's bail, measured down from the hook. Everything else hangs off this. */
-const HANG = -0.06;
+/** The hook's bight: the top face of the foot the bail bar rests on, and the swing axis. */
+const BIGHT_Y = 1.714;
+/** Top of the lamp's bail, measured down from the bight. Everything else hangs off this. */
+const HANG = 0.006;
 
 const postPainter = timberPainter({ role: "timberDark", grainAxis: "y", grainStep: 0.11, seed: 211 });
 const basePainter = timberPainter({ role: "timberBody", grainAxis: "x", grainStep: 0.12, boardAxis: "z", boardStep: 0.3, seed: 223 });
@@ -66,8 +85,12 @@ export default function createMineLantern(THREE) {
   // 40 x 16 mm strap iron out of the post head, with a diagonal stay under it and a hook.
   ironParts.push(painted(THREE, board(THREE, [ARM_LENGTH, 0.04, 0.016], [ARM_LENGTH / 2 - 0.03, HOOK_Y + 0.05, 0]), armPainter));
   ironParts.push(painted(THREE, board(THREE, [0.3, 0.03, 0.014], [0.14, HOOK_Y - 0.09, 0], [0, 0, 0.64]), armPainter));
-  // The hook itself: a short down-turn at the arm's end.
-  ironParts.push(painted(THREE, board(THREE, [0.016, 0.075, 0.016], [HOOK_X, HOOK_Y + 0.015, 0]), armPainter));
+  // The hook itself: a down-turn at the arm's end, a foot along Z, and a tip turned back up.
+  // The foot's top face at y = 1.714 is what the lamp's bail bar bears on, and the 18 mm of
+  // clear Z between the shank and the tip is the bight the 12 mm bar drops into.
+  ironParts.push(painted(THREE, board(THREE, [0.016, 0.075, 0.016], [HOOK_X, BIGHT_Y + 0.0235, 0]), armPainter));
+  ironParts.push(painted(THREE, board(THREE, [0.016, 0.014, 0.05], [HOOK_X, BIGHT_Y - 0.007, 0.017]), armPainter));
+  ironParts.push(painted(THREE, board(THREE, [0.016, 0.028, 0.016], [HOOK_X, BIGHT_Y + 0.007, 0.034]), armPainter));
 
   // Drop the standing part onto y = 0 and carry the hook down with it. The shift is read off
   // the geometry rather than assumed to be zero, so the lamp cannot end up hanging in the wrong
@@ -75,18 +98,20 @@ export default function createMineLantern(THREE) {
   const standing = [...timberParts, ...ironParts];
   const shift = -lowestY(standing);
   translateAll(THREE, standing, shift);
-  const hookY = HOOK_Y + shift;
+  const hookY = BIGHT_Y + shift;
 
   // ---- the lamp, authored about the hook -------------------------------------------------------
   // Built in its own local frame with y = 0 at the pivot, so the node can simply be placed at
   // the hook and rotated. Nothing here is grounded — it is meant to hang.
   const lampParts = [];
   const glassParts = [];
-  // Bail: two uprights and a cross bar, so the handle is a loop and not a decal.
-  for (const sz of [-1, 1]) {
-    lampParts.push(painted(THREE, board(THREE, [0.012, 0.075, 0.01], [0, HANG - 0.038, sz * 0.05]), lampPainter));
+  // Bail: two uprights and a cross bar, so the handle is a loop and not a decal. The loop lies
+  // in the XY plane, which is what lets the hook's foot pass through it along Z and what makes
+  // Z the axis it can turn about.
+  for (const sx of [-1, 1]) {
+    lampParts.push(painted(THREE, board(THREE, [0.01, 0.075, 0.012], [sx * 0.05, HANG - 0.038, 0]), lampPainter));
   }
-  lampParts.push(painted(THREE, board(THREE, [0.012, 0.012, 0.112], [0, HANG - 0.002, 0]), lampPainter));
+  lampParts.push(painted(THREE, board(THREE, [0.112, 0.012, 0.012], [0, HANG - 0.002, 0]), lampPainter));
   // Top cap: a six-sided cone, with a chimney above it.
   lampParts.push(painted(THREE, lathe(THREE, [[0.075, HANG - 0.1], [0.062, HANG - 0.082], [0.022, HANG - 0.066]], 6, [0, 0, 0]), lampPainter));
   lampParts.push(painted(THREE, tube(THREE, 0.016, 0.03, 6, [0, HANG - 0.05, 0]), lampPainter));
@@ -143,6 +168,7 @@ export default function createMineLantern(THREE) {
     clips: [{ name: "lantern_swing", seconds: 2.4, channels: "rotation only" }],
     surfaceLanguage: [
       "the lamp hangs off its own node, so the post stays still while the lamp swings",
+      "a hook with a bight and a bail loop the hook passes through — the swing axis is the bar it hangs on",
       "four 6 mm glass panes at the palest value in the kit, framed by its darkest",
       "a bail you can see through: two uprights and a cross bar, not a painted loop",
       "post braced and footed on crossed timbers rather than pushed into the ground",

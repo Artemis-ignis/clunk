@@ -490,7 +490,7 @@ function entryFileNameFor(slug: string, marketRoot: string, fromManifest?: Map<s
   const named = names.filter((name) => stem(name) === slug && !name.endsWith(".json"));
   if (named.length === 1) return `${slug}/${named[0]!}`;
   if (declared && names.includes(declared)) return `${slug}/${declared}`;
-  const glb = names.filter((name) => name.toLowerCase().endsWith(".glb"));
+  const glb = names.filter((name) => name.toLowerCase().endsWith(".glb")).filter((n) => !/^preview-.*.glb$/i.test(n)) /* 비로그인 뷰어용 미리보기 GLB(preview-*.glb)는 판매 파일이 아니다 */;
   if (glb.length === 1) return `${slug}/${glb[0]!}`;
   // 묶음이 건네주는 첫 파일은 부품의 폴더에 있다. 이름으로 찾는다.
   if (declared) {

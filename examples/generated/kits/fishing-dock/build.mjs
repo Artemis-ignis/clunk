@@ -124,6 +124,46 @@ function buildClip(root, spec) {
   return new THREE.AnimationClip(spec.name, spec.seconds, tracks);
 }
 
+/**
+ * The lowest point a part reaches at any moment of its own clips, in its own space.
+ *
+ * The rest pose is not the answer for anything that moves. `dock-rowboat` stands on its keel at
+ * y = 0 and is documented as floating; its `bob` clip then rolls it and drops it 18 mm, and the
+ * 2026-09-05 mechanism audit measured the result at -25.9 mm — a boat 25.9 mm into the ground
+ * in the kit's photograph. So the kit layout asks each part this question and stands it on the
+ * answer rather than on its rest bounds. Every key time is sampled, plus the midpoints, because
+ * a roll and a heave together can be deepest between two keys.
+ */
+function lowestOverClips(root, specs) {
+  // `precise` matters here and nowhere else in this file: without it three.js measures a
+  // rotated part by the eight corners of its unrotated box, which reported the rowboat 87.4 mm
+  // under the floor when its real deepest vertex is 25.9 mm under it.
+  const box = new THREE.Box3().setFromObject(root, true);
+  let lowest = box.min.y;
+  const times = new Set([0]);
+  for (const spec of specs) for (const track of spec.tracks) for (const time of track.times) times.add(time);
+  const keys = [...times].sort((a, b) => a - b);
+  const ordered = [...keys];
+  for (let i = 1; i < keys.length; i += 1) ordered.push((keys[i - 1] + keys[i]) / 2);
+  const clips = specs.map((spec) => buildClip(root, spec));
+  const mixer = new THREE.AnimationMixer(root);
+  for (const clip of clips) mixer.clipAction(clip).play();
+  for (const time of ordered.sort((a, b) => a - b)) {
+    mixer.setTime(0);
+    mixer.setTime(time);
+    root.updateMatrixWorld(true);
+    lowest = Math.min(lowest, new THREE.Box3().setFromObject(root, true).min.y);
+  }
+  // Put the pose back to key 0 BEFORE the actions stop, then let go of the bindings: a mixer
+  // that is stopped first leaves the node wherever the last sample left it, and this root is
+  // about to be exported into the kit file.
+  mixer.setTime(0);
+  mixer.stopAllAction();
+  mixer.uncacheRoot(root);
+  root.updateMatrixWorld(true);
+  return lowest;
+}
+
 async function exportGlb(object, clips) {
   const scene = new THREE.Scene();
   scene.name = object.name;
@@ -273,7 +313,13 @@ async function main() {
     holder.updateMatrixWorld(true);
     const box = new THREE.Box3().setFromObject(holder);
     const size = box.getSize(new THREE.Vector3());
-    holder.position.set(cursorX - box.min.x, 0, cursorZ - box.min.z);
+    // Stand it on the floor of its OWN motion, not on its rest bounds. For fourteen of the
+    // fifteen parts those are the same number and the lift is zero; for the rowboat it is the
+    // 25.9 mm the bob dips, so the keel grazes the floor at the bottom of the swell instead of
+    // passing through it.
+    const clipFloor = entry.clipSpecs.length ? lowestOverClips(entry.root, entry.clipSpecs) : box.min.y;
+    const lift = Math.max(0, box.min.y - clipFloor);
+    holder.position.set(cursorX - box.min.x, lift, cursorZ - box.min.z);
     kitRoot.add(holder);
     holder.updateMatrixWorld(true);
     const worldBox = new THREE.Box3().setFromObject(holder);
@@ -283,6 +329,7 @@ async function main() {
       standsAt: [round(worldBox.min.x), round(worldBox.min.z)],
       sizeMetres: [round(size.x), round(size.y), round(size.z)],
       lowestY: round(worldBox.min.y, 5),
+      clipFloorLiftMetres: round(lift, 5),
     });
     for (const spec of entry.clipSpecs) clips.push(buildClip(entry.root, spec));
     cursorX += size.x + GAP;

@@ -44,7 +44,7 @@ const notes = [];
 function entryGlb(slug) {
   const dir = resolve(root, "public/market", slug);
   if (!existsSync(dir)) throw new Error(`public/market/${slug} 가 없습니다`);
-  const glbs = readdirSync(dir).filter((name) => name.toLowerCase().endsWith(".glb"));
+  const glbs = readdirSync(dir).filter((name) => name.toLowerCase().endsWith(".glb")).filter((n) => !/^preview-.*.glb$/i.test(n)) /* 비로그인 뷰어용 미리보기 GLB(preview-*.glb)는 판매 파일이 아니다 */;
   if (glbs.length !== 1) throw new Error(`public/market/${slug} 에 GLB 가 ${glbs.length}개입니다`);
   return { name: glbs[0], path: resolve(dir, glbs[0]) };
 }

@@ -52,7 +52,7 @@ mkdirSync(WORK, { recursive: true });
 function entryOf(slug) {
   let names;
   try {
-    names = readdirSync(resolve(root, "public/market", slug)).filter((n) => n.toLowerCase().endsWith(".glb"));
+    names = readdirSync(resolve(root, "public/market", slug)).filter((n) => n.toLowerCase().endsWith(".glb")).filter((n) => !/^preview-.*.glb$/i.test(n)) /* 비로그인 뷰어용 미리보기 GLB(preview-*.glb)는 판매 파일이 아니다 */;
   } catch {
     return null;
   }

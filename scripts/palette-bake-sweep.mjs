@@ -157,7 +157,7 @@ const rows = [];
 for (const slug of readdirSync("public/market").sort()) {
   let names;
   try {
-    names = readdirSync(`public/market/${slug}`).filter((f) => f.toLowerCase().endsWith(".glb"));
+    names = readdirSync(`public/market/${slug}`).filter((f) => f.toLowerCase().endsWith(".glb")).filter((n) => !/^preview-.*.glb$/i.test(n)) /* 비로그인 뷰어용 미리보기 GLB(preview-*.glb)는 판매 파일이 아니다 */;
   } catch {
     continue; // 폴더가 아닌 것
   }
