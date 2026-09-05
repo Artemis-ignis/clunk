@@ -88,7 +88,8 @@ test("the public product surfaces expose creation, library, review, and marketpl
   // action, not the pipeline stage. The contract follows the word the user reads.
   assert.match(studio, /만들기|생성|prompt/i);
   assert.match(landing, /실제 제작|마켓|판매/);
-  assert.match(marketplace, /검수|라이선스|다운로드/);
+  // 2026-09-05: 마켓 첫 문장은 사용 조건(상업적으로 쓸 수 있고)과 받기를 말한다 — "라이선스" 라는 낱말은 더 이상 쓰지 않는다.
+  assert.match(marketplace, /상업적으로 쓸 수 있고|받으세요|다운로드/);
 });
 
 test("paid marketplace artifacts never ship as public previews", async () => {
