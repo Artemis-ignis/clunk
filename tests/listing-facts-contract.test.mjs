@@ -269,7 +269,7 @@ test("the kit line names the set and counts its real members", () => {
 
 test("the browser's own reading is reported as agreeing or as differing, never silently", () => {
   const facts = emptyFacts({ triangles: 520, materials: 6, byteLength: 47_960 });
-  assert.equal(reconcileMeasured(facts, { triangles: 520, materials: 6, bytes: 47_960 }), "이 브라우저에서 다시 잰 값도 같습니다.");
+  assert.equal(reconcileMeasured(facts, { triangles: 520, materials: 6, bytes: 47_960 }), "이 브라우저에서 다시 측정한 값도 같습니다.");
   assert.match(reconcileMeasured(facts, { triangles: 999, materials: 6, bytes: 47_960 }), /다릅니다 — 폴리곤 999개/u);
   assert.equal(reconcileMeasured(facts, null), null);
 });

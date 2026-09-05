@@ -36,16 +36,17 @@ const FLOW = ["생성", "검사", "수정", "게시", "에이전트"] as const;
  * the stage, the caption and the heading text all follow — nothing else in this
  * file names the file.
  *
- * This is the tractor Harvest Frontier actually ships — the operator's own game, the
- * file players see — not a stand-in authored for the page (2026-09-02: a code-built
- * tractor stood here for a day and read as a toy next to the real one).
- * `measured` is not typed by hand: every value is the 2026-08-31 re-inspection record
- * (.clunk-evidence/.../tractor.compact.m1-pc-inspection.json): triangleCount 39,320 ·
- * drawCallCount 98 · 840,136 bytes = 840 KB. If the file changes, re-read the record.
- * The record's draw-call count is not shown: a buyer cannot act on it. What they need
- * to know -- will this run in my game -- is the polygon count against the ceiling.
+ * 2026-09-05: the helicopter we sell (clunk-heli-h145), served from its own market
+ * folder rather than a copy under /landing, so the landing and the listing can never
+ * show two different files. The tractor used to stand here as well as in section 02,
+ * which put the same model on the page twice; the operator asked for one of each.
+ * Section 01 is about making an asset, so it shows one that exists because Clunk
+ * made it — two clips (rotor_spin, doors_open) the viewer can play. `measured` is
+ * not typed by hand: scripts/landing-facts.mjs reads it off the file, and
+ * tests/listing-facts-truth.test.mjs opens the file again to check it.
  */
 import landingFacts from "./data/landing-facts.json";
+import { formatBytes } from "./components/listing-facts-rows";
 
 /**
  * 첫 화면이 보여 주는 파일의 숫자. 손으로 적지 않는다.
@@ -57,13 +58,13 @@ import landingFacts from "./data/landing-facts.json";
 const LANDING = landingFacts.facts;
 
 const FEATURED_MODEL = {
-  src: "/landing/tractor.compact.m1.glb",
-  poster: "/landing/tractor-hero.png",
-  name: "트랙터",
-  fileName: LANDING.tractor.fileName,
+  src: "/market/clunk-heli-h145/h145.glb",
+  poster: "/market/clunk-heli-h145/hero-clunk-heli-h145.png",
+  name: "헬리콥터",
+  fileName: LANDING.helicopter.fileName,
   measured: {
-    faces: LANDING.tractor.triangles.toLocaleString("ko-KR"),
-    size: `${Math.round(LANDING.tractor.bytes / 1024).toLocaleString("ko-KR")} KB`,
+    faces: LANDING.helicopter.triangles.toLocaleString("ko-KR"),
+    size: formatBytes(LANDING.helicopter.bytes),
   },
 } as const;
 
@@ -81,7 +82,7 @@ const INSPECTED_MODEL = {
   fileName: LANDING.tractor.fileName,
   measured: {
     faces: LANDING.tractor.triangles.toLocaleString("ko-KR"),
-    size: `${Math.round(LANDING.tractor.bytes / 1024).toLocaleString("ko-KR")} KB`,
+    size: formatBytes(LANDING.tractor.bytes),
     faceLimit: LANDING.tractor.faceLimit.toLocaleString("ko-KR"),
     limitPercent: String(LANDING.tractor.limitPercent),
     overLimit: LANDING.tractor.triangles > LANDING.tractor.faceLimit,
@@ -109,30 +110,20 @@ const FLOW_NOTES = [
   "한 줄이면 2D, 몇 초면 3D 파일",
   `GLB를 ${RULE_COUNT}가지 항목으로`,
   "걸린 것만 고쳐 새 파일로",
-  "검사를 통과한 것만 마켓에",
+  "만든 파일 그대로 마켓에",
   `AI 도구 ${AGENT_CLIENTS.length}곳에 그대로`,
 ] as const;
 
-/** Renderer-measured triangle counts — outputs/market-launch/wave1/measurements. */
-const SHOWCASE = [
-  { slug: "market-stall", name: "시장 노점", tris: "2,456" },
-  { slug: "greenhouse", name: "온실", tris: "5,756" },
-  { slug: "storage-shed", name: "창고 헛간", tris: "1,620" },
-  { slug: "haystack", name: "건초 더미", tris: "1,322" },
-  { slug: "fence-gate", name: "울타리 게이트", tris: "520" },
-  { slug: "crate-produce", name: "농산물 상자", tris: "782" },
-  { slug: "broadleaf-full", name: "활엽수 · 라운드", tris: "1,730" },
-  { slug: "column-flame", name: "활엽수 · 플레임", tris: "2,120" },
-  { slug: "conifer-spire", name: "침엽수 · 스파이어", tris: "860" },
-  { slug: "broadleaf-forked", name: "활엽수 · 포크", tris: "2,136" },
-  { slug: "conifer-umbrella", name: "침엽수 · 우산", tris: "1,772" },
-  { slug: "crate-closed", name: "뚜껑 상자", tris: "700" },
-] as const;
-
-/* 첫 화면이 한 판(100svh)을 통째로 갖게 되면서 진열판이 세로로 커졌다. 6칸(3x2)이면
-   판 아래에 빈 자리가 남으므로 9칸(3x3)으로 채운다 — 칸은 정사각을 유지한다. */
-const HERO_CELLS = SHOWCASE.slice(0, 9);
-const MARKET_CELLS = SHOWCASE.slice(0, 6);
+/**
+ * 첫 화면 진열판. 칸마다 마켓의 실제 파일 하나이고, 폴리곤 수는 scripts/landing-facts.mjs
+ * 가 그 파일에서 측정해 둔 값이다 — 여기 손으로 적은 숫자는 없다(전에는 있었고, 그중
+ * 농산물 상자가 782 로 적혀 파일의 882 와 어긋나 있었다). 앞 9칸이 3x3 격자(첫 화면이
+ * 한 판을 통째로 갖게 되어 6칸이면 판 아래가 비었다), 뒤 3칸이 격자 위에 떠 있는 카드라
+ * 열두 칸이 서로 겹치지 않는다 — 전에는 떠 있는 카드 셋이 격자 안의 칸을 되풀이했다.
+ */
+const TILES = landingFacts.tiles.map((tile) => ({ ...tile, tris: tile.triangles.toLocaleString("ko-KR") }));
+const HERO_CELLS = TILES.slice(0, 9);
+const FLOAT_CELLS = TILES.slice(9, 12);
 
 function ShowcaseImg({ slug, name, eager }: { slug: string; name: string; eager?: boolean }) {
   return (
@@ -184,11 +175,12 @@ export default function Home() {
                     게임 제작의<br />모든 과정을<br /><em>CLUNK<br />하나로</em>
                   </span>
                 </h1>
-                {/* The operator's own sentence (2026-09-02). It says what the product does in
-                    the words a visitor uses — not how the inspector does it. */}
+                {/* The operator's own sentence (2026-09-02; second line reworded by him
+                    2026-09-05). It says what the product does in the words a visitor uses —
+                    not how the inspector does it. */}
                 <p className="cv5-hero-lede">
                   2D·3D 게임 에셋을 생성하고, 검사·수정하고, AI 에이전트와 함께 게임까지 제작하세요.
-                  만든 에셋이 게임에서 문제없이 돌아가는지도 바로 확인해 드립니다.
+                  구매한 에셋이 게임에서 문제없이 돌아가는지도 바로 확인해 드립니다.
                 </p>
                 <div className="cv5-cta-row">
                   <Link className="cv5-btn cv5-btn-primary" href="/signup?return_to=%2Fstudio%3Fintent%3Dcreate" prefetch={false}>
@@ -215,15 +207,19 @@ export default function Home() {
                     ))}
                   </div>
                   <div className="cv5-hv-foot">
-                    {/* The Harvest Frontier tractor's own record (tractor.compact.m1-pc-inspection.json):
-                        score 99, hardBlockerCount 0, two warnings. It has never scored 100. */}
-                    <span>트랙터 검사 결과</span>
-                    <b>99점 · 막는 문제 0건</b>
+                    {/* 이 자리에 트랙터 검사 점수가 있었다. 진열판은 마켓 에셋 열두 개인데 그 밑에
+                        다른 파일의 점수가 붙어 있어 무엇의 점수인지 읽히지 않았다(운영자 지적,
+                        2026-09-05). 진열판이 실제로 말하는 것 하나만 남긴다. */}
+                    <span>폴리곤 수</span>
+                    <b>파일에서 직접 측정한 값</b>
                   </div>
                 </div>
-                <div className="cv5-float cv5-float-a"><img src="/landing/showcase/conifer-spire.webp" alt="" width={240} height={240} loading="eager" /><small>860 폴리곤</small></div>
-                <div className="cv5-float cv5-float-b"><img src="/landing/showcase/crate-produce.webp" alt="" width={200} height={200} loading="eager" /><small>782 폴리곤</small></div>
-                <div className="cv5-float cv5-float-c"><img src="/landing/showcase/haystack.webp" alt="" width={220} height={220} loading="eager" /><small>1,322 폴리곤</small></div>
+                {FLOAT_CELLS.map((asset, index) => (
+                  <div className={`cv5-float cv5-float-${"abc"[index]}`} key={asset.slug}>
+                    <img src={`/landing/showcase/${asset.slug}.webp`} alt="" width={240} height={240} loading="eager" />
+                    <small>{asset.tris} 폴리곤</small>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -249,7 +245,7 @@ export default function Home() {
               <div className="cv5-sec-kicker"><span className="cv5-num">01</span><small>에셋 제작</small></div>
               <h2 id="sec-make">게임 에셋 제작</h2>
               <p>
-                한 줄이면 2D가, 몇 초면 3D 모델이 나옵니다. 검사를 통과한 것만 마켓에 올립니다.
+                한 줄이면 2D가, 몇 초면 3D 모델이 나옵니다. 만든 파일은 바로 검사로 넘어갑니다.
               </p>
               <ul className="cv5-points">
                 <li><b>2D 이미지</b> — 스프라이트·아이콘·이펙트를 문장으로</li>
@@ -263,7 +259,7 @@ export default function Home() {
             </div>
             <div className="cv5-sec-visual cv5-reveal" data-delay="1">
               <div className="cv5-mock">
-                <div className="cv5-mock-bar"><span>실제 게임에 <b>들어간 모델</b></span><span>{FEATURED_MODEL.fileName}</span></div>
+                <div className="cv5-mock-bar"><span>마켓에 <b>올라와 있는 모델</b></span><span>{FEATURED_MODEL.fileName}</span></div>
                 {/* This section is about MAKING an asset, so it shows one Clunk
                     authored, turning, with the numbers its own inspector read off
                     the file. A grid of things to buy belongs in the market section
@@ -273,14 +269,14 @@ export default function Home() {
                     <EmbeddedGlbViewer
                       src={FEATURED_MODEL.src}
                       poster={FEATURED_MODEL.poster}
-                      alt={`Harvest Frontier에 들어간 ${FEATURED_MODEL.name} — 드래그해서 돌려보세요`}
-                      hint="드래그 회전 · 휠 줌 · 실제 게임에 들어간 파일"
+                      alt={`마켓에서 파는 ${FEATURED_MODEL.name} — 드래그해서 돌려보세요`}
+                      hint="드래그 회전 · 휠 줌 · 마켓에서 파는 파일 그대로"
                     />
                   </div>
                   <div className="cv5-make-facts">
                     <div className="cv5-make-name">
                       <b>{FEATURED_MODEL.name}</b>
-                      <span>Harvest Frontier에서 실제로 쓰는 파일 · 아래 숫자는 이 파일에서 직접 읽은 값</span>
+                      <span>마켓에 올라와 있는 파일 그대로 · 아래 숫자는 이 파일에서 직접 측정한 값</span>
                     </div>
                     <div><span>폴리곤</span><b>{FEATURED_MODEL.measured.faces}개</b></div>
                     <div><span>파일 크기</span><b>{FEATURED_MODEL.measured.size}</b></div>
@@ -384,9 +380,9 @@ export default function Home() {
               <ul className="cv5-points">
                 {/* 3D는 /api/series가 템플릿 보관소에서 다시 구워 냅니다 — 문장이 모양을 만들지
                     않습니다(app/api/series/route.ts). 문장으로 그리는 것은 2D 이미지뿐입니다. */}
-                <li><b>말로 부릅니다</b> — 템플릿을 고르고 한 줄로 부르면 GLB가 나옵니다</li>
-                <li><b>문제를 먼저 알려줍니다</b> — 무엇이 걸렸는지 짚어 주고, 고칠지 물어봅니다</li>
-                <li><b>어디서든 그대로</b> — Unity, Godot, Three.js에 바로 넣어 씁니다</li>
+                <li><b>에셋 제작</b> — 템플릿을 고르고 프롬프트를 입력하면 GLB가 나옵니다</li>
+                <li><b>검사</b> — 만든 파일을 바로 검사해 무엇이 걸렸는지 짚어 주고, 고칠지 물어봅니다</li>
+                <li><b>게임에 적용</b> — 통과한 파일을 Unity, Godot, Three.js에 바로 넣습니다</li>
               </ul>
               <div>
                 <Link className="cv5-more" href="/agents" prefetch={false}>에이전트 연결 가이드 <Icon name="arrowRight" size={15} /></Link>
@@ -420,8 +416,8 @@ export default function Home() {
                 <h2 id="showcase-heading">마켓에 올라와 있는 에셋</h2>
               </div>
               <p>
-                농장·마을 배경에 바로 쓰는 3D 모델, 2D 스프라이트 시트, 이어 붙여도 이음매가 안 보이는 텍스처입니다.
-                카드마다 폴리곤 수가 적혀 있고, 베타 기간에는 로그인만 하면 무료로 받습니다.
+                게임 제작에 바로 쓸 수 있는 3D 모델, 2D 스프라이트 시트, 이어 붙여도 이음매가 안 보이는 텍스처입니다.
+                카드마다 폴리곤 수가 적혀 있고, 베타 기간에는 로그인만 하면 무료로 받을 수 있습니다.
               </p>
             </div>
             {/* 이 진열장의 높이는 마켓이 몇 개를 돌려주느냐가 아니라 설계로 정한다.

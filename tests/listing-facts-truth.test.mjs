@@ -47,7 +47,7 @@ async function entryGlb(slug) {
   return `${MARKET}/${slug}/${glb[0]}`;
 }
 
-test("적힌 삼각형 수가 파일에서 다시 잰 값과 같다", async () => {
+test("적힌 삼각형 수가 파일에서 다시 측정한 값과 같다", async () => {
   const facts = await loadFacts();
   const checked = [];
   const wrong = [];
@@ -285,4 +285,45 @@ test("색이 어디에 들어 있는지를 파일대로 말한다", async () => 
   assert.match(engineBasis(textured).join(" "), /따로 챙길 텍스처가 없/);
   assert.match(engineBasis(textured).join(" "), /확장을 하나도 요구하지 않습니다/);
   assert.equal(engineBasis(null).length, 0, "재지 않은 상품에 근거를 지어냅니다");
+});
+
+/**
+ * 첫 화면의 숫자도 같은 규칙을 따른다. app/data/landing-facts.json 은
+ * scripts/landing-facts.mjs 가 파일에서 측정해 내려놓은 값이고, 화면(app/page.tsx)은
+ * 그것만 읽는다. 여기서 같은 파일을 다시 열어 대조한다 — JSON 을 손으로 고치거나,
+ * 파일을 갈아 끼우고 스크립트를 안 돌리면 여기서 걸린다. 2026-09-04 에 실제로 그렇게
+ * 어긋났다(58,156 삼각형짜리 파일 옆에 "39,320개").
+ */
+test("첫 화면에 적힌 폴리곤 수와 용량이 그 파일에서 다시 측정한 값과 같다", async () => {
+  const raw = JSON.parse(await readFile(new URL("app/data/landing-facts.json", root), "utf8"));
+  // facts 는 섹션 01·02 의 모델, tiles 는 첫 화면 진열판 열두 칸. 둘 다 같은 규칙.
+  const entries = [
+    ...Object.entries(raw.facts ?? {}),
+    ...(raw.tiles ?? []).map((tile) => [`tile:${tile.slug}`, tile]),
+  ];
+  assert.ok(entries.length > 0, "첫 화면이 보여 주는 파일이 하나도 적혀 있지 않습니다");
+
+  const wrong = [];
+  for (const [key, fact] of entries) {
+    assert.equal(typeof fact.path, "string", `${key}: 어느 파일인지(path)가 없어 다시 측정할 수 없습니다`);
+    if (fact.fileName && fact.path.split("/").pop() !== fact.fileName) {
+      wrong.push(`${key}: fileName ${fact.fileName} 이 path ${fact.path} 의 파일 이름과 다릅니다`);
+    }
+    const bytes = await readFile(new URL(fact.path, root));
+    const entryName = fact.path.split("/").pop();
+    const report = inspectAsset({ entry: entryName, files: new Map([[entryName, new Uint8Array(bytes)]]) });
+    const measured = report?.metrics?.triangleCount;
+    if (measured !== fact.triangles) {
+      wrong.push(`${key}: 표기 ${fact.triangles?.toLocaleString()} / 실측 ${measured?.toLocaleString()} 삼각형`);
+    }
+    if (bytes.byteLength !== fact.bytes) {
+      wrong.push(`${key}: 표기 ${fact.bytes?.toLocaleString()} / 실제 ${bytes.byteLength.toLocaleString()} bytes`);
+    }
+  }
+
+  assert.deepEqual(
+    wrong,
+    [],
+    `첫 화면의 숫자가 파일과 다릅니다. node --import tsx scripts/landing-facts.mjs 를 다시 돌리세요:\n  ${wrong.join("\n  ")}`,
+  );
 });

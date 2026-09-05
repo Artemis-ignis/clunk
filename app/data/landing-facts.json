@@ -1,13 +1,120 @@
 {
   "schema": "clunk.landing-facts.v1",
-  "generatedAt": "2026-09-04T13:44:40.384Z",
+  "generatedAt": "2026-09-05T02:09:39.847Z",
   "facts": {
     "tractor": {
       "fileName": "tractor.compact.m1.glb",
+      "path": "public/landing/tractor.compact.m1.glb",
       "triangles": 58156,
       "bytes": 578376,
       "faceLimit": 40000,
       "limitPercent": 145
+    },
+    "helicopter": {
+      "fileName": "h145.glb",
+      "path": "public/market/clunk-heli-h145/h145.glb",
+      "triangles": 85150,
+      "bytes": 2833676,
+      "faceLimit": 40000,
+      "limitPercent": 213
     }
-  }
+  },
+  "tiles": [
+    {
+      "slug": "market-stall",
+      "listing": "cozy-market-stall",
+      "name": "시장 노점",
+      "path": "public/market/cozy-market-stall/market-stall.m1.clunk-optimized.glb",
+      "triangles": 2456,
+      "bytes": 215248
+    },
+    {
+      "slug": "greenhouse",
+      "listing": "cozy-greenhouse",
+      "name": "온실",
+      "path": "public/market/cozy-greenhouse/greenhouse.m1.clunk-optimized.glb",
+      "triangles": 5756,
+      "bytes": 555256
+    },
+    {
+      "slug": "storage-shed",
+      "listing": "cozy-storage-shed",
+      "name": "창고 헛간",
+      "path": "public/market/cozy-storage-shed/storage-shed.m1.clunk-optimized.glb",
+      "triangles": 1620,
+      "bytes": 138020
+    },
+    {
+      "slug": "haystack",
+      "listing": "cozy-haystack-full",
+      "name": "건초 더미",
+      "path": "public/market/cozy-haystack-full/haystack-full.clunk-optimized.glb",
+      "triangles": 1322,
+      "bytes": 132432
+    },
+    {
+      "slug": "fence-gate",
+      "listing": "cozy-fence-gate",
+      "name": "울타리 게이트",
+      "path": "public/market/cozy-fence-gate/fence-gate.m1.clunk-optimized.glb",
+      "triangles": 520,
+      "bytes": 46004
+    },
+    {
+      "slug": "crate-produce",
+      "listing": "cozy-crate-produce",
+      "name": "농산물 상자",
+      "path": "public/market/cozy-crate-produce/crate-produce.clunk-optimized.glb",
+      "triangles": 882,
+      "bytes": 90476
+    },
+    {
+      "slug": "broadleaf-full",
+      "listing": "grove-tree-pack-vol1",
+      "name": "활엽수 · 라운드",
+      "path": "public/market/grove-tree-pack-vol1/broadleaf-round-full.glb",
+      "triangles": 1810,
+      "bytes": 158428
+    },
+    {
+      "slug": "column-flame",
+      "listing": "grove-tree-pack-vol1",
+      "name": "활엽수 · 플레임",
+      "path": "public/market/grove-tree-pack-vol1/broadleaf-column-flame.glb",
+      "triangles": 2180,
+      "bytes": 189856
+    },
+    {
+      "slug": "conifer-spire",
+      "listing": "grove-tree-pack-vol1",
+      "name": "침엽수 · 스파이어",
+      "path": "public/market/grove-tree-pack-vol1/conifer-spire.glb",
+      "triangles": 860,
+      "bytes": 76804
+    },
+    {
+      "slug": "broadleaf-forked",
+      "listing": "grove-tree-pack-vol1",
+      "name": "활엽수 · 포크",
+      "path": "public/market/grove-tree-pack-vol1/broadleaf-round-forked.glb",
+      "triangles": 2176,
+      "bytes": 189692
+    },
+    {
+      "slug": "conifer-umbrella",
+      "listing": "grove-tree-pack-vol1",
+      "name": "침엽수 · 우산",
+      "path": "public/market/grove-tree-pack-vol1/conifer-umbrella.glb",
+      "triangles": 1852,
+      "bytes": 161276
+    },
+    {
+      "slug": "crate-closed",
+      "listing": "cozy-crate-closed",
+      "name": "뚜껑 상자",
+      "path": "public/market/cozy-crate-closed/crate-closed.clunk-optimized.glb",
+      "triangles": 700,
+      "bytes": 72304
+    }
+  ]
 }
