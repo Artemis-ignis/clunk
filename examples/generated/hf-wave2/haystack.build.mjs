@@ -311,24 +311,40 @@ export function buildHaystack(THREE, variantName) {
   }
   const flatBlades = variant.eatenEnd
     ? [
-        [0.42, 0.012, 0.34, 0.95, 0.05, 0.2],
-        [0.36, 0.012, -0.44, 0.85, 0.06, -0.5],
-        [0.2, 0.012, 0.62, 0.5, 0.05, 0.86],
-        [-0.34, 0.012, 0.66, -0.3, 0.06, 0.95],
-        [-0.62, 0.012, -0.3, -0.9, 0.05, -0.4],
-        [0.46, 0.012, 0.02, 0.99, 0.06, 0.05],
+        [0.42, 0.03, 0.34, 0.95, 0.26, 0.2],
+        [0.36, 0.03, -0.44, 0.85, 0.22, -0.5],
+        [0.2, 0.03, 0.62, 0.5, 0.27, 0.86],
+        [-0.34, 0.03, 0.66, -0.3, 0.23, 0.95],
+        [-0.62, 0.03, -0.3, -0.9, 0.26, -0.4],
+        [0.46, 0.03, 0.02, 0.99, 0.22, 0.05],
       ]
     : [
-        [-0.58, 0.012, 0.5, -0.7, 0.06, 0.7],
-        [0.46, 0.012, 0.56, 0.6, 0.05, 0.8],
-        [0.6, 0.012, -0.3, 0.9, 0.06, -0.4],
-        [-0.42, 0.012, -0.64, -0.4, 0.05, -0.9],
-        [0.0, 0.012, 0.7, 0.1, 0.06, 0.99],
-        [-0.66, 0.012, -0.08, -0.98, 0.05, 0.1],
+        [-0.58, 0.03, 0.5, -0.7, 0.25, 0.7],
+        [0.46, 0.03, 0.56, 0.6, 0.22, 0.8],
+        [0.6, 0.03, -0.3, 0.9, 0.27, -0.4],
+        [-0.42, 0.03, -0.64, -0.4, 0.23, -0.9],
+        [0.0, 0.03, 0.7, 0.1, 0.26, 0.99],
+        [-0.66, 0.03, -0.08, -0.98, 0.22, 0.1],
       ];
+  /*
+   * The six blades lying loose on the ground, re-cut 2026-09-05.
+   *
+   * They were 190 mm long on a 14 mm section and laid down almost flat (the plant direction's
+   * y component is 0.05, so about 3 degrees off the ground). At that ratio — 190 : 28, near
+   * 7 : 1 — a low camera sees one lit top facet and a hairline of edge, and the blade reads as a
+   * shard of card rather than as straw. Measured on the shipped file: the worst of them showed
+   * 612 mm^2 of silhouette from the side against 2,570 mm^2 from above, a 0.24 ratio.
+   *
+   * Now 150 mm on a 26 mm section (150 : 52, under 3 : 1), planted 26 mm up so the fatter root
+   * still rests on the ground rather than sinking into it, and given real bend and droop so the
+   * blade arcs instead of lying dead flat — an arc has a silhouette from every side, a flat
+   * wedge only from two. `cap: true` closes the root: these are the only blades in the model
+   * whose open end is not buried in something, and with backface culling an open end that faces
+   * the camera is a hole. Six triangles for the six caps; nothing else changes.
+   */
   for (let i = 0; i < flatBlades.length; i += 1) {
     const [x, y, z, dx, dy, dz] = flatBlades[i];
-    const blade = strawBlade(THREE, { length: 0.19, width: 0.014, bend: 0.2, droop: 0.05, seed: 300 + i });
+    const blade = strawBlade(THREE, { length: 0.15, width: 0.026, bend: 0.4, droop: 0.3, cap: true, seed: 300 + i });
     looseRaw.push(along(THREE, blade, [x, y, z], [dx, dy, dz], i * 0.9));
   }
 
@@ -374,6 +390,7 @@ export function buildHaystack(THREE, variantName) {
       "circumferential compression bands sawtoothed along the axis",
       "baler twine bands, proud of the straw",
       "straw wisps as tapered prisms, breaking the outline",
+      "every face wound outward, so backface culling shows the bale and not its inside",
       ...(variant.crater ? ["terraced bite exposing the damp compressed core"] : []),
     ],
     parts: ["bale", "twine", "loose_straw"],

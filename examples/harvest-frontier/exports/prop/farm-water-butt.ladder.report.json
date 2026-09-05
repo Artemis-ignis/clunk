@@ -1,0 +1,61 @@
+{
+  "input": "public/market/hf-water-butt/farm-water-butt.m1.glb",
+  "output": "public/market/hf-water-butt/farm-water-butt.m1.glb",
+  "trianglesBefore": 2272,
+  "before": {
+    "stileBottomMm": 197.8,
+    "stileTopMm": 882.4,
+    "stileLengthMm": [
+      684.6,
+      684.6
+    ],
+    "ladderOuterWidthMm": 168.6,
+    "rungCentresMm": [
+      318.2,
+      490.2,
+      662.2,
+      834.2
+    ],
+    "rungSpacingMm": [
+      172,
+      172,
+      172
+    ],
+    "groundMinYmm": 0
+  },
+  "after": {
+    "stileBottomMm": 0,
+    "stileTopMm": 882.4,
+    "stileLengthMm": [
+      882.4,
+      882.4
+    ],
+    "ladderOuterWidthMm": 168.6,
+    "rungCentresMm": [
+      208.5,
+      417.1,
+      625.6,
+      834.2
+    ],
+    "rungSpacingMm": [
+      208.5,
+      208.5,
+      208.5
+    ],
+    "groundMinYmm": 0
+  },
+  "trianglesAfter": 2272,
+  "widthLeftAlone": {
+    "ladderOuterWidthMm": 168.6,
+    "rungLengthMm": 151.4,
+    "buttDiameterMm": 685.5,
+    "rungOverDiameter": 0.221,
+    "harvestFrontier": {
+      "rungLengthM": 0.44,
+      "tankDiameterM": 1.94,
+      "ratio": 0.227,
+      "displayScale": 0.344
+    },
+    "why": "비율은 게임과 같다. 절대 치수만 작은 것이므로 내보내는 배율의 문제이고, 마스터 결정 사항이다."
+  }
+}

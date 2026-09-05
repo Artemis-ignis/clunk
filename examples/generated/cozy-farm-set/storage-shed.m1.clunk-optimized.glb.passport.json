@@ -1,16 +1,16 @@
 {
   "schemaVersion": "1.0",
-  "passportId": "passport-c59e7278cdcc-a44b999a9f3c",
+  "passportId": "passport-846e55abef81-e1fee84ac415",
   "coreVersion": "0.1.0",
   "ruleSetId": "clunk-game-ready-v1",
   "ruleSetVersion": "1.0.0",
   "profileId": "web",
-  "sourceHash": "c59e7278cdccdc354c2fd9d8b95d17af7b575449a5f1249129b8f469744e1cf3",
-  "outputHash": "a44b999a9f3c77bc1fb7142b8ce66ba2f1f4b75f6a68e3f8b5af906356f6200a",
+  "sourceHash": "846e55abef8185c838ed16bebc81cfe326e0e5961a451cdb9224cfe03c24052b",
+  "outputHash": "e1fee84ac41506a82a6a74230b4f2ad5d54a26cf7f44b3e92b5d009048621e2b",
   "sourceFileName": "storage-shed.m1.glb",
   "outputFileName": "storage-shed.m1.clunk-optimized.glb",
-  "sourceInspectionDigest": "ac92073739093dac3e1847f9283064c49952f0ab45f50f3488a5fdcd4814d58f",
-  "outputInspectionDigest": "82b736cbefd09e7726b9123c380605b56167712e1392ee02a9f2127c4a9dd364",
+  "sourceInspectionDigest": "4593270fba517524914012bb93b58cfc1212998ca16c2c2dfb3c362f3c2a092d",
+  "outputInspectionDigest": "108bbf96d72432fe75c6067e5d4abf4ad680481910adb76f099654485c1ef47f",
   "operations": [
     {
       "id": "clean-metadata",
@@ -27,8 +27,8 @@
       "emptyNodeCount": 0,
       "meshCount": 24,
       "primitiveCount": 24,
-      "vertexCount": 3220,
-      "triangleCount": 1620,
+      "vertexCount": 3520,
+      "triangleCount": 1768,
       "drawCallCount": 24,
       "materialCount": 9,
       "duplicateMaterialCount": 0,
@@ -65,14 +65,14 @@
       }
     },
     "score": {
-      "score": 100,
+      "score": 96,
       "threshold": 90,
-      "ready": true,
+      "ready": false,
       "hardBlockerCount": 0,
       "breakdown": {
         "format": 100,
         "scene": 100,
-        "geometry": 100,
+        "geometry": 73,
         "materials": 100,
         "textures": 100,
         "runtime": 100
@@ -89,8 +89,8 @@
       "emptyNodeCount": 0,
       "meshCount": 24,
       "primitiveCount": 24,
-      "vertexCount": 3220,
-      "triangleCount": 1620,
+      "vertexCount": 3520,
+      "triangleCount": 1768,
       "drawCallCount": 24,
       "materialCount": 9,
       "duplicateMaterialCount": 0,
@@ -127,14 +127,14 @@
       }
     },
     "score": {
-      "score": 100,
+      "score": 96,
       "threshold": 90,
-      "ready": true,
+      "ready": false,
       "hardBlockerCount": 0,
       "breakdown": {
         "format": 100,
         "scene": 100,
-        "geometry": 100,
+        "geometry": 73,
         "materials": 100,
         "textures": 100,
         "runtime": 100

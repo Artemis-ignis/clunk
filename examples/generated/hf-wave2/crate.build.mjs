@@ -168,17 +168,52 @@ export function buildCrate(THREE, variantName) {
     }
   }
 
-  // One diagonal brace per long face. Not an X — a single sloped batten is what a real crate
-  // carries, and it costs 12 triangles to say "this thing was built, not extruded".
+  /*
+   * One diagonal brace per long face. Not an X — a single sloped batten is what a real crate
+   * carries, and it is the one part of this crate that says "built, not extruded".
+   *
+   * 2026-09-05. It was not being seen. In the storefront hero — the three-quarter, the one
+   * image a buyer actually looks at — the middle of the batten was drawn BEHIND the boarding
+   * and only its two ends came through. Measured off the shipped file: 12,337 of a projected
+   * 17,300 px, so 29 % of the batten was missing from the picture the crate is sold with.
+   *
+   * It was not a modelling gap. The batten's outer face measured z = 0.2170 against the wall
+   * boards' 0.2070 — 10.0 mm proud, exactly as authored. The batten was losing the DEPTH TEST.
+   * Our own rasteriser (outputs/market-launch/wave1/tools/hero-render.mjs, and the review
+   * previews it came from) interpolates view depth with screen-space barycentrics, which is
+   * not perspective-correct, so a long triangle's interior reads FARTHER than it is by
+   * (Δz)² / 2(z₀+z₁). This batten is one 440 mm quad; at the hero camera its two ends sit
+   * 307 mm apart in depth at a mean 1.29 m, which is an 18.4 mm error at its middle — nearly
+   * twice the 10 mm it stood proud. The wall boards behind it are split into five segments and
+   * carry 0.5 mm of the same error, so the boards won.
+   *
+   * Two changes, both measured:
+   *
+   *   1. `segs = 4`. The error falls with the square of the segment's own depth spread, so
+   *      quartering the batten's faces takes 18.4 mm to 1.15 mm. It also gives the batten four
+   *      grain bands instead of the two a single quad can carry, which is the same reason every
+   *      other visible board on this crate is subdivided.
+   *   2. 18 mm thick, not 12. Still biting 2 mm into the boarding — nailed on, not balanced on —
+   *      so the outer face lands at z = 0.223: 16.0 mm proud of the boards and 13.0 mm proud of
+   *      the corner posts, against a worst-case 2.4 mm of depth error at any camera angle.
+   *
+   * 36 triangles each, up from 12, so 48 per variant. Measured on the hero frame: the batten
+   * went from two fragments totalling 12,337 px to one unbroken 20,215 px shape.
+   */
+  const BRACE_T = 0.018;
+  const BRACE_SEGS = 4;
   const bracePainter = woodPainter({ role: "crateFrame", grainAxis: "x", grainStep: 0.11, boardAxis: "z", boardStep: 0.42, seed: 53 });
   for (const sz of [-1, 1]) {
-    // + 0.004, not + 0.006. At 0.006 the batten's inner face landed on z = 0.207, which is
-    // exactly the wall boards' OUTER face — 120 cm^2 of coincident plane on the one surface of
-    // this crate a buyer looks straight at. The batten now bites 2 mm into the boarding, so it
-    // is nailed on rather than balanced on, and it still stands 10 mm proud.
     bodyParts.push(
       painted(
-        board(THREE, [0.44, 0.034, 0.012], [0, 0.232, sz * (PLANK_FACE_Z + BOARD_T * 0.5 + 0.004)], [0, 0, sz * 0.63]),
+        board(
+          THREE,
+          [0.44, 0.034, BRACE_T],
+          [0, 0.232, sz * (PLANK_FACE_Z + BOARD_T * 0.5 + BRACE_T * 0.5 - 0.002)],
+          [0, 0, sz * 0.63],
+          BRACE_SEGS,
+          "x",
+        ),
         bracePainter,
       ),
     );
@@ -360,7 +395,8 @@ export function buildCrate(THREE, variantName) {
       "corner posts standing 3 mm proud of the boarding on both faces",
       "grain streaks painted along each board's own long axis, faces segmented to carry them",
       "board undersides darkened, so every gap reads as a shadow line",
-      "diagonal brace per long face, nail heads at the board ends",
+      "diagonal brace per long face, an 18 mm batten standing 16 mm proud of the boarding",
+      "nail heads at the board ends",
       "solid boards, so the open variants show real wall thickness at the rim",
     ],
     parts: extraParts.length ? ["crate_body", "hardware", extraName] : ["crate_body", "hardware"],

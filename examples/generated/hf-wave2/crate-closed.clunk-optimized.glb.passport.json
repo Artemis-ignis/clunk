@@ -1,16 +1,16 @@
 {
   "schemaVersion": "1.0",
-  "passportId": "passport-6c5831ca1de4-09d2c8ea9e3c",
+  "passportId": "passport-8c1d2e93addf-a060a224bc64",
   "coreVersion": "0.1.0",
   "ruleSetId": "clunk-game-ready-v1",
   "ruleSetVersion": "1.0.0",
   "profileId": "web",
-  "sourceHash": "6c5831ca1de44cc6c39e1b33f117f7eca659b330e9fd6e72f88374c6c03b5e8f",
-  "outputHash": "09d2c8ea9e3c9b27ee11a90a5616d8d7528b0c73096c45c1b8ae364fb00f6d42",
+  "sourceHash": "8c1d2e93addf158949be25f79087562a5398868ff6368a9de962c202144632f3",
+  "outputHash": "a060a224bc6480a4babde618ab02f045d9e25a5886d407acd0360da38aa47bcb",
   "sourceFileName": "crate-closed.glb",
   "outputFileName": "crate-closed.clunk-optimized.glb",
-  "sourceInspectionDigest": "1c5e6813b449989a0dadf837313459ca6f9abce1b43d376b2ae1289070335b65",
-  "outputInspectionDigest": "4587890742069efc6f0f988a76cf8aff7b8e3f1c57dd8a981b9505634ac66063",
+  "sourceInspectionDigest": "29da4f7619f694abeaae40a4e784930c5df0a65b120d72f404c145114778c0ba",
+  "outputInspectionDigest": "08f63e6b1b811b678d855c2e3f7157ad58d061ddaf785e93e4801caa3c1d405f",
   "operations": [
     {
       "id": "clean-metadata",
@@ -27,8 +27,8 @@
       "emptyNodeCount": 0,
       "meshCount": 3,
       "primitiveCount": 3,
-      "vertexCount": 2100,
-      "triangleCount": 700,
+      "vertexCount": 2244,
+      "triangleCount": 748,
       "drawCallCount": 3,
       "materialCount": 1,
       "duplicateMaterialCount": 0,
@@ -50,17 +50,17 @@
         "min": [
           -0.2849999964237213,
           0,
-          -0.21699999272823334
+          -0.22300000488758087
         ],
         "max": [
           0.2849999964237213,
           0.4339999854564667,
-          0.21699999272823334
+          0.22300000488758087
         ],
         "dimensions": [
           0.5699999928474426,
           0.4339999854564667,
-          0.4339999854564667
+          0.44600000977516174
         ]
       }
     },
@@ -89,8 +89,8 @@
       "emptyNodeCount": 0,
       "meshCount": 3,
       "primitiveCount": 3,
-      "vertexCount": 2100,
-      "triangleCount": 700,
+      "vertexCount": 2244,
+      "triangleCount": 748,
       "drawCallCount": 3,
       "materialCount": 1,
       "duplicateMaterialCount": 0,
@@ -112,17 +112,17 @@
         "min": [
           -0.2849999964237213,
           0,
-          -0.21699999272823334
+          -0.22300000488758087
         ],
         "max": [
           0.2849999964237213,
           0.4339999854564667,
-          0.21699999272823334
+          0.22300000488758087
         ],
         "dimensions": [
           0.5699999928474426,
           0.4339999854564667,
-          0.4339999854564667
+          0.44600000977516174
         ]
       }
     },

@@ -1,0 +1,130 @@
+{
+  "input": "public/market/hf-player-farmhand/player-farmhand.m1.glb",
+  "output": "public/market/hf-player-farmhand/player-farmhand.m1.glb",
+  "trianglesBefore": 7040,
+  "boots": [
+    {
+      "node": "leftShin",
+      "part": "welt",
+      "lipTargetMm": 1.5,
+      "scaleXZ": 0.9152,
+      "before": {
+        "maxOutMm": 13.8,
+        "verticesOutside": 36,
+        "widthMm": 210.9,
+        "lengthMm": 362.6
+      },
+      "after": {
+        "maxOutMm": 1.5,
+        "verticesOutside": 18,
+        "widthMm": 193,
+        "lengthMm": 331.8
+      }
+    },
+    {
+      "node": "leftShin",
+      "part": "sole",
+      "lipTargetMm": 3,
+      "scaleXZ": 0.8628,
+      "before": {
+        "maxOutMm": 24.8,
+        "verticesOutside": 36,
+        "widthMm": 225.3,
+        "lengthMm": 387.3
+      },
+      "after": {
+        "maxOutMm": 3,
+        "verticesOutside": 18,
+        "widthMm": 194.4,
+        "lengthMm": 334.1
+      }
+    },
+    {
+      "node": "rightShin",
+      "part": "welt",
+      "sharedAccessorWith": "leftShin",
+      "after": {
+        "maxOutMm": 1.5,
+        "verticesOutside": 18,
+        "widthMm": 193,
+        "lengthMm": 331.8
+      }
+    },
+    {
+      "node": "rightShin",
+      "part": "sole",
+      "sharedAccessorWith": "leftShin",
+      "after": {
+        "maxOutMm": 3,
+        "verticesOutside": 18,
+        "widthMm": 194.4,
+        "lengthMm": 334.1
+      }
+    }
+  ],
+  "floatingTrim": [
+    {
+      "what": "jacket side seam",
+      "sizeMm": [
+        43.9,
+        280.2,
+        12
+      ],
+      "triangles": 12,
+      "gapBeforeMm": 16.8,
+      "pushedIntoBodyMm": 22,
+      "gapAfterMm": 0
+    },
+    {
+      "what": "jacket side seam",
+      "sizeMm": [
+        43.9,
+        280.2,
+        12
+      ],
+      "triangles": 12,
+      "gapBeforeMm": 16.8,
+      "pushedIntoBodyMm": 22,
+      "gapAfterMm": 0
+    },
+    {
+      "what": "brass button",
+      "sizeMm": [
+        24.7,
+        26,
+        21.5
+      ],
+      "triangles": 48,
+      "gapBeforeMm": 18.7,
+      "pushedIntoBodyMm": 26,
+      "gapAfterMm": 0
+    },
+    {
+      "what": "brass button",
+      "sizeMm": [
+        24.7,
+        26,
+        21.5
+      ],
+      "triangles": 48,
+      "gapBeforeMm": 9.6,
+      "pushedIntoBodyMm": 14,
+      "gapAfterMm": 0
+    }
+  ],
+  "trianglesAfter": 7040,
+  "notFixed": [
+    {
+      "what": "머리·어깨 비례 (머리 폭 536.5 mm = 재킷 어깨 폭 532.1 mm, 전신 2,299 mm 로 3.9 두신)",
+      "why": "Harvest Frontier 가 위에서 내려다보는 게임 카메라에 맞춰 작성한 비례다 (playerMotion.ts M85 주석: 전신 2.27 -> 2.28 m). 여기서 바꾸면 캐릭터를 다시 그리는 일이고, 파는 근거인 \"그 게임의 실제 파일\"도 깨진다."
+    },
+    {
+      "what": "밀짚모자 챙 787.8 mm 와 뒤로 17.2도 기울기",
+      "why": "characterKit.ts HAT_TILT=0.3 / HAT_SET_BACK=0.075 는 챙 그림자가 눈을 덮는 것을 없애려고 정한 값이고, 주민 5명이 같은 모자를 같은 각도로 쓴다. 챙 지름은 머리 폭의 1.47배로, 실제 밀짚 차양모(2~3배)보다 오히려 좁다. 재서 과하지 않으므로 두었다."
+    },
+    {
+      "what": "얼굴이 작은 그림에서 뭉개지는 것 (눈 87.7 mm 갈색 아몬드 + 17.2 mm 흰 점, 피부와의 명도차가 작다)",
+      "why": "팔레트를 바꾸면 같은 팔레트를 쓰는 주민 5명과 스프라이트 시트가 같이 어긋난다. 마스터 결정 사항으로 올린다."
+    }
+  ]
+}

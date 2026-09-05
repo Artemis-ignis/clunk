@@ -10,7 +10,13 @@
  *
  * Silhouette contract — what must survive at 10 m: the gable-front roof with its stepped tile
  * courses and barge boards, the plank door with its diagonal brace, the horizontal lap-siding
- * shadow lines, the window, and the shed lifted clear of the ground on stone piers.
+ * shadow lines, the windows, and the shed lifted clear of the ground on stone piers.
+ *
+ * Every elevation carries something. The rear gable used to be the exception — siding and
+ * corner boards and nothing else — and since the storefront key light never touches a -Z face,
+ * even the siding's own lap step went to 19/255 of contrast and the back rendered as one flat
+ * sheet. It now carries a window, a louvered vent and a water table, all mirrored from members
+ * this shed already had.
  *
  * Construction rules inherited from the series kit: no node ever carries scale, no part floats
  * (every element lands on the piers, the sill, the sheathing or the deck), and the interior is
@@ -220,46 +226,103 @@ export function createStorageShed(THREE) {
   for (const side of [-1, 1]) {
     corners.push(place(kit.box(0.075, 0.13, 1.72), [side * 1.045, 2.15, 0]));
   }
+  /*
+   * Water table across the REAR gable, where the siding stops and the gable boarding starts.
+   *
+   * The other three elevations already carry a member on that line — the two eaves have the
+   * frieze board above, the front has the door lintel at 2.11 — and the back had nothing, so
+   * the top course of siding ran straight into the first gable board with no joint. It also
+   * had nothing that could catch the storefront key at all: the key sits at (0.52, 0.74, 0.42),
+   * so no -Z surface receives any of it and the 28 mm lap step on the rear boards renders at
+   * 53/255 against 34/255 — present in the geometry, invisible in the picture. A board with a
+   * horizontal TOP face fixes that: an up-facing normal takes 0.61 of the key where the wall
+   * behind it takes none, which is the bright line the rear elevation was missing.
+   *
+   * 1.96 long so it lands between the corner boards' inner faces (+-0.98) instead of standing
+   * proud of them, 25 mm clear of the siding, and its top at 2.135 stays under the roof
+   * underside (2.219 at |x| = 0.98).
+   */
+  corners.push(place(kit.box(1.96, 0.09, 0.06), [0, 2.09, -0.875]));
   carcass.add(kit.merged("corner_and_frieze_boards", mat.woodFrame, corners));
 
   // --- Gable ends -----------------------------------------------------------------------
-  // Stepped courses per end, each cut to the roof underside at its own BOTTOM edge. Cutting at
-  // the bottom means every board is slightly too wide for the opening higher up, so the
-  // staircase is always buried in the roof rather than leaving sawtooth slots of daylight.
-  //
-  // That only works if a board is shorter than the roof is thick, otherwise its top corners
-  // punch straight back out through the tiles. The roof is thinnest at the eave — 0.067 m of
-  // deck plus the 0.047 m first tile course, measured vertically — so the course height is held
-  // to 0.09 and the pitch to 0.08, which keeps a 0.02 m margin at the worst corner and still
-  // laps every seam.
+  /*
+   * Courses of boarding, each MITRE-CUT to the rake so it stops underneath the roof.
+   *
+   * The first cut made every course a square-ended box as wide as the gable opening at its own
+   * BOTTOM edge. That leaves no daylight — a board is always slightly too wide for the opening
+   * higher up — but it pays for it by driving the two top corners 90 mm (81 mm perpendicular)
+   * into a roof that is only 60 mm of deck: every course punched through the sheathing and came
+   * to rest inside the tile courses. None of it shows, because the roof hides it, which is
+   * exactly what makes it worth removing — the buyer carries geometry no camera can ever reach.
+   * scripts/asset-geometry-audit.mjs measured it: 96 of 384 gable-board vertices (25%) inside
+   * roof_tile_courses, 72 (19%) inside roof_deck.
+   *
+   * Cutting the ends at the rake angle instead of leaving them square settles both sides of it.
+   * Each course is a trapezoid whose two ends lie on the roof underside — offset 6 mm clear of
+   * it, so nothing is buried — and the courses still meet the rake along its whole length
+   * instead of stepping away from it. Same eight courses, same 12 triangles a box cost.
+   */
   const gable = kit.group("gable");
   root.add(gable);
+
+  /** Perpendicular gap held between a cut board end and the roof underside. */
+  const GABLE_CLEAR = 0.006;
+  /** The line the ends are cut to: the roof underside, dropped by that clearance. */
+  const GABLE_LINE = UNDERSIDE_AT_RIDGE - GABLE_CLEAR / Math.cos(ROOF_ANGLE);
+  /** Half-width of the gable opening at height `y`, measured to the cut line. */
+  const gableHalfWidth = (y) => Math.min(SHEATH_W, Math.max(0, (GABLE_LINE - y) / UNDERSIDE_SLOPE));
+
+  /**
+   * One mitre-cut board: the trapezoid between two heights, extruded BOARD_T thick and centred
+   * on z = 0 so `place` can seat it on either gable like any box from the kit. The top edge
+   * collapses to a point at the ridge, where the trapezoid becomes the apex triangle.
+   */
+  const gableBoard = (bottom, top) => {
+    const halfBottom = gableHalfWidth(bottom);
+    const halfTop = gableHalfWidth(top);
+    const shape = new THREE.Shape();
+    shape.moveTo(-halfBottom, bottom);
+    shape.lineTo(halfBottom, bottom);
+    if (halfTop > 0.001) shape.lineTo(halfTop, top);
+    shape.lineTo(-halfTop, top);
+    shape.closePath();
+    const geometry = new THREE.ExtrudeGeometry(shape, { depth: BOARD_T, bevelEnabled: false, steps: 1 });
+    geometry.translate(0, 0, -BOARD_T / 2);
+    return geometry;
+  };
 
   const gableBoards = [];
   const GABLE_BASE = 2.06;
   const GABLE_PITCH = 0.08;
   const GABLE_BOARD_H = 0.09;
-  for (let step = 0; step < 10; step += 1) {
+  for (let step = 0; step < 12; step += 1) {
     const bottom = GABLE_BASE + step * GABLE_PITCH;
-    const halfWidth = Math.min(SHEATH_W, (UNDERSIDE_AT_RIDGE - bottom) / UNDERSIDE_SLOPE);
-    if (halfWidth <= 0.05) continue;
+    if (gableHalfWidth(bottom) <= 0.05) break;
+    // Courses lap by 10 mm, and the last one is trimmed at the ridge rather than run past it.
+    const top = Math.min(bottom + GABLE_BOARD_H, GABLE_LINE);
     for (const sz of [-1, 1]) {
-      gableBoards.push(
-        place(kit.box(halfWidth * 2, GABLE_BOARD_H, BOARD_T), [0, bottom + GABLE_BOARD_H / 2, sz * (HALF_D - BOARD_T / 2)]),
-      );
+      gableBoards.push(place(gableBoard(bottom, top), [0, 0, sz * (HALF_D - BOARD_T / 2)]));
     }
   }
   gable.add(kit.merged("gable_boards", mat.woodCrate, gableBoards));
 
   // Louvered vent — the detail that says "this building breathes" rather than "this is a box".
+  // One in EACH gable, not just the front: a shed with a single vent cannot cross-ventilate,
+  // and the rear elevation was the one that shipped with nothing on it at all. The rear pair
+  // is the front pair mirrored, tilt included, so the two ends read as one building.
   gable.add(
-    kit.merged("gable_vent_frame", mat.woodFrame, [
-      place(kit.box(0.42, 0.34, 0.04), [0, 2.34, HALF_D + 0.005]),
-    ]),
+    kit.merged(
+      "gable_vent_frame",
+      mat.woodFrame,
+      [1, -1].map((sz) => place(kit.box(0.42, 0.34, 0.04), [0, 2.34, sz * (HALF_D + 0.005)])),
+    ),
   );
   const louvers = [];
-  for (let slat = 0; slat < 3; slat += 1) {
-    louvers.push(place(kit.box(0.32, 0.055, 0.05), [0, 2.25 + slat * 0.09, HALF_D + 0.03], [-0.38, 0, 0]));
+  for (const sz of [1, -1]) {
+    for (let slat = 0; slat < 3; slat += 1) {
+      louvers.push(place(kit.box(0.32, 0.055, 0.05), [0, 2.25 + slat * 0.09, sz * (HALF_D + 0.03)], [-sz * 0.38, 0, 0]));
+    }
   }
   gable.add(kit.merged("gable_vent_louvers", mat.iron, louvers));
 
@@ -364,6 +427,19 @@ export function createStorageShed(THREE) {
   const windowGroup = kit.group("window");
   root.add(windowGroup);
 
+  /*
+   * TWO windows, not one: the +X side wall and the REAR gable.
+   *
+   * The rear elevation shipped as a single unbroken sheet — no opening, no applied trim, no
+   * member of any kind between the corner boards — so from behind the shed did not read as
+   * the same object the storefront photograph shows. It is the same window, mirrored onto the
+   * back wall plane, at the same 1.34 centre height: the head, cill and stiles keep their
+   * 0.80 / 0.58 / 0.06 sections, and the pane keeps the same 20 mm standoff that was measured
+   * out for the side window (the rear boards reach z = -0.864 with their lean taken into
+   * account, so the glass sits at -0.888..-0.868 and the mullions at -0.898..-0.878 — clear of
+   * the boards, still inside the frame). Merged into the same three meshes as the side window,
+   * so a second window costs geometry but not a draw call.
+   */
   windowGroup.add(
     kit.merged("window_frame", mat.woodFrame, [
       // Head and cill boards run the full 0.80 so they close on the stile ends instead of
@@ -374,6 +450,13 @@ export function createStorageShed(THREE) {
       place(kit.box(0.06, 0.58, 0.08), [1.07, 1.34, 0.41]),
       // The sill sheds water outward along +X, so it tilts about Z, not about X.
       place(kit.box(0.13, 0.05, 0.9), [1.1, 0.985, 0.05], [0, 0, -0.12]),
+      // Rear window, on the -Z gable. Same sections, axes swapped for the wall it sits on.
+      place(kit.box(0.8, 0.08, 0.06), [0, 1.67, -0.87]),
+      place(kit.box(0.8, 0.08, 0.06), [0, 1.01, -0.87]),
+      place(kit.box(0.08, 0.58, 0.06), [-0.36, 1.34, -0.87]),
+      place(kit.box(0.08, 0.58, 0.06), [0.36, 1.34, -0.87]),
+      // This sill sheds outward along -Z, so it tilts about X and the sign flips with it.
+      place(kit.box(0.9, 0.05, 0.13), [0, 0.985, -0.9], [-0.12, 0, 0]),
     ]),
   );
   /*
@@ -385,11 +468,18 @@ export function createStorageShed(THREE) {
    * frame's stiles run 1.04 to 1.10, so there is room to put the glass at 1.068-1.088 and the
    * mullions at 1.078-1.098: clear of the boards, still inside the frame.
    */
-  windowGroup.add(kit.solo("window_glass", mat.glass, kit.box(0.02, 0.6, 0.68), [1.078, 1.34, 0.05]));
+  windowGroup.add(
+    kit.merged("window_glass", mat.glass, [
+      place(kit.box(0.02, 0.6, 0.68), [1.078, 1.34, 0.05]),
+      place(kit.box(0.68, 0.6, 0.02), [0, 1.34, -0.878]),
+    ]),
+  );
   windowGroup.add(
     kit.merged("window_mullions", mat.woodFrame, [
       place(kit.box(0.02, 0.6, 0.05), [1.088, 1.34, 0.05]),
       place(kit.box(0.02, 0.05, 0.68), [1.088, 1.34, 0.05]),
+      place(kit.box(0.05, 0.6, 0.02), [0, 1.34, -0.888]),
+      place(kit.box(0.68, 0.05, 0.02), [0, 1.34, -0.888]),
     ]),
   );
 

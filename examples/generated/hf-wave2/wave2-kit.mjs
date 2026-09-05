@@ -304,10 +304,21 @@ export function wave2Material(THREE, name, roughness) {
  * silhouette edge-on. A prism is 9 triangles, is visible from every angle, and actually
  * pokes a spike out of the outline — which is the entire reason the wisps exist.
  *
+ * 2026-09-05: the winding was inverted, which threw away that guarantee. Every side face was
+ * wound clockwise seen from outside, so the prism's signed volume came out NEGATIVE, its
+ * computed normals pointed into the blade, and the engine the blade was built for culled the
+ * near face and drew the far one. `finish()` -> `computeVertexNormals()` -> `paintFaces()` reads
+ * those same normals, so the sun was also baked onto the blade's underside. Fixed by reversing
+ * every triangle; the triangle count is unchanged.
+ *
+ * `cap` closes the root ring for one more triangle. Leave it off for a blade planted in a
+ * surface — the hole is buried and nobody pays for it. Turn it on for a blade lying loose,
+ * where the open end faces the camera.
+ *
  * Built along +Y from the origin; use `along()` to plant it on a surface.
  */
 export function strawBlade(THREE, spec) {
-  const { length = 0.18, width = 0.011, bend = 0.35, droop = 0.5, seed = 1 } = spec;
+  const { length = 0.18, width = 0.011, bend = 0.35, droop = 0.5, cap = false, seed = 1 } = spec;
   const sections = [
     { t: 0, r: 1.0 },
     { t: 0.55, r: 0.62 },
@@ -337,18 +348,24 @@ export function strawBlade(THREE, spec) {
       const n = (k + 1) % 3;
       if (s === 1) {
         // Top section collapses to a point: one triangle per side, not a degenerate quad.
-        push(lower[k]);
         push(lower[n]);
+        push(lower[k]);
         push(upper[0]);
       } else {
-        push(lower[k]);
         push(lower[n]);
-        push(upper[n]);
         push(lower[k]);
         push(upper[n]);
+        push(upper[n]);
+        push(lower[k]);
         push(upper[k]);
       }
     }
+  }
+  if (cap) {
+    // One triangle over the root ring, wound to face -Y (away from the blade).
+    push(ring[0][0]);
+    push(ring[0][1]);
+    push(ring[0][2]);
   }
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(vertices), 3));
@@ -388,6 +405,23 @@ export function strawClump(THREE, spec) {
  *   3. `jitter`   per-vertex radial wobble, hashed off the grid index, so no ring is a circle
  *   4. cap spiral a sawtooth in (radius, theta) — the coil, terraced into visible steps
  *   5. `crater`   optional scooped bite, quantised into wound-layer strata
+ *
+ * 2026-09-05 — the winding. Every quad in this builder, in `twineBand` and in `strawBlade` was
+ * wound the wrong way round. Measured on the shipped haystack-full: the bale's 756 triangles
+ * enclosed a NEGATIVE volume, the vertex at the crown carried the normal (0.36, -0.90, -0.24),
+ * and 30 of the 34 loose-straw parts were inverted too — only the four icosahedron clumps, which
+ * come from THREE, were right. Two consequences, both of them things a buyer pays for:
+ *
+ *   1. Backface culling is on by default in Unity, Unreal and three.js. An inverted closed mesh
+ *      culls the surface facing the camera and draws the far one, so the bale renders as its own
+ *      inside. Our own hero renderer never showed it: it recomputes the face normal and flips it
+ *      toward the eye, so the storefront pictures looked correct while the file did not.
+ *   2. `finish()` computes normals from the winding and `paintFaces()` bakes the sun against
+ *      them, so the key light went onto the bale's UNDERSIDE. Measured on the shipped file:
+ *      baked luminance 0.360 across the top 15 % of the bale against 0.546 across the bottom
+ *      15 % — the sun was lighting it from below.
+ *
+ * Reversing the winding costs zero triangles and fixes both.
  */
 export function baleShell(THREE, spec) {
   const {
@@ -522,8 +556,10 @@ export function baleShell(THREE, spec) {
       const b = rings[j][n];
       const c = rings[j + 1][n];
       const d = rings[j + 1][i];
-      pushTri(barrelVerts, a, c, b);
-      pushTri(barrelVerts, a, d, c);
+      // Wound so the face looks OUT. It used to be the other way round — see the note on
+      // baleShell — which is why the bale's own normals pointed at its axis.
+      pushTri(barrelVerts, a, b, c);
+      pushTri(barrelVerts, a, c, d);
     }
   }
   const barrel = new THREE.BufferGeometry();
@@ -574,11 +610,11 @@ export function baleShell(THREE, spec) {
       for (let i = 0; i < radial; i += 1) {
         const n = (i + 1) % radial;
         if (sign > 0) {
-          pushTri(capVerts, outer[i], inner[i], inner[n]);
-          pushTri(capVerts, outer[i], inner[n], outer[n]);
-        } else {
           pushTri(capVerts, outer[i], inner[n], inner[i]);
           pushTri(capVerts, outer[i], outer[n], inner[n]);
+        } else {
+          pushTri(capVerts, outer[i], inner[i], inner[n]);
+          pushTri(capVerts, outer[i], inner[n], outer[n]);
         }
       }
     }
@@ -592,8 +628,8 @@ export function baleShell(THREE, spec) {
     const hub = [rim[0][0] - sign * hubInset, axisY, 0];
     for (let i = 0; i < radial; i += 1) {
       const n = (i + 1) % radial;
-      if (sign > 0) pushTri(capVerts, last[i], hub, last[n]);
-      else pushTri(capVerts, last[i], last[n], hub);
+      if (sign > 0) pushTri(capVerts, last[i], last[n], hub);
+      else pushTri(capVerts, last[i], hub, last[n]);
     }
     const cap = new THREE.BufferGeometry();
     cap.setAttribute("position", new THREE.BufferAttribute(new Float32Array(capVerts), 3));
@@ -651,12 +687,13 @@ export function twineBand(THREE, spec) {
     const iR = point(i, 1, false);
     const iL2 = point(n, -1, false);
     const iR2 = point(n, 1, false);
-    tri(oL, oR, oR2);
-    tri(oL, oR2, oL2); // outer face
-    tri(iL, oL2, oL);
-    tri(iL, iL2, oL2); // -X side wall
-    tri(iR, oR, oR2);
-    tri(iR, oR2, iR2); // +X side wall
+    // Reversed 2026-09-05 with the rest of the bale: the cord's faces were pointing inward.
+    tri(oL, oR2, oR);
+    tri(oL, oL2, oR2); // outer face
+    tri(iL, oL, oL2);
+    tri(iL, oL2, iL2); // -X side wall
+    tri(iR, oR2, oR);
+    tri(iR, iR2, oR2); // +X side wall
   }
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(verts), 3));

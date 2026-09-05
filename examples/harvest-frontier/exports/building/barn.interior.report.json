@@ -1,0 +1,74 @@
+{
+  "input": "public/market/hf-barn/barn.m1.glb",
+  "output": "public/market/hf-barn/barn.m1.glb",
+  "trianglesBefore": 15080,
+  "measured": {
+    "rearWallMm": {
+      "x": [
+        -3945,
+        3945
+      ],
+      "y": [
+        100,
+        4800
+      ],
+      "z": [
+        -3200.2,
+        -2939.8
+      ]
+    },
+    "interiorFloorMm": {
+      "x": [
+        -4025,
+        4025
+      ],
+      "y": [
+        10.2,
+        149.8
+      ],
+      "z": [
+        -2980.1,
+        2940.1
+      ]
+    },
+    "loftUndersideMm": 3000
+  },
+  "added": {
+    "node": "barnInteriorBoarding",
+    "material": "barn.fixed-palette-rubber",
+    "drawCallsAdded": 1,
+    "studs": {
+      "count": 11,
+      "sizeMm": [
+        120,
+        2850.2,
+        60
+      ],
+      "spacingMm": 720,
+      "paletteCell": "(3,0) #7f4032"
+    },
+    "girt": {
+      "count": 1,
+      "sizeMm": [
+        7800,
+        140,
+        60
+      ],
+      "atYmm": 1800,
+      "paletteCell": "(12,0) #7c3d2e"
+    },
+    "floorSeams": {
+      "count": 9,
+      "sizeMm": [
+        70,
+        10,
+        5800.3
+      ],
+      "spacingMm": 800,
+      "paletteCell": "(13,0) #4b382a"
+    },
+    "trianglesAdded": 252
+  },
+  "trianglesAfter": 15332,
+  "whyTrianglesGrew": "없던 실내 목구조를 만드는 항목이라 삼각형 보존이 불가능하다. 상자 21개 = 252 삼각형, 원본의 1.7 %."
+}
