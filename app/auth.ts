@@ -4,6 +4,7 @@ import {
   AUTH_SESSION_COOKIE,
   decodeOAuthSession,
   getOAuthEnvironment,
+  readSessionEpochSeconds,
 } from "./oauth";
 import { getRuntimeEnvironment } from "./runtime-environment";
 import {
@@ -85,7 +86,14 @@ async function readSignedSessionUser(
     const sessionSecret = environment.CLUNK_AUTH_SESSION_SECRET;
     const session = (await cookies()).get(AUTH_SESSION_COOKIE)?.value;
     if (!session || !sessionSecret) return null;
-    return await decodeOAuthSession(session, sessionSecret);
+    // CLUNK_AUTH_SESSION_EPOCH 이전에 발급된 세션은 여기서 죽는다. 서버에 세션 기록이
+    // 없는 구조에서 "전부 로그아웃"을 실행할 수 있는 유일한 손잡이다.
+    return await decodeOAuthSession(
+      session,
+      sessionSecret,
+      Date.now(),
+      readSessionEpochSeconds(environment),
+    );
   } catch {
     return null;
   }

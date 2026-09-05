@@ -13,6 +13,11 @@ export type AgentGuideKey =
 export type AgentConnection = {
   endpoint: string;
   apiKey: string;
+  /**
+   * 화면에 그릴 때만 쓰는, 가려진 키. 복사·연결 확인은 언제나 apiKey 를 쓴다.
+   * 비어 있으면 화면도 실제 키를 그린다(예전 동작).
+   */
+  maskedApiKey?: string;
 };
 
 export type AgentGuide = {
@@ -22,7 +27,10 @@ export type AgentGuide = {
   title: string;
   description: string;
   fileLabel: string;
+  /** 복사·다운로드가 쓰는 값. 실제 키가 들어 있다. */
   code: string;
+  /** 화면에 그리는 값. 키가 가려져 있다. 가릴 것이 없으면 code 와 같다. */
+  displayCode: string;
   note: string;
   status: "available" | "not-shipped";
   recommended?: boolean;
@@ -59,15 +67,28 @@ function copilotCommand(endpoint: string, key: string): string {
   return `copilot mcp add --transport http --header "Authorization: Bearer ${key}" clunk "${endpoint}"`;
 }
 
+/**
+ * 화면에 그리는 판과 복사되는 판을 갈라 놓는다.
+ *
+ * 예전에는 발급된 평문 키가 `claude mcp add … --header "Authorization: Bearer clunk_live_…"`
+ * 스니펫 안에 통째로 렌더되어, 화면 공유·녹화·스크린샷·어깨너머에 그대로 남았다. 이제
+ * 화면에는 가린 판(displayCode)이 나가고, 복사 버튼과 연결 확인만 실제 키(code)를 쓴다.
+ */
 export function buildAgentGuides(connection?: AgentConnection): AgentGuide[] {
   const endpoint = connection?.endpoint ?? DEFAULT_ENDPOINT;
-  const key = connection?.apiKey ?? DEFAULT_KEY;
+  const real = buildGuidesForKey(endpoint, connection?.apiKey ?? DEFAULT_KEY);
+  if (!connection?.maskedApiKey) return real;
+  const masked = buildGuidesForKey(endpoint, connection.maskedApiKey);
+  return real.map((guide, index) => ({ ...guide, displayCode: masked[index].code }));
+}
+
+function buildGuidesForKey(endpoint: string, key: string): AgentGuide[] {
   const hasIssuedKey = key !== DEFAULT_KEY;
   const authCommand = `claude mcp add clunk --scope user --transport http ${endpoint} --header "Authorization: Bearer ${key}"`;
   const remoteMcpJson = remoteJson(endpoint, key);
   const vscodeJson = remoteJson(endpoint, key, "servers");
 
-  return [
+  const guides: Omit<AgentGuide, "displayCode">[] = [
     {
       key: "claude-code",
       label: "Claude Code",
@@ -183,6 +204,7 @@ export function buildAgentGuides(connection?: AgentConnection): AgentGuide[] {
       recommended: true,
     },
   ];
+  return guides.map((guide) => ({ ...guide, displayCode: guide.code }));
 }
 
 export const AGENT_GUIDES = buildAgentGuides();

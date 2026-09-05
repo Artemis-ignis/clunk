@@ -83,3 +83,50 @@ test("the connection surface exposes live endpoint status and a real MCP handsha
   assert.match(statusSource, /fetch\("\/api\/mcp"/);
   assert.match(statusSource, /LIVE MCP STATUS/);
 });
+
+/**
+ * 발급된 평문 키가 화면에 그대로 서 있으면 안 된다.
+ *
+ * 2026-09-05 점검에서 발급 직후의 키가 마스킹 없이 `<code>` 에, 그리고
+ * `claude mcp add … --header "Authorization: Bearer clunk_live_…"` 스니펫 안에 통째로
+ * 렌더되고 있었다. 화면 공유·녹화·스크린샷에 그대로 남는 자리다. 복사 버튼은 실제 키를
+ * 복사하고, 화면은 가린 판을 그린다 — 그 갈라짐이 유지되는지 본다.
+ */
+test("발급된 연결 키는 화면에서 가려지고, 복사만 실제 값을 쓴다", async () => {
+  const clientSource = await readFile(new URL("../app/agents/AgentsClient.tsx", import.meta.url), "utf8");
+  const guideSource = await readFile(new URL("../app/components/agent-guides.ts", import.meta.url), "utf8");
+
+  assert.match(clientSource, /function maskApiKey\(/u, "가리는 함수가 없다");
+  assert.match(
+    clientSource,
+    /keyRevealed \? issuedSecret : maskApiKey\(issuedSecret\)/u,
+    "발급 패널이 기본으로 평문 키를 그리고 있다",
+  );
+  assert.doesNotMatch(
+    clientSource,
+    /<code>\{issuedSecret\}<\/code>/u,
+    "발급된 키가 아직 마스킹 없이 렌더된다",
+  );
+  assert.match(clientSource, /<CopyCodeButton value=\{issuedSecret\}/u, "복사 버튼은 실제 키를 써야 한다");
+  assert.match(clientSource, /selected\.displayCode/u, "스니펫이 화면용 판을 쓰지 않는다");
+  assert.match(guideSource, /maskedApiKey/u, "가이드가 가린 키를 받지 않는다");
+  assert.match(guideSource, /displayCode/u, "가이드가 화면용 판을 내놓지 않는다");
+});
+
+/** 다운로드 폴더는 백업·동기화가 지나가는 자리다. 평문 키를 떨구지 않는다. */
+test("설정 다운로드에는 평문 키가 들어가지 않는다", async () => {
+  const clientSource = await readFile(new URL("../app/agents/AgentsClient.tsx", import.meta.url), "utf8");
+  const download = clientSource.slice(
+    clientSource.indexOf("function downloadSelectedGuide"),
+    clientSource.indexOf("async function revokeKey"),
+  );
+  assert.ok(download.length > 100, "다운로드 함수를 못 찾았다");
+  assert.doesNotMatch(download, /selected\.code/u, "다운로드가 실제 키가 든 판을 쓴다");
+  assert.match(download, /CLUNK_API_KEY/u, "다운로드 파일이 환경변수 자리를 남기지 않는다");
+});
+
+/** 훔쳐간 키가 쓰이고 있는지 사람이 알아볼 수 있는 유일한 자리. */
+test("발급된 키 목록은 마지막 사용 시각을 보여 준다", async () => {
+  const clientSource = await readFile(new URL("../app/agents/AgentsClient.tsx", import.meta.url), "utf8");
+  assert.match(clientSource, /key\.lastUsedAt/u, "목록이 lastUsedAt 을 받아 놓고 버리고 있다");
+});

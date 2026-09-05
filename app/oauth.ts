@@ -67,7 +67,22 @@ function toOAuthDoor(value: unknown): OAuthDoor {
 export const AUTH_SESSION_COOKIE = "clunk_auth_session";
 export const OAUTH_TRANSACTION_COOKIE_PREFIX = "clunk_oauth_tx_";
 export const OAUTH_STATE_TTL_SECONDS = 10 * 60;
-export const AUTH_SESSION_TTL_SECONDS = 30 * 24 * 60 * 60;
+/**
+ * 세션은 서명된 토큰이고 서버에 기록이 없다. 그 말은 로그아웃이 이 브라우저의 쿠키를
+ * 지우는 것 이상을 할 수 없고, 어디선가 복사된 쿠키 한 장은 만료일까지 그대로 유효하다는
+ * 뜻이다. 30일은 그 창을 한 달로 열어 두는 값이었다. 7일로 줄인다 — 사람은 다시 로그인하고,
+ * 훔친 쿠키의 수명은 4분의 1이 된다.
+ */
+export const AUTH_SESSION_TTL_SECONDS = 7 * 24 * 60 * 60;
+/**
+ * 전부 로그아웃시키는 손잡이.
+ *
+ * 서버에 세션 기록이 없으므로 "이 사용자의 세션을 끊어라"는 명령이 존재하지 않았다.
+ * 사고가 났을 때 할 수 있는 일이 서명 비밀키 교체(= 모든 사람 재로그인 + 진행 중인 OAuth
+ * 전부 실패)뿐이었다. 이 값은 그보다 가벼운 같은 일을 한다: 환경변수에 지금 시각(초)을
+ * 넣으면 그 이전에 발급된 세션이 전부 무효가 된다. 설정하지 않으면 아무 것도 바뀌지 않는다.
+ */
+const AUTH_SESSION_EPOCH = "CLUNK_AUTH_SESSION_EPOCH";
 
 const OAUTH_STATE_SECRET = "CLUNK_OAUTH_STATE_SECRET";
 const AUTH_SESSION_SECRET = "CLUNK_AUTH_SESSION_SECRET";
@@ -446,10 +461,19 @@ export async function encodeOAuthSession(
   }, secret);
 }
 
+/** 환경변수에 적힌 무효화 기준 시각(초). 없거나 형식이 아니면 0 — 아무 것도 막지 않는다. */
+export function readSessionEpochSeconds(environment: OAuthEnvironment): number {
+  const raw = environment[AUTH_SESSION_EPOCH]?.trim();
+  if (!raw) return 0;
+  const value = Number(raw);
+  return Number.isSafeInteger(value) && value > 0 ? value : 0;
+}
+
 export async function decodeOAuthSession(
   value: string,
   secret: string,
   now = Date.now(),
+  minIssuedAtSeconds = 0,
 ): Promise<{
   id: string;
   provider: OAuthProvider;
@@ -472,7 +496,8 @@ export async function decodeOAuthSession(
       (payload.fullName !== null && typeof payload.fullName !== "string") ||
     !isSafeInteger(payload.issuedAt) ||
     !isSafeInteger(payload.expiresAt) ||
-      current >= payload.expiresAt
+      current >= payload.expiresAt ||
+      payload.issuedAt < minIssuedAtSeconds
     ) return null;
     return {
       id: payload.id,

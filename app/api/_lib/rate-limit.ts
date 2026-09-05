@@ -89,6 +89,23 @@ const RATE_LIMIT_ROUTES: readonly RateLimitRoute[] = [
     test: (pathname) => pathname === "/api/auth" || pathname.startsWith("/api/auth/"),
     limit: 30,
   },
+  // 키 발급은 D1 에 행을 만드는 쓰기이고, 이 라우트에는 아무 상한이 없었다. 한 세션이
+  // 반복해서 눌러 워크스페이스마다 수천 개의 키를 만들 수 있었다. 사람이 실제로 필요한
+  // 횟수는 분당 한 자리이므로 5 로 잡는다. 폐기(DELETE)도 같은 통에 넣는다.
+  {
+    id: "mcp-keys",
+    methods: ["POST", "DELETE"],
+    test: (pathname) => pathname === "/api/mcp/keys" || pathname.startsWith("/api/mcp/keys/"),
+    limit: 5,
+  },
+  // 키를 들고 오는 쪽. 키 자체는 256비트라 추측이 불가능하지만, 훔친 키 한 장으로
+  // 무제한 호출이 가능한 상태였다. 도구 호출은 D1 과 R2 를 건드린다.
+  {
+    id: "mcp-rpc",
+    methods: ["POST"],
+    test: (pathname) => isPath(pathname, "/api/mcp"),
+    limit: 120,
+  },
 ];
 
 const buckets = new Map<string, RateLimitBucket>();

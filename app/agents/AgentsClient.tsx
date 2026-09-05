@@ -21,10 +21,29 @@ const HANDSHAKE_LABEL: Record<HandshakeStep, string> = { idle: "대기", checkin
 
 const AGENT_CONNECT_LOGIN_HREF = "/signup?return_to=%2Fagents%3Fintent%3Dagents%23connect";
 
+/**
+ * 발급된 키를 화면에서 지우기까지의 시간. 키는 발급 응답 한 번에만 존재하고 그 뒤로는
+ * 이 브라우저 탭의 메모리에만 남는데, 그 탭은 몇 시간씩 열려 있는다. 복사할 시간은
+ * 충분히 주고, 자리를 비운 화면에 키가 계속 떠 있지는 않게 한다.
+ */
+const ISSUED_KEY_VISIBLE_MS = 10 * 60 * 1000;
+
+/**
+ * 화면에 그리는 판. 접두 11자(clunk_live_)와 끝 4자만 남기고 가린다. 접두는 이미
+ * 목록 API가 돌려주는 값이라 새로 흘리는 것이 없고, 끝 4자는 여러 키 중 어느 것을
+ * 방금 만들었는지 사람이 알아보는 데 쓴다.
+ */
+function maskApiKey(secret: string): string {
+  if (secret.length <= 15) return "•".repeat(secret.length);
+  return `${secret.slice(0, 11)}${"•".repeat(12)}${secret.slice(-4)}`;
+}
+
 export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuthenticated?: boolean }) {
   const [selectedKey, setSelectedKey] = useState<AgentGuideKey>(DEFAULT_AGENT_GUIDE.key);
   const [endpoint, setEndpoint] = useState("/api/mcp");
   const [issuedSecret, setIssuedSecret] = useState<string | null>(null);
+  // 기본은 가린 상태. 사람이 눌러야만 평문이 나오고, 누른 뒤에도 시간이 지나면 다시 가려진다.
+  const [keyRevealed, setKeyRevealed] = useState(false);
   const [keys, setKeys] = useState<ApiKeySummary[]>([]);
   const [connectionState, setConnectionState] = useState<ConnectionState>(initiallyAuthenticated ? "loading" : "signed-out");
   const [busy, setBusy] = useState<"create" | "check" | string | null>(null);
@@ -39,8 +58,11 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
   });
 
   const connection = useMemo<AgentConnection | undefined>(
-    () => (issuedSecret ? { endpoint, apiKey: issuedSecret } : undefined),
-    [endpoint, issuedSecret],
+    () =>
+      issuedSecret
+        ? { endpoint, apiKey: issuedSecret, maskedApiKey: keyRevealed ? undefined : maskApiKey(issuedSecret) }
+        : undefined,
+    [endpoint, issuedSecret, keyRevealed],
   );
   const guides = useMemo(() => buildAgentGuides(connection), [connection]);
   const selected = guides.find((guide) => guide.key === selectedKey) ?? guides[0];
@@ -48,7 +70,19 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
   const needsRemoteKey = selected.key !== "stdio" && !issuedSecret;
   const selectedCode = needsRemoteKey
     ? "‘Clunk 연결 키 만들기’를 누르면 이 설정에 실제 연결 주소와 내 계정 키가 자동으로 채워집니다."
-    : selected.code;
+    : selected.displayCode;
+
+  // 자리를 비운 화면에 평문 키가 남지 않게, 발급으로부터 정해진 시간이 지나면 상태에서 지운다.
+  // 그 뒤에도 발급된 키 자체는 살아 있다 — 목록에서 접두로 보이고, 폐기도 그대로 된다.
+  useEffect(() => {
+    if (!issuedSecret) return;
+    const timer = window.setTimeout(() => {
+      setIssuedSecret(null);
+      setKeyRevealed(false);
+      setMessage("보안을 위해 이 화면에서 연결 키를 지웠습니다. 필요하면 새 키를 만들고 그때 바로 복사하세요.");
+    }, ISSUED_KEY_VISIBLE_MS);
+    return () => window.clearTimeout(timer);
+  }, [issuedSecret]);
 
   const loadKeys = useCallback(async () => {
     setConnectionState("loading");
@@ -96,6 +130,7 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
       };
       if (!response.ok || !payload.ok || !payload.key?.secret) throw new Error(payload.error ?? "연결 키를 만들지 못했습니다.");
       setEndpoint(payload.endpoint ?? "/api/mcp");
+      setKeyRevealed(false);
       setIssuedSecret(payload.key.secret);
       setMessage("연결 키를 만들었습니다. 보안상 이 화면을 떠나면 다시 볼 수 없으니 지금 설정을 복사하세요.");
       await loadKeys();
@@ -152,7 +187,15 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
 
   function downloadSelectedGuide() {
     const filename = selected.fileLabel.endsWith(".json") ? selected.fileLabel : "clunk-mcp-setup.txt";
-    const code = selected.key === "stdio" || issuedSecret ? selected.code : "Clunk 연결 키를 먼저 발급하세요.";
+    // 내려받는 파일에는 평문 키를 넣지 않는다. 다운로드 폴더는 백업·동기화·공유가
+    // 지나가는 자리라, 한 번 떨어진 clunk_live_ 키는 사람이 지울 때까지 거기 남는다.
+    // 파일은 ${CLUNK_API_KEY} 자리를 그대로 두고, 키는 화면의 복사 버튼으로만 나간다.
+    const placeholder = buildAgentGuides({ endpoint, apiKey: "${CLUNK_API_KEY}" }).find(
+      (guide) => guide.key === selected.key,
+    );
+    const code = selected.key === "stdio" || issuedSecret
+      ? (placeholder?.code ?? selected.displayCode)
+      : "Clunk 연결 키를 먼저 발급하세요.";
     const blob = new Blob([code], { type: filename.endsWith(".json") ? "application/json" : "text/plain" });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
@@ -162,7 +205,7 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
     anchor.click();
     anchor.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 0);
-    setMessage(`${filename} 다운로드를 시작했습니다.`);
+    setMessage(`${filename} 다운로드를 시작했습니다. 파일 안의 \${CLUNK_API_KEY} 자리에 복사한 키를 넣으세요.`);
   }
 
   async function revokeKey(keyId: string) {
@@ -173,6 +216,7 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
       const payload = (await response.json()) as { ok?: boolean; error?: string };
       if (!response.ok || !payload.ok) throw new Error(payload.error ?? "키를 폐기하지 못했습니다.");
       if (issuedSecret) setIssuedSecret(null);
+      setKeyRevealed(false);
       setMessage("연결 키를 폐기했습니다. 해당 키는 즉시 사용할 수 없습니다.");
       await loadKeys();
     } catch (error) {
@@ -225,9 +269,17 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
         <div className="agent-issued-key" role="status">
           <div>
             <strong>이번에만 표시되는 연결 키</strong>
-            <small>다른 사람에게 공유하지 마세요. 설정을 복사한 뒤 연결 확인을 실행하세요.</small>
+            <small>다른 사람에게 공유하지 마세요. 복사 버튼은 가려진 상태에서도 실제 키를 복사합니다.</small>
           </div>
-          <code>{issuedSecret}</code>
+          <code>{keyRevealed ? issuedSecret : maskApiKey(issuedSecret)}</code>
+          <button
+            type="button"
+            className="button button-quiet button-sm"
+            onClick={() => setKeyRevealed((current) => !current)}
+            aria-pressed={keyRevealed}
+          >
+            {keyRevealed ? "가리기" : "보기"}
+          </button>
           <CopyCodeButton value={issuedSecret} />
         </div>
       ) : null}
@@ -259,6 +311,9 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
             <div key={key.id}>
               <code>{key.prefix}••••</code>
               <span>{key.label}</span>
+              {/* 마지막으로 쓰인 때는 서버가 이미 돌려주고 있었는데 화면이 버리고 있었다.
+                  훔쳐간 키가 쓰이고 있는지를 사람이 알아볼 수 있는 유일한 자리다. */}
+              <small>{key.lastUsedAt ? `마지막 사용 ${key.lastUsedAt}` : "사용 기록 없음"}</small>
               <button
                 type="button"
                 onClick={() => {

@@ -30,9 +30,28 @@ export const dynamic = "force-dynamic";
 const QA_KEY_ENV = "CLUNK_QA_LOGIN_KEY";
 const MIN_KEY_LENGTH = 24;
 
-export async function GET() {
+/**
+ * 손님이 오는 호스트에서는 이 문이 열려 있으면 안 된다.
+ *
+ * 2026-09-05 실측: https://clunk.games/api/auth/qa 가 `enabled:true` 를 돌려주고 있었다.
+ * 화면에 문은 없지만(QaKeyLogin 은 어디에도 렌더되지 않는다) 라우트는 살아 있어서, 정적
+ * 키 한 장을 아는 사람은 누구나 30일짜리 진짜 세션을 받는다. 키를 지우는 것이 정답이고,
+ * 지우기 전까지는 코드가 먼저 거절한다. 미리보기 워커와 로컬은 그대로 쓴다.
+ */
+const CUSTOMER_FACING_HOSTS = new Set(["clunk.games", "www.clunk.games"]);
+
+function qaSignInBlockedHere(request: Request): boolean {
+  if (getRuntimeEnvironment().CLUNK_QA_LOGIN_ALLOW_PRODUCTION === "1") return false;
+  try {
+    return CUSTOMER_FACING_HOSTS.has(new URL(request.url).hostname);
+  } catch {
+    return false;
+  }
+}
+
+export async function GET(request: Request) {
   return Response.json(
-    { ok: true, schema: "clunk.qa-signin-status.v1", enabled: qaKeyConfigured() },
+    { ok: true, schema: "clunk.qa-signin-status.v1", enabled: qaKeyConfigured() && !qaSignInBlockedHere(request) },
     { headers: { "cache-control": "no-store" } },
   );
 }
@@ -40,6 +59,12 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     assertSameOrigin(request);
+    if (qaSignInBlockedHere(request)) {
+      return privateJson(
+        { ok: false, schema: "clunk.qa-signin.v1", status: "QA_SIGNIN_DISABLED", error: "QA 로그인이 이 배포에서 비활성화되어 있습니다." },
+        { status: 404 },
+      );
+    }
     const environment = getOAuthEnvironment(getRuntimeEnvironment());
     const configuredKey = readQaKey();
     const sessionSecret = environment.CLUNK_AUTH_SESSION_SECRET;

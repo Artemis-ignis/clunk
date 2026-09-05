@@ -404,7 +404,10 @@ test("/login과 /signup은 서로 다른 문이고, 영문 라벨이 남아 있�
     signup.includes("카드도 비밀번호도 묻지 않습니다"),
     "가입 화면의 한 문장이 다릅니다",
   );
-  assert.ok(signup.includes("카드·비밀번호 없음"), "가입 카드 아래 한 줄이 다릅니다");
+  // 2026-09-05(마스터 지시): 카드 아래 회색 사실 띠("카드·비밀번호 없음 · …회 즉시 · …")는
+  // 사라졌다. 문이 답해야 하는 것은 "어떻게 들어오는가" 하나이고, 그 자리는 흰 기본
+  // 버튼 하나가 차지한다. 대신 그 버튼이 실제로 있는지를 고정한다.
+  assert.ok(signup.includes("Google로 계속하기"), "가입 화면에 기본 수단 버튼이 없습니다");
   assert.ok(signup.includes('href="/login?return_to='), "가입 화면에 로그인 문이 없습니다");
 
   // 화면의 숫자는 전부 코드가 강제하는 상수에서 온다. 페이지에 직접 타이핑하면 원장과
@@ -418,6 +421,8 @@ test("/login과 /signup은 서로 다른 문이고, 영문 라벨이 남아 있�
   // 2026-09-04: 화면에서 "크레딧"이라는 말을 뺐다. 현금을 재화로 바꾸는 것처럼 읽혀
   // 결제대행 심사가 반려한 개념이고, 실제로 이것은 만들기·검사를 몇 번 할 수 있는지다.
   // 지켜야 할 것은 낱말이 아니라 "화면의 숫자가 원장이 집행하는 상수와 같다"는 것이다.
+  // 2026-09-05: 카드 본문에서는 횟수를 말하지 않는다. 숫자가 남은 자리는 검색 결과에
+  // 뜨는 /signup 의 description 한 줄뿐이고, 아래 세 줄은 그 한 줄을 고정한다.
   assert.ok(signup.includes(`${signupGrant}회`), "가입 즉시 쓸 수 있는 횟수가 화면에 없습니다");
   assert.ok(signup.includes(`매달 ${monthlyGrant}회`), "매월 지급 횟수가 화면에 없습니다");
   assert.ok(signup.includes(`하루 ${imagesPerDay}장`), "하루 이미지 한도가 화면에 없습니다");
@@ -434,7 +439,9 @@ test("/login과 /signup은 서로 다른 문이고, 영문 라벨이 남아 있�
   // 곳이 하나 늘었다는 뜻이므로, 그 파일도 상수에서만 숫자를 받는지 함께 고정한다.
   const intentSource = await source("app/auth-intent.ts");
   assert.match(intentSource, /import \{ BETA_MONTHLY_GRANT_CREDITS, SIGNUP_GRANT_CREDITS \} from "\.\/api\/_lib\/clunk"/);
-  assert.match(intentSource, /import \{ WORKSPACE_IMAGES_PER_DAY \} from "\.\/api\/_lib\/ai-budget"/);
+  // 2026-09-05: 하루 이미지 한도는 로그인·가입 카드에서 사라졌으므로 auth-intent.ts 는
+  // ai-budget 을 더 이상 부르지 않는다. 남은 숫자(가입 직후 welcome 한 줄)는 위의 clunk.ts
+  // 상수에서만 오고, 아래 한 줄이 손으로 적은 숫자가 되돌아오지 않는지 계속 지킨다.
   assert.ok(
     !new RegExp(`${signupGrant}크레딧|${monthlyGrant}크레딧|${imagesPerDay}장`).test(intentSource),
     "app/auth-intent.ts 에 숫자가 직접 적혀 있습니다",
@@ -536,4 +543,52 @@ test("규격을 말하는 화면은 구매자의 말로 적는다 — 폴리곤 
   assert.match(workbench, /`폴리곤 \$\{measured\.triangles\.toLocaleString\(\)\}개 · 재질 \$\{measured\.materials\}개`/u);
   const rows = screenText(await source("app/components/listing-facts-rows.ts"));
   assert.match(rows, /폴리곤 \$\{facts\.triangles\.toLocaleString\("ko-KR"\)\}개/u);
+});
+
+/**
+ * 로그아웃은 상태를 바꾸는 동작인데 아무 GET 이나 받고 있었다. 남의 페이지에 실린
+ * `<img src="/signout-with-chatgpt">` 한 줄로 우리 사용자를 로그아웃시킬 수 있었다.
+ * 사람이 눌러 이동하는 최상위 탐색만 통과시킨다.
+ */
+test("로그아웃 GET 은 최상위 탐색일 때만 받는다", async () => {
+  const route = await source("app/signout-with-chatgpt/route.ts");
+  assert.match(route, /isTopLevelSameSiteNavigation/u, "GET 에 탐색 판정이 없다");
+  assert.match(route, /sec-fetch-dest/u);
+  assert.match(route, /status: 405/u, "거절하는 응답이 없다");
+
+  const embedded = await render("/signout-with-chatgpt?return_to=%2F", {
+    headers: { "sec-fetch-dest": "image", "sec-fetch-site": "cross-site" },
+  });
+  assert.equal(embedded.status, 405, "이미지로 실린 로그아웃이 통과했다");
+  assert.equal(embedded.headers.get("set-cookie"), null, "거절한 요청이 쿠키를 만졌다");
+
+  const clicked = await render("/signout-with-chatgpt?return_to=%2F", {
+    headers: { "sec-fetch-dest": "document", "sec-fetch-site": "same-origin" },
+  });
+  assert.equal(clicked.status, 302, "사람이 누른 로그아웃이 막혔다");
+});
+
+/**
+ * 세션은 서명된 토큰이고 서버에 기록이 없다. 그래서 "전부 로그아웃"이라는 명령이
+ * 존재하지 않았고, 유출된 쿠키 한 장은 만료일까지 유효했다. 수명을 줄이고, 사고가 났을 때
+ * 당길 손잡이를 하나 남긴다.
+ */
+test("세션 수명이 짧고, 전부 무효화할 손잡이가 있다", async () => {
+  const oauth = await source("app/oauth.ts");
+  assert.match(oauth, /AUTH_SESSION_TTL_SECONDS = 7 \* 24 \* 60 \* 60;/u, "세션 수명이 아직 30일이다");
+  assert.match(oauth, /CLUNK_AUTH_SESSION_EPOCH/u, "전부 무효화할 손잡이가 없다");
+  assert.match(oauth, /payload\.issuedAt < minIssuedAtSeconds/u, "손잡이를 실제로 검사하지 않는다");
+  const auth = await source("app/auth.ts");
+  assert.match(auth, /readSessionEpochSeconds\(environment\)/u, "세션 검증이 손잡이를 읽지 않는다");
+});
+
+/**
+ * QA 로그인은 정적 키 한 장으로 진짜 세션을 발급한다. 손님이 오는 호스트에서 열려 있으면
+ * 안 된다 — 2026-09-05 실측에서 clunk.games 가 enabled:true 를 돌려주고 있었다.
+ */
+test("QA 로그인은 손님이 오는 호스트에서 닫혀 있다", async () => {
+  const route = await source("app/api/auth/qa/route.ts");
+  assert.match(route, /CUSTOMER_FACING_HOSTS/u);
+  assert.match(route, /clunk\.games/u);
+  assert.match(route, /qaSignInBlockedHere\(request\)/u, "POST 가 호스트를 보지 않는다");
 });

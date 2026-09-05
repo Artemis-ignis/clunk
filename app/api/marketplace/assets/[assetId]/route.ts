@@ -168,6 +168,9 @@ export async function GET(request: Request, context: RouteContext) {
         headers: {
           location: new URL(staticPath, url.origin).toString(),
           "cache-control": publicPreview ? "public, max-age=300" : "private, no-store",
+          // 이 리다이렉트가 가리키는 정적 경로는 문이 없다. 검색 엔진과 에이전트가 그
+          // 주소를 카탈로그에 실어 나르지 않게 한다 — 문을 고치기 전까지의 최소한이다.
+          "x-robots-tag": "noindex, nofollow",
         },
       });
     }
@@ -178,7 +181,12 @@ export async function GET(request: Request, context: RouteContext) {
     return new Response(object.body, {
       headers: {
         "content-type": artifact.contentType,
-        "cache-control": publicPreview ? "public, max-age=300" : paid ? "private, no-store" : "public, max-age=31536000, immutable",
+        // 무료 등급도 위에서 로그인(또는 Clunk API 키)을 요구한다. 그런데 그 응답이
+        // 1년짜리 공개 캐시(immutable)로 나가고 있었다 — 로그인으로 막은 본문을
+        // 공유 캐시(회사 프록시, 공용 브라우저, 중간 캐시)가 저장해 다음 사람에게 그대로
+        // 내주어도 된다고 우리가 허락한 것이다. 문이 있는 응답은 문 뒤에 머문다.
+        // 미리보기(preview=1)만 실제로 공개이므로 그것만 공개 캐시를 유지한다.
+        "cache-control": publicPreview ? "public, max-age=300" : "private, no-store",
         // A preview is shown in the page; anything else is the product and should save as a
         // file — a PNG sheet opened inline read as "the download did nothing".
         "content-disposition": `${publicPreview ? "inline" : "attachment"}; filename="${artifact.fileName.replace(/[^a-zA-Z0-9._-]/g, "-")}"`,

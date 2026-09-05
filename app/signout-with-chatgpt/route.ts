@@ -25,12 +25,34 @@ export const dynamic = "force-dynamic";
  */
 const OAUTH_PROVIDERS: OAuthProvider[] = ["google", "github"];
 
+/**
+ * 로그아웃은 상태를 바꾸는 동작인데 GET 으로 열려 있었다. 남의 페이지에 실린
+ * `<img src="https://clunk.games/signout-with-chatgpt">` 한 줄이면 이 브라우저의 세션이
+ * 끊긴다(쿠키가 SameSite=Lax 라도 최상위 이동과 이미지 요청은 다르게 다뤄지고, 무엇보다
+ * 이 라우트는 쿠키를 읽지 않고 만료시키기만 하므로 아무 요청이나 통한다). 데이터가 새는
+ * 일은 아니지만 남이 우리 사용자를 마음대로 로그아웃시킬 수 있는 것은 결함이다.
+ *
+ * 사이트 안의 로그아웃 링크는 사람이 눌러 이동하는 최상위 탐색이므로 그대로 둔다. 그
+ * 조건(Sec-Fetch-Dest: document + Sec-Fetch-Site: same-origin|none)을 만족하지 못하는
+ * GET 만 거절한다. 헤더를 보내지 않는 옛 브라우저는 예전처럼 통과시킨다.
+ */
 export function GET(request: Request): Response {
+  if (!isTopLevelSameSiteNavigation(request)) {
+    return new Response(null, { status: 405, headers: { allow: "POST", "cache-control": "no-store" } });
+  }
   return endSession(request);
 }
 
 export function POST(request: Request): Response {
   return endSession(request);
+}
+
+function isTopLevelSameSiteNavigation(request: Request): boolean {
+  const destination = request.headers.get("sec-fetch-dest");
+  if (!destination) return true; // 헤더가 없는 클라이언트는 판단할 수 없다.
+  if (destination !== "document") return false;
+  const site = request.headers.get("sec-fetch-site");
+  return site === null || site === "same-origin" || site === "none";
 }
 
 function endSession(request: Request): Response {
