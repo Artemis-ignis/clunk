@@ -7,7 +7,11 @@
   "tiltNode": "blades_tilt (inserted above blades_pivot)",
   "shaftSleeve": {
     "radiusMm": 135.8,
-    "lengthMm": 610,
+    "lengthMm": 495,
+    "hubBackFaceZmm": -170,
+    "frontFaceZmm": -115,
+    "bearingDepthMm": 55,
+    "wasBearingDepthMm": 170,
     "colour": "#4a5852"
   },
   "sails": {
@@ -77,8 +81,14 @@
     "windowLumpsCopied": 2
   },
   "clearanceNote": "verified separately by tmp/audit-hf/mindist.mjs at 24 phases; the hub boss and the sleeve are allowed to meet the roof, which is what a windshaft does",
+  "padLift": {
+    "plinthFloorMm": 0,
+    "pads": 8,
+    "liftedMm": 20.4
+  },
+  "bladeAssemblyCentreOffAxisMm": 0,
   "ground": {
-    "beforeMm": -20.4,
+    "beforeMm": 0,
     "afterMm": 0
   },
   "before": {
@@ -95,7 +105,7 @@
     "meshes": 9,
     "boundsM": [
       3.3537,
-      5.0405,
+      5.0201,
       3.51
     ]
   }

@@ -82,16 +82,41 @@
  *      face so the tower is not blank from the shop's own camera angle. Every
  *      new part takes its colour from the part it replaces or copies.
  *
+ * 2026-09-05 (windmill only), from the mechanism audit:
+ *
+ *   7. THE MILL FLOATS 20.4 mm. Only the eight decorative foot pads reach y = 0;
+ *      the base plinth that the tower stands on stops 20.4 mm above it, so the
+ *      building hovers over its own rockery. The pads are authored 20.4 mm below
+ *      the plinth (the export sank them into the field); they are lifted onto the
+ *      plinth's own underside and the whole mill is then seated, so the plinth and
+ *      the pads both touch the floor.
+ *
+ *   8. THE WINDSHAFT SLEEVE RAN 271.6 mm THROUGH THE HUB. The sleeve was grown
+ *      backwards from the hub's CENTRE, so it passed through the whole boss and
+ *      out the far side of the cross arms -- the inspector reported 48 intersecting
+ *      triangle pairs. It now stops SHAFT_BEARING_DEPTH (55 mm) past the hub's back
+ *      face, which is a bearing, and its back end is unchanged so it still reaches
+ *      the cap.
+ *
+ *   9. THE HUB AND CROSS ARMS HAD NO NAME. The lattice was parented to the blade
+ *      mesh, so the exporter wrapped the mesh in a node and left the mesh's own node
+ *      unnamed -- which is the part every intersection report then had to call
+ *      "unnamed mesh, node 14". The lattice becomes a sibling carrying the same
+ *      transform, and the blade mesh keeps the name `windmillBlades`.
+ *
  * No material, colour or vertex colour is touched in either file.
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  THREE, loadGlb, saveGlb, mesh, node, lumps, deleteLumps, scaleLump,
+  THREE, loadGlb, saveGlb, mesh, node, lumps, deleteLumps, scaleLump, moveLumpWorld,
   meshes, triangleCount, worldBox, sizeMm, mm, seatOnGround, lowestY,
   averageColour, buildBoxes,
 } from './fix-lib.mjs';
+
+/** How deep a windshaft sits in its bearing before it is a shaft through a wall. */
+const SHAFT_BEARING_DEPTH = Number(process.env.SHAFT_BEARING_DEPTH ?? 0.055);
 
 /** How tall a rain butt is. */
 const BUTT_TARGET_HEIGHT = Number(process.env.BUTT_HEIGHT ?? 1.0);
@@ -329,10 +354,25 @@ async function fixWindmill(): Promise<unknown> {
     }
     // The shaft runs back along the tilt node's -Z, from the hub into the roof.
     const radius = Math.min(hub.size.x, hub.size.y) * 0.42;
-    const length = SHAFT_FORWARD + 0.35;
+    /* Where the hub's BACK face is, in the tilt node's own frame. The 2026-09-04 build
+       started the sleeve at z = 0, which is the hub's centre, so it ran through the whole
+       boss and the cross arms behind it: 271.6 mm of shaft inside the thing it carries. */
+    const toTilt = new THREE.Matrix4().copy(tilt.matrixWorld).invert().multiply(blades.matrixWorld);
+    const bladePos = blades.geometry.getAttribute('position') as THREE.BufferAttribute;
+    const probe = new THREE.Vector3();
+    let hubBackZ = Infinity;
+    for (let i = 0; i < bladePos.count; i += 1) {
+      probe.fromBufferAttribute(bladePos, i).applyMatrix4(toTilt);
+      if (Math.hypot(probe.x, probe.y) > radius + 0.060) continue;   // only what the sleeve can hit
+      hubBackZ = Math.min(hubBackZ, probe.z);
+    }
+    if (!Number.isFinite(hubBackZ)) hubBackZ = 0;
+    const front = hubBackZ + SHAFT_BEARING_DEPTH;
+    const back = -(SHAFT_FORWARD + 0.35);
+    const length = front - back;
     const geometry = new THREE.CylinderGeometry(radius, radius, length, 12, 1, false);
     geometry.rotateX(Math.PI / 2);          // cylinder axis Y -> Z
-    geometry.translate(0, 0, -length / 2);  // grow backwards from the hub
+    geometry.translate(0, 0, front - length / 2);
     if (colourAttribute) {
       const count = geometry.getAttribute('position').count;
       const colours = new Float32Array(count * 3);
@@ -347,6 +387,10 @@ async function fixWindmill(): Promise<unknown> {
     sleeve = {
       radiusMm: mm(radius),
       lengthMm: mm(length),
+      hubBackFaceZmm: mm(hubBackZ),
+      frontFaceZmm: mm(front),
+      bearingDepthMm: mm(SHAFT_BEARING_DEPTH),
+      wasBearingDepthMm: mm(-hubBackZ),
       colour: colourAttribute ? `#${[srgb(cr), srgb(cg), srgb(cb)].map((v) => Math.max(0, Math.min(255, v)).toString(16).padStart(2, '0')).join('')}` : null,
     };
   }
@@ -432,7 +476,14 @@ async function fixWindmill(): Promise<unknown> {
   latticeGeometry.computeBoundingSphere();
   const lattice = new THREE.Mesh(latticeGeometry, blades.material);
   lattice.name = 'windmillSailLattice';
-  blades.add(lattice);            // the sails' own frame, so it turns with them
+  /* A SIBLING, not a child. three's exporter wraps a mesh that has children in an extra
+     node and leaves the mesh's own node unnamed, which is how the hub and cross arms came
+     to be "unnamed mesh, node 14" in every report about this file. The lattice copies the
+     blade mesh's local transform, so it sits and turns exactly where it did. */
+  lattice.position.copy(blades.position);
+  lattice.quaternion.copy(blades.quaternion);
+  lattice.scale.copy(blades.scale);
+  blades.parent!.add(lattice);
   scene.updateMatrixWorld(true);
 
   // ---------------------------------------------- 6. the door and a window
@@ -465,8 +516,46 @@ async function fixWindmill(): Promise<unknown> {
   ], hardware, hardwareParent, windowGlassColour);
   scene.updateMatrixWorld(true);
 
+  /* ------------------------------ 7. the mill stands on the ground, not over it */
+  /* Measured here: the base plinth's underside and the eight foot pads are 20.4 mm apart,
+     and it is the PADS that are lower. Seating the model on its lowest vertex therefore
+     stood the whole building 20.4 mm in the air on a rockery. The pads are lifted onto the
+     plinth's own underside first, and then everything is seated together. */
+  const padLift = (() => {
+    const all = lumps(hardware);
+    const wide = all.filter((l) => l.size.x > 1.0 && l.size.z > 1.0);
+    const plinthFloor = Math.min(
+      worldBox(mesh(scene, 'windmillTower')).min.y,
+      ...(wide.length ? wide.map((l) => l.world.min.y) : [Infinity]),
+    );
+    const pads = all.filter((l) => l.world.min.y < plinthFloor - 0.0005);
+    if (!pads.length) return { plinthFloorMm: mm(plinthFloor), pads: 0, liftedMm: 0 };
+    const lift = plinthFloor - Math.min(...pads.map((l) => l.world.min.y));
+    for (const pad of pads) moveLumpWorld(hardware, pad, new THREE.Vector3(0, lift, 0));
+    scene.updateMatrixWorld(true);
+    return { plinthFloorMm: mm(plinthFloor), pads: pads.length, liftedMm: mm(lift) };
+  })();
+
   const ground = seatOnGround(scene, scene.children[0] ?? scene);
   scene.updateMatrixWorld(true);
+  /* The vertices that are actually there, not the transformed corners of each geometry's
+     own box: the sail disc is tilted 10 degrees, so Box3.setFromObject inflates it by 45 mm
+     on one side and the reading would be an artefact of the instrument. */
+  const bladeWobbleMm = (() => {
+    const pivotNode = node(scene, 'blades_pivot');
+    const box = new THREE.Box3();
+    const probe = new THREE.Vector3();
+    pivotNode.updateMatrixWorld(true);
+    pivotNode.traverse((n) => {
+      const m = n as THREE.Mesh;
+      if (!m.isMesh) return;
+      const attribute = m.geometry.getAttribute('position') as THREE.BufferAttribute;
+      for (let i = 0; i < attribute.count; i += 1) box.expandByPoint(probe.fromBufferAttribute(attribute, i).applyMatrix4(m.matrixWorld));
+    });
+    const centre = box.getCenter(new THREE.Vector3());
+    const axis = new THREE.Vector3().setFromMatrixPosition(pivotNode.matrixWorld);
+    return mm(centre.distanceTo(axis));
+  })();
 
   const after = { triangles: triangleCount(scene), meshes: meshes(scene).length, boundsM: worldBox(scene).getSize(new THREE.Vector3()).toArray().map((v) => +v.toFixed(4)) };
   await saveGlb(OUT, mill);
@@ -500,6 +589,8 @@ async function fixWindmill(): Promise<unknown> {
       windowLumpsCopied: windowLumps.length,
     },
     clearanceNote: 'verified separately by tmp/audit-hf/mindist.mjs at 24 phases; the hub boss and the sleeve are allowed to meet the roof, which is what a windshaft does',
+    padLift,
+    bladeAssemblyCentreOffAxisMm: bladeWobbleMm,
     ground,
     before, after,
   };

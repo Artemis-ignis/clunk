@@ -1,5 +1,5 @@
 {
-  "input": "public\\market\\hf-cultivator-compact\\cultivator.compact.m1.glb",
+  "input": "examples\\harvest-frontier\\runtime-animated\\cultivator.compact.m1.glb",
   "output": "examples\\harvest-frontier\\runtime-animated\\cultivator.repaired.glb",
   "before": {
     "meshes": 104,
@@ -7,48 +7,65 @@
     "groundMinYmm": 19.3
   },
   "tinePivotRaise": {
-    "why": "the pivot sat 340 mm below the clamp, so a visible swing dragged the clamp through the toolbar",
+    "why": "the visible hinge is the clamp bolt at y 832; the 2026-09-03 pass put the rotation centre 245 mm above it, so the shank swung about a point that is not drawn",
     "pivots": [
       {
         "node": "pivottine01",
-        "raisedMm": 340,
-        "restPoseShiftMm": 0
+        "boltCentreYmm": 854.3,
+        "pivotWasYmm": 759.3,
+        "pivotNowYmm": 854.3,
+        "raisedMm": 95
       },
       {
         "node": "pivottine02",
-        "raisedMm": 340,
-        "restPoseShiftMm": 0
+        "boltCentreYmm": 854.3,
+        "pivotWasYmm": 759.3,
+        "pivotNowYmm": 854.3,
+        "raisedMm": 95
       },
       {
         "node": "pivottine03",
-        "raisedMm": 340,
-        "restPoseShiftMm": 0
+        "boltCentreYmm": 854.3,
+        "pivotWasYmm": 759.3,
+        "pivotNowYmm": 854.3,
+        "raisedMm": 95
       },
       {
         "node": "pivottine04",
-        "raisedMm": 340,
-        "restPoseShiftMm": 0
+        "boltCentreYmm": 854.3,
+        "pivotWasYmm": 759.3,
+        "pivotNowYmm": 854.3,
+        "raisedMm": 95
       },
       {
         "node": "pivottine05",
-        "raisedMm": 340,
-        "restPoseShiftMm": 0
+        "boltCentreYmm": 854.3,
+        "pivotWasYmm": 759.3,
+        "pivotNowYmm": 854.3,
+        "raisedMm": 95
       },
       {
         "node": "pivottine06",
-        "raisedMm": 340,
-        "restPoseShiftMm": 0
+        "boltCentreYmm": 854.3,
+        "pivotWasYmm": 759.3,
+        "pivotNowYmm": 854.3,
+        "raisedMm": 95
       },
       {
         "node": "pivottine07",
-        "raisedMm": 340,
-        "restPoseShiftMm": 0
+        "boltCentreYmm": 854.3,
+        "pivotWasYmm": 759.3,
+        "pivotNowYmm": 854.3,
+        "raisedMm": 95
       }
     ]
   },
   "tineLift": {
-    "wasDegrees": "+-2 (quaternion z delta 0.028)",
-    "nowDegrees": "0 .. +8.0",
+    "why": "a spring tine flexes about its clamp bolt; with the tip 894 mm out on the lever, 8 degrees of that is 105 mm of air under the blade",
+    "wasDegrees": "0 .. +8 about a pivot 245 mm above the bolt",
+    "nowDegrees": "0 .. +4.87 about the bolt",
+    "tipRiseMm": 20,
+    "groundBandMm": 20,
     "cyclesPerClip": 3,
     "keysPerTrack": 61,
     "tines": [
@@ -56,7 +73,7 @@
         "node": "pivottine01",
         "degrees": [
           0,
-          8
+          4.87
         ],
         "cyclesPerClip": 3,
         "phaseOffsetTurns": 0
@@ -65,7 +82,7 @@
         "node": "pivottine02",
         "degrees": [
           0,
-          8
+          4.87
         ],
         "cyclesPerClip": 3,
         "phaseOffsetTurns": 0.143
@@ -74,7 +91,7 @@
         "node": "pivottine03",
         "degrees": [
           0,
-          8
+          4.87
         ],
         "cyclesPerClip": 3,
         "phaseOffsetTurns": 0.286
@@ -83,7 +100,7 @@
         "node": "pivottine04",
         "degrees": [
           0,
-          8
+          4.87
         ],
         "cyclesPerClip": 3,
         "phaseOffsetTurns": 0.429
@@ -92,7 +109,7 @@
         "node": "pivottine05",
         "degrees": [
           0,
-          8
+          4.87
         ],
         "cyclesPerClip": 3,
         "phaseOffsetTurns": 0.571
@@ -101,7 +118,7 @@
         "node": "pivottine06",
         "degrees": [
           0,
-          8
+          4.87
         ],
         "cyclesPerClip": 3,
         "phaseOffsetTurns": 0.714
@@ -110,7 +127,7 @@
         "node": "pivottine07",
         "degrees": [
           0,
-          8
+          4.87
         ],
         "cyclesPerClip": 3,
         "phaseOffsetTurns": 0.857
@@ -176,9 +193,94 @@
       "widthMmAfter": 141
     }
   ],
+  "toolbarRisers": {
+    "why": "the 2.72 m toolbar floated 39.9 mm over the cross rails and read as a part attached to nothing",
+    "gapMm": 39.9,
+    "risers": [
+      "toolbarRiserL1300",
+      "toolbarRiserL650",
+      "toolbarRiserC0",
+      "toolbarRiserR650",
+      "toolbarRiserR1300"
+    ]
+  },
   "ground": {
     "beforeMm": 22.3,
     "afterMm": 0
+  },
+  "gaugeWheels": {
+    "why": "the part that sets working depth ran 102.5 mm clear of the ground, and at ground level it cut through sweep1 and sweep7",
+    "wheels": [
+      {
+        "node": "pivotgaugeWheelLeft",
+        "bottomWasMm": 102.5,
+        "bottomNowMm": 6.2,
+        "droppedMm": 96.3,
+        "movedInboardMm": 150,
+        "laneCentreMm": -1084.7,
+        "placedAtMm": -1070,
+        "wheelWidthMm": 141,
+        "radiusMm": 248.7,
+        "axleZmm": -1070,
+        "nearestSweep": "sweep02",
+        "clearanceToSweepMm": -14.9
+      },
+      {
+        "node": "pivotgaugeWheelRight",
+        "bottomWasMm": 102.5,
+        "bottomNowMm": 6.2,
+        "droppedMm": 96.3,
+        "movedInboardMm": 150,
+        "laneCentreMm": 1055.3,
+        "placedAtMm": 1070,
+        "wheelWidthMm": 141,
+        "radiusMm": 248.7,
+        "axleZmm": 1070,
+        "nearestSweep": "sweep07",
+        "clearanceToSweepMm": -14.9
+      }
+    ],
+    "axleSymmetryMm": 0,
+    "note": "the two lanes are 29.4 mm apart in |z| because every sweep is bolted 25.2 mm to one side of its own shank; the wheels are placed on the mean so the machine is symmetric, and the box overlap that leaves against the nearest sweep is reported above"
+  },
+  "wheelSpokes": {
+    "why": "the only round thing that moves on this machine had no feature to follow",
+    "wheels": [
+      {
+        "wheel": "gaugeWheelLeft",
+        "spokes": 3,
+        "colour": "#0f120c"
+      },
+      {
+        "wheel": "gaugeWheelRight",
+        "spokes": 3,
+        "colour": "#0f120c"
+      }
+    ]
+  },
+  "rollingSpeed": {
+    "why": "eight whole turns over a clip the render samples at eight phases gave eight pixel-identical frames",
+    "matchedTo": "gaugeWheelLeft/Right on hf-tractor-compact, 7.487 m/s",
+    "perPart": {
+      "gaugeWheelLeft": {
+        "wasDegrees": 2880,
+        "degrees": 2760,
+        "radiusMm": 248.7,
+        "segmentDeg": 120,
+        "travelM": 11.978,
+        "speedMs": 7.362,
+        "degreesPerRenderPhase": 345
+      },
+      "gaugeWheelRight": {
+        "wasDegrees": 2880,
+        "degrees": 2760,
+        "radiusMm": 248.7,
+        "segmentDeg": 120,
+        "travelM": 11.978,
+        "speedMs": 7.362,
+        "degreesPerRenderPhase": 345
+      }
+    }
   },
   "bakedInstances": [],
   "merge": [
@@ -193,6 +295,11 @@
         "toolbarCrossRail2",
         "toolbarCrossRail3",
         "toolbarCrossRail4",
+        "toolbarRiserL1300",
+        "toolbarRiserL650",
+        "toolbarRiserC0",
+        "toolbarRiserR650",
+        "toolbarRiserR1300",
         "cultivatorWingLeft",
         "cultivatorWingRight",
         "endPlateLeft",
@@ -213,7 +320,7 @@
         "topLink",
         "depthAdjuster"
       ],
-      "triangles": 14700
+      "triangles": 14760
     },
     {
       "mesh": "pivottine01_metal",
@@ -321,9 +428,12 @@
         "gaugeWheelLeftlug09",
         "gaugeWheelLeftlug10",
         "gaugeWheelLeftlug11",
-        "gaugeWheelLeftlug12"
+        "gaugeWheelLeftlug12",
+        "gaugeWheelLeftSpoke1",
+        "gaugeWheelLeftSpoke2",
+        "gaugeWheelLeftSpoke3"
       ],
-      "triangles": 600
+      "triangles": 636
     },
     {
       "mesh": "gaugeWheelRight_rubber",
@@ -343,16 +453,19 @@
         "gaugeWheelRightlug09",
         "gaugeWheelRightlug10",
         "gaugeWheelRightlug11",
-        "gaugeWheelRightlug12"
+        "gaugeWheelRightlug12",
+        "gaugeWheelRightSpoke1",
+        "gaugeWheelRightSpoke2",
+        "gaugeWheelRightSpoke3"
       ],
-      "triangles": 600
+      "triangles": 636
     }
   ],
   "unsharedGeometries": 14,
   "prunedEmptyNodes": 18,
   "after": {
     "meshes": 29,
-    "drawnTriangles": 27668,
+    "drawnTriangles": 27800,
     "groundMinYmm": 0
   }
 }

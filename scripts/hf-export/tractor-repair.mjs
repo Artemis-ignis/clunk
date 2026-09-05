@@ -37,6 +37,37 @@
  *   4. THE TINES ON THE MOUNTED CULTIVATOR SWING +-2 deg — the same dead motion
  *      the standalone cultivator had. Same fix: the pivot is raised into its
  *      clamp and the swing becomes 0 -> +8 deg, three cycles per `drive`.
+ *
+ * 2026-09-05 wheel pass. The operator looked at the delivered file and said the wheels
+ * are not fixed to the tractor and hang in the air. They were right. Measured here:
+ *
+ *   5. NOTHING HELD THE FRONT AXLE UP. `frontAxle` is a 140 x 140 mm beam floating at
+ *      y 375-515 mm with 395 mm of air between its top and the chassis floor (909.9 mm).
+ *      From the side the front wheel stands on its own. A bolster now drops from the
+ *      chassis onto the beam and carries the beam's pivot pin.
+ *
+ *   6. NO WHEEL WAS ON AN AXLE. Every hub measured 20-21 mm of air to the nearest axle
+ *      metal (tmp/wheel-gap.mjs). Each of the four gets the joint a wheel has: a flange
+ *      whose rim is built from THE HUB'S OWN FACE VERTICES, so the two meet at 0.0 mm and
+ *      the faces that touch point in opposite directions (a butt joint, not a z-fight);
+ *      a spigot that runs on into the hub bore; a shaft back to the beam.
+ *
+ *   7. THE FRONT FENDERS WERE LEFT AT THE OLD WHEEL'S HEIGHT. When the front wheels were
+ *      scaled to 0.665 the fenders stayed at y 1140-1260 over a tyre whose crown is now
+ *      889.5 mm — 250 mm of daylight — and 140 mm outboard of the tyre centre. Re-seated
+ *      over the tyre they cover, and given a stay to the chassis.
+ *
+ *   8. THE FRONT WHEELS ROLLED 31 % SHORT. Over `drive` the rears turn 1080 deg at
+ *      r 859.3 mm (16.199 m) and the fronts 1440 deg at r 445.1 mm (11.259 m). Every
+ *      rolling part is re-keyed to one ground distance and lands on its own lug spacing,
+ *      so the clip still loops.
+ *
+ *   9. THE STEERING WAS GEARED 3.2:1 — +-39.2 deg of handwheel for +-12.4 deg of wheel.
+ *      The handwheel now turns +-200 deg for the same lock: 16.1:1, inside the 15-25:1 a
+ *      real tractor has. The wheel lock is left alone; it was already Ackermann-correct.
+ *
+ *  10. THE IMPLEMENT DID NOT REACH THE GROUND. Gauge wheels 16.8 mm up, cultivator
+ *      sweeps 22.3 mm up. Both seated.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -44,7 +75,25 @@ import { fileURLToPath } from 'node:url';
 import {
   THREE, loadGlb, saveGlb, meshes, node, worldBox, exactBox, mm, drawnTris, matOf, boxGeo, colourOf, addMesh,
   mergeByAnchor, pruneEmpty, dropHiddenProxies, bakeInstances, unshareGeometry, quatTrack, setTrack,
+  axleHubJoint, boxSpan, moveBoxCentreTo, cylGeo, radiusAbout,
 } from './machine-lib.mjs';
+
+/* A lugged tyre is not a circle. Seating it on the box of its rest pose leaves the lug
+ * tips below the floor a third of a turn later — the 2026-09-05 render caught the gauge
+ * wheel 5.5 mm under the ground mid-clip. Seat every wheel on the largest radius any of
+ * its vertices has about its own axle instead, and it touches at every angle. */
+const rollingFloor = [];
+function seatWheelOnItsLugs(scene, wheelNode, mover) {
+  wheelNode.updateMatrixWorld(true);
+  const centre = new THREE.Vector3().setFromMatrixPosition(wheelNode.matrixWorld);
+  const radius = radiusAbout(wheelNode, centre, [0, 0, 1]);
+  const before = centre.y;
+  mover.position.y -= centre.y - radius;
+  scene.updateMatrixWorld(true);
+  wheelNode.updateMatrixWorld(true);
+  rollingFloor.push(new THREE.Vector3().setFromMatrixPosition(wheelNode.matrixWorld).y - radius);
+  return { node: wheelNode.name, axleWasMm: mm(before), axleNowMm: mm(radius), lugRadiusMm: mm(radius) };
+}
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, '../..');
@@ -79,10 +128,11 @@ for (const side of ['Left', 'Right']) {
   const before = worldBox(wheel);
   wheel.scale.setScalar(WHEEL_SCALE);
   scene.updateMatrixWorld(true);
-  // seat the (now smaller) wheel back on the ground
-  const radius = exactBox(wheel).getSize(new THREE.Vector3()).y / 2;
-  wheel.position.y = radius;
+  // seat the (now smaller) wheel back on the ground, on its lug tips
+  wheel.position.y = exactBox(wheel).getSize(new THREE.Vector3()).y / 2;
   scene.updateMatrixWorld(true);
+  seatWheelOnItsLugs(scene, wheel, wheel);
+  const radius = new THREE.Vector3().setFromMatrixPosition(wheel.matrixWorld).y;
   const after = exactBox(wheel);
   wheelReport.push({
     node: wheel.name, scale: WHEEL_SCALE,
@@ -162,15 +212,316 @@ for (let t = 1; t <= 7; t += 1) {
 scene.updateMatrixWorld(true);
 report.tines = { wasDegrees: '+-2', nowDegrees: '0 .. +8', cyclesPerClip: 3, pivotRaisedMm: mm(PIVOT_RAISE), nodes: tines };
 
+/* ============================================================ 2026-09-05 wheel pass */
+
+/* --------------------------------------------- 4a. the front axle hangs from something */
+{
+  const beam = node(scene, 'frontAxle');
+  const beamBox = exactBox(beam);
+  const chassisBox = exactBox(node(scene, 'chassis'));
+  const metal = matOf(beam);
+  const dark = colourOf(beam);
+  const root = node(scene, 'tractorRoot');
+  const x0 = beamBox.min.x - 0.030;
+  const x1 = beamBox.max.x + 0.030;
+  boxSpan(root, metal, dark, [x0, beamBox.max.y - 0.020, -0.150], [x1, chassisBox.min.y + 0.010, 0.150], 'frontAxleBolster');
+  const pinY = beamBox.max.y - 0.010;
+  const pin = addMesh(root, cylGeo(0.048, 0.048, (x1 - x0) + 0.120, 14, dark).rotateZ(Math.PI / 2), metal, 'frontAxlePivotPin', [0, 0, 0]);
+  pin.position.copy(root.worldToLocal(new THREE.Vector3((x0 + x1) / 2, pinY, 0)));
+  scene.updateMatrixWorld(true);
+  const bolster = exactBox(node(scene, 'frontAxleBolster'));
+  report.frontAxleCarrier = {
+    why: 'the front axle beam floated 395 mm under the chassis with nothing between the two, so from the side the front wheel stood on its own',
+    beamTopYmm: mm(beamBox.max.y),
+    chassisFloorYmm: mm(chassisBox.min.y),
+    airGapWasMm: mm(chassisBox.min.y - beamBox.max.y),
+    bolsterMinMm: bolster.min.toArray().map(mm),
+    bolsterMaxMm: bolster.max.toArray().map(mm),
+    pinYmm: mm(pinY),
+  };
+}
+
+/* ------------------------------------------------- 4b. every hub sits on an axle now */
+{
+  const root = node(scene, 'tractorRoot');
+  const metal = matOf(node(scene, 'frontAxle'));
+  const joints = {};
+  /* the rear tyres stopped 0.7 mm short of the floor; seat them before the joint is
+     measured, or the flange is built against a hub that then moves. */
+  const rearSeat = [];
+  for (const name of ['wheelRearLeft', 'wheelRearRight']) rearSeat.push(seatWheelOnItsLugs(scene, node(scene, name), node(scene, name)));
+  report.rearWheelSeat = rearSeat;
+  for (const [wheelName, hubName, sign, spec] of [
+    ['wheelFrontLeft', 'hub', -1, { flange: 0.035, spigot: { radius: 0.070, depth: 0.180 }, shaft: { radius: 0.062, to: -0.500 } }],
+    ['wheelFrontRight', 'hub_1', +1, { flange: 0.035, spigot: { radius: 0.070, depth: 0.180 }, shaft: { radius: 0.062, to: 0.500 } }],
+    ['wheelRearLeft', 'hub_2', -1, { flange: 0.040, spigot: { radius: 0.100, depth: 0.220 }, shaft: { radius: 0.108, to: -0.410 } }],
+    ['wheelRearRight', 'hub_3', +1, { flange: 0.040, spigot: { radius: 0.100, depth: 0.220 }, shaft: { radius: 0.108, to: 0.410 } }],
+  ]) {
+    const hub = node(scene, hubName);
+    const wheel = node(scene, wheelName);
+    joints[wheelName] = axleHubJoint(root, hub, 2, sign, {
+      ...spec,
+      material: metal,
+      colour: colourOf(hub).clone().multiplyScalar(0.9),
+      name: wheelName.replace('wheel', 'axle'),
+    });
+    const centre = exactBox(wheel).getCenter(new THREE.Vector3());
+    const pivot = new THREE.Vector3().setFromMatrixPosition(wheel.matrixWorld);
+    joints[wheelName].pivotVsAabbCentreMm = mm(centre.distanceTo(pivot));
+  }
+  scene.updateMatrixWorld(true);
+  report.axleJoints = {
+    why: 'each hub measured 20-21 mm of air to the nearest axle metal; the flange rim is built from the hub OWN face vertices, so the joint closes at 0.0 mm by construction and the two faces that meet point in opposite directions',
+    joints,
+  };
+}
+
+/* ------------------------------------------ 4c. the front fenders cover a smaller wheel */
+{
+  const fenders = [];
+  const root = node(scene, 'tractorRoot');
+  const chassis = exactBox(node(scene, 'chassis'));
+  for (const [side, sign] of [['Left', -1], ['Right', 1]]) {
+    const fender = node(scene, `frontFender${side}`);
+    const tyre = exactBox(node(scene, `wheelFront${side}`));
+    const before = exactBox(fender);
+    const wantWidth = (tyre.max.z - tyre.min.z) + 0.030;
+    fender.scale.z *= wantWidth / (before.max.z - before.min.z);
+    scene.updateMatrixWorld(true);
+    const scaled = exactBox(fender);
+    const height = scaled.max.y - scaled.min.y;
+    moveBoxCentreTo(fender, new THREE.Vector3(
+      (before.min.x + before.max.x) / 2,
+      tyre.max.y + 0.070 + height / 2,
+      (tyre.min.z + tyre.max.z) / 2,
+    ));
+    scene.updateMatrixWorld(true);
+    const box = exactBox(fender);
+    const inner = sign < 0 ? box.max.z : box.min.z;
+    const hinge = sign * (chassis.max.z - 0.010);
+    const reach = inner + sign * 0.060;                    // 60 mm INTO the fender, not up against it
+    boxSpan(root, matOf(fender), colourOf(fender),
+      [box.min.x + 0.240, box.min.y - 0.075, Math.min(hinge, reach)],
+      [box.min.x + 0.360, box.min.y + 0.020, Math.max(hinge, reach)],
+      `frontFenderStay${side}`);
+    fenders.push({
+      part: fender.name,
+      wasYmm: [mm(before.min.y), mm(before.max.y)], nowYmm: [mm(box.min.y), mm(box.max.y)],
+      wasZmm: [mm(before.min.z), mm(before.max.z)], nowZmm: [mm(box.min.z), mm(box.max.z)],
+      tyreCrownYmm: mm(tyre.max.y), clearanceMm: mm(box.min.y - tyre.max.y),
+      stay: `frontFenderStay${side}`,
+    });
+  }
+  scene.updateMatrixWorld(true);
+  report.frontFenders = {
+    why: 'the front wheels were scaled to 0.665 and the fenders were left where the big wheel had been: 250 mm of daylight over the tyre and 140 mm off its centre, held up by nothing',
+    fenders,
+  };
+}
+
+/* ---------------------------------------------- 4d. the parts that hang in the air */
+/* The connected-component rules that came into `packages/core` this week read the merged
+ * meshes the way a buyer reads them, and they found four groups on this tractor bolted to
+ * nothing. Measured, each one, and bridged with the bracket the real machine has. */
+{
+  const root = node(scene, 'tractorRoot');
+  const matte = matOf(node(scene, 'frontBumper'));
+  const matteColour = colourOf(node(scene, 'frontBumper'));
+  const bumper = exactBox(node(scene, 'frontBumper'));
+  const chassisBox = exactBox(node(scene, 'chassis'));
+  const bridged = [];
+  for (const sign of [-1, 1]) {
+    boxSpan(root, matte, matteColour,
+      [bumper.max.x - 0.020, 1.040, sign * 0.360 < sign * 0.260 ? sign * 0.360 : sign * 0.260],
+      [chassisBox.min.x + 0.020, 1.140, sign * 0.360 > sign * 0.260 ? sign * 0.360 : sign * 0.260],
+      `frontBumperStay${sign < 0 ? 'Left' : 'Right'}`);
+  }
+  bridged.push({ part: 'frontBumper', gapMm: mm(chassisBox.min.x - bumper.max.x), bridge: 'frontBumperStayLeft/Right to the chassis nose' });
+
+  /* the rear fenders stop 8 mm short of the roll-bar posts that would carry them */
+  for (const [side, sign] of [['Left', -1], ['Right', 1]]) {
+    const fender = exactBox(node(scene, `rearFender${side}`));
+    const post = exactBox(node(scene, `rollBarPost${side}`));
+    const inner = sign < 0 ? fender.max.z : fender.min.z;
+    const postOuter = sign < 0 ? post.min.z : post.max.z;
+    boxSpan(root, matte, matteColour,
+      [1.000, 2.180, Math.min(inner - sign * 0.020, postOuter + sign * 0.020)],
+      [1.150, 2.262, Math.max(inner - sign * 0.020, postOuter + sign * 0.020)],
+      `rearFenderStay${side}`);
+    bridged.push({ part: `rearFender${side}`, gapMm: mm(Math.abs(inner - postOuter)), bridge: `rearFenderStay${side} to rollBarPost${side}` });
+  }
+
+  /* the implement toolbar floats 39.9 mm over the cross rails that should carry it */
+  {
+    const toolbar = exactBox(node(scene, 'cultivatorToolbar'));
+    const rail = exactBox(node(scene, 'toolbarCrossRail2'));
+    const frame = node(scene, 'toolbar');
+    const metal = matOf(node(scene, 'cultivatorToolbar'));
+    const colour = colourOf(node(scene, 'cultivatorToolbar'));
+    for (const z of [-1.300, -0.650, 0, 0.650, 1.300]) {
+      boxSpan(frame, metal, colour,
+        [Math.max(toolbar.min.x, rail.min.x) + 0.010, rail.max.y - 0.010, z - 0.060],
+        [Math.min(toolbar.max.x, rail.max.x) - 0.010, toolbar.min.y + 0.012, z + 0.060],
+        `toolbarRiser${z < 0 ? 'L' : (z > 0 ? 'R' : 'C')}${Math.round(Math.abs(z) * 1000)}`);
+    }
+    bridged.push({ part: 'cultivatorToolbar', gapMm: mm(toolbar.min.y - rail.max.y), bridge: '5 risers down to toolbarCrossRail2' });
+  }
+  /* two handrails a side, 860 mm long, standing 12 mm off the hood they belong to, and a
+     144 mm badge plate 101 mm in front of the nose. All four rails and the plate live inside
+     the one `tractorStaticDetail` mesh, so they cannot be moved a part at a time — they get
+     the mounting pads a real rail is bolted through. */
+  {
+    const hood = exactBox(node(scene, 'hood'));
+    const nose = exactBox(node(scene, 'nose'));
+    let pads = 0;
+    for (const y of [1.340, 1.820]) {
+      for (const sign of [-1, 1]) {
+        for (const x of [-1.250, -0.800]) {
+          const inner = sign * 0.737;
+          const into = sign * (hood.max.z - 0.010);
+          boxSpan(root, matte, matteColour,
+            [x - 0.050, y - 0.014, Math.min(inner, into)],
+            [x + 0.050, y + 0.014, Math.max(inner, into)],
+            `handrailPad${pads += 1}`);
+        }
+      }
+    }
+    boxSpan(root, matte, matteColour, [-2.050, 1.645, -0.030], [nose.min.x + 0.010, 1.695, 0.030], 'nosePlateMount');
+    bridged.push({ part: 'handrails x4', gapMm: mm(0.737 - hood.max.z), bridge: `${pads} pads to the hood side` });
+    bridged.push({ part: 'nose badge plate', gapMm: mm(nose.min.x - -2.041), bridge: 'nosePlateMount back to the nose' });
+  }
+  scene.updateMatrixWorld(true);
+  report.nothingHangsInTheAir = {
+    why: 'the sale gate now reads merged meshes as connected components, and it found the front bumper, both rear fenders and the implement toolbar attached to nothing',
+    bridged,
+  };
+}
+
 /* -------------------------------------------------------- 5. invisible proxies out */
 report.hiddenProxies = dropHiddenProxies(scene);
 
 /* ---------------------------------------------------------------- 6. ground contact */
+/* The floor is the circle the lugs roll on, not the box of the rest pose: a lugged tyre
+ * standing on a flat between two lugs measures 2.8 mm high and then reaches the floor a
+ * few degrees later. Dropping the root onto the rest box buried the tyre 2.8 mm. */
 const root = node(scene, 'tractorRoot');
-const beforeGround = exactBox(scene).min.y;
+const beforeGround = Math.min(exactBox(scene).min.y, ...rollingFloor);
 root.position.y -= beforeGround;
 scene.updateMatrixWorld(true);
 report.ground = { beforeMm: mm(beforeGround), afterMm: mm(exactBox(scene).min.y) };
+
+/* ---------------------------------------------- 6a. the implement reaches the ground */
+{
+  const seated = [];
+  for (const side of ['Left', 'Right']) {
+    const pivot = node(scene, `pivotgaugeWheel${side}`);
+    const before = exactBox(pivot).min.y;
+    const seat = seatWheelOnItsLugs(scene, node(scene, `gaugeWheel${side}`), pivot);
+    seated.push({ node: pivot.name, wasMm: mm(before), lugRadiusMm: seat.lugRadiusMm, axleYmm: seat.axleNowMm });
+  }
+  {
+    const part = node(scene, 'tineGroup');
+    const before = exactBox(part).min.y;
+    part.position.y -= before;
+    scene.updateMatrixWorld(true);
+    seated.push({ node: 'tineGroup', wasMm: mm(before), nowMm: mm(exactBox(part).min.y) });
+  }
+  report.implementGroundContact = {
+    why: 'the part that sets working depth and the blades that cut the soil were both in the air',
+    parts: seated,
+  };
+}
+
+/* -------------------------------------------- 6b. one ground speed for every wheel */
+/* Measured on this file after seating: the ground is y = 0, so a wheel that touches it
+ * has a rolling radius equal to the height of its own pivot. The rear pair sets the
+ * distance (3 whole turns, the count the clip already had); every other rolling part is
+ * given the angle that covers the SAME distance, snapped to its own lug spacing so the
+ * loop still closes on an identical frame. */
+{
+  const steer = clips.find((c) => c.name === 'steer');
+  if (!steer) throw new Error('the `steer` clip is gone');
+  const rolling = ['wheelFrontLeft', 'wheelFrontRight', 'wheelRearLeft', 'wheelRearRight', 'gaugeWheelLeft', 'gaugeWheelRight'];
+  const wheelData = {};
+  for (const name of rolling) {
+    const wheel = node(scene, name);
+    let lugs = 0;
+    wheel.traverse((n) => { if (/lug/i.test(n.name || '')) lugs += n.isInstancedMesh ? n.count : 1; });
+    wheelData[name] = {
+      radiusMm: mm(new THREE.Vector3().setFromMatrixPosition(wheel.matrixWorld).y),
+      lugs,
+      stepDeg: lugs > 2 ? 360 / lugs : 0.5,
+      bottomYmm: mm(exactBox(wheel).min.y),
+    };
+  }
+  const REAR_TURNS = 3;
+  const rRear = wheelData.wheelRearLeft.radiusMm / 1000;
+  const table = { drive: {}, steer: {} };
+  for (const clip of [drive, steer]) {
+    const scale = clip.duration / drive.duration;
+    const distance = REAR_TURNS * 2 * Math.PI * rRear * scale;
+    const keys = Math.max(33, Math.round(66 * scale) + 1);
+    const times = Array.from({ length: keys }, (_, i) => (i / (keys - 1)) * clip.duration);
+    for (const name of rolling) {
+      const d = wheelData[name];
+      const idealDeg = (distance / (d.radiusMm / 1000)) * (180 / Math.PI);
+      const degrees = Math.round(idealDeg / d.stepDeg) * d.stepDeg;
+      const total = THREE.MathUtils.degToRad(degrees);
+      setTrack(clip, name, 'quaternion', quatTrack(name, times,
+        times.map((t) => [0, 0, -(t / clip.duration) * total])));
+      table[clip.name][name] = {
+        degrees: +degrees.toFixed(2),
+        wasDegrees: null,
+        radiusMm: d.radiusMm, lugs: d.lugs,
+        travelM: +((degrees * Math.PI / 180) * (d.radiusMm / 1000)).toFixed(3),
+        speedMs: +(((degrees * Math.PI / 180) * (d.radiusMm / 1000)) / clip.duration).toFixed(3),
+        maxStepDeg: +(degrees / (keys - 1)).toFixed(1),
+      };
+    }
+    table[clip.name].groundDistanceM = +distance.toFixed(3);
+  }
+  table.drive.wheelFrontLeft.wasDegrees = 1440;
+  table.drive.wheelRearLeft.wasDegrees = 1080;
+  table.drive.gaugeWheelLeft.wasDegrees = 3600;
+  report.rollingSpeed = {
+    why: 'the front wheels covered 11.259 m while the rears covered 16.199 m in the same clip: a 31.0 % slip that no tractor has',
+    setBy: `wheelRear* at ${REAR_TURNS} whole turns`,
+    perClip: table,
+  };
+
+  /* the handwheel */
+  const track = steer.tracks.find((t) => t.name === 'steeringWheel.quaternion');
+  if (!track) throw new Error('steeringWheel has no track in `steer`');
+  const times = Array.from(track.times);
+  const ys = [];
+  for (let i = 0; i < times.length; i += 1) {
+    const q = new THREE.Quaternion(track.values[i * 4], track.values[i * 4 + 1], track.values[i * 4 + 2], track.values[i * 4 + 3]);
+    ys.push(new THREE.Euler().setFromQuaternion(q, 'XYZ').y);
+  }
+  const wasMax = ys.reduce((t, y) => Math.max(t, Math.abs(y)), 0);
+  const WANT = THREE.MathUtils.degToRad(200);
+  const factor = WANT / wasMax;
+  setTrack(steer, 'steeringWheel', 'quaternion', quatTrack('steeringWheel', times, ys.map((y) => [0, y * factor, 0])));
+  let lock = 0;
+  for (const side of ['Left', 'Right']) {
+    const pivotTrack = steer.tracks.find((t) => t.name === `steeringPivotwheelFront${side}.quaternion`);
+    for (let i = 0; i < pivotTrack.times.length; i += 1) {
+      const q = new THREE.Quaternion(pivotTrack.values[i * 4], pivotTrack.values[i * 4 + 1], pivotTrack.values[i * 4 + 2], pivotTrack.values[i * 4 + 3]);
+      lock = Math.max(lock, Math.abs(new THREE.Euler().setFromQuaternion(q, 'XYZ').y));
+    }
+  }
+  const stepDeg = (200 * 2) / (times.filter((t, i) => i > 0 && Math.abs(ys[i] - ys[i - 1]) > 1e-6).length || 1);
+  report.steeringRatio = {
+    why: 'a tractor whose handwheel goes lock to lock in 78 degrees is a go-kart; real ones are 15-25 turns of ratio',
+    handwheelWasDeg: +(wasMax * 180 / Math.PI).toFixed(1),
+    handwheelNowDeg: 200,
+    innerWheelLockDeg: +(lock * 180 / Math.PI).toFixed(1),
+    ratioWas: +((wasMax / lock)).toFixed(1),
+    ratioNow: +((WANT / lock)).toFixed(1),
+    chose: 'turned the handwheel up rather than reducing the wheel lock, because the wheel lock is already Ackermann-correct (inner 12.4 deg, outer 9.5 deg)',
+    largestKeyStepDeg: +stepDeg.toFixed(1),
+  };
+}
 
 /* -------------------------------------------------------------------- 7. draw calls */
 /* SKIP_MERGE=1 leaves every part under its authored name, for gate runs that need to say WHICH part touched which. */

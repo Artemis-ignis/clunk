@@ -442,3 +442,237 @@ export function boxOverlap(a, b) {
   const dz = Math.min(p.max.z, q.max.z) - Math.max(p.min.z, q.min.z);
   return dx > 0 && dy > 0 && dz > 0 ? Math.min(dx, dy, dz) : 0;
 }
+
+/* ------------------------------------------- axle joints (2026-09-05, wheel wave)
+ * The 2026-09-05 mechanism audit found every driven wheel in this catalogue standing
+ * 20-21 mm clear of the nearest axle metal: the hub was a disc with air behind it. A
+ * wheel that is not on an axle reads as a wheel that fell off, and the sale gate could
+ * not see it because the parts had been merged into one metal mesh per material.
+ *
+ * These three build the joint a wheel actually has, off the wheel's own vertices:
+ *   `faceRing`  reads the ring of vertices on the inboard face of a hub;
+ *   `addWorldMesh` puts a world-space triangle soup under any parent;
+ *   `axleHubJoint` welds a flange to that exact ring, butts it against the hub face,
+ *                  drives a spigot into the hub bore and runs a shaft back to the axle.
+ * Because the flange rim reuses the hub's OWN vertex positions, the hub-to-axle gap is
+ * 0.0 mm by construction rather than by nudging, and the two faces that meet are
+ * opposite-facing, so the butt joint is not a z-fight.
+ */
+
+/** The ring of world-space vertices on the extreme face of `object` along world axis `k` (0/1/2). */
+export function faceRing(object, k, sign, tolerance = 0.0006) {
+  object.updateMatrixWorld(true);
+  const points = [];
+  const v = new THREE.Vector3();
+  object.traverse((n) => {
+    if (!n.isMesh) return;
+    const pos = n.geometry.getAttribute('position');
+    for (let i = 0; i < pos.count; i += 1) points.push(v.fromBufferAttribute(pos, i).applyMatrix4(n.matrixWorld).clone());
+  });
+  if (!points.length) throw new Error('faceRing: no vertices');
+  const extreme = sign > 0
+    ? points.reduce((t, p) => Math.max(t, p.getComponent(k)), -Infinity)
+    : points.reduce((t, p) => Math.min(t, p.getComponent(k)), Infinity);
+  const onFace = points.filter((p) => Math.abs(p.getComponent(k) - extreme) <= tolerance);
+  const a = (k + 1) % 3;
+  const b = (k + 2) % 3;
+  /* The centre has to come from the extent of the face, not the mean of its vertices: a
+     cylinder duplicates its seam vertex, and on a 16-sided hub that one repeat drags the
+     mean 8 mm off the axle line — which would then build the whole joint eccentric. */
+  const centre = new THREE.Vector3();
+  const lo = [Infinity, Infinity, Infinity];
+  const hi = [-Infinity, -Infinity, -Infinity];
+  for (const p of onFace) for (let i = 0; i < 3; i += 1) { lo[i] = Math.min(lo[i], p.getComponent(i)); hi[i] = Math.max(hi[i], p.getComponent(i)); }
+  centre.set((lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2, (lo[2] + hi[2]) / 2);
+  centre.setComponent(k, extreme);
+  const radiusOf = (p) => Math.hypot(p.getComponent(a) - centre.getComponent(a), p.getComponent(b) - centre.getComponent(b));
+  const outer = onFace.reduce((t, p) => Math.max(t, radiusOf(p)), 0);
+  const seen = new Map();
+  for (const p of onFace) {
+    if (radiusOf(p) < outer * 0.92) continue;                       // the cap fan centre is not on the rim
+    const angle = Math.atan2(p.getComponent(b) - centre.getComponent(b), p.getComponent(a) - centre.getComponent(a));
+    const key = Math.round(angle * 1e4);
+    if (!seen.has(key)) seen.set(key, { angle, p });
+  }
+  const ring = [...seen.values()].sort((x, y) => x.angle - y.angle).map((e) => e.p);
+  if (ring.length < 3) throw new Error(`faceRing: found ${ring.length} rim points`);
+  const exact = new THREE.Vector3();
+  for (const p of ring) exact.add(p);
+  exact.multiplyScalar(1 / ring.length).setComponent(k, extreme);
+  return { ring, centre: exact, radius: outer, plane: extreme, axis: k };
+}
+
+/** Add a mesh from a flat array of world-space triangle vertices. */
+export function addWorldMesh(parent, positions, colour, material, name) {
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(Float32Array.from(positions), 3));
+  geometry.computeVertexNormals();
+  const c = colour instanceof THREE.Color ? colour : new THREE.Color(colour);
+  const arr = new Float32Array((positions.length / 3) * 3);
+  for (let i = 0; i < positions.length / 3; i += 1) { arr[i * 3] = c.r; arr[i * 3 + 1] = c.g; arr[i * 3 + 2] = c.b; }
+  geometry.setAttribute('color', new THREE.BufferAttribute(arr, 3));
+  parent.updateMatrixWorld(true);
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.name = name;
+  geometry.applyMatrix4(new THREE.Matrix4().copy(parent.matrixWorld).invert());
+  parent.add(mesh);
+  return mesh;
+}
+
+/**
+ * Flange + spigot + shaft between an axle and a wheel hub, measured off the hub.
+ *
+ *   parent      the node the joint belongs to (the STATIC side: an axle, not the wheel)
+ *   hub         the wheel's hub mesh/group; its inboard face ring becomes the flange rim
+ *   k, sign     the hub's axis: world component index and the outboard direction
+ *   flange      thickness of the flange plate, metres
+ *   spigot      { radius, depth } of the pin that runs on into the hub bore
+ *   shaft       { radius, to } a shaft from the flange back to world coordinate `to` on axis k
+ */
+export function axleHubJoint(parent, hub, k, sign, { flange = 0.035, spigot, shaft, material, colour, name }) {
+  const face = faceRing(hub, k, -sign);
+  const ring = face.ring;
+  const n = ring.length;
+  const back = ring.map((p) => { const q = p.clone(); q.setComponent(k, face.plane - sign * flange); return q; });
+  const backCentre = face.centre.clone();
+  backCentre.setComponent(k, face.plane - sign * flange);
+  const tri = [];
+  const push = (...ps) => { for (const p of ps) tri.push(p.x, p.y, p.z); };
+  for (let i = 0; i < n; i += 1) {
+    const j = (i + 1) % n;
+    if (sign > 0) { push(ring[i], back[i], back[j]); push(ring[i], back[j], ring[j]); push(backCentre, back[j], back[i]); push(face.centre, ring[j], ring[i]); }
+    else { push(ring[i], back[j], back[i]); push(ring[i], ring[j], back[j]); push(backCentre, back[i], back[j]); push(face.centre, ring[i], ring[j]); }
+  }
+  const parts = [addWorldMesh(parent, tri, colour, material, `${name}Flange`)];
+  const a = (k + 1) % 3;
+  const b = (k + 2) % 3;
+  const at = (c, along, radius, angle) => {
+    const p = new THREE.Vector3();
+    p.setComponent(k, along);
+    p.setComponent(a, c.getComponent(a) + Math.cos(angle) * radius);
+    p.setComponent(b, c.getComponent(b) + Math.sin(angle) * radius);
+    return p;
+  };
+  const tube = (radius, from, to, tubeName) => {
+    const seg = 16;
+    const t = [];
+    for (let i = 0; i < seg; i += 1) {
+      const t0 = (i / seg) * Math.PI * 2;
+      const t1 = ((i + 1) / seg) * Math.PI * 2;
+      const f0 = at(face.centre, from, radius, t0); const f1 = at(face.centre, from, radius, t1);
+      const b0 = at(face.centre, to, radius, t0); const b1 = at(face.centre, to, radius, t1);
+      const c0 = at(face.centre, from, 0, 0); const c1 = at(face.centre, to, 0, 0);
+      const forward = (to - from) * sign > 0;
+      if (forward) { t.push(f0, b0, b1, f0, b1, f1, c0, f1, f0, c1, b0, b1); }
+      else { t.push(f0, b1, b0, f0, f1, b1, c0, f0, f1, c1, b1, b0); }
+    }
+    const flat = [];
+    for (const p of t) flat.push(p.x, p.y, p.z);
+    return addWorldMesh(parent, flat, colour, material, tubeName);
+  };
+  if (spigot) parts.push(tube(spigot.radius, face.plane, face.plane + sign * spigot.depth, `${name}Spigot`));
+  if (shaft) parts.push(tube(shaft.radius, face.plane - sign * flange, shaft.to, `${name}Shaft`));
+  return { parts: parts.map((p) => p.name), ringPoints: n, hubFaceMm: mm(face.plane), hubRadiusMm: mm(face.radius), centreMm: face.centre.toArray().map(mm) };
+}
+
+/**
+ * The smallest turn about `axisWorld` that leaves the object looking identical, in degrees.
+ *
+ * A clip loops cleanly only if every rolling part comes back to a pose the eye cannot tell
+ * from where it started. For a lugged tyre that is the lug spacing; for a 16-sided cylinder
+ * it is 22.5 degrees; for a smooth disc it is any angle at all. Read off the object's own
+ * vertices: bin their angles about the axle, and the answer is 360 / (number of distinct
+ * angles), which is exactly the segment count the modeller used.
+ */
+export function angularSymmetryDeg(object, axisWorld, fallback = 0.5) {
+  object.updateMatrixWorld(true);
+  const origin = new THREE.Vector3().setFromMatrixPosition(object.matrixWorld);
+  const axis = new THREE.Vector3().fromArray(Array.isArray(axisWorld) ? axisWorld : axisWorld.toArray()).normalize();
+  const u = Math.abs(axis.x) < 0.9 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0);
+  const e1 = new THREE.Vector3().crossVectors(axis, u).normalize();
+  const e2 = new THREE.Vector3().crossVectors(axis, e1).normalize();
+  const angles = new Set();
+  const v = new THREE.Vector3();
+  let maxR = 0;
+  const points = [];
+  object.traverse((n) => {
+    if (!n.isMesh) return;
+    const pos = n.geometry.getAttribute('position');
+    for (let i = 0; i < pos.count; i += 1) {
+      v.fromBufferAttribute(pos, i).applyMatrix4(n.matrixWorld).sub(origin);
+      const p = new THREE.Vector2(v.dot(e1), v.dot(e2));
+      maxR = Math.max(maxR, p.length());
+      points.push(p);
+    }
+  });
+  for (const p of points) {
+    if (p.length() < maxR * 0.35) continue;                 // hub and cap centres carry no angle
+    angles.add(Math.round(((Math.atan2(p.y, p.x) * 180) / Math.PI + 360) % 360 * 4) / 4);
+  }
+  if (!angles.size) return fallback;
+  /* Counting the distinct angles is not the answer: a tyre with twelve lugs on a
+     forty-eight sided drum has sixty of them and is still only twelve-fold symmetric.
+     Test the rotation instead — the smallest turn that maps the angle set onto itself. */
+  const set = [...angles].sort((a, b) => a - b);
+  const has = (x) => {
+    const t = ((x % 360) + 360) % 360;
+    for (const a of set) if (Math.abs(a - t) < 0.3 || Math.abs(a - t - 360) < 0.3 || Math.abs(a - t + 360) < 0.3) return true;
+    return false;
+  };
+  for (let n = 360; n >= 1; n -= 1) {
+    const shift = 360 / n;
+    let ok = true;
+    for (const a of set) { if (!has(a + shift)) { ok = false; break; } }
+    if (ok) return Math.max(fallback, shift);
+  }
+  return 360;
+}
+
+/**
+ * Turn any closed mesh that is inside out the right way round.
+ *
+ * The 2026-09-05 rule GEO-INVERTED-WINDING caught one file in the catalogue this way: the
+ * seeder's four hopper bodies each enclose a NEGATIVE signed volume, so every face points
+ * into the bin. On an engine with back-face culling on a single-sided material the hopper
+ * disappears. Swapping two indices per triangle and negating the normals fixes it without
+ * touching a single vertex position.
+ */
+export function fixInvertedWinding(object) {
+  const flipped = [];
+  for (const mesh of meshes(object)) {
+    const g = mesh.geometry;
+    const pos = g.getAttribute('position');
+    const index = g.getIndex();
+    const count = index ? index.count : pos.count;
+    const a = new THREE.Vector3(); const b = new THREE.Vector3(); const c = new THREE.Vector3();
+    let volume = 0;
+    for (let i = 0; i < count; i += 3) {
+      const i0 = index ? index.getX(i) : i;
+      const i1 = index ? index.getX(i + 1) : i + 1;
+      const i2 = index ? index.getX(i + 2) : i + 2;
+      a.fromBufferAttribute(pos, i0); b.fromBufferAttribute(pos, i1); c.fromBufferAttribute(pos, i2);
+      volume += a.dot(new THREE.Vector3().crossVectors(b, c)) / 6;
+    }
+    if (volume >= 0) continue;
+    if (index) {
+      for (let i = 0; i < count; i += 3) { const t = index.getX(i + 1); index.setX(i + 1, index.getX(i + 2)); index.setX(i + 2, t); }
+      index.needsUpdate = true;
+    } else {
+      for (const name of Object.keys(g.attributes)) {
+        const at = g.getAttribute(name);
+        for (let i = 0; i < at.count; i += 3) {
+          for (let k = 0; k < at.itemSize; k += 1) {
+            const t = at.array[(i + 1) * at.itemSize + k];
+            at.array[(i + 1) * at.itemSize + k] = at.array[(i + 2) * at.itemSize + k];
+            at.array[(i + 2) * at.itemSize + k] = t;
+          }
+        }
+        at.needsUpdate = true;
+      }
+    }
+    const normal = g.getAttribute('normal');
+    if (normal) { for (let i = 0; i < normal.array.length; i += 1) normal.array[i] = -normal.array[i]; normal.needsUpdate = true; }
+    flipped.push({ mesh: mesh.name, signedVolumeM3: Math.round(volume * 1e9) / 1e9 });
+  }
+  return flipped;
+}

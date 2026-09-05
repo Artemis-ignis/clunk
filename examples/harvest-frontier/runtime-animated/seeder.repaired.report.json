@@ -1,5 +1,5 @@
 {
-  "input": "public\\market\\hf-seeder-compact\\seeder.compact.m1.glb",
+  "input": "examples\\harvest-frontier\\runtime-animated\\seeder.compact.m1.glb",
   "output": "examples\\harvest-frontier\\runtime-animated\\seeder.repaired.glb",
   "before": {
     "meshes": 410,
@@ -67,45 +67,9 @@
     ]
   },
   "rowUnitFloat": {
-    "cyclesPerClip": 2,
-    "rows": [
-      {
-        "node": "pivotrowUnit01",
-        "restQuaternionZ": -0.0275,
-        "degrees": [
-          0,
-          8
-        ],
-        "phaseOffsetTurns": 0
-      },
-      {
-        "node": "pivotrowUnit02",
-        "restQuaternionZ": -0.0275,
-        "degrees": [
-          0,
-          8
-        ],
-        "phaseOffsetTurns": 0.25
-      },
-      {
-        "node": "pivotrowUnit03",
-        "restQuaternionZ": -0.0275,
-        "degrees": [
-          0,
-          8
-        ],
-        "phaseOffsetTurns": 0.5
-      },
-      {
-        "node": "pivotrowUnit04",
-        "restQuaternionZ": -0.0275,
-        "degrees": [
-          0,
-          8
-        ],
-        "phaseOffsetTurns": 0.75
-      }
-    ]
+    "why": "a lift on a rigid row unit takes the openers, the gauge wheels and the closing wheels out of the ground together, which is what the audit measured over the whole sow clip",
+    "removedTracks": [],
+    "restPose": "down"
   },
   "hopperAgitator": {
     "why": "the seed meter shafts the clip already drives are inside the meter housing; from outside no hopper moved",
@@ -148,9 +112,539 @@
       }
     ]
   },
+  "seedMeterShaft": {
+    "why": "the shaft orbited a point 244 mm away and flew out of its own housing every clip",
+    "shafts": [
+      {
+        "node": "pivotseedMeterShaft01",
+        "eccentricityWasMm": 244.1,
+        "eccentricityNowMm": 0,
+        "shaftCentreMm": [
+          118.1,
+          1074.9,
+          -1200
+        ]
+      },
+      {
+        "node": "pivotseedMeterShaft02",
+        "eccentricityWasMm": 244.1,
+        "eccentricityNowMm": 0,
+        "shaftCentreMm": [
+          118.1,
+          1074.9,
+          -400
+        ]
+      },
+      {
+        "node": "pivotseedMeterShaft03",
+        "eccentricityWasMm": 244.1,
+        "eccentricityNowMm": 0,
+        "shaftCentreMm": [
+          118.1,
+          1074.9,
+          400
+        ]
+      },
+      {
+        "node": "pivotseedMeterShaft04",
+        "eccentricityWasMm": 244.1,
+        "eccentricityNowMm": 0,
+        "shaftCentreMm": [
+          118.1,
+          1074.9,
+          1200
+        ]
+      }
+    ]
+  },
+  "groundEngagingTools": {
+    "why": "the gauge wheel that sets sowing depth ran 111.2 mm above the floor and the closing wheels 16.9 mm; a depth wheel in the air sets no depth",
+    "seated": [
+      {
+        "node": "gaugeWheel01",
+        "movedBy": "pivotgaugeWheel01",
+        "bottomWasMm": 111.4,
+        "radiusMm": 190.8,
+        "axleYmm": 190.8
+      },
+      {
+        "node": "closingWheel01Left",
+        "movedBy": "pivotclosingWheel01Left",
+        "bottomWasMm": 17.2,
+        "radiusMm": 164,
+        "axleYmm": 164
+      },
+      {
+        "node": "openerDisc01Left",
+        "movedBy": "openerDisc01Left",
+        "bottomWasMm": 4.6,
+        "radiusMm": 255,
+        "axleYmm": 255
+      },
+      {
+        "node": "closingWheel01Right",
+        "movedBy": "pivotclosingWheel01Right",
+        "bottomWasMm": 17.2,
+        "radiusMm": 164,
+        "axleYmm": 164
+      },
+      {
+        "node": "openerDisc01Right",
+        "movedBy": "openerDisc01Right",
+        "bottomWasMm": 0.2,
+        "radiusMm": 255,
+        "axleYmm": 255
+      },
+      {
+        "node": "gaugeWheel02",
+        "movedBy": "pivotgaugeWheel02",
+        "bottomWasMm": 111.4,
+        "radiusMm": 190.8,
+        "axleYmm": 190.8
+      },
+      {
+        "node": "closingWheel02Left",
+        "movedBy": "pivotclosingWheel02Left",
+        "bottomWasMm": 17.2,
+        "radiusMm": 164,
+        "axleYmm": 164
+      },
+      {
+        "node": "openerDisc02Left",
+        "movedBy": "openerDisc02Left",
+        "bottomWasMm": 4.6,
+        "radiusMm": 255,
+        "axleYmm": 255
+      },
+      {
+        "node": "closingWheel02Right",
+        "movedBy": "pivotclosingWheel02Right",
+        "bottomWasMm": 17.2,
+        "radiusMm": 164,
+        "axleYmm": 164
+      },
+      {
+        "node": "openerDisc02Right",
+        "movedBy": "openerDisc02Right",
+        "bottomWasMm": 0.2,
+        "radiusMm": 255,
+        "axleYmm": 255
+      },
+      {
+        "node": "gaugeWheel03",
+        "movedBy": "pivotgaugeWheel03",
+        "bottomWasMm": 111.4,
+        "radiusMm": 190.8,
+        "axleYmm": 190.8
+      },
+      {
+        "node": "closingWheel03Left",
+        "movedBy": "pivotclosingWheel03Left",
+        "bottomWasMm": 17.2,
+        "radiusMm": 164,
+        "axleYmm": 164
+      },
+      {
+        "node": "openerDisc03Left",
+        "movedBy": "openerDisc03Left",
+        "bottomWasMm": 4.6,
+        "radiusMm": 255,
+        "axleYmm": 255
+      },
+      {
+        "node": "closingWheel03Right",
+        "movedBy": "pivotclosingWheel03Right",
+        "bottomWasMm": 17.2,
+        "radiusMm": 164,
+        "axleYmm": 164
+      },
+      {
+        "node": "openerDisc03Right",
+        "movedBy": "openerDisc03Right",
+        "bottomWasMm": 0.2,
+        "radiusMm": 255,
+        "axleYmm": 255
+      },
+      {
+        "node": "gaugeWheel04",
+        "movedBy": "pivotgaugeWheel04",
+        "bottomWasMm": 111.4,
+        "radiusMm": 190.8,
+        "axleYmm": 190.8
+      },
+      {
+        "node": "closingWheel04Left",
+        "movedBy": "pivotclosingWheel04Left",
+        "bottomWasMm": 17.2,
+        "radiusMm": 164,
+        "axleYmm": 164
+      },
+      {
+        "node": "openerDisc04Left",
+        "movedBy": "openerDisc04Left",
+        "bottomWasMm": 4.6,
+        "radiusMm": 255,
+        "axleYmm": 255
+      },
+      {
+        "node": "closingWheel04Right",
+        "movedBy": "pivotclosingWheel04Right",
+        "bottomWasMm": 17.2,
+        "radiusMm": 164,
+        "axleYmm": 164
+      },
+      {
+        "node": "openerDisc04Right",
+        "movedBy": "openerDisc04Right",
+        "bottomWasMm": 0.2,
+        "radiusMm": 255,
+        "axleYmm": 255
+      }
+    ]
+  },
+  "seedTubeCollars": {
+    "why": "the metering housing let seed out at y 985.4 and the tube started 31 mm lower, so the seed left the machine through air",
+    "collars": [
+      {
+        "row": "01",
+        "gapMm": 88,
+        "part": "seedTubeCollar01",
+        "added": true
+      },
+      {
+        "row": "02",
+        "gapMm": 88,
+        "part": "seedTubeCollar02",
+        "added": true
+      },
+      {
+        "row": "03",
+        "gapMm": 88,
+        "part": "seedTubeCollar03",
+        "added": true
+      },
+      {
+        "row": "04",
+        "gapMm": 88,
+        "part": "seedTubeCollar04",
+        "added": true
+      }
+    ]
+  },
+  "hopperFittings": {
+    "why": "eight bolt heads and four inspection windows read as separate floating groups: they stood off the hopper wall they are bolted through",
+    "parts": [
+      {
+        "part": "hopperInspectionWindow01",
+        "wallXmm": -234.7,
+        "wasClearOfWallMm": 71.3,
+        "movedMm": 83.3
+      },
+      {
+        "part": "hopperBolt01-1",
+        "wallXmm": -284,
+        "wasClearOfWallMm": 28.5,
+        "movedMm": 40.5
+      },
+      {
+        "part": "hopperBolt01-2",
+        "wallXmm": -284,
+        "wasClearOfWallMm": 28.5,
+        "movedMm": 40.5
+      },
+      {
+        "part": "hopperInspectionWindow02",
+        "wallXmm": -234.7,
+        "wasClearOfWallMm": 71.3,
+        "movedMm": 83.3
+      },
+      {
+        "part": "hopperBolt02-1",
+        "wallXmm": -284,
+        "wasClearOfWallMm": 28.5,
+        "movedMm": 40.5
+      },
+      {
+        "part": "hopperBolt02-2",
+        "wallXmm": -284,
+        "wasClearOfWallMm": 28.5,
+        "movedMm": 40.5
+      },
+      {
+        "part": "hopperInspectionWindow03",
+        "wallXmm": -234.7,
+        "wasClearOfWallMm": 71.3,
+        "movedMm": 83.3
+      },
+      {
+        "part": "hopperBolt03-1",
+        "wallXmm": -284,
+        "wasClearOfWallMm": 28.5,
+        "movedMm": 40.5
+      },
+      {
+        "part": "hopperBolt03-2",
+        "wallXmm": -284,
+        "wasClearOfWallMm": 28.5,
+        "movedMm": 40.5
+      },
+      {
+        "part": "hopperInspectionWindow04",
+        "wallXmm": -234.7,
+        "wasClearOfWallMm": 71.3,
+        "movedMm": 83.3
+      },
+      {
+        "part": "hopperBolt04-1",
+        "wallXmm": -284,
+        "wasClearOfWallMm": 28.5,
+        "movedMm": 40.5
+      },
+      {
+        "part": "hopperBolt04-2",
+        "wallXmm": -284,
+        "wasClearOfWallMm": 28.5,
+        "movedMm": 40.5
+      }
+    ]
+  },
+  "wheelSpokes": {
+    "why": "the render measured 0.3 % of silhouette change over the whole sow clip: everything that moves on this machine is a smooth circle",
+    "wheels": [
+      {
+        "wheel": "gaugeWheel01",
+        "radiusMm": 189.4,
+        "spokes": 3,
+        "colour": "#141612"
+      },
+      {
+        "wheel": "closingWheel01Left",
+        "radiusMm": 162.8,
+        "spokes": 3,
+        "colour": "#141612"
+      },
+      {
+        "wheel": "closingWheel01Right",
+        "radiusMm": 162.8,
+        "spokes": 3,
+        "colour": "#141612"
+      },
+      {
+        "wheel": "gaugeWheel02",
+        "radiusMm": 189.4,
+        "spokes": 3,
+        "colour": "#141612"
+      },
+      {
+        "wheel": "closingWheel02Left",
+        "radiusMm": 162.8,
+        "spokes": 3,
+        "colour": "#141612"
+      },
+      {
+        "wheel": "closingWheel02Right",
+        "radiusMm": 162.8,
+        "spokes": 3,
+        "colour": "#141612"
+      },
+      {
+        "wheel": "gaugeWheel03",
+        "radiusMm": 189.4,
+        "spokes": 3,
+        "colour": "#141612"
+      },
+      {
+        "wheel": "closingWheel03Left",
+        "radiusMm": 162.8,
+        "spokes": 3,
+        "colour": "#141612"
+      },
+      {
+        "wheel": "closingWheel03Right",
+        "radiusMm": 162.8,
+        "spokes": 3,
+        "colour": "#141612"
+      },
+      {
+        "wheel": "gaugeWheel04",
+        "radiusMm": 189.4,
+        "spokes": 3,
+        "colour": "#141612"
+      },
+      {
+        "wheel": "closingWheel04Left",
+        "radiusMm": 162.8,
+        "spokes": 3,
+        "colour": "#141612"
+      },
+      {
+        "wheel": "closingWheel04Right",
+        "radiusMm": 162.8,
+        "spokes": 3,
+        "colour": "#141612"
+      }
+    ]
+  },
+  "invertedWinding": {
+    "why": "all four hopper bodies enclose a negative signed volume, so on an engine that culls back faces the bins vanish",
+    "flipped": [
+      {
+        "mesh": "hopperBody01",
+        "signedVolumeM3": -2.706448246
+      }
+    ]
+  },
   "ground": {
-    "beforeMm": 0.2,
-    "afterMm": 0
+    "beforeMm": 0,
+    "afterMm": 0.4
+  },
+  "rollingSpeed": {
+    "why": "the opener discs implied 6.41 m/s, the gauge wheels 6.13 and the closing wheels 5.86 — 9.4 % of slip between parts that all roll on the same ground",
+    "setBy": "openerDisc*Right at 7 whole turns",
+    "groundDistanceM": 11.215,
+    "spreadPercent": 0.28,
+    "perPart": {
+      "gaugeWheel01": {
+        "degrees": 3360,
+        "radiusMm": 191,
+        "segmentDeg": 12,
+        "travelM": 11.201,
+        "speedMs": 6.411
+      },
+      "openerDisc01Left": {
+        "degrees": 2520,
+        "radiusMm": 255,
+        "segmentDeg": 7.5,
+        "travelM": 11.215,
+        "speedMs": 6.42
+      },
+      "closingWheel01Left": {
+        "degrees": 3924,
+        "radiusMm": 164,
+        "segmentDeg": 12,
+        "travelM": 11.232,
+        "speedMs": 6.429
+      },
+      "openerDisc01Right": {
+        "degrees": 2520,
+        "radiusMm": 255,
+        "segmentDeg": 7.5,
+        "travelM": 11.215,
+        "speedMs": 6.42
+      },
+      "closingWheel01Right": {
+        "degrees": 3924,
+        "radiusMm": 164,
+        "segmentDeg": 12,
+        "travelM": 11.232,
+        "speedMs": 6.429
+      },
+      "gaugeWheel02": {
+        "degrees": 3360,
+        "radiusMm": 191,
+        "segmentDeg": 12,
+        "travelM": 11.201,
+        "speedMs": 6.411
+      },
+      "openerDisc02Left": {
+        "degrees": 2520,
+        "radiusMm": 255,
+        "segmentDeg": 7.5,
+        "travelM": 11.215,
+        "speedMs": 6.42
+      },
+      "closingWheel02Left": {
+        "degrees": 3924,
+        "radiusMm": 164,
+        "segmentDeg": 12,
+        "travelM": 11.232,
+        "speedMs": 6.429
+      },
+      "openerDisc02Right": {
+        "degrees": 2520,
+        "radiusMm": 255,
+        "segmentDeg": 7.5,
+        "travelM": 11.215,
+        "speedMs": 6.42
+      },
+      "closingWheel02Right": {
+        "degrees": 3924,
+        "radiusMm": 164,
+        "segmentDeg": 12,
+        "travelM": 11.232,
+        "speedMs": 6.429
+      },
+      "gaugeWheel03": {
+        "degrees": 3360,
+        "radiusMm": 191,
+        "segmentDeg": 12,
+        "travelM": 11.201,
+        "speedMs": 6.411
+      },
+      "openerDisc03Left": {
+        "degrees": 2520,
+        "radiusMm": 255,
+        "segmentDeg": 7.5,
+        "travelM": 11.215,
+        "speedMs": 6.42
+      },
+      "closingWheel03Left": {
+        "degrees": 3924,
+        "radiusMm": 164,
+        "segmentDeg": 12,
+        "travelM": 11.232,
+        "speedMs": 6.429
+      },
+      "openerDisc03Right": {
+        "degrees": 2520,
+        "radiusMm": 255,
+        "segmentDeg": 7.5,
+        "travelM": 11.215,
+        "speedMs": 6.42
+      },
+      "closingWheel03Right": {
+        "degrees": 3924,
+        "radiusMm": 164,
+        "segmentDeg": 12,
+        "travelM": 11.232,
+        "speedMs": 6.429
+      },
+      "gaugeWheel04": {
+        "degrees": 3360,
+        "radiusMm": 191,
+        "segmentDeg": 12,
+        "travelM": 11.201,
+        "speedMs": 6.411
+      },
+      "openerDisc04Left": {
+        "degrees": 2520,
+        "radiusMm": 255,
+        "segmentDeg": 7.5,
+        "travelM": 11.215,
+        "speedMs": 6.42
+      },
+      "closingWheel04Left": {
+        "degrees": 3924,
+        "radiusMm": 164,
+        "segmentDeg": 12,
+        "travelM": 11.232,
+        "speedMs": 6.429
+      },
+      "openerDisc04Right": {
+        "degrees": 2520,
+        "radiusMm": 255,
+        "segmentDeg": 7.5,
+        "travelM": 11.215,
+        "speedMs": 6.42
+      },
+      "closingWheel04Right": {
+        "degrees": 3924,
+        "radiusMm": 164,
+        "segmentDeg": 12,
+        "travelM": 11.232,
+        "speedMs": 6.429
+      }
+    }
   },
   "bakedInstances": [],
   "merge": [
@@ -199,6 +693,214 @@
         "hopperOutlet04",
         "hopperLid04",
         "hopperHandle04",
+        "seedMeterHousing01",
+        "seedMeterFace01",
+        "seedMeterServiceFace01",
+        "seedMeterServiceCap01",
+        "parallelLink01Upper",
+        "parallelLink01Lower",
+        "parallelPin01-1",
+        "parallelPin01-2",
+        "parallelPin01-3",
+        "parallelPin01-4",
+        "rowSupportArm01Left",
+        "rowSupportArm01Right",
+        "rowGuideArm01Left",
+        "rowGuideArm01Right",
+        "rowFabricationRail01",
+        "rowDetailLinkPlate01",
+        "rowFastener01",
+        "rowClosingBridge01",
+        "rowCarrierPlate01",
+        "rowCarrierCrossbar01",
+        "closingCarrierPlate01",
+        "rowCarrierFastener01",
+        "rowGuard01",
+        "rowHose01Ribs",
+        "seedTubeRib01-1",
+        "seedTubeRib01-2",
+        "seedTubeRib01-3",
+        "meterGuard01",
+        "openerCarrier01",
+        "openerCarrierBolt01-1",
+        "openerCarrierBolt01-2",
+        "gaugeArm01",
+        "closingArm01Left",
+        "closingArm01Right",
+        "rowDepthLeverStem01",
+        "rowDepthLeverKnob01",
+        "rowSpring01",
+        "rowSpringCoil01-1",
+        "rowSpringCoil01-2",
+        "rowSpringCoil01-3",
+        "rowSpringCoil01-4",
+        "rowSpringCoil01-5",
+        "rowSpringCoil01-6",
+        "rowSpringCoil01-7",
+        "rowSpringVisible01",
+        "rowSpringVisibleCoil01-1",
+        "rowSpringVisibleCoil01-2",
+        "rowSpringVisibleCoil01-3",
+        "rowSpringVisibleCoil01-4",
+        "rowSpringVisibleCoil01-5",
+        "rowSpringVisibleCoil01-6",
+        "rowSpringVisibleCoil01-7",
+        "seedMeterHousing02",
+        "seedMeterFace02",
+        "seedMeterServiceFace02",
+        "seedMeterServiceCap02",
+        "parallelLink02Upper",
+        "parallelLink02Lower",
+        "parallelPin02-1",
+        "parallelPin02-2",
+        "parallelPin02-3",
+        "parallelPin02-4",
+        "rowSupportArm02Left",
+        "rowSupportArm02Right",
+        "rowGuideArm02Left",
+        "rowGuideArm02Right",
+        "rowFabricationRail02",
+        "rowDetailLinkPlate02",
+        "rowFastener02",
+        "rowClosingBridge02",
+        "rowCarrierPlate02",
+        "rowCarrierCrossbar02",
+        "closingCarrierPlate02",
+        "rowCarrierFastener02",
+        "rowGuard02",
+        "rowHose02Ribs",
+        "seedTubeRib02-1",
+        "seedTubeRib02-2",
+        "seedTubeRib02-3",
+        "meterGuard02",
+        "openerCarrier02",
+        "openerCarrierBolt02-1",
+        "openerCarrierBolt02-2",
+        "gaugeArm02",
+        "closingArm02Left",
+        "closingArm02Right",
+        "rowDepthLeverStem02",
+        "rowDepthLeverKnob02",
+        "rowSpring02",
+        "rowSpringCoil02-1",
+        "rowSpringCoil02-2",
+        "rowSpringCoil02-3",
+        "rowSpringCoil02-4",
+        "rowSpringCoil02-5",
+        "rowSpringCoil02-6",
+        "rowSpringCoil02-7",
+        "rowSpringVisible02",
+        "rowSpringVisibleCoil02-1",
+        "rowSpringVisibleCoil02-2",
+        "rowSpringVisibleCoil02-3",
+        "rowSpringVisibleCoil02-4",
+        "rowSpringVisibleCoil02-5",
+        "rowSpringVisibleCoil02-6",
+        "rowSpringVisibleCoil02-7",
+        "seedMeterHousing03",
+        "seedMeterFace03",
+        "seedMeterServiceFace03",
+        "seedMeterServiceCap03",
+        "parallelLink03Upper",
+        "parallelLink03Lower",
+        "parallelPin03-1",
+        "parallelPin03-2",
+        "parallelPin03-3",
+        "parallelPin03-4",
+        "rowSupportArm03Left",
+        "rowSupportArm03Right",
+        "rowGuideArm03Left",
+        "rowGuideArm03Right",
+        "rowFabricationRail03",
+        "rowDetailLinkPlate03",
+        "rowFastener03",
+        "rowClosingBridge03",
+        "rowCarrierPlate03",
+        "rowCarrierCrossbar03",
+        "closingCarrierPlate03",
+        "rowCarrierFastener03",
+        "rowGuard03",
+        "rowHose03Ribs",
+        "seedTubeRib03-1",
+        "seedTubeRib03-2",
+        "seedTubeRib03-3",
+        "meterGuard03",
+        "openerCarrier03",
+        "openerCarrierBolt03-1",
+        "openerCarrierBolt03-2",
+        "gaugeArm03",
+        "closingArm03Left",
+        "closingArm03Right",
+        "rowDepthLeverStem03",
+        "rowDepthLeverKnob03",
+        "rowSpring03",
+        "rowSpringCoil03-1",
+        "rowSpringCoil03-2",
+        "rowSpringCoil03-3",
+        "rowSpringCoil03-4",
+        "rowSpringCoil03-5",
+        "rowSpringCoil03-6",
+        "rowSpringCoil03-7",
+        "rowSpringVisible03",
+        "rowSpringVisibleCoil03-1",
+        "rowSpringVisibleCoil03-2",
+        "rowSpringVisibleCoil03-3",
+        "rowSpringVisibleCoil03-4",
+        "rowSpringVisibleCoil03-5",
+        "rowSpringVisibleCoil03-6",
+        "rowSpringVisibleCoil03-7",
+        "seedMeterHousing04",
+        "seedMeterFace04",
+        "seedMeterServiceFace04",
+        "seedMeterServiceCap04",
+        "parallelLink04Upper",
+        "parallelLink04Lower",
+        "parallelPin04-1",
+        "parallelPin04-2",
+        "parallelPin04-3",
+        "parallelPin04-4",
+        "rowSupportArm04Left",
+        "rowSupportArm04Right",
+        "rowGuideArm04Left",
+        "rowGuideArm04Right",
+        "rowFabricationRail04",
+        "rowDetailLinkPlate04",
+        "rowFastener04",
+        "rowClosingBridge04",
+        "rowCarrierPlate04",
+        "rowCarrierCrossbar04",
+        "closingCarrierPlate04",
+        "rowCarrierFastener04",
+        "rowGuard04",
+        "rowHose04Ribs",
+        "seedTubeRib04-1",
+        "seedTubeRib04-2",
+        "seedTubeRib04-3",
+        "meterGuard04",
+        "openerCarrier04",
+        "openerCarrierBolt04-1",
+        "openerCarrierBolt04-2",
+        "gaugeArm04",
+        "closingArm04Left",
+        "closingArm04Right",
+        "rowDepthLeverStem04",
+        "rowDepthLeverKnob04",
+        "rowSpring04",
+        "rowSpringCoil04-1",
+        "rowSpringCoil04-2",
+        "rowSpringCoil04-3",
+        "rowSpringCoil04-4",
+        "rowSpringCoil04-5",
+        "rowSpringCoil04-6",
+        "rowSpringCoil04-7",
+        "rowSpringVisible04",
+        "rowSpringVisibleCoil04-1",
+        "rowSpringVisibleCoil04-2",
+        "rowSpringVisibleCoil04-3",
+        "rowSpringVisibleCoil04-4",
+        "rowSpringVisibleCoil04-5",
+        "rowSpringVisibleCoil04-6",
+        "rowSpringVisibleCoil04-7",
         "hitchMastLeft",
         "hitchMastRight",
         "hitchMastSpine",
@@ -216,7 +918,7 @@
         "lowerLinkBarRight",
         "lowerLinkPinRight"
       ],
-      "triangles": 8370
+      "triangles": 38834
     },
     {
       "mesh": "body_matte",
@@ -293,74 +995,24 @@
       "triangles": 116
     },
     {
-      "mesh": "pivotrowUnit01_metal",
-      "anchor": "pivotrowUnit01",
-      "material": "seeder.fixed-palette-metal",
-      "absorbed": [
-        "seedMeterHousing01",
-        "seedMeterFace01",
-        "seedMeterServiceFace01",
-        "seedMeterServiceCap01",
-        "parallelLink01Upper",
-        "parallelLink01Lower",
-        "parallelPin01-1",
-        "parallelPin01-2",
-        "parallelPin01-3",
-        "parallelPin01-4",
-        "rowSupportArm01Left",
-        "rowSupportArm01Right",
-        "rowGuideArm01Left",
-        "rowGuideArm01Right",
-        "rowFabricationRail01",
-        "rowDetailLinkPlate01",
-        "rowFastener01",
-        "rowClosingBridge01",
-        "rowCarrierPlate01",
-        "rowCarrierCrossbar01",
-        "closingCarrierPlate01",
-        "rowCarrierFastener01",
-        "rowGuard01",
-        "rowHose01Ribs",
-        "seedTubeRib01-1",
-        "seedTubeRib01-2",
-        "seedTubeRib01-3",
-        "meterGuard01",
-        "openerCarrier01",
-        "openerCarrierBolt01-1",
-        "openerCarrierBolt01-2",
-        "gaugeArm01",
-        "closingArm01Left",
-        "closingArm01Right",
-        "rowDepthLeverStem01",
-        "rowDepthLeverKnob01",
-        "rowSpring01",
-        "rowSpringCoil01-1",
-        "rowSpringCoil01-2",
-        "rowSpringCoil01-3",
-        "rowSpringCoil01-4",
-        "rowSpringCoil01-5",
-        "rowSpringCoil01-6",
-        "rowSpringCoil01-7",
-        "rowSpringVisible01",
-        "rowSpringVisibleCoil01-1",
-        "rowSpringVisibleCoil01-2",
-        "rowSpringVisibleCoil01-3",
-        "rowSpringVisibleCoil01-4",
-        "rowSpringVisibleCoil01-5",
-        "rowSpringVisibleCoil01-6",
-        "rowSpringVisibleCoil01-7"
-      ],
-      "triangles": 7616
-    },
-    {
-      "mesh": "pivotrowUnit01_rubber",
-      "anchor": "pivotrowUnit01",
+      "mesh": "body_rubber",
+      "anchor": "(scene)",
       "material": "seeder.fixed-palette-rubber",
       "absorbed": [
         "rowHose01",
-        "seedTube01"
+        "seedTube01",
+        "seedTubeCollar01",
+        "rowHose02",
+        "seedTube02",
+        "seedTubeCollar02",
+        "rowHose03",
+        "seedTube03",
+        "seedTubeCollar03",
+        "rowHose04",
+        "seedTube04",
+        "seedTubeCollar04"
       ],
-      "triangles": 152
+      "triangles": 656
     },
     {
       "mesh": "openerDisc01Left_metal",
@@ -402,9 +1054,12 @@
       "material": "seeder.fixed-palette-rubber",
       "absorbed": [
         "tire",
-        "sidewall"
+        "sidewall",
+        "gaugeWheel01Spoke1",
+        "gaugeWheel01Spoke2",
+        "gaugeWheel01Spoke3"
       ],
-      "triangles": 336
+      "triangles": 372
     },
     {
       "mesh": "gaugeWheel01_metal",
@@ -422,9 +1077,12 @@
       "material": "seeder.fixed-palette-rubber",
       "absorbed": [
         "tire_1",
-        "sidewall_1"
+        "sidewall_1",
+        "closingWheel01LeftSpoke1",
+        "closingWheel01LeftSpoke2",
+        "closingWheel01LeftSpoke3"
       ],
-      "triangles": 336
+      "triangles": 372
     },
     {
       "mesh": "closingWheel01Left_metal",
@@ -442,9 +1100,12 @@
       "material": "seeder.fixed-palette-rubber",
       "absorbed": [
         "tire_2",
-        "sidewall_2"
+        "sidewall_2",
+        "closingWheel01RightSpoke1",
+        "closingWheel01RightSpoke2",
+        "closingWheel01RightSpoke3"
       ],
-      "triangles": 336
+      "triangles": 372
     },
     {
       "mesh": "closingWheel01Right_metal",
@@ -455,76 +1116,6 @@
         "hubCap_2"
       ],
       "triangles": 88
-    },
-    {
-      "mesh": "pivotrowUnit02_metal",
-      "anchor": "pivotrowUnit02",
-      "material": "seeder.fixed-palette-metal",
-      "absorbed": [
-        "seedMeterHousing02",
-        "seedMeterFace02",
-        "seedMeterServiceFace02",
-        "seedMeterServiceCap02",
-        "parallelLink02Upper",
-        "parallelLink02Lower",
-        "parallelPin02-1",
-        "parallelPin02-2",
-        "parallelPin02-3",
-        "parallelPin02-4",
-        "rowSupportArm02Left",
-        "rowSupportArm02Right",
-        "rowGuideArm02Left",
-        "rowGuideArm02Right",
-        "rowFabricationRail02",
-        "rowDetailLinkPlate02",
-        "rowFastener02",
-        "rowClosingBridge02",
-        "rowCarrierPlate02",
-        "rowCarrierCrossbar02",
-        "closingCarrierPlate02",
-        "rowCarrierFastener02",
-        "rowGuard02",
-        "rowHose02Ribs",
-        "seedTubeRib02-1",
-        "seedTubeRib02-2",
-        "seedTubeRib02-3",
-        "meterGuard02",
-        "openerCarrier02",
-        "openerCarrierBolt02-1",
-        "openerCarrierBolt02-2",
-        "gaugeArm02",
-        "closingArm02Left",
-        "closingArm02Right",
-        "rowDepthLeverStem02",
-        "rowDepthLeverKnob02",
-        "rowSpring02",
-        "rowSpringCoil02-1",
-        "rowSpringCoil02-2",
-        "rowSpringCoil02-3",
-        "rowSpringCoil02-4",
-        "rowSpringCoil02-5",
-        "rowSpringCoil02-6",
-        "rowSpringCoil02-7",
-        "rowSpringVisible02",
-        "rowSpringVisibleCoil02-1",
-        "rowSpringVisibleCoil02-2",
-        "rowSpringVisibleCoil02-3",
-        "rowSpringVisibleCoil02-4",
-        "rowSpringVisibleCoil02-5",
-        "rowSpringVisibleCoil02-6",
-        "rowSpringVisibleCoil02-7"
-      ],
-      "triangles": 7616
-    },
-    {
-      "mesh": "pivotrowUnit02_rubber",
-      "anchor": "pivotrowUnit02",
-      "material": "seeder.fixed-palette-rubber",
-      "absorbed": [
-        "rowHose02",
-        "seedTube02"
-      ],
-      "triangles": 152
     },
     {
       "mesh": "openerDisc02Left_metal",
@@ -566,9 +1157,12 @@
       "material": "seeder.fixed-palette-rubber",
       "absorbed": [
         "tire_3",
-        "sidewall_3"
+        "sidewall_3",
+        "gaugeWheel02Spoke1",
+        "gaugeWheel02Spoke2",
+        "gaugeWheel02Spoke3"
       ],
-      "triangles": 336
+      "triangles": 372
     },
     {
       "mesh": "gaugeWheel02_metal",
@@ -586,9 +1180,12 @@
       "material": "seeder.fixed-palette-rubber",
       "absorbed": [
         "tire_4",
-        "sidewall_4"
+        "sidewall_4",
+        "closingWheel02LeftSpoke1",
+        "closingWheel02LeftSpoke2",
+        "closingWheel02LeftSpoke3"
       ],
-      "triangles": 336
+      "triangles": 372
     },
     {
       "mesh": "closingWheel02Left_metal",
@@ -606,9 +1203,12 @@
       "material": "seeder.fixed-palette-rubber",
       "absorbed": [
         "tire_5",
-        "sidewall_5"
+        "sidewall_5",
+        "closingWheel02RightSpoke1",
+        "closingWheel02RightSpoke2",
+        "closingWheel02RightSpoke3"
       ],
-      "triangles": 336
+      "triangles": 372
     },
     {
       "mesh": "closingWheel02Right_metal",
@@ -619,76 +1219,6 @@
         "hubCap_5"
       ],
       "triangles": 88
-    },
-    {
-      "mesh": "pivotrowUnit03_metal",
-      "anchor": "pivotrowUnit03",
-      "material": "seeder.fixed-palette-metal",
-      "absorbed": [
-        "seedMeterHousing03",
-        "seedMeterFace03",
-        "seedMeterServiceFace03",
-        "seedMeterServiceCap03",
-        "parallelLink03Upper",
-        "parallelLink03Lower",
-        "parallelPin03-1",
-        "parallelPin03-2",
-        "parallelPin03-3",
-        "parallelPin03-4",
-        "rowSupportArm03Left",
-        "rowSupportArm03Right",
-        "rowGuideArm03Left",
-        "rowGuideArm03Right",
-        "rowFabricationRail03",
-        "rowDetailLinkPlate03",
-        "rowFastener03",
-        "rowClosingBridge03",
-        "rowCarrierPlate03",
-        "rowCarrierCrossbar03",
-        "closingCarrierPlate03",
-        "rowCarrierFastener03",
-        "rowGuard03",
-        "rowHose03Ribs",
-        "seedTubeRib03-1",
-        "seedTubeRib03-2",
-        "seedTubeRib03-3",
-        "meterGuard03",
-        "openerCarrier03",
-        "openerCarrierBolt03-1",
-        "openerCarrierBolt03-2",
-        "gaugeArm03",
-        "closingArm03Left",
-        "closingArm03Right",
-        "rowDepthLeverStem03",
-        "rowDepthLeverKnob03",
-        "rowSpring03",
-        "rowSpringCoil03-1",
-        "rowSpringCoil03-2",
-        "rowSpringCoil03-3",
-        "rowSpringCoil03-4",
-        "rowSpringCoil03-5",
-        "rowSpringCoil03-6",
-        "rowSpringCoil03-7",
-        "rowSpringVisible03",
-        "rowSpringVisibleCoil03-1",
-        "rowSpringVisibleCoil03-2",
-        "rowSpringVisibleCoil03-3",
-        "rowSpringVisibleCoil03-4",
-        "rowSpringVisibleCoil03-5",
-        "rowSpringVisibleCoil03-6",
-        "rowSpringVisibleCoil03-7"
-      ],
-      "triangles": 7616
-    },
-    {
-      "mesh": "pivotrowUnit03_rubber",
-      "anchor": "pivotrowUnit03",
-      "material": "seeder.fixed-palette-rubber",
-      "absorbed": [
-        "rowHose03",
-        "seedTube03"
-      ],
-      "triangles": 152
     },
     {
       "mesh": "openerDisc03Left_metal",
@@ -730,9 +1260,12 @@
       "material": "seeder.fixed-palette-rubber",
       "absorbed": [
         "tire_6",
-        "sidewall_6"
+        "sidewall_6",
+        "gaugeWheel03Spoke1",
+        "gaugeWheel03Spoke2",
+        "gaugeWheel03Spoke3"
       ],
-      "triangles": 336
+      "triangles": 372
     },
     {
       "mesh": "gaugeWheel03_metal",
@@ -750,9 +1283,12 @@
       "material": "seeder.fixed-palette-rubber",
       "absorbed": [
         "tire_7",
-        "sidewall_7"
+        "sidewall_7",
+        "closingWheel03LeftSpoke1",
+        "closingWheel03LeftSpoke2",
+        "closingWheel03LeftSpoke3"
       ],
-      "triangles": 336
+      "triangles": 372
     },
     {
       "mesh": "closingWheel03Left_metal",
@@ -770,9 +1306,12 @@
       "material": "seeder.fixed-palette-rubber",
       "absorbed": [
         "tire_8",
-        "sidewall_8"
+        "sidewall_8",
+        "closingWheel03RightSpoke1",
+        "closingWheel03RightSpoke2",
+        "closingWheel03RightSpoke3"
       ],
-      "triangles": 336
+      "triangles": 372
     },
     {
       "mesh": "closingWheel03Right_metal",
@@ -783,76 +1322,6 @@
         "hubCap_8"
       ],
       "triangles": 88
-    },
-    {
-      "mesh": "pivotrowUnit04_metal",
-      "anchor": "pivotrowUnit04",
-      "material": "seeder.fixed-palette-metal",
-      "absorbed": [
-        "seedMeterHousing04",
-        "seedMeterFace04",
-        "seedMeterServiceFace04",
-        "seedMeterServiceCap04",
-        "parallelLink04Upper",
-        "parallelLink04Lower",
-        "parallelPin04-1",
-        "parallelPin04-2",
-        "parallelPin04-3",
-        "parallelPin04-4",
-        "rowSupportArm04Left",
-        "rowSupportArm04Right",
-        "rowGuideArm04Left",
-        "rowGuideArm04Right",
-        "rowFabricationRail04",
-        "rowDetailLinkPlate04",
-        "rowFastener04",
-        "rowClosingBridge04",
-        "rowCarrierPlate04",
-        "rowCarrierCrossbar04",
-        "closingCarrierPlate04",
-        "rowCarrierFastener04",
-        "rowGuard04",
-        "rowHose04Ribs",
-        "seedTubeRib04-1",
-        "seedTubeRib04-2",
-        "seedTubeRib04-3",
-        "meterGuard04",
-        "openerCarrier04",
-        "openerCarrierBolt04-1",
-        "openerCarrierBolt04-2",
-        "gaugeArm04",
-        "closingArm04Left",
-        "closingArm04Right",
-        "rowDepthLeverStem04",
-        "rowDepthLeverKnob04",
-        "rowSpring04",
-        "rowSpringCoil04-1",
-        "rowSpringCoil04-2",
-        "rowSpringCoil04-3",
-        "rowSpringCoil04-4",
-        "rowSpringCoil04-5",
-        "rowSpringCoil04-6",
-        "rowSpringCoil04-7",
-        "rowSpringVisible04",
-        "rowSpringVisibleCoil04-1",
-        "rowSpringVisibleCoil04-2",
-        "rowSpringVisibleCoil04-3",
-        "rowSpringVisibleCoil04-4",
-        "rowSpringVisibleCoil04-5",
-        "rowSpringVisibleCoil04-6",
-        "rowSpringVisibleCoil04-7"
-      ],
-      "triangles": 7616
-    },
-    {
-      "mesh": "pivotrowUnit04_rubber",
-      "anchor": "pivotrowUnit04",
-      "material": "seeder.fixed-palette-rubber",
-      "absorbed": [
-        "rowHose04",
-        "seedTube04"
-      ],
-      "triangles": 152
     },
     {
       "mesh": "openerDisc04Left_metal",
@@ -894,9 +1363,12 @@
       "material": "seeder.fixed-palette-rubber",
       "absorbed": [
         "tire_9",
-        "sidewall_9"
+        "sidewall_9",
+        "gaugeWheel04Spoke1",
+        "gaugeWheel04Spoke2",
+        "gaugeWheel04Spoke3"
       ],
-      "triangles": 336
+      "triangles": 372
     },
     {
       "mesh": "gaugeWheel04_metal",
@@ -914,9 +1386,12 @@
       "material": "seeder.fixed-palette-rubber",
       "absorbed": [
         "tire_10",
-        "sidewall_10"
+        "sidewall_10",
+        "closingWheel04LeftSpoke1",
+        "closingWheel04LeftSpoke2",
+        "closingWheel04LeftSpoke3"
       ],
-      "triangles": 336
+      "triangles": 372
     },
     {
       "mesh": "closingWheel04Left_metal",
@@ -934,9 +1409,12 @@
       "material": "seeder.fixed-palette-rubber",
       "absorbed": [
         "tire_11",
-        "sidewall_11"
+        "sidewall_11",
+        "closingWheel04RightSpoke1",
+        "closingWheel04RightSpoke2",
+        "closingWheel04RightSpoke3"
       ],
-      "triangles": 336
+      "triangles": 372
     },
     {
       "mesh": "closingWheel04Right_metal",
@@ -952,8 +1430,8 @@
   "unsharedGeometries": 3,
   "prunedEmptyNodes": 37,
   "after": {
-    "meshes": 51,
-    "drawnTriangles": 52066,
-    "groundMinYmm": 0
+    "meshes": 44,
+    "drawnTriangles": 52546,
+    "groundMinYmm": 0.4
   }
 }

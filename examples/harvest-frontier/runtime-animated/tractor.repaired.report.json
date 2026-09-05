@@ -1,5 +1,5 @@
 {
-  "input": "public\\market\\hf-tractor-compact\\tractor.compact.m1.glb",
+  "input": "examples\\harvest-frontier\\runtime-animated\\tractor.compact.m1.glb",
   "output": "examples\\harvest-frontier\\runtime-animated\\tractor.repaired.glb",
   "before": {
     "meshes": 182,
@@ -29,18 +29,18 @@
         "scale": 0.665,
         "diameterMmBefore": 1338.6,
         "diameterMmAfter": 890.2,
-        "crownYmmAfter": 890.2,
-        "axleYmm": 445.1,
-        "bottomYmm": 0
+        "crownYmmAfter": 893,
+        "axleYmm": 447.9,
+        "bottomYmm": 2.8
       },
       {
         "node": "wheelFrontRight",
         "scale": 0.665,
         "diameterMmBefore": 1338.6,
         "diameterMmAfter": 890.2,
-        "crownYmmAfter": 890.2,
-        "axleYmm": 445.1,
-        "bottomYmm": 0
+        "crownYmmAfter": 893,
+        "axleYmm": 447.9,
+        "bottomYmm": 2.8
       }
     ],
     "rearDiameterMm": 1718.6,
@@ -49,7 +49,7 @@
   },
   "frontAxle": {
     "yMmBefore": 670,
-    "yMmAfter": 445.1,
+    "yMmAfter": 447.9,
     "halfWidthMmAfter": 650
   },
   "entrySteps": {
@@ -84,6 +84,190 @@
       "pivottine05",
       "pivottine06",
       "pivottine07"
+    ]
+  },
+  "frontAxleCarrier": {
+    "why": "the front axle beam floated 395 mm under the chassis with nothing between the two, so from the side the front wheel stood on its own",
+    "beamTopYmm": 517.9,
+    "chassisFloorYmm": 909.9,
+    "airGapWasMm": 392.1,
+    "bolsterMinMm": [
+      -1460,
+      497.9,
+      -150
+    ],
+    "bolsterMaxMm": [
+      -1260,
+      919.9,
+      150
+    ],
+    "pinYmm": 507.9
+  },
+  "rearWheelSeat": [
+    {
+      "node": "wheelRearLeft",
+      "axleWasMm": 860,
+      "axleNowMm": 862.7,
+      "lugRadiusMm": 862.7
+    },
+    {
+      "node": "wheelRearRight",
+      "axleWasMm": 860,
+      "axleNowMm": 862.7,
+      "lugRadiusMm": 862.7
+    }
+  ],
+  "axleJoints": {
+    "why": "each hub measured 20-21 mm of air to the nearest axle metal; the flange rim is built from the hub OWN face vertices, so the joint closes at 0.0 mm by construction and the two faces that meet point in opposite directions",
+    "joints": {
+      "wheelFrontLeft": {
+        "parts": [
+          "axleFrontLeftFlange",
+          "axleFrontLeftSpigot",
+          "axleFrontLeftShaft"
+        ],
+        "ringPoints": 16,
+        "hubFaceMm": -647,
+        "hubRadiusMm": 128.9,
+        "centreMm": [
+          -1360,
+          447.9,
+          -647
+        ],
+        "pivotVsAabbCentreMm": 0
+      },
+      "wheelFrontRight": {
+        "parts": [
+          "axleFrontRightFlange",
+          "axleFrontRightSpigot",
+          "axleFrontRightShaft"
+        ],
+        "ringPoints": 16,
+        "hubFaceMm": 647,
+        "hubRadiusMm": 128.9,
+        "centreMm": [
+          -1360,
+          447.9,
+          647
+        ],
+        "pivotVsAabbCentreMm": 0
+      },
+      "wheelRearLeft": {
+        "parts": [
+          "axleRearLeftFlange",
+          "axleRearLeftSpigot",
+          "axleRearLeftShaft"
+        ],
+        "ringPoints": 16,
+        "hubFaceMm": -640,
+        "hubRadiusMm": 258.4,
+        "centreMm": [
+          890,
+          862.7,
+          -640
+        ],
+        "pivotVsAabbCentreMm": 0
+      },
+      "wheelRearRight": {
+        "parts": [
+          "axleRearRightFlange",
+          "axleRearRightSpigot",
+          "axleRearRightShaft"
+        ],
+        "ringPoints": 16,
+        "hubFaceMm": 640,
+        "hubRadiusMm": 258.4,
+        "centreMm": [
+          890,
+          862.7,
+          640
+        ],
+        "pivotVsAabbCentreMm": 0
+      }
+    }
+  },
+  "frontFenders": {
+    "why": "the front wheels were scaled to 0.665 and the fenders were left where the big wheel had been: 250 mm of daylight over the tyre and 140 mm off its centre, held up by nothing",
+    "fenders": [
+      {
+        "part": "frontFenderLeft",
+        "wasYmm": [
+          1140,
+          1260
+        ],
+        "nowYmm": [
+          963,
+          1083.1
+        ],
+        "wasZmm": [
+          -1050,
+          -790
+        ],
+        "nowZmm": [
+          -949.3,
+          -610.7
+        ],
+        "tyreCrownYmm": 893,
+        "clearanceMm": 70,
+        "stay": "frontFenderStayLeft"
+      },
+      {
+        "part": "frontFenderRight",
+        "wasYmm": [
+          1140,
+          1260
+        ],
+        "nowYmm": [
+          963,
+          1083.1
+        ],
+        "wasZmm": [
+          790,
+          1050
+        ],
+        "nowZmm": [
+          610.7,
+          949.3
+        ],
+        "tyreCrownYmm": 893,
+        "clearanceMm": 70,
+        "stay": "frontFenderStayRight"
+      }
+    ]
+  },
+  "nothingHangsInTheAir": {
+    "why": "the sale gate now reads merged meshes as connected components, and it found the front bumper, both rear fenders and the implement toolbar attached to nothing",
+    "bridged": [
+      {
+        "part": "frontBumper",
+        "gapMm": 160,
+        "bridge": "frontBumperStayLeft/Right to the chassis nose"
+      },
+      {
+        "part": "rearFenderLeft",
+        "gapMm": 8,
+        "bridge": "rearFenderStayLeft to rollBarPostLeft"
+      },
+      {
+        "part": "rearFenderRight",
+        "gapMm": 8,
+        "bridge": "rearFenderStayRight to rollBarPostRight"
+      },
+      {
+        "part": "cultivatorToolbar",
+        "gapMm": 39.9,
+        "bridge": "5 risers down to toolbarCrossRail2"
+      },
+      {
+        "part": "handrails x4",
+        "gapMm": 12,
+        "bridge": "8 pads to the hood side"
+      },
+      {
+        "part": "nose badge plate",
+        "gapMm": 101,
+        "bridge": "nosePlateMount back to the nose"
+      }
     ]
   },
   "hiddenProxies": [
@@ -145,7 +329,159 @@
   ],
   "ground": {
     "beforeMm": 0,
-    "afterMm": 0
+    "afterMm": 2.8
+  },
+  "implementGroundContact": {
+    "why": "the part that sets working depth and the blades that cut the soil were both in the air",
+    "parts": [
+      {
+        "node": "pivotgaugeWheelLeft",
+        "wasMm": 16.8,
+        "lugRadiusMm": 248.7,
+        "axleYmm": 248.7
+      },
+      {
+        "node": "pivotgaugeWheelRight",
+        "wasMm": 16.8,
+        "lugRadiusMm": 248.7,
+        "axleYmm": 248.7
+      },
+      {
+        "node": "tineGroup",
+        "wasMm": 22.3,
+        "nowMm": 0
+      }
+    ]
+  },
+  "rollingSpeed": {
+    "why": "the front wheels covered 11.259 m while the rears covered 16.199 m in the same clip: a 31.0 % slip that no tractor has",
+    "setBy": "wheelRear* at 3 whole turns",
+    "perClip": {
+      "drive": {
+        "wheelFrontLeft": {
+          "degrees": 2077.5,
+          "wasDegrees": 1440,
+          "radiusMm": 447.9,
+          "lugs": 48,
+          "travelM": 16.241,
+          "speedMs": 7.482,
+          "maxStepDeg": 31.5
+        },
+        "wheelFrontRight": {
+          "degrees": 2077.5,
+          "wasDegrees": null,
+          "radiusMm": 447.9,
+          "lugs": 48,
+          "travelM": 16.241,
+          "speedMs": 7.482,
+          "maxStepDeg": 31.5
+        },
+        "wheelRearLeft": {
+          "degrees": 1080,
+          "wasDegrees": 1080,
+          "radiusMm": 862.7,
+          "lugs": 48,
+          "travelM": 16.262,
+          "speedMs": 7.492,
+          "maxStepDeg": 16.4
+        },
+        "wheelRearRight": {
+          "degrees": 1080,
+          "wasDegrees": null,
+          "radiusMm": 862.7,
+          "lugs": 48,
+          "travelM": 16.262,
+          "speedMs": 7.492,
+          "maxStepDeg": 16.4
+        },
+        "gaugeWheelLeft": {
+          "degrees": 3750,
+          "wasDegrees": 3600,
+          "radiusMm": 248.7,
+          "lugs": 12,
+          "travelM": 16.277,
+          "speedMs": 7.499,
+          "maxStepDeg": 56.8
+        },
+        "gaugeWheelRight": {
+          "degrees": 3750,
+          "wasDegrees": null,
+          "radiusMm": 248.7,
+          "lugs": 12,
+          "travelM": 16.277,
+          "speedMs": 7.499,
+          "maxStepDeg": 56.8
+        },
+        "groundDistanceM": 16.262
+      },
+      "steer": {
+        "wheelFrontLeft": {
+          "degrees": 4162.5,
+          "wasDegrees": null,
+          "radiusMm": 447.9,
+          "lugs": 48,
+          "travelM": 32.54,
+          "speedMs": 7.496,
+          "maxStepDeg": 31.5
+        },
+        "wheelFrontRight": {
+          "degrees": 4162.5,
+          "wasDegrees": null,
+          "radiusMm": 447.9,
+          "lugs": 48,
+          "travelM": 32.54,
+          "speedMs": 7.496,
+          "maxStepDeg": 31.5
+        },
+        "wheelRearLeft": {
+          "degrees": 2160,
+          "wasDegrees": null,
+          "radiusMm": 862.7,
+          "lugs": 48,
+          "travelM": 32.523,
+          "speedMs": 7.492,
+          "maxStepDeg": 16.4
+        },
+        "wheelRearRight": {
+          "degrees": 2160,
+          "wasDegrees": null,
+          "radiusMm": 862.7,
+          "lugs": 48,
+          "travelM": 32.523,
+          "speedMs": 7.492,
+          "maxStepDeg": 16.4
+        },
+        "gaugeWheelLeft": {
+          "degrees": 7500,
+          "wasDegrees": null,
+          "radiusMm": 248.7,
+          "lugs": 12,
+          "travelM": 32.555,
+          "speedMs": 7.499,
+          "maxStepDeg": 56.8
+        },
+        "gaugeWheelRight": {
+          "degrees": 7500,
+          "wasDegrees": null,
+          "radiusMm": 248.7,
+          "lugs": 12,
+          "travelM": 32.555,
+          "speedMs": 7.499,
+          "maxStepDeg": 56.8
+        },
+        "groundDistanceM": 32.523
+      }
+    }
+  },
+  "steeringRatio": {
+    "why": "a tractor whose handwheel goes lock to lock in 78 degrees is a go-kart; real ones are 15-25 turns of ratio",
+    "handwheelWasDeg": 39.2,
+    "handwheelNowDeg": 200,
+    "innerWheelLockDeg": 12.4,
+    "ratioWas": 3.2,
+    "ratioNow": 16.1,
+    "chose": "turned the handwheel up rather than reducing the wheel lock, because the wheel lock is already Ackermann-correct (inner 12.4 deg, outer 9.5 deg)",
+    "largestKeyStepDeg": 19
   },
   "bakedInstances": [
     {
@@ -194,9 +530,11 @@
         "tractorMesh5",
         "hitchMastPin",
         "topLinkPin",
-        "depthAdjusterHandle"
+        "depthAdjusterHandle",
+        "frontFenderStayLeft",
+        "frontFenderStayRight"
       ],
-      "triangles": 15372
+      "triangles": 15396
     },
     {
       "mesh": "body_metal",
@@ -228,6 +566,11 @@
         "toolbarCrossRail2",
         "toolbarCrossRail3",
         "toolbarCrossRail4",
+        "toolbarRiserL1300",
+        "toolbarRiserL650",
+        "toolbarRiserC0",
+        "toolbarRiserR650",
+        "toolbarRiserR1300",
         "cultivatorWingLeft",
         "cultivatorWingRight",
         "endPlateLeft",
@@ -250,9 +593,36 @@
         "entryStepArmLeft",
         "entryStepHangerLeft",
         "entryStepArmRight",
-        "entryStepHangerRight"
+        "entryStepHangerRight",
+        "frontAxleBolster",
+        "frontAxlePivotPin",
+        "axleFrontLeftFlange",
+        "axleFrontLeftSpigot",
+        "axleFrontLeftShaft",
+        "axleFrontRightFlange",
+        "axleFrontRightSpigot",
+        "axleFrontRightShaft",
+        "axleRearLeftFlange",
+        "axleRearLeftSpigot",
+        "axleRearLeftShaft",
+        "axleRearRightFlange",
+        "axleRearRightSpigot",
+        "axleRearRightShaft",
+        "frontBumperStayLeft",
+        "frontBumperStayRight",
+        "rearFenderStayLeft",
+        "rearFenderStayRight",
+        "handrailPad1",
+        "handrailPad2",
+        "handrailPad3",
+        "handrailPad4",
+        "handrailPad5",
+        "handrailPad6",
+        "handrailPad7",
+        "handrailPad8",
+        "nosePlateMount"
       ],
-      "triangles": 20316
+      "triangles": 21368
     },
     {
       "mesh": "body_glass-0-760-0-120",
@@ -515,7 +885,7 @@
   "prunedEmptyNodes": 22,
   "after": {
     "meshes": 51,
-    "drawnTriangles": 58156,
+    "drawnTriangles": 59232,
     "groundMinYmm": 0
   }
 }
