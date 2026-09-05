@@ -1,7 +1,8 @@
 import { BETA_MONTHLY_GRANT_CREDITS, SIGNUP_GRANT_CREDITS } from "./api/_lib/clunk";
 // 가입 직후 계량기는 가입분(SIGNUP_GRANT_CREDITS)과 그달 지급분(BETA_MONTHLY_GRANT_CREDITS, 첫 요청에
 // 바로 들어온다)의 합을 보여 준다(2026-09-05 QA 실측 55). 문장도 그 합을 말하고 내역을 괄호에 둔다.
-import { WORKSPACE_IMAGES_PER_DAY } from "./api/_lib/ai-budget";
+// 그 문장은 가입을 마친 사람이 작업공간에서 읽는 welcome 한 줄에만 남았다 —
+// 2026-09-05 마스터 지시로 로그인·가입 화면에서는 지급 횟수를 말하지 않는다.
 
 /**
  * 2026-09-03 — 가입 흐름의 문구가 사는 곳.
@@ -23,17 +24,16 @@ export type AuthIntent = "create" | "inspect" | "agents" | "market";
 /** 어느 문으로 들어왔는가. 처음 온 사람은 /signup, 돌아온 사람은 /login. */
 export type AuthDoor = "signup" | "login";
 
+/**
+ * 2026-09-05 — 문 한 장이 말하는 것은 두 가지뿐이다: 제목 한 줄과 그 아래 한 문장.
+ * 배지·사실 띠·알약 옆 작은 글씨는 카드에서 사라졌다. 눈썹 한 줄은 돌아갈 곳을
+ * 말하므로 문구가 아니라 return_to 에서 나온다(returnWithParticle).
+ */
 export type AuthCardCopy = {
-  /** 카드 맨 위의 아주 작은 배지. */
-  badge: string;
   /** 큰 제목 한 줄. */
   h1: string;
   /** 제목 아래 한 문장. */
   lede: string;
-  /** 카드 아래 회색 한 줄에 " · " 로 이어 붙는 짧은 사실들. */
-  facts: string[];
-  /** 제공자 알약 오른쪽의 작은 글씨. */
-  providerSmall: string;
 };
 
 export type AuthIntentCopy = {
@@ -49,33 +49,15 @@ export function isAuthIntent(value: unknown): value is AuthIntent {
   return typeof value === "string" && (AUTH_INTENTS as readonly string[]).includes(value);
 }
 
-/** 처음 오는 사람이 받는 것 — 숫자는 전부 상수에서 온다. */
-const SIGNUP_FACTS = [
-  "카드·비밀번호 없음",
-  `만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회 즉시`,
-  `이미지 하루 ${WORKSPACE_IMAGES_PER_DAY}장`,
-];
-
-const LOGIN_FACTS = ["비밀번호 없음", "보던 화면으로 복귀", "내 파일은 내 대시보드에만"];
-
-const SIGNUP_PROVIDER_SMALL = "계정으로 시작 ↗";
-const LOGIN_PROVIDER_SMALL = "계정으로 로그인 ↗";
-
 /** 아무 의도도 실려 오지 않았을 때의 문구. 두 문의 기본값이다. */
 export const DEFAULT_AUTH_COPY: AuthIntentCopy = {
   signup: {
-    badge: "카드 없이 시작",
-    h1: `가입하면 바로 씁니다`,
-    lede: `카드도 비밀번호도 묻지 않습니다. Google이나 GitHub 계정으로 한 번 들어오면 대시보드가 생기고, 만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 바로 들어옵니다. 그 뒤로는 매달 ${BETA_MONTHLY_GRANT_CREDITS}회가 채워집니다.`,
-    facts: SIGNUP_FACTS,
-    providerSmall: SIGNUP_PROVIDER_SMALL,
+    h1: "가입하면 바로 씁니다",
+    lede: "카드도 비밀번호도 묻지 않습니다. Google이나 GitHub 계정으로 한 번 들어오면 대시보드가 생기고, 그 자리에서 바로 만들고 검사합니다.",
   },
   login: {
-    badge: "대시보드",
     h1: "다시 오셨군요",
     lede: "Clunk는 비밀번호를 만들지도 보관하지도 않습니다. 쓰던 계정으로 들어오면 보던 화면으로 그대로 돌아갑니다.",
-    facts: LOGIN_FACTS,
-    providerSmall: LOGIN_PROVIDER_SMALL,
   },
   welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어왔습니다 · 무엇을 만들지 골라 보세요`,
 };
@@ -83,69 +65,45 @@ export const DEFAULT_AUTH_COPY: AuthIntentCopy = {
 export const INTENT_COPY: Record<AuthIntent, AuthIntentCopy> = {
   create: {
     signup: {
-      badge: "카드 없이 시작",
       h1: "첫 에셋 만들기부터",
-      lede: `계정 하나면 만들기 화면이 열립니다. 가입하는 그 자리에서 만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어오고, 확인이 끝나면 만들던 화면으로 그대로 돌아갑니다.`,
-      facts: SIGNUP_FACTS,
-      providerSmall: SIGNUP_PROVIDER_SMALL,
+      lede: "계정 하나면 만들기 화면이 열립니다. 카드도 비밀번호도 묻지 않고, 확인이 끝나면 만들던 화면으로 그대로 돌아갑니다.",
     },
     login: {
-      badge: "에셋 만들기",
       h1: "만들던 화면으로",
       lede: "쓰던 계정을 고르세요. 확인이 끝나면 에셋 만들기 화면으로 그대로 돌아갑니다.",
-      facts: LOGIN_FACTS,
-      providerSmall: LOGIN_PROVIDER_SMALL,
     },
     welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어왔습니다 · 첫 에셋을 만들어 보세요`,
   },
   inspect: {
     signup: {
-      badge: "카드 없이 시작",
       h1: "파일 검사부터",
-      lede: `파일 하나를 올리면 게임에 넣어도 되는지 확인해 드립니다. 가입하는 그 자리에서 만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어오고, 확인이 끝나면 검사 화면으로 돌아갑니다.`,
-      facts: SIGNUP_FACTS,
-      providerSmall: SIGNUP_PROVIDER_SMALL,
+      lede: "파일 하나를 올리면 게임에 넣어도 되는지 확인해 드립니다. 카드도 비밀번호도 묻지 않고, 확인이 끝나면 검사 화면으로 돌아갑니다.",
     },
     login: {
-      badge: "에셋 검사",
       h1: "검사하던 화면으로",
       lede: "쓰던 계정을 고르세요. 확인이 끝나면 검사 화면으로 그대로 돌아갑니다.",
-      facts: LOGIN_FACTS,
-      providerSmall: LOGIN_PROVIDER_SMALL,
     },
     welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어왔습니다 · 파일 하나를 올려 검사해 보세요`,
   },
   agents: {
     signup: {
-      badge: "카드 없이 시작",
       h1: "에이전트 연결부터",
-      lede: `내 계정 전용 키를 하나 만들면 쓰던 AI 도구가 바로 Clunk를 부릅니다. 가입하는 그 자리에서 만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어옵니다.`,
-      facts: SIGNUP_FACTS,
-      providerSmall: SIGNUP_PROVIDER_SMALL,
+      lede: "내 계정 전용 키를 하나 만들면 쓰던 AI 도구가 바로 Clunk를 부릅니다. 카드도 비밀번호도 묻지 않습니다.",
     },
     login: {
-      badge: "에이전트 연결",
       h1: "연결하던 화면으로",
       lede: "쓰던 계정을 고르세요. 확인이 끝나면 연결 설정 화면으로 그대로 돌아갑니다.",
-      facts: LOGIN_FACTS,
-      providerSmall: LOGIN_PROVIDER_SMALL,
     },
     welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어왔습니다 · 키를 만들면 바로 연결됩니다`,
   },
   market: {
     signup: {
-      badge: "카드 없이 시작",
       h1: "에셋 받기부터",
-      lede: `마켓 에셋은 계정만 있으면 받습니다. 가입하는 그 자리에서 만들기·검사 ${SIGNUP_GRANT_CREDITS}회도 함께 들어옵니다.`,
-      facts: SIGNUP_FACTS,
-      providerSmall: SIGNUP_PROVIDER_SMALL,
+      lede: "마켓 에셋은 계정만 있으면 받습니다. 카드도 비밀번호도 묻지 않고, 확인이 끝나면 보던 상품 화면으로 돌아갑니다.",
     },
     login: {
-      badge: "에셋 마켓",
       h1: "보던 에셋으로",
       lede: "쓰던 계정을 고르세요. 확인이 끝나면 보던 상품 화면으로 그대로 돌아갑니다.",
-      facts: LOGIN_FACTS,
-      providerSmall: LOGIN_PROVIDER_SMALL,
     },
     welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어왔습니다 · 마켓에서 에셋을 받아 보세요`,
   },
@@ -183,6 +141,19 @@ export function returnLabel(path: string): string {
   if (path.startsWith("/agents")) return "에이전트 연결";
   if (path.startsWith("/review")) return "검수 뷰어";
   return "이전 화면";
+}
+
+/**
+ * 눈썹 한 줄이 쓰는 "대시보드로 / 에셋 제작으로". 조사를 손으로 적으면 돌아갈 곳이
+ * 하나 늘 때마다 "에셋 마켓로"가 생긴다 — 받침으로 고른다(ㄹ 받침은 "로").
+ */
+export function returnWithParticle(path: string): string {
+  const label = returnLabel(path);
+  const last = label.codePointAt(label.length - 1) ?? 0;
+  const isHangulSyllable = last >= 0xac00 && last <= 0xd7a3;
+  const jongseong = isHangulSyllable ? (last - 0xac00) % 28 : 0;
+  // 받침이 없거나(0) ㄹ(8)이면 "로", 그 밖에는 "으로".
+  return `${label}${jongseong === 0 || jongseong === 8 ? "로" : "으로"}`;
 }
 
 /** 한 문(door)이 이 의도에서 쓰는 문구. */

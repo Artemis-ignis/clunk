@@ -5,12 +5,12 @@ import {
   type ChatGPTUser,
 } from "../chatgpt-auth";
 import { getOAuthEnvironment, getOAuthProviderStatuses, safeOAuthReturnPath } from "../oauth";
-import { authCardCopy, intentFromReturnTo, type AuthIntent } from "../auth-intent";
+import { authCardCopy, intentFromReturnTo, returnWithParticle, type AuthIntent } from "../auth-intent";
 import { getRuntimeEnvironment } from "../runtime-environment";
 import { trustsUpstreamIdentityHeaders } from "../api/_lib/identity-headers";
 import { SiteNav } from "../components/SiteNav";
 import { SiteFooter } from "../components/SiteFooter";
-import { ForceDarkTheme } from "../components/ForceDarkTheme";
+import { AuthCard, type AuthProviderOption } from "../components/AuthCard";
 import Link from "../components/NativeLink";
 import { createPageMetadata } from "../components/site-metadata";
 import { BETA_MONTHLY_GRANT_CREDITS, SIGNUP_GRANT_CREDITS } from "../api/_lib/clunk";
@@ -21,11 +21,12 @@ export const dynamic = "force-dynamic";
 
 /**
  * /signup is the door for someone who has never been here; /login is the door for someone
- * who has. One card in the middle of the screen, the same anatomy as /login — only the
- * badge, the headline and the sentence differ.
+ * who has. One card in the middle of the screen (app/components/AuthCard.tsx), the same
+ * anatomy as /login — only the headline, the sentence and the primary label differ.
  *
- * Every figure is imported from the module that enforces it, so this page cannot promise
- * a grant the ledger does not make.
+ * 2026-09-05(마스터): 이 화면에서 지급 횟수를 말하지 않는다. 카드가 답해야 하는 것은
+ * "어떻게 들어오는가" 하나다. 남은 숫자는 검색 결과에 뜨는 설명문뿐이고, 그 숫자는
+ * 아래처럼 그것을 강제하는 모듈에서만 온다 — 화면이 원장보다 앞서 약속하지 못한다.
  */
 
 export const metadata = createPageMetadata({
@@ -102,104 +103,99 @@ function AuthJourney({
   const providers = getOAuthProviderRows();
   const readyCount = providers.filter((status) => status.ready).length;
   const hostSiwc = isHostSiwcAvailable();
-  const signedIn = Boolean(user);
   const copy = authCardCopy("signup", intent);
   const returnQuery = encodeURIComponent(returnTo);
   // The same return path travels to /login, so switching doors never loses the destination.
   const signInHref = `/login?return_to=${returnQuery}`;
 
+  // 링크는 오늘과 한 글자도 다르지 않다 — 어느 수단이 살아 있는지, 어디로 보내는지는
+  // 여기서 정하고, AuthCard 는 그것을 그리기만 한다.
+  const ways: AuthProviderOption[] = [
+    ...providers.map((status) => ({
+      key: status.provider,
+      mark: status.provider === "google" ? ("google" as const) : ("github" as const),
+      label: `${providerLabel(status.provider)}로 계속하기`,
+      href: status.ready
+        ? "/api/auth/" + status.provider + "?from=signup&return_to=" + returnQuery
+        : null,
+      note: "준비 중 · 연결 대기",
+    })),
+    ...(hostSiwc
+      ? [
+          {
+            key: "chatgpt",
+            mark: "chatgpt" as const,
+            label: "ChatGPT 계정으로 시작하기",
+            href: chatGPTSignInPath(returnTo),
+          },
+        ]
+      : []),
+  ];
+
   return (
     <div className="cv5 cv5-auth-shell">
-      <ForceDarkTheme />
       <div className="cv5-stars" aria-hidden="true" />
       <a className="clunk-home-skip-link" href="#main-content">본문으로 건너뛰기</a>
       <SiteNav />
 
-      <main id="main-content" className="cv5-auth">
+      <main id="main-content" className="cv5-auth cv5-auth-door">
         <div className="cv5-frame cv5-auth-solo">
-          <section className="cv5-auth-card" aria-labelledby="signup-title">
-            <span className="cv5-auth-status" data-state={signedIn ? "on" : "off"}>
-              {signedIn ? "로그인됨" : copy.badge}
-            </span>
-            {/* 숫자는 전부 상수에서 옵니다. 한 개의 문자열로 렌더해야 숫자 앞뒤에 RSC
-                텍스트 분리 주석이 끼지 않습니다. */}
-            <h1 id="signup-title">{copy.h1}</h1>
-            <p className="cv5-auth-copy">
-              {signedIn
+          <AuthCard
+            titleId="signup-title"
+            eyebrow={
+              user ? "이미 로그인되어 있습니다" : `가입하면 ${returnWithParticle(returnTo)} 갑니다`
+            }
+            title={copy.h1}
+            lede={
+              user
                 ? "이 브라우저는 이미 로그인되어 있습니다. 계속하면 요청한 화면으로 이동합니다."
-                : copy.lede}
-            </p>
-
-            {errorMessage ? <p className="cv5-auth-alert" role="alert">{errorMessage}</p> : null}
-
-            {user ? (
-              <div className="cv5-auth-signedin">
-                <div className="cv5-auth-signedin-user">
-                  <strong>{user.displayName}</strong>
-                  <span>{user.email}</span>
-                  <span>{`로그인 방법: ${sessionProviderLabel(user.provider)}`}</span>
-                </div>
-                <Link className="cv5-auth-primary" href={returnTo}>
-                  요청한 화면 열기
-                  <span aria-hidden="true">↗</span>
-                </Link>
-                <Link className="cv5-auth-secondary" href={chatGPTSignOutPath(returnTo)}>
-                  이 브라우저에서 로그아웃
-                  <span aria-hidden="true">→</span>
-                </Link>
-              </div>
-            ) : (
-              <>
-                <div className="cv5-auth-providers" aria-label="가입 수단">
-                  {providers.map((status) =>
-                    status.ready ? (
-                      <Link
-                        className="cv5-auth-provider"
-                        data-ready="true"
-                        href={"/api/auth/" + status.provider + "?from=signup&return_to=" + returnQuery}
-                        key={status.provider}
-                      >
-                        {/* 한 개의 문자열로 렌더해야 라벨 사이에 RSC 텍스트 분리 주석이 끼지 않는다. */}
-                        {`${providerLabel(status.provider)}로 계속하기`}
-                        <small>{copy.providerSmall}</small>
-                      </Link>
-                    ) : (
-                      <div className="cv5-auth-provider" data-ready="false" key={status.provider}>
-                        {`${providerLabel(status.provider)}로 계속하기`}
-                        <small>준비 중 · 연결 대기</small>
-                      </div>
-                    ),
-                  )}
-                  {hostSiwc ? (
-                    <Link className="cv5-auth-provider" data-ready="true" href={chatGPTSignInPath(returnTo)}>
-                      ChatGPT 계정으로 시작하기
-                      <small>{copy.providerSmall}</small>
-                    </Link>
-                  ) : null}
-                </div>
-                {readyCount === 0 && !hostSiwc ? (
-                  <p className="cv5-auth-hint">
-                    {"가입 연결을 준비하는 중입니다. 준비가 끝나면 위 버튼이 켜집니다. 그동안 "}
-                    <Link href="/marketplace">에셋 마켓</Link>
-                    {"은 그대로 둘러볼 수 있습니다."}
-                  </p>
-                ) : null}
-              </>
-            )}
-
-            {/* 가입 흐름에는 별도 가입 폼이 없으므로 체크박스 대신 고지+링크로 동의를 표시합니다. */}
-            <p className="cv5-auth-switch">
-              계속하면 다음 화면에서 이용약관과 개인정보 수집·이용 동의를 한 번 확인합니다. 미리 읽어 두셔도 됩니다:{" "}
-              <Link href="/terms">이용약관</Link> · <Link href="/privacy">개인정보처리방침</Link>
-            </p>
-
-            <p className="cv5-auth-switch">
-              이미 계정이 있으신가요?{" "}
-              <Link href={signInHref}>로그인하기</Link>
-            </p>
-          </section>
-
-          <p className="cv5-auth-underline">{copy.facts.join(" · ")}</p>
+                : copy.lede
+            }
+            errorMessage={errorMessage}
+            providers={user ? [] : ways}
+            actions={
+              user ? (
+                <>
+                  <div className="cv5-door-user">
+                    <strong>{user.displayName}</strong>
+                    <span>{user.email}</span>
+                    <span>{`로그인 방법: ${sessionProviderLabel(user.provider)}`}</span>
+                  </div>
+                  <Link className="cv5-auth-primary" href={returnTo}>
+                    요청한 화면 열기
+                    <span aria-hidden="true">↗</span>
+                  </Link>
+                  <Link className="cv5-auth-secondary" href={chatGPTSignOutPath(returnTo)}>
+                    이 브라우저에서 로그아웃
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                </>
+              ) : null
+            }
+            hint={
+              !user && readyCount === 0 && !hostSiwc ? (
+                <p className="cv5-auth-hint">
+                  {"가입 연결을 준비하는 중입니다. 준비가 끝나면 위 버튼이 켜집니다. 그동안 "}
+                  <Link href="/marketplace">에셋 마켓</Link>
+                  {"은 그대로 둘러볼 수 있습니다."}
+                </p>
+              ) : null
+            }
+            switchRow={
+              <p>
+                {"이미 계정이 있으신가요? "}
+                <Link href={signInHref}>로그인하기</Link>
+              </p>
+            }
+            /* 가입 흐름에는 별도 가입 폼이 없으므로 체크박스 대신 고지+링크로 동의를 표시합니다.
+               동의를 간주하지 않는다는 것이 이 문장의 요점이라 문구는 그대로 둡니다. */
+            legalNote={
+              <p>
+                계속하면 다음 화면에서 이용약관과 개인정보 수집·이용 동의를 한 번 확인합니다.{" "}
+                <Link href="/terms">이용약관</Link> · <Link href="/privacy">개인정보처리방침</Link>
+              </p>
+            }
+          />
         </div>
       </main>
       <SiteFooter />
