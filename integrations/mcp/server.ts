@@ -8,6 +8,7 @@ import { promisify } from "node:util";
 import {
   createAssetInspectionEvidenceV2,
   createPassport,
+  getBuiltInTargetProfiles,
   inspectAsset,
   inspectAssetForTarget,
   optimizeAsset,
@@ -27,6 +28,8 @@ import { loadAssetOpsInput, loadBundle, writeOutputBundle } from "../shared/node
 import { resolveProfilePolicy } from "../shared/custom-profile";
 
 const profileFile = { type: "string", description: "Absolute path to a custom profile JSON. Cannot be combined with profile." };
+/** tools/list가 광고하는 값과 assertTargetProfileId가 받는 값은 같은 등록부에서 나와야 합니다. */
+const TARGET_PROFILE_IDS = getBuiltInTargetProfiles().map((profile) => profile.id);
 const execFile = promisify(execFileCallback);
 const CLUNK_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const evidenceProperties = {
@@ -41,10 +44,10 @@ const evidenceProperties = {
   humanDecision: { type: "string", enum: ["PASS", "PASS_WITH_FOLLOW_UP", "NO_GO", "NOT_EVALUATED"] },
 };
 const tools = [
-  { name: "clunk_inspect", description: "Inspect a real GLB/GLTF using Clunk Core. Use evidenceFormat=v2 for provenance and separated visual status.", inputSchema: { type: "object", required: ["path"], properties: { path: { type: "string" }, profile: { type: "string", enum: ["web", "mobile", "pc"] }, profileFile, ...evidenceProperties } } },
-  { name: "clunk_optimize", description: "Apply only Clunk's allowlisted render-safe and metadata-only operations and write a new artifact.", inputSchema: { type: "object", required: ["path"], properties: { path: { type: "string" }, outputPath: { type: "string" }, profile: { type: "string", enum: ["web", "mobile", "pc"] }, profileFile } } },
-  { name: "clunk_asset_inspect", description: "Inspect a real asset against an engine-aware target profile and return canonical evidence JSON.", inputSchema: { type: "object", required: ["path", "targetProfileId"], properties: { path: { type: "string" }, targetProfileId: { type: "string" }, assetKind: { type: "string", enum: ["3d-model", "2d-image", "sprite-atlas", "spine-project", "animation-clip"] }, runId: { type: "string" }, profileFile: { type: "string", description: "Reserved for legacy tool parity; use targetProfileId for engine-aware inspection." } } } },
-  { name: "clunk_asset_inspection_evidence", description: "Create clunk.asset-inspection-evidence.v2 for a real asset. CONTRACT_FIXTURE is structural-only; PLAYER_FACING_CAPTURE requires hashed capture evidence and keeps human decision explicit.", inputSchema: { type: "object", required: ["path"], properties: { path: { type: "string" }, profile: { type: "string", enum: ["web", "mobile", "pc"] }, profileFile, ...evidenceProperties } } },
+  { name: "clunk_inspect", description: "Inspect a real GLB/GLTF using Clunk Core. Use evidenceFormat=v2 for provenance and separated visual status.", inputSchema: { type: "object", required: ["path"], properties: { path: { type: "string" }, profile: { type: "string", enum: ["web", "mobile", "pc"], description: "Policy profile — the triangle/material/texture budget to judge against. Not an engine id; engine ids belong in clunk_asset_inspect's targetProfileId." }, profileFile, ...evidenceProperties } } },
+  { name: "clunk_optimize", description: "Apply only Clunk's allowlisted render-safe and metadata-only operations and write a new artifact.", inputSchema: { type: "object", required: ["path"], properties: { path: { type: "string" }, outputPath: { type: "string" }, profile: { type: "string", enum: ["web", "mobile", "pc"], description: "Policy profile — the triangle/material/texture budget to judge against. Not an engine id; engine ids belong in clunk_asset_inspect's targetProfileId." }, profileFile } } },
+  { name: "clunk_asset_inspect", description: "Inspect a real asset on this machine against one engine's target profile and return canonical evidence JSON. This is the local transport, so it reads the path itself; nothing is uploaded.", inputSchema: { type: "object", required: ["path", "targetProfileId"], properties: { path: { type: "string", description: "Absolute path to the asset on this machine." }, targetProfileId: { type: "string", enum: TARGET_PROFILE_IDS, description: "Which engine to check against. Not the same argument as `profile` on clunk_inspect/clunk_optimize: pc/web/mobile are policy profiles and are rejected here." }, assetKind: { type: "string", enum: ["3d-model", "2d-image", "sprite-atlas", "spine-project", "animation-clip"] }, runId: { type: "string" }, profileFile: { type: "string", description: "Reserved for legacy tool parity; use targetProfileId for engine-aware inspection." } } } },
+  { name: "clunk_asset_inspection_evidence", description: "Create clunk.asset-inspection-evidence.v2 for a real asset. CONTRACT_FIXTURE is structural-only; PLAYER_FACING_CAPTURE requires hashed capture evidence and keeps human decision explicit.", inputSchema: { type: "object", required: ["path"], properties: { path: { type: "string" }, profile: { type: "string", enum: ["web", "mobile", "pc"], description: "Policy profile — the triangle/material/texture budget to judge against. Not an engine id; engine ids belong in clunk_asset_inspect's targetProfileId." }, profileFile, ...evidenceProperties } } },
   { name: "clunk_asset_author", description: "Author a real 2D Sprite, Sprite Atlas, Spine JSON bundle, animation GLB, or 3D factory output into a separate local directory, then reopen it through AssetOps. Runtime and human visual approval stay separate.", inputSchema: { type: "object", required: ["assetKind", "targetProfileId", "outputDirectory"], properties: { assetKind: { type: "string", enum: ["2d-image", "sprite-atlas", "spine-project", "animation-clip", "3d-model"] }, targetProfileId: { type: "string" }, recipeId: { type: "string" }, recipeVersion: { type: "string" }, outputDirectory: { type: "string" }, label: { type: "string" }, prompt: { type: "string" }, factoryPath: { type: "string", description: "Required for 3d-model; a local Three.js factory module." } } } },
   { name: "clunk_scene_review", description: "Review a player-facing scene manifest and keep visualRuntime, playerFacing, and human review separate. Local capture paths are re-read only by this local stdio process.", inputSchema: { type: "object", properties: { manifestPath: { type: "string" }, manifest: { type: "object" }, profileFile: { type: "string", description: "Reserved for catalog parity; scene review uses the manifest's declared evidence." } } } },
   { name: "clunk_sprite_sheet_review", description: "Run the local RGBA sprite-sheet CLI against exact bytes. Returns LOCAL_CLI_BYTE_REHASH evidence; it never infers human review.", inputSchema: { type: "object", properties: { manifestPath: { type: "string" }, manifest: { type: "object" }, profileFile: { type: "string", description: "Reserved for catalog parity; sprite review uses the manifest's declared target profile." } } } },
@@ -67,11 +70,14 @@ async function handle(method: string, params?: { name?: string; arguments?: Reco
   if (method === "initialize") return { protocolVersion: "2025-06-18", capabilities: { tools: {} }, serverInfo: { name: "clunk", version: "0.1.0" } };
   if (method === "ping") return {};
   if (method === "tools/list") return { tools };
-  if (method !== "tools/call" || !params?.name) throw new Error(`Unsupported MCP method: ${method}`);
+  if (method !== "tools/call" || !params?.name) {
+    throw new Error(`Unsupported MCP method: ${method}. This server answers initialize, ping, tools/list and tools/call.`);
+  }
   const args = params.arguments ?? {};
   const wantsV2 = optionalString(args.evidenceFormat) === "v2" || params.name === "clunk_asset_inspection_evidence";
   if (params.name === "clunk_asset_inspect") {
     const path = requiredString(args.path, "path");
+    assertTargetProfileId(args.targetProfileId);
     const input = await loadAssetOpsInput(path);
     const value = inspectAssetForTarget({
       runId: optionalString(args.runId),
@@ -162,7 +168,13 @@ async function handle(method: string, params?: { name?: string; arguments?: Reco
     const before = inspectAsset(source.bundle, policy);
     const after = inspectAsset(output.bundle, policy);
     value = passportEnvelope(createPassport(before, after, []), after.resultDigest);
-  } else throw new Error(`Unknown Clunk tool: ${params.name}`);
+  } else {
+    throw new Error(
+      `Unknown Clunk tool: ${params.name}. This local stdio server answers: ${tools.map((tool) => tool.name).join(", ")}`
+      + " (clunk_validate and clunk_passport also still answer, kept for older callers)."
+      + " Catalogue tools such as clunk_search_assets live on the HTTP endpoint /api/mcp, not here.",
+    );
+  }
   return { content: [{ type: "text", text: JSON.stringify(value) }] };
 }
 
@@ -217,7 +229,7 @@ async function readJsonManifest(args: Record<string, unknown>): Promise<unknown>
   const manifestPath = optionalString(args.manifestPath);
   if (manifestPath) return JSON.parse(await readFile(resolve(manifestPath), "utf8"));
   if (args.manifest && typeof args.manifest === "object" && !Array.isArray(args.manifest)) return args.manifest;
-  throw new Error("Provide manifestPath or manifest.");
+  throw new Error("Provide either manifestPath (an absolute path this local server reads itself) or manifest (the JSON inline). Neither was supplied.");
 }
 
 async function runLocalSpriteReview(args: Record<string, unknown>): Promise<unknown> {
@@ -246,12 +258,35 @@ async function runLocalSpriteReview(args: Record<string, unknown>): Promise<unkn
   }
 }
 
+/**
+ * 목표 프로파일 이름이 틀렸을 때 고를 수 있는 것을 같이 준다.
+ *
+ * 2026-09-05 실측: core가 던지는 `Unknown target profile: web` 한 줄로 끝나서, 에이전트가
+ * 무엇을 넣어야 하는지 알 길이 없었습니다. `web`·`mobile`·`pc`는 이 서버의 다른 도구가
+ * `profile`로 받는 이름이라, 두 인자를 헷갈리는 것이 가장 흔한 실수입니다.
+ */
+function assertTargetProfileId(value: unknown): void {
+  const ids = getBuiltInTargetProfiles().map((profile) => profile.id);
+  const name = requiredString(value, "targetProfileId");
+  if (ids.includes(name)) return;
+  const policyName = ["web", "mobile", "pc"].includes(name.toLowerCase());
+  throw new Error(
+    `'${name}' is not a target profile.`
+    + (policyName
+      ? ` '${name}' is a policy profile — it belongs in the 'profile' argument of clunk_inspect or clunk_optimize, not in targetProfileId.`
+      : "")
+    + ` Valid targetProfileId values: ${ids.join(", ")}.`,
+  );
+}
+
 function optionalString(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
 function requiredString(value: unknown, name: string): string {
-  if (typeof value !== "string" || !value.trim()) throw new Error(`Missing ${name}.`);
+  if (typeof value !== "string" || !value.trim()) {
+    throw new Error(`${name} is required and must be a non-empty string. Received ${JSON.stringify(value)}.`);
+  }
   return value;
 }
 

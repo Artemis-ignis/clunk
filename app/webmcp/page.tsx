@@ -40,7 +40,7 @@ export default function WebMcpPage() {
               보통 에이전트는 사람이 보는 화면과 다른 곳(서버)에 말을 겁니다. 이 사이트는 화면 자신이
               도구를 내줍니다. 에이전트가 마켓을 걸러 보면 사람이 보고 있던 그 목록이 그대로 바뀌고, 모델을
               선으로 바꾸면 사람이 보던 모델이 그 자리에서 바뀝니다. 도구가 돌려주는 숫자는 전부
-              파일에서 직접 잰 값입니다.
+              파일에서 직접 측정한 값입니다.
             </p>
           </section>
 
@@ -155,7 +155,7 @@ export default function WebMcpPage() {
               <Link href="/agents">agent connection</Link> page and repeated inside the tool results.
             </p>
             <p className={styles.foot}>
-              로그인은 사람이 직접 합니다. 도구가 돌려주는 값은 전부 이 사이트가 잰 것이고,
+              로그인은 사람이 직접 합니다. 도구가 돌려주는 값은 전부 이 사이트가 측정한 것이고,
               재지 못한 항목은 결과에서 빠집니다. 파일 검사는 규격을 봅니다 — 게임 화면에서
               어떻게 보이는지는 엔진에서 찍은 최신 화면이 말해 줍니다.
             </p>

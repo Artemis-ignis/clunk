@@ -83,14 +83,14 @@ export const TOOL_DOCS: readonly ToolDoc[] = [
       { name: "query", note: { en: "free text over slug, title and description", ko: "슬러그·이름·설명에서 찾을 낱말" } },
       { name: "theme", note: { en: "all / structure / prop / tree / texture", ko: "all / structure / prop / tree / texture" } },
       { name: "grade", note: { en: "S / A / B / C", ko: "S / A / B / C" } },
-      { name: "maxPolygons", note: { en: "at most this many measured triangles", ko: "잰 폴리곤이 이 수 이하" } },
-      { name: "minPolygons", note: { en: "at least this many measured triangles", ko: "잰 폴리곤이 이 수 이상" } },
+      { name: "maxPolygons", note: { en: "at most this many measured triangles", ko: "측정한 폴리곤이 이 수 이하" } },
+      { name: "minPolygons", note: { en: "at least this many measured triangles", ko: "측정한 폴리곤이 이 수 이상" } },
       { name: "hasAnimation", note: { en: "only assets that carry motion", ko: "움직임이 있는 것만" } },
       { name: "limit", note: { en: "how many results (default 12, max 50)", ko: "몇 개까지(기본 12, 최대 50)" } },
     ],
     returns: {
       en: "Slug, title, grade and its basis, polygons, materials, size in metres, bytes, animations and URL — every figure measured by the pipeline and served by GET /api/marketplace.",
-      ko: "슬러그·이름·등급과 그 근거·폴리곤·재질·실제 크기·용량·동작·주소. 전부 GET /api/marketplace 의 잰 값.",
+      ko: "슬러그·이름·등급과 그 근거·폴리곤·재질·실제 크기·용량·동작·주소. 전부 GET /api/marketplace 의 측정값.",
     },
   },
   {
@@ -99,7 +99,7 @@ export const TOOL_DOCS: readonly ToolDoc[] = [
     page: EVERY_PAGE,
     purpose: {
       en: "Read one listing's measured facts by slug.",
-      ko: "에셋 하나의 잰 값을 슬러그로 읽습니다.",
+      ko: "에셋 하나의 측정값을 슬러그로 읽습니다.",
     },
     inputs: [{ name: "slug", note: { en: "the listing's slug", ko: "상품 주소 이름" } }],
     returns: {

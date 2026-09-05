@@ -165,6 +165,43 @@
 .agents-cv5 .agents-v4-tool-grid strong { color: var(--v5-ink-dim); font-size: 0.8rem; line-height: 1.5; }
 .agents-cv5 .agents-v4-tool-grid small { border-top: 1px solid var(--v5-line); color: var(--v5-ink-faint); font-size: 0.73rem; }
 
+/* 도구 카드의 정확한 스키마.
+   카드 제목 자리는 "이 도구가 나에게 무엇을 해 주는가" 한 문장이 차지하고, 필드 이름은
+   여기 접어 둡니다 — 없애지는 않습니다. 연결하려는 사람은 필드 이름부터 읽을 필요가
+   없고, 실제로 호출을 짜는 사람은 한 번 눌러서 그대로 볼 수 있어야 합니다. */
+.agents-cv5 .agent-tool-schema { margin-top: 10px; border-top: 1px solid var(--v5-line); padding-top: 10px; }
+.agents-cv5 .agent-tool-schema summary {
+  color: var(--v5-ink-faint);
+  cursor: pointer;
+  font-family: var(--v5-label);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  list-style: none;
+}
+.agents-cv5 .agent-tool-schema summary::-webkit-details-marker { display: none; }
+.agents-cv5 .agent-tool-schema summary::before { content: "+ "; color: var(--v5-cyan); }
+.agents-cv5 .agent-tool-schema[open] summary::before { content: "− "; }
+.agents-cv5 .agent-tool-schema summary:hover { color: var(--v5-ink-dim); }
+.agents-cv5 .agent-tool-schema dl { display: grid; gap: 4px; margin: 10px 0 0; }
+.agents-cv5 .agent-tool-schema dt {
+  color: var(--v5-ink-faint);
+  font-family: var(--v5-label);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+.agents-cv5 .agent-tool-schema dd { margin: 0 0 8px; }
+/* 필드 이름은 줄이 길어 카드 폭을 넘깁니다. 넘치는 대신 접히게 둡니다. */
+.agents-cv5 .agent-tool-schema dd code {
+  display: block;
+  color: var(--v5-ink-dim);
+  font-size: 0.71rem;
+  font-weight: 400;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
 .agents-cv5 .agents-v4-statuses { gap: 10px; }
 .agents-cv5 .agents-v4-statuses strong { font-family: var(--v5-label); font-size: 1rem; font-weight: 700; }
 .agents-cv5 .agents-v4-statuses article:nth-child(1) strong { color: var(--v5-green); }

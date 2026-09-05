@@ -332,7 +332,7 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
 
       <div className="agent-guide-footer">
         <span><Icon name="shield" size={15} />연결 키는 작업공간별로 폐기할 수 있습니다.</span>
-        <span><Icon name="fingerprint" size={15} />HTTP는 bytesBase64 업로드 또는 검증된 evidence만 받습니다.</span>
+        <span><Icon name="fingerprint" size={15} />웹으로 연결한 쪽은 올려 보낸 파일과 검증된 기록만 봅니다. 내 컴퓨터의 파일은 열지 않습니다.</span>
         <span><Icon name="circleCheck" size={15} />파일 검사 통과와 화면 검토는 끝까지 분리합니다.</span>
       </div>
     </div>

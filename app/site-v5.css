@@ -159,17 +159,38 @@ html:has(.cv5) body { background: var(--v5-bg0, #17181b); }
   border-radius: 2px;
   background: var(--v5-grad);
 }
-.cv5 .sitenav-utility { display: flex; gap: 2px; }
-.cv5 .sitenav-utility-link { display: inline-flex; align-items: center; height: 36px; padding: 0 11px; border-radius: 9px; color: var(--v5-ink-faint); font-size: 0.82rem; }
-.cv5 .sitenav-utility-link:hover { color: var(--v5-ink); }
-.cv5 .sitenav-actions { display: flex; align-items: center; gap: 9px; }
+/* 오른쪽 끝은 한 줄이다. "가는 곳"(보조 메뉴)과 "내 계정" 사이의 간격만 주 메뉴
+   사이 간격(2px)보다 넓게 두어 두 묶음을 나눈다 — 선을 긋지 않는다.
+   운영자 지적: "메뉴 상단에 검수 뷰어 문서 내 작업공간 이부분만 뭔가 | 이런식으로
+   나눠져 있어서 어색함". 그 막대는 foundry.css:79 의 border-left 였다. */
+.cv5 .sitenav-end { display: flex; align-items: center; gap: 18px; }
+.cv5 .sitenav-utility { display: flex; align-items: center; gap: 2px; }
+/* foundry.css 는 이 셋을 Space Grotesk 600 11.5px 대문자 + 세로 막대로 그린다. 여기서는
+   주 메뉴와 같은 글꼴·같은 알약 모양으로 돌리고, 다른 것은 색 한 칸뿐이다(ink-dim →
+   ink-faint). 계단은 색이 만들지 구분선이 만들지 않는다. */
+.cv5 .sitenav-utility-link {
+  display: inline-flex; align-items: center; height: 38px; padding: 0 12px; border-radius: 10px;
+  border-left: 0; text-transform: none;
+  font-family: var(--v5-font); font-size: 0.86rem; font-weight: 550; letter-spacing: -0.01em;
+  color: var(--v5-ink-faint); transition: color .18s, background .18s;
+}
+.cv5 .sitenav-utility-link:hover { color: var(--v5-ink); background: rgba(255, 255, 255, 0.05); }
+.cv5 .sitenav-utility-link-active { color: var(--v5-ink); }
+.cv5 .sitenav-actions { display: flex; align-items: center; gap: 8px; }
 .cv5 .sitenav .button-quiet {
-  height: 38px; padding: 0 16px; border-radius: 11px; border: 1px solid var(--v5-line-strong);
+  height: 38px; padding: 0 15px; border-radius: 10px; border: 1px solid var(--v5-line-strong);
   background: transparent; color: var(--v5-ink); font-size: 0.88rem; font-weight: 600;
 }
 .cv5 .sitenav .button-quiet:hover { border-color: rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.04); }
+/* 계정 묶음은 글자 링크 → 실선 버튼 → 채운 버튼, 세 계단이다. 로그인 상태(이름·로그아웃·
+   시작)와 로그아웃 상태(로그인·회원가입·시작)가 같은 모양을 갖는다. 예전에는 실선 버튼
+   둘이 채운 버튼 옆에서 같은 무게로 다투고 있었다. */
+.cv5 .sitenav .button-quiet.sitenav-login {
+  border-color: transparent; padding: 0 12px; color: var(--v5-ink-dim); font-weight: 550;
+}
+.cv5 .sitenav .button-quiet.sitenav-login:hover { color: var(--v5-ink); border-color: transparent; }
 .cv5 .sitenav .button-primary {
-  height: 38px; padding: 0 18px; border-radius: 11px; border: 0;
+  height: 38px; padding: 0 18px; border-radius: 10px; border: 0;
   background: var(--v5-grad); color: #fff; font-size: 0.88rem; font-weight: 700; box-shadow: var(--v5-glow);
 }
 .cv5 .sitenav .button-primary:hover { filter: brightness(1.08); }
@@ -504,25 +525,31 @@ html:has(.cv5) body { background: var(--v5-bg0, #17181b); }
 .cv5 .landing-mcp-tabs button::before,
 .cv5 .landing-mcp-tabs button::after { content: none !important; display: none !important; }
 
-/* 2026-09-05 스크롤 스냅을 걷어냈다.
-   운영자: "스크롤 스냅 기능 넣을거면 다 넣고 넣었으면 그 스냅마다 딱딱 한눈에 보이게
-   배치 해야하는데 어디에는 스크롤 스냅이 있고 어디에는 없고 배치도 엉망진창이고".
-   그 말이 맞았고, 잰 값이 이렇다(1440x900, 뷰포트 높이 900).
-     hero 687 · make 796 · inspect 607 · agent 900 · showcase 753 · start 535
-   여섯 중 다섯이 화면 높이와 다르니 스냅이 멈출 때마다 다음 섹션이 잘려 들어왔다.
-   유일하게 맞던 agent 는 min-height:100svh 로 억지로 늘리고, 높이 900 이하에서는
-   MCP 클라이언트 전환기와 단계 알약을 숨겨서 겨우 맞춘 것이었다 — 화면에 맞추려고
-   내용을 지운 셈이다. 나머지 다섯을 같은 방법으로 맞추면(900 기준) 약 1,000px 의
-   빈 띠가 새로 생긴다(hero +213 · inspect +293 · showcase +147 · start +365).
-   더구나 showcase 는 마켓 API 가 돌려주는 상품 수에 따라 높이가 변하고, 390x844
-   에서는 여섯 섹션이 1,066~1,819px 로 화면의 1.3~2.2배다 — "한 화면 = 한 섹션"을
-   지킬 수 없는 내용이다. 그래서 스냅을 없애고 보통 스크롤로 되돌린다.
-   남기는 것: 고정 내비(68px + 26px 그라데이션 꼬리) 밑에 앵커가 처박히지 않도록
-   하는 scroll-padding-top. 옛 규칙은 이걸 scroll-margin-top 으로만 갖고 있어서
-   스냅이 없는 페이지(#catalog · #connect)에서는 아무 효과가 없었다. */
+/* 고정 내비가 덮는 띠는 94px 이다 — 바 68px + 그 밑에 깔린 그라데이션 꼬리 26px
+   (.cv5 .sitenav-dock::after). 그래서 페이지 안 앵커(#catalog · #make · #connect)는
+   전부 이만큼 내려서 멈춘다.
+
+   [data-snap-section] 이 랜딩 밖에서 하는 일이 여기 있다. 이 표식은 /pricing(5개) ·
+   /series(3개) · /marketplace(4개) · 상품 페이지(2개)에도 붙어 있는데, 이 화면들은
+   스냅하지 않는다. 이유는 취향이 아니라 잰 값이다(1440x900, 화면 900).
+     /pricing   228 ~ 855   (0.25 ~ 0.95배) — 요금표·비교표·자주 묻는 질문
+     /series    733 ~ 1,015 (0.81 ~ 1.13배)
+     /marketplace 676 · 3,164 · 2,884 · 404 — 목록 섹션 하나가 화면의 3.5배다
+   특히 /marketplace 는 catalog(3,164) 안에 catalog-results(2,884)가 다시 들어 있다.
+   스냅 대상 안에 스냅 대상이 있는 모양은 y mandatory 가 표현할 수 없는 구조이고,
+   목록의 키는 상품 수가 정한다 — 랜딩처럼 짜임을 다시 짜서 한 판에 맞출 수 있는
+   내용이 아니다. 그래서 이 화면들에서 표식은 스냅 자리가 아니라 섹션 이름표로만 산다
+   (계약 시험 셋이 그 이름으로 "섹션이 조용히 빠지지 않았는지"를 본다). 반쯤 걸린 스냅은
+   어디에도 두지 않는다 — 스냅은 .cv5-snap 이 붙은 화면 하나의 장치다.
+
+   내비 밑으로 처박히지 않게 하는 일은 이 한 줄이 전부 맡는다. 표식마다 scroll-margin-top
+   을 또 주면 안 된다 — 두 값이 더해져 앵커가 94 가 아니라 188px 아래에 선다(실측).
+   값이 100 이었던 옛 값 대신 94 를 쓴다: 그게 실제로 내비가 덮는 높이다.
+   스냅 한 판의 계약은 파일 끝(.cv5-snap)에 따로 있다. */
+.cv5 { --v5-snap-pad: 94px; }
 html:has(.cv5) {
   scroll-behavior: smooth;
-  scroll-padding-top: 100px;
+  scroll-padding-top: 94px;
 }
 @media (prefers-reduced-motion: reduce) { html:has(.cv5) { scroll-behavior: auto; } }
 
@@ -542,11 +569,10 @@ html:has(.cv5) {
    Section 03 live scene — typing chat + real-time GLB modelling (2026-08-31)
    ========================================================================= */
 
-/* 2026-09-05: 이 섹션만 min-height:100svh + 세로 가운데 정렬이었다. 스냅이 여기서만
-   화면에 딱 맞게 서도록 억지로 늘린 것인데(잰 값 900 = 뷰포트 900, 나머지 다섯은
-   535~796), 스냅을 걷어낸 지금은 늘릴 이유가 없다. 늘린 만큼(1440x900 에서
-   섹션 02 뒤 271px, 섹션 03 뒤 327px) 위아래로 빈 띠가 생기고 있었다.
-   다른 섹션과 같은 리듬으로 되돌린다(이제 이 섹션에는 따로 붙는 규칙이 없다). */
+/* 2026-09-05: 이 섹션만 min-height:100svh 를 따로 갖고 있었다 — 여섯 중 이것 하나만
+   화면에 맞게 서도록 억지로 늘린 값이었고, 그래서 섹션 02 뒤 271px · 섹션 03 뒤 327px
+   의 빈 띠가 생겼다. 한 판 계약은 이제 파일 끝의 .cv5-snap 한 곳이 여섯 섹션에
+   똑같이 건다. 여기서는 그 예외를 뺀 상태 그대로 둔다. */
 
 .cv5-agent-mock { display: grid; gap: 12px; }
 .cv5-agent-live { display: grid; grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr); gap: 12px; }
@@ -650,9 +676,10 @@ html:has(.cv5) {
 .cv5-embed3d-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 
 /* 2026-09-05: 여기 있던 "화면 높이 900 이하면 MCP 클라이언트 전환기와 단계 알약을
-   숨긴다"는 규칙을 지운다. 그 규칙의 유일한 이유가 "이 섹션이 한 화면에 딱 맞아야
-   스냅이 산다"였는데 스냅이 없어졌다. 1440x900 은 흔한 노트북 해상도라, 그 규칙은
-   보통 방문자에게서 연결 가능한 클라이언트 목록을 통째로 감추고 있었다. */
+   숨긴다"는 규칙은 돌아오지 않는다. 1440x900 은 흔한 노트북 해상도라, 그 규칙은 보통
+   방문자에게서 연결 가능한 클라이언트 목록을 통째로 감추고 있었다. 섹션 03 을 한 판에
+   맞추는 일은 파일 끝의 .cv5-snap 규칙이 무대 높이를 줄이는 쪽으로 한다 — 화면에
+   맞추려고 보여 줄 것을 지우지 않는다. */
 
 /* ============================================================================
    2026-08-31 master full-page review — round 3
@@ -1123,9 +1150,10 @@ html:has(.cv5) {
       vertical gesture back to the page and keeps the horizontal drag orbiting. */
 /* OrbitControls writes touch-action:none as an INLINE style on the canvas, so
    only an !important author rule can take the vertical gesture back. */
-/* 2026-09-05: 옛 선택자는 `.cv5-snap` 이었다. 스냅을 걷어내면서 그 클래스가 사라지므로,
-   이 규칙이 지키려던 것(첫 화면의 세 무대)을 무대 이름으로 직접 가리킨다. 셋 다 랜딩에만
-   있으니 상품 페이지의 뷰어 동작은 그대로다. */
+/* 이 규칙이 지키려는 것은 첫 화면의 세 무대다. 무대 이름으로 직접 가리킨다 — 셋 다
+   랜딩에만 있으므로 상품 페이지의 뷰어 동작은 그대로고, 랜딩의 스냅 여부와도 무관하다.
+   (2026-09-05: 옛 선택자는 `.cv5-snap` 이었다. 그 클래스는 지금 "이 페이지는 한 판씩
+   스냅한다"는 뜻으로 돌아왔으므로, 손가락 제스처 규칙을 거기에 다시 매달지 않는다.) */
 .cv5-make-stage .cv5-embed3d canvas,
 .cv5-inspect-preview .cv5-embed3d canvas,
 .cv5-agent-stage .cv5-embed3d canvas { touch-action: pan-y !important; }
@@ -1199,3 +1227,236 @@ html:has(.cv5) {
    부러진 칸 하나를 그 칸에 맞춘다. --text-dim 은 html 에 선언돼 있고 .cv5 는 그
    자손이므로, 여기 선언이 상속값을 덮는다 — 파일 로드 순서와 무관하다. */
 .cv5 { --text-dim: var(--v5-ink-faint); }
+
+/* ============================================================================
+   2026-09-05 — 스냅 한 판 (.cv5-snap): 첫 화면의 여섯 판
+
+   운영자: "내가 스크롤 스냅 넣어서 하나의 스냅마다 딱딱 제대로 멈추면서 해당 스냅
+   위치에 제대로 보여주고 알려줄거 보이게 하라고 했던거 같은데".
+   그래서 규칙은 둘뿐이다.
+     (1) 스냅 대상은 정확히 화면 한 판이다.
+     (2) 그 한 판 안에 그 섹션이 보여 줄 것이 전부 들어간다. 안 들어가면 내용을
+         숨기는 게 아니라 짜임을 다시 짠다.
+   같은 날 아침에 "다섯 섹션이 화면과 안 맞으니 스냅을 뺀다"고 판단했던 것을 되돌린다.
+   잰 값은 맞았지만(hero 588 · make 830 · inspect 679 · agent 986 · showcase 742 ·
+   start 388, 화면 900) 고칠 곳은 스냅이 아니라 그 여섯 개의 짜임이었다.
+
+   기하. 고정 내비가 덮는 띠가 94px(바 68 + 그라데이션 꼬리 26)이라 scroll-padding-top
+   도 94px 이다. 그러면 두 번째 섹션부터는 머리가 y=94 에 서므로, 바닥이 화면 바닥에
+   정확히 닿으려면 키가 calc(100svh - 94px) 여야 한다. 첫 화면만 스크롤 0 에서 멈춰
+   패딩이 걸리지 않으므로 100svh 를 통째로 갖는다.
+   푸터에도 멈출 자리를 준다. y mandatory 는 멈출 자리가 없는 구간에서 방문자를 가장
+   가까운 자리로 되돌리므로, align 이 없으면 푸터(449px)에 영영 닿을 수 없다.
+   ========================================================================= */
+
+/* 스냅이 서는 조건. 두 값 모두 이 파일에 이미 있는 사실에서 나온다.
+   - 폭 1081 미만: 같은 파일 421행이 1080 이하에서 히어로·섹션의 두 칸 격자를 한 칸으로
+     접는다. 글과 목업이 세로로 쌓이면 어떤 섹션도 한 판에 들어갈 수 없다. 실측: 390x844
+     에서 여섯 섹션이 1,003~1,826px, 화면의 1.19~2.16배다. 거기서 한 판에 맞추는 방법은
+     내용을 지우는 것뿐이라 스냅을 켜지 않는다(app/foundry.css 도 768 이하에서 같은
+     판단을 이미 계약으로 갖고 있다).
+   - 높이 760 미만: 섹션 03 이 제일 빡빡하다. 1366x768 에서는 여섯 판 모두 넘침 0 인데
+     1100x700 에서는 MCP 설명 줄이 9px 넘친다(실측). 그 아래로는 코드 칸을 96px 밑으로
+     더 줄여야 맞는데, 그건 읽을 수 없는 크기다. 노트북 최소 높이인 768 은 살리고 그
+     아래는 보통 스크롤로 보낸다.
+   두 조건 밖에서는 보통 스크롤이다 — 스냅이 반쯤 걸리는 상태는 만들지 않는다. */
+@media (min-width: 1081px) and (min-height: 760px) {
+  html:has(.cv5-snap) { scroll-snap-type: y mandatory; }
+
+  .cv5-snap [data-snap-section] {
+    height: calc(100svh - var(--v5-snap-pad));
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+  .cv5-snap .cv5-hero { height: 100svh; }
+  .cv5-snap .cv5-footer { scroll-snap-align: end; }
+
+  /* 섹션에만 키를 주면 내용이 위에 몰리고 아래가 빈다. 판을 실제로 채우는 것은
+     프레임이므로, 섹션은 세로 상자가 되고 프레임이 남는 높이를 전부 갖는다. */
+  .cv5-snap .cv5-hero,
+  .cv5-snap .cv5-sec,
+  .cv5-snap .cv5-showcase,
+  .cv5-snap .cv5-closer { display: flex; flex-direction: column; }
+  .cv5-snap .cv5-hero > .cv5-frame,
+  .cv5-snap .cv5-sec > .cv5-frame,
+  .cv5-snap .cv5-showcase > .cv5-frame,
+  .cv5-snap .cv5-closer > .cv5-frame { flex: 1 1 auto; min-height: 0; }
+
+  /* --- 첫 화면 -----------------------------------------------------------
+     알약 띠가 화면 맨 아래를 가로지르고, 그 위를 글 칸과 진열판이 나눠 갖는다. */
+  .cv5-snap .cv5-hero-grid { flex: 1 1 auto; min-height: 0; }
+  .cv5-snap .cv5-hero-visual { min-height: 0; }
+  .cv5-snap .cv5-hero-flow { flex: 0 0 auto; }
+  /* 띠가 화면 바닥(y=900)에 딱 붙어 끝나면 잘린 것처럼 읽힌다. 판 안쪽 여백을 준다. */
+  .cv5-snap .cv5-hero > .cv5-frame { padding-bottom: clamp(20px, 3vh, 34px); }
+
+  /* --- 섹션 01·02·03 -----------------------------------------------------
+     목업은 판 높이를 그대로 받아 늘어난다. 3D 무대가 커지는 쪽이지, 글이 잘리는
+     쪽이 아니다. */
+  .cv5-snap .cv5-sec-grid { height: 100%; align-items: center; }
+  .cv5-snap .cv5-sec-visual { align-self: stretch; min-height: 0; display: flex; }
+  .cv5-snap .cv5-sec-visual > .cv5-mock {
+    flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;
+  }
+  .cv5-snap .cv5-mock-body { flex: 1 1 auto; min-height: 0; }
+  /* 무대의 바닥값(뷰어 420 · 감싼 칸 260~360)은 스냅 밖에서 판이 찌그러지지 않게 하는
+     값이다. 판 높이가 정해진 여기서는 그 값이 오히려 판을 넘기므로 푼다. 대신 키를
+     0 으로 풀기만 하면 뷰어가 자기 캔버스 크기(197px)로 쪼그라들어 무대 위쪽에만 모델이
+     서므로, 같은 자리에서 height:100% 로 무대를 채우게 한다. */
+  .cv5-snap .cv5-make-stage .cv5-embed3d,
+  .cv5-snap .cv5-inspect-preview .cv5-embed3d {
+    /* height:100% 로는 안 된다 — 뷰어와 무대 사이에 격자 칸이 한 겹 있고 그 줄이
+       내용 크기라, 백분율 높이가 자기 내용을 되묻는 순환이 되어 무시된다(실측 199px).
+       섹션 03 의 무대가 이미 쓰는 방식대로 무대에 직접 붙인다. */
+    position: absolute; inset: 0; height: auto; min-height: 0;
+  }
+
+  /* 01 — 모델 무대가 남는 높이를 갖고, 숫자 줄은 제 키만 갖는다. */
+  .cv5-snap .cv5-make { grid-template-rows: minmax(0, 1fr) auto; height: 100%; }
+  .cv5-snap .cv5-make-stage,
+  .cv5-snap .cv5-make-stage > div { min-height: 0; }
+
+  /* 02 — 좌우 두 칸을 위아래로 돌린다. 이 섹션은 뒤집힌 줄이라 목업이 좁은 칸(302px)
+     에 서는데, 거기서 판 높이를 따라가면 미리보기가 302x629 짜리 세로 통이 된다 —
+     트랙터 렌더는 가로가 긴 그림이라 그 통 안에서 위아래로 빈다. 위는 미리보기가 남는
+     높이를 갖고, 아래는 점수·검사 결과·수정 항목이 제 키만 갖는다. */
+  .cv5-snap .cv5-inspect {
+    height: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    align-items: stretch;
+  }
+  .cv5-snap .cv5-inspect-preview { aspect-ratio: auto; min-height: 0; }
+  .cv5-snap .cv5-inspect-preview > div { min-height: 0; }
+  /* 아래 줄은 점수 · 검사 결과 · 수정 항목 셋이 나란히 선다. 칸을 똑같이 나누면 폴리곤
+     한 문장(상한을 넘는다는 말까지 들어 있다)이 199px 안에서 다섯 줄로 접히므로,
+     문장이 긴 칸에 폭을 더 준다. */
+  .cv5-snap .cv5-inspect-panel {
+    grid-auto-flow: column;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr) minmax(0, 1fr);
+    align-items: center;
+  }
+
+  /* 03 — 위는 에이전트 무대, 아래는 MCP 클라이언트 전환기. 화면이 모자랄 때 줄이는
+     것은 무대이고, 전환기와 설정 코드는 그대로 둔다 — 전환기를 숨겨 맞추던 옛 규칙이
+     바로 운영자가 지적한 그 문제였다. 설정 코드는 자기 틀 안에서 스크롤한다. */
+  .cv5-snap .cv5-agent-mock { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+  /* 무대 칸은 격자다. 격자의 줄이 auto 면 줄 높이를 내용이 정하므로 판이 정해져도
+     안쪽이 그대로 삐져나온다(잰 값: 대화 320px 이 190px 짜리 칸 밖으로). 줄을
+     minmax(0,1fr) 로 못 박아 칸 높이를 따르게 한다. */
+  .cv5-snap .cv5-agent-live { flex: 1 1 auto; min-height: 150px; grid-template-rows: minmax(0, 1fr); }
+  .cv5-snap .cv5-agent-live > * { min-height: 0; }
+  .cv5-snap .cv5-agent-live .cv5-chat { overflow: auto; }
+  /* 전환기 칸은 탭 줄과 설정 코드다. 줄어드는 것은 코드 본문 하나뿐이고, 탭·머리·
+     설명 줄은 언제나 제 키를 갖는다 — 연결할 수 있는 클라이언트 목록과 복사 버튼이
+     화면 크기 때문에 사라지지 않는다. */
+  .cv5-snap .cv5-mcp-demo { flex: 0 1 auto; min-height: 0; grid-template-rows: auto minmax(0, 1fr); }
+  .cv5-snap .cv5-mcp-demo .landing-mcp-code { display: flex; flex-direction: column; min-height: 0; }
+  .cv5-snap .cv5-mcp-demo .landing-mcp-code pre { flex: 1 1 auto; min-height: 96px; overflow: auto; }
+
+  /* --- 진열장 ------------------------------------------------------------
+     격자는 언제나 두 줄이다. 목록이 짧게 와도 판의 키가 흔들리지 않게 줄 수를 못 박고,
+     카드는 정사각을 지킨 채 줄 가운데에 선다(잘라 늘리지 않는다). */
+  .cv5-snap .cv5-showcase > .cv5-frame { display: flex; flex-direction: column; }
+  .cv5-snap .cv5-showcase-live { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  .cv5-snap .cv5-showcase-live .cv5-showcase-grid {
+    flex: 1 1 auto; min-height: 0;
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+  }
+  .cv5-snap .cv5-showcase-live .cv5-showcase-card { align-self: center; width: 100%; }
+
+  /* --- 마무리 ------------------------------------------------------------
+     한 판을 통째로 갖는 화면에서는 섹션 위 여백(--v5-band)이 필요 없다. 그 96px 을
+     그대로 두면 내용이 판 가운데가 아니라 251px/155px 로 아래로 치우쳐 선다. */
+  .cv5-snap .cv5-closer { padding-top: 0; }
+  .cv5-snap .cv5-closer > .cv5-frame {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+
+  /* 푸터는 이제 자기 판을 따로 갖는다. 앞 섹션이 이미 화면 한 판을 다 쓰므로 그 위에
+     이음매 96px 을 더 얹으면 두 스냅 자리 사이에 빈 띠만 생긴다. */
+  .cv5-snap .cv5-footer { margin-top: 0; }
+}
+
+/* 움직임을 줄여 달라고 한 방문자에게는 스냅을 걸지 않는다 — 스냅은 스크롤을 가로채는
+   동작이라 그 요청과 정면으로 어긋난다. */
+@media (prefers-reduced-motion: reduce) {
+  html:has(.cv5-snap) { scroll-snap-type: none; scroll-behavior: auto; }
+  .cv5-snap [data-snap-section] {
+    height: auto;
+    scroll-snap-align: none;
+    scroll-snap-stop: normal;
+  }
+  .cv5-snap .cv5-hero { height: auto; }
+  .cv5-snap .cv5-footer { scroll-snap-align: none; }
+}
+
+/* ---------------------------------------------------------- 첫 화면 아래 띠
+   다섯 단계는 이제 첫 화면 맨 아래를 가로지르는 띠다. 알약 한 줄이던 시절에는 그
+   줄 밑으로 322px 이 빈 채 남아 있었다(알약 바닥 y=578, 화면 900). 알약마다 무엇을
+   하는지 한 줄씩 붙어 있으므로, 이 띠는 빈자리를 메우는 장식이 아니라 첫 화면이
+   마지막으로 하는 말이다. */
+.cv5-hero-inner { display: flex; flex-direction: column; gap: clamp(22px, 3.4vh, 42px); }
+.cv5-hero-flow {
+  margin-top: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  border-top: 1px solid var(--v5-line);
+  padding-top: clamp(16px, 2.2vh, 26px);
+}
+.cv5-hero-flow span {
+  height: auto; border-radius: 14px; padding: 11px 14px 12px;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 5px;
+  letter-spacing: 0.02em;
+}
+.cv5-hero-flow span > i {
+  display: flex; align-items: center; gap: 7px; align-self: auto;
+  font-style: normal; color: var(--v5-ink-dim); letter-spacing: 0.1em;
+}
+.cv5-hero-flow span > small {
+  font-family: var(--v5-font); font-size: 0.78rem; font-weight: 500;
+  letter-spacing: -0.01em; line-height: 1.5; color: var(--v5-ink-faint);
+}
+
+/* 휴대폰에서 다섯 개가 3+2 로 서면 한 칸이 118px 밖에 안 돼 설명 한 줄이 세 줄로
+   접힌다. 한 줄에 하나씩, 번호·이름과 설명을 좌우로 놓는다. */
+@media (max-width: 640px) {
+  .cv5-hero .cv5-hero-flow { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .cv5-hero .cv5-hero-flow span,
+  .cv5-hero .cv5-hero-flow span:nth-child(4),
+  .cv5-hero .cv5-hero-flow span:nth-child(5) {
+    grid-column: 1 / -1;
+    flex-direction: row; align-items: baseline; gap: 10px;
+    justify-content: flex-start; padding: 9px 12px;
+  }
+  .cv5-hero .cv5-hero-flow span > i { flex: 0 0 auto; }
+}
+
+/* -------------------------------------------------------------- 마무리 세 문
+   마지막 판은 부름 한 줄과 버튼 둘뿐이라 806px 짜리 화면에서 292px 만 쓰고 나머지가
+   비어 있었다. 위 세 섹션이 각각 가리키던 곳으로 가는 실제 문 셋을 한 줄로 놓아
+   판을 닫는다. */
+.cv5-closer-doors {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px; width: min(100%, 880px); margin: clamp(28px, 4vh, 46px) auto 0;
+}
+.cv5-closer-doors a {
+  display: grid; gap: 6px; text-align: left; padding: 15px 17px;
+  border: 1px solid var(--v5-line); border-radius: var(--v5-r);
+  background: rgba(255, 255, 255, 0.03);
+  transition: border-color .18s, background-color .18s, transform .18s;
+}
+.cv5-closer-doors a:hover {
+  border-color: rgba(139, 92, 246, 0.45);
+  background: var(--v5-grad-soft);
+  transform: translateY(-2px);
+}
+.cv5-closer-doors b {
+  font-family: var(--v5-label); font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 0.14em; color: var(--v5-ink);
+}
+.cv5-closer-doors span { font-size: 0.82rem; line-height: 1.55; color: var(--v5-ink-faint); }
+@media (max-width: 640px) {
+  .cv5-closer-doors { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+}

@@ -16,7 +16,7 @@ export const metadata = createPageMetadata({
   title: "에셋 마켓",
   // 2026-09-03: 공개 카탈로그는 3D GLB 15개와 2D PNG 텍스처 8개(그리고 각 모델의 스프라이트
   // 시트 파생본)입니다. "3D 에셋"만 적으면 목록의 3분의 1이 문구에서 사라집니다.
-  description: "Clunk가 직접 만든 가벼운 3D 모델과 이어붙는 2D 텍스처. 얼마나 무거운지 잰 값을 보고, 직접 돌리거나 이어 붙여 본 뒤 받으세요. 로그인만 하면 무료입니다.",
+  description: "Clunk가 직접 만든 가벼운 3D 모델과 이어붙는 2D 텍스처. 얼마나 무거운지 측정한 값을 보고, 직접 돌리거나 이어 붙여 본 뒤 받으세요. 로그인만 하면 무료입니다.",
   path: "/marketplace",
 });
 
@@ -57,7 +57,7 @@ export default function MarketplacePage() {
                   <em>3D 모델과 2D 텍스처</em>
                 </h1>
                 <p className={styles.heroLede}>
-                  얼마나 무거운지 잰 값과 용량을 보고, 모델은 돌려 보고 텍스처는 이어 붙여 본 뒤 받으세요.
+                  얼마나 무거운지 측정한 값과 용량을 보고, 모델은 돌려 보고 텍스처는 이어 붙여 본 뒤 받으세요.
                   {salesOpen ? "" : " 로그인만 하면 무료입니다."}
                 </p>
                 <div className={styles.heroActions}>

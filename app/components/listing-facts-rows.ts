@@ -238,6 +238,6 @@ export function reconcileMeasured(
     && (facts.materials === null || facts.materials === measured.materials)
     && facts.byteLength === measured.bytes;
   return same
-    ? "이 브라우저에서 다시 잰 값도 같습니다."
-    : `이 브라우저에서 다시 잰 값이 다릅니다 — 폴리곤 ${measured.triangles.toLocaleString("ko-KR")}개 · 재질 ${measured.materials}개 · ${formatBytes(measured.bytes)}.`;
+    ? "이 브라우저에서 다시 측정한 값도 같습니다."
+    : `이 브라우저에서 다시 측정한 값이 다릅니다 — 폴리곤 ${measured.triangles.toLocaleString("ko-KR")}개 · 재질 ${measured.materials}개 · ${formatBytes(measured.bytes)}.`;
 }

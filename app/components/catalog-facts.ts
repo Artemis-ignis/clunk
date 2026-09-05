@@ -8,7 +8,7 @@ import { isVariantSlug } from "../api/_lib/listing-variants";
  * 읽지 못한 항목은 null 로 남아 화면에서 줄째로 빠진다(빈칸이나 "—" 를 채우지 않는다).
  *
  * 2026-09-04: 이 파일은 app/components/gacha/gacha-catalog.ts 에서 나왔다. 캡슐
- * 자판기는 결제대행 심사에서 사행성으로 지목돼 통째로 사라졌지만, 등급과 잰 값을
+ * 자판기는 결제대행 심사에서 사행성으로 지목돼 통째로 사라졌지만, 등급과 측정값을
  * 읽는 계산은 뽑기와 무관하다 — 등급은 값이 아니라 크기·동작을 보고 매기고, 마켓
  * 카드가 그대로 쓰고 있다. 그래서 계산만 쓰는 쪽으로 옮겼고, 뽑기에만 쓰이던 것
  * (무작위 뽑기, 확률판, 캡슐 색, 원화 표기)은 함께 지웠다.
@@ -99,11 +99,13 @@ export function drawableListings(listings: readonly CatalogListing[]): CatalogLi
 }
 
 /* ---------------------------------------------------------------------------
-   설명 문장에서 잰 값 읽기 — 여기 적힌 문장 형태에서만 읽는다.
+   설명 문장에서 측정값 읽기 — 여기 적힌 문장 형태에서만 읽는다.
    못 읽으면 null 이고, 화면은 그 줄을 통째로 뺀다.
    ------------------------------------------------------------------------- */
 
-/** "잰 값으로 폴리곤 1,060개, 그리기 18회, 재질 5개" — 파일 하나를 연 값. */
+/** 옛 설명문에만 있던 문장 꼴. 지금 D1 설명문에는 하나도 없고(2026-09-05 확인)
+    측정값은 listing-facts.json 에서 온다. 옛 문장이 남은 곳을 위해 남겨 둔 정규식이라
+    문자열을 "측정" 으로 바꾸면 도리어 못 읽게 된다. */
 const SOLID = /잰 값으로 폴리곤 ([\d,]+)개, 그리기 ([\d,]+)회, 재질 ([\d,]+)개/u;
 /** "셋을 합쳐 폴리곤 4,596개, 그리기 68회, 재질 26개" — 묶음의 합. */
 const BUNDLE = /합쳐 폴리곤 ([\d,]+)개, 그리기 ([\d,]+)회, 재질 ([\d,]+)개/u;
@@ -189,7 +191,7 @@ export function isFreeGrade(letter: GradeLetter): boolean {
 /**
  * 폴리곤 수를 숫자로. 문장에서 못 읽으면 null 이다.
  * 나무 팩처럼 범위로 적힌 것은 그 묶음에서 가장 큰 한 그루의 값을 쓴다 —
- * "얼마나 복잡해 보이는가" 를 재는 자리라서 가장 무거운 것이 기준이다.
+ * "얼마나 복잡해 보이는가" 를 측정하는 자리라서 가장 무거운 것이 기준이다.
  */
 export function polygonCountOf(listing: Pick<CatalogListing, "description" | "facts">): number | null {
   if (typeof listing.facts?.triangles === "number" && listing.facts.triangles > 0) return listing.facts.triangles;

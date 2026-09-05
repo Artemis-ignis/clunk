@@ -94,11 +94,21 @@ test("public source links use connect instead of the provider-conflicting mcp ro
   }
 });
 
-test("agent-facing documentation names the seven-tool HTTP/local contract and official entrypoint", async () => {
+/**
+ * 2026-09-05: 이 검사는 "exactly 7 tools" 라는 글자를 찾고 있었습니다. 도구를 늘리면
+ * 문서만 그대로 두고도 통과할 수 있는 자리가 아니라, 문서가 실제 tools/list와 어긋나면
+ * 깨지는 자리여야 합니다. 이제 도구 목록 자체를 원본에서 읽어 대조합니다.
+ */
+test("agent-facing documentation names every tool the HTTP endpoint actually advertises", async () => {
   const llms = await source("public/llms.txt");
+  const mcpHttp = await source("app/api/_lib/mcp-http.ts");
+  const advertised = [...mcpHttp.matchAll(/^\s{4}name: "(clunk_[a-z_]+)",$/gmu)].map((match) => match[1]);
+  assert.ok(advertised.length >= 7, "MCP_HTTP_TOOLS names could not be read from mcp-http.ts");
   assert.match(llms, /\/connect/);
-  assert.match(llms, /exactly 7 tools/);
-  assert.match(llms, /clunk_sprite_sheet_review/);
+  assert.match(llms, new RegExp(`exactly ${advertised.length} tools`));
+  for (const name of advertised) {
+    assert.ok(llms.includes(name), `public/llms.txt never names the advertised tool ${name}`);
+  }
   assert.doesNotMatch(llms, /tool 4/);
   assert.doesNotMatch(llms, /public HTTP.*not currently available/i);
 });

@@ -95,6 +95,24 @@ const INSPECTED_MODEL = {
  */
 const AGENT_CLIENTS = ["Claude Code", "Codex", "Cursor", "GitHub Copilot", "Claude Desktop", "VS Code", "로컬 stdio"] as const;
 
+/**
+ * 다섯 단계 알약 밑에 붙는 한 줄.
+ *
+ * 1440x900 에서 첫 화면의 아래 322px 이 빈 채로 남아 있었고(알약 바닥 y=578, 화면 900),
+ * 운영자가 "첫화면 밑이 비어 보인다"고 지적했다. 그 자리를 장식으로 메우는 대신 알약을
+ * 첫 화면 맨 아래를 가로지르는 띠로 옮기고, 각 단계가 실제로 무엇을 하는지 한 줄씩
+ * 붙였다. 다섯 줄 모두 이 페이지의 다른 곳이 이미 하는 말이다 — 01·04 는 섹션 01,
+ * 02 는 섹션 02(항목 수는 코드에서 세는 RULE_COUNT), 03 은 섹션 02 의 수정 목록,
+ * 05 는 바로 위 AGENT_CLIENTS 의 길이다. 손으로 적은 숫자는 없다.
+ */
+const FLOW_NOTES = [
+  "한 줄이면 2D, 몇 초면 3D 파일",
+  `GLB를 ${RULE_COUNT}가지 항목으로`,
+  "걸린 것만 고쳐 새 파일로",
+  "검사를 통과한 것만 마켓에",
+  `AI 도구 ${AGENT_CLIENTS.length}곳에 그대로`,
+] as const;
+
 /** Renderer-measured triangle counts — outputs/market-launch/wave1/measurements. */
 const SHOWCASE = [
   { slug: "market-stall", name: "시장 노점", tris: "2,456" },
@@ -111,7 +129,9 @@ const SHOWCASE = [
   { slug: "crate-closed", name: "뚜껑 상자", tris: "700" },
 ] as const;
 
-const HERO_CELLS = SHOWCASE.slice(0, 6);
+/* 첫 화면이 한 판(100svh)을 통째로 갖게 되면서 진열판이 세로로 커졌다. 6칸(3x2)이면
+   판 아래에 빈 자리가 남으므로 9칸(3x3)으로 채운다 — 칸은 정사각을 유지한다. */
+const HERO_CELLS = SHOWCASE.slice(0, 9);
 const MARKET_CELLS = SHOWCASE.slice(0, 6);
 
 function ShowcaseImg({ slug, name, eager }: { slug: string; name: string; eager?: boolean }) {
@@ -128,13 +148,17 @@ function ShowcaseImg({ slug, name, eager }: { slug: string; name: string; eager?
 
 export default function Home() {
   return (
-    /* 2026-09-05: `cv5-snap` 이 붙어 있는 동안 이 페이지만 스크롤 스냅이 켜졌다.
-       섹션 여섯의 높이가 화면(900)과 달라 스냅마다 다음 섹션이 잘려 들어왔고,
-       390x844 에서는 섹션이 화면의 1.3~2.2배라 아예 맞을 수가 없었다.
-       스냅을 걷어냈으므로 표식도 뗀다(근거는 app/site-v5.css 의 같은 날 주석).
-       아래 data-snap-section 은 tests/site-quality-contract.test.mjs 가 못 박아 둔
-       섹션 이름표라 그대로 두지만, 이제 어떤 규칙도 여기에 스냅하지 않는다. */
-    <div className="cv5">
+    /* `cv5-snap` 은 "이 페이지의 여섯 섹션은 저마다 화면 한 판"이라는 선언이다.
+       규칙은 app/site-v5.css 한 곳에 있고, 여기 붙은 클래스가 그 규칙을 켠다.
+
+       2026-09-05 아침에 스냅을 통째로 걷어낸 판단을 되돌린다. 그때 잰 값
+       (hero 588 · make 830 · inspect 679 · agent 986 · showcase 742 · start 388,
+       화면 900)은 맞았지만 결론이 틀렸다. 운영자가 요구한 것은 "스냅마다 딱딱 멈추면서
+       그 자리에서 보여 줄 것이 다 보이게" 였지 스냅을 빼라는 말이 아니었다. 그래서
+       섹션을 지우거나 숨기는 대신 여섯 섹션의 짜임을 화면 한 판에 맞게 다시 짰다.
+       특히 섹션 03 을 한 판에 맞추려고 화면 높이 900 이하에서 MCP 클라이언트 전환기와
+       단계 알약을 숨기던 규칙은 되살리지 않는다 — 그건 맞춘 게 아니라 지운 것이었다. */
+    <div className="cv5 cv5-snap">
       <ForceDarkTheme />
       <RevealObserver />
       <div className="cv5-stars" aria-hidden="true" />
@@ -144,71 +168,76 @@ export default function Home() {
       <main id="main-content">
         {/* HERO ------------------------------------------------------- */}
         <section className="cv5-hero public-hero-frame" data-snap-section="hero" aria-labelledby="home-heading">
-          <div className="cv5-frame cv5-hero-grid">
-            <div>
-              <span className="cv5-badge">✦ 게임 제작을 위한 <b>단 하나의 AI 슈퍼앱</b></span>
-              {/* Korean headlines are broken by hand at each breakpoint, the way
-                  the Korean reference site does it: a browser wrapping Hangul
-                  splits on whatever fits, which lands mid-어절 at narrow widths.
-                  Desktop takes two lines, mobile four. */}
-              <h1 id="home-heading">
-                <span className="cv5-line-wide">
-                  게임 제작의 모든 과정을<br /><em>CLUNK 하나로</em>
-                </span>
-                <span className="cv5-line-narrow">
-                  게임 제작의<br />모든 과정을<br /><em>CLUNK<br />하나로</em>
-                </span>
-              </h1>
-              {/* The operator's own sentence (2026-09-02). It says what the product does in
-                  the words a visitor uses — not how the inspector does it. */}
-              <p className="cv5-hero-lede">
-                2D·3D 게임 에셋을 생성하고, 검사·수정하고, AI 에이전트와 함께 게임까지 제작하세요.
-                만든 에셋이 게임에서 문제없이 돌아가는지도 바로 확인해 드립니다.
-              </p>
-              <div className="cv5-cta-row">
-                <Link className="cv5-btn cv5-btn-primary" href="/signup?return_to=%2Fstudio%3Fintent%3Dcreate" prefetch={false}>
-                  무료로 시작하기 <Icon name="arrowUpRight" size={17} />
-                </Link>
-                <Link className="cv5-btn cv5-btn-ghost" href="/marketplace" prefetch={false}>
-                  마켓 둘러보기
-                </Link>
-              </div>
-              {/* Five steps. On a phone they used to wrap 4 + 1, which reads as
-                  a mistake; the mobile rule in site-v5.css lays them out 3 + 2
-                  and centres both rows so the break looks deliberate. */}
-              <div className="cv5-flow" aria-label="Clunk 작업 순서">
-                {FLOW.map((step, index) => (
-                  <span key={step}>
-                    <b>{String(index + 1).padStart(2, "0")}</b> {step}
+          <div className="cv5-frame cv5-hero-inner">
+            <div className="cv5-hero-grid">
+              <div>
+                <span className="cv5-badge">✦ 게임 제작을 위한 <b>단 하나의 AI 슈퍼앱</b></span>
+                {/* Korean headlines are broken by hand at each breakpoint, the way
+                    the Korean reference site does it: a browser wrapping Hangul
+                    splits on whatever fits, which lands mid-어절 at narrow widths.
+                    Desktop takes two lines, mobile four. */}
+                <h1 id="home-heading">
+                  <span className="cv5-line-wide">
+                    게임 제작의 모든 과정을<br /><em>CLUNK 하나로</em>
                   </span>
-                ))}
+                  <span className="cv5-line-narrow">
+                    게임 제작의<br />모든 과정을<br /><em>CLUNK<br />하나로</em>
+                  </span>
+                </h1>
+                {/* The operator's own sentence (2026-09-02). It says what the product does in
+                    the words a visitor uses — not how the inspector does it. */}
+                <p className="cv5-hero-lede">
+                  2D·3D 게임 에셋을 생성하고, 검사·수정하고, AI 에이전트와 함께 게임까지 제작하세요.
+                  만든 에셋이 게임에서 문제없이 돌아가는지도 바로 확인해 드립니다.
+                </p>
+                <div className="cv5-cta-row">
+                  <Link className="cv5-btn cv5-btn-primary" href="/signup?return_to=%2Fstudio%3Fintent%3Dcreate" prefetch={false}>
+                    무료로 시작하기 <Icon name="arrowUpRight" size={17} />
+                  </Link>
+                  <Link className="cv5-btn cv5-btn-ghost" href="/marketplace" prefetch={false}>
+                    마켓 둘러보기
+                  </Link>
+                </div>
+              </div>
+
+              <div className="cv5-hero-visual" aria-hidden="true">
+                <div className="cv5-hv-panel">
+                  {/* "TRIS" told a visitor nothing and "면" was our own coinage. 폴리곤 is
+                      the word game people already use; the panel head says once which way
+                      is better so the number under every thumbnail reads without a glossary. */}
+                  <div className="cv5-hv-head"><span>마켓에 올라온 <b>에셋</b></span><span>폴리곤 수</span></div>
+                  <div className="cv5-hv-grid">
+                    {HERO_CELLS.map((asset) => (
+                      <figure className="cv5-hv-cell" key={asset.slug} style={{ margin: 0 }}>
+                        <ShowcaseImg slug={asset.slug} name={asset.name} eager />
+                        <span>{asset.tris} 폴리곤</span>
+                      </figure>
+                    ))}
+                  </div>
+                  <div className="cv5-hv-foot">
+                    {/* The Harvest Frontier tractor's own record (tractor.compact.m1-pc-inspection.json):
+                        score 99, hardBlockerCount 0, two warnings. It has never scored 100. */}
+                    <span>트랙터 검사 결과</span>
+                    <b>99점 · 막는 문제 0건</b>
+                  </div>
+                </div>
+                <div className="cv5-float cv5-float-a"><img src="/landing/showcase/conifer-spire.webp" alt="" width={240} height={240} loading="eager" /><small>860 폴리곤</small></div>
+                <div className="cv5-float cv5-float-b"><img src="/landing/showcase/crate-produce.webp" alt="" width={200} height={200} loading="eager" /><small>782 폴리곤</small></div>
+                <div className="cv5-float cv5-float-c"><img src="/landing/showcase/haystack.webp" alt="" width={220} height={220} loading="eager" /><small>1,322 폴리곤</small></div>
               </div>
             </div>
 
-            <div className="cv5-hero-visual" aria-hidden="true">
-              <div className="cv5-hv-panel">
-                {/* "TRIS" told a visitor nothing and "면" was our own coinage. 폴리곤 is
-                    the word game people already use; the panel head says once which way
-                    is better so the number under every thumbnail reads without a glossary. */}
-                <div className="cv5-hv-head"><span>마켓에 올라온 <b>에셋</b></span><span>폴리곤 수</span></div>
-                <div className="cv5-hv-grid">
-                  {HERO_CELLS.map((asset) => (
-                    <figure className="cv5-hv-cell" key={asset.slug} style={{ margin: 0 }}>
-                      <ShowcaseImg slug={asset.slug} name={asset.name} eager />
-                      <span>{asset.tris} 폴리곤</span>
-                    </figure>
-                  ))}
-                </div>
-                <div className="cv5-hv-foot">
-                  {/* The Harvest Frontier tractor's own record (tractor.compact.m1-pc-inspection.json):
-                      score 99, hardBlockerCount 0, two warnings. It has never scored 100. */}
-                  <span>트랙터 검사 결과</span>
-                  <b>99점 · 막는 문제 0건</b>
-                </div>
-              </div>
-              <div className="cv5-float cv5-float-a"><img src="/landing/showcase/conifer-spire.webp" alt="" width={240} height={240} loading="eager" /><small>860 폴리곤</small></div>
-              <div className="cv5-float cv5-float-b"><img src="/landing/showcase/crate-produce.webp" alt="" width={200} height={200} loading="eager" /><small>782 폴리곤</small></div>
-              <div className="cv5-float cv5-float-c"><img src="/landing/showcase/haystack.webp" alt="" width={220} height={220} loading="eager" /><small>1,322 폴리곤</small></div>
+            {/* 다섯 단계. 왼쪽 글 밑에 붙어 있던 알약 줄을 첫 화면 맨 아래를 가로지르는
+                띠로 옮겼다 — 알약 바닥(y=578)과 화면 바닥(900) 사이 322px 이 비어
+                있었고, 이제 그 자리를 이 띠가 갖는다. 휴대폰에서는 4+1 로 접혀 실수처럼
+                읽히던 것을 3+2 로 세우는 규칙이 site-v5.css 에 그대로 있다. */}
+            <div className="cv5-flow cv5-hero-flow" aria-label="Clunk 작업 순서">
+              {FLOW.map((step, index) => (
+                <span key={step}>
+                  <i><b>{String(index + 1).padStart(2, "0")}</b> {step}</i>
+                  <small>{FLOW_NOTES[index]}</small>
+                </span>
+              ))}
             </div>
           </div>
         </section>
@@ -395,7 +424,12 @@ export default function Home() {
                 카드마다 폴리곤 수가 적혀 있고, 베타 기간에는 로그인만 하면 무료로 받습니다.
               </p>
             </div>
-            <LandingMarketShowcase />
+            {/* 이 진열장의 높이는 마켓이 몇 개를 돌려주느냐가 아니라 설계로 정한다.
+                한 세션에서 이 자리를 재 보면 580~3,164px 까지 흔들렸다 — 목록 응답이
+                길면 격자가 그만큼 길어졌기 때문이다. 열두 개(데스크톱 6열 x 2줄)로
+                끊고, 나머지는 아래 "전체 목록 보기"가 맡는다. 줄 수는 CSS 가
+                grid-template-rows 로 못 박으므로 응답이 짧아도 판의 키는 그대로다. */}
+            <LandingMarketShowcase limit={12} />
             <div className="cv5-showcase-foot cv5-reveal">
               <Link className="cv5-more" href="/marketplace" prefetch={false}>
                 마켓에서 전체 목록 보기 <Icon name="arrowRight" size={15} />
@@ -417,6 +451,25 @@ export default function Home() {
               </Link>
               <Link className="cv5-btn cv5-btn-ghost" href="/agents" prefetch={false}>
                 에이전트 연결
+              </Link>
+            </div>
+
+            {/* 마지막 한 판은 부름 한 줄과 버튼 둘뿐이라 806px 짜리 화면에서 292px 만
+                쓰고 나머지는 비어 있었다. 세 문을 한 줄로 놓아 화면을 닫는다 — 장식이
+                아니라 위 세 섹션이 각각 가리키던 곳으로 가는 실제 문이고, 숫자는 둘 다
+                코드에서 세어 온다(RULE_COUNT · AGENT_CLIENTS.length). */}
+            <div className="cv5-closer-doors">
+              <Link href="/marketplace" prefetch={false}>
+                <b>마켓</b>
+                <span>폴리곤 수까지 적힌 실제 파일을 받습니다</span>
+              </Link>
+              <Link href="/signup?return_to=%2Fapp%3Fintent%3Dinspect" prefetch={false}>
+                <b>검사</b>
+                <span>GLB 한 개를 {RULE_COUNT}가지 항목으로 봅니다</span>
+              </Link>
+              <Link href="/agents" prefetch={false}>
+                <b>에이전트</b>
+                <span>AI 도구 {AGENT_CLIENTS.length}곳의 연결 설정을 줍니다</span>
               </Link>
             </div>
           </div>

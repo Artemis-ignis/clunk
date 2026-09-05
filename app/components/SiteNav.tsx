@@ -111,56 +111,71 @@ export function SiteNav({ active }: { active?: ShellSection }) {
             ))}
           </ul>
 
-          <div className="sitenav-utility" aria-label="보조 메뉴">
-            {UTILITY_NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                className={`sitenav-utility-link${active === link.section ? " sitenav-utility-link-active" : ""}`}
-                href={link.href}
-                prefetch={false}
-                aria-current={active === link.section ? "page" : undefined}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
+          {/* 2026-09-05: 오른쪽이 두 덩어리로 따로 놀고 있었습니다. 운영자가 짚은 그대로
+              "검수 뷰어 | 문서 | 내 작업공간"만 세로 막대로 갈라져 있었고(foundry.css 의
+              .sitenav-utility-link 이 링크마다 border-left 를 긋습니다), 글꼴도 그 셋만
+              Space Grotesk 대문자 13.1px 이라 옆의 로그인·회원가입(Pretendard 14.1px)과
+              다른 물건처럼 읽혔습니다. 잰 간격도 어긋나 있었습니다 — 주 메뉴와 이 셋
+              사이 121px, 이 셋과 계정 버튼 사이 10px. 즉 보조 메뉴가 계정 쪽에 붙어
+              있었습니다.
+              이제 오른쪽 끝을 한 상자(.sitenav-end)로 묶고, 그 안을 "가는 곳(보조 메뉴)"
+              과 "내 계정(이름·로그아웃·시작 버튼)" 두 묶음으로만 나눕니다. 막대는 없애고
+              글꼴은 주 메뉴와 같게, 무게만 한 칸 낮춥니다. */}
+          <div className="sitenav-end">
+            <div className="sitenav-utility" aria-label="보조 메뉴">
+              {UTILITY_NAV_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  className={`sitenav-utility-link${active === link.section ? " sitenav-utility-link-active" : ""}`}
+                  href={link.href}
+                  prefetch={false}
+                  aria-current={active === link.section ? "page" : undefined}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
 
-          {/* 2026-09-05: 여기 있던 라이트/다크 토글을 뺐다. 눌러도 페이지 요소
-              435개 중 19개(4.4%)만 색이 바뀌고, 그 19개인 드로어 링크는 대비가
-              1.62:1 까지 떨어져 오히려 안 보이게 되던 버튼이다. 자세한 이유는
-              app/layout.tsx 의 data-theme 주석에 적어 뒀다. */}
-          <div className="sitenav-actions">
-            {session ? (
-              <>
-                <Link className="button button-quiet button-sm sitenav-login" href="/dashboard" prefetch={false}>
-                  {session.displayName}
-                </Link>
-                <a className="button button-quiet button-sm sitenav-signout" href="/signout-with-chatgpt?return_to=%2F">로그아웃</a>
-              </>
-            ) : (
-              <>
-                <Link className="button button-quiet button-sm sitenav-login" href={loginHref} prefetch={false}>
-                  로그인
-                </Link>
-                <Link className="button button-quiet button-sm sitenav-signup" href={signupHref} prefetch={false}>
-                  회원가입
-                </Link>
-              </>
-            )}
-            <Link className="button button-primary button-sm sitenav-cta" href={session ? "/app" : startHref} prefetch={false}>
-              {session ? "에셋 검사 열기" : "Clunk 사용하기"}
-              <Icon name="arrowUpRight" size={14} />
-            </Link>
-            <button
-              type="button"
-              className="sitenav-burger"
-              onClick={() => setOpen((value) => !value)}
-              aria-expanded={open}
-              aria-controls="sitenav-drawer"
-              aria-label={open ? "메뉴 닫기" : "메뉴 열기"}
-            >
-              <Icon name={open ? "close" : "menu"} size={18} />
-            </button>
+            {/* 2026-09-05: 여기 있던 라이트/다크 토글을 뺐다. 눌러도 페이지 요소
+                435개 중 19개(4.4%)만 색이 바뀌고, 그 19개인 드로어 링크는 대비가
+                1.62:1 까지 떨어져 오히려 안 보이게 되던 버튼이다. 자세한 이유는
+                app/layout.tsx 의 data-theme 주석에 적어 뒀다. */}
+            <div className="sitenav-actions">
+              {/* 로그인/이름은 글자 링크, 회원가입/로그아웃은 실선 버튼, 마지막이 채운
+                  버튼. 로그인 상태와 로그아웃 상태가 같은 세 계단을 갖습니다 — 예전에는
+                  실선 버튼 둘에 채운 버튼 하나라 셋이 서로 다투고 있었습니다. */}
+              {session ? (
+                <>
+                  <Link className="button button-quiet button-sm sitenav-login" href="/dashboard" prefetch={false}>
+                    {session.displayName}
+                  </Link>
+                  <a className="button button-quiet button-sm sitenav-signout" href="/signout-with-chatgpt?return_to=%2F">로그아웃</a>
+                </>
+              ) : (
+                <>
+                  <Link className="button button-quiet button-sm sitenav-login" href={loginHref} prefetch={false}>
+                    로그인
+                  </Link>
+                  <Link className="button button-quiet button-sm sitenav-signup" href={signupHref} prefetch={false}>
+                    회원가입
+                  </Link>
+                </>
+              )}
+              <Link className="button button-primary button-sm sitenav-cta" href={session ? "/app" : startHref} prefetch={false}>
+                {session ? "에셋 검사 열기" : "Clunk 사용하기"}
+                <Icon name="arrowUpRight" size={14} />
+              </Link>
+              <button
+                type="button"
+                className="sitenav-burger"
+                onClick={() => setOpen((value) => !value)}
+                aria-expanded={open}
+                aria-controls="sitenav-drawer"
+                aria-label={open ? "메뉴 닫기" : "메뉴 열기"}
+              >
+                <Icon name={open ? "close" : "menu"} size={18} />
+              </button>
+            </div>
           </div>
         </nav>
 

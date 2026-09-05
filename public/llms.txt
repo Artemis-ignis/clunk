@@ -48,14 +48,25 @@ The Sites access policy still controls whether an external client can reach the 
 
 ### Browser WebMCP
 
-The site also contains a read-only WebMCP bridge. When the browser exposes the current imperative
-API at `document.modelContext`, Clunk registers `clunk_connection_check` and
-`clunk_product_capabilities`; older experimental browsers may expose the deprecated
-`navigator.modelContext` fallback. The page visibly reports `REGISTERED`, `UNAVAILABLE`, or
-`ERROR`. These browser tools describe the HTTP endpoint and contract boundary only: they do not
-read a caller's local path, run `clunk_optimize`, or promote `structural=PASS` to
-`visualRuntime=PASS`, `playerFacing=PASS`, or human approval. Authenticated asset inspection and
-`initialize`/`tools/list` remain on the `/agents` HTTP MCP connection flow.
+The site also contains a WebMCP bridge for an agent driving a real browser. When the browser
+exposes the current imperative API at `document.modelContext`, Clunk registers its in-page tools;
+older experimental browsers may expose the deprecated `navigator.modelContext` fallback. The page
+visibly reports `REGISTERED`, `UNAVAILABLE`, or `ERROR`, and the full manifest is published at
+`/webmcp`.
+
+Six tools are registered on every page — `clunk_connection_check`, `clunk_product_capabilities`,
+`clunk_site_map`, `clunk_search_assets`, `clunk_asset_facts`, `clunk_navigate` — and ten more
+appear once the human is on the page that owns them: `asset_download_link` on a product page;
+`viewer_set`, `viewer_play_clip`, `viewer_stop`, `viewer_pivot_test`, `viewer_state` on a 3D
+viewer; `studio_templates`, `studio_create`, `studio_my_generations` in the studio; and
+`inspect_url` on the inspector. Call `clunk_site_map` to see which are live on the current page.
+
+These tools never sign anyone in, never buy anything, and never promote `structural=PASS` to
+`visualRuntime=PASS`, `playerFacing=PASS`, or human approval. `asset_download_link` returns the
+address the page's own button opens; when the human is signed out it returns the sign-up address
+instead. They do not read a caller's local path or run `clunk_optimize`. A headless agent that
+cannot drive a browser should use the HTTP endpoint below, which carries the same catalogue
+search and the same inspection contract.
 
 Client setup is generated per client from `/connect` (also available at `/agents#connect`) after sign-in: Claude Code receives a
 `claude mcp add --transport http clunk <endpoint> --header "Authorization: Bearer <key>"` command;
@@ -113,12 +124,30 @@ Content-Type: application/json
 {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18"}}
 ```
 
-The remote HTTP `tools/list` surface contains exactly 7 tools: `clunk_connection_check`, `clunk_asset_inspect`,
-`clunk_asset_validate`, `clunk_asset_inspection_evidence`, `clunk_collaboration_append`,
-`clunk_scene_review`, and `clunk_sprite_sheet_review`.
+The remote HTTP `tools/list` surface contains exactly 9 tools: `clunk_connection_check`,
+`clunk_search_assets`, `clunk_asset_facts`, `clunk_asset_inspect`, `clunk_asset_validate`,
+`clunk_asset_inspection_evidence`, `clunk_collaboration_append`, `clunk_scene_review`, and
+`clunk_sprite_sheet_review`.
+
+`clunk_search_assets` and `clunk_asset_facts` read the published catalogue, so a headless agent
+can pick an asset without driving a browser. Search filters on free text, `theme`
+(all/structure/prop/tree/texture), `grade`, `minPolygons`/`maxPolygons`, `hasAnimation` and
+`freeOnly`; every figure comes from the same measurements `GET /api/marketplace` serves, and a
+listing whose polygon count was never measured is dropped from a polygon filter rather than
+assumed to be small. Each result carries a `downloadUrl` — the address the product page's
+own button opens. Grade is access, and the two grades behave differently for an agent: a grade B
+URL answers with the bytes to any caller (a 302 to the artifact; measured 2026-09-05), so an agent
+can fetch a free asset without a browser and without signing anyone in. A grade A or S URL answers
+401 to an API key and needs the human's own signed-in browser session plus a subscription — hand
+that human the product URL rather than trying to fetch it.
+
 `clunk_asset_inspect` and `clunk_asset_validate` accept the existing
-`clunk.asset-inspection-request.v1|v2` shape with `bytesBase64` or `files[]`; raw bytes are not
-persisted. `clunk_asset_inspection_evidence` accepts a normalized
+`clunk.asset-inspection-request.v1|v2` shape: one file as `fileName` + `bytesBase64`, or a bundle
+as `entryFileName` + `files[]`. A call carrying `targetProfileId` alone is refused with the two
+shapes spelled out. Both return the measured `metrics` for a glTF container — triangles, draw
+calls, materials, texture memory, bounding box — beside the staged evidence; `clunk_asset_validate`
+additionally returns `valid`, `score`, `hardBlockerCount` and the blocking findings. Raw bytes are
+not persisted. `clunk_asset_inspection_evidence` accepts a normalized
 `clunk.asset-inspection-evidence.v2` `CONTRACT_FIXTURE`; `PLAYER_FACING_CAPTURE` still requires
 locally verified capture bytes through the CLI or local MCP. `clunk_collaboration_append` accepts
 `threadId`, `evidenceMode: append|replace`, and a normalized frame manifest. `clunk_scene_review`
@@ -131,9 +160,11 @@ The local stdio surface contains 7 advertised tools, including `clunk_inspect`, 
 `clunk_validate` and `clunk_passport` calls remain backward-compatible handlers. These catalogs are
 intentionally different: HTTP agents upload bytes/evidence, while local stdio is the only path
 that can read a local absolute path or write an authoring output in the caller's workspace.
-For HTTP `clunk_asset_inspect` and `clunk_asset_validate`, use an engine-aware
-`targetProfileId` such as `harvest-frontier-web-three`; local stdio names `pc`, `web`, and
-`mobile` are not valid HTTP target profile IDs. Local sprite review runs the exact RGBA audit and
+For HTTP `clunk_asset_inspect` and `clunk_asset_validate`, `targetProfileId` is one of
+`yeongheo-pixi-2d`, `harvest-frontier-web-three`, `godot-4`, `unity`, `unreal`,
+`web-three-mobile`, `android`, `ios`. The local stdio names `pc`, `web`, and `mobile` are policy
+profiles for that server's `profile` argument, not target profile IDs; sending one returns the
+valid list rather than a bare rejection. Local sprite review runs the exact RGBA audit and
 returns `LOCAL_CLI_BYTE_REHASH`; local scene review preserves `visualRuntime=GAP`,
 `playerFacing=NOT_EVALUATED`, and `humanDecision=NOT_EVALUATED` until separate capture and human evidence exists.
 
@@ -187,7 +218,11 @@ Tools returned by local stdio `tools/list`:
 `clunk_validate` and `clunk_passport` remain backward-compatible calls in the local server but
 are not advertised by the current seven-tool catalog.
 
-Typical agent loop: `initialize` -> `tools/list` -> `clunk_asset_inspect` or
+Typical agent loop over HTTP: `initialize` -> `tools/list` -> `clunk_search_assets` (pick by
+theme, polygon budget and `freeOnly`) -> `clunk_asset_facts` (confirm the one) -> hand the
+`downloadUrl` to the human, whose signed-in browser fetches it.
+
+Typical agent loop over local stdio: `initialize` -> `tools/list` -> `clunk_asset_inspect` or
 `clunk_sprite_sheet_review` -> (if fixable) `clunk_optimize` -> fresh evidence review.
 
 ## CLI

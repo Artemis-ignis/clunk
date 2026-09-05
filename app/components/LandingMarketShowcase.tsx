@@ -31,7 +31,7 @@ type Listing = {
   assetId: string;
   entryFileName: string;
   previewFileName?: string | null;
-  /** 등급을 매기는 잰 값. 목록 응답이 factsFor(slug)로 실어 준다. */
+  /** 등급을 매기는 측정값. 목록 응답이 factsFor(slug)로 실어 준다. */
   facts?: CatalogListing["facts"];
 };
 

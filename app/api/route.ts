@@ -29,10 +29,15 @@ export function GET(request: Request) {
       "If you are a coding agent about to build something, fetch /prompt.txt instead: the same catalogue written as working instructions rather than as a reference.",
     docs: DOCS,
 
+    // 2026-09-05: 이 자리에 "There is no public API key yet" 이라고 적혀 있었다. 사실이
+    // 아니다 — `clunk_live_...` 키는 실재하고 /agents 에서 발급한다. 에이전트가 우리를
+    // 처음 읽는 자리라 여기서 틀리면 그 뒤가 전부 어긋난다.
     auth: {
-      browse: "none — the published catalogue is readable without a key",
+      browse: "none — the published catalogue is readable without a key, and a B-grade asset's bytes download without one too",
+      apiKey:
+        "Bearer clunk_live_… on POST /api/mcp. Issue one at https://clunk.games/agents. Needed for the tools that generate or inspect; browsing and B-grade downloads are not.",
       workspace: "session cookie; every workspace-scoped route requires it and same-origin",
-      note: "There is no public API key yet. An agent runs the local MCP server (integrations/mcp/server.ts) over stdio, which reads and writes files on the machine it runs on.",
+      note: "An agent can also run the local MCP server (integrations/mcp/server.ts) over stdio, which reads and writes files on the machine it runs on — that path takes a local file path where the HTTP one takes bytes.",
     },
 
     endpoints: {

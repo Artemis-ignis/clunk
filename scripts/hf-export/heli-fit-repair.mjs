@@ -119,14 +119,37 @@ if (failed.length) {
 }
 
 // 고치지 않기로 한 것을 숫자로 남긴다.
+// 문이 동체를 못 덮는다는 말은 상자 폭(1,890mm)으로 재면 나오지만, 그것은 기체의 가장
+// 넓은 곳이지 뒤쪽 개구부가 아니다. 뒷면 근처를 실제로 잘라 재면 1,660mm 다. 상자로 재면
+// 없는 결함을 만들어 내므로 여기서는 그 단면을 잰다.
 const dr = boxOf(byName.get("door_rear_right"));
 const dl = boxOf(byName.get("door_rear_left"));
-const fu = boxOf(byName.get("fuselage"));
+const rearWidth = (() => {
+  const place = (m, p) => [0, 1, 2].map((i) => m[i] * p[0] + m[4 + i] * p[1] + m[8 + i] * p[2] + m[12 + i]);
+  const xs = [];
+  const gather = (current) => {
+    const mesh = current.getMesh();
+    if (mesh)
+      for (const prim of mesh.listPrimitives()) {
+        const pos = prim.getAttribute("POSITION");
+        if (!pos) continue;
+        for (let i = 0; i < pos.getCount(); i++) {
+          const at = place(current.getWorldMatrix(), pos.getElement(i, [0, 0, 0]));
+          if (Math.abs(at[2] - fuselageBack) < 0.08) xs.push(at[0]);
+        }
+      }
+    for (const child of current.listChildren()) gather(child);
+  };
+  gather(byName.get("fuselage"));
+  return xs.length ? Math.max(...xs) - Math.min(...xs) : null;
+})();
+const doorSpan = dr.max[0] - dl.min[0];
 console.log(
   `\n손대지 않은 것 — 뒷문 사이 틈 ${mm(dr.min[0] - dl.max[0])}, ` +
-    `문 두 짝 폭 합계 ${mm(dr.max[0] - dr.min[0] + (dl.max[0] - dl.min[0]))} vs 동체 폭 ${mm(fu.max[0] - fu.min[0])}`,
+    `문 두 짝이 덮는 폭 ${mm(doorSpan)} vs 뒷면 개구부 ${rearWidth === null ? "?" : mm(rearWidth)}` +
+    (rearWidth === null ? "" : ` (좌우 여유 ${mm((rearWidth - doorSpan) / 2)}씩)`),
 );
-console.log("  문을 늘려야 하는 일이라 여기서 정하지 않습니다.");
+console.log("  곡면 뒷면에 평판 문을 다는 구조라 이 여유는 정상 범위로 본다.");
 
 if (!apply) {
   console.log("\n미리보기입니다. 적용하려면 --apply 를 붙이세요.");

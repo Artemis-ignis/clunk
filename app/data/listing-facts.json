@@ -1,6 +1,6 @@
 {
   "schema": "clunk.listing-facts.v1",
-  "generatedAt": "2026-09-04T12:06:40.104Z",
+  "generatedAt": "2026-09-05T01:02:28.988Z",
   "sources": [
     "outputs\\market-launch\\wave1\\upload-manifest.json",
     "tmp\\listings-snapshot.json",
@@ -16,7 +16,7 @@
         3.95,
         13.64
       ],
-      "byteLength": 2833568,
+      "byteLength": 2833676,
       "format": "GLB",
       "animatedParts": [
         "main_rotor_hub",
@@ -832,7 +832,7 @@
         1.6869,
         3.16
       ],
-      "byteLength": 485340,
+      "byteLength": 485372,
       "format": "GLB",
       "animatedParts": [
         "gaugeWheelLeft",
@@ -1063,7 +1063,7 @@
         2.2454,
         3.8
       ],
-      "byteLength": 1019340,
+      "byteLength": 1019452,
       "format": "GLB",
       "animatedParts": [
         "openerDisc01Left",

@@ -447,11 +447,11 @@ function ListingCard({ listing, colour, salesOpen = false }: { listing: Listing;
           {/* 등급은 값이 아니라 크기와 동작을 보고 매기는 분류다(catalog-facts.GRADE_RULE).
               그림 위에 홀로 뜬 낱글자 "S" 는 무엇의 S 인지 말하지 않아 여기서 "S 등급" 으로
               적는다. 카드 본문은 불투명해서 대비가 그림에 좌우되지 않는다 — 가장 나쁜
-              등급색(A, #c084fc)이 6.01:1(돌고 있는 화면에서 다시 재면 6.03:1)이고,
+              등급색(A, #c084fc)이 6.01:1(돌고 있는 화면에서 다시 측정하면 6.03:1)이고,
               그림 위에서는 밝은 미리보기를 만나면 3.15:1 까지 떨어졌다. */}
           <span className={styles.gradeBadge} data-grade={grade}>{grade} 등급</span>
-          {/* 형식과 잰 값은 한 줄이다. "PNG" 만 따로 떠 있으면 무엇을 가리키는 말인지 알 수
-              없지만, 잰 값 앞에 붙으면 그 값이 무엇의 값인지를 형식이 말해 준다. */}
+          {/* 형식과 측정값은 한 줄이다. "PNG" 만 따로 떠 있으면 무엇을 가리키는 말인지 알 수
+              없지만, 측정값 앞에 붙으면 그 값이 무엇의 값인지를 형식이 말해 준다. */}
           <span>{spec ? `${formatLabel(listing)} · ${spec}` : formatLabel(listing)}</span>
           {/* Only when the file itself carries a clip or a named hinge, and it says how many
               of each. Never read off a title, so a card cannot promise motion the download
@@ -1130,11 +1130,11 @@ function describePicture(listing: DetailListing): Array<{ head: string; tail: st
   const packVerdict = d.match(/SEAMLESS (\d+)종 · SOFT-SEAM (\d+)종/u);
   const verdict = d.match(/판정은 (SEAMLESS|SOFT-SEAM)/u);
   if (packVerdict) {
-    items.push({ head: `자국 없이 이어짐 ${packVerdict[1]}종 · 살짝 티남 ${packVerdict[2]}종`, tail: "Clunk 텍스처 검사에서 잰 결과입니다" });
+    items.push({ head: `자국 없이 이어짐 ${packVerdict[1]}종 · 살짝 티남 ${packVerdict[2]}종`, tail: "Clunk 텍스처 검사에서 측정한 결과입니다" });
   } else if (verdict) {
     items.push({
       head: verdict[1] === "SEAMLESS" ? "이어붙여도 자국이 보이지 않습니다" : "이어붙이면 살짝 티가 납니다",
-      tail: "Clunk 텍스처 검사에서 잰 결과입니다",
+      tail: "Clunk 텍스처 검사에서 측정한 결과입니다",
     });
   }
   items.push({ head: `${formatLabel(listing)} ${formatBytes(listing.byteLength)}`, tail: "내려받는 파일 크기입니다" });
@@ -1457,7 +1457,7 @@ function ColourMatches({ matches }: { matches: ColourMatch[] }) {
     <section className={styles.matches}>
       <h3 className={styles.matchesTitle}>색이 맞는 에셋</h3>
       <p className={styles.matchesNote}>
-        태그가 아니라 파일에서 잰 색으로 고른 것입니다. 숫자는 색 거리이고, 0에 가까울수록 같은 팔레트입니다.
+        태그가 아니라 파일에서 측정한 색으로 고른 것입니다. 숫자는 색 거리이고, 0에 가까울수록 같은 팔레트입니다.
       </p>
       <ul className={styles.matchesList}>
         {matches.map((match) => (
