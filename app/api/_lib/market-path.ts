@@ -42,13 +42,13 @@ function isSafeMarketSegment(value: string): boolean {
  * - `hero-*`    상품 카드와 첫 화면의 대표 그림(role hero)
  * - `preview-*` 미리보기 그림과 이번에 굽는 미리보기 GLB(role preview)
  *
- * `*.card.png`(시트의 카드용 축소본)도 D1 에서는 role preview 라 열어 둘 수 있었다.
- * 열지 않은 이유는 화면이 그 파일을 정적 경로로 부르지 않기 때문이다 — 카드는 문이 있는
- * API(`?preview=1`)로 같은 그림을 받는다. 아무도 쓰지 않는 문은 닫아 두는 쪽이 낫고,
- * 그래야 "정적 경로에 문 없이 나가는 판매 파일 0개" 가 조건 없는 사실이 된다.
+ * - `*.card.png` 시트의 카드용 축소본(role preview). 처음에는 아무 화면도 정적 경로로 부르지
+ *   않아 닫아 두었는데, /agents 의 "스프라이트 시트"·"애니메이션 클립" 칸이 그 그림을 정적
+ *   경로로 쓰면서(2026-09-05) 두 칸이 401 로 비어 보였다. D1 에서도 미리보기인 파일이라 연다.
+ *   판매 파일(GLB·원본 시트 PNG·텍스처)은 여전히 이 목록 밖이다.
  */
 export function isPublicMarketFile(fileName: string): boolean {
-  return /^(?:hero-|preview-)/u.test(fileName);
+  return /^(?:hero-|preview-)/u.test(fileName) || /.card.png$/iu.test(fileName);
 }
 
 /**

@@ -166,7 +166,9 @@ test("이름 규칙은 미리보기와 대표 그림만 공개로 친다", () =>
   assert.equal(isPublicMarketFile("hero-clunk-heli-h145.png"), true);
   assert.equal(isPublicMarketFile("h145.glb"), false);
   assert.equal(isPublicMarketFile("crate.sheet.png"), false);
-  assert.equal(isPublicMarketFile("crate.sheet.card.png"), false);
+  // 카드 축소본은 D1 역할이 미리보기이고 /agents 타일이 정적 경로로 쓴다 — 공개.
+  assert.equal(isPublicMarketFile("crate.sheet.card.png"), true);
+  assert.equal(isPublicMarketFile("crate.sheet.png"), false, "원본 시트 PNG 는 판매 파일이다");
   assert.equal(isPublicMarketFile("h145.glb.passport.json"), false);
 });
 
