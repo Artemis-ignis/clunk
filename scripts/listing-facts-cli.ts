@@ -63,6 +63,12 @@ export type ListingFact = {
   /** glTF animation clips inside the file, named and timed by the file. */
   animations: Array<{ name: string; seconds: number }>;
   kit: KitId | null;
+  /**
+   * 키트가 스스로 말하는 갈래(마을 · 부두 · 광산 · 캐릭터). 키트 조각이 적어 주는 것이라
+   * 슬러그 대응표가 아니고, 적히지 않은 키트와 낱개 상품은 null 이다 — 그때 화면은 낱개
+   * 상품의 갈래로 되돌아간다(app/components/catalog-facts.ts kitsFrom).
+   */
+  theme: string | null;
   /** How many products carry the same kit. Zero when kit is null. */
   kitSize: number;
   /** Sprite-sheet grid, for a listing whose product is a sheet. */
@@ -401,6 +407,8 @@ export function factsFromManifest(manifest: ManifestFile): Record<string, Listin
         ? (measured.animations as Array<{ name: string; seconds: number }>).map((clip) => ({ name: clip.name, seconds: clip.seconds }))
         : [],
       kit,
+      // 갈래는 매니페스트가 말해 주지 않는다. 키트 조각이 적고 merge-kit-facts 가 넣는다.
+      theme: null,
       kitSize: kit ? kitSizes.get(kit) ?? 0 : 0,
       members: product.kind === "bundle" ? product.bundleOf?.length ?? null : null,
       viewYawDegrees: numberOrNull(measured.heroViewYawDegrees),
@@ -444,6 +452,7 @@ export function factsFromListings(
       animatedParts: [],
       animations: [],
       kit: null,
+      theme: null,
       kitSize: 0,
       members: null,
       viewYawDegrees: null,
@@ -652,6 +661,7 @@ async function main() {
           built.facts[slug] = {
             ...rebuilt,
             kit: fact.kit,
+            theme: fact.theme ?? null,
             kitSize: fact.kitSize,
             members: fact.members,
             viewYawDegrees: rebuilt.viewYawDegrees ?? fact.viewYawDegrees,

@@ -553,13 +553,13 @@
       "path": "/evidence/clunk-heli-h145/clunk-heli-h145__engine-three-quarter.png",
       "sha256": "e5aeff7dba94f920b0f9acaa4e2fe585863972ab70ed33bd6d878faebf3c9ca2",
       "bytes": 44672,
-      "renderer": "clunk-software-raster/1.0.0",
+      "renderer": "clunk-software-raster/1.1.0",
       "viewport": {
         "width": 512,
         "height": 512
       },
       "cameraPoseHash": "a9935e9f0253482cc7618c769ece0bf0ce29d8367c20dc59e7077b9e9a25bc60",
-      "sourceTreeHash": "5411d49f5018c050e1558cf257088b847245cb74c7b2e1d4cd6be1ec04bf286f",
+      "sourceTreeHash": "5b2d2ec5a0a8eae6f8e99c44eb51db1bd965a82d8a5ae18ed38c450280cabcd7",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -572,13 +572,13 @@
       "path": "/evidence/clunk-heli-h145/clunk-heli-h145__engine-front.png",
       "sha256": "1fbb1464220fd5dd69488779e62e269b36d8001ac3b7533a6d52ad654eebef79",
       "bytes": 24710,
-      "renderer": "clunk-software-raster/1.0.0",
+      "renderer": "clunk-software-raster/1.1.0",
       "viewport": {
         "width": 512,
         "height": 512
       },
       "cameraPoseHash": "be48b4bb7cb469e2feba158dd09400a87c273c68aa85ffeb81f8f1654d169b6d",
-      "sourceTreeHash": "5411d49f5018c050e1558cf257088b847245cb74c7b2e1d4cd6be1ec04bf286f",
+      "sourceTreeHash": "5b2d2ec5a0a8eae6f8e99c44eb51db1bd965a82d8a5ae18ed38c450280cabcd7",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -591,13 +591,13 @@
       "path": "/evidence/clunk-heli-h145/clunk-heli-h145__engine-side.png",
       "sha256": "d02a075a4ae8e673bea69ac6ad894df3ce70d9eef87728f42b4f8e1ae108a38c",
       "bytes": 26545,
-      "renderer": "clunk-software-raster/1.0.0",
+      "renderer": "clunk-software-raster/1.1.0",
       "viewport": {
         "width": 512,
         "height": 512
       },
       "cameraPoseHash": "37f32e99b067ccb00309e9288481325bda804a05c300f17598be94ad7f6e9e8e",
-      "sourceTreeHash": "5411d49f5018c050e1558cf257088b847245cb74c7b2e1d4cd6be1ec04bf286f",
+      "sourceTreeHash": "5b2d2ec5a0a8eae6f8e99c44eb51db1bd965a82d8a5ae18ed38c450280cabcd7",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -610,13 +610,13 @@
       "path": "/evidence/clunk-heli-h145/clunk-heli-h145__engine-top.png",
       "sha256": "4a156ffd5e04ed1614497094f476e43ca870359aeb93a6448a67cb1b93a6a305",
       "bytes": 45717,
-      "renderer": "clunk-software-raster/1.0.0",
+      "renderer": "clunk-software-raster/1.1.0",
       "viewport": {
         "width": 512,
         "height": 512
       },
       "cameraPoseHash": "6d85957024c3af2a1442d11614338e091dc625f84331131631a5a957201a1bf3",
-      "sourceTreeHash": "5411d49f5018c050e1558cf257088b847245cb74c7b2e1d4cd6be1ec04bf286f",
+      "sourceTreeHash": "5b2d2ec5a0a8eae6f8e99c44eb51db1bd965a82d8a5ae18ed38c450280cabcd7",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -629,13 +629,13 @@
       "path": "/evidence/clunk-heli-h145/clunk-heli-h145__player-5m.png",
       "sha256": "d402e310dc3af17f6751c6ed60feb495af94d7d5d75959142fea6dd8cfa55874",
       "bytes": 11438,
-      "renderer": "clunk-software-raster/1.0.0",
+      "renderer": "clunk-software-raster/1.1.0",
       "viewport": {
         "width": 640,
         "height": 360
       },
       "cameraPoseHash": "ab023d6f229a90585fb6b2adaf9334f8b96215fe475c4371b5fcadf87ab1b3ef",
-      "sourceTreeHash": "5411d49f5018c050e1558cf257088b847245cb74c7b2e1d4cd6be1ec04bf286f",
+      "sourceTreeHash": "5b2d2ec5a0a8eae6f8e99c44eb51db1bd965a82d8a5ae18ed38c450280cabcd7",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -648,13 +648,13 @@
       "path": "/evidence/clunk-heli-h145/clunk-heli-h145__player-15m.png",
       "sha256": "3ea908ff43656e019d8279065ca2167533ea6d03a76a53cc0bab323dfc14fb2b",
       "bytes": 11456,
-      "renderer": "clunk-software-raster/1.0.0",
+      "renderer": "clunk-software-raster/1.1.0",
       "viewport": {
         "width": 640,
         "height": 360
       },
       "cameraPoseHash": "3cc39a7398830f7d87b09f60b93b4ad340e6b2a04a78c2d222cab38fd27e27c8",
-      "sourceTreeHash": "5411d49f5018c050e1558cf257088b847245cb74c7b2e1d4cd6be1ec04bf286f",
+      "sourceTreeHash": "5b2d2ec5a0a8eae6f8e99c44eb51db1bd965a82d8a5ae18ed38c450280cabcd7",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -725,7 +725,7 @@
     "toolVersion": "clunk-visual-evidence/1.0.0",
     "renderer": {
       "id": "clunk-software-raster",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "kind": "software-rasteriser",
       "gpu": false,
       "shading": "flat warm key + cool sky hemisphere + soft contact shadow",
@@ -733,7 +733,7 @@
       "note_ko": "깊이 버퍼를 쓰는 소프트웨어 래스터라이저입니다. 따뜻한 주광과 차가운 하늘빛의 평면 음영, 바닥 접촉 그림자 하나가 전부입니다. PBR·환경광·반사·광선추적 그림자·주변광 차폐는 없습니다. 게임 엔진에서 찍은 화면이 아니며 그렇게 부르면 안 됩니다."
     },
     "sceneDigest": "6b34400cb53ecc5665130c68647fb5f558f1a7c32f60b7275e5938f9e354ba74",
-    "cameraRigHash": "100d7c6d46b331a6db62116fc1d3036b1ec7a1e0352a041f4ba489efd4b4d4b5",
+    "cameraRigHash": "a4cf96074e15287802162c142a02e03a9c994df9d59153ac7fb7417d1bb1fb77",
     "sizeMetres": [
       10.5249,
       3.95,
@@ -1069,7 +1069,44 @@
       "clip": "rotor_spin",
       "durationSeconds": 1,
       "movedPixelRatio": 0.1626,
-      "meanAbsLumaDelta": 0.069909
+      "meanAbsLumaDelta": 0.069909,
+      "phases": [
+        0,
+        0.42857142857142855,
+        0.8571428571428571
+      ],
+      "skinned": false,
+      "jointCount": 0,
+      "skinnedVertexCount": 0,
+      "clipChoice": "declaration-order",
+      "declaredClips": [
+        "rotor_spin",
+        "doors_open"
+      ],
+      "interpolations": [
+        "LINEAR"
+      ],
+      "silhouetteChangeRatio": 0.4682,
+      "silhouetteChangePairs": [
+        {
+          "from": 0,
+          "to": 1,
+          "ratio": 0.4255
+        },
+        {
+          "from": 0,
+          "to": 2,
+          "ratio": 0.4682
+        },
+        {
+          "from": 1,
+          "to": 2,
+          "ratio": 0.3408
+        }
+      ],
+      "minPhaseGroundYMetres": 0,
+      "framing": "per-phase",
+      "notes": []
     },
     "checks": [
       {
@@ -1152,11 +1189,14 @@
         "observed": {
           "declaredClipCount": 2,
           "movedPixelRatio": 0.1626,
-          "meanAbsLumaDelta": 0.069909
+          "meanAbsLumaDelta": 0.069909,
+          "silhouetteChangeRatio": 0.4682,
+          "minPhaseGroundYMetres": 0,
+          "skinned": 0
         },
-        "threshold": "movedPixelRatio > 0 and >= 0.01 between phases 0, 3/7 and 6/7 of the first clip",
-        "reason": "Clip \"rotor_spin\" changes 16.3% of the frame between its sampled phases, so the motion is visible.",
-        "reason_ko": "동작 \"rotor_spin\" 이 위상 사이에서 화면의 16.3% 를 바꿉니다. 움직임이 실제로 보입니다.",
+        "threshold": "posed frames only: movedPixelRatio >= 0.01 or silhouetteChangeRatio >= 0.02 (review above 0 / 0.002), and minPhaseGroundYMetres >= -0.005, at phases 0%, 43%, 86% of \"rotor_spin\"",
+        "reason": "Clip \"rotor_spin\" changes 16.3% of the frame and 46.8% of the silhouette between its posed phases, so the motion is visible.",
+        "reason_ko": "동작 \"rotor_spin\" 이 자세를 바꿔 가며 화면의 16.3%, 실루엣의 46.8% 를 바꿉니다. 움직임이 실제로 보입니다.",
         "captureIds": [
           "motion-0",
           "motion-1",
@@ -1236,23 +1276,26 @@
     "summary": "All 8 automated visual checks pass. No human review is required before this asset is used.",
     "summary_ko": "자동 화면 검사 8건이 모두 통과했습니다. 이 에셋을 쓰기 전에 사람이 따로 볼 필요는 없습니다.",
     "timings": {
-      "decodeMs": 182,
-      "renderMs": 784,
-      "measureMs": 207,
-      "totalMs": 2327,
-      "peakHeapBytes": 19979672
+      "decodeMs": 268,
+      "poseMs": 87,
+      "renderMs": 820,
+      "measureMs": 283,
+      "totalMs": 3663,
+      "peakHeapBytes": 32050440
     },
     "limits": [
       "The frames come from Clunk's own offline rasteriser, not from a game engine's rendering path.",
       "Materials are read as vertex colour times base colour; metal, roughness, transparency and emission are not simulated.",
       "The ground-contact measurement reads one silhouette per camera. It cannot see a part that floats behind a part that is itself grounded.",
-      "Motion is sampled at three phases (0, 3/7, 6/7) of the first declared clip only; a clip that loops exactly seven times would still alias."
+      "Motion is sampled at three phases of one clip only: a rigid file shows its first declared clip at 0, 3/7 and 6/7, where a clip that loops exactly seven times would still alias; a skinned file shows one chosen clip at 25/50/75 %, and the other clips it declares are not rendered.",
+      "Skinning is linear blend skinning on up to four joints per vertex, applied on the CPU. Morph targets, dual-quaternion skinning and any deformation a shader would do at runtime are not applied."
     ],
     "limits_ko": [
       "여기 찍힌 화면은 Clunk 자체 오프라인 래스터라이저의 결과이지, 게임 엔진이 그린 화면이 아닙니다.",
       "재질은 정점 색 × 기본 색으로만 읽습니다. 금속·거칠기·투명·발광은 계산하지 않습니다.",
       "바닥 접지 측정은 카메라마다 실루엣 하나를 읽습니다. 바닥에 닿은 부품 뒤에 숨어 떠 있는 부품은 보지 못합니다.",
-      "움직임은 첫 번째 동작의 세 위상(0, 3/7, 6/7)만 표본으로 봅니다. 동작이 정확히 일곱 번 반복하는 경우에는 여전히 겹쳐 보일 수 있습니다."
+      "움직임은 동작 하나의 세 위상만 표본으로 봅니다. 뼈대가 없는 파일은 첫 번째 동작을 0, 3/7, 6/7 에서 보므로 동작이 정확히 일곱 번 반복하면 겹쳐 보일 수 있고, 뼈대가 있는 파일은 고른 동작 하나를 25/50/75% 에서 봅니다. 나머지 동작은 그리지 않습니다.",
+      "뼈대 변형은 정점 하나당 관절 넷까지의 선형 혼합 스키닝을 CPU 에서 계산한 것입니다. 모프 타깃, 듀얼 쿼터니언 스키닝, 실행 중 셰이더가 하는 변형은 반영하지 않습니다."
     ]
   },
   "validation": {

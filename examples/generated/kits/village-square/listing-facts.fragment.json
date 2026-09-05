@@ -29,6 +29,7 @@
         }
       ],
       "kit": "kit-village-square",
+      "theme": "마을",
       "kitSize": 16,
       "members": 15,
       "viewYawDegrees": null,

@@ -372,8 +372,12 @@ test("/agents 다섯 칸이 파는 파일을 보여 주고, 밑줄의 숫자가 
   const landing = JSON.parse(await readFile(new URL("app/data/landing-facts.json", root), "utf8"));
   const registry = await loadFacts();
   const families = landing.families ?? {};
-  const kinds = ["sprite", "atlas", "spine", "motion", "model"];
-  assert.deepEqual(Object.keys(families).sort(), [...kinds].sort(), "다섯 칸이 그대로 적혀 있지 않습니다");
+  // 칸의 종류는 /agents 페이지가 정한다(AGENT_ASSETS). 2026-09-05 본 애니메이션 칸은 보여 줄
+  // 만한 리깅 캐릭터가 없어 비웠고, 승인된 캐릭터가 생기면 페이지와 등록부가 함께 되살린다.
+  const page = await readFile(new URL("../app/agents/page.tsx", import.meta.url), "utf8");
+  const kinds = [...page.matchAll(/{ kind: "([a-z]+)", label: "/g)].map((m) => m[1]);
+  assert.ok(kinds.length >= 4, "/agents 의 칸 정의를 읽지 못했습니다");
+  assert.deepEqual(Object.keys(families).sort(), [...kinds].sort(), "/agents 의 칸과 등록부의 칸이 다릅니다");
 
   const wrong = [];
   for (const kind of kinds) {

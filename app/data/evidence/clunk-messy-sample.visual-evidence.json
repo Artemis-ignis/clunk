@@ -5,13 +5,13 @@
   "evidenceKind": "MACHINE_VISUAL_CAPTURE",
   "identity": {
     "inputHash": "181473ff49e2a753b3c22198a0ef76f6052ab1efc38ac03a57c58bc62ae8fdf1",
-    "resultDigest": "91811095b6afed62aa9b396834ab660cda96ae3c031ff1275811319bf28177b1",
+    "resultDigest": "19d252dac51090249ebeb04c3349c5c55be5c0df51382c6970d6b2787e11fa6f",
     "byteLength": 1124,
     "coreBuildId": "0.1.0",
     "ruleSetId": "clunk-game-ready-v1",
     "ruleSetVersion": "1.0.0",
-    "profileId": "pc",
-    "profileHash": "e2479d196be991e881513de4ee095d73d7c8b588b0188af372093263c5f7df30",
+    "profileId": "web",
+    "profileHash": "d7cb0dbf940687d317a989dc217ff2b8e8a04415629ef08ea4d8eddd945e4b1f",
     "inspectionRunId": "visual-evidence-clunk-messy-sample-01"
   },
   "source": {
@@ -23,14 +23,14 @@
   "sourceOutputRelation": {
     "kind": "SOURCE",
     "sourceHash": "181473ff49e2a753b3c22198a0ef76f6052ab1efc38ac03a57c58bc62ae8fdf1",
-    "sourceInspectionDigest": "91811095b6afed62aa9b396834ab660cda96ae3c031ff1275811319bf28177b1"
+    "sourceInspectionDigest": "19d252dac51090249ebeb04c3349c5c55be5c0df51382c6970d6b2787e11fa6f"
   },
   "report": {
     "schemaVersion": "1.0",
     "coreVersion": "0.1.0",
     "ruleSetId": "clunk-game-ready-v1",
     "ruleSetVersion": "1.0.0",
-    "profileId": "pc",
+    "profileId": "web",
     "fileName": "clunk-messy-sample.glb",
     "format": "glb",
     "byteLength": 1124,
@@ -149,8 +149,8 @@
       "ruleSetId": "clunk-game-ready-v1",
       "ruleSetVersion": "1.0.0"
     },
-    "analysisId": "analysis-181473ff49e2-91811095",
-    "resultDigest": "91811095b6afed62aa9b396834ab660cda96ae3c031ff1275811319bf28177b1"
+    "analysisId": "analysis-181473ff49e2-19d252da",
+    "resultDigest": "19d252dac51090249ebeb04c3349c5c55be5c0df51382c6970d6b2787e11fa6f"
   },
   "findings": [
     {
@@ -347,16 +347,16 @@
   "captureEvidence": [
     {
       "media": "screenshot",
-      "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\evidence\\clunk-messy-sample\\clunk-messy-sample__engine-three-quarter.png",
+      "path": "/evidence/clunk-messy-sample/clunk-messy-sample__engine-three-quarter.png",
       "sha256": "737514b67add844af3df6c77665df3f972696069f7557d0ee4a1330dac0497a3",
       "bytes": 2992,
-      "renderer": "clunk-software-raster/1.0.0",
+      "renderer": "clunk-software-raster/1.1.0",
       "viewport": {
         "width": 512,
         "height": 512
       },
       "cameraPoseHash": "6e2fcdd863d2e9aec50c07b5c569609b9750d6530996bee985decb8884b7680d",
-      "sourceTreeHash": "85e4b35abeb2f29bf2cc46f35a5f222d18bf27d738a9804f32131f2d23356088",
+      "sourceTreeHash": "eb0cadc4f1380981f930bb38f14f97e9bddbcef11a2459757168a26551f59f2e",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -366,16 +366,16 @@
     },
     {
       "media": "screenshot",
-      "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\evidence\\clunk-messy-sample\\clunk-messy-sample__engine-front.png",
+      "path": "/evidence/clunk-messy-sample/clunk-messy-sample__engine-front.png",
       "sha256": "4bdd0dff43b1a18b6695f00e1b7280e1f5e3871caafcbe90ac4427cb20ffb47c",
       "bytes": 2369,
-      "renderer": "clunk-software-raster/1.0.0",
+      "renderer": "clunk-software-raster/1.1.0",
       "viewport": {
         "width": 512,
         "height": 512
       },
       "cameraPoseHash": "208396df2aad22e20beb36b860781fab4c27df86e2f9e4e16ab980dcae595459",
-      "sourceTreeHash": "85e4b35abeb2f29bf2cc46f35a5f222d18bf27d738a9804f32131f2d23356088",
+      "sourceTreeHash": "eb0cadc4f1380981f930bb38f14f97e9bddbcef11a2459757168a26551f59f2e",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -385,16 +385,16 @@
     },
     {
       "media": "screenshot",
-      "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\evidence\\clunk-messy-sample\\clunk-messy-sample__engine-side.png",
+      "path": "/evidence/clunk-messy-sample/clunk-messy-sample__engine-side.png",
       "sha256": "e3c7e8b818473a4bd21c08d3ea63c5edfc40fb584105f138e98bfcdf1140f1b0",
       "bytes": 1496,
-      "renderer": "clunk-software-raster/1.0.0",
+      "renderer": "clunk-software-raster/1.1.0",
       "viewport": {
         "width": 512,
         "height": 512
       },
       "cameraPoseHash": "913a0dc4908005e1760cafceaf4c8cfe2f1564dc1ace57f9223373d5b72b3df1",
-      "sourceTreeHash": "85e4b35abeb2f29bf2cc46f35a5f222d18bf27d738a9804f32131f2d23356088",
+      "sourceTreeHash": "eb0cadc4f1380981f930bb38f14f97e9bddbcef11a2459757168a26551f59f2e",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -404,16 +404,16 @@
     },
     {
       "media": "screenshot",
-      "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\evidence\\clunk-messy-sample\\clunk-messy-sample__engine-top.png",
+      "path": "/evidence/clunk-messy-sample/clunk-messy-sample__engine-top.png",
       "sha256": "d6d75dfbdd28f6b8799646e58267e4c64cf923ec9516b009b3222067bf99c9bf",
       "bytes": 3292,
-      "renderer": "clunk-software-raster/1.0.0",
+      "renderer": "clunk-software-raster/1.1.0",
       "viewport": {
         "width": 512,
         "height": 512
       },
       "cameraPoseHash": "bb1bb6ad98bef6599baf74a78328f5def652a8866081f944d03031f0cd867f91",
-      "sourceTreeHash": "85e4b35abeb2f29bf2cc46f35a5f222d18bf27d738a9804f32131f2d23356088",
+      "sourceTreeHash": "eb0cadc4f1380981f930bb38f14f97e9bddbcef11a2459757168a26551f59f2e",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -423,16 +423,16 @@
     },
     {
       "media": "screenshot",
-      "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\evidence\\clunk-messy-sample\\clunk-messy-sample__player-5m.png",
+      "path": "/evidence/clunk-messy-sample/clunk-messy-sample__player-5m.png",
       "sha256": "1a8aa941e9bfdecb8b87eab3d3782064fb296b669248e862476dcdda119d8cb6",
       "bytes": 1544,
-      "renderer": "clunk-software-raster/1.0.0",
+      "renderer": "clunk-software-raster/1.1.0",
       "viewport": {
         "width": 640,
         "height": 360
       },
       "cameraPoseHash": "d04c847a2957c1504e7d625e0d6a69b4636d59fa8d6c5478025bb037e8b00296",
-      "sourceTreeHash": "85e4b35abeb2f29bf2cc46f35a5f222d18bf27d738a9804f32131f2d23356088",
+      "sourceTreeHash": "eb0cadc4f1380981f930bb38f14f97e9bddbcef11a2459757168a26551f59f2e",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -442,16 +442,16 @@
     },
     {
       "media": "screenshot",
-      "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\evidence\\clunk-messy-sample\\clunk-messy-sample__player-15m.png",
+      "path": "/evidence/clunk-messy-sample/clunk-messy-sample__player-15m.png",
       "sha256": "c40799a9a4c14771b286c4212068fe5b73b3b7f96d4fa4de8f1b6323332650a9",
       "bytes": 1313,
-      "renderer": "clunk-software-raster/1.0.0",
+      "renderer": "clunk-software-raster/1.1.0",
       "viewport": {
         "width": 640,
         "height": 360
       },
       "cameraPoseHash": "3a24486f161705ddd712b0b9738b6a1448f4bd76eb667d72802197d9583fc1a9",
-      "sourceTreeHash": "85e4b35abeb2f29bf2cc46f35a5f222d18bf27d738a9804f32131f2d23356088",
+      "sourceTreeHash": "eb0cadc4f1380981f930bb38f14f97e9bddbcef11a2459757168a26551f59f2e",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -470,37 +470,37 @@
     },
     "captures": [
       {
-        "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\evidence\\clunk-messy-sample\\clunk-messy-sample__engine-three-quarter.png",
+        "path": "/evidence/clunk-messy-sample/clunk-messy-sample__engine-three-quarter.png",
         "sha256": "737514b67add844af3df6c77665df3f972696069f7557d0ee4a1330dac0497a3",
         "bytes": 2992,
         "verified": true
       },
       {
-        "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\evidence\\clunk-messy-sample\\clunk-messy-sample__engine-front.png",
+        "path": "/evidence/clunk-messy-sample/clunk-messy-sample__engine-front.png",
         "sha256": "4bdd0dff43b1a18b6695f00e1b7280e1f5e3871caafcbe90ac4427cb20ffb47c",
         "bytes": 2369,
         "verified": true
       },
       {
-        "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\evidence\\clunk-messy-sample\\clunk-messy-sample__engine-side.png",
+        "path": "/evidence/clunk-messy-sample/clunk-messy-sample__engine-side.png",
         "sha256": "e3c7e8b818473a4bd21c08d3ea63c5edfc40fb584105f138e98bfcdf1140f1b0",
         "bytes": 1496,
         "verified": true
       },
       {
-        "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\evidence\\clunk-messy-sample\\clunk-messy-sample__engine-top.png",
+        "path": "/evidence/clunk-messy-sample/clunk-messy-sample__engine-top.png",
         "sha256": "d6d75dfbdd28f6b8799646e58267e4c64cf923ec9516b009b3222067bf99c9bf",
         "bytes": 3292,
         "verified": true
       },
       {
-        "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\evidence\\clunk-messy-sample\\clunk-messy-sample__player-5m.png",
+        "path": "/evidence/clunk-messy-sample/clunk-messy-sample__player-5m.png",
         "sha256": "1a8aa941e9bfdecb8b87eab3d3782064fb296b669248e862476dcdda119d8cb6",
         "bytes": 1544,
         "verified": true
       },
       {
-        "path": "C:\\Users\\50106\\Desktop\\Clunk\\outputs\\evidence\\clunk-messy-sample\\clunk-messy-sample__player-15m.png",
+        "path": "/evidence/clunk-messy-sample/clunk-messy-sample__player-15m.png",
         "sha256": "c40799a9a4c14771b286c4212068fe5b73b3b7f96d4fa4de8f1b6323332650a9",
         "bytes": 1313,
         "verified": true
@@ -522,7 +522,7 @@
     "toolVersion": "clunk-visual-evidence/1.0.0",
     "renderer": {
       "id": "clunk-software-raster",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "kind": "software-rasteriser",
       "gpu": false,
       "shading": "flat warm key + cool sky hemisphere + soft contact shadow",
@@ -530,7 +530,7 @@
       "note_ko": "깊이 버퍼를 쓰는 소프트웨어 래스터라이저입니다. 따뜻한 주광과 차가운 하늘빛의 평면 음영, 바닥 접촉 그림자 하나가 전부입니다. PBR·환경광·반사·광선추적 그림자·주변광 차폐는 없습니다. 게임 엔진에서 찍은 화면이 아니며 그렇게 부르면 안 됩니다."
     },
     "sceneDigest": "2575eaa4a8ec08feff5fd3565bed4855fd840ba80b837b69067edae1b608ea57",
-    "cameraRigHash": "100d7c6d46b331a6db62116fc1d3036b1ec7a1e0352a041f4ba489efd4b4d4b5",
+    "cameraRigHash": "a4cf96074e15287802162c142a02e03a9c994df9d59153ac7fb7417d1bb1fb77",
     "sizeMetres": [
       1.6,
       1.6,
@@ -1001,23 +1001,26 @@
     "summary": "3 of 7 automated visual checks fail: silhouette, exposure, groundContact. The asset is rejected on the captures, not on a pending opinion.",
     "summary_ko": "자동 화면 검사 7건 가운데 3건이 떨어졌습니다: silhouette, exposure, groundContact. 판정 대기가 아니라, 찍은 화면을 근거로 떨어진 것입니다.",
     "timings": {
-      "decodeMs": 10,
-      "renderMs": 420,
-      "measureMs": 206,
-      "totalMs": 679,
-      "peakHeapBytes": 32747424
+      "decodeMs": 5,
+      "poseMs": 0,
+      "renderMs": 375,
+      "measureMs": 369,
+      "totalMs": 789,
+      "peakHeapBytes": 21631216
     },
     "limits": [
       "The frames come from Clunk's own offline rasteriser, not from a game engine's rendering path.",
       "Materials are read as vertex colour times base colour; metal, roughness, transparency and emission are not simulated.",
       "The ground-contact measurement reads one silhouette per camera. It cannot see a part that floats behind a part that is itself grounded.",
-      "Motion is sampled at three phases (0, 3/7, 6/7) of the first declared clip only; a clip that loops exactly seven times would still alias."
+      "Motion is sampled at three phases of one clip only: a rigid file shows its first declared clip at 0, 3/7 and 6/7, where a clip that loops exactly seven times would still alias; a skinned file shows one chosen clip at 25/50/75 %, and the other clips it declares are not rendered.",
+      "Skinning is linear blend skinning on up to four joints per vertex, applied on the CPU. Morph targets, dual-quaternion skinning and any deformation a shader would do at runtime are not applied."
     ],
     "limits_ko": [
       "여기 찍힌 화면은 Clunk 자체 오프라인 래스터라이저의 결과이지, 게임 엔진이 그린 화면이 아닙니다.",
       "재질은 정점 색 × 기본 색으로만 읽습니다. 금속·거칠기·투명·발광은 계산하지 않습니다.",
       "바닥 접지 측정은 카메라마다 실루엣 하나를 읽습니다. 바닥에 닿은 부품 뒤에 숨어 떠 있는 부품은 보지 못합니다.",
-      "움직임은 첫 번째 동작의 세 위상(0, 3/7, 6/7)만 표본으로 봅니다. 동작이 정확히 일곱 번 반복하는 경우에는 여전히 겹쳐 보일 수 있습니다."
+      "움직임은 동작 하나의 세 위상만 표본으로 봅니다. 뼈대가 없는 파일은 첫 번째 동작을 0, 3/7, 6/7 에서 보므로 동작이 정확히 일곱 번 반복하면 겹쳐 보일 수 있고, 뼈대가 있는 파일은 고른 동작 하나를 25/50/75% 에서 봅니다. 나머지 동작은 그리지 않습니다.",
+      "뼈대 변형은 정점 하나당 관절 넷까지의 선형 혼합 스키닝을 CPU 에서 계산한 것입니다. 모프 타깃, 듀얼 쿼터니언 스키닝, 실행 중 셰이더가 하는 변형은 반영하지 않습니다."
     ]
   },
   "validation": {

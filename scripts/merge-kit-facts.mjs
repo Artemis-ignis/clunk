@@ -9,7 +9,8 @@
  * 만들어졌고 등록부를 셋이 같이 고치면 서로 덮어쓴다). 합치는 것은 여기서 한 번만 한다.
  *
  * 조각에서 가져오는 것은 파일이 말해 주지 않는 것뿐이다: 어느 키트에 속하는지(kit),
- * 히어로를 찍은 각도(viewYawDegrees). 삼각형·재질·크기·용량·동작·엔진 적합은 지금
+ * 키트의 갈래(theme — 마을·부두·광산·캐릭터), 히어로를 찍은 각도(viewYawDegrees).
+ * 삼각형·재질·크기·용량·동작·엔진 적합은 지금
  * public/market/<slug>/ 에 있는 GLB 에서 scripts/listing-facts-cli.ts 의 같은 측정으로 다시
  * 잰다 — 조각을 만든 뒤 색표 굽기 같은 후처리가 파일을 바꿔도 등록부는 파일을 따라간다.
  * tests/listing-facts-truth 가 같은 파일을 다시 열어 이 값을 대조한다.
@@ -83,6 +84,12 @@ for (const kitDir of readdirSync(kitsDir, { withFileTypes: true }).filter((d) =>
   const kitSlug = kitSlugs[0];
   const parts = slugs.filter((slug) => slug !== kitSlug && entries[slug]?.kit === kitSlug).sort();
   if (parts.length < 2) throw new Error(`${kitDir}: kit="${kitSlug}" 인 부품이 ${parts.length}개 — 키트가 아닙니다`);
+  /* 키트의 갈래(마을·부두·광산·캐릭터). 파일이 말해 주지 않으므로 조각의 키트 항목에서
+     가져온다 — 슬러그 대응표를 두지 않는다. 적어 두지 않은 키트는 null 로 남고, 그때
+     키트 카드는 대표 부품의 갈래로 되돌아간다(app/components/catalog-facts.ts kitsFrom). */
+  const kitTheme = typeof entries[kitSlug]?.theme === "string" && entries[kitSlug].theme.trim()
+    ? entries[kitSlug].theme.trim()
+    : null;
 
   for (const slug of slugs) {
     const fromFragment = entries[slug];
@@ -91,6 +98,7 @@ for (const kitDir of readdirSync(kitsDir, { withFileTypes: true }).filter((d) =>
     facts[slug] = {
       ...measured,
       kit: kitSlug,
+      theme: isKit ? kitTheme : null,
       kitSize: parts.length,
       members: isKit ? parts : null,
       viewYawDegrees: typeof fromFragment.viewYawDegrees === "number" ? fromFragment.viewYawDegrees : null,

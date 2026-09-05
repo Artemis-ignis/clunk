@@ -89,14 +89,6 @@ const FAMILIES = [
     fit: "contain",
   },
   {
-    kind: "spine",
-    slug: "folk-farmer-tomas",
-    name: "농부 토마스",
-    aria: "밀짚모자 농부, 에셋 마켓에 있는 본 애니메이션 캐릭터",
-    image: "public/market/folk-farmer-tomas/hero-folk-farmer-tomas.png",
-    fit: "contain",
-  },
-  {
     kind: "motion",
     slug: "cozy-fence-gate-swing-sprites",
     factsSlug: "cozy-fence-gate",

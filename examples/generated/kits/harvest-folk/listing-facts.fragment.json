@@ -390,6 +390,7 @@
         "imageTypes": []
       },
       "kit": "kit-harvest-folk",
+      "theme": "캐릭터",
       "kitSize": 6,
       "viewYawDegrees": null,
       "sheet": null,

@@ -587,6 +587,7 @@
       "animatedParts": [],
       "animations": [],
       "kit": "kit-mine-entrance",
+      "theme": "광산",
       "kitSize": 17,
       "members": 16,
       "viewYawDegrees": 40.3,

@@ -387,6 +387,22 @@ test("키트의 합계는 부품의 합이고, 등급은 가장 높은 부품의
   assert.equal(kitById("kit-fishing-dock").grade, "S");
 });
 
+/**
+ * 2026-09-05: 키트 카드가 갈래를 적지 않고 있었다. Kit.themeName 이 대표 부품의 슬러그로
+ * 고른 낱개 갈래여서 광산 키트에 "농장 소품"이라고 적혔고, 그래서 그 줄을 지웠던 것이다.
+ * 지금 갈래는 키트가 스스로 등록부에 적어 둔다(facts.theme — 키트 조각에서
+ * scripts/merge-kit-facts.mjs 가 넣는다). 슬러그 대응표는 두지 않는다: 적어 두지 않은 키트는
+ * 예전처럼 낱개 갈래로 되돌아간다.
+ */
+test("키트의 갈래는 키트가 스스로 적어 둔 값이고, 없으면 낱개 갈래로 되돌아간다", () => {
+  assert.equal(kitById("kit-village-square").themeName, "마을");
+  assert.equal(kitById("kit-mine-entrance").themeName, "광산");
+  // 표본의 kit-fishing-dock 은 갈래를 적어 두지 않았다 — 그때만 낱개 갈래가 쓰인다.
+  const dock = kitById("kit-fishing-dock");
+  assert.equal(dock.product.facts.theme, undefined, "표본이 갈래를 적어 두지 않았는지부터 확인한다");
+  assert.equal(dock.themeName, themeById(categoryOf(dock.product)).name);
+});
+
 test("부품에서 키트로, 키트에서 부품으로 오갈 수 있다", () => {
   const kits = kitsFrom(KIT_ROWS);
   const part = KIT_ROWS.find((row) => row.slug === "dock-boat");

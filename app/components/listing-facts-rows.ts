@@ -22,6 +22,8 @@ export type ListingFacts = {
   animations: GltfClipFact[];
   /** 이 상품이 속한 키트의 식별자(=키트 상품의 슬러그). 계약은 docs/kits.md. */
   kit: string | null;
+  /** 키트가 스스로 말하는 갈래(마을 · 부두 · 광산 · 캐릭터). 키트 조각이 적어 주고, 없으면 null. */
+  theme?: string | null;
   /** 그 키트의 부품 수. 빌드 매니페스트가 센 값이라 화면은 목록에서 다시 센 수를 먼저 쓴다. */
   kitSize: number;
   /**

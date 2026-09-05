@@ -560,6 +560,7 @@
         }
       ],
       "kit": "kit-fishing-dock",
+      "theme": "부두",
       "kitSize": 16,
       "members": 15,
       "viewYawDegrees": 40.3,

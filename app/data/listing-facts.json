@@ -1,12 +1,13 @@
 {
   "schema": "clunk.listing-facts.v1",
-  "generatedAt": "2026-09-05T09:39:42.366Z",
+  "generatedAt": "2026-09-05T11:47:32.016Z",
   "sources": [
     "outputs\\market-launch\\wave1\\upload-manifest.json",
     "tmp\\listings-snapshot.json",
     "배달 파일에서 다시 잰 항목 79건",
     "이전 판의 키트 표식을 유지한 항목 49건 (scripts/merge-kit-facts.mjs 가 적은 것)",
-    "이전 판에서 유지한 항목 8건"
+    "이전 판에서 유지한 항목 8건",
+    "examples/generated/kits/*/listing-facts.fragment.json → public/market 파일에서 재측정 (scripts/merge-kit-facts.mjs)"
   ],
   "facts": {
     "clunk-heli-h145": {
@@ -749,12 +750,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -764,6 +759,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-fishing-dock",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -783,12 +785,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -798,6 +794,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-fishing-dock",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -817,12 +820,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -832,6 +829,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-fishing-dock",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -851,12 +855,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -866,6 +864,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-fishing-dock",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -885,12 +890,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -900,6 +899,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-fishing-dock",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -926,12 +932,6 @@
           "seconds": 3.2
         }
       ],
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -941,6 +941,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-fishing-dock",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -967,12 +974,6 @@
           "seconds": 6
         }
       ],
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -982,6 +983,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-fishing-dock",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -1001,12 +1009,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1016,6 +1018,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-fishing-dock",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -1035,12 +1044,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1050,6 +1053,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-fishing-dock",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -1069,12 +1079,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1084,6 +1088,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-fishing-dock",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -1103,12 +1114,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1118,6 +1123,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-fishing-dock",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -1137,12 +1149,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1152,6 +1158,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-fishing-dock",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -1171,12 +1184,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1186,6 +1193,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-fishing-dock",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -1205,12 +1219,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1220,6 +1228,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-fishing-dock",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -1246,12 +1261,6 @@
           "seconds": 4
         }
       ],
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1261,6 +1270,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-fishing-dock",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -1400,6 +1416,7 @@
         "imageTypes": []
       },
       "kit": "kit-harvest-folk",
+      "theme": null,
       "kitSize": 6,
       "members": null,
       "viewYawDegrees": null,
@@ -1523,6 +1540,7 @@
         "imageTypes": []
       },
       "kit": "kit-harvest-folk",
+      "theme": null,
       "kitSize": 6,
       "members": null,
       "viewYawDegrees": null,
@@ -1646,6 +1664,7 @@
         "imageTypes": []
       },
       "kit": "kit-harvest-folk",
+      "theme": null,
       "kitSize": 6,
       "members": null,
       "viewYawDegrees": null,
@@ -1769,6 +1788,7 @@
         "imageTypes": []
       },
       "kit": "kit-harvest-folk",
+      "theme": null,
       "kitSize": 6,
       "members": null,
       "viewYawDegrees": null,
@@ -1892,6 +1912,7 @@
         "imageTypes": []
       },
       "kit": "kit-harvest-folk",
+      "theme": null,
       "kitSize": 6,
       "members": null,
       "viewYawDegrees": null,
@@ -2015,6 +2036,7 @@
         "imageTypes": []
       },
       "kit": "kit-harvest-folk",
+      "theme": null,
       "kitSize": 6,
       "members": null,
       "viewYawDegrees": null,
@@ -2638,7 +2660,17 @@
           "seconds": 4
         }
       ],
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
       "kit": "kit-fishing-dock",
+      "theme": "부두",
       "kitSize": 15,
       "members": [
         "dock-bollard",
@@ -2660,15 +2692,6 @@
       "viewYawDegrees": 40.3,
       "sheet": null,
       "texture": null,
-      "engine": {
-        "requires": [],
-        "uses": [],
-        "colour": "material",
-        "modes": [
-          4
-        ],
-        "imageTypes": []
-      },
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3062,6 +3085,7 @@
         "imageTypes": []
       },
       "kit": "kit-harvest-folk",
+      "theme": "캐릭터",
       "kitSize": 6,
       "members": [
         "folk-botanist-mira",
@@ -3093,7 +3117,19 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "texture",
+        "modes": [
+          4
+        ],
+        "imageTypes": [
+          "image/png"
+        ]
+      },
       "kit": "kit-mine-entrance",
+      "theme": "광산",
       "kitSize": 16,
       "members": [
         "mine-cart",
@@ -3116,17 +3152,6 @@
       "viewYawDegrees": 40.3,
       "sheet": null,
       "texture": null,
-      "engine": {
-        "requires": [],
-        "uses": [],
-        "colour": "texture",
-        "modes": [
-          4
-        ],
-        "imageTypes": [
-          "image/png"
-        ]
-      },
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3160,7 +3185,17 @@
           "seconds": 3.6
         }
       ],
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
       "kit": "kit-village-square",
+      "theme": "마을",
       "kitSize": 15,
       "members": [
         "village-bell-tower",
@@ -3182,15 +3217,6 @@
       "viewYawDegrees": null,
       "sheet": null,
       "texture": null,
-      "engine": {
-        "requires": [],
-        "uses": [],
-        "colour": "material",
-        "modes": [
-          4
-        ],
-        "imageTypes": []
-      },
       "inspection": {
         "webScore": 100,
         "mobileScore": 97,
@@ -3218,12 +3244,6 @@
           "seconds": 2
         }
       ],
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3235,6 +3255,13 @@
           "image/png"
         ]
       },
+      "kit": "kit-mine-entrance",
+      "theme": null,
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 99,
         "mobileScore": 99,
@@ -3262,12 +3289,6 @@
           "seconds": 2
         }
       ],
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3279,6 +3300,13 @@
           "image/png"
         ]
       },
+      "kit": "kit-mine-entrance",
+      "theme": null,
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 99,
         "mobileScore": 99,
@@ -3298,12 +3326,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3315,6 +3337,13 @@
           "image/png"
         ]
       },
+      "kit": "kit-mine-entrance",
+      "theme": null,
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3341,12 +3370,6 @@
           "seconds": 2.4
         }
       ],
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3358,6 +3381,13 @@
           "image/png"
         ]
       },
+      "kit": "kit-mine-entrance",
+      "theme": null,
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3377,12 +3407,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3394,6 +3418,13 @@
           "image/png"
         ]
       },
+      "kit": "kit-mine-entrance",
+      "theme": null,
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3413,12 +3444,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3430,6 +3455,13 @@
           "image/png"
         ]
       },
+      "kit": "kit-mine-entrance",
+      "theme": null,
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3449,12 +3481,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3466,6 +3492,13 @@
           "image/png"
         ]
       },
+      "kit": "kit-mine-entrance",
+      "theme": null,
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3485,12 +3518,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3502,6 +3529,13 @@
           "image/png"
         ]
       },
+      "kit": "kit-mine-entrance",
+      "theme": null,
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3521,12 +3555,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3538,6 +3566,13 @@
           "image/png"
         ]
       },
+      "kit": "kit-mine-entrance",
+      "theme": null,
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3557,12 +3592,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3574,6 +3603,13 @@
           "image/png"
         ]
       },
+      "kit": "kit-mine-entrance",
+      "theme": null,
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3593,12 +3629,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3610,6 +3640,13 @@
           "image/png"
         ]
       },
+      "kit": "kit-mine-entrance",
+      "theme": null,
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3629,12 +3666,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3646,6 +3677,13 @@
           "image/png"
         ]
       },
+      "kit": "kit-mine-entrance",
+      "theme": null,
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3665,12 +3703,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3682,6 +3714,13 @@
           "image/png"
         ]
       },
+      "kit": "kit-mine-entrance",
+      "theme": null,
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3701,12 +3740,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3718,6 +3751,13 @@
           "image/png"
         ]
       },
+      "kit": "kit-mine-entrance",
+      "theme": null,
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3737,12 +3777,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3754,6 +3788,13 @@
           "image/png"
         ]
       },
+      "kit": "kit-mine-entrance",
+      "theme": null,
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3773,12 +3814,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3790,6 +3825,13 @@
           "image/png"
         ]
       },
+      "kit": "kit-mine-entrance",
+      "theme": null,
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3974,12 +4016,6 @@
           "seconds": 2.7
         }
       ],
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3989,6 +4025,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-village-square",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 97,
@@ -4008,12 +4051,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4023,6 +4060,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-village-square",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -4042,12 +4086,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4057,6 +4095,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-village-square",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -4076,12 +4121,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4091,6 +4130,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-village-square",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -4110,12 +4156,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4125,6 +4165,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-village-square",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -4144,12 +4191,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4159,6 +4200,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-village-square",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -4178,12 +4226,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4193,6 +4235,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-village-square",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -4212,12 +4261,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4227,6 +4270,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-village-square",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -4246,12 +4296,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4261,6 +4305,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-village-square",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 97,
@@ -4280,12 +4331,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4295,6 +4340,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-village-square",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -4314,12 +4366,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4329,6 +4375,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-village-square",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -4348,12 +4401,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4363,6 +4410,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-village-square",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -4382,12 +4436,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4397,6 +4445,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-village-square",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -4416,12 +4471,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4431,6 +4480,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-village-square",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -4458,12 +4514,6 @@
           "seconds": 3.6
         }
       ],
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4473,6 +4523,13 @@
         ],
         "imageTypes": []
       },
+      "kit": "kit-village-square",
+      "theme": null,
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 97,

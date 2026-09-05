@@ -104,12 +104,32 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
   }, []);
 
   // Always ask the server. The page's own idea of the session can be stale (a prerendered
-  // shell said 'signed out' to people who were signed in), and /api/mcp/keys answers 401
-  // honestly when they are not.
+  // shell said 'signed out' to people who were signed in).
+  //
+  // 2026-09-05 점검 M14: 그 질문을 /api/mcp/keys 에게 했다. 그 자리는 로그인하지 않은
+  // 사람에게 401 로 답하는 것이 맞고, 그래서 로그인하지 않은 방문자는 /agents 를 열 때마다
+  // 콘솔에 401 을 하나씩 받았다. 세션을 묻는 자리는 따로 있다 — /api/session 은 누구에게나
+  // 200 으로 답하며 로그인 여부만 말한다(사이트 머리띠가 쓰는 그 자리다). 먼저 그것을 묻고,
+  // 로그인한 사람일 때만 키 목록을 부른다. 401 을 다루는 loadKeys 쪽 처리는 그대로 둔다 —
+  // 세션이 그 사이에 끊길 수 있다.
   useEffect(() => {
-    const timer = window.setTimeout(() => void loadKeys(), 0);
-    return () => window.clearTimeout(timer);
-  }, [initiallyAuthenticated, loadKeys]);
+    let active = true;
+    void fetch("/api/session", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) return false;
+        const body = (await response.json()) as { authenticated?: boolean };
+        return Boolean(body.authenticated);
+      })
+      .catch(() => false)
+      .then((authenticated) => {
+        if (!active) return;
+        if (authenticated) void loadKeys();
+        else setConnectionState("signed-out");
+      });
+    return () => {
+      active = false;
+    };
+  }, [loadKeys]);
 
   async function createKey() {
     setBusy("create");

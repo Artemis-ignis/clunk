@@ -156,9 +156,10 @@ function KitIndexCard({ kit, salesOpen }: { kit: Kit<KitListing>; salesOpen: boo
         <span className={styles.cardTitle}>{kit.name}</span>
         <span className={styles.cardSpec}>
           <span className={styles.gradeBadge} data-grade={kit.grade}>{kit.grade} 등급</span>
-          {/* 갈래 이름은 적지 않는다. Kit.themeName 은 대표 부품의 농장 시절 갈래라 광산 키트에
-              "농장 소품"이라고 적혔다(2026-09-05). 키트 자신의 갈래는 등록부에 없다. */}
-          <span>부품 {kit.parts.length}개</span>
+          {/* 갈래 이름이 돌아왔다. Kit.themeName 은 이제 키트가 스스로 적어 둔 갈래를
+              먼저 읽는다(등록부 facts.theme — 마을 · 부두 · 광산 · 캐릭터). 그 값이 없는
+              옛 키트만 예전처럼 대표 부품의 갈래로 되돌아간다(2026-09-05). */}
+          <span>{kit.themeName} · 부품 {kit.parts.length}개</span>
         </span>
         {kit.triangles !== null ? (
           <span className={styles.cardTotals}>

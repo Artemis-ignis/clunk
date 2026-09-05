@@ -44,6 +44,8 @@ export type CatalogListing = {
     animations?: readonly { name: string; seconds?: number }[] | null; kit?: string | null;
     /** 키트 계약(docs/kits.md). 부품이 몇 개인 키트에 속하는지, 그리고 키트 상품이면 그 부품들. */
     kitSize?: number | null; members?: number | readonly string[] | null;
+    /** 키트 상품이 스스로 말하는 갈래(마을 · 부두 · 광산 · 캐릭터). 키트 조각이 적어 준다. */
+    theme?: string | null;
   } | null;
 };
 
@@ -477,9 +479,11 @@ export function kitsFrom<T extends KitSource>(listings: readonly T[]): Kit<T>[] 
       // 3개 가운데 하나" 처럼 같은 수를 두 번 말하게 된다. 새 키트에는 이름표가 없고,
       // 그때는 상품 제목이 곧 키트 이름이다(docs/kits.md 8절).
       name: LEGACY_KIT_NAMES[id] ?? group.product?.title ?? id,
-      // 낱개 상품의 갈래(농장 구조물·농장 소품·나무·텍스처)다. 마을·부두·광산 키트에는 맞는
-      // 말이 아니라 키트 화면은 이 이름을 쓰지 않는다 — 키트 자신의 갈래는 등록부에 없다.
-      themeName: themeById(categoryOf(anchor)).name,
+      // 키트가 스스로 적어 둔 갈래가 먼저다(마을 · 부두 · 광산 · 캐릭터). 그 값은 키트
+      // 조각에서 등록부로 들어온다(scripts/merge-kit-facts.mjs) — 슬러그 대응표가 아니다.
+      // 적어 두지 않은 옛 키트만 낱개 상품의 갈래(농장 구조물·농장 소품·나무·텍스처)로
+      // 되돌아간다. 2026-09-05 전에는 그 되돌이만 있어 광산 키트에 "농장 소품"이 적혔다.
+      themeName: group.product?.facts?.theme ?? themeById(categoryOf(anchor)).name,
       product: group.product,
       parts: group.parts,
       triangles: sumFacts(group.parts, (part) => part.facts?.triangles ?? null),

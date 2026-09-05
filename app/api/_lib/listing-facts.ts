@@ -23,6 +23,8 @@ export type ListingFacts = {
   animatedParts: string[];
   animations: Array<{ name: string; seconds: number }>;
   kit: string | null;
+  /** 키트가 스스로 말하는 갈래. 키트 조각이 적어 주는 값이고, 없으면 null 이다. */
+  theme?: string | null;
   kitSize: number;
   members: number | null;
   viewYawDegrees: number | null;

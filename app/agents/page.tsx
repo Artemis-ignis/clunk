@@ -30,7 +30,8 @@ const setupSteps = [
 const AGENT_ASSETS: Array<{ kind: AssetFamilyVisualKind; label: string }> = [
   { kind: "sprite", label: "2D 이미지" },
   { kind: "atlas", label: "스프라이트 시트" },
-  { kind: "spine", label: "본 애니메이션" },
+  // 본 애니메이션 칸은 비워 둔다(2026-09-05): 보여 줄 만한 리깅 캐릭터가 아직 없다.
+  // 마스터 기준(tmp/character/reference/thomas-the-farmer-sheet.png)을 넘는 캐릭터가 승인되면 되살린다.
   { kind: "motion", label: "애니메이션 클립" },
   { kind: "model", label: "3D 모델" },
 ];
@@ -83,7 +84,7 @@ export default async function AgentsPage() {
 
         <section className="agents-v4-rail" aria-label="연결 정보"><div><span>연결 주소</span><strong>/api/mcp</strong><small>웹으로 바로 연결합니다</small></div><div><span>인증</span><strong>내 계정 전용 키</strong><small>로그인 후 키 발급</small></div><div><span>쓸 수 있는 도구</span><strong>웹으로 바로 쓰는 도구 {MCP_HTTP_TOOL_COUNT}개</strong><small>내 컴퓨터의 파일을 직접 읽고 쓰는 일은 내 컴퓨터에서 쓰는 도구 {MCP_TOOLS.length}개가 맡습니다. 그 도구는 내 컴퓨터에 설치해야 씁니다.</small></div><McpEndpointStatus /></section>
 
-        <section className="agent-asset-strip" aria-label="에이전트가 검사할 수 있는 에셋 종류"><div className="agent-asset-strip-copy"><span className="eyebrow">한 번 연결하면 다섯 종류</span><strong>에이전트가 부르면<br />이 흐름으로 들어옵니다.</strong><small>파일은 내 컴퓨터에서 열거나, 직접 올려서 시작합니다.</small></div><div className="agent-asset-strip-items">{AGENT_ASSETS.map((item) => <div key={item.kind}><AssetFamilyVisual kind={item.kind} compact /><span>{item.label}</span></div>)}</div></section>
+        <section className="agent-asset-strip" aria-label="에이전트가 검사할 수 있는 에셋 종류"><div className="agent-asset-strip-copy"><span className="eyebrow">한 번 연결하면 네 종류</span><strong>에이전트가 부르면<br />이 흐름으로 들어옵니다.</strong><small>파일은 내 컴퓨터에서 열거나, 직접 올려서 시작합니다.</small></div><div className="agent-asset-strip-items">{AGENT_ASSETS.map((item) => <div key={item.kind}><AssetFamilyVisual kind={item.kind} compact /><span>{item.label}</span></div>)}</div></section>
 
         <section className="agents-v4-section agents-v4-product-loop" aria-labelledby="agent-product-loop-heading"><div className="agents-v4-heading agents-v4-heading-wide"><div><span className="eyebrow">연결하기 전에 결과부터</span><h2 id="agent-product-loop-heading">에이전트가 부르면<br /><em>이 결과가 돌아옵니다.</em></h2></div><p>아래는 미리 준비된 예시라 실행 횟수가 들지 않습니다. 자체 렌더와 게임 시점은 파일 점수와 별개로 기계가 직접 그려 측정한 뒤 판정합니다.</p></div><SampleRunWorkbench compact /></section>
 

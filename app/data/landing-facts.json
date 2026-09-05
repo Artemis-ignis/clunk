@@ -1,12 +1,12 @@
 {
   "schema": "clunk.landing-facts.v1",
-  "generatedAt": "2026-09-05T09:39:46.049Z",
+  "generatedAt": "2026-09-05T11:59:03.522Z",
   "facts": {
     "tractor": {
       "fileName": "tractor.compact.m1.glb",
       "path": "public/market/hf-tractor-compact/tractor.compact.m1.glb",
       "triangles": 59232,
-      "bytes": 1431320,
+      "bytes": 1431316,
       "faceLimit": 40000,
       "limitPercent": 148
     },
@@ -148,21 +148,6 @@
         "cell": 128,
         "directions": 8,
         "frames": null
-      }
-    },
-    "spine": {
-      "slug": "folk-farmer-tomas",
-      "name": "농부 토마스",
-      "aria": "밀짚모자 농부, 에셋 마켓에 있는 본 애니메이션 캐릭터",
-      "image": "/market/folk-farmer-tomas/hero-folk-farmer-tomas.png",
-      "imagePath": "public/market/folk-farmer-tomas/hero-folk-farmer-tomas.png",
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "fit": "contain",
-      "caption": "동작 8개 · 움직이는 부품 55개",
-      "numbers": {
-        "clips": 8,
-        "parts": 55
       }
     },
     "motion": {
