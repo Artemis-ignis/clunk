@@ -273,9 +273,11 @@ test("real market models report the intersections a human found by eye", async (
   const windmill = inspectAsset(await market("hf-windmill", "farm-windmill.m1.glb"));
   const sleeve = byRule(windmill.findings, "GEO-PART-INTERSECTION")
     .find((finding) => finding.message.includes("windmillShaftSleeve"));
-  // 2026-09-05 수리: 슬리브를 허브 뒷면 기준 55 mm 베어링 깊이로 잘랐다. 한때 271.6 mm 를
-  // 지나던 그 관통이 다시 나타나면 수리가 풀린 것이다.
-  assert.equal(sleeve, undefined, "the windmill shaft sleeve intersection came back");
+  // 2026-09-05 수리: 슬리브가 지붕을 271.6 mm 지나던 것을 허브 뒷면 기준 55 mm 베어링
+  // 깊이(측정 59 mm)로 잘랐다. 축이 베어링에 물리는 이음매라 검사기는 여전히 그 겹침을
+  // 보고한다 — 값이 59 mm 에서 벗어나면 수리가 풀렸거나 슬리브가 다시 길어진 것이다.
+  assert.ok(sleeve, "the windmill shaft sleeve bearing seat is missing");
+  assert.equal(sleeve.observed, "59 mm");
 
   const barn = inspectAsset(await market("hf-barn", "barn.m1.glb"));
   const silo = byRule(barn.findings, "GEO-PART-INTERSECTION")
