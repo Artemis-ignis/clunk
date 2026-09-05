@@ -115,7 +115,8 @@ function capture(id: string): SampleRunCapture | undefined {
  * 방문자에게 보이고 있었다. 지워지는 것은 지시이고, 사실은 남는다.
  */
 export function visitorLaneLabel(label: string): string {
-  return label.replace("엔진 렌더", "자체 렌더");
+  // 2026-09-06 마스터: 렌더 칸의 이름은 어디서나 "엔진 렌더" 하나다. 바꿔 부르지 않는다.
+  return label;
 }
 
 export function visitorRendererNote(note: string): string {

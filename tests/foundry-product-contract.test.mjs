@@ -94,7 +94,7 @@ test("workspace surfaces name their real jobs without removing evidence", async 
   // 2026-09-02: /studio is the shell around the making workspace; the prompt and
   // the job names live in the workbench it renders.
   assert.match(studio, /AssetCreationWorkbench/);
-  assert.match(studio, /에셋 만들기/);
+  assert.match(studio, /에셋 제작/);
   assert.match(await source("app/components/AssetCreationWorkbench.tsx"), /prompt/i);
   assert.match(gameReady, /Game Ready/);
   assert.match(inspector, /NOT_EVALUATED|정적 정책 점수/);

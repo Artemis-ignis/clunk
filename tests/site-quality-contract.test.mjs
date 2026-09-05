@@ -127,8 +127,8 @@ test("the product showroom makes the file-to-decision loop interactive on public
   // 오는지.
   // 포기한 보장: 2D 스프라이트 / 3D GLB 전환은 더는 없다. 그 자리에는 실제로 측정된
   // 에셋 셋(트랙터 · 나무 상자 · 헬리콥터)의 결과를 고르는 전환이 걸린다.
-  // 2026-09-05 점검 M10: "엔진 렌더" 는 바로 밑의 고지와 반대말을 해서 "자체 렌더" 가 됐다.
-  for (const lane of ["파일 검사", "자체 렌더", "게임 시점", "판정"]) {
+  // 2026-09-05 점검 M10: "엔진 렌더" 는 바로 밑의 고지와 반대말을 해서 "엔진 렌더" 가 됐다.
+  for (const lane of ["파일 검사", "엔진 렌더", "게임 시점", "판정"]) {
     assert.match(showcase, new RegExp(`label: "${lane}"`), `${lane} 칸이 사라졌다`);
   }
   assert.match(showcase, /statuses\.structural/);

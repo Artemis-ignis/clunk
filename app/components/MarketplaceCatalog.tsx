@@ -537,7 +537,7 @@ export function MarketplaceCatalog({ salesOpen = false }: { salesOpen?: boolean 
                  지금 무엇이 되는지를 한 줄로 적는다. */
               <section className={styles.sideGroup}>
                 <h2 className={styles.sideHead}>이용 조건</h2>
-                <p className={styles.sideNote}>지금은 로그인만 하면 전부 무료</p>
+                <p className={styles.sideNote}>베타 기간에는 로그인만 하면 전부 무료</p>
               </section>
             )}
           </aside>

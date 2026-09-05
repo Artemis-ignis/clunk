@@ -54,7 +54,7 @@ export function SiteFooter() {
           <span className="cv5-footer-biz-mail">이메일: junsuopar@gmail.com</span>
         </div>
         <div className="cv5-footer-bottom">
-          <span>© 2026 Artemis. All rights reserved.{billingConfigured ? "" : " · 지금은 결제를 받지 않습니다."}</span>
+          <span>© 2026 Artemis. All rights reserved.{billingConfigured ? "" : " · 베타 기간에는 결제를 받지 않습니다."}</span>
           <nav aria-label="약관 바로가기">
             <Link href="/privacy" prefetch={false}>개인정보처리방침</Link>
             <Link href="/terms" prefetch={false}>이용약관</Link>

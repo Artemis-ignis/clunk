@@ -45,7 +45,7 @@ export function accessFor(options: {
         images_per_day: WORKSPACE_IMAGES_PER_DAY,
       },
       sales_open: salesOpen,
-      ...(salesOpen ? {} : { sales_note: "지금은 로그인만 하면 모든 에셋과 기능이 열립니다." }),
+      ...(salesOpen ? {} : { sales_note: "베타 기간에는 로그인만 하면 모든 에셋과 기능이 열립니다." }),
     };
   }
 

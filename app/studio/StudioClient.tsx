@@ -8,7 +8,7 @@ import type { AssetKind } from "../../packages/core/src/assetops-contract";
 import "./studio-workbench.css";
 
 /**
- * /studio — 에셋 만들기.
+ * /studio — 에셋 제작.
  *
  * 2026-09-02. This page used to open on a headline ("무엇을 만들지 고르면, 파일까지
  * 나옵니다"), a paragraph, a four-card explainer, a workflow strip, an engine
@@ -41,7 +41,7 @@ export function StudioClient({
   return (
     <WorkspaceShell
       active="studio"
-      title="에셋 만들기"
+      title="에셋 제작"
       userLabel={userLabel}
       status={welcome ? <span className="workspace-firstrun">{welcome}</span> : undefined}
     >

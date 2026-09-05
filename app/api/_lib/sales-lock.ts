@@ -23,5 +23,5 @@ export const SALES_LOCKED_BODY = {
   schema: "clunk.sales-lock.v1" as const,
   status: "SALES_NOT_OPEN" as const,
   // 무엇이 없는지가 아니라 지금 무엇이 되는지를 말한다. 읽는 사람에게 필요한 것은 그쪽이다.
-  error: "지금은 로그인만 하면 모든 에셋과 기능이 열립니다.",
+  error: "베타 기간에는 로그인만 하면 모든 에셋과 기능이 열립니다.",
 };

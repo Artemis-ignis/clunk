@@ -80,7 +80,7 @@ export function accessChipLabel(free: boolean, salesOpen: boolean): string {
 
 /** 오른쪽 판이 문장으로 적는 같은 사실. */
 export function accessSentence(free: boolean, salesOpen: boolean): string {
-  if (!salesOpen) return "로그인만 하면 무료입니다.";
+  if (!salesOpen) return "베타 기간에는 로그인만 하면 무료입니다.";
   return free ? "무료 등급입니다. 로그인만 하면 받습니다." : "구독으로 열립니다.";
 }
 

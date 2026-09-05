@@ -7,7 +7,7 @@ import type { AssetKind } from "../../packages/core/src/assetops-contract";
 
 export const dynamic = "force-dynamic";
 export const metadata = createPageMetadata({
-  title: "에셋 만들기",
+  title: "에셋 제작",
   description: "2D 이미지, 3D 모델, 스프라이트 시트, 애니메이션 클립을 만들고 그 자리에서 검사합니다.",
   path: "/studio",
 });

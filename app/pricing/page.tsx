@@ -162,7 +162,7 @@ const FAQ = [
   },
   {
     q: "지금 마켓에서 무엇을 받을 수 있나요?",
-    a: "지금은 로그인만 하면 B·A·S 등급을 전부 받습니다. 요금은 구독이 시작될 때부터 적용됩니다.",
+    a: "베타 기간에는 로그인만 하면 B·A·S 등급을 전부 받습니다. 요금은 구독이 시작될 때부터 적용됩니다.",
   },
   {
     q: "구독은 언제 시작하나요?",
@@ -258,7 +258,7 @@ export default function PricingPage() {
                             결제 화면이 나올 것으로 읽힙니다. 결제가 닫혀 있는 동안에는 그 카드에서
                             무슨 일이 일어나는지 카드 안에서 한 줄로 말합니다. */}
                         {!salesOpen && !isFree ? (
-                          <p className={styles.planNote}>지금은 가입만 하면 됩니다. 구독이 열리기 최소 30일 전에 이메일로 먼저 알려 드립니다.</p>
+                          <p className={styles.planNote}>베타 기간에는 가입만 하면 됩니다. 구독이 열리기 최소 30일 전에 이메일로 먼저 알려 드립니다.</p>
                         ) : null}
                       </div>
 
@@ -409,7 +409,7 @@ export default function PricingPage() {
                 <div>
                   <h2 id="closer-title">먼저 써 보고 정하세요</h2>
                   <p>
-                    지금은 로그인만 하면 마켓의 모든 에셋이 열립니다. 카드도 계좌도 묻지 않습니다.
+                    베타 기간에는 로그인만 하면 마켓의 모든 에셋이 열립니다. 카드도 계좌도 묻지 않습니다.
                   </p>
                 </div>
                 <div className={styles.closerActions}>

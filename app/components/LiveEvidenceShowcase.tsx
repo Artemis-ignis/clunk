@@ -98,7 +98,7 @@ const CHECK_LABELS: Record<string, string> = {
   motion: "동작",
 };
 
-const LANE_LABELS: Record<string, string> = { visualRuntime: "자체 렌더", playerFacing: "게임 시점" };
+const LANE_LABELS: Record<string, string> = { visualRuntime: "엔진 렌더", playerFacing: "게임 시점" };
 
 const CHECK_STATUS: Record<string, { text: string; tone: Tone | "off" }> = {
   PASS: { text: "통과", tone: "pass" },
@@ -279,11 +279,11 @@ function buildRecord(slug: string, pick: string, raw: unknown): EvidenceRecord {
     {
       id: "engine",
       index: "01",
-      label: "자체 렌더",
+      label: "엔진 렌더",
       eyebrow: "네 각도를 스스로 찍습니다",
       title: "에셋을 네 각도에서 찍고 픽셀을 측정합니다.",
       body: `3/4 · 정면 · 측면 · 위. 화면 채움과 잘림, 노출, 남는 색 수, 배경과의 색 차이를 픽셀에서 직접 읽습니다. 사람이 파일을 열어 볼 차례는 없습니다.`,
-      proof: `자체 렌더 ${engineCuts}컷 · ${laneCheckSummary(checks, "visualRuntime")}`,
+      proof: `엔진 렌더 ${engineCuts}컷 · ${laneCheckSummary(checks, "visualRuntime")}`,
       available: engineCuts > 0,
     },
     {
@@ -327,7 +327,7 @@ function buildRecord(slug: string, pick: string, raw: unknown): EvidenceRecord {
       tone: structural.tone,
     },
     {
-      label: "자체 렌더",
+      label: "엔진 렌더",
       value: visualRuntime.value,
       detail: `${engineCuts}각도 · ${laneCheckSummary(checks, "visualRuntime")}`,
       tone: visualRuntime.tone,
@@ -586,7 +586,7 @@ export function LiveEvidenceShowcase({
                 detail={status.detail}
                 tone={status.tone}
                 active={
-                  (currentStage.id === "engine" && status.label === "자체 렌더")
+                  (currentStage.id === "engine" && status.label === "엔진 렌더")
                   || (currentStage.id === "player" && status.label === "게임 시점")
                   || (currentStage.id === "motion" && status.label === "판정")
                 }
@@ -636,7 +636,9 @@ export function LiveEvidenceShowcase({
 
       <div className="live-evidence-note">
         <span>이 그림에 대하여</span>
-        <p>{record.rendererNoteKo}</p>
+        {/* 2026-09-06 마스터: 렌더 칸 이름은 어디서나 "엔진 렌더". 바로 아래 기록이 게임 엔진이 아니라고
+            말하므로, 이름이 가리키는 것이 무엇인지 한 문장으로 먼저 밝힌다. */}
+        <p>엔진 렌더 칸의 그림은 Clunk가 직접 그린 것입니다. {record.rendererNoteKo}</p>
       </div>
 
       <div className="live-evidence-showcase-footer">

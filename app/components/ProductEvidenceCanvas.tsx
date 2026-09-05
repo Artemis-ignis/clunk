@@ -63,7 +63,7 @@ export function ProductEvidenceCanvas({ variant = "dashboard", compact = false }
             <span className="product-canvas-pass">{laneWord(TRACTOR.statuses.autoVerdict)}</span>
           </div>
           <div className="product-canvas-metric"><span>파일 검사</span><strong>{TRACTOR.score}</strong><small>막는 문제 {TRACTOR.hardBlockers}건</small></div>
-          <div className="product-canvas-metric"><span>자체 렌더</span><strong>{laneWord(TRACTOR.statuses.visualRuntime)}</strong><small>{TRACTOR.engineCuts}각도</small></div>
+          <div className="product-canvas-metric"><span>엔진 렌더</span><strong>{laneWord(TRACTOR.statuses.visualRuntime)}</strong><small>{TRACTOR.engineCuts}각도</small></div>
           <div className="product-canvas-metric"><span>사람 검토</span><strong>{laneWord(TRACTOR.statuses.humanDecision)}</strong><small>게임 시점 {TRACTOR.playerCuts}컷 {laneWord(TRACTOR.statuses.playerFacing)}</small></div>
           <div className="product-canvas-timeline" aria-label="검사 흐름">
             <span className="is-done">01 · 해시</span><span className="is-done">02 · 파일 검사</span><span className="is-done">03 · 화면 찍기</span><span className="is-done">04 · 판정</span>
