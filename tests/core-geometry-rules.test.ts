@@ -249,7 +249,8 @@ test("a single-part file is not judged as an assembly", async () => {
 
 test("shipped market models are measured in world space within the time budget", async () => {
   const cases: { slug: string; file: string; triangles: number }[] = [
-    { slug: "hf-tractor-compact", file: "tractor.compact.m1.glb", triangles: 58_156 },
+    // 2026-09-05 수리(허브–차축 플랜지, 볼스터, 펜더 스테이)로 58,156 → 59,232.
+    { slug: "hf-tractor-compact", file: "tractor.compact.m1.glb", triangles: 59_232 },
     { slug: "clunk-heli-h145", file: "h145.glb", triangles: 85_150 },
   ];
   for (const item of cases) {
@@ -272,8 +273,9 @@ test("real market models report the intersections a human found by eye", async (
   const windmill = inspectAsset(await market("hf-windmill", "farm-windmill.m1.glb"));
   const sleeve = byRule(windmill.findings, "GEO-PART-INTERSECTION")
     .find((finding) => finding.message.includes("windmillShaftSleeve"));
-  assert.ok(sleeve, "the windmill shaft sleeve intersection is missing");
-  assert.equal(sleeve.observed, "271.6 mm");
+  // 2026-09-05 수리: 슬리브를 허브 뒷면 기준 55 mm 베어링 깊이로 잘랐다. 한때 271.6 mm 를
+  // 지나던 그 관통이 다시 나타나면 수리가 풀린 것이다.
+  assert.equal(sleeve, undefined, "the windmill shaft sleeve intersection came back");
 
   const barn = inspectAsset(await market("hf-barn", "barn.m1.glb"));
   const silo = byRule(barn.findings, "GEO-PART-INTERSECTION")
