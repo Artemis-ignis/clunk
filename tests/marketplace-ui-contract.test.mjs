@@ -44,7 +44,7 @@ test("marketplace page describes the master-curated buyer model and exposes snap
   // 둘러보는 화면의 머리글은 세 줄이다 — 어디인지, 무엇을 하는 곳인지, 무엇을 보고 고르는지.
   assert.match(page, /<span className="cv5-eyebrow">에셋 마켓<\/span>/u);
   assert.match(page, /<h1>에셋 둘러보기<\/h1>/u);
-  assert.match(page, /폴리곤 수와 용량은 파일을 열어 측정한 값입니다/u);
+  assert.match(page, /폴리곤 수와 용량은 파일에서 측정한 값입니다/u);
   // 키트는 이 목록의 탭이 아니라 자기 화면을 갖는다. 그 길이 화면에 있어야 한다.
   assert.match(page, /href="\/kits"/u, "app/marketplace/page.tsx: 키트로 가는 길이 없다");
   assert.doesNotMatch(page, /“키트” 탭|"키트" 탭/u, "없어진 탭을 가리키는 문장이 남아 있으면 안 된다");

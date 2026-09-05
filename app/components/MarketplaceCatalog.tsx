@@ -550,7 +550,7 @@ export function MarketplaceCatalog({ salesOpen = false }: { salesOpen?: boolean 
               <label className={styles.search}>
                 <Icon name="search" size={16} />
                 <span className="sr-only">에셋 검색</span>
-                <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="이름, 형식, 라이선스로 찾기" type="search" />
+                <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="이름이나 형식으로 찾기" type="search" />
               </label>
               <ColourPicker value={colour} onChange={setColour} />
               <label className={styles.sort}>
@@ -1442,8 +1442,8 @@ function CheckoutNotice() {
   return (
     <div className={styles.checkoutNotice} role="status">
       <Icon name="circleAlert" size={17} />
-      <strong>지금은 로그인만 하면 됩니다</strong>
-      <span>모든 에셋과 기능이 열려 있습니다. 이 자리와 이메일로 먼저 알린 뒤에 바뀝니다.</span>
+      <strong>베타 기간에는 로그인만 하면 됩니다</strong>
+      <span>모든 에셋과 기능이 열려 있습니다. 유료로 바뀌기 전에 이메일로 먼저 알려 드립니다.</span>
     </div>
   );
 }

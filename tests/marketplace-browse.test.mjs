@@ -32,7 +32,7 @@ test("둘러보는 화면의 머리글은 세 줄이고, 그 아래는 곧바로
 
   assert.match(page, /<span className="cv5-eyebrow">에셋 마켓<\/span>/u);
   assert.match(page, /<h1>에셋 둘러보기<\/h1>/u);
-  assert.match(page, /폴리곤 수와 용량은 파일을 열어 측정한 값입니다/u);
+  assert.match(page, /폴리곤 수와 용량은 파일에서 측정한 값입니다/u);
 
   // 진열장 그림 한 장과 원칙 네 줄이 격자를 화면 밖으로 밀어내고 있었다. 그 둘이 돌아오면
   // 같은 일이 다시 일어난다.
