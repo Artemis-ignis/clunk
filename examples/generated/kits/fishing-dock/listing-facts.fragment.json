@@ -1,0 +1,585 @@
+{
+  "note": "app/data/listing-facts.json 의 facts 에 그대로 병합할 조각. 이 파일은 원본을 고치지 않는다.",
+  "measuredBy": "tmp/kits/fishing-dock/make-listing-facts.mts",
+  "typeGap": "scripts/listing-facts-cli.ts 의 KitId 는 cozy-farm-set | harvest-frontier | grove-tree-pack 셋뿐이다. kit:\"kit-fishing-dock\" 을 쓰려면 그 union 과 KIT_NAMES 에 항목을 더해야 한다 — 등록부는 지휘자 영역이라 여기서 고치지 않았다.",
+  "facts": {
+    "dock-lighthouse": {
+      "triangles": 1364,
+      "materials": 7,
+      "boundsMetres": [
+        1.44,
+        4.3661,
+        1.44
+      ],
+      "byteLength": 109596,
+      "format": "GLB",
+      "animatedParts": [
+        "beacon_pivot"
+      ],
+      "animations": [
+        {
+          "name": "beacon-spin",
+          "seconds": 6
+        }
+      ],
+      "kit": "kit-fishing-dock",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "dock-plank-straight": {
+      "triangles": 828,
+      "materials": 4,
+      "boundsMetres": [
+        2,
+        1.1945,
+        2
+      ],
+      "byteLength": 64172,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-fishing-dock",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "dock-plank-corner": {
+      "triangles": 1488,
+      "materials": 4,
+      "boundsMetres": [
+        2,
+        1.1945,
+        2
+      ],
+      "byteLength": 112972,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-fishing-dock",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "dock-plank-end": {
+      "triangles": 1236,
+      "materials": 4,
+      "boundsMetres": [
+        2,
+        1.1945,
+        2
+      ],
+      "byteLength": 94156,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-fishing-dock",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "dock-lantern-post": {
+      "triangles": 720,
+      "materials": 5,
+      "boundsMetres": [
+        1.015,
+        2.61,
+        0.52
+      ],
+      "byteLength": 57468,
+      "format": "GLB",
+      "animatedParts": [
+        "lantern_pivot"
+      ],
+      "animations": [
+        {
+          "name": "sway",
+          "seconds": 3.2
+        }
+      ],
+      "kit": "kit-fishing-dock",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "dock-piling": {
+      "triangles": 216,
+      "materials": 3,
+      "boundsMetres": [
+        0.3,
+        1.795,
+        0.3
+      ],
+      "byteLength": 18568,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-fishing-dock",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "dock-rod-rack": {
+      "triangles": 1340,
+      "materials": 6,
+      "boundsMetres": [
+        2.05,
+        1.0203,
+        1.12
+      ],
+      "byteLength": 102148,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-fishing-dock",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "dock-rowboat": {
+      "triangles": 1160,
+      "materials": 6,
+      "boundsMetres": [
+        3.1,
+        0.602,
+        1.3656
+      ],
+      "byteLength": 90744,
+      "format": "GLB",
+      "animatedParts": [
+        "boat_pivot"
+      ],
+      "animations": [
+        {
+          "name": "bob",
+          "seconds": 4
+        }
+      ],
+      "kit": "kit-fishing-dock",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "dock-bollard": {
+      "triangles": 550,
+      "materials": 2,
+      "boundsMetres": [
+        0.7518,
+        0.47,
+        0.3276
+      ],
+      "byteLength": 42612,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-fishing-dock",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "dock-buoy-white": {
+      "triangles": 494,
+      "materials": 3,
+      "boundsMetres": [
+        0.366,
+        1.353,
+        0.366
+      ],
+      "byteLength": 40104,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-fishing-dock",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "dock-buoy-red": {
+      "triangles": 542,
+      "materials": 4,
+      "boundsMetres": [
+        0.526,
+        0.7354,
+        0.526
+      ],
+      "byteLength": 43868,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-fishing-dock",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "dock-net-pile": {
+      "triangles": 1264,
+      "materials": 4,
+      "boundsMetres": [
+        1.3029,
+        0.428,
+        0.9767
+      ],
+      "byteLength": 95092,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-fishing-dock",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "dock-fish-crate-closed": {
+      "triangles": 776,
+      "materials": 3,
+      "boundsMetres": [
+        0.68,
+        0.362,
+        0.434
+      ],
+      "byteLength": 59588,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-fishing-dock",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "dock-fish-crate-open": {
+      "triangles": 1268,
+      "materials": 5,
+      "boundsMetres": [
+        0.674,
+        0.31,
+        0.434
+      ],
+      "byteLength": 96176,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-fishing-dock",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "dock-rope-coil": {
+      "triangles": 680,
+      "materials": 2,
+      "boundsMetres": [
+        0.928,
+        0.23,
+        0.7458
+      ],
+      "byteLength": 52024,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-fishing-dock",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "kit-fishing-dock": {
+      "triangles": 13926,
+      "materials": 12,
+      "boundsMetres": null,
+      "byteLength": 1069620,
+      "format": "GLB",
+      "animatedParts": [
+        "beacon_pivot",
+        "lantern_pivot",
+        "boat_pivot"
+      ],
+      "animations": [
+        {
+          "name": "beacon-spin",
+          "seconds": 6
+        },
+        {
+          "name": "sway",
+          "seconds": 3.2
+        },
+        {
+          "name": "bob",
+          "seconds": 4
+        }
+      ],
+      "kit": "kit-fishing-dock",
+      "kitSize": 16,
+      "members": 15,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    }
+  }
+}
