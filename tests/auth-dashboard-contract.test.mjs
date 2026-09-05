@@ -134,7 +134,10 @@ test("passport surface is backed by stored API rows and keeps final readiness se
     "utf8",
   );
   assert.match(source, /\/api\/passports/);
-  assert.match(source, /정적 재검사 결과/);
-  assert.match(source, /Game Ready READY/);
+  // 2026-09-05: 화면이 "정적 재검사 결과"와 "Game Ready READY" 라는 내부 용어를 그대로
+  // 찍고 있었다. 말은 한국어로 바뀌었지만 지켜야 하는 것은 그대로다 — 정리한 파일을
+  // 다시 검사한 결과라는 사실과, 그것이 게임 화면 승인이 아니라는 경계.
+  assert.match(source, /정리 후 다시 검사한 결과/);
+  assert.match(source, /게임 화면에서 어떻게 보이는지는 아직 이 기록에 들어 있지 않습니다/);
   assert.match(source, /연결된 에셋 보기/);
 });

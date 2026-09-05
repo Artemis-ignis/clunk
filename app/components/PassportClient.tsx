@@ -28,6 +28,14 @@ type PassportRow = {
 
 type ParsedPassport = PassportRow & { passport: Passport | null };
 
+/** 안전한 정리 한 가지의 이름. 화면에는 규칙 아이디가 아니라 이 말이 나간다. */
+const OPERATION_WORDS: Record<string, string> = {
+  "prune-empty-nodes": "빈 노드 제거",
+  "dedupe-materials": "똑같은 재질 합치기",
+  "clean-metadata": "메타데이터 정리",
+  repack: "새 파일로 다시 묶기",
+};
+
 export function PassportClient({ userLabel }: { userLabel: string }) {
   const [rows, setRows] = useState<ParsedPassport[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -87,47 +95,47 @@ export function PassportClient({ userLabel }: { userLabel: string }) {
             <em>해시로 묶인 기록.</em>
           </h2>
           <p>
-            모든 Passport는 최적화 직후의 새 재검사에서 만들어집니다. 원본 해시, 출력 해시, 적용한 작업,
-            전후 점수가 한 파일에 들어 있습니다.
+            검사 증명서는 파일을 정리한 직후, 정리된 파일을 처음부터 다시 열어 검사한 결과로 만들어집니다.
+            원본 지문과 정리된 파일의 지문, 적용한 손질, 전후 점수가 한 파일에 들어 있습니다.
           </p>
         </div>
         <Link className="button button-quiet" href="/docs">
-          Passport 규격
+          증명서에 무엇이 들어가나
           <Icon name="arrowUpRight" size={15} />
         </Link>
       </section>
 
-      <section className="passport-visual-intro" aria-label="Passport 생성 흐름">
+      <section className="passport-visual-intro" aria-label="검사 증명서가 만들어지는 흐름">
         <div className={`passport-trace-board passport-trace-board-${rows.length ? "recorded" : "empty"}`}>
           <div className="passport-trace-head">
-            <span className="mono-label">OUTPUT TRACE · SHA-256</span>
-            <strong>{rows.length ? `${rows.length} RECORDED` : "AWAITING FIRST OUTPUT"}</strong>
+            <span className="mono-label">기록 흐름 · SHA-256</span>
+            <strong>{rows.length ? `${rows.length}건 보관 중` : "아직 첫 기록 전"}</strong>
           </div>
-          <div className="passport-trace-flow" aria-label="원본에서 Passport까지의 기록 흐름">
+          <div className="passport-trace-flow" aria-label="원본에서 검사 증명서까지의 기록 흐름">
             <div className="passport-trace-node">
               <span>01</span>
-              <strong>source.glb</strong>
-              <small>input bytes · hash</small>
+              <strong>원본 파일</strong>
+              <small>올린 바이트 · 지문</small>
             </div>
             <i aria-hidden="true">→</i>
             <div className="passport-trace-node is-active">
               <span>02</span>
-              <strong>fresh reopen</strong>
-              <small>output bytes · digest</small>
+              <strong>정리한 파일 다시 열기</strong>
+              <small>정리된 바이트 · 지문</small>
             </div>
             <i aria-hidden="true">→</i>
             <div className="passport-trace-node is-safe">
               <span>03</span>
-              <strong>passport.json</strong>
-              <small>before → after</small>
+              <strong>검사 증명서</strong>
+              <small>정리 전 → 정리 후</small>
             </div>
           </div>
-          <p>{rows.length ? "저장된 원본·출력 해시를 선택해 상세 비교를 이어가세요." : "검사기에서 실제 최적화를 실행하면 이 흐름에 고정된 기록이 생깁니다."}</p>
+          <p>{rows.length ? "아래 목록에서 하나를 고르면 전후를 나란히 봅니다." : "검사기에서 최적화를 실행하면 이 흐름대로 기록이 만들어집니다."}</p>
         </div>
         <div className="passport-visual-copy">
-          <span className="mono-label">TRACEABLE OUTPUT</span>
+          <span className="mono-label">되짚을 수 있는 결과</span>
           <h3>최적화 결과도<br /><em>검사 전으로 돌아갑니다.</em></h3>
-          <p>원본과 출력의 해시, 전후 digest, 적용 작업을 한 화면에서 비교하고 다음 검토로 보냅니다.</p>
+          <p>원본과 정리된 파일의 지문, 전후 결과 지문, 적용한 손질을 한 화면에서 나란히 비교합니다.</p>
         </div>
       </section>
 
@@ -148,10 +156,10 @@ export function PassportClient({ userLabel }: { userLabel: string }) {
         <section className="panel">
           <div className="empty-block empty-block-lg">
             <Icon name="badge" size={24} />
-            <strong>아직 Passport가 없습니다</strong>
+            <strong>아직 검사 증명서가 없습니다</strong>
             <p>
-              검사기에서 에셋을 안전하게 최적화하면 Passport가 생성됩니다. 출력 바이트를 다시 열어 검증한
-              뒤에만 기록이 남기 때문에, 최적화를 실행하지 않은 에셋은 여기에 나타나지 않습니다.
+              검사기에서 파일을 안전하게 최적화하면 검사 증명서가 만들어집니다. 정리된 파일을 다시 열어
+              확인한 뒤에만 기록이 남기 때문에, 최적화를 실행하지 않은 파일은 여기에 나타나지 않습니다.
             </p>
             <Link href="/app" className="button button-primary button-sm">
               검사기 열기
@@ -163,7 +171,7 @@ export function PassportClient({ userLabel }: { userLabel: string }) {
 
       {rows.length ? (
         <div className="passport-layout">
-          <section className="panel passport-index" aria-label="Passport 목록">
+          <section className="panel passport-index" aria-label="검사 증명서 목록">
             <div className="panel-head">
               <div>
                 <span className="mono-label">보관 목록</span>
@@ -197,7 +205,7 @@ export function PassportClient({ userLabel }: { userLabel: string }) {
             </div>
           </section>
 
-          <section className="panel passport-detail" aria-label="Passport 상세">
+          <section className="panel passport-detail" aria-label="검사 증명서 상세">
             {selected ? <PassportDetail row={selected} /> : null}
           </section>
         </div>
@@ -213,7 +221,7 @@ function PassportDetail({ row }: { row: ParsedPassport }) {
       <div className="empty-block">
         <Icon name="circleAlert" size={22} />
         <strong>기록을 읽을 수 없습니다</strong>
-        <p>저장된 Passport JSON이 손상되었습니다. 원본 해시 {shortHash(row.sourceHash)}로 다시 최적화하세요.</p>
+        <p>저장된 증명서 파일을 읽지 못했습니다. 원본 지문 {shortHash(row.sourceHash)} 파일을 검사기에서 다시 최적화하면 새 증명서가 만들어집니다.</p>
       </div>
     );
   }
@@ -224,7 +232,7 @@ function PassportDetail({ row }: { row: ParsedPassport }) {
     <>
       <div className="passport-detail-head">
         <div>
-          <span className="mono-label">Passport 상세</span>
+          <span className="mono-label">증명서 상세</span>
            <h3>{passport.passportId}</h3>
            <p className="passport-file-flow">
             <strong>{passport.sourceFileName}</strong>
@@ -233,7 +241,7 @@ function PassportDetail({ row }: { row: ParsedPassport }) {
           </p>
         </div>
         <div className="passport-readiness">
-           <span className="mono-label">정적 재검사 결과</span>
+           <span className="mono-label">정리 후 다시 검사한 결과</span>
            <StatusPill status={afterReadiness} />
            <small>{row.createdAt}</small>
         </div>
@@ -242,7 +250,7 @@ function PassportDetail({ row }: { row: ParsedPassport }) {
       <dl className="compare-grid">
         <Compare label="점수" before={`${passport.before.score.score}`} after={`${passport.after.score.score}`} />
         <Compare
-          label="차단 finding"
+          label="막는 문제"
           before={`${passport.before.score.hardBlockerCount}`}
           after={`${passport.after.score.hardBlockerCount}`}
         />
@@ -265,7 +273,7 @@ function PassportDetail({ row }: { row: ParsedPassport }) {
             passport.operations.map((operation) => (
               <span key={operation.id} className="passport-op">
                 <Icon name="check" size={12} strokeWidth={2.4} />
-                {operation.id} x{operation.count}
+                {OPERATION_WORDS[operation.id] ?? operation.id} {operation.count}건
               </span>
             ))
           ) : (
@@ -276,23 +284,23 @@ function PassportDetail({ row }: { row: ParsedPassport }) {
 
       <dl className="passport-digests">
         <div>
-          <dt>원본 해시</dt>
+          <dt>원본 파일 지문</dt>
           <dd>{passport.sourceHash}</dd>
         </div>
         <div>
-          <dt>출력 해시</dt>
+          <dt>정리한 파일 지문</dt>
           <dd>{passport.outputHash}</dd>
         </div>
         <div>
-          <dt>원본 검사 digest</dt>
+          <dt>원본 결과 지문</dt>
           <dd>{passport.sourceInspectionDigest}</dd>
         </div>
         <div>
-          <dt>출력 재검사 digest</dt>
+          <dt>정리 후 결과 지문</dt>
           <dd>{passport.outputInspectionDigest}</dd>
         </div>
         <div>
-          <dt>규칙 세트</dt>
+          <dt>적용한 검사 기준</dt>
           <dd>
             {passport.ruleSetId} v{passport.ruleSetVersion} / {passport.profileId}
           </dd>
@@ -316,7 +324,7 @@ function PassportDetail({ row }: { row: ParsedPassport }) {
           className="button button-primary"
           onClick={() => downloadJson(row.passportJson, `${passport.passportId}.json`)}
         >
-          Passport JSON 다운로드
+          증명서 파일 받기
           <Icon name="download" size={15} />
         </button>
         <Link href="/app" className="button button-quiet">
@@ -328,7 +336,7 @@ function PassportDetail({ row }: { row: ParsedPassport }) {
           <Icon name="arrowUpRight" size={14} />
         </Link>
       </div>
-      <p className="muted-note">Passport의 정적 재검사 결과만으로 Game Ready READY를 주장하지 않습니다. 저장 상태와 runtime·player-facing·human review gate는 연결된 에셋에서 별도로 확인하세요.</p>
+      <p className="muted-note">이 증명서는 파일 자체를 다시 열어서 본 결과입니다. 게임 화면에서 어떻게 보이는지는 아직 이 기록에 들어 있지 않습니다.</p>
     </>
   );
 }

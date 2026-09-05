@@ -37,16 +37,16 @@ export function resolveStoredReadiness(run: {
 }
 
 export function readinessNote(state: ReadinessState): string {
-  if (state === "ready") return "차단 finding이 없습니다. 선언된 정적 정책을 충족합니다.";
+  if (state === "ready") return "게임에 넣는 것을 막는 문제가 없습니다. 고른 기준을 모두 지켰습니다.";
   if (state === "conditional") {
-    return "차단 finding은 없습니다. 정적 정책 경고가 남아 있어 수동 확인이 필요합니다.";
+    return "막는 문제는 없고, 기준을 아슬아슬하게 지난 경고가 남아 있습니다. 무엇이 걸렸는지는 아래에 그대로 적혀 있습니다.";
   }
-  return "정적 정책 차단 finding이 남아 있습니다. 허용 목록 최적화 후 새 비교를 확인하세요.";
+  return "게임에 넣는 것을 막는 문제가 남아 있습니다. 아래 \"안전하게 최적화\"를 실행하면 정리한 새 파일로 다시 검사합니다.";
 }
 
 export function readinessHint(state: ReadinessState): string | null {
   if (state !== "conditional") return null;
-  return "무손실 정리로 고칠 수 없는 경고가 남아 있습니다.";
+  return "원본을 그대로 두는 안전한 정리로는 고칠 수 없는 경고입니다.";
 }
 
 function countStoredHardBlockers(reportJson?: string | null): number | null {

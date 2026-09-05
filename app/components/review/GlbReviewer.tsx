@@ -39,7 +39,7 @@ export function GlbReviewer({ initialUrl }: { initialUrl?: string | null }) {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const handlesRef = useRef<ViewerHandles | null>(null);
   const [stats, setStats] = useState<LoadedStats | null>(null);
-  const [status, setStatus] = useState<string>(initialUrl ? "불러오는 중…" : "GLB를 드래그하거나 아래 실물 인벤토리에서 선택하세요.");
+  const [status, setStatus] = useState<string>(initialUrl ? "불러오는 중…" : "GLB 파일을 끌어다 놓거나, 아래 목록에서 하나를 골라 보세요.");
   const [wireframe, setWireframeState] = useState(false);
   const [autoRotate, setAutoRotateState] = useState(true);
   const [reference, setReferenceState] = useState(true);
@@ -333,7 +333,7 @@ export function GlbReviewer({ initialUrl }: { initialUrl?: string | null }) {
             <div><dt>크기 (m)</dt><dd>{stats.bounds.x.toFixed(2)} × {stats.bounds.y.toFixed(2)} × {stats.bounds.z.toFixed(2)}</dd></div>
           </dl>
         ) : (
-          <p className="rv-empty">파일을 불러오면 파서가 직접 센 수치가 표시됩니다.</p>
+          <p className="rv-empty">파일을 불러오면 파일에서 직접 센 수치가 나옵니다.</p>
         )}
 
         <div className="rv-toggles">

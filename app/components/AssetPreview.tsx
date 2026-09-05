@@ -168,7 +168,7 @@ export function AssetPreview({ bytes, fileName }: { bytes: Uint8Array | null; fi
         {previewState === "loading" ? (
           <div className="preview-overlay">
             <span className="spinner" />
-            <p>미리보기 파싱 중</p>
+            <p>파일을 읽는 중입니다</p>
           </div>
         ) : null}
         {previewState === "error" ? (
@@ -178,7 +178,7 @@ export function AssetPreview({ bytes, fileName }: { bytes: Uint8Array | null; fi
           </div>
         ) : null}
       </div>
-      <p className="preview-caption">미리보기는 판정 게이트가 아닙니다. 점수와 finding은 Core가 바이트에서 계산합니다.</p>
+      <p className="preview-caption">점수와 발견 항목은 파일의 바이트에서 계산합니다. 이 미리보기는 눈으로 보라고 띄운 것이라 점수에 영향을 주지 않습니다.</p>
     </div>
   );
 }

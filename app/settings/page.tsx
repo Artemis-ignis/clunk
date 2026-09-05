@@ -4,6 +4,7 @@ import { Icon } from "../components/Icon";
 import { WorkspaceShell } from "../components/WorkspaceShell";
 import { createPageMetadata } from "../components/site-metadata";
 import { MarketingConsentToggle } from "./MarketingConsentToggle";
+import { areSalesOpen } from "../api/_lib/sales-lock";
 
 export const dynamic = "force-dynamic";
 export const metadata = createPageMetadata({
@@ -50,6 +51,8 @@ export default async function SettingsPage() {
   // 예전에는 어떤 로그인이든 "ChatGPT SIWC"라고 적었는데, Google·GitHub·임시 접속에서는
   // 사실이 아니었습니다(2026-08-31 점검). 지금은 실제로 쓴 방식만 적습니다.
   const auth = authDescription(user.provider);
+  // 결제가 열렸는지는 이 화면이 판단하지 않는다. 실제로 결제를 막고 있는 값에서 읽는다.
+  const salesOpen = areSalesOpen();
 
   const rows = [
     { label: "계정", value: user.email, note: auth.accountNote },
@@ -59,6 +62,16 @@ export default async function SettingsPage() {
       note: "처음 로그인할 때 자동으로 만들어졌습니다. 여기에 만든 파일과 검사 결과가 쌓입니다.",
     },
     { label: "로그인 방식", value: auth.label, note: "Clunk는 따로 아이디와 비밀번호를 만들지 않습니다." },
+    // 사이드바에는 "지금 요금 · 무료"가 늘 떠 있는데 설정에는 요금 이야기가 한 줄도 없어서,
+    // 무엇을 쓰고 있는지 확인하러 온 사람이 갈 곳이 없었다. 판매가 닫혀 있다는 사실은
+    // 이 파일이 아니라 sales-lock 이 정한다.
+    {
+      label: "지금 요금제",
+      value: salesOpen ? "유료 요금제 사용 중" : "무료 (베타)",
+      note: salesOpen
+        ? "요금제와 결제 내역은 요금 화면에서 확인합니다."
+        : "베타 동안 모든 기능이 열려 있고, 결제 기능은 아직 없습니다. 앞으로 적용될 요금은 요금 화면에 미리 적어 두었습니다.",
+    },
     {
       label: "저장하는 것",
       value: "검사 결과와 내가 만든 파일",
@@ -141,6 +154,10 @@ export default async function SettingsPage() {
         <Link href="/app" className="button button-primary">
           내 파일 검사하러 가기
           <Icon name="arrowUpRight" size={15} />
+        </Link>
+        <Link href="/pricing" className="button button-quiet">
+          요금과 실행 횟수 보기
+          <Icon name="arrowRight" size={15} />
         </Link>
         <Link href="/docs" className="button button-quiet">
           도움말 보기

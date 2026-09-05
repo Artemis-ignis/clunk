@@ -677,6 +677,15 @@ export function EmbeddedGlbViewer({
             // "멈춤하거나 가만히 놔두면 멈춰야하는데 왜 자꾸 에셋들이 지 멋대로 돌아가냐".
             // 다시 재생하면 자동 회전도 함께 돌아온다.
             controls.autoRotate = next && autoRotateWanted;
+            if (!next) {
+              // 그래도 3초쯤 더 미끄러졌다(2026-09-05 QA 실측: 멈춤 뒤 1초·2초 화면에 픽셀 변화,
+              // 3초부터 정지). 감쇠(enableDamping)가 남은 회전량을 여러 프레임에 나눠 쓰기
+              // 때문이다. 감쇠를 잠깐 끄고 한 번 갱신하면 남은 양이 그 자리에서 소진돼
+              // 누른 프레임에 선다.
+              controls.enableDamping = false;
+              controls.update();
+              controls.enableDamping = true;
+            }
           },
           setSpeed(next) {
             rate = next;

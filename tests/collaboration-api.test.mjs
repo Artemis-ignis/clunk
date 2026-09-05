@@ -206,7 +206,9 @@ test("asset evidence UI exposes digest, byte provenance, and freshness without c
   assert.match(panel, /STRUCTURAL ONLY/);
   // 2026-09-01: the boundary reads in Korean now — the constant was never
   // meant for the person looking at their own file.
-  assert.match(inspector, /파일 규격만 본 점수입니다/);
+  // 2026-09-05: 같은 경계를 사람 말로 — "파일 자체를 열어서 본 점수" 이고 게임 화면은 그 점수에 없다.
+  assert.match(inspector, /파일 자체를 열어서 본 점수입니다/);
+  assert.match(inspector, /게임 화면에서 어떻게 보이는지는 이 점수에 들어 있지 않습니다/);
   assert.match(inspector, /resultDigest/);
   assert.match(dashboard, /resultDigest/);
   assert.match(docs, /clunk\.asset-evidence-ref\.v1/);

@@ -188,19 +188,19 @@ const PROMPT_LABEL: Record<AssetKind, { title: string; placeholder: string; hint
     hint: "이 문장이 그림을 정합니다.",
   },
   "3d-model": {
-    title: "메모",
+    title: "메모 (선택)",
     placeholder: "예: 창고 앞에 둘 궤짝",
-    hint: "모양은 위에서 고른 템플릿이 정합니다. 이 문장은 만든 기록에만 남습니다.",
+    hint: "모양은 위에서 고른 템플릿이 정합니다. 비워 두면 템플릿 이름이 기록에 남습니다.",
   },
   "sprite-atlas": {
-    title: "메모",
+    title: "메모 (선택)",
     placeholder: "예: 걷는 농부",
-    hint: "그림은 위에서 고른 템플릿이 정합니다. 이 문장은 만든 기록에만 남습니다.",
+    hint: "그림은 위에서 고른 템플릿이 정합니다. 비워 두면 템플릿 이름이 기록에 남습니다.",
   },
   "animation-clip": {
-    title: "메모",
+    title: "메모 (선택)",
     placeholder: "예: 열리는 문",
-    hint: "움직임은 위에서 고른 템플릿이 정합니다. 이 문장은 만든 기록에만 남습니다.",
+    hint: "움직임은 위에서 고른 템플릿이 정합니다. 비워 두면 템플릿 이름이 기록에 남습니다.",
   },
   "spine-project": {
     title: "무엇을 만들까요",
@@ -228,8 +228,19 @@ const REVIEW_OPTION_LABELS: Record<ReviewStatus, string> = {
   PENDING: "확인 중",
 };
 
+/** 만들 것의 종류. 목록에 영문 아이디("3d-model")가 그대로 찍히지 않게 한다. */
+const KIND_WORDS: Record<string, string> = {
+  "2d-image": "이미지",
+  "sprite-atlas": "스프라이트 시트",
+  "spine-project": "스파인 애니메이션",
+  "animation-clip": "애니메이션",
+  "3d-model": "3D 모델",
+};
+
 const LANE_VALUE_LABELS: Record<string, string> = {
   PASS: "통과",
+  CONDITIONAL: "조건부 통과",
+  BLOCKED: "막힘",
   GAP: "증거 없음",
   NO_GO: "사용 불가",
   NOT_EVALUATED: "확인 전",
@@ -428,6 +439,17 @@ export function AssetCreationWorkbench({
   }, []);
 
   /** The request body each lane sends. Kept in one place so 다시 만들기 repeats it exactly. */
+  /**
+   * 이름을 비워 두었을 때 붙는 이름.
+   *
+   * 예전에는 무엇을 만들든 "새 에셋"이었다. 궤짝도, 나무도, 트랙터도 전부 새-에셋.glb 가
+   * 되어 내 파일 목록에서 서로 구별되지 않았다. 고른 템플릿이 있으면 그 이름을 쓴다.
+   */
+  function fallbackLabel(kind: AssetKind, templateId: string): string {
+    if (kind === "2d-image") return "새 에셋";
+    return (templates.find((template) => template.id === templateId)?.name ?? "").trim() || "새 에셋";
+  }
+
   function requestBody(kind: AssetKind, overrides: Record<string, unknown> = {}) {
     const sheet = kind === "sprite-atlas" || kind === "spine-project";
     // The profile follows the kind being sent rather than the tab the screen happens to be
@@ -435,7 +457,7 @@ export function AssetCreationWorkbench({
     const target = (ASSET_OPTIONS.find((option) => option.id === kind) ?? selectedOption).target;
     return {
       assetKind: kind,
-      label: label.trim() || "새 에셋",
+      label: label.trim() || fallbackLabel(kind, activeTemplateId),
       prompt: prompt.trim(),
       targetProfileId: target,
       frames: kind === "2d-image" ? 1 : sheet ? sheetFrames : 4,
@@ -474,10 +496,21 @@ export function AssetCreationWorkbench({
 
   async function generate(override?: GenerateOverride): Promise<GenerateOutcome> {
     const assetKindNow = override?.kind ?? assetKind;
-    const promptNow = (override?.prompt ?? prompt).trim();
+    const typedPrompt = (override?.prompt ?? prompt).trim();
     const overrideTemplate = override?.templateId?.trim() ?? "";
+    // 템플릿이 모양을 정하는 종류에서 메모는 기록에만 남는 값이다. 기록용 한 줄이 없다고
+    // 만들기를 막으면, 화면이 "아무것도 바꾸지 않는다"고 적어 둔 칸이 관문이 된다.
+    // 비어 있으면 고른 템플릿 이름을 그대로 기록에 남긴다 —
+    // 만들기 API 는 빈 문장을 받지 않으므로 값 자체는 있어야 한다.
+    const templateForRun = overrideTemplate || activeTemplateId;
+    const templateNote = assetKindNow === "2d-image"
+      ? ""
+      : (templates.find((template) => template.id === templateForRun)?.name ?? "").trim();
+    const promptNow = typedPrompt || templateNote;
     if (!promptNow) {
-      const error = assetKindNow === "2d-image" ? "무엇을 그릴지 한 문장으로 적어 주세요." : "메모를 한 줄 적어 주세요. 만든 기록에 남습니다.";
+      const error = assetKindNow === "2d-image"
+        ? "무엇을 그릴지 한 문장으로 적어 주세요."
+        : "먼저 템플릿을 고르세요. 메모는 적지 않아도 됩니다.";
       setPhase("error");
       setMessageTone("error");
       setMessage(error);
@@ -524,6 +557,8 @@ export function AssetCreationWorkbench({
     // Clunk Series bundle route. See the note at the top of this file.
     const isImage = assetKindNow === "2d-image";
     const endpoint = isImage ? "/api/generation" : "/api/series";
+    // `prompt` 는 항상 여기서 넘긴다. 메모를 비워 둔 사람의 요청에서는 폼 값이 아니라
+    // 위에서 정한 기록용 문장(템플릿 이름)이 그대로 기록에 남아야 하기 때문이다.
     const overrides: Record<string, unknown> = override
       ? {
         prompt: promptNow,
@@ -532,7 +567,7 @@ export function AssetCreationWorkbench({
         ...(override.paletteId ? { paletteId: override.paletteId } : {}),
         ...(override.sizeId ? { sizeId: override.sizeId } : {}),
       }
-      : {};
+      : { prompt: promptNow };
     const body = isImage
       ? requestBody(assetKindNow, overrides)
       : { seriesId: override ? seriesForAssetKind(assetKindNow) : seriesId, ...requestBody(assetKindNow, overrides) };
@@ -555,7 +590,7 @@ export function AssetCreationWorkbench({
       setStage({
         assetId: payload.assetId,
         assetKind: assetKindNow,
-        label: override?.label ?? (label.trim() || "새 에셋"),
+        label: override?.label ?? (label.trim() || fallbackLabel(assetKindNow, templateForRun)),
         storageStatus: payload.storageStatus,
         entryFileName: payload.entryFileName,
         artifacts: payload.artifacts,
@@ -639,7 +674,9 @@ export function AssetCreationWorkbench({
       });
       setRemixSourceAssetId(payload.asset.id);
       setPhase("ready");
-      setMessage(`${payload.asset.fileName}을(를) 열었습니다.`);
+      // 파일 이름 뒤에 조사를 붙이면 이름의 마지막 글자에 따라 틀린 조사가 나온다.
+      // 이름과 조사 사이에 '파일'을 두어 어느 이름에도 맞는 문장으로 만든다.
+      setMessage(`${payload.asset.fileName} 파일을 열었습니다.`);
     } catch (error) {
       setMessageTone("error");
       setMessage(error instanceof Error ? error.message : "파일을 열지 못했습니다.");
@@ -747,6 +784,12 @@ export function AssetCreationWorkbench({
 
   const imageSrc = sourceFor(imageArtifact, true);
   const modelSrc = sourceFor(modelArtifact, false);
+
+  /**
+   * 검사기가 이 파일을 바로 열 수 있는 주소. 저장된 GLB 가 있을 때만 값이 있다 —
+   * 검사기는 GLB·GLTF 만 읽으므로, 이미지 한 장에는 보낼 것이 없다.
+   */
+  const inspectorHref = modelSrc ? `/app?source=${encodeURIComponent(modelSrc)}` : null;
 
   /**
    * The sheet's cell grid is read from the .atlas the file shipped with, not
@@ -975,8 +1018,16 @@ export function AssetCreationWorkbench({
             </div>
           ) : (
             <>
+              {/* 문장이 그림에 쓰이지 못한 실행. 사실만 적고 끝내면 사람은 "그래서 뭘 하라는
+                  거지"에서 멈춘다. 지금 이 작업공간에서 실제로 끝까지 되는 길(템플릿으로
+                  만들기)을 같은 자리에서 내민다. */}
               {stage.promptApplied === false && stage.promptNote ? (
-                <p className="studio-note">{stage.promptNote}</p>
+                <div className="studio-note studio-note-action">
+                  <p>{stage.promptNote}</p>
+                  <button type="button" className="studio-action" onClick={() => setAssetKind("3d-model")}>
+                    <Icon name="boxes" size={14} /> 템플릿으로 만들기
+                  </button>
+                </div>
               ) : null}
 
               <div className={`studio-view${modelSrc ? " studio-view-model" : ""}`}>
@@ -1050,8 +1101,11 @@ export function AssetCreationWorkbench({
                 <Link className="studio-action" href={`/assets/${encodeURIComponent(stage.assetId)}`}>
                   <Icon name="folder" size={14} /> 내 파일에서 보기
                 </Link>
-                <Link className="studio-action" href="/app">
-                  <Icon name="scan" size={14} /> 검사기로 보내기
+                {/* "보내기"라고 적어 놓고 빈 검사 화면으로만 보내면, 사람은 방금 만든 파일을
+                    내려받아 다시 올려야 했다. 저장된 파일 주소를 함께 실어 보내 검사기가
+                    그 자리에서 열고 검사하게 한다. */}
+                <Link className="studio-action" href={inspectorHref ?? "/app"}>
+                  <Icon name="scan" size={14} /> {inspectorHref ? "검사기로 보내기" : "검사기 열기"}
                 </Link>
               </div>
 
@@ -1068,12 +1122,26 @@ export function AssetCreationWorkbench({
               </div>
 
               <div className="studio-extra">
+                {/* 여기에는 이 파일에 대해 실제로 나온 판정만 놓는다. 예전에는 "게임 화면"과
+                    "사람 검토"가 늘 '확인 전'으로 함께 서 있어서, 방금 끝난 결과가 사람이 손대야
+                    끝나는 반제품처럼 읽혔다. 아직 돌지 않은 확인은 칸이 아니라 아래 한 줄로,
+                    이 판정이 무엇을 본 것인지 말하는 방식으로 남긴다. */}
                 <div className="studio-lanes">
                   <Lane label="파일 검사" value={staticInspectionStatus(stage)} detail="파일 내용과 규칙" />
-                  <Lane label="엔진 화면" value={runtimeInspectionStatus(stage)} detail="엔진에서 찍은 화면 필요" />
-                  <Lane label="게임 화면" value="NOT_EVALUATED" detail="실제 게임 화면 필요" />
-                  <Lane label="사람 검토" value={reviewStatus.humanDecision} detail="직접 보고 판단" />
+                  {/* 엔진 화면 레인은 실제로 화면을 찍어 본 결과가 있을 때만 선다. 이 배포에
+                      렌더 환경이 없으면 이 값은 늘 같은 자리에서 "확인할 환경 없음"이라, 칸으로
+                      두면 결과마다 못 끝낸 일이 하나 더 있는 것처럼 읽힌다. */}
+                  {runtimeInspectionStatus(stage) === "PASS" || runtimeInspectionStatus(stage) === "NO_GO" ? (
+                    <Lane label="엔진 화면" value={runtimeInspectionStatus(stage)} detail="엔진에서 찍은 화면" />
+                  ) : null}
+                  {reviewStatus.humanDecision !== "NOT_EVALUATED" ? (
+                    <Lane label="직접 확인" value={reviewStatus.humanDecision} detail="내가 남긴 판단" />
+                  ) : null}
                 </div>
+                <p className="studio-lane-note">
+                  이 판정은 파일 자체를 열어서 본 결과입니다. 게임 화면에서 어떻게 보이는지는 아직 이 결과에
+                  들어 있지 않습니다.
+                </p>
 
                 <details className="studio-more">
                   <summary>이 결과로 새 버전 만들기 (리믹스)</summary>
@@ -1167,7 +1235,7 @@ export function AssetCreationWorkbench({
                     )}
                   </span>
                   <strong>{item.fileName}</strong>
-                  <small>{item.assetKind || "파일"}</small>
+                  <small>{KIND_WORDS[item.assetKind] ?? item.assetKind ?? "파일"}</small>
                 </button>
               ))}
             </div>

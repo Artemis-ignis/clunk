@@ -674,6 +674,14 @@
 .studio-lane[data-tone="pass"] strong { color: var(--success); }
 .studio-lane[data-tone="fail"] strong { color: var(--danger); }
 
+/* 아직 돌지 않은 확인을 "확인 전" 칸으로 세우는 대신 한 줄로 적는 자리. */
+.studio-lane-note {
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
 /* ------------------------------------------------------------------ stacking */
 
 @media (max-width: 1180px) {
@@ -700,3 +708,12 @@
   .studio-field-row { grid-template-columns: minmax(0, 1fr); }
   .studio-stage-actions .studio-action { flex: 1 1 auto; justify-content: center; }
 }
+
+/* 문장이 쓰이지 못한 실행 옆에 붙는, 끝까지 되는 길 하나. */
+.studio-note-action {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+
+.studio-note-action p { margin: 0; }

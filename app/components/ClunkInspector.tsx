@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BUILTIN_PROFILE_BUDGETS,
   createAssetBundle,
@@ -42,10 +42,10 @@ type QueueItem = {
 
 const STEPS = [
   { index: "01", label: "입력" },
-  { index: "02", label: "파싱과 정책" },
+  { index: "02", label: "파일 읽기와 규칙" },
   { index: "03", label: "최적화" },
   { index: "04", label: "재검사" },
-  { index: "05", label: "Passport" },
+  { index: "05", label: "검사 증명서" },
 ] as const;
 
 /** Built-in profiles the workspace can persist (the API accepts exactly these three). */
@@ -79,9 +79,22 @@ function headroomPercent(report: InspectionReport): number | null {
   return Math.round(Math.max(0, Math.min(...axes)) * 100);
 }
 
+/** 안전한 정리 한 가지의 이름. 화면에는 규칙 아이디가 아니라 이 말이 나간다. */
+const OPERATION_WORDS: Record<string, string> = {
+  "prune-empty-nodes": "빈 노드 제거",
+  "dedupe-materials": "똑같은 재질 합치기",
+  "clean-metadata": "메타데이터 정리",
+  "repack": "새 파일로 다시 묶기",
+};
+
 /** Evidence lanes used to print their raw constant; a person reads words. */
 const STATUS_TEXT: Record<string, string> = {
   PASS: "통과",
+  // 파일 구조 레인은 CONDITIONAL·BLOCKED·NOT_RUN 도 돌려준다. 이 세 줄이 없어서
+  // 화면에 영문 상수가 그대로 찍혔다("파일 구조 CONDITIONAL").
+  CONDITIONAL: "조건부 통과",
+  BLOCKED: "막힘",
+  NOT_RUN: "아직 실행 안 함",
   GAP: "증거 없음",
   NO_GO: "사용 불가",
   NOT_EVALUATED: "확인 전",
@@ -114,6 +127,8 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
   // The workspace API only persists built-in-profile runs it can re-verify, so custom-profile
   // inspections stay local: full report on screen, no save, no credit.
   const activePolicy = isCustomActive ? { customProfile: customProfile! } : { profileId };
+  /** 화면에 함께 적는 한도. 내 기준(커스텀)으로 검사할 때는 내장 표가 아니므로 적지 않는다. */
+  const activeBudget = isCustomActive ? null : BUILTIN_PROFILE_BUDGETS[profileId] ?? null;
 
   const activeBytes = optimization?.outputBytes ?? sourceBytes;
   const activeFileName = optimization?.outputFileName ?? fileName;
@@ -220,6 +235,27 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
   }
 
   useInspectorWebMcp({ active: true, run: inspectFromUrl });
+
+  /**
+   * 만들기 화면의 "검사기로 보내기"가 파일을 데리고 오는 자리.
+   *
+   * 주소에 `?source=` 가 실려 있으면 그 파일을 열어 바로 검사한다. 받는 값은 이 사이트
+   * 자신의 저장 파일 경로(`/api/assets/...`)로 제한한다 — 화면이 남이 준 주소를 대신
+   * 열어 주는 통로가 되면 안 된다. 검사 자체는 사람이 파일을 끌어다 놓았을 때와 같은
+   * 흐름을 탄다.
+   */
+  const sourceLoadedRef = useRef(false);
+  useEffect(() => {
+    if (sourceLoadedRef.current) return;
+    const source = new URLSearchParams(window.location.search).get("source");
+    if (!source || !source.startsWith("/api/assets/")) return;
+    sourceLoadedRef.current = true;
+    setNotice("만들기 화면에서 보낸 파일을 여는 중입니다.");
+    void inspectFromUrl(source).then((outcome) => {
+      if (!outcome.ok) setError(outcome.error_ko);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function saveRun(
     nextReport: InspectionReport,
@@ -650,10 +686,10 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
                 }}
               />
             </label>
+            {/* 저장소 안의 예제 경로를 화면에 적어 두었었다. 방문자가 열어 볼 수 없는 주소다. */}
             <p className="muted-note">
-              선택한 예산으로 점수를 계산하며 다음 검사부터 적용됩니다. 같은 프로파일 JSON을 CLI{" "}
-              <code>--profile-file</code>, MCP <code>profileFile</code>에도 그대로 쓸 수 있습니다. 예제:{" "}
-              <code>examples/profiles/harvest-frontier.example.json</code>
+              고른 기준으로 점수를 계산하며, 다음 검사부터 적용됩니다. 같은 기준 파일을 명령줄 도구와
+              AI 도구 연결에서도 그대로 쓸 수 있습니다. <Link className="text-link" href="/docs">쓰는 법 보기</Link>
             </p>
           </div>
 
@@ -740,18 +776,32 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
           <div className="panel metrics-panel">
             <div className="panel-head">
               <div>
-                <span className="mono-label">관측 메트릭</span>
+                <span className="mono-label">측정</span>
                 <h3>파일에서 읽은 수치</h3>
               </div>
               {report ? <span className="mono-label">검사 규칙 v{report.ruleSetVersion}</span> : null}
             </div>
+            {/* 숫자만 있으면 700 이 큰지 작은지 알 수 없다. 예산이 있는 축에는 지금 고른
+                기준의 한도를 함께 적는다 — 한도는 이 검사가 실제로 쓴 표에서 온다. */}
             <dl className="metrics-grid">
-              <Metric label="장면 / 오브젝트" value={report ? `${report.metrics.sceneCount} / ${report.metrics.nodeCount}` : "—"} />
-              <Metric label="메시 / 조각" value={report ? `${report.metrics.meshCount} / ${report.metrics.primitiveCount}` : "—"} />
-              <Metric label="정점" value={report ? report.metrics.vertexCount.toLocaleString() : "대기"} />
-              <Metric label="폴리곤" value={report ? report.metrics.triangleCount.toLocaleString() : "대기"} />
-              <Metric label="재질" value={report ? `${report.metrics.materialCount}` : "대기"} />
-              <Metric label="텍스처 / 메모리" value={report ? `${report.metrics.textureCount} / ${formatBytes(report.metrics.textureMemoryBytes)}` : "대기"} />
+              <Metric label="장면 / 오브젝트" value={report ? `${report.metrics.sceneCount}개 / ${report.metrics.nodeCount}개` : "—"} />
+              <Metric label="메시 / 조각" value={report ? `${report.metrics.meshCount}개 / ${report.metrics.primitiveCount}개` : "—"} />
+              <Metric label="정점" value={report ? `${report.metrics.vertexCount.toLocaleString()}개` : "대기"} />
+              <Metric
+                label="폴리곤"
+                value={report ? `${report.metrics.triangleCount.toLocaleString()}개` : "대기"}
+                limit={report && activeBudget ? `${activeBudget.maxTriangles.toLocaleString()}개까지` : null}
+              />
+              <Metric
+                label="재질"
+                value={report ? `${report.metrics.materialCount}개` : "대기"}
+                limit={report && activeBudget ? `${activeBudget.maxMaterials}개까지` : null}
+              />
+              <Metric
+                label="텍스처 / 메모리"
+                value={report ? `${report.metrics.textureCount}개 / ${formatBytes(report.metrics.textureMemoryBytes)}` : "대기"}
+                limit={report && activeBudget ? `${formatMegabytes(activeBudget.maxTextureMemoryBytes)}까지` : null}
+              />
             </dl>
           </div>
         </section>
@@ -769,10 +819,10 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
             <div className="score-track">
               <span style={{ width: `${report?.score.score ?? 0}%` }} />
             </div>
-            <strong className="evidence-boundary-note">파일 규격만 본 점수입니다. 화면에서 어떻게 보이는지는 직접 확인하세요.</strong>
+            <strong className="evidence-boundary-note">파일 자체를 열어서 본 점수입니다. 게임 화면에서 어떻게 보이는지는 이 점수에 들어 있지 않습니다.</strong>
             <p className="score-note">
               {readiness
-                ? `${readinessNote(readiness)} 브라우저 화면과 visualRuntime은 별도이며 현재 player-facing: NOT_EVALUATED입니다.`
+                ? readinessNote(readiness)
                 : "점수는 실제 검사 보고서에서 계산됩니다. 화면 판정은 이 점수에 포함되지 않습니다."}
             </p>
           </div>
@@ -780,20 +830,29 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
           <div className="panel evidence-v2-card">
             <div className="panel-head">
               <div>
-                <span className="mono-label">출처 기록</span>
-                <h3>시각 판정은 별도 레인.</h3>
+                <span className="mono-label">검사 근거</span>
+                <h3>무엇을 보고 내린 판정인지</h3>
               </div>
-              <span className="mono-label">{evidenceV2?.schema ?? "대기"}</span>
+              {report ? <span className="mono-label">검사 규칙 v{report.ruleSetVersion}</span> : null}
             </div>
             {evidenceV2 ? (
               <>
+                {/* 아직 돌지 않은 확인은 칸으로 세우지 않는다. 네 칸 중 셋이 늘 "확인 전"으로
+                    서 있으면, 방금 끝난 검사가 사람이 손대야 끝나는 반제품처럼 읽혔다.
+                    실제로 판정이 나온 항목만 칸이 되고, 나머지는 아래 한 줄이 말한다. */}
                 <div className="evidence-v2-status-grid">
                   <span><small>파일 구조</small><strong>{STATUS_TEXT[evidenceV2.statuses.structural] ?? evidenceV2.statuses.structural}</strong></span>
-                  <span><small>엔진 화면</small><strong>{STATUS_TEXT[evidenceV2.statuses.visualRuntime] ?? evidenceV2.statuses.visualRuntime}</strong></span>
-                  <span><small>게임 화면</small><strong>{STATUS_TEXT[evidenceV2.statuses.playerFacing] ?? evidenceV2.statuses.playerFacing}</strong></span>
-                  <span><small>사람 검토</small><strong>{STATUS_TEXT[evidenceV2.statuses.humanDecision] ?? evidenceV2.statuses.humanDecision}</strong></span>
+                  {hasVerdict(evidenceV2.statuses.visualRuntime) ? (
+                    <span><small>엔진 화면</small><strong>{STATUS_TEXT[evidenceV2.statuses.visualRuntime] ?? evidenceV2.statuses.visualRuntime}</strong></span>
+                  ) : null}
+                  {hasVerdict(evidenceV2.statuses.playerFacing) ? (
+                    <span><small>게임 화면</small><strong>{STATUS_TEXT[evidenceV2.statuses.playerFacing] ?? evidenceV2.statuses.playerFacing}</strong></span>
+                  ) : null}
+                  {hasVerdict(evidenceV2.statuses.humanDecision) ? (
+                    <span><small>직접 확인</small><strong>{STATUS_TEXT[evidenceV2.statuses.humanDecision] ?? evidenceV2.statuses.humanDecision}</strong></span>
+                  ) : null}
                 </div>
-                <p className="score-note">엔진에서 찍은 화면과 사람의 확인이 있어야 마지막 두 항목이 완료됩니다.</p>
+                <p className="score-note">이 판정은 파일 자체를 본 결과입니다. 게임 화면에서 어떻게 보이는지는 아직 이 기록에 들어 있지 않습니다.</p>
               </>
             ) : <p className="score-note">파일을 검사하면 여기에 결과가 나타납니다.</p>}
           </div>
@@ -801,8 +860,8 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
           <div className="panel findings-card">
             <div className="panel-head">
               <div>
-                <span className="mono-label">발견된 문제</span>
-                {report ? <h3>{`${report.findings.length}건 기록`}</h3> : null}
+                <span className="mono-label">검사 항목</span>
+                {report ? <h3>{findingSummary(report)}</h3> : null}
               </div>
             </div>
             {report ? (
@@ -827,7 +886,7 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
               <div className="empty-block">
                 <Icon name="inspect" size={22} />
                 <strong>아직 실행한 에셋이 없습니다</strong>
-                <p>왼쪽에서 파일을 놓거나 샘플을 선택하면 규칙 단위 근거가 나타납니다.</p>
+                <p>왼쪽에 파일을 놓거나 샘플을 고르면, 규칙 하나하나에 대해 무엇을 보고 판단했는지 여기에 나옵니다.</p>
               </div>
             )}
           </div>
@@ -843,8 +902,7 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
               <Icon name="arrowUpRight" size={15} />
             </button>
             <p>
-              정해진 안전한 손질만 합니다. 아무것도 없는 빈 노드 제거, 똑같은 재질 합치기, 메타데이터 정리, 새 파일로 다시 묶기. 모양이나 그림이 바뀌는
-              geometry나 texture 변환은 하지 않습니다.
+              정해진 안전한 손질만 합니다. 아무것도 없는 빈 노드 제거, 똑같은 재질 합치기, 메타데이터 정리, 새 파일로 다시 묶기. 모양이나 그림이 바뀌는 손질(메시 다시 만들기, 텍스처 다시 굽기)은 하지 않습니다.
             </p>
           </div>
         </aside>
@@ -856,7 +914,8 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
             <div>
               <span className="mono-label">검사 증명서</span>
               <h3>정리 전후를 함께 남깁니다</h3>
-              <p>{optimization.operations.map((operation) => `${operation.id} x${operation.count}`).join(", ")}</p>
+              {/* 적용한 손질을 영문 규칙 아이디로 적어 두었었다("prune-empty-nodes x1"). */}
+              <p>{optimization.operations.map((operation) => `${OPERATION_WORDS[operation.id] ?? operation.id} ${operation.count}건`).join(" · ")}</p>
             </div>
             {optimizedReadiness ? (
               <div className="passport-readiness">
@@ -901,20 +960,44 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
           <EvidenceItem label="새 재검사" value={optimization ? "확인됨" : "최적화 후"} />
           <EvidenceItem label="다운로드 바이트" value={downloadGate === "verified" ? "재오픈 확인" : "최적화 후 확인"} />
         </dl>
-        <div className="evidence-hash-grid" aria-label="검사 provenance">
-          <InspectorHash label="inputHash" value={report?.inputHash} />
-          <InspectorHash label="resultDigest" value={report?.resultDigest} />
+        <div className="evidence-hash-grid" aria-label="검사 지문">
+          <InspectorHash label="파일 지문" value={report?.inputHash} />
+          <InspectorHash label="결과 지문" value={report?.resultDigest} />
         </div>
       </section>
     </WorkspaceShell>
   );
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
+/**
+ * 아직 돌지 않은 확인인가. NOT_EVALUATED·GAP·NOT_RUN 은 "확인하지 않았다"는 뜻이지
+ * 결과가 아니므로, 결과 칸으로 세우지 않는다.
+ */
+function hasVerdict(status: string): boolean {
+  return status !== "NOT_EVALUATED" && status !== "GAP" && status !== "NOT_RUN" && status !== "UNAVAILABLE";
+}
+
+/**
+ * 결과 한 줄. 통과한 검사에도 INFO 항목이 남기 때문에, 그 숫자를 그대로 "문제 N건"으로
+ * 적으면 멀쩡한 파일이 문제가 있는 파일처럼 읽힌다. 막는 것과 경고, 그냥 확인한 것을
+ * 나누어 적는다.
+ */
+function findingSummary(report: InspectionReport): string {
+  const blockers = report.findings.filter((finding) => finding.severity === "CRITICAL" || finding.severity === "ERROR").length;
+  const warnings = report.findings.filter((finding) => finding.severity === "WARNING").length;
+  if (blockers) return `고쳐야 하는 문제 ${blockers}건${warnings ? ` · 경고 ${warnings}건` : ""}`;
+  if (warnings) return `경고 ${warnings}건 · 막는 문제 없음`;
+  return `막는 문제 없음 · 확인한 항목 ${report.findings.length}건`;
+}
+
+function Metric({ label, value, limit = null }: { label: string; value: string; limit?: string | null }) {
   return (
     <div className="metric">
       <dt>{label}</dt>
-      <dd>{value}</dd>
+      <dd>
+        {value}
+        {limit ? <small className="metric-limit"> · 기준 {limit}</small> : null}
+      </dd>
     </div>
   );
 }

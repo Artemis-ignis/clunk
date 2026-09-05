@@ -3444,6 +3444,13 @@ pre {
   font-variant-numeric: tabular-nums;
 }
 
+/* 측정값 옆에 붙는 한도. 값보다 한 단계 조용하게. */
+.metric-limit {
+  color: var(--text-dim);
+  font-size: 0.72em;
+  font-weight: 500;
+}
+
 /* Score */
 
 .score-card {

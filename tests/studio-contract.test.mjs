@@ -198,7 +198,8 @@ test("the studio surface stays advertised where agents and docs look for it", as
   assert.match(docs, /Asset Studio/);
   assert.match(llms, /\/studio/);
   assert.match(llms, /2D.*Spine.*3D/);
-  assert.match(llms, /7 tools/);
+  // HTTP 표면은 2026-09-05 에 카탈로그 도구 둘이 붙어 9개다(llms.txt "exactly 9 tools").
+  assert.match(llms, /exactly 9 tools/);
   assert.match(llms, /clunk_asset_author/);
   assert.match(facts, /clunk_asset_author/);
   assert.match(mcp, /clunk_asset_author/);

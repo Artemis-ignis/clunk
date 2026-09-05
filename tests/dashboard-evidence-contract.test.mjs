@@ -11,10 +11,18 @@ test("dashboard presents the four evidence decisions as separate lanes", async (
   // 승인이 아닙니다")를 버리고 사는 사람의 말로 다시 적었다(7ee81d2). 못박는 것은
   // 문구가 아니라 그 문구가 지키는 것 — 파일 규격 통과가 게임 화면 승인이 아니라는
   // 사실을 이 화면이 여전히 스스로 말하는지다.
+  // 2026-09-05: 문장이 또 바뀌었다. 네 레인이 늘 "아직 안 봄"으로 서 있어 끝난 검사가
+  // 반제품처럼 읽히던 것을 고치면서, 아직 돌지 않은 확인은 칸이 아니라 이 한 줄이 맡게
+  // 되었다. 그래서 못박는 것은 여전히 문구가 아니라 그 문구가 지키는 것이다.
   assert.match(
     source,
-    /파일 규격을 통과했다고 게임 화면까지 괜찮다는 뜻은 아닙니다/,
+    /게임 화면에서 어떻게 보이는지는 아직 이 기록에 들어/,
     "app/components/DashboardClient.tsx: 파일 규격 통과가 게임 화면 승인이 아니라는 문장이 사라졌다",
+  );
+  assert.match(
+    source,
+    /확인하지 않은 것을 확인했다고 적지 않습니다/,
+    "app/components/DashboardClient.tsx: 확인하지 않은 것을 확인했다고 적지 않는다는 약속이 사라졌다",
   );
   assert.doesNotMatch(
     source,
@@ -33,5 +41,15 @@ test("dashboard keeps empty workspace and readiness states honest", async () => 
   assert.doesNotMatch(dashboard, /사용 가능한 크레딧|사용 가능 크레딧/, "옛 크레딧 표기가 남아 있으면 안 된다");
   assert.doesNotMatch(dashboard, /성공 시에만 차감|DEMO MODE|가짜|샘플 점수/);
   assert.match(detail, /NOT_EVALUATED/);
-  assert.match(detail, /runtime.*player-facing.*human review|모든 review lane/);
+  // 2026-09-05: 화면이 영문 레인 이름을 그대로 찍던 시절의 문구를 찾고 있었다. 화면은
+  // 한국어로 다시 적혔지만 지켜야 하는 것은 그대로다 — 세 가지 확인이 서로 다른 값으로
+  // 남아 있어야 하고, 파일 규격 통과가 게임 화면 승인으로 승격되면 안 된다.
+  assert.match(detail, /visualRuntime/);
+  assert.match(detail, /playerFacing/);
+  assert.match(detail, /humanDecision/);
+  assert.match(
+    detail,
+    /게임 화면에서 어떻게 보이는지는 아직 이 기록에 들어 있지 않습니다/,
+    "app/components/WorkspaceAssetDetail.tsx: 파일 규격 통과가 게임 화면 승인이 아니라는 문장이 사라졌다",
+  );
 });

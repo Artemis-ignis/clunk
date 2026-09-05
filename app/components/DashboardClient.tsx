@@ -42,6 +42,8 @@ type GenerationJob = {
   status: string;
   storageStatus: string;
   createdAt: string;
+  /** 만들 때 함께 돌아간 검사 결과. 있으면 "검사 전"이라고 적지 않는다. */
+  evidenceJson?: string | null;
 };
 
 type MeResponse = { user?: { displayName?: string } };
@@ -443,12 +445,15 @@ export function DashboardClient({ welcome }: { welcome?: string | null }) {
 function LatestInspection({ run, statuses }: { run: Run; statuses: EvidenceStatuses }) {
   const readiness = resolveStoredReadiness(run);
   const digest = storedResultDigest(run);
+  // 실제로 판정이 나온 것만 칸으로 세운다. 예전에는 네 칸 가운데 셋이 늘 "아직 안 봄"으로
+  // 서 있어서, 끝난 검사가 사람이 손대야 끝나는 반제품처럼 읽혔다. 아직 돌지 않은 확인은
+  // 칸이 아니라 아래 한 줄이 말한다.
   const lanes = [
     { id: "structural-contract", label: "파일 규격", detail: "파일 자체에 문제가 없는지", value: statuses.structural },
-    { id: "visual-runtime", label: "엔진 화면", detail: "엔진에서 찍은 화면으로 확인했는지", value: statuses.visualRuntime },
+    { id: "visual-runtime", label: "엔진 화면", detail: "엔진에서 찍은 화면", value: statuses.visualRuntime },
     { id: "player-facing", label: "게임 화면", detail: "게임 안에서 잘 보이는지", value: statuses.playerFacing },
-    { id: "human-review", label: "사람 검토", detail: "사람이 직접 보고 판단했는지", value: statuses.humanDecision },
-  ] as const;
+    { id: "human-review", label: "직접 확인", detail: "내가 남긴 판단", value: statuses.humanDecision },
+  ].filter((lane) => lane.id === "structural-contract" || hasVerdict(lane.value));
 
   return (
     <section className="home-latest" id="evidence-lanes" aria-labelledby="home-latest-heading">
@@ -460,7 +465,7 @@ function LatestInspection({ run, statuses }: { run: Run; statuses: EvidenceStatu
         <div className="home-latest-file">
           <strong title={run.fileName ?? run.id}>{run.fileName ?? run.id}</strong>
           <small>
-            {formatWhen(run.createdAt)} · 발견된 문제 {run.findingCount}건 · 점수 {run.score}/100
+            {formatWhen(run.createdAt)} · {findingSummary(run)} · 점수 {run.score}/100
           </small>
         </div>
         {run.assetId ? (
@@ -480,8 +485,8 @@ function LatestInspection({ run, statuses }: { run: Run; statuses: EvidenceStatu
         ))}
       </div>
       <p className="home-latest-note" id="next-verification">
-        파일 규격을 통과했다고 게임 화면까지 괜찮다는 뜻은 아닙니다. 화면은 따로 확인해야 하고, Clunk는
-        확인하지 않은 것을 확인했다고 적지 않습니다.
+        이 판정은 파일 자체를 열어서 본 결과입니다. 게임 화면에서 어떻게 보이는지는 아직 이 기록에 들어
+        있지 않고, Clunk는 확인하지 않은 것을 확인했다고 적지 않습니다.
       </p>
       <p className="home-latest-record">
         검사 기록 · 파일 지문 {shortHash(run.inputHash)}
@@ -489,6 +494,23 @@ function LatestInspection({ run, statuses }: { run: Run; statuses: EvidenceStatu
       </p>
     </section>
   );
+}
+
+/**
+ * 아직 돌지 않은 확인인가. "아직 안 봄"은 결과가 아니므로 결과 칸으로 세우지 않는다.
+ */
+function hasVerdict(value: string): boolean {
+  return value !== "NOT_EVALUATED" && value !== "GAP" && value !== "NOT_RUN" && value !== "UNAVAILABLE";
+}
+
+/**
+ * 결과 한 줄. 통과한 검사에도 확인 항목이 남기 때문에, 그 숫자를 그대로 "발견된 문제 N건"으로
+ * 적으면 100점짜리 파일이 문제가 있는 파일처럼 읽힌다.
+ */
+function findingSummary(run: Run): string {
+  const blockers = run.hardBlockerCount ?? 0;
+  if (blockers > 0) return `고쳐야 하는 문제 ${blockers}건`;
+  return `막는 문제 없음 · 확인한 항목 ${run.findingCount}건`;
 }
 
 function FileLine({ file }: { file: FileRow }) {
@@ -505,7 +527,7 @@ function FileLine({ file }: { file: FileRow }) {
       </span>
       <span className="home-file-score">
         {file.score === null ? (
-          <small>검사 전</small>
+          <small>{file.readiness ? `파일 검사 ${READINESS_WORDS[file.readiness]}` : "검사 전"}</small>
         ) : (
           <>
             <b>{file.score}/100</b>
@@ -530,6 +552,10 @@ function FileLine({ file }: { file: FileRow }) {
 function buildFileRows(jobs: GenerationJob[], runs: Run[]): FileRow[] {
   const rows = new Map<string, FileRow>();
   for (const job of jobs) {
+    // 아무 파일도 나오지 않은 실행은 "내 파일"이 아니다. 예전에는 막힌 실행까지 한 줄씩
+    // 서서, 저장된 적 없는 이름이 "검사 전" 상태의 파일처럼 보였다. 실행 횟수도 쓰이지
+    // 않았고 열어 볼 것도 없으므로 목록에서 뺀다 — 실패는 만들기 화면이 그 자리에서 말한다.
+    if (!job.assetId && (job.status === "BLOCKED" || job.status === "FAILED" || job.storageStatus === "BLOCKED" || job.storageStatus === "UNAVAILABLE")) continue;
     const key = job.assetId ?? `job:${job.id}`;
     rows.set(key, {
       id: key,
@@ -538,7 +564,9 @@ function buildFileRows(jobs: GenerationJob[], runs: Run[]): FileRow[] {
       kind: KIND_WORDS[job.assetKind] ?? job.assetKind,
       createdAt: job.createdAt,
       score: null,
-      readiness: null,
+      // 만들기는 그 자리에서 파일 검사를 돌린다. 그 결과를 버리고 "검사 전"이라고 적으면,
+      // 방금 "파일 검사 통과"를 본 사람에게 같은 파일이 검사 안 된 것처럼 보인다.
+      readiness: generationReadiness(job),
     });
   }
   for (const run of runs) {
@@ -555,6 +583,25 @@ function buildFileRows(jobs: GenerationJob[], runs: Run[]): FileRow[] {
     });
   }
   return [...rows.values()].sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+}
+
+/**
+ * 만들기와 함께 저장된 검사 결과를 읽는다. 점수는 이 기록에 없으므로 통과 여부만 말하고,
+ * 기록이 없으면 null — 없는 것을 있다고 적지 않는다.
+ */
+function generationReadiness(job: GenerationJob): FileRow["readiness"] {
+  if (!job.evidenceJson) return null;
+  try {
+    const parsed = JSON.parse(job.evidenceJson) as { stages?: { structure?: { status?: unknown }; policy?: { status?: unknown } } };
+    const structure = parsed.stages?.structure?.status;
+    const policy = parsed.stages?.policy?.status;
+    if (!structure || !policy) return null;
+    if (structure === "pass" && policy === "pass") return "ready";
+    if (structure === "fail" || policy === "fail") return "blocked";
+    return "conditional";
+  } catch {
+    return null;
+  }
 }
 
 function truncate(value: string, max: number): string {

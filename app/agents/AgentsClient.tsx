@@ -30,6 +30,8 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
   const [busy, setBusy] = useState<"create" | "check" | string | null>(null);
   const [message, setMessage] = useState<string>("");
   const [checkResult, setCheckResult] = useState<"PASS" | "FAIL" | null>(null);
+  // 폐기는 되돌릴 수 없고, 그 키를 쓰던 도구는 그 순간부터 연결이 끊긴다. 한 번 더 묻는다.
+  const [confirmRevokeId, setConfirmRevokeId] = useState<string | null>(null);
   const [handshake, setHandshake] = useState<{ initialize: HandshakeStep; tools: HandshakeStep; toolCount: number }>({
     initialize: "idle",
     tools: "idle",
@@ -123,7 +125,7 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
       });
       const initialize = (await response.json()) as { result?: { serverInfo?: { name?: string } }; error?: { message?: string } };
       if (!response.ok || initialize.error || initialize.result?.serverInfo?.name !== "clunk") {
-        throw new Error(initialize.error?.message ?? "Clunk initialize 응답이 올바르지 않습니다.");
+        throw new Error(initialize.error?.message ?? "연결은 되었지만 Clunk 서버가 아닌 응답이 돌아왔습니다. 연결 주소를 확인해 주세요.");
       }
       setHandshake({ initialize: "PASS", tools: "checking", toolCount: 0 });
       stage = "tools";
@@ -134,11 +136,11 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
       });
       const tools = (await toolsResponse.json()) as { result?: { tools?: unknown[] }; error?: { message?: string } };
       if (!toolsResponse.ok || tools.error || !Array.isArray(tools.result?.tools)) {
-        throw new Error(tools.error?.message ?? "Clunk tools/list 응답이 올바르지 않습니다.");
+        throw new Error(tools.error?.message ?? "도구 목록을 받지 못했습니다. 잠시 뒤 연결 확인을 다시 눌러 주세요.");
       }
       setHandshake({ initialize: "PASS", tools: "PASS", toolCount: tools.result.tools.length });
       setCheckResult("PASS");
-      setMessage(`연결 확인 통과 · ${tools.result.tools.length}개 원격 도구가 응답했습니다.`);
+      setMessage(`연결 확인 통과 · 도구 ${tools.result.tools.length}개가 응답했습니다.`);
     } catch (error) {
       setHandshake((current) => ({ ...current, [stage]: "FAIL" }));
       setCheckResult("FAIL");
@@ -165,6 +167,7 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
 
   async function revokeKey(keyId: string) {
     setBusy(keyId);
+    setConfirmRevokeId(null);
     try {
       const response = await fetch(`/api/mcp/keys/${encodeURIComponent(keyId)}`, { method: "DELETE" });
       const payload = (await response.json()) as { ok?: boolean; error?: string };
@@ -240,7 +243,7 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
         <article className="agent-handshake-card">
           <span className="mono-label">02 · 도구 목록</span>
           <strong>{HANDSHAKE_LABEL[handshake.tools]}</strong>
-          <p>{handshake.toolCount ? `${handshake.toolCount}개 도구가 실제 응답했습니다.` : "키 발급 후 실제 도구 목록을 요청합니다."}</p>
+          <p>{handshake.toolCount ? `도구 ${handshake.toolCount}개가 응답했습니다.` : "키를 만들면 도구 목록을 실제로 불러옵니다."}</p>
         </article>
         <article className="agent-handshake-card agent-handshake-card-boundary">
           <span className="mono-label">03 · 경계</span>
@@ -251,12 +254,21 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
 
       {activeKeys.length ? (
         <div className="agent-key-list" aria-label="발급된 Clunk 연결 키">
-          <span className="mono-label">ISSUED KEYS</span>
+          <span className="mono-label">발급된 연결 키</span>
           {activeKeys.map((key) => (
             <div key={key.id}>
               <code>{key.prefix}••••</code>
               <span>{key.label}</span>
-              <button type="button" onClick={() => void revokeKey(key.id)} disabled={busy !== null}>폐기</button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirmRevokeId === key.id) void revokeKey(key.id);
+                  else setConfirmRevokeId(key.id);
+                }}
+                disabled={busy !== null}
+              >
+                {confirmRevokeId === key.id ? "정말 폐기할까요?" : "폐기"}
+              </button>
             </div>
           ))}
         </div>
@@ -296,7 +308,7 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
           <p>{selected.description}</p>
           <div className="agent-availability agent-availability-available">
             <Icon name="circleCheck" size={15} />
-            {selected.key === "stdio" ? "로컬 파일용 fallback" : issuedSecret ? "키 삽입 완료 · 연결 가능" : "키 발급 후 바로 연결"}
+            {selected.key === "stdio" ? "내 컴퓨터 파일용 연결" : issuedSecret ? "설정에 키를 넣었습니다 · 바로 연결됩니다" : "키를 만들면 바로 연결됩니다"}
           </div>
         </div>
 

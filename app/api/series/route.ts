@@ -313,7 +313,9 @@ export async function POST(request: Request) {
         provenance: job.provenance,
         evidence: job.evidence ?? null,
         publication: { status: "DRAFT_ONLY", readiness: readinessLabel({ staticStatus: "NO_GO", visualRuntime: "UNAVAILABLE", playerFacing: "NOT_EVALUATED", humanDecision: "NOT_EVALUATED" }), publishable: false },
-        error: "정적 검수 blocker가 있어 산출물을 저장하지 않았습니다. 수정 후 다시 실행하십시오.",
+        // 이 화면에서 이 응답을 받는 사람은 템플릿을 고른 사람이다. 고칠 수 있는 것이
+        // 손에 없으므로 "수정 후 다시 실행하십시오"는 따를 수 없는 지시였다.
+        error: "이 템플릿으로 만든 파일이 검사를 통과하지 못해 저장하지 않았습니다. 실행 횟수는 쓰이지 않았습니다. 다른 템플릿을 골라 주세요.",
         limitations: job.limitations,
       }, { status: 422 });
     }

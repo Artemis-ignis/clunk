@@ -43,7 +43,7 @@ export function ReviewSurface({ initialGlb }: { initialGlb: string | null }) {
         <GlbReviewer initialUrl={initialGlb} />
         {inventory.length > 0 ? (
           <div className="rv-inventory" aria-label="게시된 에셋 목록 — 누르면 화면에 불러옵니다">
-            <header className="rv-panel-head">게시된 에셋 {inventory.length}개 · 눌러서 확인</header>
+            <header className="rv-panel-head">마켓에 올라온 에셋 {inventory.length}개 · 누르면 여기에 열립니다</header>
             <div className="rv-inventory-row">
               {inventory.map((listing) => (
                 <button type="button" key={listing.slug} onClick={() => loadInventoryGlb(listing)}>
