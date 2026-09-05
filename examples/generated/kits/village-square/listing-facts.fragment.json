@@ -1,0 +1,578 @@
+{
+  "note": "app/data/listing-facts.json 의 facts 에 그대로 병합할 조각입니다. 이 파일 자체는 편집 대상이 아닙니다.",
+  "measuredBy": "tmp/kits/village-square/make-listing-facts.mjs",
+  "source": "public/market/<slug>/<slug>.glb 의 바이트와 glTF JSON, 그리고 로컬 stdio MCP clunk_validate (profile web / mobile)",
+  "kitIdCaveat": "kit 값 \"kit-village-square\" 는 scripts/listing-facts-cli.ts 의 KitId 유니온에 없는 값입니다 — 병합 전에 그 타입에 항목을 더해야 합니다.",
+  "facts": {
+    "kit-village-square": {
+      "triangles": 12880,
+      "materials": 12,
+      "boundsMetres": [
+        8.5624,
+        3.0861,
+        5.606
+      ],
+      "byteLength": 725540,
+      "format": "GLB",
+      "animatedParts": [
+        "bell_pivot",
+        "winch_pivot"
+      ],
+      "animations": [
+        {
+          "name": "bell-swing",
+          "seconds": 2.7
+        },
+        {
+          "name": "winch-crank",
+          "seconds": 3.6
+        }
+      ],
+      "kit": "kit-village-square",
+      "kitSize": 16,
+      "members": 15,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 97,
+        "hardBlockers": 1,
+        "note": null
+      }
+    },
+    "village-bell-tower": {
+      "triangles": 1028,
+      "materials": 9,
+      "boundsMetres": [
+        1.4,
+        3.0861,
+        1.4
+      ],
+      "byteLength": 60948,
+      "format": "GLB",
+      "animatedParts": [
+        "bell_pivot"
+      ],
+      "animations": [
+        {
+          "name": "bell-swing",
+          "seconds": 2.7
+        }
+      ],
+      "kit": "kit-village-square",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 97,
+        "hardBlockers": 1,
+        "note": null
+      }
+    },
+    "village-bench": {
+      "triangles": 544,
+      "materials": 6,
+      "boundsMetres": [
+        1.64,
+        0.9172,
+        0.5723
+      ],
+      "byteLength": 30264,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "village-fountain": {
+      "triangles": 1816,
+      "materials": 5,
+      "boundsMetres": [
+        2.0544,
+        1.36,
+        2.0544
+      ],
+      "byteLength": 105332,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "village-lamp-post": {
+      "triangles": 412,
+      "materials": 5,
+      "boundsMetres": [
+        0.41,
+        3.0621,
+        0.38
+      ],
+      "byteLength": 26836,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "village-noticeboard": {
+      "triangles": 420,
+      "materials": 6,
+      "boundsMetres": [
+        1.44,
+        1.9356,
+        0.3592
+      ],
+      "byteLength": 26744,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "village-path-corner": {
+      "triangles": 588,
+      "materials": 3,
+      "boundsMetres": [
+        1,
+        0.0621,
+        1
+      ],
+      "byteLength": 35452,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "village-path-crossing": {
+      "triangles": 456,
+      "materials": 3,
+      "boundsMetres": [
+        1,
+        0.0621,
+        1
+      ],
+      "byteLength": 28328,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "village-path-straight": {
+      "triangles": 636,
+      "materials": 3,
+      "boundsMetres": [
+        1,
+        0.0622,
+        1
+      ],
+      "byteLength": 38044,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "village-planter-box": {
+      "triangles": 1396,
+      "materials": 7,
+      "boundsMetres": [
+        0.66,
+        0.5843,
+        0.66
+      ],
+      "byteLength": 80188,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 97,
+        "hardBlockers": 1,
+        "note": null
+      }
+    },
+    "village-planter-urn": {
+      "triangles": 844,
+      "materials": 5,
+      "boundsMetres": [
+        0.5716,
+        0.8105,
+        0.634
+      ],
+      "byteLength": 56176,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "village-postbox": {
+      "triangles": 444,
+      "materials": 6,
+      "boundsMetres": [
+        0.42,
+        1.685,
+        0.344
+      ],
+      "byteLength": 27500,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "village-signpost": {
+      "triangles": 444,
+      "materials": 5,
+      "boundsMetres": [
+        1.2287,
+        2.24,
+        1.1722
+      ],
+      "byteLength": 30648,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "village-wall-corner": {
+      "triangles": 1260,
+      "materials": 3,
+      "boundsMetres": [
+        0.67,
+        0.55,
+        0.67
+      ],
+      "byteLength": 63584,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "village-wall-straight": {
+      "triangles": 924,
+      "materials": 3,
+      "boundsMetres": [
+        1,
+        0.55,
+        0.34
+      ],
+      "byteLength": 47108,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "village-well": {
+      "triangles": 1692,
+      "materials": 9,
+      "boundsMetres": [
+        1.8837,
+        2.6791,
+        1.4516
+      ],
+      "byteLength": 103068,
+      "format": "GLB",
+      "animatedParts": [
+        "winch_pivot"
+      ],
+      "animations": [
+        {
+          "name": "winch-crank",
+          "seconds": 3.6
+        }
+      ],
+      "kit": "kit-village-square",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 97,
+        "hardBlockers": 1,
+        "note": null
+      }
+    }
+  }
+}
