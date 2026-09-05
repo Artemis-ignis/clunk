@@ -45,7 +45,7 @@ export function AuthCard({
 }: {
   titleId: string;
   /** 카드 맨 위 작은 한 줄 — 로그인 뒤 돌아갈 곳. */
-  eyebrow: string;
+  eyebrow?: string | null;
   title: string;
   lede: string;
   errorMessage?: string | null;
@@ -66,7 +66,7 @@ export function AuthCard({
         <BrandIcon size={56} />
       </Link>
 
-      <p className="cv5-door-eyebrow">{eyebrow}</p>
+      {eyebrow ? <p className="cv5-door-eyebrow">{eyebrow}</p> : null}
       <h1 id={titleId} className="cv5-door-title">{title}</h1>
       <p className="cv5-door-lede">{lede}</p>
 

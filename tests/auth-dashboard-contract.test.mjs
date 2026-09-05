@@ -52,16 +52,16 @@ test("the door a visitor lands on answers the button they pressed", async () => 
   const create = await render("/signup?return_to=%2Fstudio%3Fintent%3Dcreate");
   assert.equal(create.status, 200);
   const createHtml = await create.text();
-  assert.match(createHtml, /첫 에셋 만들기부터/);
+  assert.match(createHtml, new RegExp(">가입</h1>"));
   assert.match(createHtml, /return_to=%2Fstudio%3Fintent%3Dcreate/);
 
   const inspect = await render("/signup?return_to=%2Fapp%3Fintent%3Dinspect");
   assert.equal(inspect.status, 200);
   const inspectHtml = await inspect.text();
-  assert.match(inspectHtml, /파일 검사부터/);
+  assert.match(inspectHtml, new RegExp(">가입</h1>"));
   assert.match(inspectHtml, /return_to=%2Fapp%3Fintent%3Dinspect/);
 
-  // 의도가 없으면 오늘까지 쓰던 기본 문구가 그대로 나온다.
+  // 2026-09-05: 의도는 돌아갈 곳만 정하고 문구는 바꾸지 않는다 — 어느 문이든 제목은 한 낱말이다.
   const plain = await (await render("/signup")).text();
   assert.doesNotMatch(plain, /첫 에셋 만들기부터|파일 검사부터/);
 });

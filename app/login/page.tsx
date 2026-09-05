@@ -5,7 +5,7 @@ import {
   type ChatGPTUser,
 } from "../chatgpt-auth";
 import { getOAuthEnvironment, getOAuthProviderStatuses, safeOAuthReturnPath } from "../oauth";
-import { authCardCopy, intentFromReturnTo, returnWithParticle, type AuthIntent } from "../auth-intent";
+import { authCardCopy, intentFromReturnTo, type AuthIntent } from "../auth-intent";
 import { getRuntimeEnvironment } from "../runtime-environment";
 import { trustsUpstreamIdentityHeaders } from "../api/_lib/identity-headers";
 import { SiteNav } from "../components/SiteNav";
@@ -146,9 +146,7 @@ function AuthJourney({
         <div className="cv5-frame cv5-auth-solo">
           <AuthCard
             titleId="login-title"
-            eyebrow={
-              user ? "이미 로그인되어 있습니다" : `${returnWithParticle(returnTo)} 돌아갑니다`
-            }
+            eyebrow={user ? "이미 로그인되어 있습니다" : null}
             title={copy.h1}
             lede={
               user

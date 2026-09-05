@@ -394,9 +394,9 @@ test("/login과 /signup은 서로 다른 문이고, 영문 라벨이 남아 있�
   // 2026-09-03: 두 문 모두 가운데 카드 하나다. 좌측 마케팅 단은 사라졌고, 제목은
   // 한 줄이다. 아래 문구는 그 한 줄과 그 아래 한 문장을 그대로 고정한다.
   // 돌아오는 사람의 문
-  assert.ok(login.includes("다시 오셨군요"), "로그인 화면의 제목이 다릅니다");
+  assert.ok(login.includes(">로그인</h1>"), "로그인 화면의 제목이 다릅니다");
   assert.ok(
-    login.includes("비밀번호를 만들지도 보관하지도 않습니다"),
+    login.includes("계정 하나로 받은 에셋과 검사 기록을 관리합니다"),
     "로그인 화면의 한 문장이 다릅니다",
   );
   assert.ok(login.includes('href="/signup?return_to='), "로그인 화면에 가입 문이 없습니다");

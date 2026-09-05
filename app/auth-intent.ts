@@ -49,64 +49,28 @@ export function isAuthIntent(value: unknown): value is AuthIntent {
   return typeof value === "string" && (AUTH_INTENTS as readonly string[]).includes(value);
 }
 
+/**
+ * 문 한 장의 문구. 2026-09-05 마스터: 제목 한 낱말과 짧은 한 문장이면 된다 —
+ * "이전 화면으로 돌아갑니다 / 다시 오셨군요 / 비밀번호를 만들지도 보관하지도…" 같은
+ * 설명은 전부 뺀다(참고: polyfork.dev 의 Sign in 카드). 의도(intent)는 돌아갈 곳을
+ * 정할 뿐 문구를 바꾸지 않는다. 가입 직후 대시보드의 환영 한 줄만 의도별로 남긴다.
+ */
+const DOOR_COPY: Pick<AuthIntentCopy, "signup" | "login"> = {
+  signup: { h1: "가입", lede: "Google이나 GitHub 계정으로 바로 시작합니다." },
+  login: { h1: "로그인", lede: "계정 하나로 받은 에셋과 검사 기록을 관리합니다." },
+};
+
 /** 아무 의도도 실려 오지 않았을 때의 문구. 두 문의 기본값이다. */
 export const DEFAULT_AUTH_COPY: AuthIntentCopy = {
-  signup: {
-    h1: "가입하면 바로 씁니다",
-    lede: "카드도 비밀번호도 묻지 않습니다. Google이나 GitHub 계정으로 한 번 들어오면 대시보드가 생기고, 그 자리에서 바로 만들고 검사합니다.",
-  },
-  login: {
-    h1: "다시 오셨군요",
-    lede: "Clunk는 비밀번호를 만들지도 보관하지도 않습니다. 쓰던 계정으로 들어오면 보던 화면으로 그대로 돌아갑니다.",
-  },
+  ...DOOR_COPY,
   welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어왔습니다 · 무엇을 만들지 골라 보세요`,
 };
 
 export const INTENT_COPY: Record<AuthIntent, AuthIntentCopy> = {
-  create: {
-    signup: {
-      h1: "첫 에셋 만들기부터",
-      lede: "계정 하나면 만들기 화면이 열립니다. 카드도 비밀번호도 묻지 않고, 확인이 끝나면 만들던 화면으로 그대로 돌아갑니다.",
-    },
-    login: {
-      h1: "만들던 화면으로",
-      lede: "쓰던 계정을 고르세요. 확인이 끝나면 에셋 만들기 화면으로 그대로 돌아갑니다.",
-    },
-    welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어왔습니다 · 첫 에셋을 만들어 보세요`,
-  },
-  inspect: {
-    signup: {
-      h1: "파일 검사부터",
-      lede: "파일 하나를 올리면 게임에 넣어도 되는지 확인해 드립니다. 카드도 비밀번호도 묻지 않고, 확인이 끝나면 검사 화면으로 돌아갑니다.",
-    },
-    login: {
-      h1: "검사하던 화면으로",
-      lede: "쓰던 계정을 고르세요. 확인이 끝나면 검사 화면으로 그대로 돌아갑니다.",
-    },
-    welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어왔습니다 · 파일 하나를 올려 검사해 보세요`,
-  },
-  agents: {
-    signup: {
-      h1: "에이전트 연결부터",
-      lede: "내 계정 전용 키를 하나 만들면 쓰던 AI 도구가 바로 Clunk를 부릅니다. 카드도 비밀번호도 묻지 않습니다.",
-    },
-    login: {
-      h1: "연결하던 화면으로",
-      lede: "쓰던 계정을 고르세요. 확인이 끝나면 연결 설정 화면으로 그대로 돌아갑니다.",
-    },
-    welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어왔습니다 · 키를 만들면 바로 연결됩니다`,
-  },
-  market: {
-    signup: {
-      h1: "에셋 받기부터",
-      lede: "마켓 에셋은 계정만 있으면 받습니다. 카드도 비밀번호도 묻지 않고, 확인이 끝나면 보던 상품 화면으로 돌아갑니다.",
-    },
-    login: {
-      h1: "보던 에셋으로",
-      lede: "쓰던 계정을 고르세요. 확인이 끝나면 보던 상품 화면으로 그대로 돌아갑니다.",
-    },
-    welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어왔습니다 · 마켓에서 에셋을 받아 보세요`,
-  },
+  create: { ...DOOR_COPY, welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어왔습니다 · 첫 에셋을 만들어 보세요`, },
+  inspect: { ...DOOR_COPY, welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어왔습니다 · 파일 하나를 올려 검사해 보세요`, },
+  agents: { ...DOOR_COPY, welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어왔습니다 · 키를 만들면 바로 연결됩니다`, },
+  market: { ...DOOR_COPY, welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어왔습니다 · 마켓에서 에셋을 받아 보세요`, },
 };
 
 /**
