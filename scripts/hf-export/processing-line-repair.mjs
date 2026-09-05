@@ -33,7 +33,8 @@ import { fileURLToPath } from 'node:url';
 import {
   THREE, loadGlb, saveGlb, meshes, node, worldBox, mm, matOf, meshTris, drawnTris,
   mergeByAnchor, pruneEmpty, dropHiddenProxies, bakeInstances, unshareGeometry, exactBox, boxGeo, cylGeo, colourOf, addMesh,
-  quatTrack, setTrack,
+  quatTrack, vecTrack, setTrack,
+  tubeBetween, boxSpan, moveBoxCentreTo, spinAboutWorld, radiusAbout, boxOverlap,
 } from './machine-lib.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -188,6 +189,17 @@ report.instruments = [
   const radius = Math.min(tankBox.max.x - tankBox.min.x, tankBox.max.z - tankBox.min.z) / 2;
   const conveyor = node(scene, 'conveyor-module');
   const hopper = node(scene, 'hopper-module');
+
+  /* 2026-09-05, PROPORTION. Measured on this file: the hopper's top grate is 2,700 x 1,980 mm
+     and its rim 2,420 mm square, over a belt 1,520 mm wide and beside a tank 2,000 mm across.
+     The bin that feeds the line was the widest thing in the product — wider than the tank it
+     fills. Scaled to 0.80, so the rim is 1,936 mm: still overhanging the belt, which is what a
+     feed bin does, but no longer larger than the vessel. Everything below measures the hopper
+     after this, so the skirt and the legs are built to the size it actually is. */
+  const HOPPER_SCALE = 0.80;
+  const hopperBefore = exactBox(hopper).getSize(new THREE.Vector3());
+  hopper.scale.multiplyScalar(HOPPER_SCALE);
+  scene.updateMatrixWorld(true);
 
   /* Per vertex, not per box: a box over-measures a part that only clips a corner.
      Instanced meshes are read through their instance matrices, or a rail whose
@@ -429,22 +441,148 @@ report.instruments = [
   /* The geometry was built in world space; carry it into the parent's frame. */
   skirtMesh.applyMatrix4(new THREE.Matrix4().copy(hopper.matrixWorld).invert());
 
-  /* Legs, outside the belt on both sides and clear of the tank, up into the funnel's
-     flank where it is wide enough to meet them. */
+  /* Legs, outside the belt on both sides and clear of the tank.
+   *
+   * 2026-09-05: they used to be four vertical posts stopping at mouth + 500 mm, which is
+   * where the funnel is 1,132 mm wide — and the posts stood 1,800 mm apart. Their tops were
+   * in mid-air beside the funnel, holding nothing. Each leg now runs from its foot to the
+   * nearest point of the hopper's own rim, so it ends ON the thing it carries. The two on
+   * the belt's right lean inward, because the belt leaves no floor under the rim there. */
   const legColour = colourOf(hopperBody).clone().multiplyScalar(0.70);
-  const legTop = wantY + 0.50;
+  const rimBox = worldBox(node(scene, 'hopperRim'));
   const legXs = [beltBox.min.x - 0.140, Math.min(beltBox.max.x + 0.140, wallXOf(axis, radius, tailZ) - 0.120)];
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
   const legs = [];
   for (const [side, x] of [['L', legXs[0]], ['R', legXs[1]]]) {
     for (const [end, z] of [['F', tailZ + 0.470], ['B', tailZ - 0.470]]) {
-      const leg = addMesh(hopper, boxGeo(0.080, legTop, 0.080, legColour), matOf(hopperBody), `hopperLeg${side}${end}`);
-      hopper.worldToLocal(leg.position.set(x, legTop / 2, z));
+      const topX = clamp(x, rimBox.min.x + 0.060, rimBox.max.x - 0.060);
+      const topZ = clamp(z, rimBox.min.z + 0.060, rimBox.max.z - 0.060);
+      tubeBetween(hopper.parent, matOf(hopperBody), legColour,
+        [x, 0, z], [topX, rimBox.max.y - 0.020, topZ], 0.045, `hopperLeg${side}${end}`, 8);
       legs.push(`hopperLeg${side}${end}`);
     }
   }
 
+  /* ------------------------------------------------- THE BELT RUNS THE WRONG WAY.
+   *
+   * 2026-09-05, measured on this file. `conveyor-module` is tilted 33.2 degrees about x, so
+   * its local +z points DOWN the slope: world (0, -0.548, +0.836). Every beltMark track runs
+   * local z upward with time — from -1,460 to +1,340 mm, four times over the clip — so the
+   * belt surface travels down the slope, from the tank end toward the hopper.
+   *
+   * The hopper discharges at world z 1,162..1,982 (the low end) and the delivery chute is at
+   * world z -600..-80, 2.5 m up (the high end). The 2026-09-04 pass moved the hopper to that
+   * low end and built the chute at the high end without touching the belt animation, so the
+   * belt has been carrying away from the tank it feeds ever since.
+   *
+   * The pulleys were already right: rotating +local y turns their world -x axle so the top
+   * surface goes up the slope. It is the marks that are reversed here.
+   *
+   * And they did not agree on speed either. The marks moved 11,200 mm per clip = 1,350 mm/s;
+   * the pulleys turned 5.000 rev of a 479 mm drum = 906 mm/s of belt. A third of the belt's
+   * travel was not coming from the pulleys. Both are re-derived from one number now: the
+   * pulley turns a whole 7 revolutions per clip (so its keyframes close exactly), and the
+   * marks are re-pitched so their travel is that same distance to the millimetre. */
+  {
+    const beltTravel = (() => {
+      const rollers = ['conveyorRollerA', 'conveyorRollerB'].map((name) => {
+        const pivot = node(scene, name);
+        const centre = new THREE.Vector3().setFromMatrixPosition(pivot.matrixWorld);
+        /* The node's rest orientation is what puts its local y on the world axle; the clip has
+           to be written on top of it, not instead of it, or a 1.6 m drum spins about the belt's
+           normal like a turntable. */
+        const rest = pivot.quaternion.clone();
+        const axle = new THREE.Vector3(0, 1, 0).transformDirection(pivot.matrixWorld).normalize();
+        /* Measure the drum, not the stripes welded 8 mm proud of it: the belt rides the drum. */
+        const drum = pivot.children.find((c) => c.isMesh && !/Stripe/.test(c.name || ''));
+        return { name, pivot, rest, radius: radiusAbout(drum, centre, axle), axle };
+      });
+      /* Both drums are the same casting; take the one the belt actually wraps. */
+      const radius = Math.max(...rollers.map((r) => r.radius));
+      const REVOLUTIONS = 7;                       // whole turns, so the quaternion closes
+      const travel = REVOLUTIONS * 2 * Math.PI * radius;
+
+      const beltNormal = new THREE.Vector3(0, 1, 0).transformDirection(conveyor.matrixWorld).normalize();
+      const downSlope = new THREE.Vector3(0, 0, 1).transformDirection(conveyor.matrixWorld).normalize();
+      const upSlope = downSlope.clone().negate();
+      const KEYS = 85;
+      const times = Array.from({ length: KEYS }, (_, i) => (i / (KEYS - 1)) * run.duration);
+      const rollerReport = [];
+      for (const { name, radius: r, axle, rest } of rollers) {
+        /* omega x r at the top of the drum has to point up the slope. */
+        const surface = new THREE.Vector3().crossVectors(axle, beltNormal);
+        const sign = surface.dot(upSlope) >= 0 ? 1 : -1;
+        const values = new Float32Array(times.length * 4);
+        const spin = new THREE.Quaternion();
+        for (let i = 0; i < times.length; i += 1) {
+          const angle = sign * 2 * Math.PI * REVOLUTIONS * (times[i] / run.duration);
+          spin.setFromAxisAngle(new THREE.Vector3(0, 1, 0), angle);
+          const q = rest.clone().multiply(spin);
+          values[i * 4] = q.x; values[i * 4 + 1] = q.y; values[i * 4 + 2] = q.z; values[i * 4 + 3] = q.w;
+        }
+        setTrack(run, name, 'quaternion',
+          new THREE.QuaternionKeyframeTrack(`${name}.quaternion`, Float32Array.from(times), values));
+        rollerReport.push({ roller: name, radiusMm: mm(r), revolutionsPerClip: REVOLUTIONS, sign,
+          surfaceSpeedMmPerS: Math.round((2 * Math.PI * r * REVOLUTIONS / run.duration) * 1000) });
+      }
+
+      /* Seven marks tile a window of seven pitches; the travel has to be a whole number of
+         pitches or the marks land somewhere else at the loop. Pick the smallest number of
+         pitches that keeps the window inside the belt. */
+      const beltLocal = (() => {
+        const inv = new THREE.Matrix4().copy(conveyor.matrixWorld).invert();
+        const box = new THREE.Box3();
+        const v = new THREE.Vector3();
+        for (const mesh of meshes(belt)) {
+          const pos = mesh.geometry.getAttribute('position');
+          for (let i = 0; i < pos.count; i += 1) box.expandByPoint(v.fromBufferAttribute(pos, i).applyMatrix4(mesh.matrixWorld).applyMatrix4(inv));
+        }
+        return box;
+      })();
+      const MARKS = 7;
+      const ROLLER_MARGIN = 0.130;                 // keep the marks off the drums
+      const windowMax = (beltLocal.max.z - beltLocal.min.z) - 2 * ROLLER_MARGIN;
+      let steps = Math.ceil((MARKS * travel) / windowMax);
+      const pitch = travel / steps;
+      const windowZ = MARKS * pitch;
+      const zTop = (beltLocal.min.z + beltLocal.max.z) / 2 + windowZ / 2;
+      const speed = travel / run.duration;
+
+      for (let i = 0; i < MARKS; i += 1) {
+        const name = `beltMark${i + 1}`;
+        const old = run.tracks.find((t) => t.name === `${name}.position`);
+        const x = old ? old.values[0] : 0;
+        const y = old ? old.values[1] : 0.180;
+        const offset = i * pitch;
+        /* z(t) = zTop - ((offset + speed*t) mod window): up the slope, wrapping at the head. */
+        const ts = [0];
+        const zs = [zTop - (offset % windowZ)];
+        let wrapAt = (windowZ - (offset % windowZ)) / speed;
+        while (wrapAt < run.duration - 1e-6) {
+          ts.push(wrapAt, wrapAt);
+          zs.push(zTop - windowZ, zTop);
+          wrapAt += windowZ / speed;
+        }
+        ts.push(run.duration);
+        zs.push(zTop - ((offset + speed * run.duration) % windowZ));
+        setTrack(run, name, 'position', vecTrack(name, 'position', ts, zs.map((z) => [x, y, z])));
+      }
+      return {
+        why: 'the belt surface travelled away from the tank it feeds, and its speed did not come from its own pulleys',
+        marksTravelledMm: { before: 11200, after: mm(travel) },
+        beltSpeedMmPerS: { before: 1350, after: Math.round(speed * 1000) },
+        pulleySurfaceSpeedMmPerS: { before: 906, after: Math.round(speed * 1000) },
+        markPitchMm: mm(pitch), markWindowMm: mm(windowZ), pitchesPerClip: steps,
+        directionBefore: 'down the slope, toward the hopper', directionAfter: 'up the slope, toward the tank inlet',
+        rollers: rollerReport,
+      };
+    })();
+    report.beltDirection = beltTravel;
+  }
+
   report.lineDirection = {
     why: 'the conveyor ran through the tank wall and the belt delivered nowhere; the conveyor moved clear, the belt now empties into a side inlet, and the hopper moved to the tail it should have been feeding',
+    hopperScale: { factor: HOPPER_SCALE, wasMm: hopperBefore.toArray().map(mm), nowMm: exactBox(hopper).getSize(new THREE.Vector3()).toArray().map(mm), beltWidthMm: mm(beltBox.max.x - beltBox.min.x) },
     hopper: {
       wasOver: 'the head of the belt, 34 mm clear, unsupported',
       nowOver: 'the tail of the belt',
@@ -492,33 +630,123 @@ report.instruments = [
      `pipeTopRise` rises through exactly that spot, y 4.579..5.199, swallowing all of it.
      A visible indicator nobody can see is the defect it was meant to cure. The head is
      lifted until the coupling stands above the pipe. */
-  const rise = worldBox(node(scene, 'pipeTopRise'));
-  const coupling = node(scene, 'mixerDriveCoupling');
-  const couplingBox = worldBox(coupling);
-  const lift = (rise.max.y + 0.060) - couplingBox.min.y;
+  /* 2026-09-05: lifting was the wrong half of the answer. The top loop runs straight over the
+     tank's apex — `pipeTopRise` up the mixer's own axis, `pipeTopReturn` across it 900 mm
+     higher — so clearing one put the head inside the other (the hub was 80 mm inside
+     pipeTopReturn). The loop moves 350 mm along z first, off the mixer axis and clear of the
+     tank hatch, and the head is then lifted only as far as it still needs. */
+  const LOOP_SHIFT = 0.350;
+  const loopParts = ['pipeOverhead', 'pipeLowerLoopRise', 'pipeTopRise', 'pipeTopReturn', 'pipeTopDrop'];
+  for (const name of loopParts) node(scene, name).position.z += LOOP_SHIFT;
+  scene.updateMatrixWorld(true);
+  const headParts = ['mixerDriveShaft', 'mixerDriveHub', 'mixerDriveCoupling'];
+  const headBox = new THREE.Box3();
+  for (const name of headParts) headBox.union(exactBox(node(scene, name)));
+  let lift = 0;
+  for (const name of loopParts) {
+    const pipe = exactBox(node(scene, name));
+    const clashes = pipe.max.x > headBox.min.x && pipe.min.x < headBox.max.x
+      && pipe.max.z > headBox.min.z && pipe.min.z < headBox.max.z;
+    if (clashes) lift = Math.max(lift, (pipe.max.y + 0.060) - headBox.min.y);
+  }
   if (lift > 0) {
-    for (const name of ['mixerDriveShaft', 'mixerDriveHub', 'mixerDriveCoupling']) {
+    for (const name of headParts) {
       const part = node(scene, name);
       if (name === 'mixerDriveShaft') part.scale.y *= (worldBox(part).max.y - worldBox(part).min.y + lift) / (worldBox(part).max.y - worldBox(part).min.y);
       part.position.y += lift;
     }
     scene.updateMatrixWorld(true);
   }
-  report5b.mixerDriveHead = { why: 'the drive head added to show the mixer running stood inside pipeTopRise, invisible', liftedMm: mm(Math.max(0, lift)) };
+  report5b.mixerDriveHead = {
+    why: 'the drive head added so the mixer can be seen running stood inside pipeTopRise, and after the 2026-09-04 lift, inside pipeTopReturn',
+    loopMovedAlongZmm: mm(LOOP_SHIFT), liftedMm: mm(Math.max(0, lift)),
+  };
 
-  /* THE PUMP IS INSIDE THE TANK. `pumpHousing` puts 48 of its 383 vertices inside the
-     tank body, 180 mm deep, and `pumpMotor` 41. It moves along z, away from the tank's
-     axis, which keeps it inside `pipeFeed`'s own z span so the plumbing still meets it. */
-  const tankBox5b = worldBox(node(scene, 'tankBody'));
-  const axis5b = { x: (tankBox5b.min.x + tankBox5b.max.x) / 2, z: (tankBox5b.min.z + tankBox5b.max.z) / 2 };
-  const radius5b = Math.min(tankBox5b.max.x - tankBox5b.min.x, tankBox5b.max.z - tankBox5b.min.z) / 2;
+  /* THE TANK'S OUTLET HANDWHEEL IS A RING ROUND THE PIPE ITSELF.
+   *
+   * 2026-09-05. `valveWheel` is a torus of outer diameter 505 mm whose centre sits exactly ON
+   * the outlet pipe's axis (x -450, y 799) at z 1,320 — so its rim crosses that axis at
+   * z 1,502..1,572, and any pipe leaving the valve runs through the wheel. It is also 290 mm
+   * inside `pumpMotor`. It moves onto a stem above the valve body, where a handwheel goes:
+   * the pipe axis is then clear and the same `valveWheelPivot` track turns it about the stem,
+   * because the pivot is rotated so its local x — the axis the clip already spins — is up. */
+  const valveBody = node(scene, 'valveBody');
+  const valveBodyBox = worldBox(valveBody);
+  const wheelPivot = node(scene, 'valveWheelPivot');
+  const wheelWas = worldBox(node(scene, 'valveWheel'));
+  const wheelHalf = (wheelWas.max.z - wheelWas.min.z) / 2;
+  const stemBottom = valveBodyBox.max.y;
+  const stemTop = stemBottom + 0.120;
+  spinAboutWorld(wheelPivot, [0, 0, 1], Math.PI / 2, wheelWas.getCenter(new THREE.Vector3()));
+  moveBoxCentreTo(wheelPivot, [
+    (valveBodyBox.min.x + valveBodyBox.max.x) / 2,
+    stemTop,
+    (valveBodyBox.min.z + valveBodyBox.max.z) / 2,
+  ]);
+  const stemX = (valveBodyBox.min.x + valveBodyBox.max.x) / 2;
+  const stemZ = (valveBodyBox.min.z + valveBodyBox.max.z) / 2;
+  tubeBetween(node(scene, 'tankValve'), matOf(valveBody), colourOf(valveBody),
+    [stemX, stemBottom - 0.030, stemZ], [stemX, stemTop + 0.020, stemZ], 0.034, 'valveStem', 10);
+  /* The wheel is a torus: a stem up its middle passes through the hole and touches nothing, so
+     the inspector still called it a floating part. It gets the hub a handwheel has, turning
+     with it, wide enough to reach the rim. */
+  const wheelInner = (() => {
+    let smallest = Infinity;
+    const v = new THREE.Vector3();
+    const centre = exactBox(wheelPivot).getCenter(new THREE.Vector3());
+    for (const m of meshes(wheelPivot)) {
+      const pos = m.geometry.getAttribute('position');
+      for (let i = 0; i < pos.count; i += 1) {
+        v.fromBufferAttribute(pos, i).applyMatrix4(m.matrixWorld).sub(centre);
+        smallest = Math.min(smallest, Math.hypot(v.x, v.z));
+      }
+    }
+    return smallest;
+  })();
+  tubeBetween(wheelPivot, matOf(valveBody), colourOf(valveBody).clone().multiplyScalar(0.9),
+    [stemX, stemTop - 0.016, stemZ], [stemX, stemTop + 0.016, stemZ], wheelInner + 0.014, 'valveWheelHub', 12);
+  scene.updateMatrixWorld(true);
+  report5b.valveHandwheel = {
+    why: 'the handwheel was a ring centred on the outlet pipe\'s own axis, so its rim crossed the bore, and it stood 290 mm inside the pump motor',
+    wasCentreMm: wheelWas.getCenter(new THREE.Vector3()).toArray().map(mm),
+    nowCentreMm: exactBox(wheelPivot).getCenter(new THREE.Vector3()).toArray().map(mm),
+    stem: 'valveStem', wheelOuterRadiusMm: mm(wheelHalf),
+  };
+
+  /* THE PUMP IS INSIDE THE TANK — AND INSIDE THE TANK'S OUTLET VALVE.
+   *
+   * `pumpHousing` put 48 of its 383 vertices 180 mm inside the tank body. The 2026-09-04 pass
+   * pushed it 226 mm along z, which cleared the tank and left `valveBody` 290 mm inside
+   * `pumpMotor` and `valvePipe` 114 mm inside it — the tank's own outlet was buried in the
+   * machine that is supposed to draw from it.
+   *
+   * It moves once, far enough to be clear of everything at 50 mm, and along -x as well so the
+   * casing is centred on the outlet valve's axis and the suction line is a straight run. The
+   * distance is searched, not guessed: every part of the pump is boxed against every other
+   * part of the machine at each step. */
   const service = node(scene, 'service-network');
-  const pumpBox = worldBox(node(scene, 'pumpHousing'));
-  const nearest = Math.min(Math.abs(pumpBox.min.z - axis5b.z), Math.abs(pumpBox.max.z - axis5b.z));
-  const reach = Math.sqrt(Math.max(0, radius5b * radius5b - Math.max(
-    0, Math.min(Math.abs(pumpBox.min.x - axis5b.x), Math.abs(pumpBox.max.x - axis5b.x))) ** 2));
-  const pumpShift = Math.max(0, reach - nearest) + 0.050;
-  if (pumpShift > 0) { service.position.z += pumpShift; scene.updateMatrixWorld(true); }
+  const movableLater = new Set(['pipeFeed', 'pipeReturn', 'pipeTransfer', 'pipeUnionValve']);
+  const serviceMeshes = new Set(meshes(service));
+  const others = meshes(scene).filter((m) => !serviceMeshes.has(m) && !movableLater.has(m.name));
+  const otherBoxes = others.map((m) => ({ name: m.name, box: exactBox(m) }));
+  const CLEAR_5B = 0.050;
+  const servicePos = service.position.clone();
+  const clashOf = (dx, dz) => {
+    service.position.set(servicePos.x + dx, servicePos.y, servicePos.z + dz);
+    scene.updateMatrixWorld(true);
+    for (const m of serviceMeshes) {
+      const b = exactBox(m).expandByScalar(CLEAR_5B);
+      for (const o of otherBoxes) if (b.intersectsBox(o.box)) return `${m.name} x ${o.name}`;
+    }
+    return null;
+  };
+  const PUMP_DX = -0.320;                          // casing centred near the outlet valve's x, motor clear of the suction spool
+  let pumpDz = null;
+  for (let dz = 0; dz <= 1.400; dz += 0.010) {
+    if (!clashOf(PUMP_DX, dz)) { pumpDz = dz; break; }
+  }
+  if (pumpDz === null) throw new Error('no clear place for the pump along z');
+  clashOf(PUMP_DX, pumpDz);
   /* And its plinth was floating: `pumpBase` sat 319 mm above the floor with a 60 mm gap
      to the pump it was carrying. Stretched to stand on the floor and meet the pump. */
   const base = node(scene, 'pumpBase');
@@ -530,12 +758,568 @@ report.instruments = [
   base.position.y -= worldBox(base).min.y;
   scene.updateMatrixWorld(true);
   report5b.pump = {
-    why: 'the pump casing and its motor stood inside the tank body, and its plinth floated 319 mm above the floor',
-    movedMm: mm(pumpShift),
+    why: 'the pump casing stood inside the tank body, the tank\'s outlet valve stood inside the pump motor, and the plinth floated 319 mm above the floor',
+    movedMm: [mm(PUMP_DX), 0, mm(pumpDz)],
+    clearanceMm: mm(CLEAR_5B),
+    housingBoxMm: exactBox(node(scene, 'pumpHousing')).min.toArray().map(mm)
+      .concat(exactBox(node(scene, 'pumpHousing')).max.toArray().map(mm)),
     plinth: { wasMm: [mm(baseBox.min.y), mm(baseBox.max.y)], nowMm: [0, mm(baseWant)] },
   };
 
   report.measuredDefects = report5b;
+}
+
+/* ------------------------------------------- 5c. the bottling bench becomes a conveyor */
+/* 2026-09-05. What the file called a filling line was a flat metal bench 2,250 x 1,180 mm with
+ * six bottles standing on it, one rail along the far side, and a stop plate. Nothing above the
+ * bottles, nothing under them, and in the 8.30 s clip not one of them moves — the only thing
+ * that happens at the bottling end of a bottling machine is a lamp glowing.
+ *
+ * The bench becomes what it is drawn to be: a belt with two end drums, a bed, guide rails on
+ * both sides of the bottles, and the bottles riding it. The drum diameter is not chosen for
+ * looks — it is 2 x pitch x 3 / 4pi, the size at which two thirds of a turn carries the belt
+ * exactly one station pitch, so the drums and the bottles and the belt marks all close
+ * together at the end of the clip. */
+const station = {};
+{
+  const bottling = node(scene, 'bottling-module');
+  const railGroup = node(scene, 'bottleRail');
+  const table = node(scene, 'bottlingTable');
+  const tableBox = worldBox(table);
+  const bottleNames = ['productBottle1', 'productBottle2', 'productBottle3', 'productBottle4', 'productBottle5', 'productBottle6'];
+  const bottleGroups = bottleNames.map((n) => node(scene, n));
+  const bottleBoxes = bottleGroups.map((b) => exactBox(b));
+  const centresX = bottleBoxes.map((b) => (b.min.x + b.max.x) / 2).sort((a, b) => a - b);
+  const PITCH = (centresX[centresX.length - 1] - centresX[0]) / (centresX.length - 1);
+  const bottleDia = bottleBoxes[0].max.x - bottleBoxes[0].min.x;
+  const bottleHeight = bottleBoxes[0].max.y - bottleBoxes[0].min.y;
+
+  /* one pitch per clip = two thirds of a drum turn */
+  const ROLLER_R = (PITCH * 3) / (4 * Math.PI);
+  const rollerY = tableBox.max.y + ROLLER_R;
+  const beltTopY = tableBox.max.y + 2 * ROLLER_R;
+  const rollerAX = tableBox.min.x + ROLLER_R;
+  const rollerBX = tableBox.max.x - ROLLER_R;
+  const z0 = (tableBox.min.z + tableBox.max.z) / 2 + 0.045;     // the line the bottles run on
+  const SIDE_GAP = 0.044;
+  const beltHalf = bottleDia / 2 + SIDE_GAP;
+  const deckFrom = rollerAX + ROLLER_R;
+  const deckTo = rollerBX - ROLLER_R;
+
+  /* The row sweeps (six bottles at pitch) + one pitch + one diameter. Centre that on the table
+     so no bottle is ever off the belt, at any moment of the clip. */
+  const swept = bottleGroups.length * PITCH + bottleDia;
+  const firstX = tableBox.min.x + (tableBox.max.x - tableBox.min.x - swept) / 2 + bottleDia / 2;
+
+  const metal = matOf(node(scene, 'bottlingTable'));
+  const matte = matOf(node(scene, 'conveyorRailLeft'));
+  const rubber = matOf(node(scene, 'conveyorBelt'));
+  const frameColour = colourOf(node(scene, 'conveyorRailLeft'));
+  const beltColour = colourOf(node(scene, 'conveyorBelt'));
+
+  /* bed and belt, between the two drums */
+  boxSpan(bottling, matte, frameColour.clone().multiplyScalar(0.9),
+    [deckFrom, tableBox.max.y, z0 - beltHalf], [deckTo, beltTopY - 0.030, z0 + beltHalf], 'bottleBeltBed');
+  boxSpan(bottling, rubber, beltColour,
+    [deckFrom, beltTopY - 0.030, z0 - beltHalf], [deckTo, beltTopY, z0 + beltHalf], 'bottleBeltSurface');
+
+  /* the two drums, each on its own node so the clip can turn it */
+  const drumColour = colourOf(node(scene, 'bottlingTable'));
+  const stripeColour = drumColour.clone().multiplyScalar(0.28);
+  const KEYS_R = 25;
+  const timesR = Array.from({ length: KEYS_R }, (_, i) => (i / (KEYS_R - 1)) * run.duration);
+  const drums = [['bottleRollerA', rollerAX], ['bottleRollerB', rollerBX]];
+  for (const [name, x] of drums) {
+    const pivot = new THREE.Object3D();
+    pivot.name = name;
+    bottling.add(pivot);
+    bottling.updateMatrixWorld(true);
+    pivot.position.copy(bottling.worldToLocal(new THREE.Vector3(x, rollerY, z0)));
+    pivot.updateMatrixWorld(true);
+    const drum = cylGeo(ROLLER_R, ROLLER_R, beltHalf * 2 + 0.060, 14, drumColour);
+    drum.rotateX(Math.PI / 2);                                  // axle along z, like the belt's
+    addMesh(pivot, drum, metal, `${name}Drum`, [0, 0, 0]);
+    for (let i = 0; i < 3; i += 1) {
+      const angle = (i / 3) * Math.PI * 2;
+      const bar = boxGeo(0.024, 0.010, beltHalf * 2 + 0.040, stripeColour);
+      const m = addMesh(pivot, bar, metal, `${name}Stripe${i + 1}`, [0, 0, 0]);
+      m.position.set(Math.sin(angle) * (ROLLER_R - 0.003), Math.cos(angle) * (ROLLER_R - 0.003), 0);
+      m.rotation.z = -angle;
+    }
+    /* the top of the drum has to travel the way the bottles do, +x */
+    setTrack(run, name, 'quaternion', quatTrack(name, timesR,
+      timesR.map((t) => [0, 0, -(2 / 3) * 2 * Math.PI * (t / run.duration)])));
+  }
+
+  /* two guide rails, one either side of the bottles, on four posts off the table.
+     `bottleStopper` — a plate the bottles would now drive straight through — is re-cut as the
+     near rail, and the two authored rail posts become two of the four. */
+  const railY = [beltTopY + 0.172, beltTopY + 0.252];
+  const railZ = [z0 - (beltHalf + 0.040), z0 + (beltHalf + 0.040)];
+  const resizeTo = (object, size) => {
+    const box = exactBox(object);
+    const now = box.getSize(new THREE.Vector3());
+    object.scale.set(
+      object.scale.x * (size[0] / now.x), object.scale.y * (size[1] / now.y), object.scale.z * (size[2] / now.z));
+    object.updateMatrixWorld(true);
+    return object;
+  };
+  const railLength = rollerBX - rollerAX;
+  const railParts = [['bottleRailTop', railZ[1]], ['bottleStopper', railZ[0]]];
+  node(scene, 'bottleStopper').name = 'bottleGuideRailNear';
+  for (const [name, z] of railParts) {
+    const rail = node(scene, name === 'bottleStopper' ? 'bottleGuideRailNear' : name);
+    resizeTo(rail, [railLength, railY[1] - railY[0], 0.080]);
+    moveBoxCentreTo(rail, [(rollerAX + rollerBX) / 2, (railY[0] + railY[1]) / 2, z]);
+  }
+  /* The old stop plate was brass; a pair of guide rails either side of the same line that are
+     two different colours reads as two different parts. Repaint it as the rail it now is. */
+  {
+    const railColour = colourOf(node(scene, 'bottleRailTop'));
+    const near = node(scene, 'bottleGuideRailNear');
+    const attribute = near.geometry.getAttribute('color');
+    for (let i = 0; i < attribute.count; i += 1) attribute.setXYZ(i, railColour.r, railColour.g, railColour.b);
+    attribute.needsUpdate = true;
+  }
+  const postXs = [rollerAX + railLength * 0.16, rollerAX + railLength * 0.84];
+  const postSize = [0.080, railY[0] - tableBox.max.y, 0.080];
+  const authoredPosts = ['bottleRailSupportA', 'bottleRailSupportB'];
+  let authored = 0;
+  const posts = [];
+  for (const z of railZ) {
+    for (const x of postXs) {
+      const wanted = [x, tableBox.max.y + postSize[1] / 2, z];
+      if (authored < authoredPosts.length) {
+        const post = node(scene, authoredPosts[authored]);
+        resizeTo(post, postSize);
+        moveBoxCentreTo(post, wanted);
+        posts.push(authoredPosts[authored]);
+        authored += 1;
+      } else {
+        const name = `bottleRailPost${posts.length + 1}`;
+        boxSpan(railGroup, metal, colourOf(node(scene, 'bottleRailTop')),
+          [x - postSize[0] / 2, tableBox.max.y, z - postSize[2] / 2],
+          [x + postSize[0] / 2, railY[0], z + postSize[2] / 2], name);
+        posts.push(name);
+      }
+    }
+  }
+
+  /* the bottles ride the belt: one node, one pitch per clip, wrapping. Six identical bottles
+     at one pitch means the arrangement at the end of the clip is the arrangement at the
+     start, so the loop does not read as a jump. */
+  const train = new THREE.Object3D();
+  train.name = 'bottleTrain';
+  bottling.add(train);
+  bottling.updateMatrixWorld(true);
+  const order = bottleGroups
+    .map((g, i) => ({ g, x: (bottleBoxes[i].min.x + bottleBoxes[i].max.x) / 2 }))
+    .sort((a, b) => a.x - b.x);
+  order.forEach(({ g }, i) => {
+    const keep = g.matrixWorld.clone();
+    train.add(g);
+    train.updateMatrixWorld(true);
+    g.matrix.copy(new THREE.Matrix4().copy(train.matrixWorld).invert().multiply(keep));
+    g.matrix.decompose(g.position, g.quaternion, g.scale);
+    g.updateMatrixWorld(true);
+    const box = exactBox(g);
+    moveBoxCentreTo(g, [
+      firstX + i * PITCH,
+      (box.min.y + box.max.y) / 2 + (beltTopY - box.min.y),
+      z0,
+    ]);
+  });
+
+  /* belt marks, in the two strips of belt the bottles never stand on, so they can be proud of
+     the surface without a bottle sitting on one. Half a pitch apart: one clip carries two. */
+  const markZ = [[z0 - beltHalf, z0 - bottleDia / 2 - 0.008], [z0 + bottleDia / 2 + 0.008, z0 + beltHalf]];
+  const markPitch = PITCH / 2;
+  let markCount = 0;
+  for (let x = firstX - PITCH / 4; x < deckTo - 0.030; x += markPitch) {
+    if (x < deckFrom + 0.030) continue;
+    markCount += 1;
+    for (let s = 0; s < 2; s += 1) {
+      boxSpan(train, matte, frameColour.clone().multiplyScalar(1.25),
+        [x - 0.010, beltTopY - 0.002, markZ[s][0]], [x + 0.010, beltTopY + 0.010, markZ[s][1]],
+        `bottleBeltMark${markCount}${s === 0 ? 'F' : 'B'}`);
+    }
+  }
+  bottling.updateMatrixWorld(true);
+  const trainRest = train.position.clone();
+  setTrack(run, 'bottleTrain', 'position', vecTrack('bottleTrain', 'position', [0, run.duration],
+    [[trainRest.x, trainRest.y, trainRest.z], [trainRest.x + PITCH, trainRest.y, trainRest.z]]));
+  scene.updateMatrixWorld(true);
+
+  Object.assign(station, {
+    pitch: PITCH, bottleDia, bottleHeight, z0, beltTopY, rollerR: ROLLER_R,
+    rollerAX, rollerBX, deckFrom, deckTo, beltHalf, tableTopY: tableBox.max.y,
+    firstX, bottleTopY: beltTopY + bottleHeight,
+    stations: bottleGroups.map((_, i) => firstX + i * PITCH),
+    railZ, railY,
+  });
+  report.bottleConveyor = {
+    why: 'the bottling end was a flat bench: no belt, no rails, nothing over the bottles, and in an 8.30 s clip not one bottle moved',
+    pitchMm: mm(PITCH),
+    drumDiameterMm: mm(2 * ROLLER_R),
+    drumTurnPerClip: '2/3 revolution — exactly one station pitch of belt',
+    beltTopMm: mm(beltTopY),
+    beltWidthMm: mm(beltHalf * 2),
+    beltRunMm: [mm(deckFrom), mm(deckTo)],
+    bottlesTravelMm: mm(PITCH),
+    bottleRestXmm: [mm(firstX), mm(firstX + (bottleGroups.length - 1) * PITCH)],
+    bottleSweptXmm: [mm(firstX - bottleDia / 2), mm(firstX + bottleGroups.length * PITCH + bottleDia / 2)],
+    tableXmm: [mm(tableBox.min.x), mm(tableBox.max.x)],
+    guideRails: { parts: ['bottleRailTop', 'bottleStopper (re-cut from the old stop plate)'], zMm: railZ.map(mm), yMm: railY.map(mm) },
+    posts, marks: markCount * 2,
+  };
+}
+
+/* ------------------------------------------------ 5d. the pump is wired into the line */
+/* 2026-09-05. The pump had no pipe on either side of it. `pipeFeed` was a 404 mm stub with
+ * 200 mm of itself inside the casing and nothing on its far end; `pipeReturn` was a riser that
+ * started in mid-air; `pipeTransfer` and `pipeUnionValve` ran through the bottling table, one
+ * of its legs and the control post. Nothing joined the tank to the pump, and nothing joined
+ * either of them to the bottles, which is why the bottles could not be filled by anything.
+ *
+ * The four authored pipes are kept and re-seated on the line they were drawn for:
+ *   tank cone outlet -> valve -> pipeFeed (suction) -> pump
+ *   pump -> pipeReturn (riser) -> pipeUnionValve -> pipeTransfer (elbow) -> header
+ *   header -> six nozzles, one over each station, 45 mm above the bottle mouths. */
+{
+  const metal = matOf(node(scene, 'mixerShaft'));
+  const pipes = node(scene, 'pipeNetwork');
+  const pipeColour = colourOf(node(scene, 'pipeReturn'));
+  const housing = exactBox(node(scene, 'pumpHousing'));
+  const valveBodyBox = exactBox(node(scene, 'valveBody'));
+  const valvePipeBox = exactBox(node(scene, 'valvePipe'));
+  const valveAxis = {
+    x: (valvePipeBox.min.x + valvePipeBox.max.x) / 2,
+    y: (valvePipeBox.min.y + valvePipeBox.max.y) / 2,
+  };
+  const housingCentre = { x: (housing.min.x + housing.max.x) / 2, z: (housing.min.z + housing.max.z) / 2 };
+
+  /* a. suction: the tank's outlet valve to the pump's casing */
+  const suction = node(scene, 'pipeFeed');
+  spinAboutWorld(suction, [0, 1, 0], -Math.PI / 2, exactBox(suction).getCenter(new THREE.Vector3()));
+  moveBoxCentreTo(suction, [valveAxis.x, valveAxis.y, (valveBodyBox.max.z + housing.min.z) / 2]);
+  const suctionBox = exactBox(suction);
+  const flangeR = 0.150;
+  for (const [z, name] of [[valveBodyBox.max.z, 'suctionFlangeValve'], [housing.min.z, 'suctionFlangePump']]) {
+    tubeBetween(pipes, metal, pipeColour.clone().multiplyScalar(0.85),
+      [valveAxis.x, valveAxis.y, z - 0.020], [valveAxis.x, valveAxis.y, z + 0.020], flangeR, name, 12);
+  }
+
+  /* b. discharge: casing top -> riser -> union -> elbow -> header over the bottles */
+  const riser = node(scene, 'pipeReturn');
+  const riserSize = exactBox(riser).getSize(new THREE.Vector3());
+  /* 25 mm INTO the casing, not resting on it: a riser whose end face is exactly tangent to the
+     casing's top reads to the checker as a separate assembly, and the whole filler end of the
+     machine then counts as a body standing on its own. */
+  moveBoxCentreTo(riser, [housingCentre.x, housing.max.y + riserSize.y / 2 - 0.025, housingCentre.z]);
+  const riserBox = exactBox(riser);
+  const headerY = riserBox.max.y - 0.100;
+  const headerR = 0.090;
+
+  const union = node(scene, 'pipeUnionValve');
+  moveBoxCentreTo(union, [housingCentre.x, (housing.max.y + riserBox.max.y) / 2, housingCentre.z]);
+
+  /* the elbow that brings the riser over the bottle line */
+  const elbow = node(scene, 'pipeTransfer');
+  spinAboutWorld(elbow, [0, 1, 0], Math.PI / 2, exactBox(elbow).getCenter(new THREE.Vector3()));
+  /* The spool is 678 mm and the run from the riser to the bottle line is 475, so it has to
+     overshoot one end. Overshoot into the riser, not out over the tank, or the machine grows an
+     open pipe mouth pointing at nothing. */
+  const elbowDepth = exactBox(elbow).getSize(new THREE.Vector3()).z;
+  moveBoxCentreTo(elbow, [housingCentre.x, headerY, station.z0 + elbowDepth / 2]);
+
+  const headerFrom = housingCentre.x;
+  const headerTo = station.stations[station.stations.length - 1] + station.pitch * 0.55;
+  tubeBetween(pipes, metal, pipeColour, [headerFrom, headerY, station.z0], [headerTo, headerY, station.z0],
+    headerR, 'fillerHeader', 14);
+
+  /* c. one nozzle per station. 45 mm of daylight over the bottle mouths. */
+  const tipY = station.bottleTopY + 0.045;
+  const nozzles = [];
+  for (let i = 0; i < station.stations.length; i += 1) {
+    const x = station.stations[i];
+    tubeBetween(pipes, metal, pipeColour.clone().multiplyScalar(0.9),
+      [x, headerY - headerR + 0.010, station.z0], [x, tipY + 0.055, station.z0], 0.030, `fillerNozzle${i + 1}`, 10);
+    tubeBetween(pipes, metal, pipeColour.clone().multiplyScalar(0.7),
+      [x, tipY + 0.060, station.z0], [x, tipY, station.z0], 0.017, `fillerNozzleTip${i + 1}`, 8);
+    nozzles.push({ station: i + 1, xMm: mm(x), tipYmm: mm(tipY), overBottleMouthMm: mm(tipY - station.bottleTopY) });
+  }
+
+  /* d. the header is 2.7 m of pipe; it stands on two posts off the bottling table, outside
+        the belt, with a short arm over to the pipe itself. */
+  const postZ = station.railZ[0] - 0.080;          // outside the near guide rail, not through it
+  const hangerXs = [station.stations[0] - station.pitch * 0.45, headerTo - 0.060];
+  const hangers = [];
+  for (let i = 0; i < hangerXs.length; i += 1) {
+    const x = hangerXs[i];
+    tubeBetween(pipes, metal, pipeColour.clone().multiplyScalar(0.8),
+      [x, station.tableTopY, postZ], [x, headerY, postZ], 0.032, `fillerHangerPost${i + 1}`, 8);
+    tubeBetween(pipes, metal, pipeColour.clone().multiplyScalar(0.8),
+      [x, headerY, postZ], [x, headerY, station.z0], 0.028, `fillerHangerArm${i + 1}`, 8);
+    hangers.push(`fillerHangerPost${i + 1}`);
+  }
+  scene.updateMatrixWorld(true);
+
+  report.plumbing = {
+    why: 'the pump had no pipe on either side of it and the bottles had nothing over them',
+    suction: {
+      part: 'pipeFeed (re-seated and turned onto the outlet axis)',
+      fromMm: mm(valveBodyBox.max.z), toMm: mm(housing.min.z),
+      spoolZmm: [mm(suctionBox.min.z), mm(suctionBox.max.z)],
+      intoValveMm: mm(valveBodyBox.max.z - suctionBox.min.z),
+      intoCasingMm: mm(suctionBox.max.z - housing.min.z),
+      flanges: ['suctionFlangeValve', 'suctionFlangePump'],
+    },
+    discharge: {
+      riser: { part: 'pipeReturn', yMm: [mm(riserBox.min.y), mm(riserBox.max.y)], onCasingTopMm: mm(housing.max.y) },
+      union: 'pipeUnionValve', elbow: 'pipeTransfer',
+      headerYmm: mm(headerY), headerXmm: [mm(headerFrom), mm(headerTo)], headerZmm: mm(station.z0),
+      hangers,
+    },
+    nozzles,
+  };
+}
+
+/* ------------------------------------- 5e. the control panel stands up and is wired in */
+/* Its post stopped 279 mm above the floor and its foot floated at 299 mm, so the whole panel
+ * hung in the air beside the tank; the post also ran 70 mm through the bottling table it stood
+ * against; and nothing ran from it to the machine it controls. */
+{
+  const panel = node(scene, 'control-panel');
+  const pole = node(scene, 'controlPole');
+  const foot = node(scene, 'controlFoot');
+  const tableEdge = worldBox(node(scene, 'bottlingTable')).min.z;
+  const panelBefore = exactBox(panel);
+  const panelStep = Math.max(0, panelBefore.max.z - (tableEdge - 0.060));
+  panel.position.z -= panelStep;
+  panel.updateMatrixWorld(true);
+  scene.updateMatrixWorld(true);
+  const poleBox = worldBox(pole);
+  const footBox = worldBox(foot);
+  pole.scale.y *= poleBox.max.y / (poleBox.max.y - poleBox.min.y);
+  pole.updateMatrixWorld(true);
+  pole.position.y -= worldBox(pole).min.y;
+  foot.position.y -= footBox.min.y;
+  panel.updateMatrixWorld(true);
+  scene.updateMatrixWorld(true);
+
+  const body = worldBox(node(scene, 'controlPanelBody'));
+  /* the beacon and its base stood 19.6 mm above the panel top, holding on to nothing */
+  const beaconGap = exactBox(node(scene, 'controlBeaconBase')).min.y - body.max.y;
+  if (beaconGap > 0) {
+    for (const name of ['controlBeaconBase', 'controlBeacon']) node(scene, name).position.y -= beaconGap;
+    scene.updateMatrixWorld(true);
+  }
+  const motor = exactBox(node(scene, 'pumpMotor'));
+  const matte = matOf(node(scene, 'conveyorRailLeft'));
+  const conduitColour = colourOf(node(scene, 'controlPole')).clone().multiplyScalar(0.55);
+  const poleNow = worldBox(pole);
+  const runX = (poleNow.min.x + poleNow.max.x) / 2;
+  const runZ = poleNow.max.z + 0.020;
+  const lowY = 0.250;
+  const motorX = (motor.min.x + motor.max.x) / 2 - (motor.max.x - motor.min.x) * 0.29;
+  /* The straight line from the panel to the motor passes under the tank. Run it at a height
+     that is below the tank's shell and still inside the motor's own face. */
+  const motorY = Math.min((motor.min.y + motor.max.y) / 2,
+    exactBox(node(scene, 'tankBody')).min.y - 0.050);
+  const legsOf = [
+    [[runX, body.min.y, runZ], [runX, lowY, runZ], 'controlConduitDrop'],
+    [[runX, lowY, runZ], [motorX, lowY, runZ], 'controlConduitFloor'],
+    [[motorX, lowY, runZ], [motorX, motorY, runZ], 'controlConduitRise'],
+    [[motorX, motorY, runZ], [motorX, motorY, motor.min.z], 'controlConduitToMotor'],
+  ];
+  for (const [a, b, name] of legsOf) tubeBetween(panel, matte, conduitColour, a, b, 0.025, name, 8);
+  scene.updateMatrixWorld(true);
+  report.controlPanel = {
+    why: 'the post stopped 279 mm above the floor, its foot floated at 299 mm, and no conduit left the panel',
+    poleNowMm: [mm(worldBox(pole).min.y), mm(worldBox(pole).max.y)],
+    footNowMm: [mm(worldBox(foot).min.y), mm(worldBox(foot).max.y)],
+    movedOffTheTableMm: mm(panelStep),
+    beaconDroppedMm: mm(Math.max(0, beaconGap)),
+    conduit: legsOf.map(([, , name]) => name),
+    conduitEndsOnMm: [mm(motorX), mm(motorY), mm(motor.min.z)],
+  };
+}
+
+/* ------------------------------- 5f. three things that were resting on nothing */
+/* These were always here; the 2026-09-04 file hid them because `conveyorRollerA/B` were turning
+ * about the belt's normal instead of their own axle, so a 1.6 m drum swept through half the
+ * machine every clip and the checker read everything it passed through as "supported". With the
+ * drums turning on their axles the three come back out:
+ *   - the three shipping crates hover 284.8 mm above the floor,
+ *   - both control buttons and the display are entirely INSIDE the panel body — bought, drawn,
+ *     and invisible,
+ *   - the pump's end cover stops 10 mm short of the casing it covers. */
+{
+  const floats = {};
+  const crates = node(scene, 'shipping-crates');
+  const crateBox = exactBox(crates);
+  crates.position.y -= crateBox.min.y;
+  scene.updateMatrixWorld(true);
+  /* And the second crate stood 60 mm off the stack it belongs to, so the three staged crates
+     read as two separate piles. Slid up against the first. */
+  const stack = exactBox(node(scene, 'shippingCrate1'));
+  const loose = node(scene, 'shippingCrate2');
+  const crateGap = exactBox(loose).min.z - stack.max.z;
+  if (crateGap > 0) { loose.position.z -= crateGap + 0.020; scene.updateMatrixWorld(true); }
+  floats.crates = {
+    wasMm: mm(crateBox.min.y), nowMm: mm(exactBox(crates).min.y),
+    secondCrateClosedMm: mm(Math.max(0, crateGap + 0.020)),
+  };
+
+  /* The console's face is not vertical: measured on its own vertices it stands at z 608 mm at
+     y 1,660 and leans back to z 471 mm at y 2,790. The buttons and the display were placed on a
+     flat face that is not there — the display hung 91 mm in front of the panel, the buttons sat
+     inside it. Each one is re-seated on the face at its own height. */
+  const bodyMesh = node(scene, 'controlPanelBody');
+  const faceZAt = (() => {
+    const v = new THREE.Vector3();
+    const pos = bodyMesh.geometry.getAttribute('position');
+    let lo = null; let hi = null;
+    const box = exactBox(bodyMesh);
+    const mid = (box.min.y + box.max.y) / 2;
+    for (let i = 0; i < pos.count; i += 1) {
+      v.fromBufferAttribute(pos, i).applyMatrix4(bodyMesh.matrixWorld);
+      const bucket = v.y < mid ? 'lo' : 'hi';
+      const best = bucket === 'lo' ? lo : hi;
+      if (!best || v.z > best.z) { if (bucket === 'lo') lo = { y: v.y, z: v.z }; else hi = { y: v.y, z: v.z }; }
+    }
+    return (y) => lo.z + (hi.z - lo.z) * ((y - lo.y) / (hi.y - lo.y));
+  })();
+  const seated = [];
+  for (const name of ['controlButton1', 'controlButton2', 'controlDisplay']) {
+    const part = node(scene, name);
+    const box = exactBox(part);
+    const wantMax = faceZAt((box.min.y + box.max.y) / 2) + (box.max.z - box.min.z) * 0.45;
+    part.position.z += wantMax - box.max.z;
+    seated.push({ name, movedMm: mm(wantMax - box.max.z), faceZmm: mm(faceZAt((box.min.y + box.max.y) / 2)) });
+  }
+  scene.updateMatrixWorld(true);
+  {
+    const glow = node(scene, 'controlDisplayGlow');
+    const display = exactBox(node(scene, 'controlDisplay'));
+    const box = exactBox(glow);
+    const want = display.max.z - 0.004;
+    glow.position.z += want - box.min.z;
+    seated.push({ name: 'controlDisplayGlow', movedMm: mm(want - box.min.z), onto: 'controlDisplay' });
+  }
+  scene.updateMatrixWorld(true);
+  floats.panelFace = { faceZmm: [mm(faceZAt(1.66)), mm(faceZAt(2.79))], parts: seated };
+
+  const cover = node(scene, 'pumpCover');
+  const casing = exactBox(node(scene, 'pumpHousing'));
+  const coverBox = exactBox(cover);
+  const close = coverBox.min.x - casing.max.x;
+  if (close > 0) { cover.position.x -= close + 0.020; scene.updateMatrixWorld(true); }
+  floats.pumpCover = { gapWasMm: mm(Math.max(0, close)), gapNowMm: mm(exactBox(cover).min.x - casing.max.x) };
+
+  report.restingOnNothing = {
+    why: 'a drum turning about the wrong axis swept through the machine and made the checker read three unsupported groups as supported',
+    ...floats,
+  };
+}
+
+/* --------------------------------------------- 5g. a band that gripped nothing */
+{
+  const band = node(scene, 'tankUpperBand');
+  const tank = exactBox(node(scene, 'tankBody'));
+  const axis = new THREE.Vector3((tank.min.x + tank.max.x) / 2, 0, (tank.min.z + tank.max.z) / 2);
+  /* The tank is not a cylinder. Measured: 1,000.1 mm across at y 829 and 940.0 mm at y 4,089 —
+     a 60 mm taper over its height. At the band's own height the shell is 947.9 mm, and the
+     band's inner ring is 980 mm, which is the 31.9 mm the inspector reported. Fit the shell's
+     radius against height off its own vertices and pull the band onto it. */
+  const tankBodyNode = node(scene, 'tankBody');
+  const tankR = radiusAbout(tankBodyNode, axis, [0, 1, 0]);
+  const shellRadiusAt = (() => {
+    const samples = [];
+    const v = new THREE.Vector3();
+    for (const m of meshes(tankBodyNode)) {
+      const pos = m.geometry.getAttribute('position');
+      for (let i = 0; i < pos.count; i += 1) {
+        v.fromBufferAttribute(pos, i).applyMatrix4(m.matrixWorld);
+        const r = Math.hypot(v.x - axis.x, v.z - axis.z);
+        if (r > tankR * 0.5) samples.push([v.y, r]);       // skip the cap fan centres
+      }
+    }
+    const n = samples.length;
+    const sy = samples.reduce((t, s) => t + s[0], 0);
+    const sr = samples.reduce((t, s) => t + s[1], 0);
+    const syy = samples.reduce((t, s) => t + s[0] * s[0], 0);
+    const syr = samples.reduce((t, s) => t + s[0] * s[1], 0);
+    const slope = (n * syr - sy * sr) / (n * syy - sy * sy);
+    const intercept = (sr - slope * sy) / n;
+    return (y) => intercept + slope * y;
+  })();
+  const innerRadius = (object) => {
+    let smallest = Infinity;
+    const v = new THREE.Vector3();
+    for (const m of meshes(object)) {
+      const pos = m.geometry.getAttribute('position');
+      for (let i = 0; i < pos.count; i += 1) {
+        v.fromBufferAttribute(pos, i).applyMatrix4(m.matrixWorld);
+        smallest = Math.min(smallest, Math.hypot(v.x - axis.x, v.z - axis.z));
+      }
+    }
+    return smallest;
+  };
+  const before = radiusAbout(band, axis, [0, 1, 0]);
+  const beforeInner = innerRadius(band);
+  const centre = exactBox(band).getCenter(new THREE.Vector3());
+  const shellHere = shellRadiusAt(centre.y);
+  const wanted = (shellHere - 0.012) / beforeInner;
+  /* The band is authored flat in its own xy plane and laid down by a -90 degree turn about x,
+     so its LOCAL z is the world vertical and its local x and y are the two radial axes. Scale
+     the two that lie in the floor plane, or the ring comes out an ellipse. */
+  const radialAxes = [['x', new THREE.Vector3(1, 0, 0)], ['y', new THREE.Vector3(0, 1, 0)], ['z', new THREE.Vector3(0, 0, 1)]]
+    .filter(([, v]) => Math.abs(v.clone().transformDirection(band.matrixWorld).y) < 0.5)
+    .map(([k]) => k);
+  if (radialAxes.length !== 2) throw new Error(`tankUpperBand: ${radialAxes.length} radial axes, expected 2`);
+  for (const k of radialAxes) band.scale[k] *= wanted;
+  band.updateMatrixWorld(true);
+  moveBoxCentreTo(band, centre);
+  report.tankUpperBand = {
+    why: 'the inspector measured it 31.9 mm clear of the tank it is a band round — it touched nothing',
+    outerRadiusMm: { before: mm(before), after: mm(radiusAbout(band, axis, [0, 1, 0])) },
+    innerRadiusMm: { before: mm(beforeInner), after: mm(innerRadius(band)) },
+    tankShellRadiusHereMm: mm(shellHere),
+    tankTaperMm: [mm(shellRadiusAt(exactBox(tankBodyNode).min.y)), mm(shellRadiusAt(exactBox(tankBodyNode).max.y))],
+  };
+}
+
+/* ------------------------------------------- 5h. where every added part actually ended up */
+/* Written before the merge, because after it there are no part names left to measure. */
+{
+  const added = {};
+  const wanted = [
+    'conveyorRollerAStripe1', 'conveyorRollerAStripe2', 'conveyorRollerAStripe3',
+    'conveyorRollerBStripe1', 'conveyorRollerBStripe2', 'conveyorRollerBStripe3',
+    'mixerDriveShaft', 'mixerDriveHub', 'mixerDriveCoupling',
+    'hopperSkirt', 'hopperLegLF', 'hopperLegLB', 'hopperLegRF', 'hopperLegRB',
+    'conveyorDeliveryChute', 'tankSideInlet', 'valveStem', 'valveWheelHub',
+    'pipeFeed', 'suctionFlangeValve', 'suctionFlangePump',
+    'pipeReturn', 'pipeUnionValve', 'pipeTransfer', 'fillerHeader',
+    'fillerNozzle1', 'fillerNozzle2', 'fillerNozzle3', 'fillerNozzle4', 'fillerNozzle5', 'fillerNozzle6',
+    'fillerNozzleTip1', 'fillerNozzleTip6', 'fillerHangerPost1', 'fillerHangerArm1',
+    'fillerHangerPost2', 'fillerHangerArm2',
+    'bottleBeltBed', 'bottleBeltSurface', 'bottleRollerADrum', 'bottleRollerBDrum',
+    'bottleRailTop', 'bottleGuideRailNear', 'bottleRailSupportA', 'bottleRailSupportB',
+    'bottleRailPost3', 'bottleRailPost4',
+    'productBottle1', 'productBottle2', 'productBottle3', 'productBottle4', 'productBottle5', 'productBottle6',
+    'bottleBeltMark1F', 'bottleBeltMark12B',
+    'controlConduitDrop', 'controlConduitFloor', 'controlConduitRise', 'controlConduitToMotor',
+    'controlPole', 'controlFoot', 'tankUpperBand', 'pumpBase', 'pumpHousing', 'pumpMotor', 'pumpCover',
+  ];
+  for (const name of wanted) {
+    const found = scene.getObjectByName(name);
+    if (!found) continue;
+    const box = exactBox(found);
+    added[name] = { minMm: box.min.toArray().map(mm), maxMm: box.max.toArray().map(mm) };
+  }
+  report.partPositions = added;
 }
 
 /* ---------------------------------------------------------------- 6. ground contact */

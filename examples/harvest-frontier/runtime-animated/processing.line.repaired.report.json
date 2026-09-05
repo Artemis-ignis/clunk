@@ -1,5 +1,5 @@
 {
-  "input": "examples\\harvest-frontier\\runtime-animated\\processing.line.fixed.m1.glb",
+  "input": "examples\\harvest-frontier\\runtime-animated\\processing.line.m1.glb",
   "output": "examples\\harvest-frontier\\runtime-animated\\processing.line.repaired.glb",
   "before": {
     "meshes": 142,
@@ -66,17 +66,67 @@
       "motion": "one full turn about its own axle per clip"
     }
   ],
+  "beltDirection": {
+    "why": "the belt surface travelled away from the tank it feeds, and its speed did not come from its own pulleys",
+    "marksTravelledMm": {
+      "before": 11200,
+      "after": 10556
+    },
+    "beltSpeedMmPerS": {
+      "before": 1350,
+      "after": 1272
+    },
+    "pulleySurfaceSpeedMmPerS": {
+      "before": 906,
+      "after": 1272
+    },
+    "markPitchMm": 406,
+    "markWindowMm": 2842,
+    "pitchesPerClip": 26,
+    "directionBefore": "down the slope, toward the hopper",
+    "directionAfter": "up the slope, toward the tank inlet",
+    "rollers": [
+      {
+        "roller": "conveyorRollerA",
+        "radiusMm": 240,
+        "revolutionsPerClip": 7,
+        "sign": 1,
+        "surfaceSpeedMmPerS": 1272
+      },
+      {
+        "roller": "conveyorRollerB",
+        "radiusMm": 240,
+        "revolutionsPerClip": 7,
+        "sign": 1,
+        "surfaceSpeedMmPerS": 1272
+      }
+    ]
+  },
   "lineDirection": {
     "why": "the conveyor ran through the tank wall and the belt delivered nowhere; the conveyor moved clear, the belt now empties into a side inlet, and the hopper moved to the tail it should have been feeding",
+    "hopperScale": {
+      "factor": 0.8,
+      "wasMm": [
+        2700,
+        1615.1,
+        2430
+      ],
+      "nowMm": [
+        2160,
+        1721.1,
+        1944
+      ],
+      "beltWidthMm": 1520
+    },
     "hopper": {
       "wasOver": "the head of the belt, 34 mm clear, unsupported",
       "nowOver": "the tail of the belt",
       "mouthMm": [
-        820.2,
-        820.2
+        656.2,
+        656.2
       ],
       "mouthAboveBeltMm": 60,
-      "clearedTankByMm": 183.6,
+      "clearedTankByMm": 0,
       "mouthStillOverBelt": true,
       "skirt": {
         "walls": 4,
@@ -155,12 +205,41 @@
       ]
     },
     "mixerDriveHead": {
-      "why": "the drive head added to show the mixer running stood inside pipeTopRise, invisible",
-      "liftedMm": 274.1
+      "why": "the drive head added so the mixer can be seen running stood inside pipeTopRise, and after the 2026-09-04 lift, inside pipeTopReturn",
+      "loopMovedAlongZmm": 350,
+      "liftedMm": 0
+    },
+    "valveHandwheel": {
+      "why": "the handwheel was a ring centred on the outlet pipe's own axis, so its rim crossed the bore, and it stood 290 mm inside the pump motor",
+      "wasCentreMm": [
+        -450,
+        799,
+        1320
+      ],
+      "nowCentreMm": [
+        -450,
+        1119,
+        1160
+      ],
+      "stem": "valveStem",
+      "wheelOuterRadiusMm": 255
     },
     "pump": {
-      "why": "the pump casing and its motor stood inside the tank body, and its plinth floated 319 mm above the floor",
-      "movedMm": 225.9,
+      "why": "the pump casing stood inside the tank body, the tank's outlet valve stood inside the pump motor, and the plinth floated 319 mm above the floor",
+      "movedMm": [
+        -320,
+        0,
+        770
+      ],
+      "clearanceMm": 50,
+      "housingBoxMm": [
+        -680,
+        499,
+        1470,
+        80,
+        1219,
+        2170
+      ],
       "plinth": {
         "wasMm": [
           319,
@@ -171,6 +250,1004 @@
           499
         ]
       }
+    }
+  },
+  "bottleConveyor": {
+    "why": "the bottling end was a flat bench: no belt, no rails, nothing over the bottles, and in an 8.30 s clip not one bottle moved",
+    "pitchMm": 310,
+    "drumDiameterMm": 148,
+    "drumTurnPerClip": "2/3 revolution — exactly one station pitch of belt",
+    "beltTopMm": 1486.9,
+    "beltWidthMm": 380.5,
+    "beltRunMm": [
+      873,
+      2827
+    ],
+    "bottlesTravelMm": 310,
+    "bottleRestXmm": [
+      920,
+      2470
+    ],
+    "bottleSweptXmm": [
+      773.8,
+      2926.2
+    ],
+    "tableXmm": [
+      725,
+      2975
+    ],
+    "guideRails": {
+      "parts": [
+        "bottleRailTop",
+        "bottleStopper (re-cut from the old stop plate)"
+      ],
+      "zMm": [
+        1114.8,
+        1575.2
+      ],
+      "yMm": [
+        1658.9,
+        1738.9
+      ]
+    },
+    "posts": [
+      "bottleRailSupportA",
+      "bottleRailSupportB",
+      "bottleRailPost3",
+      "bottleRailPost4"
+    ],
+    "marks": 24
+  },
+  "plumbing": {
+    "why": "the pump had no pipe on either side of it and the bottles had nothing over them",
+    "suction": {
+      "part": "pipeFeed (re-seated and turned onto the outlet axis)",
+      "fromMm": 1355,
+      "toMm": 1470,
+      "spoolZmm": [
+        1210.4,
+        1614.6
+      ],
+      "intoValveMm": 144.6,
+      "intoCasingMm": 144.6,
+      "flanges": [
+        "suctionFlangeValve",
+        "suctionFlangePump"
+      ]
+    },
+    "discharge": {
+      "riser": {
+        "part": "pipeReturn",
+        "yMm": [
+          1194,
+          2516.4
+        ],
+        "onCasingTopMm": 1219
+      },
+      "union": "pipeUnionValve",
+      "elbow": "pipeTransfer",
+      "headerYmm": 2416.4,
+      "headerXmm": [
+        -300,
+        2640.5
+      ],
+      "headerZmm": 1345,
+      "hangers": [
+        "fillerHangerPost1",
+        "fillerHangerPost2"
+      ]
+    },
+    "nozzles": [
+      {
+        "station": 1,
+        "xMm": 920,
+        "tipYmm": 2204.4,
+        "overBottleMouthMm": 45
+      },
+      {
+        "station": 2,
+        "xMm": 1230,
+        "tipYmm": 2204.4,
+        "overBottleMouthMm": 45
+      },
+      {
+        "station": 3,
+        "xMm": 1540,
+        "tipYmm": 2204.4,
+        "overBottleMouthMm": 45
+      },
+      {
+        "station": 4,
+        "xMm": 1850,
+        "tipYmm": 2204.4,
+        "overBottleMouthMm": 45
+      },
+      {
+        "station": 5,
+        "xMm": 2160,
+        "tipYmm": 2204.4,
+        "overBottleMouthMm": 45
+      },
+      {
+        "station": 6,
+        "xMm": 2470,
+        "tipYmm": 2204.4,
+        "overBottleMouthMm": 45
+      }
+    ]
+  },
+  "controlPanel": {
+    "why": "the post stopped 279 mm above the floor, its foot floated at 299 mm, and no conduit left the panel",
+    "poleNowMm": [
+      0,
+      1899
+    ],
+    "footNowMm": [
+      0,
+      80
+    ],
+    "movedOffTheTableMm": 260.1,
+    "beaconDroppedMm": 14.8,
+    "conduit": [
+      "controlConduitDrop",
+      "controlConduitFloor",
+      "controlConduitRise",
+      "controlConduitToMotor"
+    ],
+    "conduitEndsOnMm": [
+      -1094,
+      779,
+      1560
+    ]
+  },
+  "restingOnNothing": {
+    "why": "a drum turning about the wrong axis swept through the machine and made the checker read three unsupported groups as supported",
+    "crates": {
+      "wasMm": 284.8,
+      "nowMm": 0,
+      "secondCrateClosedMm": 26.4
+    },
+    "panelFace": {
+      "faceZmm": [
+        607.9,
+        471.7
+      ],
+      "parts": [
+        {
+          "name": "controlButton1",
+          "movedMm": 1.5,
+          "faceZmm": 583.9
+        },
+        {
+          "name": "controlButton2",
+          "movedMm": 1.5,
+          "faceZmm": 583.9
+        },
+        {
+          "name": "controlDisplay",
+          "movedMm": -60.6,
+          "faceZmm": 500.7
+        },
+        {
+          "name": "controlDisplayGlow",
+          "movedMm": -64.6,
+          "onto": "controlDisplay"
+        }
+      ]
+    },
+    "pumpCover": {
+      "gapWasMm": 10,
+      "gapNowMm": -20
+    }
+  },
+  "tankUpperBand": {
+    "why": "the inspector measured it 31.9 mm clear of the tank it is a band round — it touched nothing",
+    "outerRadiusMm": {
+      "before": 1044.1,
+      "after": 997.2
+    },
+    "innerRadiusMm": {
+      "before": 980,
+      "after": 935.9
+    },
+    "tankShellRadiusHereMm": 947.9,
+    "tankTaperMm": [
+      1000,
+      940
+    ]
+  },
+  "partPositions": {
+    "conveyorRollerAStripe1": {
+      "minMm": [
+        -3141,
+        2361.2,
+        -239.7
+      ],
+      "maxMm": [
+        -1585.8,
+        2428.4,
+        -190.3
+      ]
+    },
+    "conveyorRollerAStripe2": {
+      "minMm": [
+        -3141,
+        2759.5,
+        -439.6
+      ],
+      "maxMm": [
+        -1585.8,
+        2774.9,
+        -366.1
+      ]
+    },
+    "conveyorRollerAStripe3": {
+      "minMm": [
+        -3141,
+        2383.2,
+        -652.9
+      ],
+      "maxMm": [
+        -1585.8,
+        2453.4,
+        -610
+      ]
+    },
+    "conveyorRollerBStripe1": {
+      "minMm": [
+        -3141,
+        750,
+        2219.5
+      ],
+      "maxMm": [
+        -1585.8,
+        817.2,
+        2268.9
+      ]
+    },
+    "conveyorRollerBStripe2": {
+      "minMm": [
+        -3141,
+        1148.3,
+        2019.6
+      ],
+      "maxMm": [
+        -1585.8,
+        1163.7,
+        2093.1
+      ]
+    },
+    "conveyorRollerBStripe3": {
+      "minMm": [
+        -3141,
+        772,
+        1806.3
+      ],
+      "maxMm": [
+        -1585.8,
+        842.2,
+        1849.2
+      ]
+    },
+    "mixerDriveShaft": {
+      "minMm": [
+        -495,
+        4744.9,
+        -165
+      ],
+      "maxMm": [
+        -405,
+        5064.9,
+        -75
+      ]
+    },
+    "mixerDriveHub": {
+      "minMm": [
+        -535,
+        4894.9,
+        -205
+      ],
+      "maxMm": [
+        -365,
+        4974.9,
+        -35
+      ]
+    },
+    "mixerDriveCoupling": {
+      "minMm": [
+        -680,
+        4984.9,
+        -170
+      ],
+      "maxMm": [
+        -220,
+        5054.9,
+        -70
+      ]
+    },
+    "hopperSkirt": {
+      "minMm": [
+        -2691.5,
+        950.8,
+        1325.8
+      ],
+      "maxMm": [
+        -2035.3,
+        1379.8,
+        1982
+      ]
+    },
+    "hopperLegLF": {
+      "minMm": [
+        -3308.4,
+        0,
+        2078.9
+      ],
+      "maxMm": [
+        -3218.4,
+        2619.9,
+        2168.9
+      ]
+    },
+    "hopperLegLB": {
+      "minMm": [
+        -3308.4,
+        0,
+        1138.9
+      ],
+      "maxMm": [
+        -3218.4,
+        2619.9,
+        1228.9
+      ]
+    },
+    "hopperLegRF": {
+      "minMm": [
+        -1508.4,
+        0,
+        2078.9
+      ],
+      "maxMm": [
+        -1418.4,
+        2619.9,
+        2168.9
+      ]
+    },
+    "hopperLegRB": {
+      "minMm": [
+        -1508.4,
+        0,
+        1138.9
+      ],
+      "maxMm": [
+        -1418.4,
+        2619.9,
+        1228.9
+      ]
+    },
+    "conveyorDeliveryChute": {
+      "minMm": [
+        -1603.4,
+        2427.8,
+        -600.2
+      ],
+      "maxMm": [
+        -1335.4,
+        2577.8,
+        -80.2
+      ]
+    },
+    "tankSideInlet": {
+      "minMm": [
+        -1440.4,
+        2317.6,
+        -530.2
+      ],
+      "maxMm": [
+        -1370.4,
+        2688.1,
+        -150.2
+      ]
+    },
+    "valveStem": {
+      "minMm": [
+        -482.3,
+        969,
+        1126
+      ],
+      "maxMm": [
+        -417.7,
+        1139,
+        1194
+      ]
+    },
+    "valveWheelHub": {
+      "minMm": [
+        -649,
+        1103,
+        961
+      ],
+      "maxMm": [
+        -251,
+        1135,
+        1359
+      ]
+    },
+    "pipeFeed": {
+      "minMm": [
+        -594.8,
+        699.1,
+        1210.4
+      ],
+      "maxMm": [
+        -305.2,
+        898.9,
+        1614.6
+      ]
+    },
+    "suctionFlangeValve": {
+      "minMm": [
+        -600,
+        649,
+        1335
+      ],
+      "maxMm": [
+        -300,
+        949,
+        1375
+      ]
+    },
+    "suctionFlangePump": {
+      "minMm": [
+        -600,
+        649,
+        1450
+      ],
+      "maxMm": [
+        -300,
+        949,
+        1490
+      ]
+    },
+    "pipeReturn": {
+      "minMm": [
+        -412.9,
+        1194,
+        1655.7
+      ],
+      "maxMm": [
+        -187.1,
+        2516.4,
+        1984.3
+      ]
+    },
+    "pipeUnionValve": {
+      "minMm": [
+        -460,
+        1707.7,
+        1664
+      ],
+      "maxMm": [
+        -140,
+        2027.7,
+        1976
+      ]
+    },
+    "pipeTransfer": {
+      "minMm": [
+        -470.7,
+        2208,
+        1345
+      ],
+      "maxMm": [
+        -129.3,
+        2624.7,
+        2023.4
+      ]
+    },
+    "fillerHeader": {
+      "minMm": [
+        -300,
+        2328.6,
+        1255
+      ],
+      "maxMm": [
+        2640.5,
+        2504.1,
+        1435
+      ]
+    },
+    "fillerNozzle1": {
+      "minMm": [
+        891.5,
+        2259.4,
+        1315
+      ],
+      "maxMm": [
+        948.5,
+        2336.4,
+        1375
+      ]
+    },
+    "fillerNozzle2": {
+      "minMm": [
+        1201.5,
+        2259.4,
+        1315
+      ],
+      "maxMm": [
+        1258.5,
+        2336.4,
+        1375
+      ]
+    },
+    "fillerNozzle3": {
+      "minMm": [
+        1511.5,
+        2259.4,
+        1315
+      ],
+      "maxMm": [
+        1568.5,
+        2336.4,
+        1375
+      ]
+    },
+    "fillerNozzle4": {
+      "minMm": [
+        1821.5,
+        2259.4,
+        1315
+      ],
+      "maxMm": [
+        1878.5,
+        2336.4,
+        1375
+      ]
+    },
+    "fillerNozzle5": {
+      "minMm": [
+        2131.5,
+        2259.4,
+        1315
+      ],
+      "maxMm": [
+        2188.5,
+        2336.4,
+        1375
+      ]
+    },
+    "fillerNozzle6": {
+      "minMm": [
+        2441.5,
+        2259.4,
+        1315
+      ],
+      "maxMm": [
+        2498.5,
+        2336.4,
+        1375
+      ]
+    },
+    "fillerNozzleTip1": {
+      "minMm": [
+        903,
+        2204.4,
+        1328
+      ],
+      "maxMm": [
+        937,
+        2264.4,
+        1362
+      ]
+    },
+    "fillerNozzleTip6": {
+      "minMm": [
+        2453,
+        2204.4,
+        1328
+      ],
+      "maxMm": [
+        2487,
+        2264.4,
+        1362
+      ]
+    },
+    "fillerHangerPost1": {
+      "minMm": [
+        748.5,
+        1338.9,
+        1002.8
+      ],
+      "maxMm": [
+        812.5,
+        2416.4,
+        1066.8
+      ]
+    },
+    "fillerHangerArm1": {
+      "minMm": [
+        752.5,
+        2388.4,
+        1034.8
+      ],
+      "maxMm": [
+        808.5,
+        2444.4,
+        1345
+      ]
+    },
+    "fillerHangerPost2": {
+      "minMm": [
+        2548.5,
+        1338.9,
+        1002.8
+      ],
+      "maxMm": [
+        2612.5,
+        2416.4,
+        1066.8
+      ]
+    },
+    "fillerHangerArm2": {
+      "minMm": [
+        2552.5,
+        2388.4,
+        1034.8
+      ],
+      "maxMm": [
+        2608.5,
+        2444.4,
+        1345
+      ]
+    },
+    "bottleBeltBed": {
+      "minMm": [
+        873,
+        1338.9,
+        1154.8
+      ],
+      "maxMm": [
+        2827,
+        1456.9,
+        1535.2
+      ]
+    },
+    "bottleBeltSurface": {
+      "minMm": [
+        873,
+        1456.9,
+        1154.8
+      ],
+      "maxMm": [
+        2827,
+        1486.9,
+        1535.2
+      ]
+    },
+    "bottleRollerADrum": {
+      "minMm": [
+        726.9,
+        1338.9,
+        1124.8
+      ],
+      "maxMm": [
+        871.2,
+        1486.9,
+        1565.2
+      ]
+    },
+    "bottleRollerBDrum": {
+      "minMm": [
+        2828.8,
+        1338.9,
+        1124.8
+      ],
+      "maxMm": [
+        2973.1,
+        1486.9,
+        1565.2
+      ]
+    },
+    "bottleRailTop": {
+      "minMm": [
+        799,
+        1658.9,
+        1535.2
+      ],
+      "maxMm": [
+        2901,
+        1738.9,
+        1615.2
+      ]
+    },
+    "bottleGuideRailNear": {
+      "minMm": [
+        799,
+        1658.9,
+        1074.8
+      ],
+      "maxMm": [
+        2901,
+        1738.9,
+        1154.8
+      ]
+    },
+    "bottleRailSupportA": {
+      "minMm": [
+        1095.3,
+        1338.9,
+        1074.8
+      ],
+      "maxMm": [
+        1175.3,
+        1658.9,
+        1154.8
+      ]
+    },
+    "bottleRailSupportB": {
+      "minMm": [
+        2524.7,
+        1338.9,
+        1074.8
+      ],
+      "maxMm": [
+        2604.7,
+        1658.9,
+        1154.8
+      ]
+    },
+    "bottleRailPost3": {
+      "minMm": [
+        1095.3,
+        1338.9,
+        1535.2
+      ],
+      "maxMm": [
+        1175.3,
+        1658.9,
+        1615.2
+      ]
+    },
+    "bottleRailPost4": {
+      "minMm": [
+        2524.7,
+        1338.9,
+        1535.2
+      ],
+      "maxMm": [
+        2604.7,
+        1658.9,
+        1615.2
+      ]
+    },
+    "productBottle1": {
+      "minMm": [
+        773.8,
+        1486.9,
+        1195
+      ],
+      "maxMm": [
+        1066.2,
+        2159.4,
+        1495
+      ]
+    },
+    "productBottle2": {
+      "minMm": [
+        1083.8,
+        1486.9,
+        1195
+      ],
+      "maxMm": [
+        1376.2,
+        2159.4,
+        1495
+      ]
+    },
+    "productBottle3": {
+      "minMm": [
+        1393.8,
+        1486.9,
+        1195
+      ],
+      "maxMm": [
+        1686.2,
+        2159.4,
+        1495
+      ]
+    },
+    "productBottle4": {
+      "minMm": [
+        1703.8,
+        1486.9,
+        1195
+      ],
+      "maxMm": [
+        1996.2,
+        2159.4,
+        1495
+      ]
+    },
+    "productBottle5": {
+      "minMm": [
+        2013.8,
+        1486.9,
+        1195
+      ],
+      "maxMm": [
+        2306.2,
+        2159.4,
+        1495
+      ]
+    },
+    "productBottle6": {
+      "minMm": [
+        2323.8,
+        1486.9,
+        1195
+      ],
+      "maxMm": [
+        2616.2,
+        2159.4,
+        1495
+      ]
+    },
+    "bottleBeltMark1F": {
+      "minMm": [
+        987.5,
+        1484.9,
+        1154.8
+      ],
+      "maxMm": [
+        1007.5,
+        1496.9,
+        1190.8
+      ]
+    },
+    "bottleBeltMark12B": {
+      "minMm": [
+        2692.5,
+        1484.9,
+        1499.2
+      ],
+      "maxMm": [
+        2712.5,
+        1496.9,
+        1535.2
+      ]
+    },
+    "controlConduitDrop": {
+      "minMm": [
+        1025,
+        250,
+        515
+      ],
+      "maxMm": [
+        1075,
+        1603.8,
+        565
+      ]
+    },
+    "controlConduitFloor": {
+      "minMm": [
+        -1094,
+        225,
+        515
+      ],
+      "maxMm": [
+        1050,
+        275,
+        565
+      ]
+    },
+    "controlConduitRise": {
+      "minMm": [
+        -1119,
+        250,
+        515
+      ],
+      "maxMm": [
+        -1069,
+        779,
+        565
+      ]
+    },
+    "controlConduitToMotor": {
+      "minMm": [
+        -1119,
+        754,
+        540
+      ],
+      "maxMm": [
+        -1069,
+        804,
+        1560
+      ]
+    },
+    "controlPole": {
+      "minMm": [
+        990,
+        0,
+        399.9
+      ],
+      "maxMm": [
+        1110,
+        1899,
+        520
+      ]
+    },
+    "controlFoot": {
+      "minMm": [
+        840,
+        0,
+        289.9
+      ],
+      "maxMm": [
+        1260,
+        80,
+        630
+      ]
+    },
+    "tankUpperBand": {
+      "minMm": [
+        -1447.1,
+        3627,
+        -1117.1
+      ],
+      "maxMm": [
+        547.1,
+        3691,
+        877.1
+      ]
+    },
+    "pumpBase": {
+      "minMm": [
+        -950,
+        0,
+        1350
+      ],
+      "maxMm": [
+        350,
+        499,
+        2290
+      ]
+    },
+    "pumpHousing": {
+      "minMm": [
+        -680,
+        499,
+        1470
+      ],
+      "maxMm": [
+        80,
+        1219,
+        2170
+      ]
+    },
+    "pumpMotor": {
+      "minMm": [
+        -1220,
+        709,
+        1560
+      ],
+      "maxMm": [
+        -620,
+        1129,
+        2080
+      ]
+    },
+    "pumpCover": {
+      "minMm": [
+        60,
+        539,
+        1500
+      ],
+      "maxMm": [
+        240,
+        1179,
+        2140
+      ]
     }
   },
   "ground": {
@@ -192,15 +1269,15 @@
         "tankSideInlet",
         "hopperBody",
         "hopperSkirt",
+        "pipeTopRise",
+        "pipeTopReturn",
+        "pipeTopDrop",
         "hopperLegLF",
         "hopperLegLB",
         "hopperLegRF",
-        "hopperLegRB",
-        "pipeTopRise",
-        "pipeTopReturn",
-        "pipeTopDrop"
+        "hopperLegRB"
       ],
-      "triangles": 1472
+      "triangles": 1552
     },
     {
       "mesh": "body_metal",
@@ -220,6 +1297,7 @@
         "gaugeHousing",
         "valvePipe",
         "valveBody",
+        "valveStem",
         "hopperLatch",
         "pumpCover",
         "pumpMotor",
@@ -229,6 +1307,25 @@
         "pipeUnionValve",
         "pipeOverhead",
         "pipeLowerLoopRise",
+        "suctionFlangeValve",
+        "suctionFlangePump",
+        "fillerHeader",
+        "fillerNozzle1",
+        "fillerNozzleTip1",
+        "fillerNozzle2",
+        "fillerNozzleTip2",
+        "fillerNozzle3",
+        "fillerNozzleTip3",
+        "fillerNozzle4",
+        "fillerNozzleTip4",
+        "fillerNozzle5",
+        "fillerNozzleTip5",
+        "fillerNozzle6",
+        "fillerNozzleTip6",
+        "fillerHangerPost1",
+        "fillerHangerArm1",
+        "fillerHangerPost2",
+        "fillerHangerArm2",
         "bottlingTable",
         "bottlingLegLB",
         "bottlingLegLF",
@@ -237,11 +1334,13 @@
         "bottleRailTop",
         "bottleRailSupportA",
         "bottleRailSupportB",
-        "bottleStopper",
+        "bottleGuideRailNear",
+        "bottleRailPost3",
+        "bottleRailPost4",
         "controlBeaconBase",
         "controlButton1"
       ],
-      "triangles": 10480
+      "triangles": 11256
     },
     {
       "mesh": "body_rubber",
@@ -252,6 +1351,7 @@
         "gaugeFace",
         "conveyorDeliveryChute",
         "conveyorBelt",
+        "bottleBeltSurface",
         "controlButton2",
         "crateSlat12",
         "crateSlat42",
@@ -260,7 +1360,7 @@
         "crateSlat12_2",
         "crateSlat42_2"
       ],
-      "triangles": 3908
+      "triangles": 3920
     },
     {
       "mesh": "body_matte",
@@ -297,27 +1397,30 @@
         "conveyorFootPlateR",
         "pumpBase",
         "pumpHousing",
-        "bottleCap",
-        "bottleLabel",
-        "bottleCap_1",
-        "bottleLabel_1",
-        "bottleCap_2",
-        "bottleLabel_2",
-        "bottleCap_3",
-        "bottleLabel_3",
-        "bottleCap_4",
-        "bottleLabel_4",
-        "bottleCap_5",
-        "bottleLabel_5",
+        "bottleBeltBed",
         "controlPole",
         "controlFoot",
         "controlPanelBody",
         "controlDisplay",
+        "controlConduitDrop",
+        "controlConduitFloor",
+        "controlConduitRise",
+        "controlConduitToMotor",
         "crateBody",
         "crateBody_1",
         "crateBody_2"
       ],
-      "triangles": 23052
+      "triangles": 19736
+    },
+    {
+      "mesh": "valveWheelPivot_metal",
+      "anchor": "valveWheelPivot",
+      "material": "processing.line.fixed-palette-metal",
+      "absorbed": [
+        "valveWheel",
+        "valveWheelHub"
+      ],
+      "triangles": 336
     },
     {
       "mesh": "mixerPivot_metal",
@@ -369,8 +1472,32 @@
       "triangles": 1112
     },
     {
-      "mesh": "body_glass-0-540-0-320",
-      "anchor": "(scene)",
+      "mesh": "bottleRollerA_metal",
+      "anchor": "bottleRollerA",
+      "material": "processing.line.fixed-palette-metal",
+      "absorbed": [
+        "bottleRollerADrum",
+        "bottleRollerAStripe1",
+        "bottleRollerAStripe2",
+        "bottleRollerAStripe3"
+      ],
+      "triangles": 92
+    },
+    {
+      "mesh": "bottleRollerB_metal",
+      "anchor": "bottleRollerB",
+      "material": "processing.line.fixed-palette-metal",
+      "absorbed": [
+        "bottleRollerBDrum",
+        "bottleRollerBStripe1",
+        "bottleRollerBStripe2",
+        "bottleRollerBStripe3"
+      ],
+      "triangles": 92
+    },
+    {
+      "mesh": "bottleTrain_glass-0-540-0-320",
+      "anchor": "bottleTrain",
       "material": "processing.line.fixed-palette-glass-0-540-0-320",
       "absorbed": [
         "bottleGlass",
@@ -395,6 +1522,50 @@
       "triangles": 1800
     },
     {
+      "mesh": "bottleTrain_matte",
+      "anchor": "bottleTrain",
+      "material": "processing.line.fixed-palette-matte",
+      "absorbed": [
+        "bottleCap",
+        "bottleLabel",
+        "bottleCap_1",
+        "bottleLabel_1",
+        "bottleCap_2",
+        "bottleLabel_2",
+        "bottleCap_3",
+        "bottleLabel_3",
+        "bottleCap_4",
+        "bottleLabel_4",
+        "bottleCap_5",
+        "bottleLabel_5",
+        "bottleBeltMark1F",
+        "bottleBeltMark1B",
+        "bottleBeltMark2F",
+        "bottleBeltMark2B",
+        "bottleBeltMark3F",
+        "bottleBeltMark3B",
+        "bottleBeltMark4F",
+        "bottleBeltMark4B",
+        "bottleBeltMark5F",
+        "bottleBeltMark5B",
+        "bottleBeltMark6F",
+        "bottleBeltMark6B",
+        "bottleBeltMark7F",
+        "bottleBeltMark7B",
+        "bottleBeltMark8F",
+        "bottleBeltMark8B",
+        "bottleBeltMark9F",
+        "bottleBeltMark9B",
+        "bottleBeltMark10F",
+        "bottleBeltMark10B",
+        "bottleBeltMark11F",
+        "bottleBeltMark11B",
+        "bottleBeltMark12F",
+        "bottleBeltMark12B"
+      ],
+      "triangles": 3744
+    },
+    {
       "mesh": "body_emissive-0-716-0-423-0-091-0-200",
       "anchor": "(scene)",
       "material": "processing.line.fixed-palette-emissive-0-716-0-423-0-091-0-200",
@@ -416,10 +1587,35 @@
     }
   ],
   "unsharedGeometries": 6,
-  "prunedEmptyNodes": 19,
+  "prunedEmptyNodes": 18,
   "after": {
-    "meshes": 21,
-    "drawnTriangles": 48860,
+    "meshes": 24,
+    "drawnTriangles": 50388,
     "groundMinYmm": 0
+  },
+  "saleFile": {
+    "path": "public/market/hf-processing-line/processing.line.m1.glb",
+    "bytes": 1075324,
+    "sha256": "56a61c6b1f9283bcb02ba08a3497fbbd895983fed0df9a0ea54586c04db692f5",
+    "builtBy": [
+      "scripts/hf-export/processing-line-repair.mjs",
+      "scripts/hf-export/package-machine-glb.mjs",
+      "@gltf-transform dequantize + EXT_meshopt_compression dropped",
+      "scripts/bake-vertex-colour-palette.mjs"
+    ],
+    "previous": {
+      "bytes": 1121780,
+      "triangles": 48860,
+      "drawCalls": 21,
+      "sha256": "c7c9aff3f1ca2b1086568db8aa796abb (md5)"
+    },
+    "hero": {
+      "path": "public/market/hf-processing-line/hero-hf-processing-line.png",
+      "bytes": 184319
+    },
+    "preview": {
+      "path": "public/market/hf-processing-line/preview-hf-processing-line.webp",
+      "bytes": 21448
+    }
   }
 }

@@ -323,3 +323,122 @@ export function setTrack(clip, nodeName, prop, track) {
 
 /** Evenly spaced sample times over a clip, inclusive of both ends. */
 export const samples = (duration, n) => Array.from({ length: n + 1 }, (_, i) => (i / n) * duration);
+
+/* --------------------------------------------------- world-space builders (2026-09-05)
+ * The 2026-09-04 passes all placed new parts by hand-writing `parent.worldToLocal(...)`
+ * at every call site. That works while every group is axis-aligned; the processing line's
+ * conveyor is not (it is tilted 33.2 degrees), and a pipe that has to start on the belt and
+ * end on the tank cannot be written in either group's frame. These four take world
+ * coordinates and do the frame arithmetic once.
+ *
+ * Additive only: nothing above this line changed, so the other repair scripts that import
+ * from here are untouched.
+ */
+
+/** A cylinder whose two end faces are exactly at the world points `from` and `to`. */
+export function tubeBetween(parent, material, colour, from, to, radius, name, segments = 12) {
+  const a = new THREE.Vector3().fromArray(Array.isArray(from) ? from : from.toArray());
+  const b = new THREE.Vector3().fromArray(Array.isArray(to) ? to : to.toArray());
+  const direction = new THREE.Vector3().subVectors(b, a);
+  const length = direction.length();
+  if (!(length > 0)) throw new Error(`tubeBetween(${name}): the two ends are the same point`);
+  const mesh = new THREE.Mesh(cylGeo(radius, radius, length, segments, colour), material);
+  mesh.name = name;
+  parent.updateMatrixWorld(true);
+  const world = new THREE.Matrix4().compose(
+    new THREE.Vector3().addVectors(a, b).multiplyScalar(0.5),
+    new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.clone().normalize()),
+    new THREE.Vector3(1, 1, 1),
+  );
+  new THREE.Matrix4().copy(parent.matrixWorld).invert().multiply(world)
+    .decompose(mesh.position, mesh.quaternion, mesh.scale);
+  parent.add(mesh);
+  return mesh;
+}
+
+/** A box whose world-axis-aligned extent is exactly [min, max] on each axis. */
+export function boxSpan(parent, material, colour, min, max, name) {
+  const lo = new THREE.Vector3().fromArray(min);
+  const hi = new THREE.Vector3().fromArray(max);
+  const size = new THREE.Vector3().subVectors(hi, lo);
+  const mesh = new THREE.Mesh(boxGeo(size.x, size.y, size.z, colour), material);
+  mesh.name = name;
+  parent.updateMatrixWorld(true);
+  const centre = new THREE.Vector3().addVectors(lo, hi).multiplyScalar(0.5);
+  mesh.position.copy(parent.worldToLocal(centre));
+  parent.add(mesh);
+  return mesh;
+}
+
+/** Translate an object so the centre of the box of its real vertices lands on `target`. */
+export function moveBoxCentreTo(object, target) {
+  object.updateMatrixWorld(true);
+  const centre = exactBox(object).getCenter(new THREE.Vector3());
+  const want = new THREE.Vector3().fromArray(Array.isArray(target) ? target : target.toArray());
+  const delta = new THREE.Vector3().subVectors(want, centre);
+  const parent = object.parent;
+  if (parent) {
+    parent.updateMatrixWorld(true);
+    const inverse = new THREE.Matrix4().extractRotation(parent.matrixWorld).invert();
+    delta.applyMatrix4(inverse);
+    const scale = new THREE.Vector3().setFromMatrixScale(parent.matrixWorld);
+    delta.set(delta.x / (scale.x || 1), delta.y / (scale.y || 1), delta.z / (scale.z || 1));
+  }
+  object.position.add(delta);
+  object.updateMatrixWorld(true);
+  return object;
+}
+
+/** Turn an object about a world axis through a world point, keeping everything else. */
+export function spinAboutWorld(object, axis, angle, through) {
+  object.updateMatrixWorld(true);
+  const pivot = new THREE.Vector3().fromArray(Array.isArray(through) ? through : through.toArray());
+  const rotation = new THREE.Matrix4().makeRotationAxis(
+    new THREE.Vector3().fromArray(Array.isArray(axis) ? axis : axis.toArray()).normalize(), angle);
+  const world = new THREE.Matrix4()
+    .makeTranslation(pivot.x, pivot.y, pivot.z)
+    .multiply(rotation)
+    .multiply(new THREE.Matrix4().makeTranslation(-pivot.x, -pivot.y, -pivot.z))
+    .multiply(object.matrixWorld);
+  const parent = object.parent;
+  if (parent) parent.updateMatrixWorld(true);
+  const local = parent
+    ? new THREE.Matrix4().copy(parent.matrixWorld).invert().multiply(world)
+    : world;
+  local.decompose(object.position, object.quaternion, object.scale);
+  object.updateMatrixWorld(true);
+  return object;
+}
+
+/** The largest distance from the line (point, axis) to any vertex of `object`, in world units. */
+export function radiusAbout(object, point, axis) {
+  object.updateMatrixWorld(true);
+  const origin = new THREE.Vector3().fromArray(Array.isArray(point) ? point : point.toArray());
+  const unit = new THREE.Vector3().fromArray(Array.isArray(axis) ? axis : axis.toArray()).normalize();
+  let best = 0;
+  const v = new THREE.Vector3();
+  const m = new THREE.Matrix4();
+  object.traverse((n) => {
+    if (!n.isMesh) return;
+    const pos = n.geometry.getAttribute('position');
+    const copies = n.isInstancedMesh ? n.count : 1;
+    for (let c = 0; c < copies; c += 1) {
+      if (n.isInstancedMesh) { n.getMatrixAt(c, m); m.premultiply(n.matrixWorld); } else m.copy(n.matrixWorld);
+      for (let i = 0; i < pos.count; i += 1) {
+        v.fromBufferAttribute(pos, i).applyMatrix4(m).sub(origin);
+        best = Math.max(best, v.clone().sub(unit.clone().multiplyScalar(v.dot(unit))).length());
+      }
+    }
+  });
+  return best;
+}
+
+/** Deepest world-box overlap between two objects, or 0 when their boxes are apart. */
+export function boxOverlap(a, b) {
+  const p = exactBox(a);
+  const q = exactBox(b);
+  const dx = Math.min(p.max.x, q.max.x) - Math.max(p.min.x, q.min.x);
+  const dy = Math.min(p.max.y, q.max.y) - Math.max(p.min.y, q.min.y);
+  const dz = Math.min(p.max.z, q.max.z) - Math.max(p.min.z, q.min.z);
+  return dx > 0 && dy > 0 && dz > 0 ? Math.min(dx, dy, dz) : 0;
+}
