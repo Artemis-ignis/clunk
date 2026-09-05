@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { EmbeddedGlbViewer } from "./review/EmbeddedGlbViewer";
+import { PREVIEW_NOTE_ALWAYS } from "../api/_lib/market-path";
 
 /**
  * Landing section-03 live scene: when the section lands in view the conversation
@@ -29,7 +30,9 @@ const STEPS = [
   { tool: "clunk_passport", note: "만든 과정을 검사 증명서로 남김" },
 ] as const;
 
-const GLB_URL = "/market/cozy-farm-set-vol1/market-stall.m1.clunk-optimized.glb";
+// 첫 화면의 이 자리도 미리보기 파일을 연다. 파는 파일은 로그인한 사람에게만 나간다
+// (app/api/_lib/market-gate.ts).
+const GLB_URL = "/market/cozy-farm-set-vol1/preview-market-stall.m1.clunk-optimized.glb";
 
 // timeline (seconds), played once per visit
 const T_USER = 0.4;
@@ -168,7 +171,9 @@ export function AgentLiveDemo() {
         <EmbeddedGlbViewer
           src={GLB_URL}
           alt="에이전트가 만든 시장 노점 — 드래그해서 돌려보세요"
-          hint="드래그 회전 · 휠 줌 · 실제 판매 파일"
+          hint="드래그 회전 · 휠 줌"
+          previewSrc={GLB_URL}
+          previewNote={PREVIEW_NOTE_ALWAYS}
           revealProgress={reduced ? 1 : scene.checked > 0 || scene.buildProgress > 0 ? scene.buildProgress : 0}
         />
         <span className="cv5-agent-stage-tag">{building ? "지금 만드는 중 · market-stall.glb" : "만들어진 파일 · market-stall.glb"}</span>

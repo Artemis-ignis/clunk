@@ -92,9 +92,14 @@ test("the public product surfaces expose creation, library, review, and marketpl
 });
 
 test("paid marketplace artifacts never ship as public previews", async () => {
+  // 2026-09-05: 이 판정이 라우트에서 app/api/_lib/market-gate.ts 로 옮겨갔다. 정적 경로
+  // (/market/<slug>/<file>)에도 같은 문을 세우면서, 문이 둘로 갈라져 한쪽만 고쳐지는 일을
+  // 막으려고 판정을 한 함수에 모았다. 라우트는 그 함수를 부르기만 한다.
+  const gate = await source("app/api/_lib/market-gate.ts");
+  assert.match(gate, /paid \? artifactRole === "preview" : true/);
+  assert.doesNotMatch(gate, /artifactRole === "page" \|\| artifactRole === "texture"/);
   const route = await source("app/api/marketplace/assets/[assetId]/route.ts");
-  assert.match(route, /paid \? artifact\.role === "preview" : true/);
-  assert.doesNotMatch(route, /artifact\.role === "page" \|\| artifact\.role === "texture"/);
+  assert.match(route, /authorizeMarketDownload\(/);
 });
 
 test("the billing boundary converts zero-decimal currencies exactly once", async () => {

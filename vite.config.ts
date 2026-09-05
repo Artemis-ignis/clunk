@@ -17,6 +17,19 @@ const isNetlifyBuild = process.env.NITRO_PRESET === "netlify" || process.env.NIT
 const localBindingConfig = {
   main: "./worker/index.ts",
   compatibility_flags: ["nodejs_compat"],
+  // 판매 파일의 문을 정적 경로에도 세운다.
+  //
+  // Cloudflare 는 배포에 번들된 파일이 있으면 워커를 건너뛰고 그 파일을 그대로 준다.
+  // 그래서 `/api/marketplace/assets/{id}` 가 401 로 막는 바이트가 `/market/<slug>/<file>`
+  // 에서는 문 없이 나가고 있었다(2026-09-05 점검 A1). `run_worker_first` 는 여기 적은
+  // 경로만 워커가 먼저 받게 한다 — 나머지 정적 파일은 예전처럼 자산 층이 바로 준다.
+  //
+  // `binding` 은 통과시킨 파일을 워커가 스스로 내주기 위한 손잡이다. 이름이
+  // STATIC_ASSETS 인 이유는 ASSETS 가 이미 R2 버킷(.openai/hosting.json)이라서다.
+  assets: {
+    binding: "STATIC_ASSETS",
+    run_worker_first: ["/market/*"],
+  },
   d1_databases: d1
     ? [
         {

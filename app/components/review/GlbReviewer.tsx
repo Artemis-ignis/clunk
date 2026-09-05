@@ -339,7 +339,7 @@ export function GlbReviewer({ initialUrl }: { initialUrl?: string | null }) {
         <div className="rv-toggles">
           <label><input type="checkbox" checked={wireframe} onChange={(event) => { setWireframeState(event.target.checked); handlesRef.current?.setWireframe(event.target.checked); }} /> 와이어프레임</label>
           <label><input type="checkbox" checked={autoRotate} onChange={(event) => { setAutoRotateState(event.target.checked); handlesRef.current?.setAutoRotate(event.target.checked); }} /> 자동 회전</label>
-          <label><input type="checkbox" checked={reference} onChange={(event) => { setReferenceState(event.target.checked); handlesRef.current?.setReference(event.target.checked); }} /> 기준 스케일 (1.7m)</label>
+          <label><input type="checkbox" checked={reference} onChange={(event) => { setReferenceState(event.target.checked); handlesRef.current?.setReference(event.target.checked); }} /> 기준 축척 (1.7m)</label>
         </div>
 
         {stats && stats.clips.length > 0 ? (

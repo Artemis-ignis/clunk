@@ -1,10 +1,8 @@
 import { getCurrentUser } from "../../../../auth";
-import { areSalesOpen } from "../../../_lib/sales-lock";
-import { requireMcpApiKey } from "../../../_lib/mcp-auth";
-import { getRuntimeAssets, getRuntimeDb, ensureSchema, getCatalogAccessForUser, isSafeRecordId, jsonError, privateJson } from "../../../_lib/clunk";
-import { gradeOf, isFreeGrade } from "../../../../components/catalog-facts";
-import { factsFor } from "../../../_lib/listing-facts";
-import { clipsFor, variantSlugsOf } from "../../../_lib/listing-variants";
+import { getRuntimeAssets, getRuntimeDb, ensureSchema, isSafeRecordId, jsonError } from "../../../_lib/clunk";
+import { getRuntimeBinding } from "../../../../runtime-environment";
+import { authorizeMarketDownload, resolveListingAccess } from "../../../_lib/market-gate";
+import { isModelFileName, previewGlbUrl } from "../../../_lib/market-path";
 
 export const dynamic = "force-dynamic";
 
@@ -40,38 +38,12 @@ export async function GET(request: Request, context: RouteContext) {
     }
     const db = getRuntimeDb();
     await ensureSchema(db);
-    // 등급이 곧 접근권이다(catalog-facts.isFreeGrade): B는 로그인만 하면 받고, A와 S는
-    // 구독자만 받는다. 저장해 둔 컬럼을 읽지 않는 이유는 그 값이 등급과 어긋날 수 있고,
-    // 어긋난 순간 구독 전용 에셋이 조용히 무료로 나가기 때문이다. 카드 위의 칩과 이
-    // 문지기가 같은 함수를 부르므로 화면과 문이 갈라질 수 없다.
-    //
-    // 같은 에셋이 여러 상품에 걸려 있으면 가장 넓은 쪽(무료)을 따른다 — 한 곳에서 무료로
-    // 공개한 파일을 다른 곳 때문에 막지 않는다.
-    const listings = await db.prepare(
-      `SELECT l.slug, l.title, l.description, a.file_name AS entryFileName
-       FROM clunk_marketplace_listings l
-       JOIN clunk_assets a ON a.id = l.asset_id
-       WHERE l.asset_id = ? AND l.status = 'PUBLISHED'`,
-    ).bind(assetId).all<{ slug: string; title: string; description: string; entryFileName: string }>();
-    if (!listings.results.length) {
+    // 등급을 보는 판정은 정적 경로의 문지기와 같은 함수다(app/api/_lib/market-gate.ts).
+    // 문이 둘로 갈라져 한쪽만 고쳐지는 일을 막으려고 한 곳에 모아 두었다.
+    const { listings, paid } = await resolveListingAccess(db, assetId);
+    if (!listings.length) {
       return missing("ASSET_NOT_PUBLISHED", "공개된 상품 중에 이 에셋이 없습니다.", "초안이거나 내려간 상품일 수 있습니다. 목록에서 현재 공개 중인 에셋을 확인하세요.", url.origin);
     }
-    // 움직임 판정은 이 모델에서 구운 시트의 제목도 본다(hasMotionOf). 제목은 공개된
-    // 상품에서만 읽는다 — 내려간 상품이 등급을 올리면 안 된다.
-    const publishedTitles = await db.prepare(
-      `SELECT slug, title FROM clunk_marketplace_listings WHERE status = 'PUBLISHED'`,
-    ).all<{ slug: string; title: string }>();
-    const titleBySlug = new Map(publishedTitles.results.map((row) => [row.slug, row.title]));
-    const paid = !listings.results.some((row) => isFreeGrade(gradeOf({
-      title: row.title,
-      description: row.description,
-      entryFileName: row.entryFileName,
-      facts: factsFor(row.slug),
-      clips: clipsFor(row.slug),
-      variants: variantSlugsOf(row.slug)
-        .filter((slug) => titleBySlug.has(slug))
-        .map((slug) => ({ slug, title: titleBySlug.get(slug) })),
-    }).letter));
     const artifact = await db.prepare(
       `SELECT aa.file_name AS fileName, aa.content_type AS contentType, aa.object_key AS objectKey, aa.role
        FROM clunk_asset_artifacts aa
@@ -88,88 +60,70 @@ export async function GET(request: Request, context: RouteContext) {
         url.origin,
       );
     }
-    // 무료 등급도 로그인(또는 Clunk API 키)이 있어야 받는다. 약관 제4조·요금·마켓 문구가 전부
-    // "B 등급은 로그인만 하면" 이라고 약속하는데, 2026-09-05 실측에서 이 문이 없어 B 등급이
-    // 로그인 없이 나가고 있었고 에이전트 문서까지 그 사고를 사실로 적고 있었다. 미리보기
-    // (preview=1)는 카드가 쓰므로 그대로 공개다. 헤드리스 에이전트는 /api/mcp 에 쓰는 것과
-    // 같은 Authorization: Bearer clunk_live_… 로 받는다 — 사람을 부르지 않는다.
-    if (!paid && !previewRequested) {
-      const user = await getCurrentUser();
-      if (!user && !(await hasClunkApiKey(request))) {
-        return privateJson({
-          ok: false,
-          schema: "clunk.marketplace-download.v1",
-          status: "AUTHENTICATION_REQUIRED",
-          error: "에셋을 받으려면 로그인하거나 Authorization: Bearer <Clunk API 키> 를 보내야 합니다. 무료 등급도 같습니다.",
-        }, { status: 401 });
+    // 모델을 미리보기로 달라고 하면 미리보기 파일로 보낸다.
+    //
+    // 로그인하지 않은 방문자의 뷰어가 여기로 온다. 파는 GLB 를 그대로 내주면 문이
+    // 있으나 마나이므로, 폴리곤을 줄이고 그림을 128px 로 줄여 구운 파일
+    // (scripts/market-preview-glb.mjs)로 보낸다. 움직임(클립)은 그대로 들어 있다 —
+    // 사는 사람이 판단하는 것이 움직임이라서다. 그 파일이 아직 없으면 아래로 흘러가
+    // 평소의 문 판정을 받는다.
+    if (previewRequested && isModelFileName(artifact.fileName)) {
+      const slug = listings.find((row) => row.entryFileName === artifact.fileName)?.slug ?? listings[0].slug;
+      const previewPath = previewGlbUrl(slug, artifact.fileName);
+      if (await staticAssetExists(previewPath, url.origin)) {
+        return new Response(null, {
+          status: 302,
+          headers: { location: new URL(previewPath, url.origin).toString(), "cache-control": "public, max-age=300" },
+        });
       }
     }
-    // A paid product's page/texture artifacts ARE the product bytes, so they
-    // never ship as a public preview. Paid listings only expose an artifact
-    // whose role is explicitly "preview"; free listings may preview anything.
-    const publicPreview = previewRequested && (paid ? artifact.role === "preview" : true);
-    if (paid && !publicPreview) {
-      const user = await getCurrentUser();
-      if (!user) {
-        return privateJson({ ok: false, schema: "clunk.marketplace-download.v1", status: "AUTHENTICATION_REQUIRED", error: "유료 에셋을 받으려면 로그인해야 합니다." }, { status: 401 });
-      }
-      // 구독이 살아 있으면 전체 카탈로그를 받는다.
-      //
-      // 낱개로 값을 매겨 크레딧으로 팔던 구조는 결제대행 심사에서 환금성으로
-      // 걸렸다. 파는 것을 기간 접근권 하나로 바꿨으므로, 유료 에셋의 문은
-      // "이 에셋을 샀는가"가 아니라 "지금 구독 중인가"로 열린다.
-      //
-      // 과거에 낱개로 산 기록(clunk_marketplace_entitlements)은 그대로 인정한다.
-      // 이미 값을 치른 사람에게서 받은 것을 거두지 않는다.
-      const access = await getCatalogAccessForUser(db, user.id);
-      if (access !== "full") {
-        // 값을 치른 기록만 문을 연다. 베타에서 "받기"를 누르면 그 에셋에 ACTIVE
-        // 기록이 하나 생기는데(marketplace/checkout, provider 'beta', 0원), 그것까지
-        // 영구 소유로 인정하면 구독을 여는 날 베타에 눌러 본 사람은 그 유료 에셋을
-        // 영원히 무료로 갖는다. 2026-09-04 마스터의 무료 계정이 구독자 전용 헬리콥터를
-        // 그렇게 받았다 — 그날 13:30 에 눌러 생긴 기록 하나 때문이었다.
-        //
-        // 베타 중에는 그 기록이 곧 베타의 무료 개방이므로 그대로 인정하고, 판매가
-        // 열린 뒤에는 인정하지 않는다. 실제로 값을 치른 기록(provider 가 beta 가
-        // 아닌 것)은 판매가 열린 뒤에도 그대로 인정한다 — 받은 것을 거두지 않는다.
-        const entitlement = await db.prepare(
-          `SELECT e.id FROM clunk_marketplace_entitlements e
-             JOIN clunk_marketplace_orders o ON o.id = e.order_id
-            WHERE e.buyer_user_id = ? AND e.asset_id = ? AND e.status = 'ACTIVE'
-              AND (? = 1 OR o.payment_provider <> 'beta')
-            LIMIT 1`,
-        ).bind(user.id, assetId, areSalesOpen() ? 0 : 1).first<{ id: string }>();
-        if (!entitlement) {
-          return privateJson({
-            ok: false,
-            schema: "clunk.marketplace-download.v1",
-            status: "SUBSCRIPTION_REQUIRED",
-            error: "구독하면 전체 에셋을 받을 수 있습니다. 무료 등급 에셋은 로그인만 하면 받습니다.",
-          }, { status: 403 });
-        }
-      }
-    }
+    // 등급·로그인·구독 판정. 정적 경로의 문지기가 부르는 것과 같은 함수다.
+    const decision = await authorizeMarketDownload({
+      db,
+      request,
+      assetId,
+      paid,
+      previewRequested,
+      artifactRole: artifact.role,
+      getUser: getCurrentUser,
+    });
+    if (!decision.allowed) return decision.response;
+    const publicPreview = decision.publicPreview;
     // "asset:/<path>" object keys point at files bundled into the Worker's
     // own static assets (1st-party QA inventory published before R2 exists).
-    // The bytes are genuinely stored and served by this deployment; the same
-    // auth/entitlement checks above still gate paid downloads. Note for the
-    // sales-open milestone: bundled paths are publicly fetchable by URL, so
-    // real paid inventory moves to R2 object keys before 실판매 개시.
+    //
+    // 2026-09-05 까지 이 갈래는 정적 경로로 302 를 보냈다. 그 경로에는 문이 없었으므로
+    // 리다이렉트를 따라간 브라우저가 아니라 주소만 아는 누구나 같은 바이트를 받을 수
+    // 있었다. 이제 워커가 자산 층에서 바이트를 직접 읽어 이 응답에 실어 보낸다 —
+    // 판정을 통과한 요청만 파일을 본다.
     if (artifact.objectKey.startsWith("asset:/")) {
       const staticPath = artifact.objectKey.slice("asset:".length);
       if (!/^\/[a-zA-Z0-9._/-]+$/.test(staticPath) || staticPath.includes("..")) {
         return missing("STORAGE_KEY_REJECTED", "저장 경로가 안전 규칙을 통과하지 못했습니다.", "상품 데이터 문제입니다. 다시 시도해도 같습니다.", url.origin);
       }
-      // A same-origin fetch from inside the Worker re-enters the Worker's own
-      // router (the static layer sits in front of BROWSER requests only), so
-      // hand the browser a redirect instead of proxying.
-      return new Response(null, {
-        status: 302,
+      const fetcher = staticAssetFetcher();
+      if (!fetcher) {
+        // 자산 손잡이가 없는 배포(로컬 dev, Netlify)에서는 예전처럼 정적 경로로 보낸다.
+        // 그 배포에는 워커 문지기도 없으므로 이 리다이렉트가 상황을 나쁘게 만들지 않는다.
+        return new Response(null, {
+          status: 302,
+          headers: {
+            location: new URL(staticPath, url.origin).toString(),
+            "cache-control": publicPreview ? "public, max-age=300" : "private, no-store",
+            "x-robots-tag": "noindex, nofollow",
+          },
+        });
+      }
+      const bundled = await fetcher.fetch(new Request(new URL(staticPath, url.origin)));
+      if (!bundled.ok || !bundled.body) {
+        return missing("STORAGE_OBJECT_MISSING", "파일이 등록돼 있지만 저장소에서 읽히지 않습니다.", "우리 쪽 문제입니다. 잠시 뒤 다시 시도해 주세요.", url.origin);
+      }
+      return new Response(bundled.body, {
+        status: 200,
         headers: {
-          location: new URL(staticPath, url.origin).toString(),
+          "content-type": artifact.contentType,
           "cache-control": publicPreview ? "public, max-age=300" : "private, no-store",
-          // 이 리다이렉트가 가리키는 정적 경로는 문이 없다. 검색 엔진과 에이전트가 그
-          // 주소를 카탈로그에 실어 나르지 않게 한다 — 문을 고치기 전까지의 최소한이다.
+          "content-disposition": `${publicPreview ? "inline" : "attachment"}; filename="${artifact.fileName.replace(/[^a-zA-Z0-9._-]/g, "-")}"`,
           "x-robots-tag": "noindex, nofollow",
         },
       });
@@ -197,12 +151,23 @@ export async function GET(request: Request, context: RouteContext) {
   }
 }
 
-/** Authorization 헤더에 유효한 Clunk API 키가 있으면 true. 없거나 틀리면 false — 여기서는 던지지 않는다. */
-async function hasClunkApiKey(request: Request): Promise<boolean> {
-  if (!request.headers.get("authorization")) return false;
+/** 배포에 번들된 정적 파일을 워커가 직접 읽는 손잡이(vite.config.ts assets.binding). */
+function staticAssetFetcher(): Fetcher | undefined {
+  return getRuntimeBinding<Fetcher>("STATIC_ASSETS");
+}
+
+/** 미리보기 파일이 실제로 배포에 들어 있는가. 없으면 미리보기로 보내지 않는다. */
+async function staticAssetExists(path: string, origin: string): Promise<boolean> {
+  const target = new URL(path, origin);
   try {
-    await requireMcpApiKey(request);
-    return true;
+    const fetcher = staticAssetFetcher();
+    // 손잡이가 없는 배포에서는 같은 주소를 그냥 부른다. 미리보기 파일은 문지기가
+    // 이름으로 통과시키므로(market-path.isPublicMarketFile) 자기 자신을 부르는 길이
+    // 문에 걸리지 않는다.
+    const response = fetcher
+      ? await fetcher.fetch(new Request(target, { method: "HEAD" }))
+      : await fetch(new Request(target, { method: "HEAD" }));
+    return response.ok;
   } catch {
     return false;
   }

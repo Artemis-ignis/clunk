@@ -7,9 +7,17 @@ import {
   trustsUpstreamIdentityHeaders,
 } from "../app/api/_lib/identity-headers";
 import { enforceRateLimit } from "../app/api/_lib/rate-limit";
+import { gateStaticMarketRequest } from "../app/api/_lib/market-gate";
 
 interface Env {
   ASSETS: Fetcher;
+  /**
+   * 배포에 번들된 정적 파일(public/). `assets.binding` 으로 붙는다(vite.config.ts).
+   *
+   * 이 손잡이가 없으면 워커가 `/market/**` 을 먼저 받더라도 통과시킨 파일을 스스로
+   * 내줄 방법이 없다.
+   */
+  STATIC_ASSETS?: Fetcher;
   DB: D1Database;
   /** "1" only on a deployment sitting behind the ChatGPT Sites identity proxy. */
   CLUNK_TRUST_SIWC_HEADERS?: string;
@@ -78,6 +86,19 @@ const worker = {
 
     const limited = await enforceRateLimit(inbound, runtimeEnvironment);
     if (limited) return withSecurityHeaders(limited);
+
+    // 판매 파일의 문. `/market/<slug>/<file>` 은 정적 자산 층이 워커보다 먼저 답하던
+    // 자리라, API 가 401 로 막는 바이트가 같은 주소에서 그냥 나가고 있었다(2026-09-05
+    // 점검 A1, 파일 195개). `assets.run_worker_first` 로 이 경로만 워커가 먼저 받고,
+    // 판정은 API 라우트와 같은 함수가 한다(app/api/_lib/market-gate.ts).
+    //
+    // 미리보기(preview-*, hero-*, *.card.png)는 카드와 첫 화면이 거는 그림이라 그대로
+    // 통과한다. 나머지는 로그인·구독을 보고, 통과한 바이트는 `private, no-store` 로 나간다.
+    const assetLayer = env.STATIC_ASSETS;
+    if (assetLayer) {
+      const gated = await gateStaticMarketRequest(inbound, (request) => assetLayer.fetch(request));
+      if (gated) return withSecurityHeaders(gated);
+    }
 
     return withSecurityHeaders(await handler.fetch(inbound, env, ctx));
   },

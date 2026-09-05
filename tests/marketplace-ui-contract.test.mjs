@@ -104,10 +104,16 @@ test("public marketplace UI is aligned with the published listing and checkout c
   // 2026-09-04: 유료 에셋의 문은 "이 에셋을 샀는가"가 아니라 "지금 구독 중인가"로
   // 열린다(da174bd). 거절 코드도 그 사실을 말하도록 바뀌었으므로 새 코드로 고정하고,
   // 낱개 구매를 전제하던 옛 코드가 되살아나지 않는지 함께 본다.
+  // 2026-09-05: 이 판정이 라우트에서 app/api/_lib/market-gate.ts 로 옮겨갔다. 같은 바이트가
+  // 놓인 정적 경로(/market/<slug>/<file>)에도 문을 세우면서, 문이 둘로 갈라져 한쪽만
+  // 고쳐지는 일을 막으려고 판정을 한 함수에 모았다. 그래서 문지기 파일을 본다.
+  const gateFile = "app/api/_lib/market-gate.ts";
+  const gate = await source(gateFile);
+  assert.match(gate, /SUBSCRIPTION_REQUIRED/u, `${gateFile}: 거절 코드가 구독을 말하지 않는다`);
+  assert.doesNotMatch(gate, /ENTITLEMENT_REQUIRED/u, `${gateFile}: 낱개 구매를 전제한 옛 코드가 되살아나면 안 된다`);
+  assert.match(gate, /getCatalogAccessForUser/u, `${gateFile}: 문을 여는 판정이 구독이 아니다`);
   const deliveryFile = "app/api/marketplace/assets/[assetId]/route.ts";
-  assert.match(delivery, /SUBSCRIPTION_REQUIRED/u, `${deliveryFile}: 거절 코드가 구독을 말하지 않는다`);
-  assert.doesNotMatch(delivery, /ENTITLEMENT_REQUIRED/u, `${deliveryFile}: 낱개 구매를 전제한 옛 코드가 되살아나면 안 된다`);
-  assert.match(delivery, /getCatalogAccessForUser/u, `${deliveryFile}: 문을 여는 판정이 구독이 아니다`);
+  assert.match(delivery, /authorizeMarketDownload\(/u, `${deliveryFile}: 내려받기 라우트가 그 문지기를 부르지 않는다`);
 });
 
 /* ---------------------------------------------------------------------------

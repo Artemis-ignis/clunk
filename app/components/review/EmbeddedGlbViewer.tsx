@@ -147,10 +147,27 @@ export function EmbeddedGlbViewer({
   fileName,
   revealProgress,
   onModelReady,
+  previewNote,
+  previewSrc,
 }: {
   src: string;
   poster?: string | null;
   alt: string;
+  /**
+   * 미리보기 파일을 열고 있을 때 무대 밑에 서는 한 줄.
+   *
+   * 판매 파일은 로그인한 사람에게만 나간다(app/api/_lib/market-gate.ts). 그래서 로그인
+   * 하지 않은 방문자는 폴리곤을 줄여 구운 파일을 본다. 그 사실을 화면이 말하지 않으면
+   * 방문자는 파는 파일을 봤다고 믿는다.
+   */
+  previewNote?: string | null;
+  /**
+   * 문이 막았을 때 물러날 미리보기 파일.
+   *
+   * 로그인은 했지만 구독이 없는 방문자가 유료 상품을 열면 판매 파일은 403 이다. 그때
+   * 뷰어가 죽는 대신 이 파일을 연다.
+   */
+  previewSrc?: string | null;
   /** The one-line caption under the stage. The default names a shop file; a landing sample passes its own. */
   hint?: string;
   onMeasured?: (spec: MeasuredSpec) => void;
@@ -187,6 +204,8 @@ export function EmbeddedGlbViewer({
   const stageRef = useRef<HTMLDivElement | null>(null);
   const frameRef = useRef<HTMLDivElement | null>(null);
   const [failed, setFailed] = useState(false);
+  // 문이 막아 미리보기로 물러났는가. 화면이 그 사실을 한 줄로 말해야 한다.
+  const [usingPreview, setUsingPreview] = useState(false);
   const [clipName, setClipName] = useState<string | null>(null);
   const measuredRef = useRef(onMeasured);
   measuredRef.current = onMeasured;
@@ -304,7 +323,17 @@ export function EmbeddedGlbViewer({
         controls.autoRotate = true;
         controls.autoRotateSpeed = 1.0;
 
-        const buffer = await (await fetch(src)).arrayBuffer();
+        // 파는 파일부터 열어 본다. 문이 막으면(로그인 안 함 401, 구독 없음 403) 미리보기로
+        // 물러난다 — 뷰어가 포스터로 주저앉는 대신 방문자가 볼 수 있는 것을 연다.
+        // 어느 쪽을 열었는지는 화면이 한 줄로 말한다(previewNote).
+        setUsingPreview(false);
+        let response = await fetch(src);
+        if (!response.ok && previewSrc && previewSrc !== src) {
+          response = await fetch(previewSrc);
+          if (!disposed) setUsingPreview(true);
+        }
+        if (!response.ok) throw new Error(`model ${response.status}`);
+        const buffer = await response.arrayBuffer();
         const loader = new GLTFLoader();
         // 압축된 GLB 는 디코더 없이는 열리지 않는다. 다만 그 디코더는 불러오는 것만으로
         // WebAssembly 를 컴파일하므로, 파일이 실제로 압축을 쓸 때만 붙인다.
@@ -936,7 +965,7 @@ export function EmbeddedGlbViewer({
       disposed = true;
       cleanup?.();
     };
-  }, [src, clipsKey, pivotsKey, yawDegrees, workbench]);
+  }, [src, previewSrc, clipsKey, pivotsKey, yawDegrees, workbench]);
 
   // Fullscreen is a browser state, not ours: listen rather than assume the button worked.
   useEffect(() => {
@@ -1025,9 +1054,15 @@ export function EmbeddedGlbViewer({
     );
   }
 
+  // 지금 열려 있는 것이 미리보기일 때만 그 줄을 세운다 — 판매 파일을 보고 있는 사람에게
+  // 미리보기라고 적으면 그것이 거짓이다.
+  const onPreviewNote = previewNote && (usingPreview || (previewSrc != null && src === previewSrc))
+    ? previewNote
+    : null;
+
   const stage = (
     <div className="cv5-embed3d" ref={stageRef} role="img" aria-label={`${alt} — 인터랙티브 3D 미리보기`}>
-      {workbench ? null : <span className="cv5-embed3d-hint">{hint ?? "드래그 회전 · 휠 줌 · 실제 판매 파일"}</span>}
+      {workbench ? null : <span className="cv5-embed3d-hint">{hint ?? (onPreviewNote ? "드래그 회전 · 휠 줌" : "드래그 회전 · 휠 줌 · 실제 받는 파일")}</span>}
       {workbench || !clipName ? null : <span className="cv5-embed3d-anim">▶ {clipName} 재생 중</span>}
     </div>
   );
@@ -1129,7 +1164,8 @@ export function EmbeddedGlbViewer({
           </div>
         ) : null}
 
-        <span className="cv5-bench-hint">{hint ?? "드래그 회전 · 휠 줌 · 실제 판매 파일"}</span>
+        <span className="cv5-bench-hint">{hint ?? (onPreviewNote ? "드래그 회전 · 휠 줌" : "드래그 회전 · 휠 줌 · 실제 받는 파일")}</span>
+        {onPreviewNote ? <p className="cv5-bench-note">{onPreviewNote}</p> : null}
 
         {motionBar ? (
           <div className="cv5-bench-motion">
@@ -1267,8 +1303,9 @@ export function EmbeddedGlbViewer({
   // `display: contents` 는 껍데기를 레이아웃에서 지운다. 조종 줄이 없을 때의 모양은
   // 예전과 같고, DOM 최상위 요소는 처음부터 끝까지 하나로 유지된다.
   return (
-    <div style={wantsControls ? bar.wrap : bar.passthrough}>
+    <div style={wantsControls || onPreviewNote ? bar.wrap : bar.passthrough}>
       {stage}
+      {onPreviewNote ? <p style={bar.note}>{onPreviewNote}</p> : null}
       {!wantsControls ? null : (
         <>
       <div style={bar.row}>

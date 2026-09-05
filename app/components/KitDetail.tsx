@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import Link from "./NativeLink";
 import { Icon } from "./Icon";
 import { EmbeddedGlbViewer } from "./review/EmbeddedGlbViewer";
+import { PREVIEW_NOTE, previewModelUrl, useModelSource } from "./model-source";
 import { gradeOf, previewImageUrlOf, type Kit } from "./catalog-facts";
 import { accessSentence, formatBytes, useKitCatalog, type KitListing } from "./KitsIndex";
 import styles from "./KitPages.module.css";
@@ -78,6 +79,9 @@ export function KitDetail({ kitId, salesOpen = false }: { kitId: string; salesOp
 function KitBody({ kit, salesOpen }: { kit: Kit<KitListing>; salesOpen: boolean }) {
   const palette = useMemo(() => mergedPalette(kit.parts), [kit.parts]);
   const product = kit.product;
+  // 로그인하지 않은 방문자는 미리보기 파일을, 로그인한 방문자는 문이 있는 주소로 판매
+  // 파일 그대로를 본다(app/components/model-source.ts).
+  const productSource = useModelSource(product ?? null, kit.free);
 
   return (
     <>
@@ -103,10 +107,12 @@ function KitBody({ kit, salesOpen }: { kit: Kit<KitListing>; salesOpen: boolean 
       </div>
 
       <div className={styles.detailGrid}>
-        {product ? (
+        {product && productSource ? (
           <div className={styles.stage}>
             <EmbeddedGlbViewer
-              src={`/market/${product.slug}/${product.entryFileName}`}
+              src={productSource.src}
+              previewSrc={previewModelUrl(product.slug, product.entryFileName)}
+              previewNote={productSource.note ?? PREVIEW_NOTE}
               poster={kit.heroUrl}
               alt={`${kit.name} 전체 장면`}
               hint="키트 전체 장면 · 드래그 회전 · 휠 줌"
