@@ -66,7 +66,7 @@ export const DEFAULT_AUTH_COPY: AuthIntentCopy = {
   signup: {
     badge: "카드 없이 시작",
     h1: `가입하면 바로 씁니다`,
-    lede: `카드도 비밀번호도 묻지 않습니다. Google이나 GitHub 계정으로 한 번 들어오면 내 작업공간이 만들어지고, 만들기·검사 ${SIGNUP_GRANT_CREDITS}회가 바로 들어옵니다. 그 뒤로는 매달 ${BETA_MONTHLY_GRANT_CREDITS}회가 채워집니다.`,
+    lede: `카드도 비밀번호도 묻지 않습니다. Google이나 GitHub 계정으로 한 번 들어오면 내 작업공간이 만들어지고, 만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 바로 들어옵니다. 그 뒤로는 매달 ${BETA_MONTHLY_GRANT_CREDITS}회가 채워집니다.`,
     facts: SIGNUP_FACTS,
     providerSmall: SIGNUP_PROVIDER_SMALL,
   },
@@ -119,7 +119,7 @@ export const INTENT_COPY: Record<AuthIntent, AuthIntentCopy> = {
     signup: {
       badge: "카드 없이 시작",
       h1: "에이전트 연결부터",
-      lede: `내 계정 전용 키를 하나 만들면 쓰던 AI 도구가 바로 Clunk를 부릅니다. 가입하는 그 자리에서 만들기·검사 ${SIGNUP_GRANT_CREDITS}회가 들어옵니다.`,
+      lede: `내 계정 전용 키를 하나 만들면 쓰던 AI 도구가 바로 Clunk를 부릅니다. 가입하는 그 자리에서 만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어옵니다.`,
       facts: SIGNUP_FACTS,
       providerSmall: SIGNUP_PROVIDER_SMALL,
     },

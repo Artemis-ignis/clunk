@@ -154,7 +154,7 @@ test("collaboration UI keeps capture integrity, asset audit, and human visual re
   assert.doesNotMatch(agents, /사람이 직접 보고 판단해야 합니다|증거 없음/);
   // 2026-09-04(마스터 지적): 같은 구분을 부정문("…말하지 않습니다") 대신 방문자에게
   // 무엇이 답을 주는지로 적는다. 지켜야 할 것은 문장 형태가 아니라 구분 자체다.
-  assert.match(agents, /파일 검사는 규격을 봅니다[\s\S]*엔진에서 그린 화면과 게임 안에서 본 장면까지 모여야 판정/);
+  assert.match(agents, /파일 검사는 규격을 봅니다[\s\S]*엔진 렌더와 게임 시점까지 Clunk가 직접 그려 측정한 뒤 판정합니다/);
   assert.match(panel, /inspectionRunId/);
   assert.match(facts, /fresh HF.*inspectionRunId/);
   assert.match(facts, /profileId is required for CURRENT/);
