@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import Link from "./NativeLink";
-import { BrandIcon } from "./BrandMark";
 
 /**
  * 2026-09-05 — /login 과 /signup 이 쓰는 한 장의 카드.
@@ -57,15 +56,9 @@ export function AuthCard({
   switchRow: ReactNode;
   legalNote: ReactNode;
 }) {
-  const primary = providers.find((option) => option.href) ?? providers[0] ?? null;
-  const rest = primary ? providers.filter((option) => option !== primary) : providers;
 
   return (
     <section className="cv5-auth-card cv5-door" aria-labelledby={titleId}>
-      <Link className="cv5-door-brand" href="/" aria-label="Clunk 홈">
-        <BrandIcon size={56} />
-      </Link>
-
       {eyebrow ? <p className="cv5-door-eyebrow">{eyebrow}</p> : null}
       <h1 id={titleId} className="cv5-door-title">{title}</h1>
       <p className="cv5-door-lede">{lede}</p>
@@ -76,11 +69,7 @@ export function AuthCard({
         <div className="cv5-door-actions">{actions}</div>
       ) : (
         <div className="cv5-door-ways">
-          {primary ? <AuthProviderButton option={primary} tone="primary" /> : null}
-          {rest.length ? (
-            <p className="cv5-door-or"><span>또는</span></p>
-          ) : null}
-          {rest.map((option) => (
+          {providers.map((option) => (
             <AuthProviderButton key={option.key} option={option} tone="secondary" />
           ))}
         </div>

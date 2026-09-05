@@ -72,17 +72,6 @@
   }
 }
 
-.cv5-door-brand {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 58px;
-  height: 58px;
-  border: 1px solid var(--v5-line);
-  border-radius: 17px;
-  background: var(--v5-panel);
-}
-
 .cv5-door-eyebrow {
   margin: 20px 0 0;
   font-family: var(--v5-label);
@@ -160,15 +149,7 @@
   color: var(--v5-amber);
 }
 
-.cv5-door-way[data-tone="primary"][data-ready="true"] {
-  background: var(--door-white);
-  color: var(--door-white-ink);
-  box-shadow: 0 12px 28px -18px rgba(0, 0, 0, 0.9);
-}
-
-.cv5-door-way[data-tone="primary"][data-ready="true"]:hover { filter: brightness(0.93); }
-.cv5-door-way[data-tone="primary"][data-ready="true"]:active { filter: brightness(0.88); }
-
+/* 2026-09-05 마스터: 두 수단은 같은 모양이다 — 한쪽만 흰 바탕에 그림자를 두지 않는다. 카드 위의 마크도 뺐다(나브에 워드마크가 이미 있다). */
 .cv5-door-way[data-tone="secondary"][data-ready="true"] {
   border-color: var(--v5-line-strong);
   background: var(--v5-panel);
