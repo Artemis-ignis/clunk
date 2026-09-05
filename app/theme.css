@@ -1,0 +1,497 @@
+/* ============================================================================
+   CLUNK — 테마 팔레트 세 벌 (2026-09-05)
+   기본(default) · 화이트(light) · 블랙(dark)
+
+   왜 이 파일이 생겼나
+   ------------------
+   2026-09-05 이전의 라이트/다크 토글은 눌러도 화면이 안 따라왔다(요소 435개 중
+   19개, 4.4%). 원인은 버튼이 아니라 배색이 한 곳에 모여 있지 않았다는 것이다.
+   cv5 층은 색을 리터럴로 박아 뒀고(site-v5.css 137개, marketplace.module.css
+   162개), globals/foundry 는 각자 자기 사다리를 들고 있었다. 토큰을 뒤집어도
+   리터럴은 그대로 남았다.
+
+   그래서 이 파일이 유일한 배색 원본이다. 화면이 쓰는 이름(--v5-*, --ink-*,
+   --text-*, --line, --foundry-* …)은 전부 여기 --t-* 를 가리키게 다시 묶었고,
+   흩어져 있던 리터럴은 같은 --t-* 로 갈아 끼웠다.
+
+   읽는 법
+   ------
+   · --t-on-rgb  겹쳐 칠하는 잉크의 RGB. 어두운 테마에서는 흰색, 화이트에서는
+     거의 검정. rgba(255,255,255,α) 로 박혀 있던 면·선은 전부
+     rgba(var(--t-on-rgb), α) 가 됐다 — 알파는 그대로 두고 밑색만 뒤집힌다.
+   · --t-ink-rgb  본문 잉크의 RGB. rgba(232,236,241,α) 계열이 여기로 왔다.
+     화이트의 8,11,16 은 알파 0.6 에서도 칩 바닥(#eef0f4) 위 5.04:1 이다.
+   · --t-art-*    렌더가 구워져 들어오는 무대. 세 테마 모두 어둡게 둔다 —
+     에셋 이미지의 배경이 검게 구워져 있어서, 무대만 희게 바꾸면 이미지가
+     네모난 검은 딱지로 뜬다. 대신 무대를 감싸는 카드(--t-bg1/--t-line)는
+     테마를 따라가고, 무대 안의 글자는 --t-art-ink 로 고정한다.
+   · 강조(그라데이션 버튼·링크·초점 링)의 색상은 세 테마가 같은 보라를 쓴다.
+     화이트에서만 글자로 읽히는 칸(--t-link/--t-indigo/--t-violet)을 어둡게 내려
+     흰 바탕에서 4.5:1 을 넘긴다. 채운 버튼의 그라데이션 자체는 그대로다.
+
+   세 블록은 반드시 같은 토큰 이름을 전부 갖는다(tests/theme-contract.test.mjs
+   가 파싱해서 확인한다). 하나라도 빠지면 그 테마에서만 값이 없어지고, 값이
+   없는 var() 는 선언 전체를 무효로 만들어 화면이 통째로 깨진다.
+   ========================================================================= */
+
+/* ---------------------------------------------------------------- 기본 */
+/* 오늘의 화면 그대로. 값은 app/site-v5.css 의 cv5 사다리(2026-09-04 중성 재조정)
+   와 app/components/cv5-surface.css 의 리맵에서 옮겼다. */
+:root[data-theme="default"] {
+  --t-color-scheme: dark;
+
+  --t-on-rgb: 255, 255, 255;
+  --t-shadow-rgb: 0, 0, 0;
+
+  --t-bg0: #17181b;
+  --t-bg1: #1d1f22;
+  --t-bg2: #24262a;
+  --t-bg3: #2c2f33;
+  --t-bg4: #34383d;
+  --t-bg-deep: #131416;
+  --t-panel: rgba(255, 255, 255, 0.035);
+  --t-line: rgba(255, 255, 255, 0.1);
+  --t-line-strong: rgba(255, 255, 255, 0.18);
+
+  --t-ink: #f2f4f7;
+  --t-ink-rgb: 232, 236, 241;
+  --t-ink-dim: rgba(232, 236, 241, 0.74);
+  --t-ink-faint: rgba(232, 236, 241, 0.6);
+  --t-ink-inverse: #1a1b1e;
+  --t-bg-inverse: #f4f9fd;
+
+  --t-bar: rgba(23, 24, 27, 0.96);
+  --t-bar-quiet: rgba(23, 24, 27, 0.82);
+  --t-glass: rgba(29, 31, 34, 0.72);
+  --t-glass-strong: rgba(23, 24, 27, 0.94);
+  --t-ground-rgb: 23, 24, 27;
+  --t-scrim: rgba(0, 0, 0, 0.62);
+
+  /* 렌더 무대 — 세 테마 모두 어둡게 둔다(위 주석). 무대를 감싸는 액자는
+     --t-well-* 로 테마를 따라간다. */
+  --t-art-card: #26282c;
+  --t-art-tile: #2a2d31;
+  --t-art-cap: #232529;
+  --t-art-top: #26282c;
+  --t-art-mid: #1d1f22;
+  --t-art-bot: #17181b;
+  --t-art-radial-in: #2c2f33;
+  --t-art-radial-out: #232529;
+  --t-art-well: #0d1017;
+  --t-art-ink: #f2f4f7;
+  --t-art-ink-dim: rgba(232, 236, 241, 0.72);
+  --t-plate: rgba(11, 13, 24, 0.8);
+  --t-plate-ink: #ffffff;
+
+  /* 무대와 판을 감싸는 액자 — 이쪽은 테마를 따라간다 */
+  --t-well-grad: linear-gradient(178deg, #131628, #0c0e1a 68%);
+  --t-well-grad-soft: linear-gradient(178deg, #12152699, #0b0d18);
+  --t-well-grad2: linear-gradient(178deg, #232529, #1b1c1f 68%);
+  --t-well-grad2-soft: linear-gradient(178deg, #23252999, #1b1c1f);
+  --t-code-bg: #1a1b1e;
+  --t-code-ink: #b4bcc8;
+
+  --t-link: #a5a8ff;
+  --t-indigo: #7b7ff0;
+  --t-violet: #a97bf5;
+  --t-accent-rgb: 139, 92, 246;
+  --t-accent-ink: #ffffff;
+  --t-accent-soft-ink: #c4b5fd;
+  --t-badge-bg: #151329;
+  --t-badge-ink: #e7e2ff;
+  --t-grad: linear-gradient(96deg, #6c6ff2 6%, #8b7bf4 94%);
+  --t-grad-soft: linear-gradient(96deg, rgba(123, 127, 240, 0.15), rgba(139, 123, 244, 0.15));
+  --t-glow: 0 10px 26px -14px rgba(108, 111, 242, 0.5);
+
+  --t-cyan: #59d9ff;
+  --t-cyan-rgb: 89, 217, 255;
+  --t-green: #34d399;
+  --t-green-rgb: 52, 211, 153;
+  --t-amber: #fbbf24;
+  --t-amber-rgb: 251, 191, 36;
+  --t-red: #f87171;
+  --t-red-rgb: 248, 113, 113;
+
+  --t-shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.44), 0 4px 14px rgba(0, 0, 0, 0.36);
+  --t-shadow-panel: 0 2px 4px rgba(0, 0, 0, 0.4), 0 18px 44px rgba(0, 0, 0, 0.5);
+  --t-shadow-lift: 0 4px 12px rgba(0, 0, 0, 0.46), 0 30px 70px rgba(0, 0, 0, 0.6);
+  --t-shadow-accent: 0 10px 26px -14px rgba(108, 111, 242, 0.5);
+}
+
+/* ---------------------------------------------------------------- 화이트 */
+/* 겹쳐 칠하는 잉크(--t-on-rgb)를 흰색에서 거의 검정으로 뒤집는 것이 이 팔레트의
+   전부다. 알파는 어두운 테마와 같은 값을 쓰므로, 0.03 짜리 흰 면은 0.03 짜리
+   먹 면이 되어 흰 바탕 위에서 같은 세기로 읽힌다. */
+:root[data-theme="light"] {
+  --t-color-scheme: light;
+
+  --t-on-rgb: 8, 11, 16;
+  --t-shadow-rgb: 15, 23, 33;
+
+  --t-bg0: #f6f7f9;
+  --t-bg1: #ffffff;
+  --t-bg2: #ffffff;
+  --t-bg3: #eef0f4;
+  --t-bg4: #e2e6ec;
+  --t-bg-deep: #eceef2;
+  --t-panel: rgba(8, 11, 16, 0.03);
+  --t-line: rgba(8, 11, 16, 0.14);
+  --t-line-strong: rgba(8, 11, 16, 0.26);
+
+  --t-ink: #0b0f15;
+  --t-ink-rgb: 8, 11, 16;
+  --t-ink-dim: rgba(8, 11, 16, 0.78);
+  --t-ink-faint: rgba(8, 11, 16, 0.66);
+  --t-ink-inverse: #ffffff;
+  --t-bg-inverse: #14161a;
+
+  --t-bar: rgba(255, 255, 255, 0.96);
+  --t-bar-quiet: rgba(255, 255, 255, 0.84);
+  --t-glass: rgba(255, 255, 255, 0.82);
+  --t-glass-strong: rgba(255, 255, 255, 0.96);
+  --t-ground-rgb: 246, 247, 249;
+  --t-scrim: rgba(15, 23, 33, 0.46);
+
+  /* 무대는 어두운 채로 둔다 — 에셋 렌더의 배경이 검게 구워져 들어온다. */
+  --t-art-card: #26282c;
+  --t-art-tile: #2a2d31;
+  --t-art-cap: #232529;
+  --t-art-top: #26282c;
+  --t-art-mid: #1d1f22;
+  --t-art-bot: #17181b;
+  --t-art-radial-in: #2c2f33;
+  --t-art-radial-out: #232529;
+  --t-art-well: #0d1017;
+  --t-art-ink: #f2f4f7;
+  --t-art-ink-dim: rgba(232, 236, 241, 0.72);
+  --t-plate: rgba(11, 13, 24, 0.8);
+  --t-plate-ink: #ffffff;
+
+  --t-well-grad: linear-gradient(178deg, #ffffff, #f1f3f7 68%);
+  --t-well-grad-soft: linear-gradient(178deg, #ffffffdd, #f4f6fa);
+  --t-well-grad2: linear-gradient(178deg, #ffffff, #eef0f4 68%);
+  --t-well-grad2-soft: linear-gradient(178deg, #ffffffcc, #f2f4f8);
+  --t-code-bg: #f1f3f7;
+  --t-code-ink: #38424f;
+
+  /* 흰 바탕에서 글자로 읽혀야 하는 칸만 내린다: link 7.35:1 · indigo 7.29:1 ·
+     violet 6.16:1. 채운 버튼의 그라데이션은 세 테마가 같은 물건으로 읽혀야
+     하므로 그대로 둔다. */
+  --t-link: #4a45cf;
+  --t-indigo: #4a45cf;
+  --t-violet: #7231d6;
+  --t-accent-rgb: 114, 49, 214;
+  --t-accent-ink: #ffffff;
+  --t-accent-soft-ink: #5b21b6;
+  --t-badge-bg: #efeaff;
+  --t-badge-ink: #3c1a86;
+  --t-grad: linear-gradient(96deg, #6c6ff2 6%, #8b7bf4 94%);
+  --t-grad-soft: linear-gradient(96deg, rgba(114, 49, 214, 0.1), rgba(139, 123, 244, 0.12));
+  --t-glow: 0 10px 26px -14px rgba(108, 111, 242, 0.45);
+
+  --t-cyan: #0b6c8c;
+  --t-cyan-rgb: 11, 108, 140;
+  /* #0b7a52 는 자기 soft 칠(13% 알파) 위에서 4.39:1 로 아슬하게 못 미쳤다
+     (2026-09-05 /dashboard "연결됨" 실측). 한 칸 내려 5.02:1. */
+  --t-green: #0a7049;
+  --t-green-rgb: 10, 112, 73;
+  --t-amber: #8a5a06;
+  --t-amber-rgb: 138, 90, 6;
+  --t-red: #b3213c;
+  --t-red-rgb: 179, 33, 60;
+
+  --t-shadow-soft: 0 1px 2px rgba(15, 23, 33, 0.06), 0 4px 14px rgba(15, 23, 33, 0.06);
+  --t-shadow-panel: 0 2px 4px rgba(15, 23, 33, 0.05), 0 18px 44px rgba(15, 23, 33, 0.1);
+  --t-shadow-lift: 0 4px 12px rgba(15, 23, 33, 0.08), 0 30px 70px rgba(15, 23, 33, 0.14);
+  --t-shadow-accent: 0 10px 26px -14px rgba(108, 111, 242, 0.45);
+}
+
+/* ---------------------------------------------------------------- 블랙 */
+/* 바닥이 순수한 검정(#000)이라 OLED 화면에서 픽셀이 꺼진다. 면과 면 사이가
+   좁아지므로 겹쳐 칠하는 알파와 경계선을 한 칸씩 올려, 카드가 바닥에 묻히지
+   않게 한다(--t-panel 0.035 → 0.045, --t-line 0.10 → 0.14). */
+:root[data-theme="dark"] {
+  --t-color-scheme: dark;
+
+  --t-on-rgb: 255, 255, 255;
+  --t-shadow-rgb: 0, 0, 0;
+
+  --t-bg0: #000000;
+  --t-bg1: #0b0b0d;
+  --t-bg2: #131316;
+  --t-bg3: #1c1c20;
+  --t-bg4: #26262b;
+  --t-bg-deep: #000000;
+  --t-panel: rgba(255, 255, 255, 0.045);
+  --t-line: rgba(255, 255, 255, 0.14);
+  --t-line-strong: rgba(255, 255, 255, 0.24);
+
+  --t-ink: #f7f8fa;
+  --t-ink-rgb: 236, 239, 244;
+  --t-ink-dim: rgba(236, 239, 244, 0.76);
+  --t-ink-faint: rgba(236, 239, 244, 0.62);
+  --t-ink-inverse: #000000;
+  --t-bg-inverse: #f7f8fa;
+
+  --t-bar: rgba(0, 0, 0, 0.96);
+  --t-bar-quiet: rgba(0, 0, 0, 0.82);
+  --t-glass: rgba(11, 11, 13, 0.78);
+  --t-glass-strong: rgba(0, 0, 0, 0.94);
+  --t-ground-rgb: 0, 0, 0;
+  --t-scrim: rgba(0, 0, 0, 0.72);
+
+  --t-art-card: #131316;
+  --t-art-tile: #16171a;
+  --t-art-cap: #101012;
+  --t-art-top: #1a1a1e;
+  --t-art-mid: #0e0e10;
+  --t-art-bot: #000000;
+  --t-art-radial-in: #1c1c20;
+  --t-art-radial-out: #101012;
+  --t-art-well: #06080d;
+  --t-art-ink: #f7f8fa;
+  --t-art-ink-dim: rgba(236, 239, 244, 0.74);
+  --t-plate: rgba(0, 0, 0, 0.82);
+  --t-plate-ink: #ffffff;
+
+  --t-well-grad: linear-gradient(178deg, #0d1020, #000000 68%);
+  --t-well-grad-soft: linear-gradient(178deg, #0b0b12cc, #000000);
+  --t-well-grad2: linear-gradient(178deg, #131316, #000000 68%);
+  --t-well-grad2-soft: linear-gradient(178deg, #13131699, #000000);
+  --t-code-bg: #0b0b0d;
+  --t-code-ink: #aeb6c2;
+
+  --t-link: #b0b3ff;
+  --t-indigo: #8b8ff5;
+  --t-violet: #b48af7;
+  --t-accent-rgb: 149, 105, 250;
+  --t-accent-ink: #ffffff;
+  --t-accent-soft-ink: #cdbcff;
+  --t-badge-bg: #14122a;
+  --t-badge-ink: #e7e2ff;
+  --t-grad: linear-gradient(96deg, #6c6ff2 6%, #8b7bf4 94%);
+  --t-grad-soft: linear-gradient(96deg, rgba(123, 127, 240, 0.18), rgba(139, 123, 244, 0.18));
+  --t-glow: 0 10px 26px -14px rgba(108, 111, 242, 0.55);
+
+  --t-cyan: #6ddfff;
+  --t-cyan-rgb: 109, 223, 255;
+  --t-green: #3fd9a4;
+  --t-green-rgb: 63, 217, 164;
+  --t-amber: #fcc63a;
+  --t-amber-rgb: 252, 198, 58;
+  --t-red: #fa8888;
+  --t-red-rgb: 250, 136, 136;
+
+  --t-shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.6), 0 4px 14px rgba(0, 0, 0, 0.5);
+  --t-shadow-panel: 0 2px 4px rgba(0, 0, 0, 0.55), 0 18px 44px rgba(0, 0, 0, 0.65);
+  --t-shadow-lift: 0 4px 12px rgba(0, 0, 0, 0.6), 0 30px 70px rgba(0, 0, 0, 0.75);
+  --t-shadow-accent: 0 10px 26px -14px rgba(108, 111, 242, 0.55);
+}
+
+/* ============================================================================
+   화면이 쓰는 이름 → 위 팔레트
+   ---------------------------------------------------------------------------
+   선택자를 `:root[data-theme]` 로 쓴다. globals.css 의 `:root[data-theme="dark"]`
+   램프와 같은 특정도(0,2,0)지만 이 파일이 뒤에 실려 이긴다. 특정도를 더 올리면
+   .cv5-surface 리맵(0,3,0)과 다투게 되므로 올리지 않는다 — 그쪽은 리맵 자체를
+   --t-* 로 고쳐 뒀다.
+   ========================================================================= */
+:root[data-theme] {
+  color-scheme: var(--t-color-scheme);
+
+  /* --- app/site-v5.css 의 cv5 사다리 --- */
+  --v5-bg0: var(--t-bg0);
+  --v5-bg1: var(--t-bg1);
+  --v5-bg2: var(--t-bg2);
+  --v5-bg3: var(--t-bg3);
+  --v5-panel: var(--t-panel);
+  --v5-line: var(--t-line);
+  --v5-line-strong: var(--t-line-strong);
+  --v5-ink: var(--t-ink);
+  --v5-ink-dim: var(--t-ink-dim);
+  --v5-ink-faint: var(--t-ink-faint);
+  --v5-indigo: var(--t-indigo);
+  --v5-violet: var(--t-violet);
+  --v5-grad: var(--t-grad);
+  --v5-grad-soft: var(--t-grad-soft);
+  --v5-glow: var(--t-glow);
+  --v5-cyan: var(--t-cyan);
+  --v5-green: var(--t-green);
+  --v5-amber: var(--t-amber);
+  --v5-red: var(--t-red);
+
+  /* --- app/globals.css 의 legacy 사다리 --- */
+  --ink-0: var(--t-bg0);
+  --ink-1: var(--t-bg1);
+  --ink-2: var(--t-bg2);
+  --ink-3: var(--t-bg3);
+  --ink-4: var(--t-bg4);
+  --ink-inverse: var(--t-bg-inverse);
+  --line: var(--t-line);
+  --line-strong: var(--t-line-strong);
+  --tint-1: rgba(var(--t-on-rgb), 0.03);
+  --tint-2: rgba(var(--t-on-rgb), 0.05);
+  --tint-3: rgba(var(--t-on-rgb), 0.08);
+  --text: rgba(var(--t-ink-rgb), 0.72);
+  --text-strong: var(--t-ink);
+  --text-muted: rgba(var(--t-ink-rgb), 0.66);
+  --text-dim: var(--t-ink-faint);
+  --text-on-accent: var(--t-accent-ink);
+  --accent: var(--t-link);
+  --accent-strong: var(--t-indigo);
+  --accent-bright: rgb(var(--t-accent-rgb));
+  --accent-glow: var(--t-accent-soft-ink);
+  --accent-soft: rgba(var(--t-accent-rgb), 0.14);
+  --accent-line: rgba(var(--t-accent-rgb), 0.38);
+  --accent-ink: var(--t-accent-ink);
+  --accent-2: var(--t-violet);
+  --accent-2-bright: rgb(var(--t-accent-rgb));
+  --accent-2-soft: rgba(var(--t-accent-rgb), 0.14);
+  --success: var(--t-green);
+  --success-soft: rgba(var(--t-green-rgb), 0.13);
+  --warning: var(--t-amber);
+  --warning-soft: rgba(var(--t-amber-rgb), 0.13);
+  --danger: var(--t-red);
+  --danger-soft: rgba(var(--t-red-rgb), 0.13);
+  --glass: var(--t-glass);
+  --glass-strong: var(--t-glass-strong);
+  --ground-rgb: var(--t-ground-rgb);
+  --shadow-soft: var(--t-shadow-soft);
+  --shadow-panel: var(--t-shadow-panel);
+  --shadow-lift: var(--t-shadow-lift);
+  --shadow-accent: var(--t-shadow-accent);
+
+  /* --- app/foundry.css 의 warm-paper 사다리 --- */
+  --foundry-paper: var(--t-bg0);
+  --foundry-paper-strong: var(--t-bg1);
+  --foundry-paper-deep: var(--t-bg-deep);
+  --foundry-ink: var(--t-ink);
+  --foundry-ink-soft: rgba(var(--t-ink-rgb), 0.7);
+  --foundry-ink-faint: var(--t-ink-faint);
+  --foundry-graphite: var(--t-bg1);
+  --foundry-graphite-soft: var(--t-bg3);
+  --foundry-line: var(--t-line);
+  --foundry-line-strong: var(--t-line-strong);
+  --foundry-amber: var(--t-violet);
+  --foundry-amber-deep: var(--t-link);
+  --foundry-amber-soft: rgba(var(--t-accent-rgb), 0.16);
+}
+
+/* 페이지 바닥. globals.css 의 `html/body { background: var(--ink-0) }` 는 위
+   리맵을 따라오지만, site-v5.css 의 `html:has(.cv5)` 가 --v5-bg0 의 리터럴
+   대체값을 들고 있어 한 겹 더 못을 박아 둔다. */
+:root[data-theme] body { background: var(--t-bg0); }
+
+/* ============================================================================
+   테마 스위치 (app/components/ThemeSwitch.tsx)
+   ---------------------------------------------------------------------------
+   세 칸짜리 알약 하나. 내비의 오른쪽 끝(데스크톱), 모바일 드로어, 작업공간
+   툴바 — 세 곳에 같은 모양으로 선다. 색은 위 팔레트만 쓰므로 어느 테마에서든
+   자기 화면에 맞는 대비가 나온다.
+   ========================================================================= */
+.theme-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--t-line);
+  border-radius: 999px;
+  background: rgba(var(--t-on-rgb), 0.04);
+}
+
+.theme-switch-option {
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 10px;
+  height: 26px;
+  background: transparent;
+  color: var(--t-ink-faint);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.18s, background 0.18s;
+}
+
+.theme-switch-option:hover { color: var(--t-ink); }
+
+.theme-switch-option.is-on {
+  color: var(--t-ink);
+  background: rgba(var(--t-on-rgb), 0.1);
+  box-shadow: inset 0 0 0 1px var(--t-line);
+}
+
+.theme-switch-option:focus-visible {
+  outline: 2px solid var(--t-indigo);
+  outline-offset: 2px;
+}
+
+/* 드로어 안에서는 한 줄을 통째로 쓴다. 드로어는 calc(100dvh - 84px) 안에서
+   스크롤하므로 높이를 더 먹지 않게 계정 줄과 같은 리듬(32px)으로 맞춘다. */
+.theme-switch-drawer {
+  display: flex;
+  width: 100%;
+  margin-top: 8px;
+}
+.theme-switch-drawer .theme-switch-option {
+  flex: 1;
+  height: 32px;
+}
+
+/* 좁은 화면의 내비 바에서는 자리를 못 낸다 — 드로어 쪽 사본이 그 역할을 한다.
+   기준값은 site-v5.css:1199px 가 보조 메뉴(.sitenav-utility)를 접는 지점과 같다.
+   그 아래에서는 한 줄에 기본 메뉴·계정·CTA 만 남는다. */
+@media (max-width: 1199px) {
+  .sitenav-end .theme-switch-bar { display: none; }
+}
+/* 작업공간 툴바는 760px 아래에서 제목·검사 버튼·계정만 남는다. 그 아래에서는
+   왼쪽 메뉴(드로어) 안의 사본이 대신 선다. */
+@media (max-width: 760px) {
+  .workspace-toolbar .theme-switch-bar { display: none; }
+}
+
+/* ============================================================================
+   무대 위에 얹히는 조작부
+   ---------------------------------------------------------------------------
+   3D 작업대(.cv5-bench)와 3D 미리보기(.cv5-embed3d)의 도구 줄·칩·설명은 렌더
+   화면 위에 떠 있다. 그 화면은 세 테마 모두 어둡다(--t-art-*). 그런데 글자와
+   경계선은 테마 토큰을 읽고 있어서, 화이트 테마에서 rgb(8,11,16) 잉크가
+   rgb(47,49,52) 판 위에 얹혀 1.42:1 이 됐다(2026-09-05 측정).
+   여기서 잉크·선 토큰만 무대용 값으로 되돌린다. 규칙을 하나하나 고치는 대신
+   토큰을 국소적으로 다시 선언하는 쪽이, 나중에 도구가 늘어도 따라온다.
+   ========================================================================= */
+/* 같은 이유로 어두운 제품 목업 셋도 여기 묶는다 — 화면 안에 든 "제품 화면"
+   그림이라 바닥이 세 테마 모두 어둡다(globals.css 의 #0a1a27 · #0b1724 ·
+   #0b2130). 그 바닥은 다른 사람이 손대는 블록이라 건드리지 않고, 그 안에서만
+   잉크·선 토큰을 무대용으로 되돌린다. */
+.cv5-bench,
+.cv5-embed3d,
+.sample-workbench,
+.live-evidence-showcase,
+.asset-family-visual,
+/* 문법 색이 칠해진 코드 카드도 세 테마 모두 어둡게 둔다 — 바닥만 희게 바꾸면
+   그 색들이 흰 종이 위에 뜬다. */
+.agent-code-card {
+  --t-on-rgb: 255, 255, 255;
+  --t-ink-rgb: 232, 236, 241;
+  --t-ink: var(--t-art-ink);
+  --t-ink-dim: var(--t-art-ink-dim);
+  --t-ink-faint: rgba(232, 236, 241, 0.6);
+  --t-line: rgba(255, 255, 255, 0.1);
+  --t-line-strong: rgba(255, 255, 255, 0.18);
+  --v5-ink: var(--t-art-ink);
+  --v5-ink-dim: var(--t-art-ink-dim);
+  --v5-ink-faint: rgba(232, 236, 241, 0.6);
+  --v5-line: rgba(255, 255, 255, 0.1);
+  --v5-line-strong: rgba(255, 255, 255, 0.18);
+  --text: var(--t-art-ink-dim);
+  --text-strong: var(--t-art-ink);
+  --text-muted: var(--t-art-ink-dim);
+  --text-dim: rgba(232, 236, 241, 0.6);
+  --line: rgba(255, 255, 255, 0.1);
+  --line-strong: rgba(255, 255, 255, 0.18);
+}

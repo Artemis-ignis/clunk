@@ -1,6 +1,5 @@
 import { createPageMetadata } from "../components/site-metadata";
 import {
-  LEGAL_DRAFT_DATE,
   LEGAL_EFFECTIVE_DATE,
   LEGAL_OPERATOR_ROWS,
   LegalRows,
@@ -29,7 +28,8 @@ export default function TermsPage() {
         <h2 id="terms-operator">사업자 표시사항</h2>
         <p>
           전자상거래 등에서의 소비자보호에 관한 법률 제10조가 요구하는 표시사항입니다.
-          확정된 항목은 사업자등록증명 그대로 기재했고, 미확정 항목은 <b>지어낸 값 대신 [ ]로 표시</b>합니다.
+          확정된 항목은 사업자등록증명 그대로 기재했습니다. 아직 확정되지 않은 항목은 <b>[확정 전]</b>이라고
+          적어 두고, 확정되는 대로 이 자리에 채웁니다.
         </p>
         <LegalRows rows={LEGAL_OPERATOR_ROWS} />
         <p className="cv5-legal-note">
@@ -126,10 +126,9 @@ export default function TermsPage() {
           운영합니다. 구체적인 예외와 절차는 <a href="/refunds">취소·환불정책</a>에 정합니다.
         </p>
         <p className="cv5-legal-note">
-          위 고지·동의 절차는 구매 흐름에 구현되어 있습니다: 유료 결제는 청약철회 제한
-          동의가 확인된 요청에서만 시작되고, 동의 없는 요청에는 결제 세션이 생성되지
-          않습니다. 동의가 있어야만 주문이 생성되므로 주문 기록이 동의 시점의 기록을
-          겸합니다. 단, 현재 유료 결제 기능이 없어 유상 거래를 하지 않습니다.
+          결제는 이 동의를 받은 뒤에만 시작됩니다. 동의하지 않으면 결제가 시작되지 않고 주문도
+          만들어지지 않으므로, 주문 기록이 곧 동의한 시점의 기록입니다. 현재는 유료 결제 기능이
+          없어 유상 거래를 하지 않습니다.
         </p>
       </section>
 
@@ -228,7 +227,7 @@ export default function TermsPage() {
           라이선스 문서에 따릅니다.
         </p>
         <p className="cv5-legal-note">
-          부칙 — 이 약관은 {LEGAL_DRAFT_DATE} 작성되어 {LEGAL_EFFECTIVE_DATE}부터 시행합니다. 유상 판매에
+          부칙 — 이 약관은 {LEGAL_EFFECTIVE_DATE}부터 시행합니다. 유상 판매에
           관한 조항은 유료 전환을 최소 30일 전에 공지한 뒤부터 적용합니다.
         </p>
       </section>

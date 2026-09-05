@@ -1,6 +1,5 @@
 import { SiteNav } from "../components/SiteNav";
 import { SiteFooter } from "../components/SiteFooter";
-import { ForceDarkTheme } from "../components/ForceDarkTheme";
 import { createPageMetadata } from "../components/site-metadata";
 import { ReviewSurface } from "./ReviewSurface";
 import "./review.css";
@@ -22,7 +21,6 @@ export const metadata = createPageMetadata({
 export default function ReviewPage({ searchParams }: { searchParams?: Promise<{ glb?: string }> }) {
   return (
     <div className="cv5">
-      <ForceDarkTheme />
       <div className="cv5-stars" aria-hidden="true" />
       <a className="clunk-home-skip-link" href="#main-content">본문으로 건너뛰기</a>
       <SiteNav active="review" />

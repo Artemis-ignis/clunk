@@ -2,7 +2,6 @@ import Link from "./components/NativeLink";
 import { Icon } from "./components/Icon";
 import { SiteNav } from "./components/SiteNav";
 import { RevealObserver } from "./components/Reveal";
-import { ForceDarkTheme } from "./components/ForceDarkTheme";
 import { LandingMcpDemo } from "./components/LandingMcpDemo";
 import { AgentLiveDemo } from "./components/AgentLiveDemo";
 import { SiteFooter } from "./components/SiteFooter";
@@ -13,9 +12,11 @@ import { EmbeddedGlbViewer } from "./components/review/EmbeddedGlbViewer";
 
 export const metadata = createPageMetadata({
   // The title and description are the operator's exact wording (2026-09-02): the three
-  // products in one line, no internal vocabulary. Do not "improve" them.
-  title: "AI 게임 에셋 생성 & 게임 제작 에이전트",
-  description: "2D·3D 게임 에셋을 생성하고, 검사·수정하고, AI 에이전트와 함께 게임까지 제작하세요.",
+  // products in one line, no internal vocabulary. Do not "improve" them — the one word that
+  // did change is 생성 → 제작, because the nav, the sections and the glossary
+  // (docs/copy-glossary.ko.md) all say 제작 and the title tag was the last place saying 생성.
+  title: "AI 게임 에셋 제작 & 게임 제작 에이전트",
+  description: "2D·3D 게임 에셋을 제작하고, 검사·수정하고, AI 에이전트와 함께 게임까지 제작하세요.",
   path: "/",
 });
 
@@ -50,6 +51,7 @@ const FLOW = ["제작", "검사", "수정", "적용", "에이전트"] as const;
  * tests/listing-facts-truth.test.mjs opens the file again to check it.
  */
 import landingFacts from "./data/landing-facts.json";
+import { PREVIEW_NOTE_ALWAYS } from "./api/_lib/market-path";
 import { formatBytes } from "./components/listing-facts-rows";
 import { areSalesOpen } from "./api/_lib/sales-lock";
 
@@ -63,7 +65,9 @@ import { areSalesOpen } from "./api/_lib/sales-lock";
 const LANDING = landingFacts.facts;
 
 const FEATURED_MODEL = {
-  src: "/market/clunk-heli-h145/h145.glb",
+  // 첫 화면은 언제나 미리보기 파일을 연다. 파는 파일은 로그인한 사람에게만 나가고
+  // (app/api/_lib/market-gate.ts), 첫 화면은 로그인하지 않은 방문자가 먼저 보는 자리다.
+  src: "/market/clunk-heli-h145/preview-h145.glb",
   poster: "/market/clunk-heli-h145/hero-clunk-heli-h145.png",
   name: "헬리콥터",
   fileName: LANDING.helicopter.fileName,
@@ -99,7 +103,7 @@ const INSPECTED_MODEL = {
  * (app/components/agent-guides.ts의 buildAgentGuides 키 목록).
  * 이 저장소에 연결 가이드가 없는 이름(Grok Build·Antigravity·DeepSeek·GLM)은 뺐습니다.
  */
-const AGENT_CLIENTS = ["Claude Code", "Codex", "Cursor", "GitHub Copilot", "Claude Desktop", "VS Code", "로컬 stdio"] as const;
+const AGENT_CLIENTS = ["Claude Code", "Codex", "Cursor", "GitHub Copilot", "Claude Desktop", "VS Code", "내 컴퓨터 연결"] as const;
 
 /**
  * 다섯 단계 알약 밑에 붙는 한 줄.
@@ -158,7 +162,6 @@ export default function Home() {
        특히 섹션 03 을 한 판에 맞추려고 화면 높이 900 이하에서 MCP 클라이언트 전환기와
        단계 알약을 숨기던 규칙은 되살리지 않는다 — 그건 맞춘 게 아니라 지운 것이었다. */
     <div className="cv5 cv5-snap">
-      <ForceDarkTheme />
       <RevealObserver />
       <div className="cv5-stars" aria-hidden="true" />
       <a className="clunk-home-skip-link" href="#main-content">본문으로 건너뛰기</a>
@@ -187,8 +190,8 @@ export default function Home() {
                     2026-09-05). It says what the product does in the words a visitor uses —
                     not how the inspector does it. */}
                 <p className="cv5-hero-lede">
-                  2D·3D 게임 에셋을 생성하고, 검사·수정하고, AI 에이전트와 함께 게임까지 제작하세요.
-                  구매한 에셋이 게임에서 문제없이 돌아가는지도 바로 확인해 드립니다.
+                  2D·3D 게임 에셋을 제작하고, 검사·수정하고, AI 에이전트와 함께 게임까지 제작하세요.
+                  받은 에셋이 게임에서 문제없이 돌아가는지도 바로 확인해 드립니다.
                 </p>
                 <div className="cv5-cta-row">
                   <Link className="cv5-btn cv5-btn-primary" href="/signup?return_to=%2Fstudio%3Fintent%3Dcreate" prefetch={false}>
@@ -277,14 +280,16 @@ export default function Home() {
                     <EmbeddedGlbViewer
                       src={FEATURED_MODEL.src}
                       poster={FEATURED_MODEL.poster}
-                      alt={`마켓에서 파는 ${FEATURED_MODEL.name} — 드래그해서 돌려보세요`}
-                      hint="드래그 회전 · 휠 줌 · 마켓에서 파는 파일 그대로"
+                      alt={`마켓에 올라온 ${FEATURED_MODEL.name} — 드래그해서 돌려보세요`}
+                      hint="드래그 회전 · 휠 줌"
+                      previewSrc={FEATURED_MODEL.src}
+                      previewNote={PREVIEW_NOTE_ALWAYS}
                     />
                   </div>
                   <div className="cv5-make-facts">
                     <div className="cv5-make-name">
                       <b>{FEATURED_MODEL.name}</b>
-                      <span>마켓에 올라와 있는 파일 그대로 · 아래 숫자는 이 파일에서 직접 측정한 값</span>
+                      <span>아래 숫자는 마켓에서 받는 파일에서 직접 측정한 값</span>
                     </div>
                     <div><span>폴리곤</span><b>{FEATURED_MODEL.measured.faces}개</b></div>
                     <div><span>파일 크기</span><b>{FEATURED_MODEL.measured.size}</b></div>
@@ -403,7 +408,7 @@ export default function Home() {
             </div>
             <div className="cv5-sec-visual cv5-reveal" data-delay="1">
               <div className="cv5-mock">
-                <div className="cv5-mock-bar"><span>에이전트 <b>작업 화면</b></span><span>실제로 연결된 상태</span></div>
+                <div className="cv5-mock-bar"><span>에이전트 <b>작업 화면</b></span><span>미리 준비된 화면</span></div>
                 <div className="cv5-mock-body cv5-agent-mock">
                   <AgentLiveDemo />
                   <div className="cv5-mcp-demo">

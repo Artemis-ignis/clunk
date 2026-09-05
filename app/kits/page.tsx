@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { SiteShell } from "../components/SiteShell";
-import { ForceDarkTheme } from "../components/ForceDarkTheme";
 import { KitsIndex } from "../components/KitsIndex";
 import { createPageMetadata } from "../components/site-metadata";
 import { areSalesOpen } from "../api/_lib/sales-lock";
@@ -37,7 +36,6 @@ export default async function KitsPage({
 
   return (
     <div className="cv5">
-      <ForceDarkTheme />
       <div className="cv5-stars" aria-hidden="true" />
       <SiteShell active="kits">
         <main className={styles.page}>

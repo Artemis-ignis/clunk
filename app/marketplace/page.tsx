@@ -1,7 +1,6 @@
 import Link from "../components/NativeLink";
 import { Icon } from "../components/Icon";
 import { SiteShell } from "../components/SiteShell";
-import { ForceDarkTheme } from "../components/ForceDarkTheme";
 import { RevealObserver } from "../components/Reveal";
 import { createPageMetadata } from "../components/site-metadata";
 import { MarketplaceCatalog } from "../components/MarketplaceCatalog";
@@ -42,7 +41,6 @@ export default function MarketplacePage() {
   const salesOpen = areSalesOpen();
   return (
     <div className="cv5">
-      <ForceDarkTheme />
       <RevealObserver />
       <div className="cv5-stars" aria-hidden="true" />
       <SiteShell active="marketplace">

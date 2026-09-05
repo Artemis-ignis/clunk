@@ -33,7 +33,7 @@
 .workspace-cv5 .workspace-rail,
 .workspace-cv5 .workspace-drawer {
   border-right-color: var(--v5-line);
-  background: rgba(8, 9, 19, 0.86);
+  background: rgba(var(--t-ground-rgb), 0.86);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
@@ -69,22 +69,22 @@
   letter-spacing: -0.01em;
 }
 .workspace-cv5 .rail-link svg { color: var(--v5-ink-faint); }
-.workspace-cv5 .rail-link:hover { background: rgba(255, 255, 255, 0.05); color: var(--v5-ink); }
+.workspace-cv5 .rail-link:hover { background: rgba(var(--t-on-rgb), 0.05); color: var(--v5-ink); }
 .workspace-cv5 .rail-link:hover svg { color: var(--v5-ink-dim); }
 
 /* Active nav is the landing's gradient-tinted pill, not a flat cyan wash. */
 .workspace-cv5 .rail-link-active {
-  border: 1px solid rgba(139, 92, 246, 0.32);
+  border: 1px solid rgba(var(--t-accent-rgb), 0.32);
   background: var(--v5-grad-soft);
   color: var(--v5-ink);
   font-weight: 700;
 }
-.workspace-cv5 .rail-link-active svg { color: #c4b5fd; }
+.workspace-cv5 .rail-link-active svg { color: var(--t-accent-soft-ink); }
 
 .workspace-cv5 .rail-plan {
   border: 1px solid var(--v5-line);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--t-on-rgb), 0.03);
 }
 .workspace-cv5 .rail-plan strong { color: var(--v5-ink); }
 .workspace-cv5 .rail-plan small { color: var(--v5-ink-faint); }
@@ -92,7 +92,7 @@
 /* ----------------------------------------------------------------- toolbar */
 .workspace-cv5 .workspace-toolbar {
   border-bottom: 1px solid var(--v5-line);
-  background: rgba(6, 7, 15, 0.78);
+  background: rgba(var(--t-ground-rgb), 0.78);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
@@ -107,13 +107,13 @@
 .workspace-cv5 .workspace-quick-action {
   border: 1px solid var(--v5-line-strong);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--t-on-rgb), 0.03);
   color: var(--v5-ink);
   font-weight: 650;
 }
 .workspace-cv5 .workspace-quick-action:hover {
-  border-color: rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(var(--t-on-rgb), 0.3);
+  background: rgba(var(--t-on-rgb), 0.06);
 }
 
 .workspace-cv5 .workspace-avatar {
@@ -127,7 +127,7 @@
   border-radius: 10px;
   color: var(--v5-ink-dim);
 }
-.workspace-cv5 .icon-button:hover { background: rgba(255, 255, 255, 0.06); color: var(--v5-ink); }
+.workspace-cv5 .icon-button:hover { background: rgba(var(--t-on-rgb), 0.06); color: var(--v5-ink); }
 
 /* -------------------------------------------------------------------- main */
 .workspace-cv5 .workspace-main {
@@ -148,15 +148,15 @@
 /* Status chips: monospace label treatment, matching the landing's mock bars. */
 .workspace-cv5 .conn-chip {
   border: 1px solid var(--v5-line);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(var(--t-on-rgb), 0.04);
   font-family: var(--v5-label);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.06em;
 }
 .workspace-cv5 .conn-chip-connected {
-  border-color: rgba(52, 211, 153, 0.4);
-  background: rgba(52, 211, 153, 0.1);
+  border-color: rgba(var(--t-green-rgb), 0.4);
+  background: rgba(var(--t-green-rgb), 0.1);
   color: var(--v5-green);
 }
 
@@ -169,9 +169,9 @@
   align-items: center;
   min-height: 28px;
   padding: 0 12px;
-  border: 1px solid rgba(139, 92, 246, 0.38);
+  border: 1px solid rgba(var(--t-accent-rgb), 0.38);
   border-radius: 999px;
-  background: rgba(139, 92, 246, 0.1);
+  background: rgba(var(--t-accent-rgb), 0.1);
   font-size: 0.76rem;
   font-weight: 650;
   line-height: 1.3;
@@ -188,8 +188,8 @@
    directly on top of the hero renders so the mismatch is very visible. */
 .workspace-cv5 .studio-command-hero-preview-meta,
 .workspace-cv5 .dashboard-welcome-stamp {
-  border-color: rgba(139, 92, 246, 0.35);
-  background: rgba(6, 7, 15, 0.82);
+  border-color: rgba(var(--t-accent-rgb), 0.35);
+  background: rgba(var(--t-ground-rgb), 0.82);
   color: var(--v5-ink);
 }
 .workspace-cv5 .studio-command-hero-preview-meta span,
@@ -203,15 +203,15 @@
   border-color: var(--v5-line-strong);
   border-radius: var(--v5-r-lg);
   background:
-    radial-gradient(circle at 82% 18%, rgba(124, 93, 250, 0.2), transparent 34%),
-    linear-gradient(178deg, #131628, #0c0e1a 68%);
+    radial-gradient(circle at 82% 18%, rgba(var(--t-accent-rgb), 0.2), transparent 34%),
+    var(--t-well-grad);
   color: var(--v5-ink);
 }
 .workspace-cv5 .passport-trace-node > strong { color: var(--v5-ink); font-family: var(--v5-label); }
 
 /* The Game Ready summary keeps an olive foundry border on its CTA. */
 .workspace-cv5 .studio-game-ready-summary > .button { border-color: var(--v5-line-strong); color: var(--v5-ink); }
-.workspace-cv5 .studio-game-ready-summary > .button:hover { border-color: rgba(255, 255, 255, 0.32); }
+.workspace-cv5 .studio-game-ready-summary > .button:hover { border-color: rgba(var(--t-on-rgb), 0.32); }
 .workspace-cv5 .studio-game-ready-summary dd { color: var(--v5-ink); font-family: var(--v5-label); }
 
 /* ---------------------------------------------------------------- settings */
@@ -222,7 +222,7 @@
   padding: 14px 16px;
   border: 1px solid var(--v5-line);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--t-on-rgb), 0.03);
 }
 .workspace-cv5 .settings-row + .settings-row { margin-top: 8px; }
 .workspace-cv5 .settings-row dt {
@@ -244,7 +244,7 @@
   padding: 12px 14px;
   border: 1px solid var(--v5-line);
   border-radius: 11px;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(var(--t-on-rgb), 0.02);
   font-size: 0.8rem;
   line-height: 1.6;
   color: var(--v5-ink-dim);
@@ -261,17 +261,17 @@
 .workspace-cv5 .settings-boundary-visual {
   border: 1px solid var(--v5-line-strong);
   border-radius: var(--v5-r-lg);
-  background: linear-gradient(178deg, #131628, #0c0e1a 68%);
+  background: var(--t-well-grad);
 }
 .workspace-cv5 .settings-boundary-topline { font-family: var(--v5-label); letter-spacing: 0.12em; color: var(--v5-ink-faint); }
 .workspace-cv5 .settings-boundary-topline strong { color: var(--v5-green); }
 .workspace-cv5 .settings-boundary-topline i { background: var(--v5-green); }
 .workspace-cv5 .settings-boundary-stage > b { color: var(--v5-cyan); }
-.workspace-cv5 .settings-boundary-file { border: 1px solid var(--v5-line); border-radius: 11px; background: rgba(255, 255, 255, 0.03); }
+.workspace-cv5 .settings-boundary-file { border: 1px solid var(--v5-line); border-radius: 11px; background: rgba(var(--t-on-rgb), 0.03); }
 .workspace-cv5 .settings-boundary-file span,
 .workspace-cv5 .settings-boundary-file small { color: var(--v5-ink-faint); font-family: var(--v5-label); }
 .workspace-cv5 .settings-boundary-file strong { color: var(--v5-ink); font-family: var(--v5-label); }
-.workspace-cv5 .settings-boundary-file.is-safe { border-color: rgba(52, 211, 153, 0.32); }
+.workspace-cv5 .settings-boundary-file.is-safe { border-color: rgba(var(--t-green-rgb), 0.32); }
 .workspace-cv5 .settings-boundary-file.is-safe strong { color: var(--v5-green); }
 .workspace-cv5 .settings-boundary-visual > p { color: var(--v5-ink-faint); }
 .workspace-cv5 .settings-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }

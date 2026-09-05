@@ -72,7 +72,7 @@
   padding: 0 13px;
   border: 1px solid var(--v5-line);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--t-on-rgb), 0.03);
   font-family: var(--v5-label);
   font-size: 0.68rem;
   font-weight: 700;
@@ -86,9 +86,9 @@
   padding: 0;
   border: 1px solid var(--v5-line-strong);
   border-radius: var(--v5-r-lg);
-  background: linear-gradient(178deg, #131628, #0c0e1a 68%);
-  box-shadow: 0 40px 90px -38px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(124, 93, 250, 0.12),
-    0 24px 80px -30px rgba(124, 93, 250, 0.35);
+  background: var(--t-well-grad);
+  box-shadow: 0 40px 90px -38px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(var(--t-accent-rgb), 0.12),
+    0 24px 80px -30px rgba(var(--t-accent-rgb), 0.35);
 }
 .connect-cv5 .connect-console-head {
   padding: 13px 18px;
@@ -140,7 +140,7 @@
   border: 1px solid var(--v5-line);
   border-radius: var(--v5-r-lg);
   background:
-    radial-gradient(52% 70% at 76% 12%, rgba(124, 93, 250, 0.14), transparent 68%),
+    radial-gradient(52% 70% at 76% 12%, rgba(var(--t-accent-rgb), 0.14), transparent 68%),
     var(--v5-bg1);
 }
 .connect-cv5 .connect-boundary h2 {
@@ -157,7 +157,7 @@
   padding: 16px 18px;
   border: 1px solid var(--v5-line);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--t-on-rgb), 0.03);
 }
 .connect-cv5 .connect-boundary-grid span {
   font-family: var(--v5-label);
@@ -167,8 +167,8 @@
   color: var(--v5-ink-faint);
 }
 .connect-cv5 .connect-boundary-grid strong { margin-top: 10px; font-family: var(--v5-label); font-size: 0.86rem; }
-.connect-cv5 .connect-boundary-grid > div:nth-child(1) { border-color: rgba(52, 211, 153, 0.3); background: rgba(52, 211, 153, 0.06); }
-.connect-cv5 .connect-boundary-grid > div:nth-child(2) { border-color: rgba(251, 191, 36, 0.3); background: rgba(251, 191, 36, 0.06); }
+.connect-cv5 .connect-boundary-grid > div:nth-child(1) { border-color: rgba(var(--t-green-rgb), 0.3); background: rgba(var(--t-green-rgb), 0.06); }
+.connect-cv5 .connect-boundary-grid > div:nth-child(2) { border-color: rgba(var(--t-amber-rgb), 0.3); background: rgba(var(--t-amber-rgb), 0.06); }
 .connect-cv5 .connect-boundary-grid small { margin-top: 7px; font-size: 0.7rem; color: var(--v5-ink-faint); }
 
 /* ------------------------------------------------------------- responsive */
@@ -194,12 +194,12 @@
   padding: 18px 20px;
   border: 1px solid var(--v5-line);
   border-radius: var(--v5-r);
-  background: rgba(255, 255, 255, 0.025);
+  background: rgba(var(--t-on-rgb), 0.025);
   transition: border-color .2s, transform .2s, background .2s;
 }
 .connect-deeper-card:hover {
-  border-color: rgba(139, 92, 246, 0.5);
-  background: rgba(255, 255, 255, 0.045);
+  border-color: rgba(var(--t-accent-rgb), 0.5);
+  background: rgba(var(--t-on-rgb), 0.045);
   transform: translateY(-2px);
 }
 .connect-deeper-card strong { color: var(--v5-ink); font-size: 0.98rem; font-weight: 700; }

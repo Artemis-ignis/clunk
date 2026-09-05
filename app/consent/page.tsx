@@ -5,7 +5,6 @@ import { readConsentState } from "../api/_lib/reads";
 import { safeOAuthReturnPath } from "../oauth";
 import { SiteNav } from "../components/SiteNav";
 import { SiteFooter } from "../components/SiteFooter";
-import { ForceDarkTheme } from "../components/ForceDarkTheme";
 import { createPageMetadata } from "../components/site-metadata";
 import { ConsentForm } from "./ConsentForm";
 import "../login/auth-v5.css";
@@ -39,7 +38,6 @@ export default async function ConsentPage({
 
   return (
     <div className="cv5 cv5-auth-shell">
-      <ForceDarkTheme />
       <div className="cv5-stars" aria-hidden="true" />
       <a className="clunk-home-skip-link" href="#main-content">본문으로 건너뛰기</a>
       <SiteNav />

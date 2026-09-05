@@ -7,7 +7,6 @@ import { areSalesOpen } from "../../api/_lib/sales-lock";
 import { kitsFrom, type CatalogListing, type Kit } from "../../components/catalog-facts";
 import { createPageMetadata } from "../../components/site-metadata";
 import { SiteShell } from "../../components/SiteShell";
-import { ForceDarkTheme } from "../../components/ForceDarkTheme";
 import { KitDetail } from "../../components/KitDetail";
 import styles from "../../components/KitPages.module.css";
 
@@ -85,7 +84,6 @@ export default async function KitPage({ params }: { params: Promise<{ slug: stri
 
   return (
     <div className="cv5">
-      <ForceDarkTheme />
       <div className="cv5-stars" aria-hidden="true" />
       <SiteShell active="kits">
         <main className={styles.page}>

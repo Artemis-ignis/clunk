@@ -32,7 +32,11 @@ test("주 메뉴에 키트 문이 있다", async () => {
 test("/kits 는 공개 화면이고 작업 화면 껍데기를 쓰지 않는다", async () => {
   const page = await source("app/kits/page.tsx");
   assert.match(page, /SiteShell/);
-  assert.match(page, /ForceDarkTheme/);
+  // 2026-09-05: 여기 있던 /ForceDarkTheme/ 못을 뺐다. 그 컴포넌트는 화면마다
+  // data-theme 을 dark 로 박아 두는 것이었고, 테마가 세 벌(기본·화이트·블랙)이
+  // 된 지금은 사람이 고른 값을 덮어써 버린다. 16개 화면에서 함께 지웠고,
+  // 그 자리의 계약은 tests/theme-contract.test.mjs 가 본다.
+  assert.doesNotMatch(page, /ForceDarkTheme/);
   assert.match(page, /KitsIndex/);
   assert.match(page, /areSalesOpen/);
   assert.match(page, /한 벌로 꾸미는/);

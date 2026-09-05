@@ -1,7 +1,6 @@
 import Link from "../components/NativeLink";
 import { Icon } from "../components/Icon";
 import { SiteShell } from "../components/SiteShell";
-import { ForceDarkTheme } from "../components/ForceDarkTheme";
 import { createPageMetadata } from "../components/site-metadata";
 import "./series-v5.css";
 import { getClunkSeriesCatalog } from "../../packages/clunk-series/src/catalog";
@@ -81,7 +80,6 @@ export default function SeriesPage() {
     /* cv5 chrome — the foundry warm-paper ramp this page renders against is
        remapped onto the navy palette by cv5-surface.css. */
     <div className="cv5 cv5-surface series-cv5">
-      <ForceDarkTheme />
       <div className="cv5-stars" aria-hidden="true" />
       <SiteShell active="series">
       <main className="series-page foundry-page">

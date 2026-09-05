@@ -10,7 +10,7 @@
    ========================================================================= */
 
 .page {
-  color: var(--v5-ink, #f2f4f7);
+  color: var(--v5-ink, var(--t-ink));
 }
 
 /* ── 머리 ─────────────────────────────────────────────────────────────────── */
@@ -42,7 +42,7 @@
   margin: 0;
   font-size: clamp(0.98rem, 1.25vw, 1.08rem);
   line-height: 1.74;
-  color: var(--v5-ink-dim, rgba(232, 236, 241, 0.74));
+  color: var(--v5-ink-dim, rgba(var(--t-ink-rgb), 0.74));
 }
 
 /* ── 카드 격자 ────────────────────────────────────────────────────────────── */
@@ -60,23 +60,23 @@
   display: flex;
   flex-direction: column;
   text-decoration: none;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(var(--t-on-rgb), 0.12);
   border-radius: 18px;
   overflow: hidden;
-  background: linear-gradient(180deg, #26282c 0%, #1d1f22 60%, #17181b 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 26px 60px -36px rgba(0, 0, 0, 0.95);
+  background: linear-gradient(180deg, var(--t-art-top) 0%, var(--t-art-mid) 60%, var(--t-art-bot) 100%);
+  box-shadow: inset 0 1px 0 rgba(var(--t-on-rgb), 0.09), 0 26px 60px -36px rgba(0, 0, 0, 0.95);
   transition: transform 0.22s, border-color 0.22s, box-shadow 0.22s;
 }
 
 .card:hover {
   transform: translateY(-3px);
-  border-color: rgba(255, 255, 255, 0.24);
+  border-color: rgba(var(--t-on-rgb), 0.24);
 }
 
 .cardArt {
   display: block;
   position: relative;
-  background: radial-gradient(80% 70% at 50% 30%, #2c2f33, #232529 70%);
+  background: radial-gradient(80% 70% at 50% 30%, var(--t-art-radial-in), var(--t-art-radial-out) 70%);
 }
 
 .cardArt img {
@@ -94,7 +94,7 @@
   aspect-ratio: 4 / 3;
   padding: 18px;
   text-align: center;
-  color: var(--v5-ink-faint, rgba(232, 236, 241, 0.6));
+  color: var(--v5-ink-faint, rgba(var(--t-ink-rgb), 0.6));
   font-family: var(--v5-label, ui-monospace, monospace);
   font-size: 0.74rem;
 }
@@ -124,8 +124,8 @@
   letter-spacing: 0.04em;
   /* 알파 없이 꽉 찬 칠 — 뒤에 어떤 미리보기가 와도 대비가 변하지 않습니다.
      #e7e2ff / #151329 는 14.45:1. */
-  background: #151329;
-  color: #e7e2ff;
+  background: var(--t-badge-bg);
+  color: var(--t-badge-ink);
   box-shadow: 0 0 0 1px rgba(231, 226, 255, 0.24), 0 6px 18px -8px rgba(0, 0, 0, 0.9);
 }
 
@@ -158,7 +158,7 @@
   display: grid;
   gap: 6px;
   padding: 13px 15px 15px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(var(--t-on-rgb), 0.1);
 }
 
 .cardTitle {
@@ -167,7 +167,7 @@
   font-weight: 700;
   line-height: 1.35;
   letter-spacing: -0.02em;
-  color: var(--v5-ink, #f2f4f7);
+  color: var(--v5-ink, var(--t-ink));
 }
 
 .cardSpec {
@@ -178,14 +178,14 @@
   font-family: var(--v5-label, ui-monospace, monospace);
   font-size: 0.72rem;
   font-variant-numeric: tabular-nums;
-  color: var(--v5-ink-dim, rgba(232, 236, 241, 0.74));
+  color: var(--v5-ink-dim, rgba(var(--t-ink-rgb), 0.74));
 }
 
 .cardTotals {
   font-family: var(--v5-label, ui-monospace, monospace);
   font-size: 0.72rem;
   font-variant-numeric: tabular-nums;
-  color: var(--v5-ink-faint, rgba(232, 236, 241, 0.6));
+  color: var(--v5-ink-faint, rgba(var(--t-ink-rgb), 0.6));
 }
 
 .gradeBadge {
@@ -200,13 +200,13 @@
   font-weight: 800;
   letter-spacing: 0.03em;
   color: var(--grade-ink, #e6dcc6);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--v5-line-strong, rgba(255, 255, 255, 0.18));
+  background: rgba(var(--t-on-rgb), 0.05);
+  border: 1px solid var(--v5-line-strong, rgba(var(--t-on-rgb), 0.18));
   white-space: nowrap;
 }
 
 .gradeBadge[data-grade="S"] { --grade-ink: #f5c542; }
-.gradeBadge[data-grade="A"] { --grade-ink: #c084fc; }
+.gradeBadge[data-grade="A"] { --grade-ink: var(--t-violet); }
 .gradeBadge[data-grade="B"] { --grade-ink: #5eead4; }
 
 /* ── 상태 (읽는 중 · 비어 있음 · 열 수 없음) ──────────────────────────────── */
@@ -217,9 +217,9 @@
   justify-items: start;
   margin-top: clamp(28px, 3.4vw, 44px);
   padding: 26px 24px;
-  border: 1px solid var(--v5-line, rgba(255, 255, 255, 0.1));
+  border: 1px solid var(--v5-line, rgba(var(--t-on-rgb), 0.1));
   border-radius: 18px;
-  background: var(--v5-panel, rgba(255, 255, 255, 0.035));
+  background: var(--v5-panel, rgba(var(--t-on-rgb), 0.035));
 }
 
 .state strong {
@@ -230,7 +230,7 @@
 .state small {
   font-size: 0.86rem;
   line-height: 1.7;
-  color: var(--v5-ink-dim, rgba(232, 236, 241, 0.74));
+  color: var(--v5-ink-dim, rgba(var(--t-ink-rgb), 0.74));
 }
 
 /* ── 한 벌 화면 ───────────────────────────────────────────────────────────── */
@@ -243,11 +243,11 @@
   font-size: 0.76rem;
   font-weight: 700;
   letter-spacing: 0.06em;
-  color: var(--v5-ink-faint, rgba(232, 236, 241, 0.6));
+  color: var(--v5-ink-faint, rgba(var(--t-ink-rgb), 0.6));
   text-decoration: none;
 }
 
-.back:hover { color: var(--v5-ink, #f2f4f7); }
+.back:hover { color: var(--v5-ink, var(--t-ink)); }
 
 .detailHead {
   display: grid;
@@ -272,7 +272,7 @@
   font-family: var(--v5-label, ui-monospace, monospace);
   font-size: 0.8rem;
   font-variant-numeric: tabular-nums;
-  color: var(--v5-ink-dim, rgba(232, 236, 241, 0.74));
+  color: var(--v5-ink-dim, rgba(var(--t-ink-rgb), 0.74));
 }
 
 .swatches {
@@ -286,7 +286,7 @@
   width: 18px;
   height: 18px;
   border-radius: 5px;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(var(--t-on-rgb), 0.16);
 }
 
 .detailGrid {
@@ -307,11 +307,11 @@
 /* 합본 파일이 없는 키트는 대표 그림이 그 자리에 서므로 판을 직접 입힙니다. */
 .stageStill {
   display: block;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(var(--t-on-rgb), 0.12);
   border-radius: 20px;
   overflow: hidden;
-  background: linear-gradient(180deg, #26282c 0%, #1d1f22 60%, #17181b 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 30px 70px -40px rgba(0, 0, 0, 0.95);
+  background: linear-gradient(180deg, var(--t-art-top) 0%, var(--t-art-mid) 60%, var(--t-art-bot) 100%);
+  box-shadow: inset 0 1px 0 rgba(var(--t-on-rgb), 0.09), 0 30px 70px -40px rgba(0, 0, 0, 0.95);
 }
 
 .stageArt img {
@@ -323,21 +323,21 @@
 .stageCaption {
   display: block;
   padding: 12px 16px 14px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(var(--t-on-rgb), 0.1);
   font-family: var(--v5-label, ui-monospace, monospace);
   font-size: 0.74rem;
   letter-spacing: 0.02em;
-  color: var(--v5-ink-faint, rgba(232, 236, 241, 0.6));
+  color: var(--v5-ink-faint, rgba(var(--t-ink-rgb), 0.6));
 }
 
 .panel {
   display: grid;
   gap: 14px;
   padding: 22px 22px 24px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(var(--t-on-rgb), 0.12);
   border-radius: 20px;
-  background: linear-gradient(180deg, #26282c 0%, #1d1f22 60%, #17181b 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 30px 70px -40px rgba(0, 0, 0, 0.95);
+  background: linear-gradient(180deg, var(--t-art-top) 0%, var(--t-art-mid) 60%, var(--t-art-bot) 100%);
+  box-shadow: inset 0 1px 0 rgba(var(--t-on-rgb), 0.09), 0 30px 70px -40px rgba(0, 0, 0, 0.95);
 }
 
 .panelName {
@@ -355,7 +355,7 @@
   flex-wrap: wrap;
   font-size: 0.9rem;
   line-height: 1.6;
-  color: var(--v5-ink-dim, rgba(232, 236, 241, 0.74));
+  color: var(--v5-ink-dim, rgba(var(--t-ink-rgb), 0.74));
 }
 
 .factList {
@@ -371,7 +371,7 @@
   gap: 9px;
   font-size: 0.9rem;
   line-height: 1.62;
-  color: var(--v5-ink-dim, rgba(232, 236, 241, 0.74));
+  color: var(--v5-ink-dim, rgba(var(--t-ink-rgb), 0.74));
 }
 
 .factList li::before {
@@ -416,12 +416,12 @@
 .btnPrimary:hover { filter: brightness(1.08); }
 
 .btnGhost {
-  border: 1px solid var(--v5-line-strong, rgba(255, 255, 255, 0.18));
-  color: var(--v5-ink, #f2f4f7);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--v5-line-strong, rgba(var(--t-on-rgb), 0.18));
+  color: var(--v5-ink, var(--t-ink));
+  background: rgba(var(--t-on-rgb), 0.03);
 }
 
-.btnGhost:hover { border-color: rgba(255, 255, 255, 0.32); }
+.btnGhost:hover { border-color: rgba(var(--t-on-rgb), 0.32); }
 
 .partsSection {
   margin-top: clamp(36px, 4.4vw, 60px);
@@ -445,7 +445,7 @@
   font-family: var(--v5-label, ui-monospace, monospace);
   font-size: 0.76rem;
   font-variant-numeric: tabular-nums;
-  color: var(--v5-ink-faint, rgba(232, 236, 241, 0.6));
+  color: var(--v5-ink-faint, rgba(var(--t-ink-rgb), 0.6));
 }
 
 .partGrid {
@@ -462,22 +462,22 @@
   flex-direction: column;
   height: 100%;
   text-decoration: none;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(var(--t-on-rgb), 0.12);
   border-radius: 16px;
   overflow: hidden;
-  background: linear-gradient(180deg, #26282c 0%, #1d1f22 60%, #17181b 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 20px 46px -32px rgba(0, 0, 0, 0.95);
+  background: linear-gradient(180deg, var(--t-art-top) 0%, var(--t-art-mid) 60%, var(--t-art-bot) 100%);
+  box-shadow: inset 0 1px 0 rgba(var(--t-on-rgb), 0.09), 0 20px 46px -32px rgba(0, 0, 0, 0.95);
   transition: transform 0.2s, border-color 0.2s;
 }
 
 .partCard:hover {
   transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.24);
+  border-color: rgba(var(--t-on-rgb), 0.24);
 }
 
 .partArt {
   display: block;
-  background: radial-gradient(80% 70% at 50% 30%, #2c2f33, #232529 70%);
+  background: radial-gradient(80% 70% at 50% 30%, var(--t-art-radial-in), var(--t-art-radial-out) 70%);
 }
 
 .partArt img {
@@ -497,7 +497,7 @@
   display: grid;
   gap: 5px;
   padding: 11px 13px 13px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(var(--t-on-rgb), 0.1);
 }
 
 .partName {
@@ -505,7 +505,7 @@
   font-weight: 700;
   line-height: 1.4;
   letter-spacing: -0.015em;
-  color: var(--v5-ink, #f2f4f7);
+  color: var(--v5-ink, var(--t-ink));
 }
 
 .partSpec {
@@ -516,7 +516,7 @@
   font-family: var(--v5-label, ui-monospace, monospace);
   font-size: 0.7rem;
   font-variant-numeric: tabular-nums;
-  color: var(--v5-ink-dim, rgba(232, 236, 241, 0.74));
+  color: var(--v5-ink-dim, rgba(var(--t-ink-rgb), 0.74));
 }
 
 @media (max-width: 900px) {

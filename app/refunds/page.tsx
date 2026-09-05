@@ -1,6 +1,5 @@
 import { createPageMetadata } from "../components/site-metadata";
 import {
-  LEGAL_DRAFT_DATE,
   LEGAL_EFFECTIVE_DATE,
   LEGAL_OPERATOR_ROWS,
   LegalRows,
@@ -72,14 +71,13 @@ export default function RefundsPage() {
           <li>위 내용에 동의한다는 구매자의 명시적 의사표시(동의 체크)</li>
         </ol>
         <p>
-          동의가 확인되지 않으면 결제 세션을 생성하지 않습니다. 동의 사실은 주문 기록과 함께 보관하여
-          분쟁 시 확인할 수 있게 합니다.
+          동의하지 않으면 결제가 시작되지 않습니다. 동의한 사실은 주문 기록과 함께 보관하여
+          다툼이 생겼을 때 확인할 수 있게 합니다.
         </p>
         <p className="cv5-legal-note">
-          위 고지·동의 절차는 구매 흐름에 구현되어 있습니다: 구독 결제는
-          청약철회 제한 동의가 함께 전달된 요청에서만 시작되며, 동의가 없으면 결제 세션이
-          생성되지 않습니다. 동의가 있어야만 주문이 생성되므로 주문 기록이 동의 시점의
-          기록을 겸합니다. 이 정책은 2026-09-02부터 시행 중이며, 현재 유료 결제 기능이 없어 유상
+          구독 결제는 청약철회 제한에 동의한 요청에서만 시작되며, 동의하지 않으면 결제가
+          시작되지 않습니다. 동의해야만 주문이 만들어지므로 주문 기록이 곧 동의한 시점의
+          기록입니다. 이 정책은 2026-09-02부터 시행 중이며, 현재 유료 결제 기능이 없어 유상
           거래를 하지 않습니다.
         </p>
       </section>
@@ -134,7 +132,7 @@ export default function RefundsPage() {
           <a href="/terms">이용약관</a>, 개인정보 처리는 <a href="/privacy">개인정보처리방침</a>을 따릅니다.
         </p>
         <p className="cv5-legal-note">
-          이 정책은 {LEGAL_DRAFT_DATE} 작성되어 {LEGAL_EFFECTIVE_DATE}부터 시행합니다. 현재 유료 결제
+          이 정책은 {LEGAL_EFFECTIVE_DATE}부터 시행합니다. 현재 유료 결제
           기능이 없으므로 유상 환불 조항은 결제를 시작할 때 적용됩니다. 받은 파일이 손상됐거나 내려받아지지
           않는 문제는 고객문의 전자우편 junsuopar@gmail.com으로 알려 주시면 다시 제공합니다.
         </p>

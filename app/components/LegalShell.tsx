@@ -1,6 +1,5 @@
 import Link from "./NativeLink";
 import { SiteNav } from "./SiteNav";
-import { ForceDarkTheme } from "./ForceDarkTheme";
 import { SiteFooter } from "./SiteFooter";
 import "./legal-v5.css";
 
@@ -17,7 +16,11 @@ import "./legal-v5.css";
  * field with a plausible-looking string — only real registration data.
  */
 
-export const LEGAL_DRAFT_DATE = "2026-08-31";
+/*
+ * 2026-09-05 점검 M12: 세 문서의 머리에 "초안 작성일 2026-08-31" 이 적혀 있었다. 이용자가
+ * 알아야 하는 날짜는 시행일과 최종 수정일 둘이고, 초안을 쓴 날은 내부 기록이다. 그 줄과
+ * 그 값을 문서에서 함께 뺐다.
+ */
 /**
  * In force from the day the free beta opened. These documents used to tie their own effect
  * to the 통신판매업 filing, which told a person already signed in that no terms and no
@@ -44,13 +47,14 @@ export const LEGAL_OPERATOR_ROWS: LegalRow[] = [
   { label: "상호", value: "Artemis" },
   { label: "대표자", value: "박준성" },
   { label: "사업자등록번호", value: "361-02-03814" },
-  { label: "통신판매업 신고번호", value: "[유료 판매를 시작할 때 신고 후 기재 — 유료 결제 기능이 없어 해당 없음]", placeholder: true },
+  // 확정 전. dd 는 is-placeholder 로 본문과 다른 색·서체로 그려져 채워진 값처럼 읽히지 않는다.
+  { label: "통신판매업 신고번호", value: "[확정 전 — 유료 판매를 시작할 때 신고하고 기재합니다]", placeholder: true },
   { label: "사업장 주소", value: "인천광역시 제물포구 화도진로 16 (우편번호 22552)" },
   { label: "연락처", value: "+82 10-2761-9841" },
   { label: "전자우편", value: "junsuopar@gmail.com" },
   // Stated, not placeholder: the privacy policy already names D1 and R2, and this is where
   // the site runs.
-  { label: "호스팅 제공자", value: "Cloudflare, Inc. (미국) — Workers · D1 · R2" },
+  { label: "호스팅 제공자", value: "Cloudflare, Inc. (미국)" },
 ];
 
 export function LegalRows({ rows }: { rows: LegalRow[] }) {
@@ -84,7 +88,6 @@ export function LegalShell({
 }) {
   return (
     <div className="cv5">
-      <ForceDarkTheme />
       <div className="cv5-stars" aria-hidden="true" />
       <a className="clunk-home-skip-link" href="#legal-content">본문으로 건너뛰기</a>
       <SiteNav />
@@ -100,7 +103,6 @@ export function LegalShell({
               <li><strong>시행 중</strong></li>
               <li>{`시행일 ${effectiveDate}`}</li>
               <li>{`최종 수정일 ${updatedDate}`}</li>
-              <li>{`초안 작성일 ${LEGAL_DRAFT_DATE}`}</li>
             </ul>
             <p className="cv5-legal-status" role="note">{LEGAL_DRAFT_NOTICE}</p>
           </header>

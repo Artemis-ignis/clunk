@@ -7,7 +7,6 @@ import { clipsFor } from "../../api/_lib/listing-variants";
 import { gradeOf, isFreeGrade } from "../../components/catalog-facts";
 import { createPageMetadata, SITE_ORIGIN } from "../../components/site-metadata";
 import { SiteShell } from "../../components/SiteShell";
-import { ForceDarkTheme } from "../../components/ForceDarkTheme";
 import { MarketplaceListingDetail } from "../../components/MarketplaceCatalog";
 import Link from "../../components/NativeLink";
 import { Icon } from "../../components/Icon";
@@ -148,7 +147,6 @@ export default async function MarketplaceListingPage({ params }: { params: Promi
   if (!found) notFound();
   return (
     <div className="cv5">
-      <ForceDarkTheme />
       <div className="cv5-stars" aria-hidden="true" />
       <SiteShell active="marketplace">
         <main className={`${styles.page} ${styles.detailPage}`} data-snap-section="listing-detail" data-listing-slug={slug}>
@@ -165,8 +163,8 @@ export default async function MarketplaceListingPage({ params }: { params: Promi
             <noscript>
               <section className={styles.noScriptRecovery} aria-labelledby="listing-not-found-heading">
                 <span>CLUNK MARKET</span>
-                <h1 id="listing-not-found-heading">판매 중이 아닌 주소입니다.</h1>
-                <p>상품이 삭제되었거나 아직 공개되지 않았습니다. 마켓으로 돌아가 현재 구매 가능한 에셋을 확인해 주세요.</p>
+                <h1 id="listing-not-found-heading">지금은 열 수 없는 주소입니다.</h1>
+                <p>상품이 내려갔거나 아직 공개되지 않았습니다. 마켓으로 돌아가 지금 받을 수 있는 에셋을 확인해 주세요.</p>
                 <Link className="cv5-btn cv5-btn-ghost" href="/marketplace">마켓으로 돌아가기 <Icon name="arrowLeft" size={15} /></Link>
               </section>
             </noscript>

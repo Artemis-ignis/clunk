@@ -23,7 +23,7 @@
 
 :global(.cv5 .site-footer) {
   border-top: 1px solid var(--v5-line);
-  background: rgba(255, 255, 255, 0.012);
+  background: rgba(var(--t-on-rgb), 0.012);
 }
 
 :global(.cv5 .site-footer-art) {
@@ -36,10 +36,10 @@
 }
 
 :global(.cv5 .demo-marker) {
-  border: 1px solid rgba(251, 191, 36, 0.4);
+  border: 1px solid rgba(var(--t-amber-rgb), 0.4);
   border-radius: 999px;
   padding: 6px 12px;
-  background: rgba(251, 191, 36, 0.08);
+  background: rgba(var(--t-amber-rgb), 0.08);
   color: var(--v5-amber);
   font-family: var(--v5-label);
   font-size: 0.72rem;
@@ -223,7 +223,7 @@
 
 .sideRow:hover:not(:disabled) {
   color: var(--v5-ink);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(var(--t-on-rgb), 0.04);
 }
 
 .sideRow:disabled {
@@ -234,7 +234,7 @@
 
 .sideRowOn {
   color: var(--v5-ink);
-  border-color: rgba(139, 92, 246, 0.5);
+  border-color: rgba(var(--t-accent-rgb), 0.5);
   background: var(--v5-grad-soft);
 }
 
@@ -292,13 +292,13 @@
   padding: 0 14px;
   border: 1px solid var(--v5-line);
   border-radius: 11px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--t-on-rgb), 0.03);
   color: var(--v5-ink-faint);
 }
 
 .search:focus-within {
-  border-color: rgba(139, 92, 246, 0.55);
-  box-shadow: 0 0 0 3px rgba(124, 93, 250, 0.14);
+  border-color: rgba(var(--t-accent-rgb), 0.55);
+  box-shadow: 0 0 0 3px rgba(var(--t-accent-rgb), 0.14);
 }
 
 .search input {
@@ -357,8 +357,8 @@
   height: 24px;
   padding: 0 10px;
   border-radius: 999px;
-  background: #151329;
-  color: #e7e2ff;
+  background: var(--t-badge-bg);
+  color: var(--t-badge-ink);
   font-family: var(--v5-label);
   font-size: 0.7rem;
   font-weight: 700;
@@ -377,8 +377,8 @@
 
 .card:hover {
   transform: translateY(-4px);
-  border-color: rgba(139, 92, 246, 0.55);
-  box-shadow: 0 20px 44px -20px rgba(0, 0, 0, 0.85), 0 0 24px -6px rgba(124, 93, 250, 0.35);
+  border-color: rgba(var(--t-accent-rgb), 0.55);
+  box-shadow: 0 20px 44px -20px rgba(0, 0, 0, 0.85), 0 0 24px -6px rgba(var(--t-accent-rgb), 0.35);
 }
 
 .cardArt {
@@ -421,7 +421,7 @@
   justify-items: center;
   gap: 8px;
   padding: 24px;
-  background: radial-gradient(circle at 50% 28%, rgba(124, 93, 250, 0.2), transparent 56%), #0d0f1e;
+  background: radial-gradient(circle at 50% 28%, rgba(var(--t-accent-rgb), 0.2), transparent 56%), #0d0f1e;
   text-align: center;
 }
 
@@ -598,7 +598,7 @@
 .btnPrimary {
   background: var(--v5-grad);
   color: #fff;
-  box-shadow: 0 10px 26px -12px rgba(124, 93, 250, 0.6);
+  box-shadow: 0 10px 26px -12px rgba(var(--t-accent-rgb), 0.6);
 }
 
 .btnPrimary:hover {
@@ -613,12 +613,12 @@
 
 .btnGhost {
   border: 1px solid var(--v5-line-strong);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--t-on-rgb), 0.03);
   color: var(--v5-ink);
 }
 
 .btnGhost:hover {
-  border-color: rgba(255, 255, 255, 0.32);
+  border-color: rgba(var(--t-on-rgb), 0.32);
 }
 
 .btnGhost:disabled {
@@ -634,7 +634,7 @@
   width: fit-content;
   min-height: 28px;
   padding: 4px 12px;
-  border: 1px solid rgba(139, 92, 246, 0.4);
+  border: 1px solid rgba(var(--t-accent-rgb), 0.4);
   border-radius: 999px;
   background: var(--v5-grad-soft);
   color: var(--v5-ink);
@@ -658,7 +658,7 @@
   gap: 4px;
   height: 24px;
   padding: 0 9px;
-  border: 1px solid rgba(139, 92, 246, 0.45);
+  border: 1px solid rgba(var(--t-accent-rgb), 0.45);
   border-radius: 7px;
   background: rgba(12, 10, 26, 0.78);
   backdrop-filter: blur(6px);
@@ -678,9 +678,9 @@
   gap: 4px 12px;
   align-items: center;
   padding: 14px 16px;
-  border: 1px solid rgba(251, 191, 36, 0.35);
+  border: 1px solid rgba(var(--t-amber-rgb), 0.35);
   border-radius: var(--v5-r);
-  background: rgba(251, 191, 36, 0.06);
+  background: rgba(var(--t-amber-rgb), 0.06);
 }
 
 .checkoutNotice svg {
@@ -710,7 +710,7 @@
   padding: clamp(38px, 6vw, 70px) clamp(24px, 7vw, 96px);
   border: 1px solid var(--v5-line);
   border-radius: var(--v5-r-lg);
-  background: linear-gradient(178deg, #12152699, #0b0d18);
+  background: var(--t-well-grad-soft);
   text-align: center;
 }
 
@@ -801,7 +801,7 @@
 
 .step:hover {
   transform: translateY(-3px);
-  border-color: rgba(139, 92, 246, 0.45);
+  border-color: rgba(var(--t-accent-rgb), 0.45);
 }
 
 .step span {
@@ -810,7 +810,7 @@
   justify-content: center;
   width: 34px;
   height: 34px;
-  border: 1px solid rgba(139, 92, 246, 0.4);
+  border: 1px solid rgba(var(--t-accent-rgb), 0.4);
   border-radius: 10px;
   background: var(--v5-grad-soft);
   color: var(--v5-ink);
@@ -929,8 +929,8 @@
   border: 1px solid var(--v5-line-strong);
   border-radius: var(--v5-r-lg);
   overflow: hidden;
-  background: linear-gradient(178deg, #131628, #0c0e1a 68%);
-  box-shadow: 0 36px 90px -40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(124, 93, 250, 0.1);
+  background: var(--t-well-grad);
+  box-shadow: 0 36px 90px -40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(var(--t-accent-rgb), 0.1);
 }
 
 .preview img {
@@ -945,7 +945,7 @@
   left: 12px;
   top: 12px;
   padding: 5px 10px;
-  border: 1px solid rgba(52, 211, 153, 0.4);
+  border: 1px solid rgba(var(--t-green-rgb), 0.4);
   border-radius: 8px;
   background: rgba(5, 6, 12, 0.74);
   backdrop-filter: blur(6px);
@@ -963,7 +963,7 @@
   padding: clamp(18px, 2.4vw, 26px);
   border: 1px solid var(--v5-line-strong);
   border-radius: var(--v5-r-lg);
-  background: linear-gradient(178deg, #12152699, #0b0d18);
+  background: var(--t-well-grad-soft);
   box-shadow: 0 36px 90px -40px rgba(0, 0, 0, 0.9);
 }
 
@@ -980,7 +980,7 @@
   padding: 0 10px;
   border: 1px solid var(--v5-line);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--t-on-rgb), 0.03);
   color: var(--v5-ink-dim);
   font-family: var(--v5-label);
   font-size: 0.72rem;
@@ -1011,7 +1011,7 @@
   padding: 14px 16px;
   border: 1px solid var(--v5-line);
   border-radius: var(--v5-r);
-  background: rgba(99, 102, 241, 0.07);
+  background: rgba(var(--t-accent-rgb), 0.07);
 }
 
 /* 이 자리는 .accessBadge + .accessLarge 알약이 칠한다. 예전에는 브랜드 그라디언트를
@@ -1034,7 +1034,7 @@
   padding: 12px 14px;
   border: 1px solid var(--v5-line);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(var(--t-on-rgb), 0.02);
 }
 
 .payState span {
@@ -1057,8 +1057,8 @@
 }
 
 .payState[data-payment-state="PAYMENT_PROVIDER_NOT_CONFIGURED"] {
-  border-color: rgba(251, 191, 36, 0.35);
-  background: rgba(251, 191, 36, 0.06);
+  border-color: rgba(var(--t-amber-rgb), 0.35);
+  background: rgba(var(--t-amber-rgb), 0.06);
 }
 
 .payState[data-payment-state="PAYMENT_PROVIDER_NOT_CONFIGURED"] strong {
@@ -1074,9 +1074,9 @@
   gap: 10px;
   align-items: flex-start;
   padding: 13px 15px;
-  border: 1px solid rgba(139, 92, 246, 0.32);
+  border: 1px solid rgba(var(--t-accent-rgb), 0.32);
   border-radius: 12px;
-  background: rgba(124, 93, 250, 0.06);
+  background: rgba(var(--t-accent-rgb), 0.06);
   font-size: 0.84rem;
   line-height: 1.6;
   color: var(--v5-ink-dim);
@@ -1096,7 +1096,7 @@
 }
 
 .consent a {
-  color: #cdb7ff;
+  color: var(--t-accent-soft-ink);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -1123,7 +1123,7 @@
   padding: 40px 20px;
   border: 1px solid var(--v5-line);
   border-radius: var(--v5-r-lg);
-  background: linear-gradient(178deg, #12152699, #0b0d18);
+  background: var(--t-well-grad-soft);
   text-align: center;
   margin-top: 22px;
 }
@@ -1182,8 +1182,8 @@
 }
 
 .evidencePass {
-  border-color: rgba(52, 211, 153, 0.35);
-  background: rgba(52, 211, 153, 0.06);
+  border-color: rgba(var(--t-green-rgb), 0.35);
+  background: rgba(var(--t-green-rgb), 0.06);
 }
 
 .evidencePass strong {
@@ -1191,8 +1191,8 @@
 }
 
 .evidenceFail {
-  border-color: rgba(248, 113, 113, 0.35);
-  background: rgba(248, 113, 113, 0.06);
+  border-color: rgba(var(--t-red-rgb), 0.35);
+  background: rgba(var(--t-red-rgb), 0.06);
 }
 
 .evidenceFail strong {
@@ -1217,13 +1217,13 @@
   padding: 13px 16px;
   border: 1px solid var(--v5-line);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(var(--t-on-rgb), 0.02);
   transition: border-color 0.18s, background 0.18s;
 }
 
 .fileRow:hover {
-  border-color: rgba(139, 92, 246, 0.4);
-  background: rgba(124, 93, 250, 0.05);
+  border-color: rgba(var(--t-accent-rgb), 0.4);
+  background: rgba(var(--t-accent-rgb), 0.05);
 }
 
 .fileRow > div {
@@ -1268,7 +1268,7 @@
   padding: 0 13px;
   border: 1px solid var(--v5-line-strong);
   border-radius: 9px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--t-on-rgb), 0.03);
   color: var(--v5-ink);
   font-size: 0.76rem;
   font-weight: 650;
@@ -1276,7 +1276,7 @@
 }
 
 .fileRow a:hover {
-  border-color: rgba(255, 255, 255, 0.32);
+  border-color: rgba(var(--t-on-rgb), 0.32);
 }
 
 .detailBuyerGuide {
@@ -1301,7 +1301,7 @@
 }
 
 .textLink:hover {
-  color: #cdb7ff;
+  color: var(--t-accent-soft-ink);
 }
 
 .noScriptRecovery {
@@ -1376,7 +1376,7 @@
     width: auto;
     border-color: var(--v5-line);
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(var(--t-on-rgb), 0.03);
     white-space: nowrap;
   }
 
@@ -1568,7 +1568,7 @@
 .snippetBox {
   border: 1px solid var(--v5-line-strong);
   border-radius: var(--v5-r-lg);
-  background: linear-gradient(178deg, #12152699, #0b0d18);
+  background: var(--t-well-grad-soft);
   overflow: hidden;
 }
 .snippetTabs {
@@ -1583,7 +1583,7 @@
   padding: 0 13px;
   border-radius: 9px;
   border: 1px solid var(--v5-line);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--t-on-rgb), 0.03);
   color: var(--v5-ink-dim);
   font-family: var(--v5-label);
   font-size: 0.72rem;
@@ -1594,7 +1594,7 @@
 .snippetTabs button:hover { color: var(--v5-ink); }
 .snippetTabOn {
   color: var(--v5-ink) !important;
-  border-color: rgba(139, 92, 246, 0.5) !important;
+  border-color: rgba(var(--t-accent-rgb), 0.5) !important;
   background: var(--v5-grad-soft) !important;
 }
 .snippetBody { position: relative; }
@@ -1623,13 +1623,13 @@
   padding: 0 12px;
   border-radius: 10px;
   border: 1px solid var(--v5-line-strong);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--t-on-rgb), 0.03);
   color: var(--v5-ink);
   font-family: inherit;
   font-size: 0.84rem;
   cursor: pointer;
 }
-.sort select:focus-visible { outline: 2px solid rgba(139, 92, 246, 0.6); outline-offset: 2px; }
+.sort select:focus-visible { outline: 2px solid rgba(var(--t-accent-rgb), 0.6); outline-offset: 2px; }
 .sort option { background: #12152a; color: var(--v5-ink); }
 
 /* Measured palette: the file's own colours, copyable, sized by how much of the
@@ -1679,7 +1679,7 @@
   font-size: 0.72rem;
   letter-spacing: 0.01em;
   color: #fff;
-  background: #0b0d18cc;
+  background: var(--t-plate);
   text-align: center;
 }
 /* The share, drawn as the width of the same number the label states. */
@@ -1855,7 +1855,7 @@
   padding: 14px 16px;
   border: 1px solid var(--v5-line);
   border-radius: var(--v5-r);
-  background: rgba(255, 255, 255, 0.025);
+  background: rgba(var(--t-on-rgb), 0.025);
 }
 
 .variantsTitle {
@@ -1949,7 +1949,7 @@
   border: 1px solid var(--v5-line-strong);
   border-radius: var(--v5-r-lg);
   overflow: hidden;
-  background: #0d1017;
+  background: var(--t-art-well);
   box-shadow: 0 36px 90px -46px rgba(0, 0, 0, 0.9);
 }
 :global(.cv5-bench[data-background="light"]) { background: #ececec; }
@@ -1994,11 +1994,11 @@
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
-:global(.cv5-bench-tool:hover) { background: rgba(124, 93, 250, 0.16); color: var(--v5-ink); }
+:global(.cv5-bench-tool:hover) { background: rgba(var(--t-accent-rgb), 0.16); color: var(--v5-ink); }
 :global(.cv5-bench-tool:focus-visible) { outline: 2px solid var(--v5-cyan); outline-offset: 2px; }
 :global(.cv5-bench-tool[data-on="true"]) {
-  background: rgba(124, 93, 250, 0.26);
-  border-color: rgba(124, 93, 250, 0.6);
+  background: rgba(var(--t-accent-rgb), 0.26);
+  border-color: rgba(var(--t-accent-rgb), 0.6);
   color: var(--v5-ink);
 }
 :global(.cv5-bench[data-background="light"] .cv5-bench-tool) {
@@ -2052,7 +2052,7 @@
 :global(.cv5-bench-textbtn) {
   appearance: none;
   border: 1px solid var(--v5-line-strong);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(var(--t-on-rgb), 0.04);
   color: var(--v5-ink-dim);
   border-radius: 999px;
   padding: 3px 10px;
@@ -2168,7 +2168,7 @@
   padding: 0 11px;
   border-radius: 999px;
   border: 1px solid var(--v5-line-strong);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(var(--t-on-rgb), 0.04);
   color: var(--v5-ink-dim);
   font-family: inherit;
   font-size: 0.75rem;
@@ -2177,8 +2177,8 @@
 }
 :global(.cv5-bench-chip-tiny) { padding: 0 8px; }
 :global(.cv5-bench-chip[aria-pressed="true"]) {
-  background: rgba(124, 93, 250, 0.22);
-  border-color: rgba(124, 93, 250, 0.6);
+  background: rgba(var(--t-accent-rgb), 0.22);
+  border-color: rgba(var(--t-accent-rgb), 0.6);
   color: var(--v5-ink);
 }
 :global(.cv5-bench-chip:disabled) { opacity: 0.45; cursor: not-allowed; }
@@ -2235,7 +2235,7 @@
   padding: 4px 10px;
   border-radius: 999px;
   border: 1px solid var(--v5-line-strong);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--t-on-rgb), 0.03);
   color: var(--v5-ink-dim);
   font-family: var(--v5-label);
   font-size: 0.72rem;
@@ -2274,7 +2274,7 @@
   padding: 14px;
   border: 1px solid var(--v5-line-strong);
   border-radius: var(--v5-r-lg);
-  background: #0d1017;
+  background: var(--t-art-well);
 }
 .flatStage {
   position: relative;
@@ -2362,7 +2362,7 @@
   gap: 4px;
   height: 20px;
   padding: 0 8px;
-  border: 1px solid rgba(89, 217, 255, 0.4);
+  border: 1px solid rgba(var(--t-cyan-rgb), 0.4);
   border-radius: 6px;
   background: rgba(8, 20, 28, 0.78);
   color: #bfeeff;
@@ -2381,21 +2381,21 @@
   /* 2026-09-04: 이 판이 사이트에서 제일 보라였다. 재 보니 채도 43.8~48.6%,
      밝기 6.9~12.5% — 배경이 아니라 보라 사각형이었고, 그리드에 30장이 깔려 있었다.
      마스터: "너무 어둡고 보라색계열이 심함". 바탕 램프와 같은 중성으로 내린다. */
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(var(--t-on-rgb), 0.12);
   border-radius: 18px;
-  background: linear-gradient(180deg, #26282c 0%, #1d1f22 60%, #17181b 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 26px 60px -36px rgba(0, 0, 0, 0.95);
+  background: linear-gradient(180deg, var(--t-art-top) 0%, var(--t-art-mid) 60%, var(--t-art-bot) 100%);
+  box-shadow: inset 0 1px 0 rgba(var(--t-on-rgb), 0.09), 0 26px 60px -36px rgba(0, 0, 0, 0.95);
   transform-style: preserve-3d;
 }
 .card:hover {
   transform: perspective(900px) rotateX(2deg) translateY(-6px);
-  border-color: rgba(255, 255, 255, 0.28);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 30px 64px -26px rgba(0, 0, 0, 0.95);
+  border-color: rgba(var(--t-on-rgb), 0.28);
+  box-shadow: inset 0 1px 0 rgba(var(--t-on-rgb), 0.14), 0 30px 64px -26px rgba(0, 0, 0, 0.95);
 }
 /* 그림 뒤판. 미리보기가 뜨기 전 가장 먼저 보이는 면이라 여기가 보라면 목록 전체가
    보라로 열린다. 그리고 에셋의 색을 판단하는 자리에 색을 얹으면 안 된다. */
-.cardArt { background: radial-gradient(80% 70% at 50% 30%, #2c2f33, #232529 70%); }
-.cardBody { border-top-color: rgba(255, 255, 255, 0.10); }
+.cardArt { background: radial-gradient(80% 70% at 50% 30%, var(--t-art-radial-in), var(--t-art-radial-out) 70%); }
+.cardBody { border-top-color: rgba(var(--t-on-rgb), 0.10); }
 
 /* 등급 칩 (2026-09-04)
    이 배지는 위 반구·아래 반구·가운데 크롬 이음선을 가진 캡슐로 그려져 있었다 — 캡슐
@@ -2412,19 +2412,19 @@
   height: 20px; padding: 0 8px; border-radius: 6px;
   font-family: var(--v5-label); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.03em;
   color: var(--grade-ink, #e6dcc6);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--t-on-rgb), 0.05);
   border: 1px solid var(--v5-line-strong);
   white-space: nowrap;
 }
 .gradeBadge[data-grade="S"] { --grade-ink: #f5c542; }
-.gradeBadge[data-grade="A"] { --grade-ink: #c084fc; }
+.gradeBadge[data-grade="A"] { --grade-ink: var(--t-violet); }
 .gradeBadge[data-grade="B"] { --grade-ink: #5eead4; }
 @media (prefers-reduced-motion: reduce) { .card:hover { transform: none; } }
 /* 상세 화면의 판들도 같은 캐비닛이다. */
 .detailSection, .detailBuy, .evidenceCard, .variantRow {
-  border-color: rgba(255, 255, 255, 0.12);
-  background: linear-gradient(180deg, #26282c 0%, #1d1f22 60%, #17181b 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 30px 70px -40px rgba(0, 0, 0, 0.95);
+  border-color: rgba(var(--t-on-rgb), 0.12);
+  background: linear-gradient(180deg, var(--t-art-top) 0%, var(--t-art-mid) 60%, var(--t-art-bot) 100%);
+  box-shadow: inset 0 1px 0 rgba(var(--t-on-rgb), 0.09), 0 30px 70px -40px rgba(0, 0, 0, 0.95);
 }
 
 /* ── 키트 (docs/kits.md) ────────────────────────────────────────────────────
@@ -2440,8 +2440,8 @@
   /* 알약은 늘 오른쪽 위, 키트 표시는 왼쪽 위. 둘이 자리를 다투지 않는다. */
   margin-right: auto;
   border-radius: 999px;
-  background: #151329;
-  color: #e7e2ff;
+  background: var(--t-badge-bg);
+  color: var(--t-badge-ink);
   font-family: var(--v5-label);
   font-size: 0.72rem;
   font-weight: 800;
@@ -2461,7 +2461,7 @@
   padding: 16px 18px;
   border: 1px solid var(--v5-line-strong, var(--v5-line));
   border-radius: var(--v5-r);
-  background: linear-gradient(180deg, rgba(124, 93, 250, 0.14), rgba(124, 93, 250, 0.03));
+  background: linear-gradient(180deg, rgba(var(--t-accent-rgb), 0.14), rgba(var(--t-accent-rgb), 0.03));
 }
 
 .kitHeadText { display: grid; gap: 4px; min-width: 0; flex: 1 1 300px; }
@@ -2574,8 +2574,8 @@
   flex: 0 0 auto;
   padding: 3px 9px;
   border-radius: 999px;
-  background: #151329;
-  color: #e7e2ff;
+  background: var(--t-badge-bg);
+  color: var(--t-badge-ink);
   font-family: var(--v5-label);
   font-size: 0.68rem;
   font-weight: 800;

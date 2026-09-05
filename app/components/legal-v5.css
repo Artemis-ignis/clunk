@@ -120,7 +120,7 @@
 }
 
 .cv5-legal-body a {
-  color: #c4b5fd;
+  color: var(--t-accent-soft-ink);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -211,7 +211,7 @@
   font-weight: 700;
 }
 
-.cv5-legal-crosslinks a:hover { color: #cdb7ff; }
+.cv5-legal-crosslinks a:hover { color: var(--t-accent-soft-ink); }
 
 @media (max-width: 640px) {
   .cv5-legal-table > div { grid-template-columns: 1fr; gap: 5px; }

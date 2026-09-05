@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "./NativeLink";
 import { BrandLockup } from "./BrandMark";
 import { Icon } from "./Icon";
+import { ThemeSwitch } from "./ThemeSwitch";
 
 /**
  * Public navigation for the Clunk product shell. The primary row follows the
@@ -148,10 +149,13 @@ export function SiteNav({ active }: { active?: ShellSection }) {
               ))}
             </div>
 
-            {/* 2026-09-05: 여기 있던 라이트/다크 토글을 뺐다. 눌러도 페이지 요소
-                435개 중 19개(4.4%)만 색이 바뀌고, 그 19개인 드로어 링크는 대비가
-                1.62:1 까지 떨어져 오히려 안 보이게 되던 버튼이다. 자세한 이유는
-                app/layout.tsx 의 data-theme 주석에 적어 뒀다. */}
+            {/* 2026-09-05 오전에 뺐던 라이트/다크 토글의 자리. 그때는 눌러도 요소
+                435개 중 19개(4.4%)만 색이 바뀌던 버튼이라 뺐고, 같은 날 배색을
+                app/theme.css 한 곳으로 모은 뒤 세 벌짜리로 되살렸다.
+                1199px 아래에서는 이 사본이 접히고 드로어 안의 사본이 대신 선다 —
+                보조 메뉴가 접히는 지점과 같다(app/theme.css). */}
+            <ThemeSwitch variant="bar" />
+
             <div className="sitenav-actions">
               {/* 로그인/이름은 글자 링크, 회원가입/로그아웃은 실선 버튼, 마지막이 채운
                   버튼. 로그인 상태와 로그아웃 상태가 같은 세 계단을 갖습니다 — 예전에는
@@ -217,6 +221,9 @@ export function SiteNav({ active }: { active?: ShellSection }) {
                 </Link>
               ))}
             </div>
+            {/* 휴대폰에서 테마를 고르는 곳. 드로어는 calc(100dvh - 84px) 안에서
+                스크롤하므로 한 줄(32px)만 더 쓴다. */}
+            <ThemeSwitch variant="drawer" />
             <div className="sitenav-drawer-actions">
               {session ? (
                 <>

@@ -4,7 +4,8 @@
    glass product-UI mockups inside every section, floating real-asset cards.
    Scope: .cv5 pages. All numbers rendered inside mockups are REAL measurements
    (tractor 100/100 reinspection, wave1 renderer-measured tris) — never staged.
-   Dark-committed system: cv5 pages force data-theme=dark via <ForceDarkTheme/>.
+   2026-09-05: 이 층은 더는 어둠에 못 박혀 있지 않다. 배색은 app/theme.css 가 세 벌
+   (기본·화이트·블랙)로 들고 있고, 아래 사다리는 그 팔레트를 가리키기만 한다.
 
    2026-09-04 배색 재조정 — 운영자 지적: "전체적으로 색감이 이상함, 너무 어둡고
    보라색 계열이 심함". 원인은 강조색이 보라라서가 아니라 '중립색 자체가 보라'
@@ -24,39 +25,34 @@
 
 .cv5 {
   /* ground — 채도 8% 이하의 차가운 회색 사다리(위 주석의 실측 근거) */
-  --v5-bg0: #17181b; /* H225 S8.0% L9.8%  okC 0.006 — 페이지 바닥 */
-  --v5-bg1: #1d1f22; /* H216 S7.9% L12.4% okC 0.006 — 패널 */
-  --v5-bg2: #24262a; /* H220 S7.7% L15.3% okC 0.008 — 카드 */
-  --v5-bg3: #2c2f33; /* H214 S7.4% L18.6% okC 0.008 — 카드 위의 칩 */
-  /* 바닥이 밝아진 만큼 흰 알파 경계선의 상대 대비가 줄어, 옛 경계 가시성을
-     유지하려고 알파를 올렸다(bg0 위 대비 1.17 → 1.33 / 1.45 → 1.76). */
-  --v5-panel: rgba(255, 255, 255, 0.035);
-  --v5-line: rgba(255, 255, 255, 0.1);
-  --v5-line-strong: rgba(255, 255, 255, 0.18);
-
-  /* ink — 옛 잉크는 밑색이 보라(#e9ecf8 H228 S51.7%)였다. 같은 밝기의 중립으로
-     바꾸고, 바닥이 밝아진 만큼 알파를 올려 대비를 오히려 키웠다.
-     bg0 위 WCAG: ink 16.11:1 · ink-dim 8.61:1 · ink-faint 6.07:1
-     bg3 위 최악값도 ink 12.21:1 · ink-dim 6.96:1 · ink-faint 5.14:1 (본문 4.5 통과) */
-  --v5-ink: #f2f4f7;
-  --v5-ink-dim: rgba(232, 236, 241, 0.74);
-  --v5-ink-faint: rgba(232, 236, 241, 0.6);
-
-  /* brand — 강조로만 쓰는 색. 바닥이 밝아졌으므로 강조도 같이 밝혀 대비를
-     지킨다(indigo 4.50:1 → 5.19:1, violet 5.08:1 → 5.78:1 on bg0).
-     그라데이션의 색상 호(arc)도 좁힌다: OKLCH 277°→304°(27°)는 한 버튼 안에서
-     남보라가 자보라로 변해 '무지개'로 읽혔다. 278°→287°(9°)면 한 색으로 읽힌다. */
-  --v5-indigo: #7b7ff0;
-  --v5-violet: #a97bf5;
-  --v5-grad: linear-gradient(96deg, #6c6ff2 6%, #8b7bf4 94%);
-  --v5-grad-soft: linear-gradient(96deg, rgba(123, 127, 240, 0.15), rgba(139, 123, 244, 0.15));
-  /* 옛 글로우는 0.55 짜리 보라가 44px 번져 버튼 주변 바닥까지 물들였다.
-     기본 버튼 하나를 띄우는 데 필요한 만큼만 남긴다. */
-  --v5-glow: 0 10px 26px -14px rgba(108, 111, 242, 0.5);
-  --v5-cyan: #59d9ff;
-  --v5-green: #34d399;
-  --v5-amber: #fbbf24;
-  --v5-red: #f87171;
+  /* 2026-09-05: 이 사다리의 값은 app/theme.css 로 옮겼다. 테마가 세 벌(기본·화이트·
+     블랙)이 되면서 배색 원본이 한 곳에 있어야 했고, 여기에 리터럴이 남아 있으면
+     .cv5 가 <html> 의 팔레트를 덮어써 이 페이지들만 테마를 안 따라온다.
+     기본 테마의 값은 아래 주석에 적힌 옛 값과 한 글자도 다르지 않다.
+     ground: bg0 #17181b(H225 S8.0% L9.8%) · bg1 #1d1f22 · bg2 #24262a · bg3 #2c2f33.
+     ink: #f2f4f7 / rgba(232,236,241,.74) / .6 — bg0 위 16.11:1 · 8.61:1 · 6.07:1,
+     bg3 위 최악값도 12.21:1 · 6.96:1 · 5.14:1.
+     brand: indigo #7b7ff0(bg0 위 5.19:1) · violet #a97bf5(5.78:1), 그라데이션 호는
+     OKLCH 278°→287°(9°)로 좁혀 한 색으로 읽히게 둔 그대로다. */
+  --v5-bg0: var(--t-bg0);
+  --v5-bg1: var(--t-bg1);
+  --v5-bg2: var(--t-bg2);
+  --v5-bg3: var(--t-bg3);
+  --v5-panel: var(--t-panel);
+  --v5-line: var(--t-line);
+  --v5-line-strong: var(--t-line-strong);
+  --v5-ink: var(--t-ink);
+  --v5-ink-dim: var(--t-ink-dim);
+  --v5-ink-faint: var(--t-ink-faint);
+  --v5-indigo: var(--t-indigo);
+  --v5-violet: var(--t-violet);
+  --v5-grad: var(--t-grad);
+  --v5-grad-soft: var(--t-grad-soft);
+  --v5-glow: var(--t-glow);
+  --v5-cyan: var(--t-cyan);
+  --v5-green: var(--t-green);
+  --v5-amber: var(--t-amber);
+  --v5-red: var(--t-red);
 
   /* No nested var() here: an undefined inner variable poisons the whole
      custom property (guaranteed-invalid) and silently drops the page to the
@@ -79,17 +75,19 @@
   letter-spacing: -0.012em;
   word-break: keep-all;
   overflow-wrap: break-word;
-  color-scheme: dark;
+  color-scheme: var(--t-color-scheme);
   min-height: 100vh;
 }
 
 html:has(.cv5),
-html:has(.cv5) body { background: var(--v5-bg0, #17181b); }
+html:has(.cv5) body { background: var(--v5-bg0, var(--t-bg0)); }
 
 /* legacy bare-element rules (globals.css h1/p colors) must never win here */
 :where(.cv5) h1, :where(.cv5) h2, :where(.cv5) h3, :where(.cv5) h4 { color: var(--v5-ink); }
 :where(.cv5) p, :where(.cv5) li, :where(.cv5) dd, :where(.cv5) dt { color: var(--v5-ink-dim); }
-.cv5 .theme-toggle { display: none; }
+/* 2026-09-05: 여기 `.cv5 .theme-toggle { display: none }` 이 있었다. cv5 위에서 옛
+   라이트/다크 버튼을 숨기던 줄인데, 그 버튼이 아무 일도 안 하던 이유의 절반이었다.
+   새 테마 스위치는 theme-switch 라는 이름을 쓰고 숨기지 않는다. */
 
 /* 2026-09-04: 보라를 장식에서 빼는 대신 "누르는 곳"에 몰아준다 — 기본 버튼, 활성 내비,
    링크, 그리고 여기 초점 링. globals.css 의 기본 초점색(--accent, 청록)은 cv5 위에서
@@ -130,14 +128,14 @@ html:has(.cv5) body { background: var(--v5-bg0, #17181b); }
    스크롤하면 메뉴 아래에 빈 검은 띠가 하나 더 깔렸다(2026-09-05 마스터가 짚음). */
 .cv5 .sitenav-dock::before {
   content: ""; position: absolute; inset: 0; height: auto;
-  background: rgba(23, 24, 27, 0.96);
+  background: rgba(var(--t-ground-rgb), 0.96);
   backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
   border-bottom: 0;
 }
 .cv5 .sitenav-dock::after {
   content: ""; position: absolute; top: 100%; left: 0; right: 0; height: 26px;
   pointer-events: none;
-  background: linear-gradient(to bottom, rgba(23, 24, 27, 0.96), rgba(23, 24, 27, 0));
+  background: linear-gradient(to bottom, rgba(var(--t-ground-rgb), 0.96), rgba(var(--t-ground-rgb), 0));
 }
 .cv5 .sitenav-inner { position: relative; width: min(var(--v5-frame), calc(100% - clamp(24px, 4vw, 72px))); margin-inline: auto; }
 .cv5 .sitenav { display: flex; align-items: center; gap: 10px; height: 68px; background: none; border: 0; box-shadow: none; padding: 0; }
@@ -147,7 +145,7 @@ html:has(.cv5) body { background: var(--v5-bg0, #17181b); }
   display: inline-flex; align-items: center; height: 38px; padding: 0 15px; border-radius: 10px;
   color: var(--v5-ink-dim); font-size: 0.9rem; font-weight: 550; letter-spacing: -0.01em; transition: color .18s, background .18s;
 }
-.cv5 .sitenav-link:hover { color: var(--v5-ink); background: rgba(255, 255, 255, 0.05); }
+.cv5 .sitenav-link:hover { color: var(--v5-ink); background: rgba(var(--t-on-rgb), 0.05); }
 .cv5 .sitenav-link { position: relative; }
 .cv5 .sitenav-link-active { color: var(--v5-ink); }
 /* one clean indicator: a short gradient bar centered under the label */
@@ -177,14 +175,14 @@ html:has(.cv5) body { background: var(--v5-bg0, #17181b); }
   font-family: var(--v5-font); font-size: 0.86rem; font-weight: 550; letter-spacing: -0.01em;
   color: var(--v5-ink-faint); transition: color .18s, background .18s;
 }
-.cv5 .sitenav-utility-link:hover { color: var(--v5-ink); background: rgba(255, 255, 255, 0.05); }
+.cv5 .sitenav-utility-link:hover { color: var(--v5-ink); background: rgba(var(--t-on-rgb), 0.05); }
 .cv5 .sitenav-utility-link-active { color: var(--v5-ink); }
 .cv5 .sitenav-actions { display: flex; align-items: center; gap: 8px; }
 .cv5 .sitenav .button-quiet {
   height: 38px; padding: 0 15px; border-radius: 10px; border: 1px solid var(--v5-line-strong);
   background: transparent; color: var(--v5-ink); font-size: 0.88rem; font-weight: 600;
 }
-.cv5 .sitenav .button-quiet:hover { border-color: rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.04); }
+.cv5 .sitenav .button-quiet:hover { border-color: rgba(var(--t-on-rgb), 0.3); background: rgba(var(--t-on-rgb), 0.04); }
 /* 계정 묶음은 글자 링크 → 실선 버튼 → 채운 버튼, 세 계단이다. 로그인 상태(이름·로그아웃·
    시작)와 로그아웃 상태(로그인·회원가입·시작)가 같은 모양을 갖는다. 예전에는 실선 버튼
    둘이 채운 버튼 옆에서 같은 무게로 다투고 있었다. */
@@ -205,7 +203,7 @@ html:has(.cv5) body { background: var(--v5-bg0, #17181b); }
 
 .cv5-badge {
   display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px;
-  border: 1px solid rgba(139, 92, 246, 0.4); border-radius: 999px;
+  border: 1px solid rgba(var(--t-accent-rgb), 0.4); border-radius: 999px;
   background: var(--v5-grad-soft); color: var(--v5-ink); font-size: 0.8rem; font-weight: 600;
 }
 .cv5-badge b { background: var(--v5-grad); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 800; }
@@ -219,13 +217,13 @@ html:has(.cv5) body { background: var(--v5-bg0, #17181b); }
 .cv5-btn:active { transform: translateY(1px); }
 .cv5-btn-primary { background: var(--v5-grad); color: #fff; box-shadow: var(--v5-glow); }
 .cv5-btn-primary:hover { filter: brightness(1.08); }
-.cv5-btn-ghost { border: 1px solid var(--v5-line-strong); color: var(--v5-ink); background: rgba(255, 255, 255, 0.03); }
-.cv5-btn-ghost:hover { border-color: rgba(255, 255, 255, 0.32); }
+.cv5-btn-ghost { border: 1px solid var(--v5-line-strong); color: var(--v5-ink); background: rgba(var(--t-on-rgb), 0.03); }
+.cv5-btn-ghost:hover { border-color: rgba(var(--t-on-rgb), 0.32); }
 
 .cv5-flow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 36px; }
 .cv5-flow span {
   display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 13px;
-  border: 1px solid var(--v5-line); border-radius: 999px; background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--v5-line); border-radius: 999px; background: rgba(var(--t-on-rgb), 0.03);
   font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; color: var(--v5-ink-dim);
 }
 .cv5-flow span b { color: var(--v5-ink); font-weight: 700; }
@@ -236,31 +234,31 @@ html:has(.cv5) body { background: var(--v5-bg0, #17181b); }
 .cv5-hv-panel {
   position: relative; margin-left: auto; width: min(480px, 100%);
   border: 1px solid var(--v5-line-strong); border-radius: var(--v5-r-lg);
-  background: linear-gradient(178deg, #232529, #1b1c1f 68%);
+  background: var(--t-well-grad2);
   /* 2026-09-04: 이 판은 첫 화면에서 가장 큰 면이다. 그 둘레에 보라 링(1px .12)과
      보라 광채(80px .35)를 둘렀으니 큰 면 전체가 보라로 물들었다. 깊이는 검정
      그림자가 내고, 테두리는 중립 흰 실선이 낸다 — 보라는 뺀다. */
-  box-shadow: 0 40px 90px -38px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  box-shadow: 0 40px 90px -38px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(var(--t-on-rgb), 0.06);
   padding: 18px; z-index: 2;
 }
 .cv5-hv-head { display: flex; justify-content: space-between; align-items: center; padding: 2px 4px 14px; }
 .cv5-hv-head span { font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; color: var(--v5-ink-faint); }
 .cv5-hv-head b { color: var(--v5-cyan); }
 .cv5-hv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.cv5-hv-cell { position: relative; border: 1px solid var(--v5-line); border-radius: 12px; overflow: hidden; background: #2a2d31; }
+.cv5-hv-cell { position: relative; border: 1px solid var(--v5-line); border-radius: 12px; overflow: hidden; background: var(--t-art-tile); }
 .cv5-hv-cell img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
 .cv5-hv-cell span {
   position: absolute; inset: auto 0 0 0; padding: 14px 8px 6px; text-align: left;
   font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.07em; color: rgba(255, 255, 255, 0.85);
   background: linear-gradient(180deg, transparent, rgba(10, 11, 13, 0.88) 72%);
 }
-.cv5-hv-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding: 12px 12px; border: 1px solid var(--v5-line); border-radius: 12px; background: rgba(255, 255, 255, 0.045); }
+.cv5-hv-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding: 12px 12px; border: 1px solid var(--v5-line); border-radius: 12px; background: rgba(var(--t-on-rgb), 0.045); }
 .cv5-hv-foot span { font-size: 0.78rem; color: var(--v5-ink-dim); }
 .cv5-hv-foot b { font-family: var(--v5-label); font-size: 0.78rem; color: var(--v5-green); letter-spacing: 0.05em; }
 
 .cv5-float {
   position: absolute; border: 1px solid var(--v5-line-strong); border-radius: 14px; overflow: hidden;
-  background: #26282c; box-shadow: 0 28px 60px -24px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.07);
+  background: var(--t-art-card); box-shadow: 0 28px 60px -24px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(var(--t-on-rgb), 0.07);
   z-index: 3; animation: cv5-drift 7s ease-in-out infinite;
 }
 .cv5-float img { display: block; width: 100%; height: 100%; object-fit: cover; }
@@ -282,9 +280,9 @@ html:has(.cv5) body { background: var(--v5-bg0, #17181b); }
 .cv5-num {
   display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px;
   border-radius: 12px; font-family: var(--v5-label); font-weight: 700; font-size: 1.02rem;
-  border: 1px solid rgba(139, 92, 246, 0.4); background: var(--v5-grad-soft); color: var(--v5-ink);
+  border: 1px solid rgba(var(--t-accent-rgb), 0.4); background: var(--v5-grad-soft); color: var(--v5-ink);
 }
-.cv5-sec[data-tone="green"] .cv5-num { border-color: rgba(52, 211, 153, 0.4); background: rgba(52, 211, 153, 0.1); }
+.cv5-sec[data-tone="green"] .cv5-num { border-color: rgba(var(--t-green-rgb), 0.4); background: rgba(var(--t-green-rgb), 0.1); }
 .cv5-sec-kicker { display: flex; align-items: center; gap: 14px; }
 .cv5-sec-kicker small { font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.16em; color: var(--v5-ink-faint); }
 .cv5-sec-copy h2 { margin: 18px 0 0; font-size: clamp(1.7rem, 3.2vw, 2.45rem); font-weight: 830; letter-spacing: -0.035em; line-height: 1.18; text-wrap: balance; }
@@ -298,18 +296,18 @@ html:has(.cv5) body { background: var(--v5-bg0, #17181b); }
    중립으로 내리고, 보라는 누르는 것(버튼·활성 탭·초점 링)에만 남긴다. */
 .cv5-points li::before {
   content: ""; flex: 0 0 auto; width: 2px; height: 1.05em; border-radius: 1px;
-  background: rgba(255, 255, 255, 0.28); margin-top: 0.34em;
+  background: rgba(var(--t-on-rgb), 0.28); margin-top: 0.34em;
 }
-.cv5-sec[data-tone="green"] .cv5-points li::before { background: rgba(52, 211, 153, 0.6); }
+.cv5-sec[data-tone="green"] .cv5-points li::before { background: rgba(var(--t-green-rgb), 0.6); }
 .cv5-more { display: inline-flex; align-items: center; gap: 8px; margin-top: 26px; color: var(--v5-ink); font-weight: 700; font-size: 0.92rem; border-bottom: 1px solid transparent; }
-.cv5-more:hover { color: #c0b3fb; }
+.cv5-more:hover { color: var(--t-accent-soft-ink); }
 .cv5-more + .cv5-more { margin-left: 22px; }
 
 /* mockup shells */
 .cv5-mock {
   border: 1px solid var(--v5-line-strong); border-radius: var(--v5-r-lg);
-  background: linear-gradient(178deg, #23252999, #1b1c1f) , var(--v5-bg1);
-  box-shadow: 0 36px 90px -40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  background: var(--t-well-grad2-soft) , var(--v5-bg1);
+  box-shadow: 0 36px 90px -40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(var(--t-on-rgb), 0.05);
   overflow: hidden;
 }
 .cv5-mock-bar { display: flex; align-items: center; justify-content: space-between; padding: 13px 18px; border-bottom: 1px solid var(--v5-line); }
@@ -321,10 +319,10 @@ html:has(.cv5) body { background: var(--v5-bg0, #17181b); }
 .cv5-market { display: grid; grid-template-columns: 128px 1fr; gap: 14px; }
 .cv5-market-side { display: grid; gap: 4px; align-content: start; }
 .cv5-market-side span { padding: 8px 11px; border-radius: 9px; font-size: 0.76rem; color: var(--v5-ink-faint); }
-.cv5-market-side span.on { background: var(--v5-grad-soft); color: var(--v5-ink); border: 1px solid rgba(139, 92, 246, 0.3); font-weight: 600; }
+.cv5-market-side span.on { background: var(--v5-grad-soft); color: var(--v5-ink); border: 1px solid rgba(var(--t-accent-rgb), 0.3); font-weight: 600; }
 .cv5-market-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.cv5-market-card { position: relative; border: 1px solid var(--v5-line); border-radius: 11px; overflow: hidden; background: #2a2d31; transition: transform .2s, border-color .2s; }
-.cv5-market-card:hover { transform: translateY(-2px); border-color: rgba(139, 92, 246, 0.5); }
+.cv5-market-card { position: relative; border: 1px solid var(--v5-line); border-radius: 11px; overflow: hidden; background: var(--t-art-tile); transition: transform .2s, border-color .2s; }
+.cv5-market-card:hover { transform: translateY(-2px); border-color: rgba(var(--t-accent-rgb), 0.5); }
 .cv5-market-card img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
 .cv5-market-card figcaption {
   display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 7px 9px;
@@ -338,26 +336,26 @@ html:has(.cv5) body { background: var(--v5-bg0, #17181b); }
 .cv5-inspect-preview img { width: 100%; height: 100%; object-fit: cover; }
 .cv5-inspect-preview small { position: absolute; left: 10px; top: 10px; font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; color: #333; background: rgba(255,255,255,0.8); border-radius: 6px; padding: 3px 8px; }
 .cv5-inspect-panel { display: grid; gap: 10px; align-content: start; }
-.cv5-score { display: flex; align-items: center; gap: 14px; border: 1px solid var(--v5-line); border-radius: 12px; padding: 12px 14px; background: rgba(52, 211, 153, 0.06); }
-.cv5-score-ring { width: 58px; height: 58px; border-radius: 50%; background: conic-gradient(var(--v5-green) 360deg, rgba(255,255,255,0.08) 0); display: grid; place-items: center; }
-.cv5-score-ring i { width: 46px; height: 46px; border-radius: 50%; background: #1d1f22; display: grid; place-items: center; font-style: normal; font-family: var(--v5-label); font-weight: 700; font-size: 0.86rem; color: var(--v5-green); }
+.cv5-score { display: flex; align-items: center; gap: 14px; border: 1px solid var(--v5-line); border-radius: 12px; padding: 12px 14px; background: rgba(var(--t-green-rgb), 0.06); }
+.cv5-score-ring { width: 58px; height: 58px; border-radius: 50%; background: conic-gradient(var(--v5-green) 360deg, rgba(var(--t-on-rgb), 0.08) 0); display: grid; place-items: center; }
+.cv5-score-ring i { width: 46px; height: 46px; border-radius: 50%; background: var(--t-bg1); display: grid; place-items: center; font-style: normal; font-family: var(--v5-label); font-weight: 700; font-size: 0.86rem; color: var(--v5-green); }
 .cv5-score div span { display: block; font-family: var(--v5-label); font-size: 0.72rem; letter-spacing: 0.12em; color: var(--v5-ink-faint); }
 .cv5-score div b { font-size: 0.92rem; color: var(--v5-ink); }
 .cv5-find { display: grid; gap: 6px; }
 .cv5-find div { display: flex; justify-content: space-between; gap: 10px; border: 1px solid var(--v5-line); border-radius: 10px; padding: 8px 12px; font-size: 0.78rem; color: var(--v5-ink-dim); font-variant-numeric: tabular-nums; }
 .cv5-find div b { color: var(--v5-ink); font-weight: 600; }
-.cv5-find div[data-tone="warn"] { border-color: rgba(251, 191, 36, 0.35); background: rgba(251, 191, 36, 0.06); }
+.cv5-find div[data-tone="warn"] { border-color: rgba(var(--t-amber-rgb), 0.35); background: rgba(var(--t-amber-rgb), 0.06); }
 .cv5-find div[data-tone="warn"] b { color: var(--v5-amber); }
 .cv5-ops { display: flex; flex-wrap: wrap; gap: 7px; }
-.cv5-ops span { border: 1px solid var(--v5-line-strong); border-radius: 9px; padding: 7px 11px; font-size: 0.73rem; color: var(--v5-ink-dim); background: rgba(255,255,255,0.03); }
+.cv5-ops span { border: 1px solid var(--v5-line-strong); border-radius: 9px; padding: 7px 11px; font-size: 0.73rem; color: var(--v5-ink-dim); background: rgba(var(--t-on-rgb), 0.03); }
 .cv5-ops span b { color: var(--v5-green); margin-right: 5px; }
 
 /* 03 agent mockup */
 .cv5-agent { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 14px; }
-.cv5-chat { border: 1px solid var(--v5-line); border-radius: 12px; padding: 14px; display: grid; gap: 10px; align-content: start; background: rgba(255,255,255,0.02); }
+.cv5-chat { border: 1px solid var(--v5-line); border-radius: 12px; padding: 14px; display: grid; gap: 10px; align-content: start; background: rgba(var(--t-on-rgb), 0.02); }
 .cv5-msg { max-width: 92%; border-radius: 12px; padding: 10px 13px; font-size: 0.8rem; line-height: 1.55; }
-.cv5-msg-user { justify-self: end; background: var(--v5-grad-soft); border: 1px solid rgba(139, 92, 246, 0.32); color: var(--v5-ink); }
-.cv5-msg-bot { background: rgba(255, 255, 255, 0.04); border: 1px solid var(--v5-line); color: var(--v5-ink-dim); width: 100%; max-width: 100%; }
+.cv5-msg-user { justify-self: end; background: var(--v5-grad-soft); border: 1px solid rgba(var(--t-accent-rgb), 0.32); color: var(--v5-ink); }
+.cv5-msg-bot { background: rgba(var(--t-on-rgb), 0.04); border: 1px solid var(--v5-line); color: var(--v5-ink-dim); width: 100%; max-width: 100%; }
 .cv5-steps { display: grid; gap: 6px; margin-top: 8px; }
 .cv5-steps span { display: flex; align-items: center; gap: 8px; font-family: var(--v5-label); font-size: 0.72rem; letter-spacing: 0.04em; color: var(--v5-ink-dim); }
 .cv5-steps span b { color: var(--v5-green); font-weight: 700; }
@@ -367,12 +365,12 @@ html:has(.cv5) body { background: var(--v5-bg0, #17181b); }
 .cv5-agent-assets header { font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; color: var(--v5-ink-faint); padding-bottom: 9px; }
 .cv5-agent-assets div { display: flex; gap: 8px; }
 .cv5-agent-assets img { width: 56px; height: 56px; border-radius: 9px; border: 1px solid var(--v5-line); object-fit: cover; }
-.cv5-code { border: 1px solid var(--v5-line); border-radius: 12px; background: #1a1b1e; padding: 13px 14px; overflow-x: auto; }
-.cv5-code pre { margin: 0; font-family: var(--v5-label); font-size: 0.72rem; line-height: 1.66; color: #b4bcc8; white-space: pre; }
+.cv5-code { border: 1px solid var(--v5-line); border-radius: 12px; background: var(--t-code-bg); padding: 13px 14px; overflow-x: auto; }
+.cv5-code pre { margin: 0; font-family: var(--v5-label); font-size: 0.72rem; line-height: 1.66; color: var(--t-code-ink); white-space: pre; }
 .cv5-code pre b { color: var(--v5-cyan); font-weight: 500; }
 
 /* ---------------------------------------------------------------- stats */
-.cv5-stats { margin-top: clamp(64px, 9vw, 112px); border-block: 1px solid var(--v5-line); background: rgba(255, 255, 255, 0.014); }
+.cv5-stats { margin-top: clamp(64px, 9vw, 112px); border-block: 1px solid var(--v5-line); background: rgba(var(--t-on-rgb), 0.014); }
 .cv5-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
 .cv5-stat { padding: clamp(22px, 3vw, 34px) clamp(14px, 2vw, 28px); border-left: 1px solid var(--v5-line); }
 .cv5-stat:first-child { border-left: 0; }
@@ -389,10 +387,10 @@ html:has(.cv5) body { background: var(--v5-bg0, #17181b); }
 .cv5-eyebrow { display: inline-flex; align-items: center; gap: 9px; font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.16em; color: var(--v5-ink-faint); }
 .cv5-eyebrow::before { content: ""; width: 22px; height: 1.5px; background: var(--v5-grad); }
 .cv5-showcase-grid { margin: clamp(26px, 4vw, 40px) 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 13px; }
-.cv5-showcase-card a { display: block; position: relative; border: 1px solid var(--v5-line); border-radius: var(--v5-r); overflow: hidden; background: #26282c; transition: transform .22s, border-color .22s, box-shadow .22s; }
+.cv5-showcase-card a { display: block; position: relative; border: 1px solid var(--v5-line); border-radius: var(--v5-r); overflow: hidden; background: var(--t-art-card); transition: transform .22s, border-color .22s, box-shadow .22s; }
 /* 2026-09-04: 호버마다 24px 보라 광채가 카드 밖으로 번져 격자 전체가 보라로 깜빡였다.
    강조는 테두리 한 줄이면 충분하다 — 광채는 검정 그림자로만 남긴다. */
-.cv5-showcase-card a:hover { transform: translateY(-4px); border-color: rgba(139, 92, 246, 0.5); box-shadow: 0 20px 44px -20px rgba(0, 0, 0, 0.85); }
+.cv5-showcase-card a:hover { transform: translateY(-4px); border-color: rgba(var(--t-accent-rgb), 0.5); box-shadow: 0 20px 44px -20px rgba(0, 0, 0, 0.85); }
 .cv5-showcase-card img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; transition: transform .3s; }
 .cv5-showcase-card a:hover img { transform: scale(1.05); }
 .cv5-showcase-meta { position: absolute; inset: auto 0 0 0; display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 20px 10px 8px; background: linear-gradient(180deg, transparent, rgba(10, 11, 13, 0.9) 66%); }
@@ -413,7 +411,7 @@ html:has(.cv5) body { background: var(--v5-bg0, #17181b); }
 .cv5-closer .cv5-cta-row { justify-content: center; }
 
 /* ---------------------------------------------------------------- footer */
-.cv5-footer { margin-top: clamp(48px, 7vw, 80px); border-top: 1px solid var(--v5-line); background: rgba(255, 255, 255, 0.012); }
+.cv5-footer { margin-top: clamp(48px, 7vw, 80px); border-top: 1px solid var(--v5-line); background: rgba(var(--t-on-rgb), 0.012); }
 .cv5-footer-inner { display: grid; grid-template-columns: minmax(0, 1.1fr) repeat(3, minmax(0, 0.63fr)); gap: clamp(22px, 4vw, 48px); padding: clamp(36px, 5vw, 56px) 0 26px; }
 .cv5-footer-brand strong { font-family: var(--v5-label); font-size: 1.1rem; letter-spacing: 0.14em; color: var(--v5-ink); }
 .cv5-footer-brand p { margin: 12px 0 0; font-size: 0.82rem; line-height: 1.7; color: var(--v5-ink-faint); max-width: 300px; }
@@ -491,22 +489,22 @@ html:has(.cv5) body { background: var(--v5-bg0, #17181b); }
 .cv5 .landing-mcp-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
 .cv5 .landing-mcp-tabs button {
   height: 30px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--v5-line);
-  background: rgba(255, 255, 255, 0.03); color: var(--v5-ink-dim);
+  background: rgba(var(--t-on-rgb), 0.03); color: var(--v5-ink-dim);
   font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; cursor: pointer;
   transition: color .16s, border-color .16s, background .16s;
 }
 .cv5 .landing-mcp-tabs button:hover { color: var(--v5-ink); }
 .cv5 .landing-mcp-tabs button.is-active {
-  color: var(--v5-ink); border-color: rgba(139, 92, 246, 0.5); background: var(--v5-grad-soft);
+  color: var(--v5-ink); border-color: rgba(var(--t-accent-rgb), 0.5); background: var(--v5-grad-soft);
 }
-.cv5 .landing-mcp-code { border: 1px solid var(--v5-line); border-radius: 12px; background: #1a1b1e; overflow: hidden; }
+.cv5 .landing-mcp-code { border: 1px solid var(--v5-line); border-radius: 12px; background: var(--t-code-bg); overflow: hidden; }
 .cv5 .landing-terminal-head {
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
   padding: 8px 8px 8px 13px; border-bottom: 1px solid var(--v5-line);
   font-family: var(--v5-label); font-size: 0.72rem; letter-spacing: 0.12em; color: var(--v5-ink-faint);
 }
 .cv5 .landing-mcp-copy { height: 28px; padding: 0 11px; border-radius: 8px; border: 0; background: var(--v5-grad); color: #fff; font-size: 0.72rem; font-weight: 700; }
-.cv5 .landing-mcp-code pre { margin: 0; padding: 12px 14px; overflow-x: auto; font-family: var(--v5-label); font-size: 0.72rem; line-height: 1.66; color: #b4bcc8; }
+.cv5 .landing-mcp-code pre { margin: 0; padding: 12px 14px; overflow-x: auto; font-family: var(--v5-label); font-size: 0.72rem; line-height: 1.66; color: var(--t-code-ink); }
 .cv5 .landing-mcp-note { margin: 0; padding: 9px 13px 11px; font-size: 0.72rem; color: var(--v5-ink-faint); border-top: 1px solid var(--v5-line); }
 
 @media (max-width: 640px) {
@@ -593,7 +591,7 @@ html:has(.cv5) {
   border-radius: 12px;
   background:
     radial-gradient(120% 90% at 50% 110%, rgba(255, 255, 255, 0.06), transparent 60%),
-    #26282c;
+    var(--t-art-card);
   min-height: 320px;
   overflow: hidden;
 }
@@ -602,14 +600,14 @@ html:has(.cv5) {
 .cv5-agent-stage-tag {
   position: absolute; left: 10px; top: 10px; z-index: 2;
   font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
-  color: var(--v5-ink-faint); background: rgba(23, 24, 27, 0.82); border: 1px solid var(--v5-line);
+  color: var(--v5-ink-faint); background: rgba(var(--t-ground-rgb), 0.82); border: 1px solid var(--v5-line);
   border-radius: 7px; padding: 4px 8px;
 }
 
 .cv5-agent-scan {
   position: absolute; right: 10px; top: 10px; z-index: 2;
   font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
-  color: var(--v5-amber); background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.4);
+  color: var(--v5-amber); background: rgba(var(--t-amber-rgb), 0.1); border: 1px solid rgba(var(--t-amber-rgb), 0.4);
   border-radius: 7px; padding: 4px 8px;
   animation: cv5-scan-blink 0.5s steps(2) infinite;
 }
@@ -621,7 +619,7 @@ html:has(.cv5) {
   /* 좁은 무대에서는 위 왼쪽의 파일 이름표와도 부딪힌다 — 아래 오른쪽, 안내 알약 한 줄 위. */
   position: absolute; right: 10px; bottom: 54px; z-index: 2;
   font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em;
-  color: var(--v5-green); background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.45);
+  color: var(--v5-green); background: rgba(var(--t-green-rgb), 0.1); border: 1px solid rgba(var(--t-green-rgb), 0.45);
   border-radius: 9px; padding: 7px 11px;
   animation: cv5-badge-pop 0.35s cubic-bezier(0.2, 1.4, 0.4, 1);
 }
@@ -659,7 +657,7 @@ html:has(.cv5) {
   overflow: hidden;
   background:
     radial-gradient(120% 90% at 50% 115%, rgba(255, 255, 255, 0.06), transparent 62%),
-    #26282c;
+    var(--t-art-card);
   border: 1px solid var(--v5-line-strong);
   min-height: 420px;
 }
@@ -667,13 +665,13 @@ html:has(.cv5) {
 .cv5-embed3d-hint {
   position: absolute; left: 12px; bottom: 12px; z-index: 2;
   font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
-  color: var(--v5-ink-dim); background: rgba(23, 24, 27, 0.82); border: 1px solid var(--v5-line);
+  color: var(--v5-ink-dim); background: rgba(var(--t-ground-rgb), 0.82); border: 1px solid var(--v5-line);
   border-radius: 8px; padding: 6px 10px;
 }
 .cv5-embed3d-anim {
   position: absolute; right: 12px; bottom: 12px; z-index: 2;
   font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
-  color: var(--v5-cyan); background: rgba(89, 217, 255, 0.08); border: 1px solid rgba(89, 217, 255, 0.35);
+  color: var(--v5-cyan); background: rgba(var(--t-cyan-rgb), 0.08); border: 1px solid rgba(var(--t-cyan-rgb), 0.35);
   border-radius: 8px; padding: 5px 9px;
 }
 .cv5-embed3d-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
@@ -692,14 +690,17 @@ html:has(.cv5) {
       Move them outside the panel's content box and darken the frame so they
       read as depth, not as pasted white stickers. */
 .cv5-float {
-  background: #26282c;
-  border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 22px 50px -26px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.07);
+  background: var(--t-art-card);
+  border-color: rgba(var(--t-on-rgb), 0.12);
+  box-shadow: 0 22px 50px -26px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(var(--t-on-rgb), 0.07);
 }
 .cv5-float-a { left: -18px; top: 6px; }
 .cv5-float-b { left: 4px; bottom: 96px; }
 .cv5-float-c { right: -18px; bottom: 96px; }
-.cv5-hv-foot { position: relative; z-index: 4; background: #232529; }
+/* 이 줄은 무대가 아니라 무대 밑의 설명 띠다 — 글자가 테마를 따라가므로 바닥도
+   따라가야 한다(2026-09-05: --t-art-cap 로 두었더니 화이트 테마에서 흰 판 밑에
+   검은 띠 하나만 남았다). */
+.cv5-hv-foot { position: relative; z-index: 4; background: var(--t-bg2); }
 
 /* 2. Flipped rows put the VISUAL in the narrow column (order swaps position,
       not track width), so the inspector mock was squeezed with dead space
@@ -709,10 +710,10 @@ html:has(.cv5) {
 /* 3. The tractor render is alpha-cut, so it does not need a light plate —
       a dark studio ground keeps it from reading as a stray white card. */
 .cv5-inspect-preview {
-  background: radial-gradient(120% 90% at 50% 115%, rgba(255, 255, 255, 0.06), transparent 62%), #2a2c30;
+  background: radial-gradient(120% 90% at 50% 115%, rgba(255, 255, 255, 0.06), transparent 62%), var(--t-art-tile);
 }
 .cv5-inspect-preview small {
-  background: rgba(23, 24, 27, 0.82);
+  background: rgba(var(--t-ground-rgb), 0.82);
   color: var(--v5-ink-dim);
   border: 1px solid var(--v5-line);
 }
@@ -805,7 +806,7 @@ html:has(.cv5) {
 --------------------------------------------------------------------------- */
 .cv5 {
   letter-spacing: 0;
-  --v5-ink-faint: rgba(232, 236, 241, 0.6);
+  --v5-ink-faint: rgba(var(--t-ink-rgb), 0.6);
 }
 
 .cv5 h1,
@@ -937,8 +938,8 @@ html:has(.cv5) {
   background: transparent; color: var(--v5-ink-faint); font: inherit; font-size: 0.83rem;
   cursor: pointer; transition: color .18s, border-color .18s, background-color .18s;
 }
-.cv5-showcase-tab:hover { color: var(--v5-ink); border-color: rgba(139, 92, 246, 0.45); }
-.cv5-showcase-tab.is-on { background: var(--v5-grad-soft); border-color: rgba(139, 92, 246, 0.45); color: var(--v5-ink); font-weight: 600; }
+.cv5-showcase-tab:hover { color: var(--v5-ink); border-color: rgba(var(--t-accent-rgb), 0.45); }
+.cv5-showcase-tab.is-on { background: var(--v5-grad-soft); border-color: rgba(var(--t-accent-rgb), 0.45); color: var(--v5-ink); font-weight: 600; }
 .cv5-showcase-tab i {
   font-style: normal; font-family: var(--v5-label); font-size: 0.72rem;
   font-variant-numeric: tabular-nums; color: var(--v5-ink-faint);
@@ -946,8 +947,8 @@ html:has(.cv5) {
 .cv5-showcase-tab.is-on i { color: var(--v5-cyan); }
 
 .cv5-showcase-live .cv5-showcase-grid { margin-top: clamp(16px, 2.4vw, 22px); }
-.cv5-showcase-card.is-loading { aspect-ratio: 1; border: 1px solid var(--v5-line); border-radius: var(--v5-r); background: #26282c; }
-.cv5-showcase-noart { display: block; aspect-ratio: 1; background: radial-gradient(circle at 50% 34%, rgba(255, 255, 255, 0.05), transparent 60%), #26282c; }
+.cv5-showcase-card.is-loading { aspect-ratio: 1; border: 1px solid var(--v5-line); border-radius: var(--v5-r); background: var(--t-art-card); }
+.cv5-showcase-noart { display: block; aspect-ratio: 1; background: radial-gradient(circle at 50% 34%, rgba(255, 255, 255, 0.05), transparent 60%), var(--t-art-card); }
 .cv5-showcase-meta { flex-wrap: wrap; }
 .cv5-showcase-meta i {
   font-style: normal; font-family: var(--v5-label); font-size: 0.72rem; font-weight: 700;
@@ -981,7 +982,7 @@ html:has(.cv5) {
 .cv5-make { display: grid; gap: 12px; }
 .cv5-make-stage {
   position: relative; border: 1px solid var(--v5-line); border-radius: 12px;
-  overflow: hidden; background: #26282c; min-height: 260px;
+  overflow: hidden; background: var(--t-art-card); min-height: 260px;
 }
 .cv5-make-stage > div { width: 100%; height: 100%; min-height: 260px; }
 .cv5-make-stage canvas { display: block; width: 100%; height: 100%; }
@@ -1115,7 +1116,7 @@ html:has(.cv5) {
 .cv5-footer-legal {
   font-size: 0.78rem;
   line-height: 1.6;
-  color: rgba(232, 236, 241, 0.76);
+  color: rgba(var(--t-ink-rgb), 0.76);
   justify-content: flex-start;
 }
 .cv5-footer-beta { color: var(--v5-ink-dim); }
@@ -1166,7 +1167,7 @@ html:has(.cv5) {
 .cv5-agent-stage .cv5-embed3d-hint { bottom: 10px; }
 
 /* Section 03 'making' veil: a progress bar over the interactive viewer. It never blocks the pointer. */
-.cv5-agent-veil { position: absolute; left: 10px; right: 10px; bottom: 44px; z-index: 2; pointer-events: none; height: 4px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); overflow: visible; }
+.cv5-agent-veil { position: absolute; left: 10px; right: 10px; bottom: 44px; z-index: 2; pointer-events: none; height: 4px; border-radius: 999px; background: rgba(var(--t-on-rgb), 0.08); overflow: visible; }
 .cv5-agent-veil > span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--v5-violet), var(--v5-cyan)); transition: width 200ms linear; }
 .cv5-agent-veil > small { position: absolute; right: 0; top: 8px; font-size: 0.72rem; color: var(--v5-ink-dim); }
 .cv5-agent-stage[data-building="true"] .cv5-embed3d { filter: saturate(0.6) brightness(0.85); transition: filter 400ms ease; }
@@ -1454,11 +1455,11 @@ html:has(.cv5) {
 .cv5-closer-doors a {
   display: grid; gap: 6px; text-align: left; padding: 15px 17px;
   border: 1px solid var(--v5-line); border-radius: var(--v5-r);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--t-on-rgb), 0.03);
   transition: border-color .18s, background-color .18s, transform .18s;
 }
 .cv5-closer-doors a:hover {
-  border-color: rgba(139, 92, 246, 0.45);
+  border-color: rgba(var(--t-accent-rgb), 0.45);
   background: var(--v5-grad-soft);
   transform: translateY(-2px);
 }

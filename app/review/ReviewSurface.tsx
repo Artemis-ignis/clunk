@@ -3,13 +3,27 @@
 import { useEffect, useState } from "react";
 import { GlbReviewer } from "../components/review/GlbReviewer";
 import { SpriteReviewer } from "../components/review/SpriteReviewer";
+import { modelSourceFor, probeSession } from "../components/model-source";
+import { previewImageUrlOf } from "../components/catalog-facts";
 
-type CatalogListing = { slug: string; title: string; entryFileName: string; previewFileName?: string | null };
+type CatalogListing = { slug: string; title: string; assetId: string; entryFileName: string; previewFileName?: string | null };
 
 /** Tabbed review surface: 3D GLB viewer + 2D sprite player + live inventory rail. */
 export function ReviewSurface({ initialGlb }: { initialGlb: string | null }) {
   const [tab, setTab] = useState<"3d" | "2d">(initialGlb ? "3d" : "3d");
   const [inventory, setInventory] = useState<CatalogListing[]>([]);
+  // 파는 파일은 로그인한 사람에게만 나간다. 로그인하지 않았으면 미리보기 파일을 연다.
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    void probeSession().then((value) => {
+      if (active) setSignedIn(value);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -27,9 +41,9 @@ export function ReviewSurface({ initialGlb }: { initialGlb: string | null }) {
 
   function loadInventoryGlb(listing: CatalogListing) {
     setTab("3d");
-    // Bundled QA inventory is served from the Worker's own static assets.
-    const url = `/market/${listing.slug}/${listing.entryFileName}`;
-    window.dispatchEvent(new CustomEvent("clunk:review-load-glb", { detail: url }));
+    // 뷰어가 열 파일은 한 곳에서 정한다(app/components/model-source.ts).
+    const { src } = modelSourceFor(listing, signedIn);
+    window.dispatchEvent(new CustomEvent("clunk:review-load-glb", { detail: src }));
   }
 
   return (
@@ -43,12 +57,13 @@ export function ReviewSurface({ initialGlb }: { initialGlb: string | null }) {
         <GlbReviewer initialUrl={initialGlb} />
         {inventory.length > 0 ? (
           <div className="rv-inventory" aria-label="게시된 에셋 목록 — 누르면 화면에 불러옵니다">
-            <header className="rv-panel-head">마켓에 올라온 에셋 {inventory.length}개 · 누르면 여기에 열립니다</header>
+            <header className="rv-panel-head">이 화면에서 바로 열어 보는 에셋 {inventory.length}개 · 누르면 여기에 열립니다</header>
             <div className="rv-inventory-row">
               {inventory.map((listing) => (
                 <button type="button" key={listing.slug} onClick={() => loadInventoryGlb(listing)}>
-                  {listing.previewFileName ? (
-                    <img src={`/market/${listing.slug}/${listing.previewFileName}`} alt="" width={72} height={72} loading="lazy" />
+                  {previewImageUrlOf(listing) ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={previewImageUrlOf(listing) ?? ""} alt="" width={72} height={72} loading="lazy" />
                   ) : null}
                   <span>{listing.title}</span>
                 </button>

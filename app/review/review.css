@@ -7,16 +7,16 @@
 .rv-tabs { display: flex; gap: 8px; margin: 28px 0 14px; }
 .rv-tabs button {
   height: 40px; padding: 0 18px; border-radius: 11px; border: 1px solid var(--v5-line-strong);
-  background: rgba(255, 255, 255, 0.03); color: var(--v5-ink-dim);
+  background: rgba(var(--t-on-rgb), 0.03); color: var(--v5-ink-dim);
   font-family: var(--v5-label); font-size: 0.74rem; font-weight: 700; letter-spacing: 0.06em; cursor: pointer;
 }
-.rv-tabs button.on { background: var(--v5-grad-soft); border-color: rgba(139, 92, 246, 0.5); color: var(--v5-ink); }
+.rv-tabs button.on { background: var(--v5-grad-soft); border-color: rgba(var(--t-accent-rgb), 0.5); color: var(--v5-ink); }
 
 .rv-glb, .rv-sprite {
   display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 14px;
   border: 1px solid var(--v5-line-strong); border-radius: var(--v5-r-lg);
-  background: linear-gradient(178deg, #12152699, #0b0d18);
-  box-shadow: 0 36px 90px -40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(124, 93, 250, 0.08);
+  background: var(--t-well-grad-soft);
+  box-shadow: 0 36px 90px -40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(var(--t-accent-rgb), 0.08);
   padding: 14px;
 }
 
@@ -31,7 +31,7 @@
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2;
   max-width: min(420px, 84%);
   padding: 12px 16px; border-radius: 12px; border: 1px solid var(--v5-line-strong);
-  background: rgba(6, 7, 15, 0.86); color: var(--v5-ink-dim); font-size: 0.86rem;
+  background: rgba(var(--t-ground-rgb), 0.86); color: var(--v5-ink-dim); font-size: 0.86rem;
   line-height: 1.6; text-align: center;
 }
 
@@ -45,19 +45,19 @@
 
 .rv-toggles { display: grid; gap: 8px; }
 .rv-toggles label { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--v5-ink-dim); }
-.rv-toggles input[type="range"] { flex: 1; accent-color: #8b5cf6; }
-.rv-toggles input[type="checkbox"] { width: 15px; height: 15px; accent-color: #8b5cf6; }
+.rv-toggles input[type="range"] { flex: 1; accent-color: rgb(var(--t-accent-rgb)); }
+.rv-toggles input[type="checkbox"] { width: 15px; height: 15px; accent-color: rgb(var(--t-accent-rgb)); }
 
 .rv-clips { display: grid; gap: 6px; }
 .rv-clips button {
   height: 32px; padding: 0 12px; border-radius: 9px; border: 1px solid var(--v5-line);
-  background: rgba(255, 255, 255, 0.03); color: var(--v5-ink-dim);
+  background: rgba(var(--t-on-rgb), 0.03); color: var(--v5-ink-dim);
   font-size: 0.76rem; text-align: left; cursor: pointer;
 }
-.rv-clips button.on, .rv-clips button:hover { border-color: rgba(139, 92, 246, 0.5); color: var(--v5-ink); }
+.rv-clips button.on, .rv-clips button:hover { border-color: rgba(var(--t-accent-rgb), 0.5); color: var(--v5-ink); }
 
 /* sprite stage */
-.rv-sprite-stage { position: relative; height: 520px; border: 1px solid var(--v5-line); border-radius: 14px; overflow: hidden; background: #0d1017; }
+.rv-sprite-stage { position: relative; height: 520px; border: 1px solid var(--v5-line); border-radius: 14px; overflow: hidden; background: var(--t-art-well); }
 /* absolute canvas: its bitmap follows the stage box, never feeds layout back */
 .rv-sprite-canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
 .rv-sprite-sequence {
@@ -74,14 +74,14 @@
 .rv-sprite-hud b { color: var(--v5-cyan); font-size: 0.86rem; font-variant-numeric: tabular-nums; }
 
 /* inventory rail */
-.rv-inventory { margin-top: 14px; border: 1px solid var(--v5-line); border-radius: 14px; padding: 12px 14px; background: rgba(255, 255, 255, 0.015); }
+.rv-inventory { margin-top: 14px; border: 1px solid var(--v5-line); border-radius: 14px; padding: 12px 14px; background: rgba(var(--t-on-rgb), 0.015); }
 .rv-inventory-row { display: flex; gap: 10px; overflow-x: auto; padding: 10px 2px 4px; }
 .rv-inventory-row button {
   flex: 0 0 auto; display: grid; gap: 6px; justify-items: center; width: 96px;
   border: 1px solid var(--v5-line); border-radius: 11px; padding: 8px 6px;
-  background: rgba(255, 255, 255, 0.02); color: var(--v5-ink-dim); font-size: 0.74rem; cursor: pointer;
+  background: rgba(var(--t-on-rgb), 0.02); color: var(--v5-ink-dim); font-size: 0.74rem; cursor: pointer;
 }
-.rv-inventory-row button:hover { border-color: rgba(139, 92, 246, 0.5); color: var(--v5-ink); }
+.rv-inventory-row button:hover { border-color: rgba(var(--t-accent-rgb), 0.5); color: var(--v5-ink); }
 .rv-inventory-row img { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; }
 
 /* the published-asset rail: a sideways scroll on a phone hides everything past
@@ -107,7 +107,7 @@
   position: absolute; top: 12px; right: 12px; z-index: 2;
   display: inline-flex; align-items: center;
   padding: 8px 12px; border-radius: 10px; border: 1px solid var(--v5-line-strong);
-  background: rgba(6, 7, 15, 0.82); color: var(--v5-ink); font-size: 0.8rem; cursor: pointer;
+  background: rgba(var(--t-ground-rgb), 0.82); color: var(--v5-ink); font-size: 0.8rem; cursor: pointer;
 }
 .rv-open:hover { border-color: var(--v5-ink); }
 .rv-open:focus-within { outline: 2px solid var(--v5-ink); outline-offset: 2px; }
@@ -121,5 +121,5 @@
 .rv-reference-caption {
   position: absolute; left: 12px; bottom: 12px; z-index: 2;
   padding: 6px 10px; border-radius: 9px; border: 1px solid var(--v5-line-strong);
-  background: rgba(6, 7, 15, 0.82); color: var(--v5-ink-dim); font-size: 0.76rem;
+  background: rgba(var(--t-ground-rgb), 0.82); color: var(--v5-ink-dim); font-size: 0.76rem;
 }

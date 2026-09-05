@@ -5,7 +5,7 @@ import Link from "./NativeLink";
 import { BrandLockup } from "./BrandMark";
 import { Icon, type IconName } from "./Icon";
 import { SnapRoot } from "./SnapRoot";
-import { ForceDarkTheme } from "./ForceDarkTheme";
+import { ThemeSwitch } from "./ThemeSwitch";
 import "../workspace.css";
 import "./workspace-v5.css";
 
@@ -119,10 +119,10 @@ export function WorkspaceShell({
        route — /dashboard /assets /studio /bundles?view=workspace /app /passport
        /settings — renders through this shell, so opting the shell in is what
        moves all of them onto the cv5 navy ground in one place. `cv5-surface`
-       swings the legacy globals/foundry token ramps; ForceDarkTheme pins
-       data-theme=dark so those ramps never resolve to the light palette. */
+       swings the legacy globals/foundry token ramps, and app/theme.css keys
+       every one of those ramps off <html data-theme> so this shell follows the
+       reader's choice instead of being pinned dark. */
     <div className={`workspace foundry-workspace-page cv5 cv5-surface workspace-cv5${railOpen ? " workspace-rail-open" : ""}`}>
-      <ForceDarkTheme />
       <SnapRoot mode="workspace" />
       <div className="cv5-stars" aria-hidden="true" />
       <div className="workspace-aurora" aria-hidden="true" />
@@ -151,6 +151,8 @@ export function WorkspaceShell({
             <Icon name="close" size={18} />
           </button>
         </div>
+        {/* 760px 아래에서는 툴바의 테마 스위치가 접힌다 — 그 사본이 여기 선다. */}
+        <ThemeSwitch variant="drawer" />
         {rail("drawer")}
       </div>
 
@@ -178,10 +180,11 @@ export function WorkspaceShell({
             <span>내 파일 검사</span>
           </Link>
           <div className="workspace-toolbar-end">
-            {/* 작업공간 툴바의 라이트/다크 토글이 있던 자리. 이 껍데기는 바로 위에서
-                ForceDarkTheme 으로 data-theme 을 dark 에 못 박고, site-v5.css:92 가
-                `.cv5 .theme-toggle { display: none }` 로 버튼을 숨기고 있었다 —
-                켜지지도 보이지도 않는 조작부였다. */}
+            {/* 로그인한 화면에서도 테마를 고를 수 있어야 한다 — 여기가 공개 화면의
+                내비에 해당하는 자리다. 2026-09-05 오전까지 이 자리의 토글은 위에서
+                ForceDarkTheme 이 data-theme 을 dark 에 못 박고 site-v5.css 가
+                버튼을 숨겨서, 켜지지도 보이지도 않았다. 둘 다 걷어냈다. */}
+            <ThemeSwitch variant="bar" />
             {status}
             <Link className="workspace-avatar" href="/settings" prefetch={false} title={`${userLabel} · 설정`}>
               {userLabel.slice(0, 1).toUpperCase()}

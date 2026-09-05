@@ -18,7 +18,7 @@
    ========================================================================= */
 
 .page {
-  color: var(--v5-ink, #f4f5fa);
+  color: var(--v5-ink, var(--t-ink));
   background: transparent;
 }
 
@@ -55,7 +55,7 @@
 .manifestRows span,
 .stateCard > span,
 .nextLinks span {
-  color: var(--v5-ink-faint, rgba(233, 236, 248, 0.42));
+  color: var(--v5-ink-faint, rgba(var(--t-ink-rgb), 0.42));
   font-family: var(--v5-label, "Space Grotesk V", "Space Grotesk", ui-monospace, monospace);
   font-size: 0.72rem;
   font-weight: 700;
@@ -68,7 +68,7 @@
 .emptySection h2,
 .nextSection h2 {
   margin: 20px 0 0;
-  color: var(--v5-ink, #f4f5fa);
+  color: var(--v5-ink, var(--t-ink));
   font-size: clamp(2.4rem, 5.2vw, 3.9rem);
   font-weight: 860;
   letter-spacing: -0.042em;
@@ -91,7 +91,7 @@
 .sectionHeading h2 em,
 .emptySection h2 em,
 .nextSection h2 em {
-  background: var(--v5-grad, linear-gradient(96deg, #6366f1 4%, #8b5cf6 52%, #a855f7 96%));
+  background: var(--v5-grad, linear-gradient(96deg, #6366f1 4%, rgb(var(--t-accent-rgb)) 52%, var(--t-violet) 96%));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -103,7 +103,7 @@
 .emptySection > div > p {
   max-width: 540px;
   margin: 20px 0 0;
-  color: var(--v5-ink-dim, rgba(233, 236, 248, 0.66));
+  color: var(--v5-ink-dim, rgba(var(--t-ink-rgb), 0.66));
   font-size: clamp(0.96rem, 1.3vw, 1.08rem);
   line-height: 1.72;
 }
@@ -133,8 +133,8 @@
 
 .primary {
   color: #fff;
-  background: var(--v5-grad, linear-gradient(96deg, #6366f1 4%, #8b5cf6 52%, #a855f7 96%));
-  box-shadow: var(--v5-glow, 0 12px 44px -12px rgba(124, 93, 250, 0.55));
+  background: var(--v5-grad, linear-gradient(96deg, #6366f1 4%, rgb(var(--t-accent-rgb)) 52%, var(--t-violet) 96%));
+  box-shadow: var(--v5-glow, 0 12px 44px -12px rgba(var(--t-accent-rgb), 0.55));
 }
 
 .primary:hover {
@@ -142,14 +142,14 @@
 }
 
 .secondary {
-  color: var(--v5-ink, #f4f5fa);
-  border-color: var(--v5-line-strong, rgba(255, 255, 255, 0.15));
-  background: rgba(255, 255, 255, 0.03);
+  color: var(--v5-ink, var(--t-ink));
+  border-color: var(--v5-line-strong, rgba(var(--t-on-rgb), 0.15));
+  background: rgba(var(--t-on-rgb), 0.03);
 }
 
 .secondary:hover {
-  border-color: rgba(255, 255, 255, 0.32);
-  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(var(--t-on-rgb), 0.32);
+  background: rgba(var(--t-on-rgb), 0.06);
 }
 
 .primary:active,
@@ -162,7 +162,7 @@
 .secondary:focus-visible,
 .nextLinks a:focus-visible,
 .stateCard a:focus-visible {
-  outline: 2px solid #a855f7;
+  outline: 2px solid var(--t-violet);
   outline-offset: 3px;
 }
 
@@ -173,12 +173,12 @@
   min-height: 400px;
   padding: 22px;
   overflow: hidden;
-  color: var(--v5-ink, #f4f5fa);
-  border: 1px solid var(--v5-line-strong, rgba(255, 255, 255, 0.15));
+  color: var(--v5-ink, var(--t-ink));
+  border: 1px solid var(--v5-line-strong, rgba(var(--t-on-rgb), 0.15));
   border-radius: var(--v5-r-lg, 20px);
-  background: linear-gradient(178deg, #131628, #0c0e1a 68%);
-  box-shadow: 0 40px 90px -38px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(124, 93, 250, 0.12),
-    0 24px 80px -30px rgba(124, 93, 250, 0.35);
+  background: var(--t-well-grad);
+  box-shadow: 0 40px 90px -38px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(var(--t-accent-rgb), 0.12),
+    0 24px 80px -30px rgba(var(--t-accent-rgb), 0.35);
 }
 
 .manifest::after {
@@ -187,8 +187,8 @@
   bottom: 27%;
   left: -12%;
   height: 1px;
-  background: rgba(139, 92, 246, 0.28);
-  box-shadow: 0 68px rgba(139, 92, 246, 0.16), 0 136px rgba(139, 92, 246, 0.1);
+  background: rgba(var(--t-accent-rgb), 0.28);
+  box-shadow: 0 68px rgba(var(--t-accent-rgb), 0.16), 0 136px rgba(var(--t-accent-rgb), 0.1);
   content: "";
   transform: rotate(-18deg);
 }
@@ -200,13 +200,13 @@
   justify-content: space-between;
   gap: 18px;
   padding-bottom: 14px;
-  border-bottom: 1px solid var(--v5-line, rgba(255, 255, 255, 0.08));
+  border-bottom: 1px solid var(--v5-line, rgba(var(--t-on-rgb), 0.08));
   font-size: 0.72rem;
   letter-spacing: 0.14em;
 }
 
 .manifestTopline span:last-child {
-  color: var(--v5-cyan, #59d9ff);
+  color: var(--v5-cyan, var(--t-cyan));
 }
 
 .manifestRows {
@@ -223,19 +223,19 @@
   gap: 14px;
   align-items: center;
   padding: 11px 13px;
-  border: 1px solid var(--v5-line, rgba(255, 255, 255, 0.08));
+  border: 1px solid var(--v5-line, rgba(var(--t-on-rgb), 0.08));
   border-radius: 11px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--t-on-rgb), 0.03);
 }
 
 .manifestRows span {
-  color: var(--v5-ink-faint, rgba(233, 236, 248, 0.42));
+  color: var(--v5-ink-faint, rgba(var(--t-ink-rgb), 0.42));
   font-size: 0.72rem;
   letter-spacing: 0.14em;
 }
 
 .manifestRows strong {
-  color: var(--v5-ink, #f4f5fa);
+  color: var(--v5-ink, var(--t-ink));
   font-family: var(--v5-label, "Space Grotesk V", "Space Grotesk", ui-monospace, monospace);
   font-size: 0.78rem;
   font-weight: 700;
@@ -245,7 +245,7 @@
   position: relative;
   z-index: 1;
   margin: 26px 0 0;
-  color: var(--v5-ink-faint, rgba(233, 236, 248, 0.42));
+  color: var(--v5-ink-faint, rgba(var(--t-ink-rgb), 0.42));
   font-size: 0.8rem;
   line-height: 1.65;
 }
@@ -253,7 +253,7 @@
 /* ------------------------------------------------------------ workflow flow */
 .section {
   display: block;
-  border-top: 1px solid var(--v5-line, rgba(255, 255, 255, 0.08));
+  border-top: 1px solid var(--v5-line, rgba(var(--t-on-rgb), 0.08));
 }
 
 .sectionHeading {
@@ -272,19 +272,19 @@
 .flowGrid article {
   min-height: 0;
   padding: 22px;
-  border: 1px solid var(--v5-line, rgba(255, 255, 255, 0.08));
+  border: 1px solid var(--v5-line, rgba(var(--t-on-rgb), 0.08));
   border-radius: var(--v5-r, 14px);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--t-on-rgb), 0.03);
   transition: border-color 200ms ease, transform 200ms ease;
 }
 
 .flowGrid article:hover {
   transform: translateY(-2px);
-  border-color: rgba(139, 92, 246, 0.45);
+  border-color: rgba(var(--t-accent-rgb), 0.45);
 }
 
 .flowGrid article > span {
-  background: var(--v5-grad, linear-gradient(96deg, #6366f1 4%, #8b5cf6 52%, #a855f7 96%));
+  background: var(--v5-grad, linear-gradient(96deg, #6366f1 4%, rgb(var(--t-accent-rgb)) 52%, var(--t-violet) 96%));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -297,7 +297,7 @@
 .flowGrid strong {
   display: block;
   margin-top: 26px;
-  color: var(--v5-ink, #f4f5fa);
+  color: var(--v5-ink, var(--t-ink));
   font-size: 1.04rem;
   font-weight: 750;
   letter-spacing: -0.028em;
@@ -305,7 +305,7 @@
 
 .flowGrid p {
   margin: 9px 0 0;
-  color: var(--v5-ink-dim, rgba(233, 236, 248, 0.66));
+  color: var(--v5-ink-dim, rgba(var(--t-ink-rgb), 0.66));
   font-size: 0.84rem;
   line-height: 1.65;
 }
@@ -314,14 +314,14 @@
 .emptySection {
   grid-template-columns: minmax(0, 1.02fr) minmax(300px, 0.98fr);
   gap: clamp(28px, 4vw, 64px);
-  border-top: 1px solid var(--v5-line, rgba(255, 255, 255, 0.08));
+  border-top: 1px solid var(--v5-line, rgba(var(--t-on-rgb), 0.08));
 }
 
 .stateCard {
   padding: 24px;
-  border: 1px solid rgba(251, 191, 36, 0.3);
+  border: 1px solid rgba(var(--t-amber-rgb), 0.3);
   border-radius: var(--v5-r-lg, 20px);
-  background: rgba(251, 191, 36, 0.06);
+  background: rgba(var(--t-amber-rgb), 0.06);
 }
 
 .stateCard > span {
@@ -331,7 +331,7 @@
 .stateCard strong {
   display: block;
   margin-top: 28px;
-  color: var(--v5-amber, #fbbf24);
+  color: var(--v5-amber, var(--t-amber));
   font-family: var(--v5-label, "Space Grotesk V", "Space Grotesk", ui-monospace, monospace);
   font-size: clamp(0.98rem, 2vw, 1.22rem);
   font-weight: 700;
@@ -340,13 +340,13 @@
 
 .stateCard p {
   margin: 14px 0 20px;
-  color: var(--v5-ink-dim, rgba(233, 236, 248, 0.66));
+  color: var(--v5-ink-dim, rgba(var(--t-ink-rgb), 0.66));
   font-size: 0.84rem;
   line-height: 1.65;
 }
 
 .stateCard a {
-  color: var(--v5-ink, #f4f5fa);
+  color: var(--v5-ink, var(--t-ink));
   font-size: 0.88rem;
   font-weight: 700;
   text-decoration: none;
@@ -354,13 +354,13 @@
 }
 
 .stateCard a:hover {
-  color: #cdb7ff;
+  color: var(--t-accent-soft-ink);
 }
 
 /* -------------------------------------------------------------- next surface */
 .nextSection {
   padding: clamp(56px, 8vw, 104px) 0 clamp(48px, 7vw, 88px);
-  border-top: 1px solid var(--v5-line, rgba(255, 255, 255, 0.08));
+  border-top: 1px solid var(--v5-line, rgba(var(--t-on-rgb), 0.08));
 }
 
 .nextLinks {
@@ -376,18 +376,18 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 22px;
-  color: var(--v5-ink, #f4f5fa);
-  border: 1px solid var(--v5-line, rgba(255, 255, 255, 0.08));
+  color: var(--v5-ink, var(--t-ink));
+  border: 1px solid var(--v5-line, rgba(var(--t-on-rgb), 0.08));
   border-radius: var(--v5-r, 14px);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--t-on-rgb), 0.03);
   text-decoration: none;
   transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
 
 .nextLinks a:hover {
   transform: translateY(-3px);
-  border-color: rgba(139, 92, 246, 0.5);
-  box-shadow: 0 20px 44px -20px rgba(0, 0, 0, 0.85), 0 0 24px -6px rgba(124, 93, 250, 0.35);
+  border-color: rgba(var(--t-accent-rgb), 0.5);
+  box-shadow: 0 20px 44px -20px rgba(0, 0, 0, 0.85), 0 0 24px -6px rgba(var(--t-accent-rgb), 0.35);
 }
 
 .nextLinks strong {

@@ -165,13 +165,13 @@
   padding: clamp(22px, 2.6vw, 30px);
   border: 1px solid var(--v5-line);
   border-radius: var(--v5-r-lg);
-  background: rgba(255, 255, 255, 0.018);
+  background: rgba(var(--t-on-rgb), 0.018);
 }
 
 .planFeatured {
   position: relative;
   border-color: rgba(139, 123, 244, 0.42);
-  background: linear-gradient(180deg, rgba(123, 127, 240, 0.17), rgba(255, 255, 255, 0.045) 52%);
+  background: linear-gradient(180deg, rgba(123, 127, 240, 0.17), rgba(var(--t-on-rgb), 0.045) 52%);
   box-shadow: 0 22px 52px -26px rgba(108, 111, 242, 0.65), 0 0 0 1px rgba(139, 123, 244, 0.16);
 }
 
@@ -207,7 +207,7 @@
   align-items: center;
   padding: 4px 11px;
   border-radius: 999px;
-  border: 1px solid rgba(139, 92, 246, 0.4);
+  border: 1px solid rgba(var(--t-accent-rgb), 0.4);
   background: var(--v5-grad-soft);
   font-family: var(--v5-label);
   font-size: 0.75rem;
@@ -291,7 +291,7 @@
   padding: 0 16px;
   border-radius: 12px;
   border: 1px solid var(--v5-line-strong);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(var(--t-on-rgb), 0.04);
   color: var(--v5-ink);
   font-size: 0.92rem;
   font-weight: 700;
@@ -301,12 +301,12 @@
   transition: filter 0.18s, border-color 0.18s;
 }
 
-.planBtn:hover:not(:disabled) { border-color: rgba(255, 255, 255, 0.32); }
+.planBtn:hover:not(:disabled) { border-color: rgba(var(--t-on-rgb), 0.32); }
 
 .planBtn:disabled {
   color: var(--v5-ink-faint);
   border-color: var(--v5-line);
-  background: rgba(255, 255, 255, 0.015);
+  background: rgba(var(--t-on-rgb), 0.015);
   cursor: not-allowed;
 }
 
@@ -449,7 +449,7 @@
   letter-spacing: 0.06em;
   color: var(--v5-ink);
   white-space: nowrap;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--t-on-rgb), 0.03);
 }
 
 .usageTable tbody th,
@@ -476,8 +476,8 @@
 .amountUp { color: var(--v5-green); }
 .amountDown { color: var(--v5-ink); }
 
-.compareFeatured { background: rgba(99, 102, 241, 0.1); }
-.compareTable thead th.compareFeatured { color: var(--v5-ink); background: rgba(99, 102, 241, 0.16); }
+.compareFeatured { background: rgba(var(--t-accent-rgb), 0.1); }
+.compareTable thead th.compareFeatured { color: var(--v5-ink); background: rgba(var(--t-accent-rgb), 0.16); }
 
 /* ------------------------------------------------- 두 요금제가 같은 항목 */
 /* 표에서 빼낸 네 줄이 사는 자리(app/pricing/page.tsx 의 SHARED_ROWS). 표 위에 두어,
@@ -487,7 +487,7 @@
   padding: 16px 18px;
   border: 1px solid var(--v5-line);
   border-radius: var(--v5-r-lg);
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(var(--t-on-rgb), 0.02);
 }
 
 .compareSharedHead {
@@ -530,12 +530,12 @@
   padding: 18px 20px;
   border: 1px solid var(--v5-line);
   border-radius: var(--v5-r-lg);
-  background: rgba(255, 255, 255, 0.018);
+  background: rgba(var(--t-on-rgb), 0.018);
 }
 
 .compareCardFeatured {
   border-color: rgba(139, 123, 244, 0.42);
-  background: linear-gradient(180deg, rgba(123, 127, 240, 0.17), rgba(255, 255, 255, 0.045) 52%);
+  background: linear-gradient(180deg, rgba(123, 127, 240, 0.17), rgba(var(--t-on-rgb), 0.045) 52%);
   box-shadow: 0 22px 52px -26px rgba(108, 111, 242, 0.65), 0 0 0 1px rgba(139, 123, 244, 0.16);
 }
 
@@ -558,7 +558,7 @@
   align-items: center;
   padding: 4px 11px;
   border-radius: 999px;
-  border: 1px solid rgba(139, 92, 246, 0.4);
+  border: 1px solid rgba(var(--t-accent-rgb), 0.4);
   background: var(--v5-grad-soft);
   font-family: var(--v5-label);
   font-size: 0.75rem;
@@ -660,7 +660,7 @@
   padding: clamp(26px, 3.4vw, 40px);
   border: 1px solid var(--v5-line-strong);
   border-radius: var(--v5-r-lg);
-  background: linear-gradient(180deg, rgba(99, 102, 241, 0.09), rgba(255, 255, 255, 0.02) 60%);
+  background: linear-gradient(180deg, rgba(var(--t-accent-rgb), 0.09), rgba(var(--t-on-rgb), 0.02) 60%);
 }
 
 .closerBox > div:first-child { min-width: 0; flex: 1 1 300px; }

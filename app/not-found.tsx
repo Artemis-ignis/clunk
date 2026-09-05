@@ -2,7 +2,6 @@ import Link from "./components/NativeLink";
 import { Icon } from "./components/Icon";
 import { SiteNav } from "./components/SiteNav";
 import { SiteFooter } from "./components/SiteFooter";
-import { ForceDarkTheme } from "./components/ForceDarkTheme";
 import { createPageMetadata } from "./components/site-metadata";
 
 export const metadata = createPageMetadata({
@@ -19,7 +18,6 @@ export const metadata = createPageMetadata({
 export default function NotFound() {
   return (
     <div className="cv5">
-      <ForceDarkTheme />
       <div className="cv5-stars" aria-hidden="true" />
       <SiteNav />
       <main className="cv5-nf">
