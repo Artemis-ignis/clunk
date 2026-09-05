@@ -477,6 +477,8 @@ export function kitsFrom<T extends KitSource>(listings: readonly T[]): Kit<T>[] 
       // 3개 가운데 하나" 처럼 같은 수를 두 번 말하게 된다. 새 키트에는 이름표가 없고,
       // 그때는 상품 제목이 곧 키트 이름이다(docs/kits.md 8절).
       name: LEGACY_KIT_NAMES[id] ?? group.product?.title ?? id,
+      // 낱개 상품의 갈래(농장 구조물·농장 소품·나무·텍스처)다. 마을·부두·광산 키트에는 맞는
+      // 말이 아니라 키트 화면은 이 이름을 쓰지 않는다 — 키트 자신의 갈래는 등록부에 없다.
       themeName: themeById(categoryOf(anchor)).name,
       product: group.product,
       parts: group.parts,
@@ -485,9 +487,10 @@ export function kitsFrom<T extends KitSource>(listings: readonly T[]): Kit<T>[] 
       grade,
       free: isFreeGrade(grade),
       heroUrl: previewImageUrlOf(group.product ?? largest ?? anchor),
-      href: group.product
-        ? `/marketplace/${encodeURIComponent(group.product.slug)}`
-        : `/marketplace?kit=${encodeURIComponent(id)}#catalog`,
+      // 키트는 자기 화면을 갖는다(/kit/<id>). 합본 상품이 있든 없든 한 벌은 한 자리에서
+      // 보여 준다 — 합본이 있는 키트만 상품 페이지로 보내면, 같은 물건인데 어떤 것은
+      // 상품이고 어떤 것은 걸러 놓은 목록이 되어 두 가지 화면을 배워야 한다.
+      href: `/kit/${encodeURIComponent(id)}`,
       licenseStatus: (group.product ?? anchor).licenseStatus ?? null,
     });
   }

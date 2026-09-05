@@ -37,17 +37,18 @@ test("login and signup render the real host OAuth journey and explain failures",
   }
 });
 
-test("kits sends signed-out visitors to the marketplace and signed-in visitors to their workspace", async () => {
-  // 2026-09-02: the public marketing half of /kits was removed. The route now has
-  // exactly two doors — the workspace list behind sign-in, and a one-paragraph
-  // intro for signed-in visitors — and no public product page at all.
-  const kits = await source("app/kits/page.tsx");
+test("bundles sends signed-out visitors to the marketplace and signed-in visitors to their workspace", async () => {
+  // 2026-09-05: /kits became the public kit index, so the workspace 묶음 feature moved to
+  // /bundles. That route still has exactly two doors — the workspace list behind sign-in,
+  // and a one-paragraph intro for signed-in visitors — and no public product page at all.
+  // The public kit surfaces are pinned in tests/kits-pages.test.mjs.
+  const kits = await source("app/bundles/page.tsx");
   assert.match(kits, /WorkspaceShell/);
   assert.match(kits, /KitsClient/);
   assert.match(kits, /params\.view === "workspace"/);
-  assert.match(kits, /requireChatGPTUser\("\/kits\?view=workspace"\)/);
+  assert.match(kits, /requireChatGPTUser\("\/bundles\?view=workspace"\)/);
   assert.match(kits, /if \(!user\) redirect\("\/marketplace"\)/);
-  assert.match(kits, /href="\/kits\?view=workspace"/);
+  assert.match(kits, /href="\/bundles\?view=workspace"/);
   assert.match(kits, /href="\/dashboard"/);
   assert.doesNotMatch(kits, /SiteShell/);
   // The old marketing markup is only allowed to survive in the explanatory comment.
@@ -67,13 +68,13 @@ test("kits sends signed-out visitors to the marketplace and signed-in visitors t
   const agents = await source("app/agents/page.tsx");
   assert.match(agents, /<McpEndpointStatus/);
 
-  // The 404 page points at the surfaces that still exist as pages; /kits and
-  // /mcp are redirects now, so they must not be advertised there.
+  // The 404 page points at the surfaces that still exist as pages; /mcp is a
+  // redirect now, so it must not be advertised there.
   const notFound = await source("app/not-found.tsx");
   for (const href of ["/", "/marketplace", "/app", "/review", "/agents", "/pricing"]) {
     assert.match(notFound, new RegExp(`href="${href.replaceAll("/", "\/")}"`));
   }
-  assert.doesNotMatch(notFound, /href="\/kits"|href="\/mcp"/);
+  assert.doesNotMatch(notFound, /href="\/mcp"/);
 });
 
 test("all requested public route files remain present", async () => {
@@ -83,6 +84,8 @@ test("all requested public route files remain present", async () => {
     "app/signup/page.tsx",
     "app/not-found.tsx",
     "app/kits/page.tsx",
+    "app/kit/[slug]/page.tsx",
+    "app/bundles/page.tsx",
     "app/series/page.tsx",
     "app/mcp/page.tsx",
   ]) {

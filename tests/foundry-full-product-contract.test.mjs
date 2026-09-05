@@ -14,7 +14,7 @@ test("full product contract has private asset, project, kit, and provider surfac
     "app/api/providers/route.ts",
     "app/assets/[assetId]/page.tsx",
     "app/assets/page.tsx",
-    "app/kits/page.tsx",
+    "app/bundles/page.tsx",
     "app/components/WorkspaceAssetDetail.tsx",
     "app/components/KitsClient.tsx",
     "scripts/foundry-runtime-smoke.ps1",

@@ -19,9 +19,10 @@ import "./workspace-v5.css";
 
 export type WorkspaceSection = "overview" | "assets" | "studio" | "inspector" | "passports" | "kits" | "pricing" | "docs" | "settings";
 
-/* 2026-09-02: "모음집"(/kits)은 해시 목록으로 파일을 묶는 내부 작업면이라, 처음
+/* 2026-09-02: "모음집"(/bundles)은 해시 목록으로 파일을 묶는 내부 작업면이라, 처음
    들어온 사람에게는 눌러도 할 일이 없는 칸이었습니다. 사이드바에서 뺐습니다.
-   경로와 `kits` 섹션 값은 그대로 살아 있어 /kits 를 직접 열면 여전히 동작합니다. */
+   경로와 `kits` 섹션 값은 그대로 살아 있어 /bundles 를 직접 열면 여전히 동작합니다.
+   공개 키트 목록은 /kits 이고 SiteShell 쪽 화면입니다(docs/kits.md 1절). */
 const PRIMARY_NAV: { section: WorkspaceSection; label: string; href: string; icon: IconName }[] = [
   { section: "overview", label: "홈", href: "/dashboard", icon: "layout" },
   { section: "assets", label: "내 파일", href: "/assets", icon: "folder" },
@@ -115,7 +116,7 @@ export function WorkspaceShell({
 
   return (
     /* cv5 chrome (2026-08-31 unified-site pass): every authenticated workspace
-       route — /dashboard /assets /studio /kits?view=workspace /app /passport
+       route — /dashboard /assets /studio /bundles?view=workspace /app /passport
        /settings — renders through this shell, so opting the shell in is what
        moves all of them onto the cv5 navy ground in one place. `cv5-surface`
        swings the legacy globals/foundry token ramps; ForceDarkTheme pins

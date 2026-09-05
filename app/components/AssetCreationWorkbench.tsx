@@ -1240,7 +1240,7 @@ export function AssetCreationWorkbench({
                 <details className="studio-more">
                   <summary>이 결과로 새 버전 만들기 (리믹스)</summary>
                   <div>
-                    <p className="studio-field-hint">원본은 그대로 두고, 원본 번호와 지문을 기록한 새 파일을 만듭니다. Kit(모음집)에 담는 것은 <Link className="text-link" href="/kits">모음집</Link>에서 합니다.</p>
+                    <p className="studio-field-hint">원본은 그대로 두고, 원본 번호와 지문을 기록한 새 파일을 만듭니다. Kit(모음집)에 담는 것은 <Link className="text-link" href="/bundles">모음집</Link>에서 합니다.</p>
                     <label className="studio-field">
                       <span>변경 프롬프트</span>
                       <textarea value={remixPrompt} onChange={(event) => setRemixPrompt(event.target.value)} rows={2} maxLength={2_000} />

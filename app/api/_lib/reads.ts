@@ -55,6 +55,51 @@ export type PublishedListingSummary = {
  * 던집니다 — 부르는 쪽이 "없음" 과 "못 읽음" 을 구별할 수 있어야 404 를 잘못 내지
  * 않습니다.
  */
+/** 키트를 세우는 데 필요한 만큼의 공개 상품 행. `/kit/[slug]` 와 `/kits` 의 서버 쪽이 씁니다. */
+export type PublishedListingRow = {
+  slug: string;
+  title: string;
+  description: string;
+  status: string;
+  assetId: string;
+  entryFileName: string;
+  byteLength: number | null;
+  licenseStatus: string | null;
+};
+
+/**
+ * 공개된 상품 전부, 키트 계산에 드는 열만. 사실(폴리곤·키트 소속)은 저장소가 아니라
+ * 등록부(app/data/listing-facts.json)에 있으므로 부르는 쪽이 붙입니다.
+ *
+ * 저장소가 닿지 않으면 던집니다 — 상품이 없는 것과 못 읽은 것은 다른 일입니다.
+ */
+export async function readPublishedListingsForKits(): Promise<PublishedListingRow[]> {
+  const db = getRuntimeDb();
+  await ensureSchema(db);
+  const rows = await db
+    .prepare(
+      `SELECT l.slug, l.title, l.description, l.license_status AS licenseStatus, l.status,
+        l.asset_id AS assetId, a.file_name AS entryFileName, a.byte_length AS byteLength
+       FROM clunk_marketplace_listings l
+       JOIN clunk_assets a ON a.id = l.asset_id
+       WHERE l.status = 'PUBLISHED' ORDER BY l.slug`,
+    )
+    .all<{
+      slug: string; title: string; description: string | null; licenseStatus: string | null;
+      status: string; assetId: string; entryFileName: string; byteLength: number | null;
+    }>();
+  return (rows.results ?? []).map((row) => ({
+    slug: String(row.slug),
+    title: String(row.title ?? ""),
+    description: String(row.description ?? ""),
+    status: String(row.status),
+    assetId: String(row.assetId),
+    entryFileName: String(row.entryFileName ?? ""),
+    byteLength: row.byteLength ?? null,
+    licenseStatus: row.licenseStatus ?? null,
+  }));
+}
+
 export async function readPublishedListingBySlug(slug: string): Promise<PublishedListingSummary | null> {
   if (!/^[a-z0-9가-힣][a-z0-9가-힣-]{0,95}$/iu.test(slug)) return null;
   const db = getRuntimeDb();

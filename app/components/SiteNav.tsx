@@ -12,11 +12,14 @@ import { Icon } from "./Icon";
  * inspect the handoff. Workspace and documentation remain utility destinations.
  */
 
-export type ShellSection = "home" | "series" | "studio" | "app" | "dashboard" | "pricing" | "docs" | "agents" | "marketplace" | "review";
+export type ShellSection = "home" | "series" | "studio" | "app" | "dashboard" | "pricing" | "docs" | "agents" | "marketplace" | "kits" | "review";
 
 const NAV_LINKS: { label: string; href: string; section: ShellSection }[] = [
   { label: "에셋 제작", href: "/studio", section: "studio" },
   { label: "에셋 마켓", href: "/marketplace", section: "marketplace" },
+  // 키트는 낱개 에셋과 고르는 방법이 다릅니다 — 한 장면을 통째로 꾸미려고 오는
+  // 사람에게는 목록의 탭이 아니라 자기 문이 있어야 합니다(docs/kits.md).
+  { label: "키트", href: "/kits", section: "kits" },
   { label: "에셋 검사", href: "/app", section: "app" },
   { label: "제작 에이전트", href: "/agents", section: "agents" },
   { label: "요금", href: "/pricing", section: "pricing" },

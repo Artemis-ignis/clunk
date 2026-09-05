@@ -377,7 +377,7 @@ test("키트의 합계는 부품의 합이고, 등급은 가장 높은 부품의
   assert.equal(village.grade, "A");
   assert.equal(village.free, false, "A 등급 키트는 구독으로 열린다");
   assert.equal(village.product.slug, "kit-village-square");
-  assert.equal(village.href, "/marketplace/kit-village-square");
+  assert.equal(village.href, "/kit/kit-village-square", "키트는 자기 주소(/kit/<id>)로 간다 — 마켓 상품 페이지가 아니라");
 
   // 합친 파일 자신은 9,420개라 홀로 두면 S 가 되지만, 키트의 등급은 부품이 정한다.
   assert.equal(gradeOf(village.product).letter, "S");
@@ -412,7 +412,7 @@ test("합쳐 파는 상품이 없는 키트는 목록을 그 키트로 좁혀 �
   assert.equal(kit.id, "harvest-frontier");
   assert.equal(kit.name, "하베스트 프론티어 세트", "상품이 없으면 이름표에서 이름을 가져온다");
   assert.equal(kit.product, null);
-  assert.equal(kit.href, "/marketplace?kit=harvest-frontier#catalog");
+  assert.equal(kit.href, "/kit/harvest-frontier", "합본이 없는 키트도 자기 주소가 있다");
   assert.equal(kit.parts.length, 2);
 
   // 그룹 이름으로만 묶여 있던 옛 키트는 대응표를 거쳐 합본 상품에 닿는다.
@@ -423,7 +423,7 @@ test("합쳐 파는 상품이 없는 키트는 목록을 그 키트로 좁혀 �
   assert.equal(legacy.length, 1);
   assert.equal(legacy[0].id, "cozy-farm-set");
   assert.equal(legacy[0].product.slug, "cozy-farm-set-vol1");
-  assert.equal(legacy[0].href, "/marketplace/cozy-farm-set-vol1");
+  assert.equal(legacy[0].href, "/kit/cozy-farm-set");
   assert.ok(
     !legacy[0].parts.some((part) => part.slug === "cozy-farm-set-vol1"),
     "합본 상품이 자기 부품 목록에 들어가면 안 된다",

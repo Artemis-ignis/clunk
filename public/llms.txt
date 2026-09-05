@@ -34,7 +34,8 @@ Status: Korea first, free open beta since 2026-09-02. Nothing is sold right now.
 - [Clunk home](https://clunk.games/): sample-first product walkthrough and evidence states.
 - [Clunk Series](https://clunk.games/series): Clunk-native Forge, Sprite, Material, Motion, Game Ready, and Market surfaces with the audited GitHub source ledger.
 - [Asset Studio](https://clunk.games/studio): authenticated native series authoring, real artifact bytes, and review Draft flow.
-- [Kits](https://clunk.games/kits): authenticated projects and hash-only Clunk Kit manifests; a signed-out caller is redirected to the marketplace.
+- [Kits](https://clunk.games/kits): the public kit index. Each kit has its own page at https://clunk.games/kit/:kitId with the whole kit scene and every part in it.
+- [Bundles](https://clunk.games/bundles): authenticated projects and hash-only Clunk Kit manifests; a signed-out caller is redirected to the marketplace.
 - [Asset detail](https://clunk.games/assets/:assetId): authenticated artifact hashes, provenance, evidence, and downloads.
 - [Connect](https://clunk.games/connect): redirects to https://clunk.games/agents#connect, the one HTTP MCP setup and handshake screen.
 - [Documentation](https://clunk.gitbook.io/docs): contracts, asset families, and runtime boundaries. https://clunk.games/docs redirects here.
@@ -82,7 +83,7 @@ the Authorization header; Cursor and Claude Desktop receive `mcpServers` JSON; V
 Clunk Series is built from audited GitHub source material, not from runtime calls to those
 repositories. Its native job provider is `clunk-series-native-v1`; every artifact keeps its
 series ID, source record IDs, license state, prompt/reference role, request hash, and SHA-256.
-The public catalog is `/series` and the authenticated creation surface is `/studio`. The authenticated package surface is `/kits`; source-linked Remix is available after a real native result exists. FORGE FRONT is a separate collaboration target, not a game implementation inside Clunk.
+The public catalog is `/series` and the authenticated creation surface is `/studio`. The authenticated package surface is `/bundles`; source-linked Remix is available after a real native result exists. FORGE FRONT is a separate collaboration target, not a game implementation inside Clunk.
 
 - Parses real GLB and glTF 2.0 bytes. No screenshot, no fixture, no mock metric.
 - Records `inputHash` (SHA-256 of the input bytes), `coreBuildId`, `ruleSetId`, `ruleSetVersion`
@@ -950,7 +951,7 @@ playerFacing remains `NOT_EVALUATED`.
 `GET /api/providers` reports the checked-in capability registry. `POST /api/series` accepts
 `operation: "remix"` with a workspace-scoped `sourceAssetId`; the source hash is recorded and a
 new asset is written. `GET /api/assets/:assetId` returns private workspace metadata, and adding
-`file` plus `download=1` retrieves an exact R2 artifact when storage is configured. `/kits` and
+`file` plus `download=1` retrieves an exact R2 artifact when storage is configured. `/bundles` and
 `/api/kits` create `clunk.asset-kit.v1` hash-only manifests from workspace assets. A Kit manifest
 does not contain raw bytes and does not mean production approval.
 
