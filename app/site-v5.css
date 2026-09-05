@@ -137,12 +137,17 @@ html:has(.cv5) body { background: var(--v5-bg0, var(--t-bg0)); }
   pointer-events: none;
   background: linear-gradient(to bottom, rgba(var(--t-ground-rgb), 0.96), rgba(var(--t-ground-rgb), 0));
 }
-.cv5 .sitenav-inner { position: relative; width: min(var(--v5-frame), calc(100% - clamp(24px, 4vw, 72px))); margin-inline: auto; }
+/* 2026-09-06: 상단 줄은 본문 프레임보다 넓게 쓴다. 메뉴 6·보조 3·테마 전환·계정·CTA 를 한 줄에 두면
+   로그인 상태에서 1,280px 가 넘는데, 프레임(--v5-frame)에 가두자 줄어들 수 있는 유일한 항목인 로고가
+   23×12px 로 눌렸다(마스터 캡처). 줄은 1360px 까지 펴고, 로고는 아래에서 절대 줄지 않게 한다. */
+.cv5 .sitenav-inner { position: relative; width: min(1360px, calc(100% - clamp(24px, 4vw, 72px))); margin-inline: auto; }
 .cv5 .sitenav { display: flex; align-items: center; gap: 10px; height: 68px; background: none; border: 0; box-shadow: none; padding: 0; }
-.cv5 .sitenav .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--v5-ink); font-family: var(--v5-label); font-weight: 700; font-size: 1.28rem; letter-spacing: 0.16em; }
-.cv5 .sitenav-links { display: flex; gap: 2px; list-style: none; margin: 0 auto; padding: 0; }
+.cv5 .sitenav .brand { display: inline-flex; align-items: center; gap: 10px; flex: 0 0 auto; color: var(--v5-ink); font-family: var(--v5-label); font-weight: 700; font-size: 1.28rem; letter-spacing: 0.16em; }
+/* 워드마크는 줄이 좁아져도 42px 높이 그대로. img { max-width: 100% } 가 부모를 따라 줄어드는 것을 막는다. */
+.cv5 .sitenav .brand-wordmark { height: 42px; width: auto; max-width: none; flex: 0 0 auto; }
+.cv5 .sitenav-links { display: flex; gap: 2px; list-style: none; margin: 0 auto; padding: 0; flex: 0 1 auto; min-width: 0; }
 .cv5 .sitenav-link {
-  display: inline-flex; align-items: center; height: 38px; padding: 0 15px; border-radius: 10px;
+  display: inline-flex; align-items: center; height: 38px; padding: 0 12px; border-radius: 10px; white-space: nowrap;
   color: var(--v5-ink-dim); font-size: 0.9rem; font-weight: 550; letter-spacing: -0.01em; transition: color .18s, background .18s;
 }
 .cv5 .sitenav-link:hover { color: var(--v5-ink); background: rgba(var(--t-on-rgb), 0.05); }
@@ -164,13 +169,13 @@ html:has(.cv5) body { background: var(--v5-bg0, var(--t-bg0)); }
    사이 간격(2px)보다 넓게 두어 두 묶음을 나눈다 — 선을 긋지 않는다.
    운영자 지적: "메뉴 상단에 검수 뷰어 문서 내 작업공간 이부분만 뭔가 | 이런식으로
    나눠져 있어서 어색함". 그 막대는 foundry.css:79 의 border-left 였다. */
-.cv5 .sitenav-end { display: flex; align-items: center; gap: 18px; }
+.cv5 .sitenav-end { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
 .cv5 .sitenav-utility { display: flex; align-items: center; gap: 2px; }
 /* foundry.css 는 이 셋을 Space Grotesk 600 11.5px 대문자 + 세로 막대로 그린다. 여기서는
    주 메뉴와 같은 글꼴·같은 알약 모양으로 돌리고, 다른 것은 색 한 칸뿐이다(ink-dim →
    ink-faint). 계단은 색이 만들지 구분선이 만들지 않는다. */
 .cv5 .sitenav-utility-link {
-  display: inline-flex; align-items: center; height: 38px; padding: 0 12px; border-radius: 10px;
+  display: inline-flex; align-items: center; height: 38px; padding: 0 9px; border-radius: 10px; white-space: nowrap;
   border-left: 0; text-transform: none;
   font-family: var(--v5-font); font-size: 0.86rem; font-weight: 550; letter-spacing: -0.01em;
   color: var(--v5-ink-faint); transition: color .18s, background .18s;
@@ -462,7 +467,9 @@ html:has(.cv5) body { background: var(--v5-bg0, var(--t-bg0)); }
    나가 있었다(지갑을 넣기 전에 잰 값이다). 보조 메뉴 셋(검수 뷰어·문서·내 작업공간)은
    서랍에도 그대로 있으므로, 자리가 모자라는 폭에서는 먼저 접는다 — 그러면 1024 에서도
    기본 메뉴·지갑·로그인 상태·CTA 가 모두 한 줄에 들어온다. */
-@media (max-width: 1199px) {
+/* 2026-09-06: 로그인 상태(이름 알약 + 로그아웃 + CTA)는 1,400px 아래에서 보조 메뉴까지 한 줄에 못 든다.
+   보조 셋은 푸터 '자료' 열에도 있고 이름 알약이 대시보드로 가므로, 그 폭에서는 먼저 접는다. */
+@media (max-width: 1399px) {
   .cv5 .sitenav-utility { display: none; }
 }
 /* 1440 에서 로그아웃 상태의 줄이 22px 넘쳤다 — 지갑이 "로그인하면 N크레딧" 한 문장을 들기
