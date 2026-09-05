@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "./NativeLink";
 import { Icon } from "./Icon";
 import { EmbeddedGlbViewer, type MeasuredSpec } from "./review/EmbeddedGlbViewer";
-import { modelSourceFor, previewModelUrl, previewNoteFor } from "./model-source";
+import { modelSourceFor, previewModelUrl, previewNoteFor, probeSession } from "./model-source";
 import {
   cardSpec,
   factRows,
@@ -825,9 +825,11 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
 
   useEffect(() => {
     let active = true;
-    void fetch("/api/credits", { cache: "no-store" })
-      .then((response) => {
-        if (active) setSignedIn(response.status !== 401);
+    // 2026-09-05: 예전에는 /api/credits 를 찔러 401 인지로 알아냈다 — 비로그인 방문마다 콘솔에
+    // 401 이 남았다. 같은 화면의 뷰어가 이미 /api/session 을 한 번 물어보므로 그 약속을 나눠 쓴다.
+    void probeSession()
+      .then((value) => {
+        if (active) setSignedIn(value);
       })
       // A network failure is not proof of being signed out, so the button keeps its normal
       // wording and the 401 branch in startCheckout stays the safety net.
