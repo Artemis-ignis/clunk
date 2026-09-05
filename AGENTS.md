@@ -25,3 +25,12 @@
   wrapper is not a Clunk workflow.
 - Record provenance, license, prompt/reference role, and hashes for every generated or imported
   sample.
+
+## Handoff between agents
+
+- Before starting work, read the newest file in `docs/handoff/` (currently
+  `docs/handoff/2026-09-06-codex-handoff.md`). It records what is mid-flight, the deploy
+  procedure, where credentials live (never their values), and the owner's open decisions.
+- When you stop for any reason (limit, error, end of session), update that file first: what you
+  changed, what is uncommitted, what the next agent must run. Commit small, push after the
+  deploy-tree test suite is green.
