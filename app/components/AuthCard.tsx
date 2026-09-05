@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "./NativeLink";
-import { BrandMark } from "./BrandMark";
+import { BrandIcon } from "./BrandMark";
 
 /**
  * 2026-09-05 — /login 과 /signup 이 쓰는 한 장의 카드.
@@ -63,7 +63,7 @@ export function AuthCard({
   return (
     <section className="cv5-auth-card cv5-door" aria-labelledby={titleId}>
       <Link className="cv5-door-brand" href="/" aria-label="Clunk 홈">
-        <BrandMark size={40} gradientId={titleId} />
+        <BrandIcon size={56} />
       </Link>
 
       <p className="cv5-door-eyebrow">{eyebrow}</p>

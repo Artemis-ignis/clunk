@@ -159,3 +159,24 @@ export function BrandLockup({
     />
   );
 }
+
+/**
+ * 네모 자리에 서는 C 마크. 운영자가 준 그림(public/brand/clunk-mark.png)에서 후광을 잘라 내고
+ * 512px 로 줄인 판(clunk-mark-flat.png)이다. 어두운 테마의 후광은 워드마크와 같이 app/theme.css
+ * 의 .brand-mark 규칙이 얹는다. 2026-09-05: 로그인 문의 마크가 아직 옛 파란 슬래브(위의 SVG
+ * BrandMark)였다 — 그 SVG 는 이제 아무 데서도 쓰지 않는다.
+ */
+const MARK = { src: "/brand/clunk-mark-flat.png", width: 512, height: 512 };
+
+export function BrandIcon({ size = 48, className = "" }: { size?: number; className?: string }) {
+  return (
+    <Image
+      className={className ? "brand-mark " + className : "brand-mark"}
+      src={MARK.src}
+      alt="Clunk"
+      width={size}
+      height={size}
+      priority
+    />
+  );
+}

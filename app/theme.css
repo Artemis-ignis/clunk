@@ -880,9 +880,11 @@
    있던 보라 후광이 화이트에서 로고 뒤 회색 네모로 보였기 때문에(2026-09-05) 그림에서
    빼고, 바닥이 어두운 두 테마에서만 여기서 얹는다. 화이트는 후광 없이 그대로.
    ========================================================================= */
-.brand-wordmark {
+.brand-wordmark,
+.brand-mark {
   filter: drop-shadow(0 0 10px rgba(112, 64, 255, 0.55)) drop-shadow(0 0 2px rgba(200, 160, 255, 0.5));
 }
-:root[data-theme="light"] .brand-wordmark {
+:root[data-theme="light"] .brand-wordmark,
+:root[data-theme="light"] .brand-mark {
   filter: none;
 }
