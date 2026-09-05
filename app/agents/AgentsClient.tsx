@@ -38,6 +38,24 @@ function maskApiKey(secret: string): string {
   return `${secret.slice(0, 11)}${"•".repeat(12)}${secret.slice(-4)}`;
 }
 
+/**
+ * 저장된 시각은 UTC 문자열("2026-09-05 12:08:52")입니다. 그대로 찍으면 한국에서
+ * 방금 키를 쓴 사람이 아홉 시간 전 시각을 봅니다 — 훔쳐간 키가 쓰였는지 알아보라고
+ * 세운 자리에서 그것은 잘못된 시각입니다. 읽는 사람의 시간대로만 옮기고, 값은 만들지
+ * 않습니다(app/components/DashboardClient.tsx 의 formatWhen 과 같은 규칙).
+ */
+function formatUsedAt(value: string): string {
+  const parsed = new Date(/[Z+]|GMT/.test(value) ? value : `${value.replace(" ", "T")}Z`);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toLocaleString("ko-KR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuthenticated?: boolean }) {
   const [selectedKey, setSelectedKey] = useState<AgentGuideKey>(DEFAULT_AGENT_GUIDE.key);
   const [endpoint, setEndpoint] = useState("/api/mcp");
@@ -333,7 +351,7 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
               <span>{key.label}</span>
               {/* 마지막으로 쓰인 때는 서버가 이미 돌려주고 있었는데 화면이 버리고 있었다.
                   훔쳐간 키가 쓰이고 있는지를 사람이 알아볼 수 있는 유일한 자리다. */}
-              <small>{key.lastUsedAt ? `마지막 사용 ${key.lastUsedAt}` : "사용 기록 없음"}</small>
+              <small>{key.lastUsedAt ? `마지막 사용 ${formatUsedAt(key.lastUsedAt)}` : "사용 기록 없음"}</small>
               <button
                 type="button"
                 onClick={() => {

@@ -304,3 +304,14 @@
 
 .workspace-cv5 .workspace-signout { margin-left: 8px; font-size: 0.78rem; color: var(--v5-ink-dim); text-decoration: none; padding: 6px 10px; border: 1px solid var(--v5-line); border-radius: 8px; white-space: nowrap; }
 .workspace-cv5 .workspace-signout:hover { color: var(--v5-ink); border-color: var(--v5-line-strong); }
+
+/* -------------------------------------------------------------- file chips */
+/* 2026-09-05 로그인 화면 점검: /app 의 파일 종류 칩(.file-chip)은 app/globals.css
+   에서 색을 못 박고 있습니다 — 글자 #7ce5f4, 바탕 rgba(76,210,240,.14). 어두운
+   바탕에서는 읽히지만, 화이트 테마에서는 옅은 하늘색 바탕(rgb(230,249,253)) 위의
+   옅은 하늘색 글자가 되어 대비가 1.34:1 로 떨어집니다(실측). 작업공간 안에서만
+   테마 토큰을 쓰게 해 세 테마 모두에서 읽히게 합니다 — 화이트에서 4.8:1 입니다. */
+.workspace-cv5 .file-chip {
+  background: rgba(var(--t-cyan-rgb), 0.14);
+  color: var(--t-cyan);
+}

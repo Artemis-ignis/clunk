@@ -1292,11 +1292,13 @@ export function AssetCreationWorkbench({
         </div>
       </section>
 
-      {/* ------------------------------------------------------- 오른쪽: 내 생성물 */}
-      <aside className="studio-col studio-col-mine" aria-label="내 생성물">
+      {/* --------------------------------------------------------- 오른쪽: 내 파일 */}
+      {/* 2026-09-05: 이 칸의 이름은 "내 생성물"이었습니다. 용어 사전(docs/copy-glossary.ko.md)
+          에서 "생성"은 쓰지 않는 말이고, 왼쪽 메뉴가 같은 것을 "내 파일"이라고 부릅니다. */}
+      <aside className="studio-col studio-col-mine" aria-label="내 파일">
         <div className="studio-col-head">
           <Icon name="folder" size={15} />
-          <strong>내 생성물</strong>
+          <strong>내 파일</strong>
           <small>{mineState === "ready" ? `${mine.length}개` : ""}</small>
         </div>
         <div className="studio-col-body">
