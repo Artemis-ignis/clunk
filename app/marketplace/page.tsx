@@ -55,7 +55,7 @@ export default function MarketplacePage() {
               <span className="cv5-eyebrow">에셋 마켓</span>
               <h1>에셋 둘러보기</h1>
               <p className={styles.browseLede}>
-                폴리곤 수와 용량은 파일을 열어 측정한 값입니다. 모델은 돌려 보고, 텍스처는 이어 붙여 본 뒤 받으세요.
+                폴리곤 수와 용량은 파일을 열어 측정한 값이고, 라이선스(어디까지 써도 되는지)는 상품마다 적어 두었습니다. 모델은 돌려 보고, 텍스처는 이어 붙여 본 뒤 받으세요.
                 {salesOpen ? "" : " 로그인만 하면 무료입니다."}
               </p>
               {/* 키트는 이 목록의 탭이 아니라 자기 화면을 갖는다. 여기서는 그 길만 말한다. */}
