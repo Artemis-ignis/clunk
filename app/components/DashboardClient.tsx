@@ -193,11 +193,14 @@ export function DashboardClient({ welcome }: { welcome?: string | null }) {
       setConnection("checking");
       setMessage("");
       try {
+        // 2026-09-05: 개발 서버가 멈춘 채 답을 안 주자 이 화면이 "불러오는 중" 으로 영원히 돌았다.
+        // 네 요청 모두 15초를 넘기면 끊고 오류 상태로 간다 — 스피너는 끝이 있어야 한다.
+        const signal = AbortSignal.timeout(15_000);
         const [me, runResponse, creditResponse, generationResponse] = await Promise.all([
-          fetch("/api/me", { cache: "no-store" }),
-          fetch("/api/runs", { cache: "no-store" }),
-          fetch("/api/credits", { cache: "no-store" }),
-          fetch("/api/generation", { cache: "no-store" }),
+          fetch("/api/me", { cache: "no-store", signal }),
+          fetch("/api/runs", { cache: "no-store", signal }),
+          fetch("/api/credits", { cache: "no-store", signal }),
+          fetch("/api/generation", { cache: "no-store", signal }),
         ]);
         if (cancelled) return;
         if (!me.ok) {
@@ -243,10 +246,14 @@ export function DashboardClient({ welcome }: { welcome?: string | null }) {
         if (!generationResponse.ok) {
           setMessage("만든 파일 목록만 잠시 불러오지 못했습니다. 나머지는 정상입니다.");
         }
-      } catch {
+      } catch (error) {
         if (cancelled) return;
         setConnection("error");
-        setMessage("연결이 끊겼습니다. 인터넷 상태를 확인한 뒤 다시 시도해 주세요.");
+        setMessage(
+          error instanceof DOMException && error.name === "TimeoutError"
+            ? "서버가 15초 안에 답하지 않았습니다. 잠시 뒤 다시 시도해 주세요."
+            : "연결이 끊겼습니다. 인터넷 상태를 확인한 뒤 다시 시도해 주세요.",
+        );
       }
     }
     void loadWorkspace();
