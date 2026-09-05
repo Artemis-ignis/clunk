@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import Link from "./NativeLink";
 import { BrandLockup } from "./BrandMark";
 import { Icon } from "./Icon";
-import { ThemeToggle } from "./ThemeToggle";
 
 /**
  * Public navigation for the Clunk product shell. The primary row follows the
@@ -126,8 +125,11 @@ export function SiteNav({ active }: { active?: ShellSection }) {
             ))}
           </div>
 
+          {/* 2026-09-05: 여기 있던 라이트/다크 토글을 뺐다. 눌러도 페이지 요소
+              435개 중 19개(4.4%)만 색이 바뀌고, 그 19개인 드로어 링크는 대비가
+              1.62:1 까지 떨어져 오히려 안 보이게 되던 버튼이다. 자세한 이유는
+              app/layout.tsx 의 data-theme 주석에 적어 뒀다. */}
           <div className="sitenav-actions">
-            <ThemeToggle />
             {session ? (
               <>
                 <Link className="button button-quiet button-sm sitenav-login" href="/dashboard" prefetch={false}>

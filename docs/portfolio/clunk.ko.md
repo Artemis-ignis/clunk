@@ -137,7 +137,8 @@ Meshy조차 MCP로 에이전트에 붙습니다. 앞으로 에셋을 고르는 �
   보고하는 `byteLength`가 **30/30 일치**하는 것으로 동일성을 대신했고, R2 객체 해시까지는
   대조하지 못했다고 명시했습니다.
 
-원본: `tmp/asset-audit/README.md` (컨택트 시트 30장, 측정 JSON, 재현 명령 전부 포함)
+원본: [audits/asset-audit.ko.md](audits/asset-audit.ko.md) — 판정 근거와 재현 명령 전부.
+컨택트 시트는 `npm run asset:visual` 로 다시 만듭니다.
 
 ### 4-4. 같은 방식으로 사이트 문구도 감사했다
 
@@ -161,7 +162,7 @@ Meshy조차 MCP로 에이전트에 붙습니다. 앞으로 에셋을 고르는 �
   `studio_create`가 있었습니다. → 문서 전면 교체.
 - "결제 전 미리보기"라는 문구 — 결제 기능 자체가 없으므로 그 시점이 존재하지 않습니다.
 
-원본: `tmp/copy-audit/claims.md` (문구 원문 · 판정 · 근거 파일:줄번호 · 고친 문구)
+원본: [audits/copy-audit.ko.md](audits/copy-audit.ko.md) — 문구 원문 · 판정 · 근거 파일:줄번호 · 고친 문구.
 
 **이 두 감사가 제가 일하는 방식입니다.** 기능을 더 붙이는 대신, 이미 내놓은 것이 사실인지
 먼저 재고, 아니면 내리거나 고칩니다.
@@ -180,8 +181,8 @@ Meshy조차 MCP로 에이전트에 붙습니다. 앞으로 에셋을 고르는 �
 | WebMCP 도구 | **23개** (비로그인 19 · 로그인 필요 4) | `app/webmcp/tool-manifest.ts`, 라이브 `/webmcp` |
 | MCP 도구 | 원격 7 · 로컬 stdio 7 | `app/api/_lib/mcp-http.ts`, `/agents` |
 | 3D 템플릿 | **21종 × 색조합 6종** | `scripts/template-library/templates.mjs` |
-| 전수 감사한 상품 | **30건** (판매가 6 / 수정 16 / 내림 8) | `tmp/asset-audit/README.md` |
-| 대조한 문구 주장 | **102개** (틀림 22 · 과장 10) | `tmp/copy-audit/claims.md` |
+| 전수 감사한 상품 | **30건** (판매가 6 / 수정 16 / 내림 8) | [audits/asset-audit.ko.md](audits/asset-audit.ko.md) |
+| 대조한 문구 주장 | **102개** (틀림 22 · 과장 10) | [audits/copy-audit.ko.md](audits/copy-audit.ko.md) |
 | 커밋 | **271개**, 2026-08-21 → 2026-09-03 (**14일**), 1인 | `git rev-list --count HEAD` |
 | 추적 파일 | 2,303개 | `git ls-files \| wc -l` |
 | 인프라 비용 | Cloudflare 무료 구간 안, **쓴 돈은 도메인뿐** | 아래 6-2 |
@@ -307,11 +308,14 @@ grep -c 'id: \"' scripts/template-library/templates.mjs
 git rev-list --count HEAD
 git log --reverse --format=%ad --date=short | head -1
 
-# 에셋 감사 원본 (컨택트 시트 30장 + 측정 JSON + 재현 명령)
-cat tmp/asset-audit/README.md
+# 에셋 감사 원본
+cat docs/portfolio/audits/asset-audit.ko.md
+
+# 컨택트 시트 다시 만들기 (파는 3D 전부 · 여섯 각도)
+npm run asset:visual
 
 # 문구 감사 원본 (주장 102개 대조표)
-cat tmp/copy-audit/claims.md
+cat docs/portfolio/audits/copy-audit.ko.md
 ```
 
 ## 부록 B. 이 문서가 주장하지 않는 것

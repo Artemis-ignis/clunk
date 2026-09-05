@@ -20,7 +20,10 @@
 .agents-cv5 .agents-v4-page {
   width: min(var(--v5-frame), calc(100% - clamp(28px, 5vw, 88px)));
   margin-inline: auto;
-  padding: clamp(104px, 12vw, 148px) 0 clamp(48px, 7vw, 80px);
+  /* 2026-09-05: 세로 여백을 사이트 공통 사다리(app/site-v5.css)로 옮긴다.
+     옛 값은 위 148 + 아래 80 이었고, 그 위에 히어로가 24~48 을 더 얹어
+     첫 제목이 화면 한참 아래에서 시작했다. 아래 여백은 푸터가 갖는다. */
+  padding: var(--v5-lead) 0 0;
   color: var(--v5-ink);
 }
 
@@ -28,16 +31,21 @@
 .agents-cv5 .agents-v4-hero {
   grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
   gap: clamp(28px, 4vw, 64px);
-  padding: clamp(24px, 4vw, 48px) 0 clamp(40px, 6vw, 72px);
+  /* 머리 여백은 .agents-v4-page 가 이미 갖고 있다. 여기서 또 얹으면 두 겹이 된다. */
+  padding: 0 0 var(--v5-stack);
 }
 .agents-cv5 .agents-v4-copy { max-width: 560px; }
 
 /* One display scale for every heading on the page, matching `.cv5-hero h1`
    and `.cv5-sec-copy h2` on the landing. The legacy -.075em/0.99 setting was
    tuned for the light v4 layout and reads as broken tracking on the navy. */
+/* 2026-09-05: 62.4px(1440) 이었다. 사이트의 H1 이 64.8 / 62.4 / 54.4 / 48 / 38.4 /
+   33.6 여섯 가지라 계단이 없었고, 이 제목은 폭 560px 칸에 62.4px 으로 들어가 두 번째
+   줄("에이전트가 검사합니다.")이 705px 를 요구해 넘치고 있었다. 랜딩만 display 계단을
+   쓰고 나머지 공개 페이지의 첫 제목은 모두 h1 계단(1440 에서 50px)을 쓴다. */
 .agents-cv5 .agents-v4-copy h1 {
   margin-top: 22px;
-  font-size: clamp(2.4rem, 5.2vw, 3.9rem);
+  font-size: var(--v5-h1);
   font-weight: 860;
   letter-spacing: -0.042em;
   line-height: 1.12;
@@ -46,11 +54,14 @@
 .agents-cv5 .agents-v4-handoff h2,
 .agents-cv5 .agents-v4-final h2 {
   margin-top: 16px;
-  font-size: clamp(1.7rem, 3.2vw, 2.45rem);
+  font-size: var(--v5-h2);
   font-weight: 830;
   letter-spacing: -0.035em;
   line-height: 1.18;
 }
+/* 히어로 오른쪽 쇼룸의 제목은 섹션 제목이 아니라 패널 안의 제목이다(옛 28.8px —
+   어느 계단에도 없던 값). 한 계단 아래인 h3 로 내린다. */
+.agents-cv5 .live-evidence-showcase h2 { font-size: var(--v5-h3); }
 .agents-cv5 .agents-v4-copy > p,
 .agents-cv5 .agents-v4-heading > p,
 .agents-cv5 .agents-v4-handoff p {
@@ -105,8 +116,12 @@
 .agents-cv5 .agents-v4-rail .mcp-live-status { border-top: 1px solid var(--v5-line); }
 
 /* ---------------------------------------------------------------- sections */
+/* 이 섹션들은 아래에 구분선을 갖는다. 선이 이음매 한가운데 서야 하므로 위아래로
+   band 의 절반씩 나눠 갖는다 — 두 섹션 사이에 보이는 빈 띠는 결국 band 하나다.
+   옛 값은 위아래 96 씩이라 이음매마다 192~202px 이 재졌다(1440x900 실측
+   202 · 201 · 202 · 193 · 197). */
 .agents-cv5 .agents-v4-section {
-  padding: clamp(56px, 8vw, 96px) 0;
+  padding: var(--v5-band-half) 0;
   border-bottom: 1px solid var(--v5-line);
 }
 .agents-cv5 .agents-v4-heading-wide { gap: clamp(18px, 3vw, 48px); margin-bottom: clamp(26px, 4vw, 40px); }
@@ -171,7 +186,7 @@
 }
 
 /* --------------------------------------------------------------- handoff */
-.agents-cv5 .agents-v4-handoff { gap: clamp(30px, 5vw, 60px); padding: clamp(56px, 8vw, 92px) 0; }
+.agents-cv5 .agents-v4-handoff { gap: clamp(30px, 5vw, 60px); padding: var(--v5-band-half) 0; }
 .agents-cv5 .agents-v4-handoff-card {
   border: 1px solid var(--v5-line-strong);
   border-radius: var(--v5-r-lg);
@@ -199,7 +214,9 @@
   line-height: 1.6;
 }
 
-.agents-cv5 .agents-v4-final { padding: clamp(56px, 8vw, 80px) 0 20px; }
+/* 마지막 섹션은 아래 여백을 갖지 않는다 — 푸터 위 이음매는
+   .cv5-footer 의 margin-top(= --v5-band) 하나가 만든다. */
+.agents-cv5 .agents-v4-final { padding: var(--v5-band-half) 0 0; }
 
 /* ------------------------------------------------------------- asset strip */
 /* The strip had no surface rule of its own and inherited a light one from a global, while
@@ -209,6 +226,9 @@
   background: var(--v5-panel, var(--v5-surface, #0b0d18));
   color: var(--v5-ink);
   border-bottom: 1px solid var(--v5-line);
+  /* globals.css 의 margin: 42px 0 0 대신 공통 사다리로. 이 띠는 히어로 묶음의
+     일부라 섹션 사이(band)가 아니라 묶음 안(stack) 간격을 쓴다. */
+  margin-block: var(--v5-stack) 0;
 }
 .agents-cv5 .agent-asset-strip-copy strong { color: var(--v5-ink); font-weight: 800; letter-spacing: -0.03em; }
 .agents-cv5 .agent-asset-strip-copy small { color: var(--v5-ink-faint); }

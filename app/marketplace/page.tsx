@@ -43,7 +43,11 @@ export default function MarketplacePage() {
       <div className="cv5-stars" aria-hidden="true" />
       <SiteShell active="marketplace">
         <main className={styles.page}>
-          <header className={styles.hero} data-snap-section="hero">
+          {/* data-band 는 이 화면이 사이트 공통 세로 리듬(app/site-v5.css 의 --v5-lead /
+              --v5-band)을 쓰겠다고 선언하는 표식입니다. 이 페이지의 여백은 CSS 모듈이
+              따로 갖고 있었고(위 96 · 110 · 64), 그래서 내비 아래 150px · 히어로 아래
+              192px 처럼 사이트의 다른 곳과 안 맞는 빈 띠가 생겼습니다. */}
+          <header className={styles.hero} data-band="hero" data-snap-section="hero">
             <div className={`cv5-frame ${styles.heroGrid}`}>
               <div>
                 <span className="cv5-badge">✦ Clunk가 <b>직접 만든 에셋</b></span>
@@ -102,7 +106,7 @@ export default function MarketplacePage() {
             </div>
           </header>
 
-          <section id="catalog" className={styles.catalogSection} data-snap-section="catalog" aria-labelledby="marketplace-catalog-heading">
+          <section id="catalog" className={styles.catalogSection} data-band="section" data-snap-section="catalog" aria-labelledby="marketplace-catalog-heading">
             <div className="cv5-frame">
               <div className={styles.sectionHead}>
                 <span className="cv5-eyebrow">에셋 목록</span>
@@ -115,7 +119,7 @@ export default function MarketplacePage() {
             </div>
           </section>
 
-          <section className={styles.buyerSection} data-snap-section="use-clunk" aria-labelledby="marketplace-buyer-heading">
+          <section className={styles.buyerSection} data-band="section" data-snap-section="use-clunk" aria-labelledby="marketplace-buyer-heading">
             <div className={`cv5-frame ${styles.buyerGrid}`}>
               <div className="cv5-reveal">
                 <div className={styles.sectionHead}>

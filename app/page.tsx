@@ -128,7 +128,13 @@ function ShowcaseImg({ slug, name, eager }: { slug: string; name: string; eager?
 
 export default function Home() {
   return (
-    <div className="cv5 cv5-snap">
+    /* 2026-09-05: `cv5-snap` 이 붙어 있는 동안 이 페이지만 스크롤 스냅이 켜졌다.
+       섹션 여섯의 높이가 화면(900)과 달라 스냅마다 다음 섹션이 잘려 들어왔고,
+       390x844 에서는 섹션이 화면의 1.3~2.2배라 아예 맞을 수가 없었다.
+       스냅을 걷어냈으므로 표식도 뗀다(근거는 app/site-v5.css 의 같은 날 주석).
+       아래 data-snap-section 은 tests/site-quality-contract.test.mjs 가 못 박아 둔
+       섹션 이름표라 그대로 두지만, 이제 어떤 규칙도 여기에 스냅하지 않는다. */
+    <div className="cv5">
       <ForceDarkTheme />
       <RevealObserver />
       <div className="cv5-stars" aria-hidden="true" />

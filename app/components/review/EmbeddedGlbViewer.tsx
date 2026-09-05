@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 
 import { gltfClipLabel } from "./gltf-clip-labels";
+import { Icon, type IconName } from "../Icon";
 import { attachMeshoptDecoder } from "../meshopt-decoder";
 import { readPalette, type PaletteEntry } from "./measure-palette";
 import { useViewerWebMcp, type ViewerView } from "../../webmcp/useViewerWebMcp";
@@ -1032,23 +1033,23 @@ export function EmbeddedGlbViewer({
         {stage}
 
         <div className="cv5-bench-rail cv5-bench-rail-left" role="toolbar" aria-label="에셋 조정 도구" aria-orientation="vertical">
-          <RailButton icon="🎨" label="색 바꾸기" pressed={openTool === "colour"} onClick={() => setOpenTool(openTool === "colour" ? null : "colour")} />
-          <RailButton icon="🖌" label="와이어프레임 보기" pressed={wireframe} onClick={() => { const next = !wireframe; setWireframe(next); handlesRef.current?.setWireframe(next); }} />
-          <RailButton icon="↔" label="좌우 반전" pressed={mirror} onClick={() => { const next = !mirror; setMirror(next); handlesRef.current?.setMirror(next); }} />
-          <RailButton icon="📏" label="치수 상자 보기" pressed={dimensions} onClick={() => { const next = !dimensions; setDimensions(next); handlesRef.current?.setDimensions(next); }} />
-          <RailButton icon="〰" label="면 보기 (플랫 셰이딩)" pressed={flatShading} onClick={() => { const next = !flatShading; setFlatShading(next); handlesRef.current?.setFlatShading(next); }} />
+          <RailButton icon="palette" label="색 바꾸기" pressed={openTool === "colour"} onClick={() => setOpenTool(openTool === "colour" ? null : "colour")} />
+          <RailButton icon="wireframe" label="와이어프레임 보기" pressed={wireframe} onClick={() => { const next = !wireframe; setWireframe(next); handlesRef.current?.setWireframe(next); }} />
+          <RailButton icon="mirror" label="좌우 반전" pressed={mirror} onClick={() => { const next = !mirror; setMirror(next); handlesRef.current?.setMirror(next); }} />
+          <RailButton icon="ruler" label="치수 상자 보기" pressed={dimensions} onClick={() => { const next = !dimensions; setDimensions(next); handlesRef.current?.setDimensions(next); }} />
+          <RailButton icon="facets" label="면 보기 (플랫 셰이딩)" pressed={flatShading} onClick={() => { const next = !flatShading; setFlatShading(next); handlesRef.current?.setFlatShading(next); }} />
           <RailButton
-            icon={background === "dark" ? "◐" : "◑"}
+            icon="contrast"
             label={background === "dark" ? "배경 밝게" : "배경 어둡게"}
             pressed={background === "light"}
             onClick={() => { const next: Background = background === "dark" ? "light" : "dark"; setBackground(next); handlesRef.current?.setBackground(next); }}
           />
-          <RailButton icon="↺" label="카메라 초기화" onClick={() => handlesRef.current?.resetCamera()} />
+          <RailButton icon="reset" label="카메라 초기화" onClick={() => handlesRef.current?.resetCamera()} />
         </div>
 
         <div className="cv5-bench-rail cv5-bench-rail-right" role="toolbar" aria-label="화면과 조명 도구" aria-orientation="vertical">
           <RailButton
-            icon="🔆"
+            icon="lighting"
             label={`조명 바꾸기 · 지금 ${LIGHTING_LABELS[lighting]}`}
             onClick={() => {
               const order: LightingPreset[] = ["studio", "outdoor", "night"];
@@ -1059,11 +1060,11 @@ export function EmbeddedGlbViewer({
           >
             <span className="cv5-bench-tag">{LIGHTING_LABELS[lighting]}</span>
           </RailButton>
-          <RailButton icon="▦" label="격자 바닥 보기" pressed={grid} onClick={() => { const next = !grid; setGrid(next); handlesRef.current?.setGrid(next); }} />
-          <RailButton icon="◍" label="그림자 켜기" pressed={shadows} onClick={() => { const next = !shadows; setShadows(next); handlesRef.current?.setShadows(next); }} />
-          <RailButton icon="⟳" label="자동 회전" pressed={autoRotate} onClick={() => { const next = !autoRotate; setAutoRotate(next); handlesRef.current?.setAutoRotate(next); }} />
-          <RailButton icon="⛶" label="전체 화면" pressed={fullscreen} onClick={toggleFullscreen} />
-          <RailButton icon="⤓" label="지금 화면 PNG로 저장" onClick={saveScreenshot} />
+          <RailButton icon="grid" label="격자 바닥 보기" pressed={grid} onClick={() => { const next = !grid; setGrid(next); handlesRef.current?.setGrid(next); }} />
+          <RailButton icon="shadow" label="그림자 켜기" pressed={shadows} onClick={() => { const next = !shadows; setShadows(next); handlesRef.current?.setShadows(next); }} />
+          <RailButton icon="orbit" label="자동 회전" pressed={autoRotate} onClick={() => { const next = !autoRotate; setAutoRotate(next); handlesRef.current?.setAutoRotate(next); }} />
+          <RailButton icon="fullscreen" label="전체 화면" pressed={fullscreen} onClick={toggleFullscreen} />
+          <RailButton icon="download" label="지금 화면 PNG로 저장" onClick={saveScreenshot} />
         </div>
 
         {/* The colour panel. It opens over the stage rather than pushing the model around,
@@ -1330,6 +1331,16 @@ export function EmbeddedGlbViewer({
  * The icon is decorative and the Korean label is the accessible name, so a screen reader and
  * a tooltip say the same sentence. `aria-pressed` is set only for tools that stay on, because
  * a one-shot action (reset the camera, save a picture) has no pressed state to report.
+ *
+ * 2026-09-05: 그림 자리에 이모지 글자를 넣던 자리다. 열세 개를 재 보니 font-size 는 다
+ * 16.8px 인데 실제 가로폭은 8.0px(⤓)~23.1px(🎨·📏·🔆)로 3배 가까이 벌어져 있었다 —
+ * 컬러 이모지(🎨🖌📏🔆)와 흑백 기호(↔〰◐↺▦◍⟳⛶⤓)를 섞으면 브라우저가 서로 다른
+ * 서체에서 글리프를 끌어오기 때문이다. 42px 원 안에서 아이콘 크기가 제각각이면
+ * 돈 받고 파는 화면에서 가장 싸구려로 보이는 자리가 된다. 이제 아이콘은 앱 공용
+ * Icon 레지스트리의 SVG 라, 열세 개가 모두 정확히 18x18 로 그려진다.
+ *
+ * `icon` 은 IconName 이라 없는 이름을 적으면 타입체크에서 걸린다 — 이모지로 되돌아갈
+ * 수 있는 문자열 구멍을 아예 막아 둔다.
  */
 function RailButton({
   icon,
@@ -1338,7 +1349,7 @@ function RailButton({
   onClick,
   children,
 }: {
-  icon: string;
+  icon: IconName;
   label: string;
   pressed?: boolean;
   onClick: () => void;
@@ -1354,7 +1365,7 @@ function RailButton({
       data-on={pressed ? "true" : undefined}
       onClick={onClick}
     >
-      <span aria-hidden="true">{icon}</span>
+      <Icon name={icon} size={18} strokeWidth={1.7} />
       {children}
     </button>
   );

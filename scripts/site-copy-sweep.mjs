@@ -18,7 +18,7 @@ const BASE = process.env.SWEEP_BASE ?? "https://clunk.games";
 
 const PAGES = [
   "/", "/agents", "/marketplace", "/pricing", "/privacy", "/refunds", "/review", "/series",
-  "/studio", "/app", "/webmcp", "/terms", "/consent", "/login", "/signup", "/portfolio",
+  "/studio", "/app", "/webmcp", "/terms", "/consent", "/login", "/signup",
   "/kits", "/connect",
   "/marketplace/hf-tractor-compact", "/marketplace/cozy-crate-closed", "/marketplace/tex-soil-tilled-v2",
 ];

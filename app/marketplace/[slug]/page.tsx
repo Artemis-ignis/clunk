@@ -1,3 +1,5 @@
+import { cache } from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { readPublishedListingBySlug, type PublishedListingSummary } from "../../api/_lib/reads";
 import { factsFor } from "../../api/_lib/listing-facts";
@@ -12,11 +14,10 @@ import { Icon } from "../../components/Icon";
 import styles from "../marketplace.module.css";
 
 export const dynamic = "force-dynamic";
-export const metadata = createPageMetadata({
-  title: "에셋 상세",
-  description: "Clunk 공개 에셋의 실제 미리보기, 파일 구성, 포맷, 라이선스, 그리고 어느 게임 엔진에서 열리는지를 확인합니다.",
-  path: "/marketplace",
-});
+
+/** 상품 행을 못 읽었을 때만 쓰는 일반 문구. 없는 이름을 지어내느니 이쪽이 낫다. */
+const FALLBACK_DESCRIPTION =
+  "Clunk 공개 에셋의 실제 미리보기, 파일 구성, 포맷, 라이선스, 그리고 어느 게임 엔진에서 열리는지를 확인합니다.";
 
 /**
  * A slug that is not a published listing used to answer 200 with a
@@ -27,11 +28,15 @@ export const metadata = createPageMetadata({
  * The listing as this page needs it server-side: enough to decide the 404 and to emit the
  * structured data. Storage being unavailable is not proof a listing is missing, so that
  * case reports found with no row and the client surfaces the real error.
+ *
+ * 2026-09-05: generateMetadata 와 페이지 본문이 같은 행을 필요로 한다. react cache 로
+ * 감싸 두면 한 요청 안에서 D1 질의가 한 번만 나간다 — 제목을 제대로 붙이려고 상품마다
+ * 조회를 두 배로 늘릴 이유는 없다.
  */
-async function readListing(slug: string): Promise<{
+const readListing = cache(async (slug: string): Promise<{
   found: boolean;
   listing: PublishedListingSummary | null;
-}> {
+}> => {
   try {
     const listing = await readPublishedListingBySlug(slug);
     return { found: Boolean(listing), listing };
@@ -40,6 +45,43 @@ async function readListing(slug: string): Promise<{
     // 실제 오류를 말하게 둔다.
     return { found: true, listing: null };
   }
+});
+
+/**
+ * 검색 결과와 공유 카드에 실릴 한 줄. 상품 설명 앞부분을 문장 끝에서 자른다 —
+ * 검색 결과가 잘라 보여 주는 길이가 대략 155자라 그 뒤는 어차피 "…"로 사라진다.
+ */
+function metaDescription(listing: PublishedListingSummary): string {
+  const text = listing.description?.replace(/\s+/gu, " ").trim();
+  if (!text) return FALLBACK_DESCRIPTION;
+  if (text.length <= 155) return text;
+  const head = text.slice(0, 155);
+  // 한국어 서술문은 "…다." 로 끝난다. 문장 경계가 너무 앞이면(=한 문장이 통째로 긴
+  // 경우) 그냥 낱말 경계에서 자르고 말줄임을 붙인다.
+  const sentenceEnd = Math.max(head.lastIndexOf("다. "), head.lastIndexOf(". "));
+  if (sentenceEnd >= 60) return head.slice(0, sentenceEnd + 2).trim();
+  const wordEnd = head.lastIndexOf(" ");
+  return `${(wordEnd >= 60 ? head.slice(0, wordEnd) : head).trim()}…`;
+}
+
+/**
+ * 2026-09-05: 팔고 있는 상품 세 개(clunk-heli-h145 · hf-tractor-compact ·
+ * tex-soil-tilled-v2)의 <title> 이 전부 "에셋 상세 | Clunk" 하나였다. 탭도, 북마크도,
+ * 검색 결과도, 공유한 링크도 파는 물건마다 똑같은 글자를 보여 준다는 뜻이고 — 상품
+ * 이름으로는 이 페이지에 닿을 방법이 없다는 뜻이다. 제목과 설명은 본문이 이미 읽고
+ * 있는 그 행에서 그대로 가져온다. 새로 만드는 자료가 아니다.
+ */
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const { listing } = await readListing(slug);
+  const path = `/marketplace/${encodeURIComponent(slug)}`;
+  if (!listing) {
+    return createPageMetadata({ title: "에셋 상세", description: FALLBACK_DESCRIPTION, path });
+  }
+  // 영어 이름은 제목에 붙이지 않는다. 탭에 보이는 글자는 스무 자 남짓이라 그 자리는
+  // 한국어 이름이 먼저 가져가야 한다. 영어 이름은 본문과 구조화 데이터의
+  // alternateName 에 이미 실려 있다.
+  return createPageMetadata({ title: listing.title, description: metaDescription(listing), path });
 }
 
 /**

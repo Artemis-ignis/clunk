@@ -3,20 +3,29 @@
  * 상품 설명이 파는 부품이 파일 안에 실제로, 보이는 크기로 있는지 본다.
  *
  * 왜 필요한가. 2026-09-04 눈으로 훑어 보니 가장 위험한 결함은 형상이 아니라 약속이었다.
- *
- *   헛간   설명: "다락으로 올라가는 사다리" → 파일에 ladder/stair 노드 0건
- *   농부   이름: "도구 세 가지를 든" → 물뿌리개·바구니·호미가 전부 크기 0으로 눌려 있음
- *
- * 둘 다 형상 감사(asset-geometry-audit)와 색·수치 검사를 전부 통과했다. 그 검사들은
+ * 헛간 설명은 "다락으로 올라가는 사다리" 를 파는데 파일에 ladder/stair 노드가 0건이었다.
+ * 형상 감사(asset-geometry-audit)도 색·수치 검사도 전부 통과한 파일이다 — 그 검사들은
  * 파일 안을 보지만 상품이 무엇을 약속했는지는 안 보기 때문이다. 사는 사람은 반대로
  * 약속을 읽고 산다.
  *
  * 어떻게 보나. 한국어 부품 이름과 파일 안 노드 이름을 잇는 사전을 두고, 설명이나 제목에
- * 그 말이 나오면 파일에 짝이 되는 노드가 있는지, 그리고 **눈에 보이는 크기인지**를 잰다.
- * 크기 0은 게임이 "장착 안 함"을 표현하는 방식이라 노드는 있어도 사는 사람에게는 없다.
+ * 그 말이 나오면 파일에 짝이 되는 노드가 있는지, 그리고 눈에 보이는 크기인지를 잰다.
  *
- * 사전은 손으로 적는다. 낱말을 기계로 뽑으면 "게임" 같은 말까지 부품으로 세고, 없는 것을
- * 있다고 하거나 있는 것을 없다고 하는 쪽이 더 나쁘다. 새 상품이 오면 여기 한 줄 는다.
+ * 이 검사가 단정하는 것은 하나뿐이다 — **이름은 있는데 아무 동작도 그 크기를 건드리지
+ * 않으면서 크기가 0인 것.** 나머지는 전부 "눈으로 확인할 것" 으로 넘긴다. 까닭이 둘 있다.
+ *
+ *   포장이 이름을 지운다. 메시를 재질별 덩어리(`body_matte`)로 합치면서 부품 이름이
+ *   사라지므로, 이름이 없다고 부품이 없는 것이 아니다.
+ *
+ *   크기 0이 결함이 아닐 수 있다. 농부의 도구 셋은 여섯 동작 전부가 scale 을 몰고 있어서
+ *   괭이질을 틀면 괭이가 손에 들린다. 2026-09-04 그걸 결함으로 읽고 파일을 고쳤다가
+ *   되돌렸다 — 파일은 맞았고 틀린 것은 "도구 세 가지를 든" 이라는 제목이었다.
+ *
+ * 없는 것을 있다고 하는 것보다 있는 것을 없다고 하는 쪽이 나쁘다. 그래서 확실한 것만
+ * 단정한다.
+ *
+ * 사전은 손으로 적는다. 낱말을 기계로 뽑으면 "게임" 같은 말까지 부품으로 센다.
+ * 새 상품이 오면 여기 한 줄 는다.
  *
  * 사용: node scripts/listing-claim-audit.mjs
  * 필요: CLOUDFLARE_ACCOUNT_ID / CLOUDFLARE_API_TOKEN (설명문이 D1 에만 있다)
@@ -91,6 +100,12 @@ async function partsOf(path) {
     .registerExtensions(ALL_EXTENSIONS)
     .registerDependencies({ "meshopt.decoder": MeshoptDecoder, "meshopt.encoder": MeshoptEncoder });
   const doc = await io.read(path);
+  // 어떤 노드의 크기를 동작이 조종하는가. 그런 노드의 0 은 "없음" 이 아니라 "아직 안 쥠" 이다.
+  const animatedScale = new Set();
+  for (const animation of doc.getRoot().listAnimations())
+    for (const channel of animation.listChannels())
+      if (channel.getTargetPath() === "scale" && channel.getTargetNode())
+        animatedScale.add(channel.getTargetNode().getName());
   const parts = [];
   const place = (m, p) => [0, 1, 2].map((i) => m[i] * p[0] + m[4 + i] * p[1] + m[8 + i] * p[2] + m[12 + i]);
   // 이름은 메시가 없는 묶음 노드에 붙어 있는 일이 많다 — 파는 파일에서 메시 노드는
@@ -120,7 +135,7 @@ async function partsOf(path) {
     };
     gather(node);
     const size = min.every(Number.isFinite) ? Math.max(...[0, 1, 2].map((i) => max[i] - min[i])) : 0;
-    parts.push({ name: node.getName() ?? "", size });
+    parts.push({ name: node.getName() ?? "", size, animatedScale: animatedScale.has(node.getName()) });
     for (const child of node.listChildren()) walk(child);
   };
   for (const scene of doc.getRoot().listScenes()) for (const node of scene.listChildren()) walk(node);
@@ -179,10 +194,23 @@ for (const row of rows) {
     }
     const visible = named.filter((part) => part.size >= MIN_VISIBLE_M);
     if (!visible.length) {
-      problems.push(
-        `${row.slug}: "${claim.label}" 가 파일에 있지만 크기가 0 입니다 (${named.map((p) => p.name).slice(0, 3).join(", ")})` +
-          " — 노드는 있어도 사는 사람에게는 없습니다",
-      );
+      // 크기 0 이라고 다 결함은 아니다. 동작이 그 부품의 크기를 조종하면, 0 은 "없음" 이
+      // 아니라 "아직 안 쥠" 이다 — 농부의 도구 셋이 그렇다. 여섯 동작 전부가
+      // toolHoe/toolWateringCan/toolHarvestBasket 의 scale 을 몰고 있어서, 괭이질을
+      // 틀면 괭이가 손에 들린다. 2026-09-04 이걸 결함으로 읽고 파일을 고쳤다가 되돌렸다.
+      // 파일은 맞았고 틀린 것은 "도구 세 가지를 든" 이라는 제목이었다.
+      const animated = named.some((part) => part.animatedScale);
+      if (animated) {
+        unverifiable.push(
+          `${row.slug}: "${claim.label}" 는 쉬는 자세에서 크기 0 이지만 동작이 크기를 조종합니다` +
+            " — 정지 화면(미리보기·카드)에서는 안 보이니 제목과 설명이 그 사실을 말해야 합니다",
+        );
+      } else {
+        problems.push(
+          `${row.slug}: "${claim.label}" 가 파일에 있지만 크기가 0 입니다 (${named.map((p) => p.name).slice(0, 3).join(", ")})` +
+            " — 노드는 있어도 사는 사람에게는 없습니다",
+        );
+      }
     }
   }
 }

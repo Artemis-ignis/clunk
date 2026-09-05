@@ -2,7 +2,6 @@ import Link from "./NativeLink";
 import { chatGPTSignInPath, chatGPTSignOutPath, type ChatGPTUser } from "../chatgpt-auth";
 import { BrandLockup } from "./BrandMark";
 import { Icon } from "./Icon";
-import { ThemeToggle } from "./ThemeToggle";
 import { getOAuthProviderStatuses, type OAuthProvider } from "../oauth";
 
 export function AuthEntryCard({
@@ -40,8 +39,9 @@ export function AuthEntryCard({
           <BrandLockup gradientId={isSignup ? "clunk-signup" : "clunk-login"} />
         </Link>
         <span className="login-topbar-end">
+          {/* 라이트/다크 토글이 있던 자리. 화면을 실제로 바꾸지 못하는 버튼이라
+              걷어냈다 — app/layout.tsx 의 data-theme 주석 참고. */}
           <span className="mono-label">비공개 파일럿</span>
-          <ThemeToggle />
         </span>
       </header>
 

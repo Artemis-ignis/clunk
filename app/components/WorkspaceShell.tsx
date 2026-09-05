@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "./NativeLink";
 import { BrandLockup } from "./BrandMark";
 import { Icon, type IconName } from "./Icon";
-import { ThemeToggle } from "./ThemeToggle";
 import { SnapRoot } from "./SnapRoot";
 import { ForceDarkTheme } from "./ForceDarkTheme";
 import "../workspace.css";
@@ -178,8 +177,11 @@ export function WorkspaceShell({
             <span>내 파일 검사</span>
           </Link>
           <div className="workspace-toolbar-end">
+            {/* 작업공간 툴바의 라이트/다크 토글이 있던 자리. 이 껍데기는 바로 위에서
+                ForceDarkTheme 으로 data-theme 을 dark 에 못 박고, site-v5.css:92 가
+                `.cv5 .theme-toggle { display: none }` 로 버튼을 숨기고 있었다 —
+                켜지지도 보이지도 않는 조작부였다. */}
             {status}
-            <ThemeToggle />
             <Link className="workspace-avatar" href="/settings" prefetch={false} title={`${userLabel} · 설정`}>
               {userLabel.slice(0, 1).toUpperCase()}
               <span className="sr-only">{userLabel} · 설정</span>

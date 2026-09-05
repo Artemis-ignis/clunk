@@ -102,11 +102,14 @@ const PLANS: Plan[] = [
     images: 30,
     seats: 1,
     featured: true,
+    // 2026-09-05 시각 감사: "무료에 있는 것 전부"가 다섯 줄 중 넷째에 있었다. 구독을
+    // 읽는 사람이 가장 먼저 묻는 것은 "무료에서 쓰던 게 없어지나"이므로 그 답이 맨 위에
+    // 선다. 나머지는 구독으로만 열리는 것 → 지속되는 것 순서.
     features: [
+      "무료에 있는 것 전부",
       "A·S 등급까지 전체 카탈로그 — 내려받기 제한 없음",
       "앞으로 올라오는 에셋도 그대로 포함",
       "구독을 끊어도 받은 파일은 계정에 그대로 남습니다",
-      "무료에 있는 것 전부",
       "만들기·검사 매달 300회, 이미지 하루 30장",
     ],
   },
@@ -124,6 +127,23 @@ const COMPARISON: { label: string; value: (plan: Plan) => string }[] = [
   { label: "만들기·검사 / 달", value: (p) => `${p.credits.toLocaleString("ko-KR")}회` },
   { label: "이미지 생성 / 하루", value: (p) => `${p.images}장` },
 ];
+
+/**
+ * 비교표는 다른 것만 담는다.
+ *
+ * 2026-09-05 시각 감사: 위 열 행 중 네 행(내려받기 횟수 · 받은 파일 · 상업적 이용 ·
+ * AI 도구 연결)이 두 열 모두 같은 값이었다 — 표의 44%가 아무것도 비교하지 않고
+ * 자리만 먹었고, 정작 다른 항목은 그 사이에 묻혔다. 값이 같은 행은 표에서 빼서
+ * 표 위의 "두 요금제 모두 해당" 한 덩어리로 올린다. 지우지는 않는다 — 없앤 것이
+ * 아니라 위치를 옮긴 것이고, 방문자는 그 네 가지가 무료에도 있다는 걸 알아야 한다.
+ *
+ * 나누는 일을 손으로 하지 않고 값으로 계산하는 이유: 나중에 요금제가 바뀌어 어느 행의
+ * 값이 갈리면 그 행이 저절로 표로 돌아온다. 손으로 골라 두면 그때 표가 다시 거짓말을 한다.
+ */
+const isSameForEveryPlan = (row: (typeof COMPARISON)[number]) =>
+  PLANS.every((plan) => row.value(plan) === row.value(PLANS[0]));
+const SHARED_ROWS = COMPARISON.filter(isSameForEveryPlan);
+const DIFFERING_ROWS = COMPARISON.filter((row) => !isSameForEveryPlan(row));
 
 const FAQ = [
   {
@@ -239,8 +259,15 @@ export default function PricingPage() {
 
                       {/* 결제가 열리면 유료 플랜의 이 버튼이 결제 화면으로 이어집니다. 그전까지는
                           어느 플랜을 눌러도 할 수 있는 일이 같으므로(로그인하면 전부 받는다) 같은
-                          문을 엽니다. 눌리지 않는 버튼은 방문자에게 고장으로 읽힙니다. */}
-                      <Link className={`${styles.planBtn} ${isFree ? styles.planBtnPrimary : ""}`} href={startHref}>
+                          문을 엽니다. 눌리지 않는 버튼은 방문자에게 고장으로 읽힙니다.
+
+                          2026-09-05 시각 감사: 그라데이션 주 버튼이 무료 카드에, 유령 버튼이
+                          구독 카드에 붙어 있었다 — 파는 쪽이 덜 눌리게 생긴 화면이었다.
+                          강조는 파는 것(featured)에 붙인다. 문구와 목적지는 그대로다. */}
+                      <Link
+                        className={`${styles.planBtn} ${plan.featured ? styles.planBtnPrimary : ""}`}
+                        href={startHref}
+                      >
                         가입하고 시작하기 <Icon name="arrowUpRight" size={15} />
                       </Link>
 
@@ -264,11 +291,30 @@ export default function PricingPage() {
             <div className="cv5-frame">
               <div className={styles.sectionHead}>
                 <h2 id="compare-title">요금제 비교</h2>
-                <p>같은 항목을 나란히 놓고 봅니다.</p>
+                <p>값이 다른 항목만 표에 남겼습니다. 두 요금제가 똑같은 것은 그 위에 한 번만 적습니다.</p>
               </div>
+
+              {/* 두 요금제가 같은 항목. 표 안에서 같은 값을 두 번 읽히는 대신 여기서 한 번 읽힙니다. */}
+              {SHARED_ROWS.length > 0 ? (
+                <div className={styles.compareShared}>
+                  <p className={styles.compareSharedHead}>두 요금제 모두 해당</p>
+                  <ul>
+                    {SHARED_ROWS.map((row) => (
+                      <li key={row.label}>
+                        <Icon name="check" size={14} />
+                        <span>
+                          <b>{row.label}</b> {row.value(PLANS[0])}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              {/* 넓은 화면: 표 하나. 좁은 화면에서는 아래 카드가 대신 서고 이쪽이 숨습니다. */}
               <div className={styles.tableWrap}>
                 <table className={styles.compareTable}>
-                  <caption className={styles.srOnly}>요금제별 항목 비교</caption>
+                  <caption className={styles.srOnly}>무료와 구독의 값이 갈리는 항목만 담은 표</caption>
                   <thead>
                     <tr>
                       <th scope="col">항목</th>
@@ -280,7 +326,7 @@ export default function PricingPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {COMPARISON.map((row) => (
+                    {DIFFERING_ROWS.map((row) => (
                       <tr key={row.label}>
                         <th scope="row">{row.label}</th>
                         {PLANS.map((plan) => (
@@ -292,6 +338,34 @@ export default function PricingPage() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+
+              {/* 좁은 화면: 요금제 한 장씩.
+                  2026-09-05 시각 감사: 390px 에서 표 폭이 560px 이라 "구독" 열 전체(x 408~575)가
+                  화면 밖에 있었고, 옆으로 밀린다는 표시가 아무것도 없었다 — 파는 열이 전화기에서는
+                  보이지 않았다는 뜻이다. 스크롤 힌트를 붙이는 대신 표를 접기로 한 이유: 열이 둘뿐이라
+                  요금제당 한 장으로 세우면 손가락을 대지 않고도 모든 값이 보인다. 힌트는 값을
+                  여전히 제스처 뒤에 숨겨 둔다. */}
+              <div className={styles.compareCards}>
+                {PLANS.map((plan) => (
+                  <div
+                    key={plan.id}
+                    className={`${styles.compareCard}${plan.featured ? ` ${styles.compareCardFeatured}` : ""}`}
+                  >
+                    <p className={styles.compareCardName}>
+                      {plan.name}
+                      {plan.featured ? <span className={styles.compareCardTag}>가장 많이 고릅니다</span> : null}
+                    </p>
+                    <dl>
+                      {DIFFERING_ROWS.map((row) => (
+                        <div key={row.label}>
+                          <dt>{row.label}</dt>
+                          <dd>{row.value(plan)}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </div>
+                ))}
               </div>
             </div>
           </section>
