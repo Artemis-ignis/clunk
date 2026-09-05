@@ -1,16 +1,16 @@
 {
   "schemaVersion": "1.0",
-  "passportId": "passport-69093d528daf-cc222f6c9950",
+  "passportId": "passport-3203faa7e038-9d7b99f7a16f",
   "coreVersion": "0.1.0",
   "ruleSetId": "clunk-game-ready-v1",
   "ruleSetVersion": "1.0.0",
   "profileId": "web",
-  "sourceHash": "69093d528daf18860eb481010192012b137ae47b12deb8da3bcce379da40e90a",
-  "outputHash": "cc222f6c9950267a4e08a419e6e0334406c46b09939c0a70b44e736873104d0f",
+  "sourceHash": "3203faa7e03808fa2901d2395d8e4994c5a4513e840bec0131b3fb40ee63fdac",
+  "outputHash": "9d7b99f7a16f505e838c2e986d1ddc05407c7e951fd08ac6091e9f427f3de924",
   "sourceFileName": "fence-gate.m1.glb",
   "outputFileName": "fence-gate.m1.clunk-optimized.glb",
-  "sourceInspectionDigest": "1f54a22f9a68d179eaee9d3a6dec887aff5406bb6e23832dd1233d72258a07f2",
-  "outputInspectionDigest": "d072e3d1f76adc5d40673d930bcac2f712b92cf426a5f69e91f8701b42ab2396",
+  "sourceInspectionDigest": "9515bc0deb87f9e291691d99c0b1deb2cd15db15c856de02c535aeb93b87d5ed",
+  "outputInspectionDigest": "f9fdf8896b31f7946d0b78da250493053577f33dfcb249b1e1ad1cd5d5baf17d",
   "operations": [
     {
       "id": "clean-metadata",
@@ -67,12 +67,12 @@
     "score": {
       "score": 100,
       "threshold": 90,
-      "ready": true,
+      "ready": false,
       "hardBlockerCount": 0,
       "breakdown": {
         "format": 100,
         "scene": 100,
-        "geometry": 100,
+        "geometry": 97,
         "materials": 100,
         "textures": 100,
         "runtime": 100
@@ -129,12 +129,12 @@
     "score": {
       "score": 100,
       "threshold": 90,
-      "ready": true,
+      "ready": false,
       "hardBlockerCount": 0,
       "breakdown": {
         "format": 100,
         "scene": 100,
-        "geometry": 100,
+        "geometry": 97,
         "materials": 100,
         "textures": 100,
         "runtime": 100

@@ -1,10 +1,11 @@
 {
   "schema": "clunk.listing-facts.v1",
-  "generatedAt": "2026-09-05T07:21:11.256Z",
+  "generatedAt": "2026-09-05T07:38:41.132Z",
   "sources": [
     "outputs\\market-launch\\wave1\\upload-manifest.json",
     "tmp\\listings-snapshot.json",
     "배달 파일에서 다시 잰 항목 79건",
+    "이전 판의 키트 표식을 유지한 항목 49건 (scripts/merge-kit-facts.mjs 가 적은 것)",
     "이전 판에서 유지한 항목 1건",
     "examples/generated/kits/*/listing-facts.fragment.json → public/market 파일에서 재측정 (scripts/merge-kit-facts.mjs)"
   ],
@@ -240,7 +241,7 @@
       "triangles": 4312,
       "materials": 16,
       "boundsMetres": null,
-      "byteLength": 243336,
+      "byteLength": 243448,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -291,7 +292,7 @@
         1.71,
         0.52
       ],
-      "byteLength": 46004,
+      "byteLength": 49368,
       "format": "GLB",
       "animatedParts": [
         "post_hinge_pintles",

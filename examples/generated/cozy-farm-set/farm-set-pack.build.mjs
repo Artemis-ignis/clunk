@@ -24,7 +24,7 @@
  * public/market/cozy-farm-set-vol1/cozy-farm-set-vol1.glb 로도 함께 쓴다 —
  * listing-facts-cli 는 슬러그와 이름이 같은 파일을 엔트리로 고른다.
  */
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile, unlink, writeFile } from "node:fs/promises";
 import { resolve, join } from "node:path";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
@@ -139,6 +139,8 @@ await writeFile(staged, Buffer.from(binary));
 // 낱개가 열리는 자리에서 팩도 그대로 열려야 한다.
 const io = new NodeIO();
 const document = await io.read(staged);
+// 중간 파일은 읽는 즉시 지운다. 남겨 두면 세트 폴더 옆에 추적되지 않는 GLB 가 한 장 더 생긴다.
+await unlink(staged);
 await document.transform(dedup(), prune());
 await io.write(OUT, document);
 await writeFile(join(MARKET, "cozy-farm-set-vol1.glb"), await readFile(OUT));

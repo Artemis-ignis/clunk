@@ -1,6 +1,6 @@
 {
   "schema": "clunk.landing-facts.v1",
-  "generatedAt": "2026-09-05T03:25:15.864Z",
+  "generatedAt": "2026-09-05T07:40:42.284Z",
   "facts": {
     "tractor": {
       "fileName": "tractor.compact.m1.glb",
@@ -58,7 +58,7 @@
       "name": "울타리 게이트",
       "path": "public/market/cozy-fence-gate/fence-gate.m1.clunk-optimized.glb",
       "triangles": 520,
-      "bytes": 46004
+      "bytes": 49368
     },
     {
       "slug": "crate-produce",

@@ -14,6 +14,13 @@
  *
  * The gate is the one asset in the set with a genuinely functional joint, so the hardware is
  * modelled as a chain that actually closes: pin on the post, strap on the leaf, bar into keeper.
+ *
+ * The factory is the whole product. The file on sale used to be this bake plus a second pass
+ * (scripts/add-pivot-clip.mjs, 2026-09-04) that thinned the hinge pins, moved the hinge line
+ * onto the pins and appended the `swing` clip — three things a buyer receives that the factory
+ * did not know about, so re-baking the factory no longer reproduced the shipped file and every
+ * colourway the template library baked from it shipped the old pins with no clip. All three
+ * live here now; scripts/threejs-to-glb.mjs writes `root.animations` into the GLB.
  */
 import { createKit, place, selectMaterials, summarize } from "./farm-kit.mjs";
 
@@ -31,6 +38,22 @@ const GATE_H = 1.02;
 const RAIL_Y = [0.055, 0.51, 0.965]; // leaf-local rail centres
 const STILE_X = [0.06, 0.71, 1.36]; // leaf-local stile centres: two ends and one middle
 const HINGE_Y = [0.16, 0.86]; // leaf-local hinge centres
+// The hinge LINE is the pin axis, not the leaf's mid-plane: the pins stand 48 mm toward +Z of
+// the leaf centre, so the leaf turns about z = 0.048 and every leaf part steps back by that
+// much to keep its world position. A leaf pivoting on its own mid-plane would drag its straps
+// through the pintles as it opened.
+const HINGE_Z = 0.048;
+// 11.2 mm, not 16. A 16 mm pin's outer facet stood 1.14 mm inside the pintle's outer face,
+// parallel to it and facing the same way — 32 cm² of same-facing coplanar overlap on the one
+// hinge face a buyer sees, which flat shading renders as a flickering seam. 0.7 of it keeps
+// the facet 5.3 mm inside the pintle, where nothing can see it.
+const PIN_RADIUS = 0.0112;
+// The published motion of the leaf: 8 frames at 8 fps, shut → 90° open → shut, plus the wrap
+// key at 1.000 s so the cycle closes. The same keys the product page's viewer plays
+// (app/api/_lib/listing-variants.ts LISTING_CLIPS) and the same ones the 8-frame sprite sheet
+// was baked from — the buyer of the model and the buyer of the sheet get one motion.
+const SWING_FPS = 8;
+const SWING_DEGREES = [0, -22, -48, -74, -90, -74, -48, -22];
 
 export function createFenceGate(THREE) {
   const kit = createKit(THREE);
@@ -45,8 +68,9 @@ export function createFenceGate(THREE) {
     scaleMeters: 1,
     sockets: ["gate_pivot"],
     socketNotes: {
-      gate_pivot: "Hinge node on the inner face of the -X post. Rotate about +Y; negative angles swing the leaf toward +Z. Zero is shut and latched.",
+      gate_pivot: "Hinge node on the pin axis of the -X post (x -0.725, z 0.048). Rotate about +Y; negative angles swing the leaf toward +Z. Zero is shut and latched; the swing clip plays shut → 90° open → shut in 1 s.",
     },
+    clips: ["swing"],
     clearOpeningMeters: (POST_X - POST_HALF) * 2,
   };
 
@@ -91,7 +115,7 @@ export function createFenceGate(THREE) {
   const pins = [];
   for (const y of HINGE_Y) {
     pintles.push(place(kit.box(0.07, 0.1, 0.06), [HINGE_X - 0.02, GATE_BOTTOM + y, 0.05]));
-    pins.push(place(kit.cyl(0.016, 0.016, 0.12, 6), [HINGE_X, GATE_BOTTOM + y, 0.048]));
+    pins.push(place(kit.cyl(PIN_RADIUS, PIN_RADIUS, 0.12, 6), [HINGE_X, GATE_BOTTOM + y, HINGE_Z]));
   }
   hardware.add(kit.merged("post_hinge_pintles", mat.iron, pintles));
   hardware.add(kit.merged("post_hinge_pins", mat.iron, pins));
@@ -107,7 +131,7 @@ export function createFenceGate(THREE) {
   // --- Gate leaf (the moving part) ------------------------------------------------------
   // Everything below hangs off gate_pivot, so rotating that one node swings the whole leaf,
   // hardware included, and nothing is left behind on the post.
-  const gatePivot = kit.group("gate_pivot", [HINGE_X, GATE_BOTTOM, 0]);
+  const gatePivot = kit.group("gate_pivot", [HINGE_X, GATE_BOTTOM, HINGE_Z]);
   gatePivot.userData = { socket: "gate_pivot", axis: "+Y", closedRadians: 0, opensNegative: true };
   root.add(gatePivot);
 
@@ -157,6 +181,22 @@ export function createFenceGate(THREE) {
   );
   // Lift tab, kept inboard of the keeper so a hand could actually reach it.
   gatePivot.add(kit.solo("gate_latch_grip", mat.brass, kit.box(0.045, 0.08, 0.04), [1.3, 0.755, 0.052]));
+
+  // The leaf parts above are authored with z = 0 on the leaf's mid-plane. The pivot sits on the
+  // pin axis, so each part steps back by HINGE_Z: world positions are unchanged, the axis is not.
+  for (const part of gatePivot.children) part.position.z -= HINGE_Z;
+
+  // The swing, keyed on the pivot's quaternion about +Y (negative opens toward +Z).
+  const frames = [...SWING_DEGREES, SWING_DEGREES[0]];
+  const times = new Float32Array(frames.map((_, index) => index / SWING_FPS));
+  const values = new Float32Array(frames.flatMap((degrees) => {
+    const half = (degrees * Math.PI) / 360;
+    return [0, Math.sin(half), 0, Math.cos(half)];
+  }));
+  const swing = new THREE.AnimationClip("swing", frames.length ? (frames.length - 1) / SWING_FPS : 0, [
+    new THREE.QuaternionKeyframeTrack("gate_pivot.quaternion", times, values),
+  ]);
+  root.animations = [swing];
 
   root.userData.measured = summarize(THREE, root);
   return root;

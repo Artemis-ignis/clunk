@@ -655,6 +655,8 @@ async function main() {
             kitSize: fact.kitSize,
             members: fact.members,
             viewYawDegrees: rebuilt.viewYawDegrees ?? fact.viewYawDegrees,
+            // 검사 점수도 조각이 적은 것이다 — 이 실행은 키트 파일을 점수 매기지 않는다.
+            inspection: rebuilt.inspection ?? fact.inspection,
           };
           kitKept += 1;
         }

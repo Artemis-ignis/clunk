@@ -7,6 +7,13 @@
  * first exported function). This script instantiates it headlessly and writes a binary GLB
  * that the normal Clunk gate (inspect → optimize → passport) can consume.
  *
+ * Clips travel with the model. A factory that owns a moving part puts its AnimationClips on
+ * `root.animations` (three.js's own slot for them) and they are written into the GLB. Until
+ * 2026-09-05 the only way a factory-made file got a clip was a second tool rewriting the
+ * exported bytes (scripts/add-pivot-clip.mjs on the fence gate), which left the committed GLB
+ * unreproducible from its factory. Factories without clips export exactly as before — the
+ * option is only passed when there is something to write, so their bytes do not move.
+ *
  * Texture-free procedural models only: GLTFExporter needs browser APIs the moment images are
  * involved, and the generation pipeline deliberately stays code-only geometry/materials.
  *
@@ -67,7 +74,8 @@ const scene = new THREE.Scene();
 scene.add(root);
 
 const exporter = new GLTFExporter();
-const result = await exporter.parseAsync(scene, { binary: true });
+const animations = Array.isArray(root.animations) ? root.animations.filter((clip) => clip && Array.isArray(clip.tracks)) : [];
+const result = await exporter.parseAsync(scene, animations.length ? { binary: true, animations } : { binary: true });
 if (!(result instanceof ArrayBuffer)) throw new Error("Expected a binary GLB ArrayBuffer.");
 
 await writeFile(resolve(outPath), Buffer.from(result), { flag: "wx" });
