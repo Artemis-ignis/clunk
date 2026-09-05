@@ -327,3 +327,113 @@ test("첫 화면에 적힌 폴리곤 수와 용량이 그 파일에서 다시 �
     `첫 화면의 숫자가 파일과 다릅니다. node --import tsx scripts/landing-facts.mjs 를 다시 돌리세요:\n  ${wrong.join("\n  ")}`,
   );
 });
+
+/**
+ * /agents 의 다섯 칸이 진짜 파일을 보여 주는가.
+ *
+ * 이 자리는 CSS 로 그린 그림 네 개였다 — 가짜 캐릭터, 가짜 격자, 막대 인간, 그리고
+ * "00:00 / 00:42" 가 적힌 가짜 파형. 다섯 종류를 다 다룬다고 말하면서 정작 화면에 있는
+ * 파일은 트랙터 한 칸뿐이었다. 적힌 숫자와 파일이 어긋나면 잡아내겠다는 가게가 자기
+ * 화면에서는 파일 없이 그림만 그리고 있었던 셈이다.
+ *
+ * 그래서 다섯 칸 모두 마켓에 올라와 있는 파일을 가리키고, 밑줄의 숫자는
+ * scripts/landing-facts.mjs 가 상품 기록에서 옮겨 적는다. 여기서 (1) 그림 파일이 실제로
+ * 있고 적어 둔 픽셀 크기와 같은지, (2) 옮겨 적은 숫자가 상품 기록과 같은지, (3) 3D 모델
+ * 칸은 파일을 다시 열어 측정한 값과도 같은지, (4) 그 숫자가 밑줄에 그대로 적혀 있는지를
+ * 본다. JSON 을 손으로 고치거나 파일을 갈아 끼우고 스크립트를 안 돌리면 여기서 걸린다.
+ */
+
+/**
+ * 그림 파일의 픽셀 크기를 파일 머리에서 읽는다. PNG 는 IHDR, WebP 는 RIFF 안의
+ * VP8X/VP8/VP8L 청크. 만드는 쪽(scripts/landing-facts.mjs)과 다른 코드로 읽어야 대조가
+ * 된다 — 같은 함수를 부르면 둘이 같이 틀린다.
+ */
+async function imagePixelSize(url) {
+  const b = await readFile(url);
+  const be32 = (i) => ((b[i] << 24) >>> 0) + (b[i + 1] << 16) + (b[i + 2] << 8) + b[i + 3];
+  const le = (i, n) => { let v = 0; for (let k = n - 1; k >= 0; k--) v = v * 256 + b[i + k]; return v; };
+  if (b.length > 24 && b.toString("ascii", 1, 4) === "PNG") return [be32(16), be32(20)];
+  if (b.length > 16 && b.toString("ascii", 0, 4) === "RIFF" && b.toString("ascii", 8, 12) === "WEBP") {
+    for (let at = 12; at + 8 <= b.length; ) {
+      const type = b.toString("ascii", at, at + 4);
+      const size = le(at + 4, 4);
+      const data = at + 8;
+      if (type === "VP8X") return [le(data + 4, 3) + 1, le(data + 7, 3) + 1];
+      if (type === "VP8 ") return [le(data + 6, 2) & 0x3fff, le(data + 8, 2) & 0x3fff];
+      if (type === "VP8L") { const bits = le(data + 1, 4); return [(bits & 0x3fff) + 1, ((bits >> 14) & 0x3fff) + 1]; }
+      at = data + size + (size & 1);
+    }
+  }
+  return null;
+}
+
+test("/agents 다섯 칸이 파는 파일을 보여 주고, 밑줄의 숫자가 상품 기록과 같다", async () => {
+  const landing = JSON.parse(await readFile(new URL("app/data/landing-facts.json", root), "utf8"));
+  const registry = await loadFacts();
+  const families = landing.families ?? {};
+  const kinds = ["sprite", "atlas", "spine", "motion", "model"];
+  assert.deepEqual(Object.keys(families).sort(), [...kinds].sort(), "다섯 칸이 그대로 적혀 있지 않습니다");
+
+  const wrong = [];
+  for (const kind of kinds) {
+    const tile = families[kind];
+    const fact = registry[tile.slug];
+    if (!fact) { wrong.push(`${kind}: ${tile.slug} 이 상품 기록에 없습니다`); continue; }
+
+    const size = await imagePixelSize(new URL(tile.imagePath, root));
+    if (!size) wrong.push(`${kind}: ${tile.imagePath} 의 픽셀 크기를 읽지 못했습니다`);
+    else if (size[0] !== tile.imageWidth || size[1] !== tile.imageHeight) {
+      wrong.push(`${kind}: 표기 ${tile.imageWidth}×${tile.imageHeight} / 파일 ${size[0]}×${size[1]} 픽셀`);
+    }
+    // public/ 아래가 그대로 정적 주소다. 주소와 파일이 다르면 화면은 빈 칸을 보여 준다.
+    if (tile.image !== `/${tile.imagePath.replace(/^public\//, "")}`) {
+      wrong.push(`${kind}: 화면 주소 ${tile.image} 가 파일 ${tile.imagePath} 와 다릅니다`);
+    }
+
+    const n = tile.numbers;
+    const pieces = [];
+    const same = (label, written, real) => { if (written !== real) wrong.push(`${kind}: ${label} 표기 ${written} / 기록 ${real}`); };
+    if (kind === "sprite") {
+      same("해상도", n.resolution, fact.texture?.resolution);
+      same("용량", n.byteLength, fact.byteLength);
+      same("형식", n.format, fact.format);
+      pieces.push(String(n.resolution), String(n.format));
+      if (n.byteLength >= 1_000_000) pieces.push(`${(n.byteLength / 1_000_000).toFixed(1)} MB`);
+    } else if (kind === "atlas") {
+      for (const key of ["cell", "directions", "frames"]) same(key, n[key], fact.sheet?.[key]);
+      pieces.push(String(n.cell), String(n.directions), String(n.frames));
+    } else if (kind === "spine") {
+      same("동작 수", n.clips, fact.animations.length);
+      same("움직이는 부품 수", n.parts, fact.animatedParts.length);
+      pieces.push(String(n.clips), String(n.parts));
+    } else if (kind === "motion") {
+      same("프레임 수", n.frames, fact.sheet?.frames);
+      // 동작의 이름과 길이는 이 시트를 구워 낸 원본 3D 상품이 갖고 있다.
+      const clip = registry[n.clipSlug]?.animations?.[0];
+      if (!clip) wrong.push(`${kind}: ${n.clipSlug} 에 동작이 없습니다`);
+      else { same("동작 이름", n.clip, clip.name); same("동작 길이", n.seconds, clip.seconds); }
+      pieces.push(n.seconds.toFixed(1), String(n.frames));
+    } else {
+      // 3D 모델 칸만 파일에서 직접 측정한 값이다. 파일과도, 상품 기록과도 같아야 한다.
+      const name = n.path.split("/").pop();
+      const bytes = await readFile(new URL(n.path, root));
+      const metrics = inspectAsset({ entry: name, files: new Map([[name, new Uint8Array(bytes)]]) })?.metrics;
+      same("폴리곤(파일)", n.triangles, metrics?.triangleCount);
+      same("재질(파일)", n.materials, metrics?.materialCount);
+      same("동작(파일)", n.clips, metrics?.animationCount);
+      same("폴리곤", n.triangles, fact.triangles);
+      same("재질", n.materials, fact.materials);
+      same("동작 수", n.clips, fact.animations.length);
+      pieces.push(n.triangles.toLocaleString("ko-KR"), String(n.materials), String(n.clips));
+    }
+    for (const piece of pieces) {
+      if (!tile.caption.includes(piece)) wrong.push(`${kind}: 밑줄 "${tile.caption}" 에 ${piece} 가 없습니다`);
+    }
+  }
+
+  assert.deepEqual(
+    wrong,
+    [],
+    `/agents 다섯 칸이 파일과 어긋납니다. node --import tsx scripts/landing-facts.mjs 를 다시 돌리세요:\n  ${wrong.join("\n  ")}`,
+  );
+});

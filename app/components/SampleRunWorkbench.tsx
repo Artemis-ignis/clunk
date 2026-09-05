@@ -26,7 +26,7 @@ import { EvidenceStatusGrid, type EvidenceStatusTone } from "./EvidenceStatusGri
 /* 아래 네 표는 LiveEvidenceShowcase 의 것과 같은 말을 쓴다. 한 화면에서 같은 상태가
    다른 이름으로 불리면 안 되기 때문이다.
    GAP 만 다르게 옮긴다: 쇼룸은 찍은 화면이 아예 없는 기록까지 다루느라 "증거 없음"으로
-   적지만, 이 예시에는 엔진 렌더 4장이 실제로 찍혀 있다. 없어서가 아니라 측정해서 떨어진
+   적지만, 이 예시에는 자체 렌더 4장이 실제로 찍혀 있다. 없어서가 아니라 측정해서 떨어진
    것이므로 "미달"이 맞는 말이다. */
 const STRUCTURAL_WORD: Record<string, { value: string; tone: EvidenceStatusTone }> = {
   PASS: { value: "통과", tone: "pass" },
@@ -81,7 +81,7 @@ const CHECK_STATUS_WORD: Record<string, string> = {
   NOT_APPLICABLE: "해당 없음",
 };
 
-const LANE_LABEL: Record<string, string> = { visualRuntime: "엔진 렌더", playerFacing: "게임 시점" };
+const LANE_LABEL: Record<string, string> = { visualRuntime: "자체 렌더", playerFacing: "게임 시점" };
 
 /** sample-run-model.ts는 단계 이름과 다음 할 일을 영어로 들고 있습니다. */
 const STAGE_COPY: Record<SampleRunStageId, { label: string; title: string }> = {
@@ -112,7 +112,7 @@ const PANEL_HEADING: Record<SampleRunStageId, string> = {
 
 const PANEL_BODY: Record<SampleRunStageId, string> = {
   asset: "Clunk에 들어 있는 GLB 파일을 그대로 씁니다. 이 예시의 파일과 지문은 고정되어 있고, 예시가 통과했다고 해서 내 파일이 통과한 것은 아닙니다.",
-  inspection: "파일 검사 결과와 지적된 문제, 파일 지문을 한 화면에 모읍니다. 이어서 같은 파일을 엔진 렌더 4각도와 게임 시점 2거리로 직접 찍어 픽셀을 측정합니다.",
+  inspection: "파일 검사 결과와 지적된 문제, 파일 지문을 한 화면에 모읍니다. 이어서 같은 파일을 자체 렌더 4각도와 게임 시점 2거리로 직접 찍어 픽셀을 측정합니다.",
   decision: `파일 검사 점수만으로 게임에 넣어도 된다고 하지 않습니다. 자동 화면 검사 ${measuredChecks.length}건 가운데 ${failedChecks.length}건이 떨어졌고(${failedNames}), 그 근거는 아래 찍힌 화면입니다. 사람이 다시 판정할 자리는 없습니다.`,
 };
 
@@ -181,7 +181,7 @@ export function SampleRunWorkbench({ compact = false }: { compact?: boolean }) {
                 tone: structural.tone,
               },
               {
-                label: "엔진 렌더",
+                label: "자체 렌더",
                 value: visualRuntime.value,
                 detail: `${SAMPLE_RUN_EVIDENCE.engineCaptureCount}각도 · ${SAMPLE_RUN_EVIDENCE.engineSummary}`,
                 tone: visualRuntime.tone,

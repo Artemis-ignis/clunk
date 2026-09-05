@@ -23,6 +23,8 @@
 import { useMemo, useRef, useState } from "react";
 import Link from "./NativeLink";
 import { Icon } from "./Icon";
+// 방문자에게 나가는 렌더 이름과 고지를 다듬는 곳은 한 군데다(sample-run-model).
+import { visitorLaneLabel, visitorRendererNote } from "./sample-run-model";
 import "./live-evidence.css";
 
 import heliEvidence from "../data/evidence/clunk-heli-h145.visual-evidence.json";
@@ -96,7 +98,7 @@ const CHECK_LABELS: Record<string, string> = {
   motion: "동작",
 };
 
-const LANE_LABELS: Record<string, string> = { visualRuntime: "엔진 렌더", playerFacing: "게임 시점" };
+const LANE_LABELS: Record<string, string> = { visualRuntime: "자체 렌더", playerFacing: "게임 시점" };
 
 const CHECK_STATUS: Record<string, { text: string; tone: Tone | "off" }> = {
   PASS: { text: "통과", tone: "pass" },
@@ -237,9 +239,9 @@ function buildRecord(slug: string, pick: string, raw: unknown): EvidenceRecord {
     return {
       id: capture.id,
       group: capture.lane === "playerFacing" ? "player" : "engine",
-      labelKo: capture.label_ko,
+      labelKo: visitorLaneLabel(capture.label_ko),
       short: shortLabel(capture.label_ko),
-      alt: `${json.source.fileName} — ${capture.label_ko}`,
+      alt: `${json.source.fileName} — ${visitorLaneLabel(capture.label_ko)}`,
       src: capture.path,
       sha256: capture.sha256,
       bytes: capture.bytes,
@@ -277,11 +279,11 @@ function buildRecord(slug: string, pick: string, raw: unknown): EvidenceRecord {
     {
       id: "engine",
       index: "01",
-      label: "엔진 렌더",
+      label: "자체 렌더",
       eyebrow: "네 각도를 스스로 찍습니다",
       title: "에셋을 네 각도에서 찍고 픽셀을 측정합니다.",
       body: `3/4 · 정면 · 측면 · 위. 화면 채움과 잘림, 노출, 남는 색 수, 배경과의 색 차이를 픽셀에서 직접 읽습니다. 사람이 파일을 열어 볼 차례는 없습니다.`,
-      proof: `엔진 렌더 ${engineCuts}컷 · ${laneCheckSummary(checks, "visualRuntime")}`,
+      proof: `자체 렌더 ${engineCuts}컷 · ${laneCheckSummary(checks, "visualRuntime")}`,
       available: engineCuts > 0,
     },
     {
@@ -325,7 +327,7 @@ function buildRecord(slug: string, pick: string, raw: unknown): EvidenceRecord {
       tone: structural.tone,
     },
     {
-      label: "엔진 렌더",
+      label: "자체 렌더",
       value: visualRuntime.value,
       detail: `${engineCuts}각도 · ${laneCheckSummary(checks, "visualRuntime")}`,
       tone: visualRuntime.tone,
@@ -368,7 +370,7 @@ function buildRecord(slug: string, pick: string, raw: unknown): EvidenceRecord {
     triangleCount: visual.triangleCount,
     score: json.report.score.score,
     hardBlockerCount: json.report.score.hardBlockerCount,
-    rendererNoteKo: visual.renderer.note_ko,
+    rendererNoteKo: visitorRendererNote(visual.renderer.note_ko),
     summaryKo: visual.summary_ko,
     humanDecisionText: humanText,
     verdict: json.statuses.autoVerdict,
@@ -584,7 +586,7 @@ export function LiveEvidenceShowcase({
                 detail={status.detail}
                 tone={status.tone}
                 active={
-                  (currentStage.id === "engine" && status.label === "엔진 렌더")
+                  (currentStage.id === "engine" && status.label === "자체 렌더")
                   || (currentStage.id === "player" && status.label === "게임 시점")
                   || (currentStage.id === "motion" && status.label === "판정")
                 }
@@ -609,7 +611,7 @@ export function LiveEvidenceShowcase({
                       <span>{LANE_LABELS[check.lane] ?? check.lane} · {CHECK_LABELS[check.id] ?? check.id}</span>
                       <strong>{status.text}</strong>
                     </div>
-                    <p>{check.reason_ko}</p>
+                    <p>{visitorLaneLabel(check.reason_ko)}</p>
                   </li>
                 );
               })}

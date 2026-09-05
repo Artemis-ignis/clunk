@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "./NativeLink";
 import { Icon } from "./Icon";
 import { EmbeddedGlbViewer, type MeasuredSpec } from "./review/EmbeddedGlbViewer";
+import { modelSourceFor, previewModelUrl, previewNoteFor } from "./model-source";
 import {
   cardSpec,
   factRows,
@@ -91,7 +92,9 @@ type ListingClip = { name: string; label: string; fps: number; tracks: Array<{ n
 /** A listing the shop found by comparing measured colour, not by matching a tag. */
 type ColourMatch = { slug: string; title: string; distance: number; palette: Array<{ hex: string; share: number }> };
 
-type CatalogFilter = "all" | "2d" | "3d" | "motion";
+type CatalogFilter = "all" | "2d" | "3d" | "texture";
+/** 움직임은 갈래가 아니라 갈래와 겹쳐 거는 조건이다 — 움직이는 3D 는 3D 모델에도 선다. */
+type MotionFilter = "all" | "yes";
 type CatalogSort = "newest" | "name" | "size-asc";
 type CatalogState = "loading" | "ready" | "error";
 type CheckoutState = { status?: string; configured?: boolean; provider?: string | null };
@@ -246,8 +249,21 @@ const CATALOG_SORTS = new Set<string>(["newest", "name", "size-asc"]);
 const CATALOG_FILTERS: readonly { id: CatalogFilter; label: string }[] = [
   { id: "all", label: "전체" },
   { id: "3d", label: "3D 모델" },
+  { id: "texture", label: "텍스처" },
   { id: "2d", label: "2D 스프라이트" },
-  { id: "motion", label: "움직임 있음" },
+];
+
+/**
+ * 움직임 줄. 갈래와 따로 거는 조건이다.
+ *
+ * 2026-09-05 점검 M5: "3D 모델 47" 은 움직이는 3D 17개를 뺀 수였고, 실제 3D 파일 64개
+ * 가운데 47개만 보였다. 움직임을 갈래에서 떼어 내면 3D 모델은 GLB 전부를 세고, 움직이는
+ * 것만 보고 싶은 사람은 이 줄을 겹쳐 건다. 홈이 "텍스처"라 부르는 8개를 목록만
+ * "2D 스프라이트"라 부르던 것도 함께 갈랐다.
+ */
+const MOTION_FILTERS: readonly { id: MotionFilter; label: string }[] = [
+  { id: "all", label: "전체" },
+  { id: "yes", label: "움직임 있음" },
 ];
 
 /** 테마를 고르지 않은 상태. 주소의 기본값이기도 하다. */
@@ -287,7 +303,7 @@ function kitShortName(name: string): string {
 type FacetRow = { id: string; label: string; count: number };
 
 /** 지금 걸려 있는 조건. 사이드바의 수도, 격자도 같은 하나를 본다. */
-type Facets = { filter: CatalogFilter; theme: string; access: "all" | "free"; query: string };
+type Facets = { filter: CatalogFilter; motion: MotionFilter; theme: string; access: "all" | "free"; query: string };
 
 /**
  * `salesOpen` 은 서버가 알려 준다(app/api/_lib/sales-lock.areSalesOpen). 지금은 판매가
@@ -307,6 +323,10 @@ export function MarketplaceCatalog({ salesOpen = false }: { salesOpen?: boolean 
   const [query, setQuery] = useState(initial.get("q") ?? "");
   const [filter, setFilter] = useState<CatalogFilter>(
     CATALOG_FILTERS.some((option) => option.id === initial.get("cat")) ? initial.get("cat") as CatalogFilter : "all",
+  );
+  // 옛 주소(`?cat=motion`)로 들어온 링크는 같은 것을 본다: 갈래는 전체, 움직임만 걸린다.
+  const [motion, setMotion] = useState<MotionFilter>(
+    initial.get("motion") === "yes" || initial.get("cat") === "motion" ? "yes" : "all",
   );
   const [sort, setSort] = useState<CatalogSort>(
     CATALOG_SORTS.has(initial.get("sort") ?? "") ? initial.get("sort") as CatalogSort : "newest",
@@ -345,6 +365,7 @@ export function MarketplaceCatalog({ salesOpen = false }: { salesOpen?: boolean 
       else params.set(key, value);
     };
     apply("cat", filter, "all");
+    apply("motion", motion, "all");
     apply("theme", theme, THEME_ALL);
     apply("access", access, "all");
     apply("sort", sort, "newest");
@@ -357,7 +378,7 @@ export function MarketplaceCatalog({ salesOpen = false }: { salesOpen?: boolean 
       "",
       search ? `?${search}${window.location.hash}` : `${window.location.pathname}${window.location.hash}`,
     );
-  }, [access, colour, filter, legacyTarget, query, sort, theme]);
+  }, [access, colour, filter, legacyTarget, motion, query, sort, theme]);
 
   useEffect(() => {
     let active = true;
@@ -401,8 +422,8 @@ export function MarketplaceCatalog({ salesOpen = false }: { salesOpen?: boolean 
   }, [kits]);
 
   const facets: Facets = useMemo(
-    () => ({ filter, theme, access: salesOpen ? access : "all", query }),
-    [access, filter, query, salesOpen, theme],
+    () => ({ filter, motion, theme, access: salesOpen ? access : "all", query }),
+    [access, filter, motion, query, salesOpen, theme],
   );
 
   // 한 상품이 지금 조건에 걸리는지. 격자도 사이드바의 수도 이 함수 하나를 부른다 —
@@ -417,6 +438,7 @@ export function MarketplaceCatalog({ salesOpen = false }: { salesOpen?: boolean 
       if (!searchable.includes(normalizedQuery)) return false;
     }
     if (next.filter !== "all" && listingFamily(listing) !== next.filter) return false;
+    if (next.motion === "yes" && !hasMovement(listing)) return false;
     if (next.theme !== THEME_ALL && (themeOfSlug.get(listing.slug) ?? THEME_NONE) !== next.theme) return false;
     if (next.access === "free" && !isFreeTier(listing)) return false;
     return true;
@@ -451,6 +473,11 @@ export function MarketplaceCatalog({ salesOpen = false }: { salesOpen?: boolean 
     [countFor],
   );
 
+  const motionRows: FacetRow[] = useMemo(
+    () => MOTION_FILTERS.map((option) => ({ id: option.id, label: option.label, count: countFor({ motion: option.id }) })),
+    [countFor],
+  );
+
   const themeRows: FacetRow[] = useMemo(() => {
     const rows: FacetRow[] = [{ id: THEME_ALL, label: "전체", count: countFor({ theme: THEME_ALL }) }];
     for (const kit of kits) {
@@ -478,6 +505,7 @@ export function MarketplaceCatalog({ salesOpen = false }: { salesOpen?: boolean 
   const resetFacets = () => {
     setQuery("");
     setFilter("all");
+    setMotion("all");
     setTheme(THEME_ALL);
     setAccess("all");
     setColour("");
@@ -495,6 +523,7 @@ export function MarketplaceCatalog({ salesOpen = false }: { salesOpen?: boolean 
               적힌 수만큼의 카드가 선다. 900px 아래에서는 격자 위의 가로 칩 줄이 된다. */}
           <aside className={styles.side} aria-label="에셋 거르기">
             <FacetGroup title="분류" rows={familyRows} current={filter} onPick={(id) => setFilter(id as CatalogFilter)} />
+            <FacetGroup title="움직임" rows={motionRows} current={motion} onPick={(id) => setMotion(id === "yes" ? "yes" : "all")} />
             <FacetGroup title="테마" rows={themeRows} current={theme} onPick={setTheme} />
             {salesOpen ? (
               <FacetGroup
@@ -963,8 +992,21 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
   // signed-in visitor is granted the file.
   const beta = checkout?.status === "PAYMENT_PROVIDER_NOT_CONFIGURED";
   const downloadHref = `/api/marketplace/assets/${encodeURIComponent(listing.assetId)}?file=${encodeURIComponent(listing.entryFileName)}`;
+  // 로그아웃 방문자에게 파일 주소를 그대로 걸면 서버가 401 을 JSON 으로 답하고,
+  // `download` 속성이 그 234바이트를 <이름>.glb 로 저장한다(2026-09-05 점검 C1).
+  // 세션은 이 화면이 이미 한 번 물어봤으므로(signedIn), 답이 "아니오"인 동안에는
+  // 파일 대신 로그인 문으로 보낸다. 로그인한 방문자의 동작은 그대로다.
+  const mustSignIn = signedIn === false;
+  const loginHref = `/login?return_to=${encodeURIComponent(`/marketplace/${listing.slug}?intent=market`)}`;
   const owned = ownedIds.has(listing.id);
   const isModel = isModelListing(listing);
+  // 뷰어가 열 파일. 로그인하지 않은 방문자는 미리보기 파일을 보고, 로그인한 방문자는
+  // 문이 있는 주소로 판매 파일 그대로를 본다(app/components/model-source.ts).
+  // 세션은 위에서 이미 한 번 물어 둔 값을 그대로 쓴다 — 요청을 하나 더 보내지 않는다.
+  // "받을 수 있는가" 를 로그인 여부만으로 판정하지 않는다. 로그인은 했지만 구독이 없는
+  // 방문자에게 유료 상품의 판매 주소는 403 이고, 뷰어가 그것을 먼저 부르면 콘솔에 오류가
+  // 남는다. 화면이 이미 아는 사실(무료 등급인가, 방금 받았는가)을 함께 본다.
+  const modelSource = modelSourceFor(listing, signedIn === null ? null : signedIn && (freeTier || owned), signedIn);
   const name = displayTitle(listing.slug, listing.title);
   const pictureSpec = describePicture(listing);
   const rows = listing.facts ? factRows(listing.facts) : [];
@@ -1007,9 +1049,11 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
       <section className={styles.detailStage} data-snap-section="listing-stage">
         {isModel ? (
           <EmbeddedGlbViewer
-            src={`/market/${listing.slug}/${listing.entryFileName}`}
+            src={modelSource.src}
+            previewSrc={previewModelUrl(listing.slug, listing.entryFileName)}
+            previewNote={previewNoteFor(signedIn)}
             poster={previewUrl}
-            alt={`${name} 실제 판매 파일`}
+            alt={modelSource.isPreview ? `${name} 미리보기 파일` : `${name} 실제 받는 파일`}
             onMeasured={setMeasured}
             // The motions the sprite baker turned this model's pivots with, so the door a
             // buyer sees opening on the sheet also opens on the model itself.
@@ -1168,7 +1212,11 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
           ) : null}
           <div className={styles.actions}>
             {freeTier ? (
-              <a className={`${styles.btn} ${styles.btnPrimary}`} href={downloadHref} download={listing.entryFileName}>무료 파일 받기 <Icon name="download" size={15} /></a>
+              mustSignIn ? (
+                <Link className={`${styles.btn} ${styles.btnPrimary}`} href={loginHref}>로그인하고 받기 <Icon name="arrowUpRight" size={15} /></Link>
+              ) : (
+                <a className={`${styles.btn} ${styles.btnPrimary}`} href={downloadHref} download={listing.entryFileName}>무료 파일 받기 <Icon name="download" size={15} /></a>
+              )
             ) : owned ? (
               <a className={`${styles.btn} ${styles.btnPrimary}`} href={downloadHref} download={listing.entryFileName}>파일 받기 <Icon name="download" size={15} /></a>
             ) : beta ? (
@@ -1190,7 +1238,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
               A download link that answers 401 in JSON is not a link, it is a trap: until the
               visitor holds the entitlement the row says what will open it instead. */}
           <div className={styles.detailFilesHead}>{beta ? "받으면 열리는 파일" : "구독하면 열리는 파일"}</div>
-          <div className={styles.files}>{listing.artifacts.filter((artifact) => !PAGE_IMAGE_ROLES.has(artifact.role.trim().toLowerCase())).map((artifact) => <article className={styles.fileRow} key={artifact.fileName}><div><Icon name={artifact.contentType === "image/png" ? "image" : artifact.contentType.includes("gltf") ? "box" : "fileJson"} size={17} /><strong>{artifact.fileName}</strong></div><span>{roleLabel(artifact.role)} · {formatBytes(artifact.byteLength)}</span><code>{artifact.sha256.slice(0, 16)}…</code>{owned || freeTier ? <a href={`/api/marketplace/assets/${encodeURIComponent(listing.assetId)}?file=${encodeURIComponent(artifact.fileName)}`} download={artifact.fileName}>다운로드</a> : <span className={styles.fileLocked}>{beta ? "받기 버튼을 누르면 열립니다" : "구독하면 열립니다"}</span>}</article>)}</div>
+          <div className={styles.files}>{listing.artifacts.filter((artifact) => !PAGE_IMAGE_ROLES.has(artifact.role.trim().toLowerCase())).map((artifact) => <article className={styles.fileRow} key={artifact.fileName}><div><Icon name={artifact.contentType === "image/png" ? "image" : artifact.contentType.includes("gltf") ? "box" : "fileJson"} size={17} /><strong>{artifact.fileName}</strong></div><span>{roleLabel(artifact.role)} · {formatBytes(artifact.byteLength)}</span><code>{artifact.sha256.slice(0, 16)}…</code>{owned || freeTier ? (mustSignIn ? <Link href={loginHref}>로그인하고 받기</Link> : <a href={`/api/marketplace/assets/${encodeURIComponent(listing.assetId)}?file=${encodeURIComponent(artifact.fileName)}`} download={artifact.fileName}>다운로드</a>) : <span className={styles.fileLocked}>{beta ? "받기 버튼을 누르면 열립니다" : "구독하면 열립니다"}</span>}</article>)}</div>
         </div>
       </section>
 
@@ -1231,13 +1279,19 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
                   </div>
                   <span className={styles.variantFacts}>{facts.join(" · ")}</span>
                   {has || isFreeTier({ ...variant, description: "" }) ? (
-                    <a
-                      className={`${styles.btn} ${styles.btnGhost} ${styles.variantBtn}`}
-                      href={variantHref}
-                      download={variant.entryFileName}
-                    >
-                      내려받기 <Icon name="download" size={14} />
-                    </a>
+                    mustSignIn ? (
+                      <Link className={`${styles.btn} ${styles.btnGhost} ${styles.variantBtn}`} href={loginHref}>
+                        로그인하고 받기 <Icon name="arrowUpRight" size={14} />
+                      </Link>
+                    ) : (
+                      <a
+                        className={`${styles.btn} ${styles.btnGhost} ${styles.variantBtn}`}
+                        href={variantHref}
+                        download={variant.entryFileName}
+                      >
+                        내려받기 <Icon name="download" size={14} />
+                      </a>
+                    )
                   ) : beta ? (
                     <button
                       type="button"
@@ -1270,7 +1324,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
           <div className={styles.sectionHead}>
             <span className="cv5-eyebrow">바로 쓰기</span>
             <h2 id="detail-integration-heading">받은 파일을<br /><em>붙여넣기로 씁니다</em></h2>
-            <p>구매한 GLB를 프로젝트에 넣고 아래 코드를 복사하면 끝입니다. 검사까지 같은 파일로 이어집니다.</p>
+            <p>받은 GLB를 프로젝트에 넣고 아래 코드를 복사하면 끝입니다. 검사까지 같은 파일로 이어집니다.</p>
           </div>
           <div className={styles.snippetBox}>
             <div className={styles.snippetTabs} role="tablist" aria-label="연동 방식">
@@ -1310,14 +1364,14 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
         {/* A shop tells the buyer what was checked on the file they are about to
             pay for. The four internal review lanes are QA vocabulary and stay in
             the workspace; here we publish only what a buyer can act on. */}
-        <div className={styles.sectionHead}><span className="cv5-eyebrow">판매 전 확인</span><h2 id="detail-evidence-heading">파일을 열어보고<br /><em>확인한 것</em></h2></div>
+        <div className={styles.sectionHead}><span className="cv5-eyebrow">받기 전 확인</span><h2 id="detail-evidence-heading">파일을 열어보고<br /><em>확인한 것</em></h2></div>
         {/* A PNG texture has no 면 and no 재질, and it was never put in a renderer. The card
             used to promise a buyer of a texture that we had counted its triangles and loaded
             it into three.js — neither of which happened.
 
             The draw-call count is gone from every buyer-facing surface: it is an engine word,
             and a shopper cannot act on it. The inspector still measures it. */}
-        <div className={styles.evidenceGrid}><EvidenceCard label="파일 규격" value={listing.evidence.static} detail={isModel ? "면 개수·재질 수·크기·구조를 파일에서 직접 읽었습니다" : "해상도·이어짐·파일 크기를 파일에서 직접 읽었습니다"} pending="아직 파일을 읽어 재보지 않았습니다" /><EvidenceCard label={isModel ? "화면에서 확인" : "그림으로 확인"} value={listing.evidence.visualRuntime} detail={isModel ? "실제 게임 렌더러에 띄워 확인했습니다" : "실제 화면에 띄워 눈으로 확인했습니다"} pending={isModel ? "게임 렌더러에 올려 본 기록이 없습니다. 페이지 위의 미리보기는 지금 여러분 브라우저가 그린 것입니다" : "화면에 띄워 확인한 기록이 없습니다"} /><EvidenceCard label="판매자 검토" value={listing.evidence.humanDecision} detail="Clunk(아르테미스)가 직접 만들고 검토했습니다" pending="판매자가 아직 검토하지 않았습니다" /></div>
+        <div className={styles.evidenceGrid}><EvidenceCard label="파일 규격" value={listing.evidence.static} detail={isModel ? "면 개수·재질 수·크기·구조를 파일에서 직접 읽었습니다" : "해상도·이어짐·파일 크기를 파일에서 직접 읽었습니다"} pending="아직 파일을 열어 측정하지 않았습니다" /><EvidenceCard label={isModel ? "화면에서 확인" : "그림으로 확인"} value={listing.evidence.visualRuntime} detail={isModel ? "실제 게임 렌더러에 띄워 확인했습니다" : "실제 화면에 띄워 눈으로 확인했습니다"} pending={isModel ? "게임 렌더러에 올려 본 기록이 없습니다. 페이지 위의 미리보기는 지금 여러분 브라우저가 그린 것입니다" : "화면에 띄워 확인한 기록이 없습니다"} /><EvidenceCard label="만든 곳 검토" value={listing.evidence.humanDecision} detail="Clunk(아르테미스)가 직접 만들고 검토했습니다" pending="만든 곳이 아직 검토하지 않았습니다" /></div>
         {/* The one caveat the inspection raised, moved here out of the description. A listing
             whose file cleared every budget has nothing to add and shows nothing. */}
         {listing.facts?.inspection?.note ? (
@@ -1335,7 +1389,7 @@ function EvidenceCard({ label, value, detail, pending }: { label: string; value:
   const safeValue: EvidenceStatus = value === "PASS" || value === "GAP" || value === "NOT_EVALUATED" || value === "NO_GO" || value === "PENDING" || value === "UNAVAILABLE" ? value : "NOT_EVALUATED";
   const tone = safeValue === "PASS" ? styles.evidencePass : safeValue === "NO_GO" ? styles.evidenceFail : styles.evidencePending;
   // The lane names are ours; the buyer gets the verdict in their own words.
-  const verdict = safeValue === "PASS" ? "확인함" : safeValue === "NO_GO" ? "판매 보류" : "확인 전";
+  const verdict = safeValue === "PASS" ? "확인함" : safeValue === "NO_GO" ? "공개 보류" : "확인 전";
   // The line under the verdict used to describe the check in the past tense whatever the
   // verdict said, so a texture that was never put in a renderer still read "we loaded it
   // into three.js and checked" under the words "not checked yet". A card that has not
@@ -1551,16 +1605,27 @@ function createIdempotencyKey(): string {
   return `checkout-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
+/**
+ * 어떤 파일을 파는가. 움직임은 여기서 보지 않는다 — 움직이는 GLB 도 3D 모델이다.
+ *
+ * 갈래를 가르는 근거는 파일 자신이다: 확장자가 3D 를, 구운 격자(facts.sheet)가 시트를,
+ * 그 밖의 PNG 가 이어 붙이는 타일(텍스처)을 가른다. 홈이 같은 8개를 "텍스처"라 부르므로
+ * 목록도 같은 이름을 쓴다.
+ */
 function listingFamily(listing: Listing): Exclude<CatalogFilter, "all"> {
   const value = `${listing.entryFileName} ${listing.format ?? ""}`.toLowerCase();
-  // What makes a listing Motion is a clip or a named hinge in the file it sells, which the
-  // measured facts carry. An animated sheet is a ".sheet.png" like any other, so for those
-  // the frame count in the baker's own title is the evidence — the sheet's grid, not a word
-  // someone typed.
-  const animated = hasMotion(listing.facts) || (listing.facts?.sheet?.frames ?? null) !== null;
-  if (animated || value.includes("motion") || value.includes("animation")) return "motion";
-  if (value.includes("png") || value.includes("sprite") || value.includes("atlas") || value.includes("spine") || value.includes("2d")) return "2d";
+  if (value.includes("glb") || value.includes("gltf")) return "3d";
+  if (listing.facts?.sheet || value.includes("sheet") || value.includes("sprite") || value.includes("atlas") || value.includes("spine")) return "2d";
+  if (listing.facts?.texture || value.includes("png")) return "texture";
   return "3d";
+}
+
+/**
+ * 움직이는가. 파일이 든 동작(facts.animations / animatedParts)이나 구운 시트의 프레임이
+ * 근거다 — 제목에 적힌 낱말이 아니라.
+ */
+function hasMovement(listing: Listing): boolean {
+  return hasMotion(listing.facts) || (listing.facts?.sheet?.frames ?? null) !== null;
 }
 
 /**
@@ -1616,10 +1681,10 @@ function TileBench({ src, alt, texture }: { src: string; alt: string; texture: L
       </div>
       <p className={styles.flatNote}>
         {texture?.seamLeftRight !== undefined && texture.seamTopBottom !== undefined
-          ? `이은 자리를 재 봤습니다 — 좌우 ×${texture.seamLeftRight.toFixed(2)}, 상하 ×${texture.seamTopBottom.toFixed(2)}. 타일 안쪽 인접 픽셀차 대비 배율이고 1.0이면 이은 자리를 내부와 구분할 수 없습니다. 위에서 직접 이어 붙여 확인해 보세요.`
+          ? `이은 자리를 측정했습니다 — 좌우 ×${texture.seamLeftRight.toFixed(2)}, 상하 ×${texture.seamTopBottom.toFixed(2)}. 타일 안쪽 인접 픽셀차 대비 배율이고 1.0이면 이은 자리를 내부와 구분할 수 없습니다. 위에서 직접 이어 붙여 확인해 보세요.`
           : seamless
-            ? "이어 붙인 경계를 재 봤을 때 자국이 남지 않았습니다. 위에서 직접 이어 붙여 확인해 보세요."
-            : "이어 붙인 경계에 옅은 자국이 남는 것으로 재졌습니다."}
+            ? "이어 붙인 경계를 측정했을 때 자국이 남지 않았습니다. 위에서 직접 이어 붙여 확인해 보세요."
+            : "이어 붙인 경계에 옅은 자국이 남는 것으로 측정됐습니다."}
         {/* Two of the tiles ship as three mixable variants, and their preview is the 2x2
             those variants make — otherwise this bench would repeat one variant and show
             exactly the grid the variants exist to break. */}

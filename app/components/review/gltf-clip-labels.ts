@@ -31,6 +31,17 @@ export const GLTF_CLIP_LABELS: Readonly<Record<string, string>> = {
   // The H145-style helicopter built in code (2026-09-03).
   "rotor-spin": "로터 회전",
   "doors-open": "문 열기",
+  // 키트 부품이 들고 나온 동작들(2026-09-05 점검 M9: 상품·키트 화면에 영문 식별자가
+  // 그대로 나오고 있었다). 이름은 그 부품을 지은 파일이 스스로 적어 둔 것을 옮겼다 —
+  // examples/generated/kits/**/*.factory.mjs 의 `koreanName`, 이름이 없는 둘은 같은
+  // 파일이 그 동작을 설명한 문장에서.
+  "bell-swing": "종 흔들리기",
+  "winch-crank": "두레박 손잡이 돌리기",
+  "beacon-spin": "등 회전",
+  sway: "등불 흔들림",
+  bob: "물결에 흔들리기",
+  "lantern-swing": "램프 흔들림",
+  "wheels-roll": "바퀴 굴리기",
 };
 
 /**

@@ -20,7 +20,7 @@ export function WebMcpStatusPanel() {
   const [settled, setSettled] = useState(false);
   const [state, setState] = useState<WebMcpStatusDetail>({
     status: "unavailable",
-    detail: "Asking this browser for its model context.",
+    detail: "이 브라우저가 도구를 받아 주는지 물어보고 있습니다.",
     tools: [],
   });
 
@@ -59,24 +59,15 @@ export function WebMcpStatusPanel() {
         <span className={styles.statusDot} data-on={live ? "1" : undefined} aria-hidden="true" />
         <strong>
           {!settled
-            ? "Checking this browser"
+            ? "이 브라우저를 확인하는 중"
             : live
-              ? `${state.tools.length} tools are registered on this page`
+              ? `이 화면에 도구 ${state.tools.length}개가 걸렸습니다`
               : state.status === "error"
-                ? "The tools could not be registered"
-                : "This browser cannot use them yet"}
+                ? "도구를 걸지 못했습니다"
+                : "이 브라우저에서는 아직 쓸 수 없습니다"}
         </strong>
       </div>
       <p className={styles.statusDetail}>{state.detail}</p>
-      <p className={styles.ko}>
-        {!settled
-          ? "이 브라우저에서 쓸 수 있는지 확인하고 있습니다."
-          : live
-            ? `이 화면에 도구 ${state.tools.length}개가 걸려 있습니다.`
-            : state.status === "error"
-              ? "도구를 걸지 못했습니다."
-              : "이 브라우저에서는 아직 쓸 수 없습니다."}
-      </p>
       {live ? (
         <ul className={styles.statusList}>
           {state.tools.map((tool) => (
@@ -88,9 +79,7 @@ export function WebMcpStatusPanel() {
         </ul>
       ) : settled ? (
         <p className={styles.statusDetail}>
-          Follow &quot;How to test this&quot; below and reload — the tools that register will be named here.
-          <br />
-          <span className={styles.ko}>아래 &quot;How to test this&quot;를 따라 한 뒤 새로 고치면, 걸린 도구 이름이 여기에 나옵니다.</span>
+          아래 &quot;이 화면을 시험하는 법&quot;을 따라 한 뒤 새로 고치면, 걸린 도구 이름이 여기에 나옵니다.
         </p>
       ) : null}
     </div>

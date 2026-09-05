@@ -83,7 +83,7 @@ const statuses = evidence.statuses;
 const captures: SampleRunCapture[] = visual.captures.map((capture) => ({
   id: capture.id,
   lane: capture.lane as SampleRunLane,
-  labelKo: capture.label_ko,
+  labelKo: visitorLaneLabel(capture.label_ko),
   src: capture.path,
   sha256: capture.sha256,
   bytes: capture.bytes,
@@ -95,7 +95,7 @@ const checks: SampleRunCheck[] = visual.checks.map((check) => ({
   id: check.id,
   lane: check.lane as SampleRunLane,
   status: check.status,
-  reasonKo: check.reason_ko,
+  reasonKo: visitorLaneLabel(check.reason_ko),
 }));
 
 function laneSummary(lane: SampleRunLane): string {
@@ -107,6 +107,19 @@ function laneSummary(lane: SampleRunLane): string {
 
 function capture(id: string): SampleRunCapture | undefined {
   return captures.find((item) => item.id === id);
+}
+
+/**
+ * 방문자가 읽는 렌더 고지. 근거 파일의 문장을 그대로 쓰되, 끝에 붙은 팀 지시문
+ * ("그렇게 부르면 안 됩니다")만 뺀다 — 2026-09-05 점검 M10: 내부 지시문이 그대로
+ * 방문자에게 보이고 있었다. 지워지는 것은 지시이고, 사실은 남는다.
+ */
+export function visitorLaneLabel(label: string): string {
+  return label.replace("엔진 렌더", "자체 렌더");
+}
+
+export function visitorRendererNote(note: string): string {
+  return note.replace("게임 엔진에서 찍은 화면이 아니며 그렇게 부르면 안 됩니다.", "게임 엔진에서 찍은 화면이 아닙니다.");
 }
 
 /** 화면이 쓰는 값은 전부 여기서 나온다. 손으로 적은 숫자는 하나도 없다. */
@@ -122,7 +135,7 @@ export const SAMPLE_RUN_EVIDENCE = {
   ruleCodes: [...new Set(evidence.findings.filter((finding) => finding.severity !== "INFO").map((finding) => finding.code))],
   sizeMetres: visual.sizeMetres,
   triangleCount: visual.triangleCount,
-  rendererNoteKo: visual.renderer.note_ko,
+  rendererNoteKo: visitorRendererNote(visual.renderer.note_ko),
   summaryKo: visual.summary_ko,
   captures,
   checks,

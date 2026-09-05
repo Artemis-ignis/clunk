@@ -113,9 +113,11 @@ Before migrating, verify all of the following in a dedicated environment:
 6. Custom-domain, TLS, CORS, CSP, secure-cookie, WebMCP/MCP endpoint, and rollback checks pass in a
    fresh deployment.
 
-The public operational health surface is `/api/health`. It exposes only whether the
-core D1/R2 bindings are available and the configured/unavailable state of optional
-OAuth, billing, and provider capabilities; it never returns secret values. The current
+The public operational health surface is `/api/health`. Anonymously it exposes only
+whether the core D1/R2 bindings are available (`ok`, `status`, `runtime`); the
+configured/unavailable state of optional OAuth, billing, and provider capabilities —
+which names the environment variables each one wants — is returned only to a signed-in
+caller or one holding a Clunk API key. It never returns secret values. The current
 private product surfaces include `/api/projects`, `/api/kits`,
 `/api/assets/:assetId`, and source-linked `/api/series` remix. They must retain the same
 workspace scope and R2 download authorization after a Worker migration.

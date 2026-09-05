@@ -76,6 +76,44 @@ export const CLIP_LABELS: Readonly<Record<string, string>> = {
   walk: "걷기",
 };
 
+/**
+ * 하베스트 포크 캐릭터 여섯의 동작 이름.
+ *
+ * 위의 `CLIP_LABELS` 와 쓰임이 다릅니다. 저것은 스프라이트 굽는 쪽이 모델의 축을 돌려 만든
+ * 동작의 이름이고, 이것은 **파일이 스스로 들고 있는** glTF 클립의 이름입니다. 여섯 캐릭터는
+ * 68개짜리 뼈대와 클립 여덟 개를 GLB 안에 넣어 팔기 때문에, 뷰어는 아래 `LISTING_CLIPS` 가
+ * 아니라 파일에서 클립을 읽습니다 — 그래서 여섯 슬러그는 `LISTING_CLIPS` 에 항목이 없고,
+ * 여기에는 그 이름의 한국어 표기만 적어 둡니다. 상품 설명(examples/generated/kits/
+ * harvest-folk/characters.mjs 의 `CLIP_KO`)과 같은 낱말을 씁니다.
+ *
+ * `run` 이 하나 어긋나 있습니다. 화면이 실제로 읽는 표
+ * (app/components/review/gltf-clip-labels.ts 의 `GLTF_CLIP_LABELS`)에는 `run` 이 하베스트
+ * 프론티어 기계의 "가동" 으로 적혀 있고, `wave` 와 `carry_idle` 은 아예 없습니다. 그 파일은
+ * 이 작업의 소관이 아니어서 손대지 않았고,
+ * examples/generated/kits/harvest-folk/product-gaps.md 에 적어 두었습니다.
+ */
+export const CHARACTER_CLIP_LABELS: Readonly<Record<string, string>> = {
+  idle: "대기",
+  walk: "걷기",
+  run: "달리기",
+  wave: "손 흔들기",
+  carry_idle: "바구니 들고 대기",
+  hoe: "괭이질",
+  water: "물주기",
+  harvest: "수확",
+};
+
+/** 하베스트 포크 키트의 상품 슬러그. 부품 여섯과 합본 하나. */
+export const HARVEST_FOLK_SLUGS: readonly string[] = [
+  "kit-harvest-folk",
+  "folk-farmer-tomas",
+  "folk-farmer-ida",
+  "folk-elder-otto",
+  "folk-botanist-mira",
+  "folk-merchant-benno",
+  "folk-kid-pim",
+];
+
 export type ClipAxis = "x" | "y" | "z";
 export type ClipTrack = {
   /** The glTF node this track turns. The viewer disables the clip when the file has no such node. */
@@ -112,6 +150,11 @@ const LISTING_CLIPS: Readonly<Record<string, readonly ListingClip[]>> = {
       tracks: [{ node: "door_pivot", axis: "y", degrees: [0, -14, -34, -56, -74, -85, -90, -90] }],
     },
   ],
+  // 하베스트 포크 여섯(`HARVEST_FOLK_SLUGS`)은 여기에 없고, 없는 것이 맞습니다. 저 파일들은
+  // 68개짜리 뼈대와 클립 여덟 개를 GLB 안에 들고 있어서 뷰어가 파일에서 바로 읽습니다. 여기에
+  // 항목을 만들면 뷰어 막대에 같은 동작이 두 번 걸리고, 그중 하나는 뼈 하나를 몇 도 돌리는
+  // 지어낸 동작이 됩니다 — 이 표는 구운 적 있는 동작만 적는 자리입니다.
+  // 한국어 이름은 위의 `CHARACTER_CLIP_LABELS` 에 있습니다.
 };
 
 /** The clips baked for this listing, or an empty array. Never a clip invented for a model. */

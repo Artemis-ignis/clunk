@@ -148,7 +148,10 @@ test("collaboration UI keeps capture integrity, asset audit, and human visual re
   // 지금 화면의 이름으로 같은 것을 검사한다.
   // 2026-09-05: 네 칸은 상태가 아니라 에이전트가 수행하는 네 단계다. 빈 상태를 상수로 박아 두면
   // 위의 쇼룸(실제 기계 판정)과 같은 화면에서 반대말을 하게 된다.
-  assert.match(agents, /엔진 렌더[\s\S]*4각도 렌더/);
+  // 2026-09-05 점검 M10: 칸 이름이 "엔진 렌더"인데 바로 밑 고지는 "게임 엔진에서 찍은
+  // 화면이 아닙니다"라 한 화면이 반대말을 했다. 이 렌더는 Clunk 자체 래스터라이저가
+  // 그린 것이므로 이름을 "자체 렌더"로 옮겼다. 지켜야 할 것은 네 칸의 구분이다.
+  assert.match(agents, /자체 렌더[\s\S]*4각도 렌더/);
   assert.match(agents, /게임 시점[\s\S]*눈높이 5 m · 15 m/);
   assert.match(agents, /판정[\s\S]*기계가 냅니다/);
   assert.doesNotMatch(agents, /사람이 직접 보고 판단해야 합니다|증거 없음/);
@@ -164,7 +167,7 @@ test("collaboration UI keeps capture integrity, asset audit, and human visual re
   assert.match(sampleRun, /decisionAuthority/);
   // 2026-09-04(마스터 지적): 같은 구분을 부정문("…말하지 않습니다") 대신 방문자에게
   // 무엇이 답을 주는지로 적는다. 지켜야 할 것은 문장 형태가 아니라 구분 자체다.
-  assert.match(agents, /파일 검사는 규격을 봅니다[\s\S]*엔진 렌더와 게임 시점까지 Clunk가 직접 그려 측정한 뒤 판정합니다/);
+  assert.match(agents, /파일 검사는 규격을 봅니다[\s\S]*자체 렌더와 게임 시점까지 Clunk가 직접 그려 측정한 뒤 판정합니다/);
   assert.match(panel, /inspectionRunId/);
   assert.match(facts, /fresh HF.*inspectionRunId/);
   assert.match(facts, /profileId is required for CURRENT/);

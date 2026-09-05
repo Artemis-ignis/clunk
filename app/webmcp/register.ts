@@ -80,7 +80,7 @@ export function getModelContext(): ModelContext | null {
 
 const registry = new Map<string, RegisteredTool>();
 let lastStatus: WebMcpStatus = "unavailable";
-let lastDetail = "This browser does not expose the WebMCP imperative API.";
+let lastDetail = "이 브라우저는 화면 안 도구(WebMCP)를 아직 받지 않습니다.";
 
 /** 지금 등록되어 있는 도구들. 등록한 순서 그대로. */
 export function registeredTools(): RegisteredTool[] {
@@ -104,7 +104,7 @@ function announce(status: WebMcpStatus, detail: string): void {
 /** WebMCP 가 없는 브라우저라고 한 번만 알린다. 콘솔에는 아무것도 찍지 않는다. */
 export function announceUnavailable(): void {
   if (registry.size > 0) return;
-  announce("unavailable", "This browser does not expose the WebMCP imperative API.");
+  announce("unavailable", "이 브라우저는 화면 안 도구(WebMCP)를 아직 받지 않습니다.");
 }
 
 /* ---------------------------------------------------------------------------
@@ -216,12 +216,12 @@ export async function registerTools(
     }
     signal.addEventListener("abort", () => {
       for (const name of registered) registry.delete(name);
-      announce(registry.size > 0 ? "registered" : "unavailable", `${registry.size} tools are registered on this page.`);
+      announce(registry.size > 0 ? "registered" : "unavailable", `이 화면에 도구 ${registry.size}개가 걸렸습니다.`);
     }, { once: true });
-    announce("registered", `${registry.size} tools are registered on this page.`);
+    announce("registered", `이 화면에 도구 ${registry.size}개가 걸렸습니다.`);
     return { ok: true, registered };
   } catch (error) {
-    announce("error", error instanceof Error ? error.message : "Registering the WebMCP tools failed.");
+    announce("error", error instanceof Error ? error.message : "화면 안 도구를 걸지 못했습니다.");
     return { ok: false, registered, reason: "error" };
   }
 }

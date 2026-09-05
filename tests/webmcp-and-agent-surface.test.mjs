@@ -191,12 +191,13 @@ test("the /webmcp page is a human manifest with a live status panel", async () =
   assert.match(page, /WebMcpStatusPanel/);
   // How to turn it on, in both places it can be turned on.
   assert.match(page, /chrome:\/\/flags\/#enable-webmcp-testing/);
-  assert.match(page, /ChatGPT in-app browser/);
-  // Judges arrive in English and their agent reads English; the product's own language sits
-  // beside it rather than instead of it.
-  assert.match(page, /How to test this/);
+  assert.match(page, /ChatGPT 앱 안의 브라우저/);
+  // 2026-09-05 점검 C2: 이 화면의 본문 9,275자가 영어였다. 방문자가 읽는 글은 한국어
+  // 하나이고, 에이전트가 읽는 영어는 도구 자신(tool-manifest 의 en, 각 도구의 description)
+  // 에 그대로 남는다 — 아래 "agents read English" 검사가 그쪽을 지킨다.
+  assert.match(page, /이 화면을 시험하는 법/);
   assert.match(page, /EXAMPLE_PROMPTS/);
-  assert.match(page, /styles\.ko/);
+  assert.doesNotMatch(page, /How to test this|Without signing in|Prompts to try/, "영어 본문이 돌아왔습니다");
   // The panel reads the live registry rather than printing a fixed list.
   assert.match(panel, /currentStatus\(\)/);
   assert.match(panel, /STATUS_EVENT/);

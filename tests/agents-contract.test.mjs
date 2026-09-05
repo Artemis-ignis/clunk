@@ -32,7 +32,11 @@ test("server-renders the client connection guide", async () => {
   // 2026-09-05: 한 화면이 같은 두 가지를 두 벌의 말로 부르고 있어서 화면의 말로 통일했다
   // ("웹으로 바로 쓰는 도구" / "내 컴퓨터에서 쓰는 도구"). 기술 용어는 괄호로 한 번만 남는다.
   assert.match(html, /웹으로 바로 쓰는 도구 <!-- -->\d+<!-- -->개/);
-  assert.match(html, /로컬 stdio/);
+  // 2026-09-05 점검 M11: 방문자 화면에 영문 도구 낱말(endpoint·terminal·stdio)이 남아
+  // 있었다. 지켜야 할 것은 "내 컴퓨터에서 도는 길이 따로 있다"는 사실이지 그 영문
+  // 이름이 아니므로, 화면이 지금 그것을 부르는 말로 옮긴다.
+  assert.match(html, /내 컴퓨터에서 쓰는 도구/);
+  assert.doesNotMatch(html, /(^|[^a-z])(stdio|endpoint|terminal)([^a-z]|$)/i, "방문자 화면에 영문 도구 낱말이 돌아왔습니다");
   assert.match(clientSource, /Clunk 연결 키 만들기/);
   assert.match(clientSource, /const \[endpoint, setEndpoint\] = useState\("\/api\/mcp"\)/);
   assert.match(clientSource, /fetch\(endpoint, \{[\s\S]*method: "POST"/);
@@ -41,7 +45,7 @@ test("server-renders the client connection guide", async () => {
   // 말한다는 것이므로 문구만 따라 옮긴다.
   assert.match(clientSource, /키를 만들면 바로 연결됩니다/);
   assert.match(guideSource, /Authorization: Bearer/);
-  assert.match(guideSource, /로컬 stdio/);
+  assert.match(guideSource, /label: "내 컴퓨터 연결"/);
   assert.doesNotMatch(html, /Polyfork/);
 });
 

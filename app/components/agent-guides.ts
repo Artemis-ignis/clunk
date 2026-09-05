@@ -94,8 +94,8 @@ function buildGuidesForKey(endpoint: string, key: string): AgentGuide[] {
       label: "Claude Code",
       kicker: "원격 MCP · 권장",
       title: "Clunk 연결을 한 줄로 완료",
-      description: "Clunk가 발급한 연결 키와 HTTPS endpoint를 그대로 등록합니다. 로컬 경로 치환이 없습니다.",
-      fileLabel: "terminal",
+      description: "Clunk가 발급한 연결 키와 HTTPS 연결 주소를 그대로 등록합니다. 내 컴퓨터 경로를 바꿔 넣을 일이 없습니다.",
+      fileLabel: "명령줄",
       code: authCommand,
       note: hasIssuedKey
         ? "Clunk에서 발급한 이 키가 이미 명령에 삽입되어 있습니다. 실행 후 claude mcp list에서 clunk가 connected인지 확인하세요."
@@ -108,7 +108,7 @@ function buildGuidesForKey(endpoint: string, key: string): AgentGuide[] {
       label: "Codex",
       kicker: "원격 MCP · CLI",
       title: "Codex CLI에 한 번에 등록",
-      description: "Codex의 공식 streamable HTTP 등록 명령과 bearer-token 환경변수를 함께 생성합니다.",
+      description: "Codex가 쓰는 원격 연결 등록 명령과 키 환경변수를 함께 만들어 줍니다.",
       fileLabel: "PowerShell + Codex",
       code: codexCommand(endpoint, key),
       note: hasIssuedKey
@@ -122,7 +122,7 @@ function buildGuidesForKey(endpoint: string, key: string): AgentGuide[] {
       label: "Cursor",
       kicker: "IDE · CLI · 원격 HTTP",
       title: "mcp.json으로 즉시 연결",
-      description: "Cursor IDE와 cursor-agent가 읽는 원격 HTTP 설정을 발급합니다.",
+      description: "Cursor 편집기와 cursor-agent 가 읽는 원격 연결 설정을 만들어 줍니다.",
       fileLabel: ".cursor/mcp.json",
       code: remoteMcpJson,
       note: hasIssuedKey
@@ -136,7 +136,7 @@ function buildGuidesForKey(endpoint: string, key: string): AgentGuide[] {
       label: "GitHub Copilot",
       kicker: "원격 MCP · CLI",
       title: "Copilot에 한 줄로 추가",
-      description: "GitHub Copilot CLI가 지원하는 HTTP 등록 명령에 Clunk endpoint와 Bearer 키를 넣습니다.",
+      description: "GitHub Copilot 명령줄 도구의 등록 명령에 Clunk 연결 주소와 인증 키를 넣습니다.",
       fileLabel: "copilot mcp add",
       code: copilotCommand(endpoint, key),
       note: hasIssuedKey
@@ -150,7 +150,7 @@ function buildGuidesForKey(endpoint: string, key: string): AgentGuide[] {
       label: "Claude Desktop",
       kicker: "데스크톱 · 원격 HTTP",
       title: "mcpServers 블록을 바로 사용",
-      description: "Claude Desktop에서 사용하는 원격 서버 블록에 Clunk endpoint와 키를 함께 넣습니다.",
+      description: "Claude Desktop이 쓰는 원격 서버 설정에 Clunk 연결 주소와 키를 함께 넣습니다.",
       fileLabel: "claude_desktop_config.json",
       code: remoteMcpJson,
       note: hasIssuedKey
@@ -164,7 +164,7 @@ function buildGuidesForKey(endpoint: string, key: string): AgentGuide[] {
       label: "VS Code",
       kicker: "편집기 · 원격 HTTP",
       title: "servers 설정으로 연결",
-      description: "VS Code .vscode/mcp.json에서 사용하는 servers 형식으로 완성된 설정을 제공합니다.",
+      description: "VS Code 의 .vscode/mcp.json 형식으로 완성된 설정을 그대로 드립니다.",
       fileLabel: ".vscode/mcp.json",
       code: vscodeJson,
       note: hasIssuedKey
@@ -175,31 +175,31 @@ function buildGuidesForKey(endpoint: string, key: string): AgentGuide[] {
     },
     {
       key: "stdio",
-      label: "로컬 stdio",
-      kicker: "오프라인 fallback",
-      title: "원본 파일을 직접 읽는 로컬 서버",
-      description: "HTTP가 접근할 수 없는 로컬 GLB/GLTF는 기존 stdio 경로로 검사합니다. 이 경로는 로컬 파일 작업용입니다.",
+      label: "내 컴퓨터 연결",
+      kicker: "내 컴퓨터에서 도는 서버",
+      title: "원본 파일을 직접 읽는 내 컴퓨터 서버",
+      description: "웹으로는 열 수 없는 내 컴퓨터 안의 GLB·GLTF 는 내 컴퓨터에서 도는 서버가 읽어 검사합니다. 이 길은 내 컴퓨터 파일 작업용입니다.",
       fileLabel: "mcp.json",
       code: MCP_CONFIG_SNIPPET,
-      note: "로컬 원본 파일을 읽어야 할 때만 사용하세요. 현재 저장소 루트 placeholder는 제품 UI에서 자동으로 채울 수 없으므로, 이 fallback은 명시적으로 로컬 설정으로 남깁니다.",
+      note: "내 컴퓨터의 원본 파일을 읽어야 할 때만 쓰세요. 저장소 위치는 사람마다 달라 이 화면이 대신 채울 수 없으므로, 설정 안의 그 자리는 직접 적어야 합니다.",
       status: "available",
     },
     {
       key: "api",
-      label: "Clunk HTTP MCP",
+      label: "Clunk 연결 정보",
       kicker: "연결 상태",
-      title: "Clunk가 직접 제공하는 endpoint",
-      description: "remote agent는 Clunk의 HTTPS endpoint로 연결하고, 키로 workspace 범위를 인증합니다. local path는 HTTP로 읽지 않습니다.",
-      fileLabel: "endpoint",
+      title: "Clunk가 직접 운영하는 연결 주소",
+      description: "웹으로 연결한 도구는 Clunk의 HTTPS 주소로 붙고, 키로 어느 작업공간인지를 확인합니다. 내 컴퓨터 안의 경로는 이 길로 읽지 않습니다.",
+      fileLabel: "연결 정보",
       code: [
-        `endpoint: ${endpoint}`,
-        "transport: streamable HTTP",
-        "auth: Authorization: Bearer <issued Clunk key>",
-        `remote-safe tools: ${MCP_HTTP_TOOL_COUNT} remote-safe tools · local stdio tools: ${MCP_TOOLS.length}`,
+        `연결 주소: ${endpoint}`,
+        "전송: streamable HTTP",
+        "인증: Authorization: Bearer <발급받은 Clunk 키>",
+        `웹으로 쓰는 도구 ${MCP_HTTP_TOOL_COUNT}개 · 내 컴퓨터에서 쓰는 도구 ${MCP_TOOLS.length}개`,
       ].join("\n"),
       note: hasIssuedKey
-        ? "연결 확인 버튼이 initialize → tools/list를 실제로 호출합니다. 이 endpoint는 Clunk 소유 계약입니다."
-        : "Clunk 연결 키를 발급한 뒤 연결 확인을 눌러 실제 endpoint 응답을 확인하세요.",
+        ? "연결 확인 버튼이 이 주소에 실제로 물어보고 답을 그대로 보여 줍니다. 이 주소는 Clunk가 직접 운영합니다."
+        : "Clunk 연결 키를 발급한 뒤 연결 확인을 눌러 이 주소의 실제 응답을 확인하세요.",
       status: "available",
       recommended: true,
     },
@@ -210,4 +210,4 @@ function buildGuidesForKey(endpoint: string, key: string): AgentGuide[] {
 export const AGENT_GUIDES = buildAgentGuides();
 export const DEFAULT_AGENT_GUIDE = AGENT_GUIDES[0];
 
-export const AGENT_GUIDE_PROTOCOL_NOTE = `MCP ${MCP_SERVER.protocolVersion} · ${MCP_HTTP_TOOL_COUNT} HTTP tools · ${MCP_TOOLS.length} local stdio tools`;
+export const AGENT_GUIDE_PROTOCOL_NOTE = `MCP ${MCP_SERVER.protocolVersion} · 웹으로 쓰는 도구 ${MCP_HTTP_TOOL_COUNT}개 · 내 컴퓨터에서 쓰는 도구 ${MCP_TOOLS.length}개`;

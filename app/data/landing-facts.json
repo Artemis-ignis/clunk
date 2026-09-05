@@ -1,14 +1,14 @@
 {
   "schema": "clunk.landing-facts.v1",
-  "generatedAt": "2026-09-05T08:35:25.079Z",
+  "generatedAt": "2026-09-05T09:17:57.475Z",
   "facts": {
     "tractor": {
       "fileName": "tractor.compact.m1.glb",
-      "path": "public/landing/tractor.compact.m1.glb",
-      "triangles": 58156,
-      "bytes": 578376,
+      "path": "public/market/hf-tractor-compact/tractor.compact.m1.glb",
+      "triangles": 59232,
+      "bytes": 1431320,
       "faceLimit": 40000,
-      "limitPercent": 145
+      "limitPercent": 148
     },
     "helicopter": {
       "fileName": "h145.glb",
@@ -135,34 +135,34 @@
       }
     },
     "atlas": {
-      "slug": "farmhand-walk-sprites",
-      "name": "농부 걷기",
+      "slug": "cozy-market-stall-sprites",
+      "name": "시장 노점 8방향",
       "aria": "농부 걷기, 에셋 마켓에 있는 스프라이트 시트",
-      "image": "/market/farmhand-walk-sprites/threejs-factory-v1.sheet.card.png",
-      "imagePath": "public/market/farmhand-walk-sprites/threejs-factory-v1.sheet.card.png",
-      "imageWidth": 576,
-      "imageHeight": 512,
+      "image": "/market/cozy-market-stall-sprites/market-stall.m1.clunk-optimized.sheet.card.png",
+      "imagePath": "public/market/cozy-market-stall-sprites/market-stall.m1.clunk-optimized.sheet.card.png",
+      "imageWidth": 384,
+      "imageHeight": 384,
       "fit": "contain",
-      "caption": "64×64 · 8방향 × 8프레임",
+      "caption": "128×128 · 8방향",
       "numbers": {
-        "cell": 64,
+        "cell": 128,
         "directions": 8,
-        "frames": 8
+        "frames": null
       }
     },
     "spine": {
-      "slug": "hf-player-farmhand",
-      "name": "밀짚모자 농부",
+      "slug": "folk-farmer-tomas",
+      "name": "농부 토마스",
       "aria": "밀짚모자 농부, 에셋 마켓에 있는 본 애니메이션 캐릭터",
-      "image": "/market/hf-player-farmhand/hero-hf-player-farmhand.png",
-      "imagePath": "public/market/hf-player-farmhand/hero-hf-player-farmhand.png",
+      "image": "/market/folk-farmer-tomas/hero-folk-farmer-tomas.png",
+      "imagePath": "public/market/folk-farmer-tomas/hero-folk-farmer-tomas.png",
       "imageWidth": 1024,
       "imageHeight": 1024,
       "fit": "contain",
-      "caption": "동작 6개 · 움직이는 부품 16개",
+      "caption": "동작 8개 · 움직이는 부품 55개",
       "numbers": {
-        "clips": 6,
-        "parts": 16
+        "clips": 8,
+        "parts": 55
       }
     },
     "motion": {
@@ -191,10 +191,10 @@
       "imageWidth": 1600,
       "imageHeight": 1200,
       "fit": "contain",
-      "caption": "폴리곤 58,156개 · 재질 8개 · 동작 2개",
+      "caption": "폴리곤 59,232개 · 재질 8개 · 동작 2개",
       "numbers": {
         "path": "public/landing/tractor.compact.m1.glb",
-        "triangles": 58156,
+        "triangles": 59232,
         "materials": 8,
         "clips": 2
       }

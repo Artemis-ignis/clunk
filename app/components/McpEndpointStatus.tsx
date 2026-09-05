@@ -25,11 +25,15 @@ const STATE_COPY: Record<EndpointState, { label: string; detail: string }> = {
 };
 
 /** 브라우저에서 바로 도구를 등록하는 경로. 예전에는 UNAVAILABLE 같은
- *  내부 상태 이름을 그대로 화면에 찍었습니다. */
+ *  내부 상태 이름을 그대로 화면에 찍었습니다.
+ *
+ *  2026-09-05 점검 M10: 칸 이름이 "브라우저에서 바로 연결"인데 바로 옆 상태가
+ *  "이 브라우저에서는 쓸 수 없습니다"라 한 줄이 스스로를 부정했습니다. 이름은 무엇에
+ *  대한 칸인지만 말하고, 되는지 안 되는지는 상태 한 줄이 말합니다. */
 const WEBMCP_COPY: Record<WebMcpState, string> = {
   checking: "확인 중",
   registered: "이 브라우저에서 바로 쓸 수 있습니다",
-  unavailable: "이 브라우저에서는 쓸 수 없습니다",
+  unavailable: "이 브라우저에서는 아직 쓸 수 없습니다",
   error: "등록하지 못했습니다",
 };
 
@@ -100,7 +104,7 @@ export function McpEndpointStatus() {
           <code>{endpoint}</code>
           <CopyCodeButton value={endpoint} />
         </div>
-        <div data-webmcp-status={webmcpState}><span>브라우저에서 바로 연결</span><code>{WEBMCP_COPY[webmcpState]}</code></div>
+        <div data-webmcp-status={webmcpState}><span>브라우저 안 도구</span><code>{WEBMCP_COPY[webmcpState]}</code></div>
       </div>
       {/* 예전에는 UNAVAILABLE_OVER_HTTP 같은 내부 값을 칸마다 찍었습니다.
           사람이 알아야 하는 것은 아래 한 문장뿐입니다. */}

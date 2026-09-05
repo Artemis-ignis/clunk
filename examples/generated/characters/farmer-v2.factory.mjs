@@ -696,12 +696,12 @@ export default function createFarmerV2(THREE) {
     const a = swell(t / d);
     r.hips([0, -0.030 * a, -0.012 * a]);
     r.euler("Hips", -4 * a, 0, 0);
-    r.euler("Spine", 9 * a, -4 * a, 0);
-    r.euler("Chest", 7 * a, -3 * a, 0);
-    r.euler("Neck", 6 * a, 0, 0);
-    r.euler("Head", 12 * a, -3 * a, 0);
-    r.euler("UpperArm_R", -30 * a, -6 * a, 4 * a);
-    r.euler("Forearm_R", -62 * a, 0, -8 * a);
+    r.euler("Spine", 13 * a, -5 * a, 0);
+    r.euler("Chest", 9 * a, -4 * a, 0);
+    r.euler("Neck", 7 * a, 0, 0);
+    r.euler("Head", 16 * a, -3 * a, 0);
+    r.euler("UpperArm_R", -42 * a, -11 * a, 5 * a);
+    r.euler("Forearm_R", -48 * a, 0, -8 * a);
     r.euler("Hand_R", -14 * a, 0, 8 * a);
     r.euler("UpperArm_L", -8 * a, 0, 2 * a);
     r.euler("Forearm_L", -12 * a, 0, 0);

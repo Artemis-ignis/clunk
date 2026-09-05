@@ -15,6 +15,19 @@ test("health route reports core runtime and optional capability states without s
   assert.match(route, /getBillingStatus/);
   assert.match(route, /missing/);
   assert.doesNotMatch(route, /SECRET_KEY|CLIENT_SECRET|API_KEY/);
+
+  // 2026-09-05 점검 C4: 설정 상세(제공자·OAuth·결제의 requiredEnvironment 와 missing)가
+  // 인증 없이 나갔다. 공개 응답은 살아 있는지만 답하고, 그 상세는 작업공간과 같은 문
+  // (세션) 또는 Clunk 연결 키 뒤로 옮겼다. 두 문 가운데 하나라도 사라지면 실패한다.
+  assert.match(route, /getCurrentUser/, "설정 상세가 세션 확인 없이 나갑니다");
+  assert.match(route, /requireMcpApiKey/, "연결 키로 읽는 길이 사라졌습니다");
+  // 공개 응답에 실리는 것: 살아 있는지(ok·status·runtime), 무엇을 답한 것인지(schema),
+  // 언제인지. 환경변수 이름과 비어 있는 자리 목록은 여기 없다.
+  const publicBody = route.slice(route.indexOf("const base = {"), route.indexOf("if (!(await isOperator"));
+  for (const field of ["ok", "schema", "status", "checkedAt", "runtime"]) {
+    assert.match(publicBody, new RegExp(`${field}`), `공개 응답에서 ${field} 가 빠졌습니다`);
+  }
+  assert.doesNotMatch(publicBody, /capabilities|providers|billing|oauth/, "공개 응답에 설정 상세가 돌아왔습니다");
 });
 
 test("Cloudflare worker applies the deployment security header contract", async () => {

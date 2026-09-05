@@ -37,7 +37,7 @@ export function GET(request: Request) {
       apiKey:
         "Bearer clunk_live_… on POST /api/mcp. Issue one at https://clunk.games/agents. Needed for the tools that generate or inspect; browsing and B-grade downloads are not.",
       workspace: "session cookie; every workspace-scoped route requires it and same-origin",
-      note: "An agent can also run the local MCP server (integrations/mcp/server.ts) over stdio, which reads and writes files on the machine it runs on — that path takes a local file path where the HTTP one takes bytes.",
+      note: "An agent can also run the local MCP server over stdio, which reads and writes files on the machine it runs on — that path takes a local file path where the HTTP one takes bytes.",
     },
 
     endpoints: {

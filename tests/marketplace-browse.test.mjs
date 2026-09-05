@@ -65,18 +65,25 @@ test("한 벌로 파는 것은 목록의 탭이 아니라 자기 화면으로 �
   assert.match(catalog, /window\.location\.replace\(legacyTarget\)/u, "옮겨 가는 동작이 없다");
 });
 
-test("거르는 자리는 분류·테마·이용 조건 셋이고, 적힌 수는 격자와 같은 계산에서 나온다", async () => {
+test("거르는 자리는 분류·움직임·테마·이용 조건이고, 적힌 수는 격자와 같은 계산에서 나온다", async () => {
   const catalog = await source("app/components/MarketplaceCatalog.tsx");
 
   assert.match(catalog, /title="분류"/u, "분류로 거르는 자리가 없다");
+  assert.match(catalog, /title="움직임"/u, "움직임으로 거르는 자리가 없다");
   assert.match(catalog, /title="테마"/u, "테마로 거르는 자리가 없다");
   assert.match(catalog, /title="이용 조건"/u, "이용 조건으로 거르는 자리가 없다");
   assert.match(catalog, /<aside className=\{styles\.side\}/u, "거르는 자리가 왼쪽에 서지 않는다");
 
   // 분류는 파일을 보고 가른다(listingFamily). 키트는 여기 없다.
-  for (const label of ["전체", "3D 모델", "2D 스프라이트", "움직임 있음"]) {
+  //
+  // 2026-09-05 점검 M5: "2D 스프라이트 8" 로 세던 8개는 전부 텍스처였고(홈은 같은 것을
+  // 텍스처라 부른다), "3D 모델 47" 은 움직이는 3D 17개를 뺀 수라 GLB 64개 가운데 47개만
+  // 보였다. 움직임은 갈래가 아니라 갈래와 겹쳐 거는 조건이 되었다.
+  for (const label of ["전체", "3D 모델", "텍스처", "2D 스프라이트"]) {
     assert.ok(catalog.includes(`label: "${label}"`), `분류에 "${label}" 이 없다`);
   }
+  assert.ok(catalog.includes('label: "움직임 있음"'), "움직임 줄이 없다");
+  assert.match(catalog, /if \(next\.motion === "yes" && !hasMovement\(listing\)\)/u, "움직임이 갈래와 따로 걸리지 않는다");
 
   // 테마는 목록에서 세운 키트에서 나온다. 이름을 표에 적어 두면 키트가 늘 때마다 화면을
   // 고쳐야 하고, 고치지 않으면 새 키트가 조용히 사라진다.
