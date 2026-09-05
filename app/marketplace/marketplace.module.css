@@ -85,136 +85,175 @@
   color: var(--v5-cyan);
 }
 
-/* ---------------------------------------------------------------- hero */
+/* ------------------------------------------------------------- browse head
 
-.hero {
+   둘러보는 화면의 머리글은 세 줄이다. 예전 이 자리에는 진열장 그림 한 장과 원칙 네 줄이
+   있었고, 1920×1080 에서 격자의 윗변이 화면 밖(y≈1290)에 있었다 — 에셋을 보러 온 사람이
+   스크롤을 해야 에셋을 만났다. 지금은 머리글이 제 몫만 쓰고 곧바로 목록이 선다. */
+
+.browseHead {
   display: grid;
-  align-content: center;
-  padding: clamp(124px, 15vh, 168px) 0 clamp(40px, 6vw, 64px);
+  align-content: start;
 }
 
-.heroGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr);
-  gap: clamp(28px, 4vw, 64px);
-  align-items: center;
-}
-
-.hero h1 {
-  margin: 20px 0 0;
-  font-size: clamp(2.2rem, 4.6vw, 3.4rem);
+.browseHead h1 {
+  margin: 14px 0 0;
   font-weight: 860;
   letter-spacing: -0.04em;
   line-height: 1.14;
   text-wrap: balance;
 }
 
-.hero h1 em {
-  font-style: normal;
-  background: var(--v5-grad);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.heroLede {
-  margin: 18px 0 0;
-  max-width: 520px;
+.browseLede {
+  margin: 12px 0 0;
+  max-width: 720px;
   color: var(--v5-ink-dim);
-  font-size: clamp(0.98rem, 1.3vw, 1.08rem);
-  line-height: 1.72;
+  font-size: clamp(0.94rem, 1.15vw, 1.02rem);
+  line-height: 1.68;
 }
 
-.heroActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 30px;
-}
-
-/* right-hand market panel — same construction as the landing hero panel */
-.heroPanel {
-  position: relative;
-  margin-left: auto;
-  width: min(470px, 100%);
-  border: 1px solid var(--v5-line-strong);
-  border-radius: var(--v5-r-lg);
-  background: linear-gradient(178deg, #131628, #0c0e1a 68%);
-  box-shadow: 0 40px 90px -38px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(124, 93, 250, 0.12), 0 24px 80px -30px rgba(124, 93, 250, 0.35);
-  padding: 18px;
-}
-
-.heroPanelHead {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 2px 4px 14px;
-}
-
-.heroPanelHead span {
-  font-family: var(--v5-label);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
+.browseKits {
+  margin: 6px 0 0;
   color: var(--v5-ink-faint);
+  font-size: 0.86rem;
+  line-height: 1.6;
 }
 
-.heroPanelHead b {
-  color: var(--v5-cyan);
+.browseKits a {
+  color: var(--v5-ink);
+  font-weight: 700;
+  border-bottom: 1px solid var(--v5-line-strong);
+  padding-bottom: 1px;
 }
 
-.heroPanelArt {
-  position: relative;
-  border: 1px solid var(--v5-line);
-  border-radius: 12px;
-  overflow: hidden;
-  background: #191c2e;
-}
-
-.heroPanelArt img {
-  display: block;
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-}
-
-.heroPanelFoot {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  margin-top: 14px;
-  padding: 12px;
-  border: 1px solid var(--v5-line);
-  border-radius: 12px;
-  background: rgba(99, 102, 241, 0.07);
-}
-
-.heroPanelFoot span {
-  font-size: 0.78rem;
-  color: var(--v5-ink-dim);
-}
-
-.heroPanelFoot b {
-  font-family: var(--v5-label);
-  font-size: 0.72rem;
-  color: var(--v5-green);
-  letter-spacing: 0.05em;
-  white-space: nowrap;
+.browseKits a:hover {
+  border-bottom-color: currentColor;
 }
 
 /* ---------------------------------------------------------------- catalog */
 
-.catalogSection {
+/* 머리글과 목록은 한 덩어리다. 사이트 공통 띠(--v5-band, 96px)를 여기에 두면 둘 사이가
+   다른 화면의 '다음 섹션' 만큼 벌어져, 머리글이 목록의 것이 아닌 것처럼 읽힌다. */
+.browseSection {
   display: grid;
   align-content: start;
-  padding: clamp(56px, 8vw, 96px) 0 0;
+  padding: clamp(20px, 2.6vw, 30px) 0 0;
 }
 
 .catalog {
   display: grid;
   gap: 14px;
-  margin-top: clamp(24px, 3.5vw, 38px);
+}
+
+/* 왼쪽에 거르는 자리, 오른쪽에 격자. 왼쪽은 스크롤을 따라오므로 목록 어디에서든 조건을
+   바꿀 수 있다. */
+.browse {
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr);
+  gap: clamp(18px, 2.2vw, 30px);
+  align-items: start;
+}
+
+.browse > * {
+  min-width: 0;
+}
+
+.side {
+  position: sticky;
+  /* 고정 내비(68px) 아래로 한 뼘. */
+  top: 88px;
+  display: grid;
+  gap: 18px;
+  align-content: start;
+  max-height: calc(100vh - 108px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.sideGroup {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+}
+
+.sideHead {
+  margin: 0;
+  color: var(--v5-ink-faint);
+  font-family: var(--v5-label);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.sideList {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sideRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 30px;
+  padding: 4px 9px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: none;
+  color: var(--v5-ink-dim);
+  font-family: var(--v5-font);
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.14s, background 0.14s, border-color 0.14s;
+}
+
+.sideRow b {
+  flex: 0 0 auto;
+  font-family: var(--v5-label);
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--v5-ink-faint);
+}
+
+.sideRow:hover:not(:disabled) {
+  color: var(--v5-ink);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.sideRow:disabled {
+  color: var(--v5-ink-faint);
+  opacity: 0.45;
+  cursor: default;
+}
+
+.sideRowOn {
+  color: var(--v5-ink);
+  border-color: rgba(139, 92, 246, 0.5);
+  background: var(--v5-grad-soft);
+}
+
+.sideRowOn b {
+  color: var(--v5-ink);
+}
+
+.sideNote {
+  margin: 2px 0 0;
+  padding: 4px 9px;
+  color: var(--v5-ink-dim);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.main {
+  display: grid;
+  gap: 12px;
+  align-content: start;
 }
 
 .controls {
@@ -227,6 +266,20 @@
   border-radius: var(--v5-r);
   background: var(--v5-panel);
   backdrop-filter: blur(8px);
+}
+
+/* 목록이 지금 무엇을 몇 개 세우고 있는지. 조건을 바꾸면 이 줄이 먼저 바뀐다. */
+.countLine {
+  /* 한 줄을 통째로 갖는다. 검색·색·정렬과 어깨를 나란히 하면 셋 중 하나처럼 읽히는데,
+     이것은 고르는 것이 아니라 지금 목록이 무엇인지 말하는 줄이다. */
+  flex: 1 1 100%;
+  min-width: 0;
+  font-family: var(--v5-label);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--v5-ink-dim);
+  font-variant-numeric: tabular-nums;
 }
 
 .search {
@@ -263,47 +316,6 @@
   color: var(--v5-ink-faint);
 }
 
-.tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.tab {
-  height: 34px;
-  padding: 0 13px;
-  border: 1px solid var(--v5-line);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--v5-ink-dim);
-  font-family: var(--v5-label);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  cursor: pointer;
-  transition: color 0.16s, border-color 0.16s, background 0.16s;
-}
-
-.tab:hover {
-  color: var(--v5-ink);
-}
-
-.tabOn {
-  color: var(--v5-ink);
-  border-color: rgba(139, 92, 246, 0.5);
-  background: var(--v5-grad-soft);
-}
-
-.count {
-  margin-left: auto;
-  font-family: var(--v5-label);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--v5-ink-faint);
-  white-space: nowrap;
-}
-
 /* image-forward listing grid — mirrors the landing showcase cards */
 .grid {
   display: grid;
@@ -311,15 +323,56 @@
   gap: 14px;
 }
 
+/* 카드는 <article> 이고, 그 안의 큰 링크 하나가 그림과 본문을 덮는다. 부품 카드에는
+   키트로 가는 작은 링크가 하나 더 붙는데, 링크 안의 링크는 성립하지 않는 마크업이라
+   둘을 형제로 놓는다. */
 .card {
   display: flex;
   flex-direction: column;
-  text-decoration: none;
   border: 1px solid var(--v5-line);
   border-radius: var(--v5-r);
   overflow: hidden;
   background: #14172a;
   transition: transform 0.22s, border-color 0.22s, box-shadow 0.22s;
+}
+
+.cardMain {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+}
+
+/* 부품 카드의 마지막 줄. 이 상품이 어느 한 벌에 속하는지 말하고, 그 한 벌로 데려간다.
+   칠은 키트 딱지와 같은 것이라 대비도 같다(#e7e2ff / #151329, 14.45:1). */
+.cardKitRow {
+  display: flex;
+  margin-top: -6px;
+  padding: 0 14px 12px;
+}
+
+.cardKitChip {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #151329;
+  color: #e7e2ff;
+  font-family: var(--v5-label);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 0 0 1px rgba(231, 226, 255, 0.22);
+}
+
+.cardKitChip:hover,
+.cardKitChip:focus-visible {
+  box-shadow: 0 0 0 1px rgba(231, 226, 255, 0.55);
 }
 
 .card:hover {
@@ -1286,15 +1339,55 @@
 
 /* ---------------------------------------------------------------- responsive */
 
+/* 900px 아래에서는 거르는 자리가 격자 위의 가로 칩 줄이 된다. 세로로 쌓으면 조건 열몇
+   줄이 화면을 채우고 정작 에셋은 그 아래로 밀려난다. */
+@media (max-width: 900px) {
+  .browse {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .side {
+    position: static;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 14px;
+    max-height: none;
+    overflow-x: auto;
+    padding: 0 0 4px;
+  }
+
+  .sideGroup {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 0 0 auto;
+  }
+
+  .sideHead {
+    white-space: nowrap;
+  }
+
+  .sideList {
+    display: flex;
+    gap: 6px;
+  }
+
+  .sideRow {
+    width: auto;
+    border-color: var(--v5-line);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.03);
+    white-space: nowrap;
+  }
+
+  .sideNote {
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+  }
+}
+
 @media (max-width: 1080px) {
-  .heroGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .heroPanel {
-    margin-inline: auto;
-  }
-
   .detailHero {
     grid-template-columns: 1fr;
   }
@@ -1313,10 +1406,6 @@
 }
 
 @media (max-width: 640px) {
-  .hero {
-    padding-top: 112px;
-  }
-
   .grid {
     grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
     gap: 10px;
@@ -1328,10 +1417,6 @@
 
   .policyGrid {
     grid-template-columns: 1fr;
-  }
-
-  .count {
-    margin-left: 0;
   }
 
   .fileRow {
@@ -2335,8 +2420,8 @@
 .gradeBadge[data-grade="A"] { --grade-ink: #c084fc; }
 .gradeBadge[data-grade="B"] { --grade-ink: #5eead4; }
 @media (prefers-reduced-motion: reduce) { .card:hover { transform: none; } }
-/* 마켓 첫 화면의 진열 판과 상세의 판들도 같은 캐비닛이다. */
-.heroPanel, .detailSection, .detailBuy, .evidenceCard, .variantRow {
+/* 상세 화면의 판들도 같은 캐비닛이다. */
+.detailSection, .detailBuy, .evidenceCard, .variantRow {
   border-color: rgba(255, 255, 255, 0.12);
   background: linear-gradient(180deg, #26282c 0%, #1d1f22 60%, #17181b 100%);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 30px 70px -40px rgba(0, 0, 0, 0.95);

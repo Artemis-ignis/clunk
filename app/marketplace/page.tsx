@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "../components/NativeLink";
 import { Icon } from "../components/Icon";
 import { SiteShell } from "../components/SiteShell";
@@ -14,16 +13,21 @@ export const dynamic = "force-dynamic";
 
 export const metadata = createPageMetadata({
   title: "에셋 마켓",
-  // 2026-09-03: 공개 카탈로그는 3D GLB 15개와 2D PNG 텍스처 8개(그리고 각 모델의 스프라이트
-  // 시트 파생본)입니다. "3D 에셋"만 적으면 목록의 3분의 1이 문구에서 사라집니다.
-  description: "Clunk가 직접 만든 가벼운 3D 모델과 이어붙는 2D 텍스처, 그리고 한 벌로 쓰는 키트. 폴리곤 수와 용량은 파일을 열어 측정한 값입니다. 직접 돌려 보고 이어 붙여 본 뒤 받으세요. 로그인만 하면 무료입니다.",
+  // 공개 카탈로그는 3D GLB 와 2D PNG 텍스처(그리고 각 모델의 스프라이트 시트 파생본)입니다.
+  // "3D 에셋"만 적으면 목록의 상당수가 문구에서 사라집니다. 한 벌로 파는 키트는 이 화면이
+  // 아니라 /kits 가 세우므로, 여기서는 그쪽으로 가는 길만 말합니다.
+  description: "Clunk가 직접 만든 가벼운 3D 모델과 이어붙는 2D 텍스처를 한자리에서 둘러봅니다. 폴리곤 수와 용량은 파일을 열어 측정한 값입니다. 모델은 돌려 보고, 텍스처는 이어 붙여 본 뒤 받으세요. 로그인만 하면 무료입니다.",
   path: "/marketplace",
 });
 
 /**
- * Public marketplace — cv5 unified restyle (2026-08-31). Same catalog contract
- * as before (published API rows only, honest empty/error states), rendered in
- * the master-approved cv5 system: deep-navy ground, glass cards, gradient CTAs.
+ * 공개 에셋 마켓 — 둘러보는 화면(2026-09-05).
+ *
+ * 이 화면이 하는 일은 하나다: 지금 받을 수 있는 에셋을 빨리 훑고 좁히는 것. 그래서 머리글은
+ * 한 화면을 차지하지 않고, 왼쪽에 거르는 자리(분류·테마·이용 조건)와 오른쪽에 격자가 곧바로
+ * 선다. 예전 이 자리를 채우던 진열장 그림과 원칙 네 줄은 격자를 화면 아래로 밀어내고 있었다.
+ *
+ * 한 벌로 파는 키트는 여기서 탭 하나가 아니라 자기 화면(/kits, /kit/<id>)을 갖는다(docs/kits.md).
  */
 
 const BUYER_STEPS = (salesOpen: boolean) =>
@@ -43,81 +47,26 @@ export default function MarketplacePage() {
       <div className="cv5-stars" aria-hidden="true" />
       <SiteShell active="marketplace">
         <main className={styles.page}>
-          {/* data-band 는 이 화면이 사이트 공통 세로 리듬(app/site-v5.css 의 --v5-lead /
-              --v5-band)을 쓰겠다고 선언하는 표식입니다. 이 페이지의 여백은 CSS 모듈이
-              따로 갖고 있었고(위 96 · 110 · 64), 그래서 내비 아래 150px · 히어로 아래
-              192px 처럼 사이트의 다른 곳과 안 맞는 빈 띠가 생겼습니다. */}
-          <header className={styles.hero} data-band="hero" data-snap-section="hero">
-            <div className={`cv5-frame ${styles.heroGrid}`}>
-              <div>
-                <span className="cv5-badge">✦ Clunk가 <b>직접 만든 에셋</b></span>
-                <h1>
-                  게임에 바로 넣는
-                  <br />
-                  <em>3D 모델과 2D 텍스처</em>
-                </h1>
-                <p className={styles.heroLede}>
-                  폴리곤 수와 용량은 파일을 열어 측정한 값입니다. 모델은 돌려 보고, 텍스처는 이어 붙여 본 뒤 받으세요.
-                  {salesOpen ? "" : " 로그인만 하면 무료입니다."}
-                </p>
-                <div className={styles.heroActions}>
-                  <Link className="cv5-btn cv5-btn-primary" href="#catalog">
-                    에셋 보기 <Icon name="arrowRight" size={16} />
-                  </Link>
-                  <Link className="cv5-btn cv5-btn-ghost" href="/app" prefetch={false}>
-                    Clunk 제품 사용하기 <Icon name="arrowUpRight" size={16} />
-                  </Link>
-                </div>
-                <div className="cv5-flow" aria-label="공개 마켓 원칙">
-                  <span><b>GLB</b> 즉시 사용</span>
-                  <span><b>3D</b> 미리보기</span>
-                  {/* 키트는 상품 하나가 아니라 한 벌이다. 목록의 키트 탭이 그것을 세우고,
-                      이 자리는 그런 것이 있다는 사실만 말한다(docs/kits.md). */}
-                  <span><b>키트</b> 한 벌씩</span>
-                  <span>{salesOpen ? <><b>구독</b> 전체 열림</> : <><b>로그인</b> 무료</>}</span>
-                </div>
-              </div>
-
-              {/* The window of a shop shows what the shop sells. This is the real
-                  render of a listing on this page, with that listing's own price
-                  and measured triangle count — not a sample from elsewhere. */}
-              <div aria-hidden="true">
-                <div className={styles.heroPanel}>
-                  <div className={styles.heroPanelHead}>
-                    <span>시장 노점</span>
-                    <span>GLB · 215 KB</span>
-                  </div>
-                  <div className={styles.heroPanelArt}>
-                    <Image
-                      src="/api/marketplace/assets/asset-w1-cozy-market-stall?file=preview-cozy-market-stall.webp&preview=1"
-                      alt=""
-                      width={720}
-                      height={520}
-                      unoptimized
-                      priority
-                    />
-                  </div>
-                  <div className={styles.heroPanelFoot}>
-                    {/* cozy-market-stall, as app/data/listing-facts.json measured it. The draw
-                        call this line used to state is an engine word a shopper cannot act on;
-                        the material count replaced it on every buyer-facing surface. */}
-                    <span>폴리곤 2,456개 · 재질 11개 · 실제 크기 2.44 m</span>
-                    <b>무료</b>
-                  </div>
-                </div>
-              </div>
+          {/* 머리글은 세 줄이다. 여기서 화면을 한 판 쓰면 정작 보러 온 격자가 첫 화면 밖으로
+              밀려난다 — data-band 는 사이트 공통 세로 리듬(app/site-v5.css)의 머리 여백만
+              가져오고, 그 아래는 곧바로 목록이다. */}
+          <header className={styles.browseHead} data-band="hero" data-snap-section="hero">
+            <div className="cv5-frame">
+              <span className="cv5-eyebrow">에셋 마켓</span>
+              <h1>에셋 둘러보기</h1>
+              <p className={styles.browseLede}>
+                폴리곤 수와 용량은 파일을 열어 측정한 값입니다. 모델은 돌려 보고, 텍스처는 이어 붙여 본 뒤 받으세요.
+                {salesOpen ? "" : " 로그인만 하면 무료입니다."}
+              </p>
+              {/* 키트는 이 목록의 탭이 아니라 자기 화면을 갖는다. 여기서는 그 길만 말한다. */}
+              <p className={styles.browseKits}>
+                한 장면을 통째로 꾸미려면 <Link href="/kits">키트</Link>에서 한 벌씩 보실 수 있습니다.
+              </p>
             </div>
           </header>
 
-          <section id="catalog" className={styles.catalogSection} data-band="section" data-snap-section="catalog" aria-labelledby="marketplace-catalog-heading">
+          <section id="catalog" className={styles.browseSection} data-snap-section="catalog" aria-label="에셋 목록">
             <div className="cv5-frame">
-              <div className={styles.sectionHead}>
-                <span className="cv5-eyebrow">에셋 목록</span>
-                <h2 id="marketplace-catalog-heading">
-                  지금 받을 수 있는 <em>에셋</em>
-                </h2>
-                <p>폴리곤 수와 파일 크기, 라이선스(어디까지 써도 되는지)를 상품마다 적어 두었습니다. 한 장면을 통째로 꾸미려면 목록 위의 “키트” 탭에서 한 벌씩 보실 수 있습니다.</p>
-              </div>
               <MarketplaceCatalog salesOpen={salesOpen} />
             </div>
           </section>

@@ -27,7 +27,6 @@ import {
   kitOfPart,
   kitOfProduct,
   kitsFrom,
-  type Kit,
 } from "./catalog-facts";
 import { useProductWebMcp } from "../webmcp/useProductWebMcp";
 
@@ -92,7 +91,7 @@ type ListingClip = { name: string; label: string; fps: number; tracks: Array<{ n
 /** A listing the shop found by comparing measured colour, not by matching a tag. */
 type ColourMatch = { slug: string; title: string; distance: number; palette: Array<{ hex: string; share: number }> };
 
-type CatalogFilter = "all" | "kit" | "2d" | "3d" | "motion";
+type CatalogFilter = "all" | "2d" | "3d" | "motion";
 type CatalogSort = "newest" | "name" | "size-asc";
 type CatalogState = "loading" | "ready" | "error";
 type CheckoutState = { status?: string; configured?: boolean; provider?: string | null };
@@ -238,18 +237,57 @@ type DetailPayload = { ok?: boolean; error?: string; listing?: DetailListing; ch
 const CATALOG_SORTS = new Set<string>(["newest", "name", "size-asc"]);
 
 /**
- * 목록을 거르는 탭.
+ * 왼쪽에서 목록을 거르는 분류. 무엇을 파는지가 아니라 어떤 파일인지로 가른다
+ * (listingFamily — 상품이 실제로 내주는 파일을 보고 정한다).
  *
- * "키트"는 다른 셋과 성격이 다르다 — 나머지는 상품을 거르지만 키트 탭은 상품 대신
- * 키트를 세운다(docs/kits.md). 그래서 카드 격자 자체가 바뀐다.
+ * 키트는 여기 없다. 한 벌로 파는 것은 상품 하나가 아니라 한 벌이라 자기 화면을 갖는다
+ * (/kits, /kit/<id> — docs/kits.md). 목록에서는 테마로 좁혀 볼 수 있다.
  */
 const CATALOG_FILTERS: readonly { id: CatalogFilter; label: string }[] = [
   { id: "all", label: "전체" },
-  { id: "kit", label: "키트" },
   { id: "3d", label: "3D 모델" },
   { id: "2d", label: "2D 스프라이트" },
   { id: "motion", label: "움직임 있음" },
 ];
+
+/** 테마를 고르지 않은 상태. 주소의 기본값이기도 하다. */
+const THEME_ALL = "all";
+/** 어느 키트에도 속하지 않는 상품이 모이는 자리. */
+const THEME_NONE = "none";
+
+/** 주소에 실려도 되는 값인지. 키트 식별자와 테마 값이 같은 꼴을 쓴다. */
+const SLUGLIKE = /^[a-z0-9][a-z0-9-]{0,95}$/i;
+
+/**
+ * 키트를 목록의 탭으로 보던 옛 주소를 새 화면으로 보낸다.
+ *
+ * `?cat=kit` 은 키트 목록이었고 지금은 /kits 가, `?kit=<id>` 는 한 키트만 펼친 목록이었고
+ * 지금은 /kit/<id> 가 그 일을 한다. 링크를 받은 사람이 빈 목록을 보는 일이 없도록 이 화면이
+ * 직접 옮겨 준다.
+ */
+function legacyKitTarget(params: URLSearchParams): string {
+  const kit = params.get("kit") ?? "";
+  if (SLUGLIKE.test(kit)) return `/kit/${encodeURIComponent(kit)}`;
+  if (params.get("cat") === "kit") return "/kits";
+  return "";
+}
+
+/**
+ * 사이드바와 카드에 적는 키트 이름.
+ *
+ * 새 키트의 이름은 합본 상품의 제목이고, 그 제목에는 부품 수가 괄호로 붙어 있다
+ * ("마을 광장 키트 (부품 15종)"). 이 화면은 부품 수를 스스로 세므로 괄호를 그대로 두면
+ * 한 줄에 두 개의 수가 서로 다른 것을 가리키게 된다.
+ */
+function kitShortName(name: string): string {
+  return name.replace(/\s*\([^()]*\)\s*$/u, "").trim() || name;
+}
+
+/** 사이드바 한 줄. 세어 둔 수는 그 줄을 골랐을 때 격자에 서는 카드 수와 같다. */
+type FacetRow = { id: string; label: string; count: number };
+
+/** 지금 걸려 있는 조건. 사이드바의 수도, 격자도 같은 하나를 본다. */
+type Facets = { filter: CatalogFilter; theme: string; access: "all" | "free"; query: string };
 
 /**
  * `salesOpen` 은 서버가 알려 준다(app/api/_lib/sales-lock.areSalesOpen). 지금은 판매가
@@ -279,35 +317,47 @@ export function MarketplaceCatalog({ salesOpen = false }: { salesOpen?: boolean 
     const value = initial.get("colour") ?? "";
     return /^#[0-9a-f]{6}$/i.test(value) ? value.toLowerCase() : "";
   });
-  // 한 키트만 펼쳐 보는 자리. 합쳐 파는 상품이 있는 키트는 그 상품 페이지가 키트 화면이
-  // 되지만, 부품만 파는 키트(하베스트 프론티어)는 열어 볼 상품 페이지가 없다 — 없는
-  // 페이지를 만들지 않고 목록을 그 키트로 좁힌다(docs/kits.md 7절).
-  const [kitFocus, setKitFocus] = useState(() => {
-    const value = initial.get("kit") ?? "";
-    return /^[a-z0-9][a-z0-9-]{0,95}$/i.test(value) ? value : "";
+  // 어느 테마(키트)로 좁혀 볼지. 키트 식별자 그대로이거나, 어느 키트에도 속하지 않는
+  // 상품만 보는 "none" 이다.
+  const [theme, setTheme] = useState(() => {
+    const value = initial.get("theme") ?? "";
+    return SLUGLIKE.test(value) ? value : THEME_ALL;
   });
+  // 로그인만 하면 받는 것만 볼지. 판매가 닫혀 있는 동안에는 전부 그러하므로 거르는 자리를
+  // 걸지 않는다.
+  const [access, setAccess] = useState<"all" | "free">(() => (initial.get("access") === "free" ? "free" : "all"));
+  // 옛 키트 주소로 들어온 방문자. 목록을 그리기 전에 새 화면으로 보낸다.
+  const [legacyTarget] = useState(() => (typeof window === "undefined" ? "" : legacyKitTarget(new URLSearchParams(window.location.search))));
+
+  useEffect(() => {
+    if (!legacyTarget || typeof window === "undefined") return;
+    // replace: 뒤로 가기가 옛 주소로 되돌아가면 다시 여기로 튕겨 나온다.
+    window.location.replace(legacyTarget);
+  }, [legacyTarget]);
 
   // replaceState, not push: a filter is a view of one page, and stacking every keystroke
   // in history turns the back button into an undo log for the search box.
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || legacyTarget) return;
     const params = new URLSearchParams(window.location.search);
     const apply = (key: string, value: string, fallback: string) => {
       if (value === fallback) params.delete(key);
       else params.set(key, value);
     };
     apply("cat", filter, "all");
+    apply("theme", theme, THEME_ALL);
+    apply("access", access, "all");
     apply("sort", sort, "newest");
     apply("q", query.trim(), "");
     apply("colour", colour, "");
-    apply("kit", kitFocus, "");
+    params.delete("kit");
     const search = params.toString();
     window.history.replaceState(
       null,
       "",
       search ? `?${search}${window.location.hash}` : `${window.location.pathname}${window.location.hash}`,
     );
-  }, [filter, sort, query, colour, kitFocus]);
+  }, [access, colour, filter, legacyTarget, query, sort, theme]);
 
   useEffect(() => {
     let active = true;
@@ -338,30 +388,42 @@ export function MarketplaceCatalog({ salesOpen = false }: { salesOpen?: boolean 
   // 목록에서 키트를 세운다. 근거는 상품이 스스로 적어 둔 사실(facts.kit / facts.members)
   // 하나뿐이라, 키트가 새로 들어오면 이 화면은 고치지 않아도 선다(docs/kits.md).
   const kits = useMemo(() => kitsFrom(listings), [listings]);
-  const focusedKit = useMemo(
-    () => (kitFocus ? kits.find((kit) => kit.id === kitFocus) ?? null : null),
-    [kitFocus, kits],
+
+  // 상품 슬러그 → 그 상품이 서 있는 테마. 부품도 합본 상품도 같은 테마에 선다. 근거는
+  // kitsFrom 이 세운 키트 하나뿐이라, 사이드바가 세는 것과 격자가 거르는 것이 갈라질 수 없다.
+  const themeOfSlug = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const kit of kits) {
+      for (const part of kit.parts) map.set(part.slug, kit.id);
+      if (kit.product) map.set(kit.product.slug, kit.id);
+    }
+    return map;
+  }, [kits]);
+
+  const facets: Facets = useMemo(
+    () => ({ filter, theme, access: salesOpen ? access : "all", query }),
+    [access, filter, query, salesOpen, theme],
   );
 
-  const filteredKits = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-    if (!normalizedQuery) return kits;
-    return kits.filter((kit) => `${kit.name} ${kit.themeName}`.toLowerCase().includes(normalizedQuery));
-  }, [kits, query]);
-
-  const filteredListings = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-    // 키트 하나를 펼친 동안에는 그 키트의 부품만 선다. 부품이 아닌 것을 함께 보여 주면
-    // "이 키트의 부품 9개"라고 적어 놓고 열 몇 장을 깔게 된다.
-    const pool = focusedKit ? focusedKit.parts : listings;
-    const matched = pool.filter((listing) => {
+  // 한 상품이 지금 조건에 걸리는지. 격자도 사이드바의 수도 이 함수 하나를 부른다 —
+  // 세는 곳과 거르는 곳이 다른 규칙을 쓰면 사이드바는 언젠가 틀린 수를 적는다.
+  const matchesFacets = useMemo(() => (listing: Listing, next: Facets) => {
+    const normalizedQuery = next.query.trim().toLowerCase();
+    if (normalizedQuery) {
       const searchable = [listing.title, listing.description, listing.entryFileName, listing.format, listing.licenseStatus]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
-      const matchesQuery = !normalizedQuery || searchable.includes(normalizedQuery);
-      return matchesQuery && (focusedKit || filter === "all" || filter === "kit" || listingFamily(listing) === filter);
-    });
+      if (!searchable.includes(normalizedQuery)) return false;
+    }
+    if (next.filter !== "all" && listingFamily(listing) !== next.filter) return false;
+    if (next.theme !== THEME_ALL && (themeOfSlug.get(listing.slug) ?? THEME_NONE) !== next.theme) return false;
+    if (next.access === "free" && !isFreeTier(listing)) return false;
+    return true;
+  }, [themeOfSlug]);
+
+  const filteredListings = useMemo(() => {
+    const matched = listings.filter((listing) => matchesFacets(listing, facets));
     // Picking a colour is itself a sort instruction — the asset carrying most of it should
     // lead — so it overrides whatever the sort select happens to say.
     if (colour) {
@@ -374,7 +436,52 @@ export function MarketplaceCatalog({ salesOpen = false }: { salesOpen?: boolean 
 
       return (a.byteLength ?? 0) - (b.byteLength ?? 0);
     });
-  }, [colour, filter, focusedKit, listings, query, sort]);
+  }, [colour, facets, listings, matchesFacets, sort]);
+
+  // 사이드바에 적히는 수. 그 줄만 바꿔 끼운 조건으로 다시 세므로, 어떤 줄을 골라도 적힌
+  // 수와 격자에 서는 카드 수가 같다.
+  const countFor = useMemo(
+    () => (patch: Partial<Facets>) =>
+      listings.reduce((total, listing) => total + (matchesFacets(listing, { ...facets, ...patch }) ? 1 : 0), 0),
+    [facets, listings, matchesFacets],
+  );
+
+  const familyRows: FacetRow[] = useMemo(
+    () => CATALOG_FILTERS.map((option) => ({ id: option.id, label: option.label, count: countFor({ filter: option.id }) })),
+    [countFor],
+  );
+
+  const themeRows: FacetRow[] = useMemo(() => {
+    const rows: FacetRow[] = [{ id: THEME_ALL, label: "전체", count: countFor({ theme: THEME_ALL }) }];
+    for (const kit of kits) {
+      rows.push({ id: kit.id, label: kitShortName(kit.name), count: countFor({ theme: kit.id }) });
+    }
+    rows.push({ id: THEME_NONE, label: "그 밖", count: countFor({ theme: THEME_NONE }) });
+    return rows;
+  }, [countFor, kits]);
+
+  const accessRows: FacetRow[] = useMemo(
+    () => [
+      { id: "all", label: "전체", count: countFor({ access: "all" }) },
+      { id: "free", label: "무료", count: countFor({ access: "free" }) },
+    ],
+    [countFor],
+  );
+
+  // 이 목록이 한 가지 이용 조건으로만 채워져 있을 때에만 그 말을 적는다. 상품마다 다르면
+  // 목록 머리글이 대표할 수 없으므로 줄째로 뺀다 — 자세한 것은 상품마다 적혀 있다.
+  const licenceNote = useMemo(() => {
+    const values = new Set(listings.map((listing) => (listing.licenseStatus ?? "").trim()).filter(Boolean));
+    return values.size === 1 ? licenseLabel([...values][0]) : null;
+  }, [listings]);
+
+  const resetFacets = () => {
+    setQuery("");
+    setFilter("all");
+    setTheme(THEME_ALL);
+    setAccess("all");
+    setColour("");
+  };
 
   return (
     <div className={styles.catalog} data-testid="marketplace-catalog" data-snap-section="catalog-results">
@@ -383,71 +490,119 @@ export function MarketplaceCatalog({ salesOpen = false }: { salesOpen?: boolean 
       {state === "ready" && catalogCheckout?.status === "PAYMENT_PROVIDER_NOT_CONFIGURED" ? <CheckoutNotice /> : null}
       {state === "ready" && listings.length === 0 ? <CatalogEmpty /> : null}
       {state === "ready" && listings.length > 0 ? (
-        <>
-          <div className={styles.controls} aria-label="공개 에셋 필터">
-            <label className={styles.search}>
-              <Icon name="search" size={16} />
-              <span className="sr-only">에셋 검색</span>
-              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="이름, 형식, 라이선스로 찾기" type="search" />
-            </label>
-            <ColourPicker value={colour} onChange={setColour} />
-            <div className={styles.tabs} role="tablist" aria-label="에셋 패밀리">
-              {CATALOG_FILTERS
-                // 키트가 하나도 서지 않으면 키트 탭도 걸지 않는다. 눌러도 빈 화면이
-                // 나오는 탭은 상점이 스스로에 대해 하는 거짓말이다.
-                .filter((option) => option.id !== "kit" || kits.length > 0)
-                .map((option) => (
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={!focusedKit && filter === option.id}
-                    className={`${styles.tab}${!focusedKit && filter === option.id ? ` ${styles.tabOn}` : ""}`}
-                    key={option.id}
-                    onClick={() => { setFilter(option.id); setKitFocus(""); }}
-                  >
-                    {option.label}
-                  </button>
-                ))}
+        <div className={styles.browse}>
+          {/* 거르는 자리. 적힌 수는 전부 지금 목록에서 다시 센 값이라, 어느 줄을 눌러도
+              적힌 수만큼의 카드가 선다. 900px 아래에서는 격자 위의 가로 칩 줄이 된다. */}
+          <aside className={styles.side} aria-label="에셋 거르기">
+            <FacetGroup title="분류" rows={familyRows} current={filter} onPick={(id) => setFilter(id as CatalogFilter)} />
+            <FacetGroup title="테마" rows={themeRows} current={theme} onPick={setTheme} />
+            {salesOpen ? (
+              <FacetGroup
+                title="이용 조건"
+                rows={accessRows}
+                current={access}
+                onPick={(id) => setAccess(id === "free" ? "free" : "all")}
+              />
+            ) : (
+              /* 판매가 닫혀 있는 동안에는 거를 것이 없다. 고를 수 없는 조건을 걸어 두는 대신
+                 지금 무엇이 되는지를 한 줄로 적는다. */
+              <section className={styles.sideGroup}>
+                <h2 className={styles.sideHead}>이용 조건</h2>
+                <p className={styles.sideNote}>지금은 로그인만 하면 전부 무료</p>
+              </section>
+            )}
+          </aside>
+
+          <div className={styles.main}>
+            <div className={styles.controls} aria-label="공개 에셋 필터">
+              <span className={styles.countLine} aria-live="polite">
+                에셋 {filteredListings.length}개 · GLB·PNG{licenceNote ? ` · ${licenceNote}` : ""}
+              </span>
+              <label className={styles.search}>
+                <Icon name="search" size={16} />
+                <span className="sr-only">에셋 검색</span>
+                <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="이름, 형식, 라이선스로 찾기" type="search" />
+              </label>
+              <ColourPicker value={colour} onChange={setColour} />
+              <label className={styles.sort}>
+                <span className="sr-only">정렬 기준</span>
+                <select value={sort} onChange={(event) => setSort(event.target.value as CatalogSort)}>
+                  <option value="newest">최신순</option>
+                  <option value="name">이름순</option>
+                  <option value="size-asc">파일 작은순</option>
+                </select>
+              </label>
             </div>
-            <label className={styles.sort}>
-              <span className="sr-only">정렬 기준</span>
-              <select value={sort} onChange={(event) => setSort(event.target.value as CatalogSort)}>
-                <option value="newest">최신순</option>
-                <option value="name">이름순</option>
-                <option value="size-asc">파일 작은순</option>
-              </select>
-            </label>
-            <span className={styles.count} aria-live="polite">
-              {focusedKit
-                ? `부품 ${filteredListings.length}개`
-                : filter === "kit"
-                  ? `키트 ${filteredKits.length}개`
-                  : `에셋 ${filteredListings.length}개`}
-            </span>
+            {filteredListings.length === 0 ? <NoResults query={query} onReset={resetFacets} /> : null}
+            {/* 베타(결제 미설정) 상태는 카드에 칠하지 않는다. 예전에는 베타면 모든 카드의
+                접근권 칩이 "무료" 색으로 칠해져, 글자는 "구독자 전용"인데 색은 무료인
+                칩이 스물몇 장 깔렸다 — 두 상태를 색으로 구분할 수 없던 진짜 까닭이다.
+                지금 무엇이 열려 있는지는 위의 CheckoutNotice 가 한 번만 말한다. */}
+            <div className={styles.grid}>
+              {filteredListings.map((listing) => {
+                const kitId = themeOfSlug.get(listing.slug) ?? null;
+                const kit = kitId ? kits.find((row) => row.id === kitId) ?? null : null;
+                return (
+                  <ListingCard
+                    key={listing.id}
+                    listing={listing}
+                    colour={colour}
+                    salesOpen={salesOpen}
+                    kit={kit
+                      ? {
+                          name: kitShortName(kit.name),
+                          href: kit.href,
+                          // 합본 상품은 키트 그 자체다. 그 카드는 키트 화면으로 간다.
+                          product: isKitProduct(listing) || kit.product?.slug === listing.slug,
+                        }
+                      : null}
+                  />
+                );
+              })}
+            </div>
           </div>
-          {/* 키트 하나를 펼친 화면의 머리글. 어느 키트인지, 무엇이 몇 개 들어 있는지,
-              그리고 여기서 나가는 길이 한 자리에 있어야 한다. */}
-          {focusedKit ? <KitFocusHead kit={focusedKit} onClear={() => setKitFocus("")} /> : null}
-          {(focusedKit || filter !== "kit") && filteredListings.length === 0 ? (
-            <NoResults query={query} onReset={() => { setQuery(""); setFilter("all"); setColour(""); setKitFocus(""); }} />
-          ) : null}
-          {!focusedKit && filter === "kit" && filteredKits.length === 0 ? (
-            <NoResults query={query} onReset={() => { setQuery(""); setFilter("all"); setColour(""); setKitFocus(""); }} />
-          ) : null}
-          {/* 베타(결제 미설정) 상태는 카드에 칠하지 않는다. 예전에는 베타면 모든 카드의
-              접근권 칩이 "무료" 색으로 칠해져, 글자는 "구독자 전용"인데 색은 무료인
-              칩이 스물몇 장 깔렸다 — 두 상태를 색으로 구분할 수 없던 진짜 까닭이다.
-              지금 무엇이 열려 있는지는 위의 CheckoutNotice 가 한 번만 말한다. */}
-          <div className={styles.grid}>
-            {!focusedKit && filter === "kit"
-              ? filteredKits.map((kit) => <KitCard key={kit.id} kit={kit} salesOpen={salesOpen} />)
-              : filteredListings.map((listing) => (
-                  <ListingCard key={listing.id} listing={listing} colour={colour} salesOpen={salesOpen} />
-                ))}
-          </div>
-        </>
+        </div>
       ) : null}
     </div>
+  );
+}
+
+/**
+ * 사이드바의 한 무리. 줄마다 이름과 수가 있고, 수는 그 줄을 골랐을 때 격자에 서는
+ * 카드 수다. 하나도 없는 줄은 눌리지 않는다 — 눌러도 빈 화면이 나오는 줄은 목록이
+ * 스스로에 대해 하는 거짓말이다.
+ */
+function FacetGroup({
+  title,
+  rows,
+  current,
+  onPick,
+}: {
+  title: string;
+  rows: readonly FacetRow[];
+  current: string;
+  onPick: (id: string) => void;
+}) {
+  return (
+    <section className={styles.sideGroup}>
+      <h2 className={styles.sideHead}>{title}</h2>
+      <ul className={styles.sideList}>
+        {rows.map((row) => (
+          <li key={row.id}>
+            <button
+              type="button"
+              className={`${styles.sideRow}${current === row.id ? ` ${styles.sideRowOn}` : ""}`}
+              aria-pressed={current === row.id}
+              disabled={row.count === 0 && current !== row.id}
+              onClick={() => onPick(row.id)}
+            >
+              <span>{row.label}</span>
+              <b>{row.count}</b>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
@@ -461,7 +616,18 @@ export function MarketplaceCatalog({ salesOpen = false }: { salesOpen?: boolean 
  * /api/marketplace); a listing with no facts shows its format instead of a guess.
  */
 
-function ListingCard({ listing, colour, salesOpen = false }: { listing: Listing; colour?: string; salesOpen?: boolean }) {
+function ListingCard({
+  listing,
+  colour,
+  salesOpen = false,
+  kit = null,
+}: {
+  listing: Listing;
+  colour?: string;
+  salesOpen?: boolean;
+  /** 이 상품이 서 있는 키트. `product` 면 이 상품이 곧 그 키트다. */
+  kit?: { name: string; href: string; product: boolean } | null;
+}) {
   const previewUrl = getPreviewUrl(listing);
   const cardFree = isFreeTier(listing);
   const grade = cardGrade(listing);
@@ -471,163 +637,96 @@ function ListingCard({ listing, colour, salesOpen = false }: { listing: Listing;
   // 부품 슬러그를 적어 둔 키트 상품이거나, 개수만 적힌 옛 묶음일 때의 그 개수.
   const kitMembers = memberCount(listing.facts?.members ?? null);
 
-  // One card, one link. A grid is for choosing what to open, so the card carries
-  // the picture, the name, the number that decides fit, and whether it can be had —
-  // the buy decision belongs on the page the card opens.
+  // A grid is for choosing what to open, so the card carries the picture, the name, the
+  // number that decides fit, and whether it can be had — the buy decision belongs on the
+  // page the card opens.
+  //
+  // 카드는 링크 하나였다. 부품 카드에 키트로 가는 길을 붙이려면 링크가 둘이 되는데, 링크
+  // 안의 링크는 성립하지 않는 마크업이라(브라우저가 바깥 링크를 잘라 버린다) 카드를
+  // <article> 로 두고 그 안에 큰 링크 하나와 작은 링크 하나를 나란히 놓는다.
   return (
-    <Link className={styles.card} href={`/marketplace/${encodeURIComponent(listing.slug)}`}>
-      <span className={styles.cardArt}>
-        {previewUrl ? (
-          <Image src={previewUrl} alt={`${displayTitle(listing.slug, listing.title)} 미리보기`} width={720} height={540} unoptimized />
-        ) : (
-          <PreviewUnavailable listing={listing} />
-        )}
-        {/* 그림 위에 뜨는 것은 접근권 하나다.
-            2026-09-04 마스터: "무료랑 구독자 전용은 버튼형태로 만들던가 해야지 색감 저따구로
-            하면 어케 보라고 … 그리고 PNG 애들은 뭐냐". 재 보니 맞는 말이었다 —
-            public/market 의 히어로 PNG 30장에서 칩이 앉는 띠(위 5~20%)를 픽셀째 읽어 WCAG
-            대비를 계산했더니, 옛 무료 칩(16% 민트 위의 #34d399 글자)은 밝은 미리보기 위에서
-            1.21:1 이었다. 글자와 배경을 구분할 수 있는 값이 아니다. 지금은 불투명하게 칠해
-            무료 9.76:1 / 구독자 전용 8.24:1 이고, 뒤에 어떤 그림이 오든 그 값이 유지된다.
-            등급과 형식은 카드 본문의 사실줄로 내렸다 — 그림 위에 홀로 뜬 "PNG" 는 무엇을
-            가리키는지 말해 주지 않지만, "PNG · 1024×1024 · 이어붙는 타일" 은 스스로 말한다. */}
-        <span className={styles.cardBadges} aria-hidden="true">
-          {/* Why this card is where it is. Reordering a grid without saying what reordered
-              it reads as the shop shuffling itself. Only here while a colour is picked. */}
-          {colourShare !== null ? (
-            <span className={styles.colourBadge}>이 색 {Math.round(colourShare * 100)}%</span>
+    <article className={styles.card}>
+      <Link className={styles.cardMain} href={kit?.product ? kit.href : `/marketplace/${encodeURIComponent(listing.slug)}`}>
+        <span className={styles.cardArt}>
+          {previewUrl ? (
+            <Image src={previewUrl} alt={`${displayTitle(listing.slug, listing.title)} 미리보기`} width={720} height={540} unoptimized />
+          ) : (
+            <PreviewUnavailable listing={listing} />
+          )}
+          {/* 그림 위에 뜨는 것은 접근권 하나다.
+              2026-09-04 마스터: "무료랑 구독자 전용은 버튼형태로 만들던가 해야지 색감 저따구로
+              하면 어케 보라고 … 그리고 PNG 애들은 뭐냐". 측정해 보니 맞는 말이었다 —
+              public/market 의 히어로 PNG 30장에서 칩이 앉는 띠(위 5~20%)를 픽셀째 읽어 WCAG
+              대비를 계산했더니, 옛 무료 칩(16% 민트 위의 #34d399 글자)은 밝은 미리보기 위에서
+              1.21:1 이었다. 글자와 배경을 구분할 수 있는 값이 아니다. 지금은 불투명하게 칠해
+              무료 9.76:1 / 구독자 전용 8.24:1 이고, 뒤에 어떤 그림이 오든 그 값이 유지된다.
+              등급과 형식은 카드 본문의 사실줄로 내렸다 — 그림 위에 홀로 뜬 "PNG" 는 무엇을
+              가리키는지 말해 주지 않지만, "PNG · 1024×1024 · 이어붙는 타일" 은 스스로 말한다. */}
+          <span className={styles.cardBadges} aria-hidden="true">
+            {/* Why this card is where it is. Reordering a grid without saying what reordered
+                it reads as the shop shuffling itself. Only here while a colour is picked. */}
+            {colourShare !== null ? (
+              <span className={styles.colourBadge}>이 색 {Math.round(colourShare * 100)}%</span>
+            ) : null}
+            {/* 이 상품이 곧 한 벌일 때. 낱개 카드와 한 벌 카드가 같은 격자에 서므로, 어느
+                쪽인지는 그림 위에서 바로 읽혀야 한다(docs/kits.md). */}
+            {kit?.product ? <span className={styles.kitBadge}>키트</span> : null}
+            {/* 판매가 열리기 전에는 유료 등급도 로그인만 하면 받는다. 그 사실을 숨기고
+                "구독자 전용" 이라고만 적으면, 눌러서 받아지는 순간 라벨이 거짓이 된다. */}
+            <span className={`${styles.accessBadge} ${cardFree || !salesOpen ? styles.accessFree : styles.accessSub}`}>
+              {cardFree ? "무료" : salesOpen ? "구독자 전용" : "베타 무료"}
+            </span>
+          </span>
+        </span>
+        <span className={styles.cardBody}>
+          <span className={styles.cardTitle}>{displayTitle(listing.slug, listing.title)}</span>
+          <span className={styles.cardSpec}>
+            {/* 등급은 값이 아니라 크기와 동작을 보고 매기는 분류다(catalog-facts.GRADE_RULE).
+                그림 위에 홀로 뜬 낱글자 "S" 는 무엇의 S 인지 말하지 않아 여기서 "S 등급" 으로
+                적는다. 카드 본문은 불투명해서 대비가 그림에 좌우되지 않는다 — 가장 나쁜
+                등급색(A, #c084fc)이 6.01:1(돌고 있는 화면에서 다시 측정하면 6.03:1)이고,
+                그림 위에서는 밝은 미리보기를 만나면 3.15:1 까지 떨어졌다. */}
+            <span className={styles.gradeBadge} data-grade={grade}>{grade} 등급</span>
+            {/* 형식과 측정값은 한 줄이다. "PNG" 만 따로 떠 있으면 무엇을 가리키는 말인지 알 수
+                없지만, 측정값 앞에 붙으면 그 값이 무엇의 값인지를 형식이 말해 준다. */}
+            <span>{spec ? `${formatLabel(listing)} · ${spec}` : formatLabel(listing)}</span>
+            {/* Only when the file itself carries a clip or a named hinge, and it says how many
+                of each. Never read off a title, so a card cannot promise motion the download
+                does not have.
+
+                The generative-AI label used to sit here too. It is a legal disclosure, not a
+                feature, and every card carrying it made the grid read as a row of stickers;
+                it now appears once on the product page, under the facts. */}
+            {motion ? <span className={styles.motionChip}>{motion}</span> : null}
+          </span>
+          {/* 이 상품이 키트라면 몇 개가 들어 있는지가 카드에서 가장 먼저 읽혀야 하는
+              사실이다 — 낱개와 값이 같은 자리에 놓이기 때문이다(docs/kits.md). */}
+          {kitMembers ? <span className={styles.cardIncluded}>부품 {kitMembers}개 묶음</span> : null}
+          {/* The 2D sheets baked from this model come with it. Saying so on the card is what
+              makes the grid honest after the sheets stopped being cards of their own. */}
+          {listing.variants?.length ? (
+            <span className={styles.cardIncluded}>스프라이트 시트 {listing.variants.length}종 포함</span>
           ) : null}
-          {/* 판매가 열리기 전에는 유료 등급도 로그인만 하면 받는다. 그 사실을 숨기고
-              "구독자 전용" 이라고만 적으면, 눌러서 받아지는 순간 라벨이 거짓이 된다. */}
-          <span className={`${styles.accessBadge} ${cardFree || !salesOpen ? styles.accessFree : styles.accessSub}`}>
-            {cardFree ? "무료" : salesOpen ? "구독자 전용" : "베타 무료"}
-          </span>
+          {/* The asset's own colours, in proportion. Scanning a grid for something that fits
+              an existing scene is most of what browsing a shop is, and a thumbnail buried in
+              a shadowed render does not answer it. */}
+          {listing.palette?.length ? (
+            <span className={styles.cardPalette} aria-hidden="true">
+              {listing.palette.map((entry) => (
+                <span key={entry.hex} style={{ background: entry.hex, flexGrow: Math.max(entry.share, 0.02) }} />
+              ))}
+            </span>
+          ) : null}
         </span>
-      </span>
-      <span className={styles.cardBody}>
-        <span className={styles.cardTitle}>{displayTitle(listing.slug, listing.title)}</span>
-        <span className={styles.cardSpec}>
-          {/* 등급은 값이 아니라 크기와 동작을 보고 매기는 분류다(catalog-facts.GRADE_RULE).
-              그림 위에 홀로 뜬 낱글자 "S" 는 무엇의 S 인지 말하지 않아 여기서 "S 등급" 으로
-              적는다. 카드 본문은 불투명해서 대비가 그림에 좌우되지 않는다 — 가장 나쁜
-              등급색(A, #c084fc)이 6.01:1(돌고 있는 화면에서 다시 측정하면 6.03:1)이고,
-              그림 위에서는 밝은 미리보기를 만나면 3.15:1 까지 떨어졌다. */}
-          <span className={styles.gradeBadge} data-grade={grade}>{grade} 등급</span>
-          {/* 형식과 측정값은 한 줄이다. "PNG" 만 따로 떠 있으면 무엇을 가리키는 말인지 알 수
-              없지만, 측정값 앞에 붙으면 그 값이 무엇의 값인지를 형식이 말해 준다. */}
-          <span>{spec ? `${formatLabel(listing)} · ${spec}` : formatLabel(listing)}</span>
-          {/* Only when the file itself carries a clip or a named hinge, and it says how many
-              of each. Never read off a title, so a card cannot promise motion the download
-              does not have.
-
-              The generative-AI label used to sit here too. It is a legal disclosure, not a
-              feature, and every card carrying it made the grid read as a row of stickers;
-              it now appears once on the product page, under the facts. */}
-          {motion ? <span className={styles.motionChip}>{motion}</span> : null}
+      </Link>
+      {/* 부품이 어느 한 벌에 속하는지, 그리고 그 한 벌로 가는 길. 카드를 여는 링크와 나란히
+          놓인 별개의 링크라 서로를 삼키지 않는다. */}
+      {kit && !kit.product ? (
+        <span className={styles.cardKitRow}>
+          <Link className={styles.cardKitChip} href={kit.href}>{kit.name}</Link>
         </span>
-        {/* 이 상품이 키트라면 몇 개가 들어 있는지가 카드에서 가장 먼저 읽혀야 하는
-            사실이다 — 낱개와 값이 같은 자리에 놓이기 때문이다(docs/kits.md). */}
-        {kitMembers ? <span className={styles.cardIncluded}>부품 {kitMembers}개 묶음</span> : null}
-        {/* The 2D sheets baked from this model come with it. Saying so on the card is what
-            makes the grid honest after the sheets stopped being cards of their own. */}
-        {listing.variants?.length ? (
-          <span className={styles.cardIncluded}>스프라이트 시트 {listing.variants.length}종 포함</span>
-        ) : null}
-        {/* The asset's own colours, in proportion. Scanning a grid for something that fits
-            an existing scene is most of what browsing a shop is, and a thumbnail buried in
-            a shadowed render does not answer it. */}
-        {listing.palette?.length ? (
-          <span className={styles.cardPalette} aria-hidden="true">
-            {listing.palette.map((entry) => (
-              <span key={entry.hex} style={{ background: entry.hex, flexGrow: Math.max(entry.share, 0.02) }} />
-            ))}
-          </span>
-        ) : null}
-      </span>
-    </Link>
-  );
-}
-
-/**
- * 키트 한 장. 상품 카드와 같은 틀을 쓰되 읽히는 사실이 다르다 — 낱개는 "이 파일이
- * 얼마나 무거운가"를 묻고, 키트는 "무엇이 몇 개 들어 있고 서로 어울리는가"를 묻는다.
- *
- * 등급은 합친 파일의 등급이 아니라 가장 높은 부품의 등급이다(docs/kits.md 5절). 부품
- * 여섯 개가 전부 B 인 키트를 S 로 적으면 사는 사람이 S 급 물건을 기대하게 된다.
- */
-function KitCard({ kit, salesOpen = false }: { kit: Kit<Listing>; salesOpen?: boolean }) {
-  return (
-    <Link className={styles.card} href={kit.href} data-kit={kit.id}>
-      <span className={styles.cardArt}>
-        {kit.heroUrl ? (
-          <Image src={kit.heroUrl} alt={`${kit.name} 미리보기`} width={720} height={540} unoptimized />
-        ) : (
-          <span className={styles.previewUnavailable} role="img" aria-label={`${kit.name} 미리보기 없음`}>
-            <span>미리보기 이미지 없음</span>
-            <strong>{kit.name}</strong>
-          </span>
-        )}
-        <span className={styles.cardBadges} aria-hidden="true">
-          <span className={styles.kitBadge}>키트</span>
-          <span className={`${styles.accessBadge} ${kit.free || !salesOpen ? styles.accessFree : styles.accessSub}`}>
-            {kit.free ? "무료" : salesOpen ? "구독자 전용" : "베타 무료"}
-          </span>
-        </span>
-      </span>
-      <span className={styles.cardBody}>
-        <span className={styles.cardTitle}>{kit.name}</span>
-        <span className={styles.cardSpec}>
-          <span className={styles.gradeBadge} data-grade={kit.grade}>{kit.grade} 등급</span>
-          <span>{kit.themeName} · 부품 {kit.parts.length}개</span>
-        </span>
-        {kit.triangles !== null ? (
-          <span className={styles.cardIncluded}>
-            부품 합계 폴리곤 {kit.triangles.toLocaleString("ko-KR")}개
-            {kit.byteLength ? ` · ${formatBytes(kit.byteLength)}` : ""}
-          </span>
-        ) : null}
-      </span>
-    </Link>
-  );
-}
-
-/**
- * 한 키트를 펼쳐 볼 때 목록 위에 놓이는 머리글.
- *
- * 합쳐 파는 상품이 있는 키트는 그 상품 페이지가 키트 화면이므로 여기까지 오지 않는다.
- * 여기 서는 것은 부품만 파는 키트다 — 그래도 사는 사람에게는 하나의 물건이라, 이름과
- * 합계와 나가는 길을 한 자리에 둔다.
- */
-function KitFocusHead({ kit, onClear }: { kit: Kit<Listing>; onClear: () => void }) {
-  return (
-    <section className={styles.kitHead} aria-label={`${kit.name} 키트`} data-kit-head={kit.id}>
-      <div className={styles.kitHeadText}>
-        <span className={styles.kitHeadEyebrow}>키트 · {kit.themeName}</span>
-        <strong>{kit.name}</strong>
-        <span className={styles.kitHeadGrade}>
-          <span className={styles.gradeBadge} data-grade={kit.grade}>{kit.grade} 등급</span>
-          <small>부품 중 가장 높은 등급입니다</small>
-          <small>{licenseLabel(kit.licenseStatus ?? "cleared")}</small>
-        </span>
-        <p>
-          같은 팔레트, 같은 축척으로 만든 부품 {kit.parts.length}개입니다.
-          {kit.triangles !== null
-            ? ` 모두 합치면 폴리곤 ${kit.triangles.toLocaleString("ko-KR")}개${kit.byteLength ? `, ${formatBytes(kit.byteLength)}` : ""}입니다.`
-            : ""}
-          {" 부품은 하나씩 따로 받습니다."}
-        </p>
-      </div>
-      <div className={styles.kitHeadActions}>
-        {kit.product ? (
-          <Link className={`${styles.btn} ${styles.btnPrimary}`} href={`/marketplace/${encodeURIComponent(kit.product.slug)}`}>
-            한 파일로 받기 <Icon name="arrowRight" size={14} />
-          </Link>
-        ) : null}
-        <button type="button" className={`${styles.btn} ${styles.btnGhost}`} onClick={onClear}>
-          전체 목록으로 <Icon name="arrowLeft" size={14} />
-        </button>
-      </div>
-    </section>
+      ) : null}
+    </article>
   );
 }
 

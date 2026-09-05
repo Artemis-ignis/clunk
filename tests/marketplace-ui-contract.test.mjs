@@ -38,9 +38,16 @@ test("marketplace catalog defensively renders only published API rows with comme
 test("marketplace page describes the master-curated buyer model and exposes snap sections", async () => {
   const page = await source("app/marketplace/page.tsx");
 
-  // 누가 만든 물건인지는 그대로 말한다. 다만 "구매"라는 말은 낱개로 파는 구조와 함께
-  // 사라졌으므로(4c8bb6b), 이 자리는 지금 화면에 실제로 서 있는 문장으로 다시 고정한다.
-  assert.match(page, /Clunk가 <b>직접 만든 에셋<\/b>/u);
+  // 누가 만든 물건인지는 그대로 말한다. 그 말이 서 있던 히어로 판은 격자를 첫 화면 밖으로
+  // 밀어내고 있어 사라졌고, 같은 사실은 이 화면의 소개 문장이 그대로 갖고 있다.
+  assert.match(page, /Clunk가 직접 만든/u, "app/marketplace/page.tsx: 누가 만든 물건인지 말하지 않는다");
+  // 둘러보는 화면의 머리글은 세 줄이다 — 어디인지, 무엇을 하는 곳인지, 무엇을 보고 고르는지.
+  assert.match(page, /<span className="cv5-eyebrow">에셋 마켓<\/span>/u);
+  assert.match(page, /<h1>에셋 둘러보기<\/h1>/u);
+  assert.match(page, /폴리곤 수와 용량은 파일을 열어 측정한 값입니다/u);
+  // 키트는 이 목록의 탭이 아니라 자기 화면을 갖는다. 그 길이 화면에 있어야 한다.
+  assert.match(page, /href="\/kits"/u, "app/marketplace/page.tsx: 키트로 가는 길이 없다");
+  assert.doesNotMatch(page, /“키트” 탭|"키트" 탭/u, "없어진 탭을 가리키는 문장이 남아 있으면 안 된다");
   // 2026-09-04: 이 화면이 말하는 구매 모형이 바뀌었다. "크레딧으로 결제"가 아니라
   // "무료 등급은 로그인, 그 밖은 구독"이다. 낱개로 값을 매기는 말이 되살아나면 안 된다.
   assert.match(page, /무료 등급은 로그인만 하면 되고, 그 밖은 구독으로 열립니다/u);
@@ -108,14 +115,15 @@ test("public marketplace UI is aligned with the published listing and checkout c
    여기서는 화면이 그 계산을 실제로 쓰고 있는지만 본다.
    ------------------------------------------------------------------------- */
 
-test("the shop sells kits as a unit: a tab, a card, and a way back from a part", async () => {
+test("the shop sells kits as a unit: a theme, a chip on the part, and a way back from a part", async () => {
   const catalog = await source("app/components/MarketplaceCatalog.tsx");
 
-  // 키트는 탭 하나로 서고, 그 탭은 상품이 아니라 키트를 센다.
-  assert.match(catalog, /\{ id: "kit", label: "키트" \}/u, "목록에 키트 탭이 없다");
-  assert.match(catalog, /키트 \$\{filteredKits\.length\}개/u, "키트 탭이 키트가 아니라 상품을 세고 있다");
-  assert.match(catalog, /function KitCard/u, "키트 카드가 없다");
-  assert.match(catalog, /부품 \{kit\.parts\.length\}개/u, "키트 카드가 부품 수를 말하지 않는다");
+  // 2026-09-05: 키트는 목록의 탭이 아니라 자기 화면(/kits, /kit/<id>)을 갖는다. 목록에
+  // 남은 것은 둘이다 — 테마로 좁혀 보는 자리, 그리고 부품 카드에서 그 한 벌로 가는 길.
+  assert.doesNotMatch(catalog, /\{ id: "kit", label: "키트" \}/u, "없어진 키트 탭이 목록에 되살아났다");
+  assert.match(catalog, /title="테마"/u, "목록을 테마로 좁혀 볼 자리가 없다");
+  assert.match(catalog, /className=\{styles\.cardKitChip\}/u, "부품 카드에 그 한 벌로 가는 길이 없다");
+  assert.match(catalog, /legacyKitTarget/u, "옛 키트 주소를 새 화면으로 보내지 않는다");
 
   // 부품에서 키트로 돌아가는 길. 부품 한 장을 보고 "나머지는 어디 있나"를 묻게 두면 안 된다.
   assert.match(catalog, /이 키트의 일부/u, "부품 상세가 어느 키트의 것인지 말하지 않는다");
