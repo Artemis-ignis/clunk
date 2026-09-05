@@ -22,7 +22,10 @@
  * Environment: CLUNK_CF_R2_BUCKET (default clunk-assets), plus whatever wrangler needs to
  * authenticate (CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID or a wrangler login).
  */
-import { execFileSync } from "node:child_process";
+import { execFile, execFileSync } from "node:child_process";
+import { promisify } from "node:util";
+
+const execFileAsync = promisify(execFile);
 import { createHash } from "node:crypto";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, resolve, sep } from "node:path";
@@ -67,6 +70,18 @@ function walk(dir, into = []) {
     else into.push(path);
   }
   return into;
+}
+
+/** 파일 하나를 올린다(비동기). wrangler 호출 하나가 4~5초라 1,610개를 차례로 올리면 두 시간이
+ *  넘는다(2026-09-05 실측). 아래 루프는 --concurrency(기본 8)개를 동시에 돌리고, library.json 만은
+ *  전부 끝난 뒤 마지막에 따로 올린다. */
+function r2PutAsync(key, file, contentType) {
+  return execFileAsync(
+    "npx",
+    ["wrangler", "r2", "object", "put", `${BUCKET}/${key}`, "--file", file, "--content-type", contentType,
+      ...(LOCAL ? ["--local", "--persist-to", ".wrangler/state"] : ["--remote"])],
+    { cwd: REPO, shell: process.platform === "win32", maxBuffer: 32 * 1024 * 1024 },
+  );
 }
 
 function r2Put(key, file, contentType) {
@@ -119,11 +134,27 @@ if (DRY) {
   process.exit(0);
 }
 
+const concurrencyIndex = process.argv.indexOf("--concurrency");
+const CONCURRENCY = Math.max(1, Number(concurrencyIndex >= 0 ? process.argv[concurrencyIndex + 1] : 8) || 8);
 let done = 0;
-for (const entry of planned) {
-  r2Put(entry.key, entry.file, entry.contentType);
-  done += 1;
-  process.stdout.write(`  ${String(done).padStart(3)}/${planned.length}  ${entry.key}\n`);
+let next = 0;
+const failures = [];
+async function worker() {
+  while (next < planned.length) {
+    const entry = planned[next++];
+    try {
+      await r2PutAsync(entry.key, entry.file, entry.contentType);
+      done += 1;
+      process.stdout.write(`  ${String(done).padStart(4)}/${planned.length}  ${entry.key}\n`);
+    } catch (error) {
+      failures.push(`${entry.key}: ${error instanceof Error ? error.message.split("\n")[0] : String(error)}`);
+    }
+  }
+}
+await Promise.all(Array.from({ length: Math.min(CONCURRENCY, planned.length) }, () => worker()));
+if (failures.length) {
+  process.stderr.write(`\n올리지 못한 파일 ${failures.length}개 — library.json 은 올리지 않습니다(옛 카탈로그 유지):\n  ${failures.join("\n  ")}\n`);
+  process.exit(1);
 }
 
 // library.json last: the routes treat its absence as "not set up yet", so a run that dies
