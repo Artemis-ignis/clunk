@@ -9,6 +9,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { Document, NodeIO } from "@gltf-transform/core";
 import {
   CONTACT_TOLERANCE_MM,
   GROUND_TOLERANCE_MM,
@@ -420,4 +421,148 @@ test("the buried verdict carries the measured fill of the enclosing part", async
   assert.equal(caged.findings.filter((item) => item.title.includes("묻혔음")).length, 0);
   const solid = inspectAsset(await fixture("penetrating-rod.glb"));
   assert.equal(one(solid.findings, "GEO-PART-INTERSECTION").observed, "200 mm");
+});
+
+/*
+ * ------------------------------------------------------------------ 용접 성분(병합 메시)
+ *
+ * 2026-09-05 감사가 찾은 것. 파는 파일 넷(hf-processing-line·hf-seeder-compact·
+ * hf-tractor-compact·hf-cultivator-compact)은 형상이 `body_metal`·`body_matte` 같은
+ * 재질별 거대 메시로 합쳐져 있어 위의 규칙이 전부 0건을 냈다. 덩어리가 바닥에 닿는 데가
+ * 한 군데라도 있으면 그 안에 용접된 채 떠 있는 부품이 전부 통과한다.
+ *
+ * 아래 두 픽스처는 그 상황을 가장 작게 옮긴 것이다 — 프리미티브 하나 안에 몸통 둘.
+ * 이름을 `body_metal` 로 둔 것은 실제 파일이 그렇기 때문이고, 이 검사기가 "재질별
+ * 묶음"으로 알아보는 것도 그 이름이다.
+ */
+
+/** 축 정렬 상자 하나. 면은 바깥을 보게 감는다(오른손 좌표계 반시계 = 앞면). */
+function boxGeometry(center: readonly number[], half: readonly number[]) {
+  const corners = [
+    [-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],
+    [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1],
+  ].map(([sx, sy, sz]) => [center[0] + sx * half[0], center[1] + sy * half[1], center[2] + sz * half[2]]);
+  const faces = [
+    [0, 2, 1], [0, 3, 2],
+    [4, 5, 6], [4, 6, 7],
+    [0, 5, 4], [0, 1, 5],
+    [1, 6, 5], [1, 2, 6],
+    [2, 7, 6], [2, 3, 7],
+    [3, 4, 7], [3, 0, 4],
+  ];
+  return { positions: corners.flat(), indices: faces.flat() };
+}
+
+/**
+ * 프리미티브 하나에 상자 여럿을 넣은 GLB. 상자끼리 꼭짓점을 나누지 않으므로 색인으로는
+ * 갈라져 있고, 좌표로 용접해야만 몸통 여럿이 드러난다 — 실제 파일과 같은 모양이다.
+ */
+async function mergedBodiesBundle(
+  name: string,
+  merged: { center: number[]; half: number[] }[],
+  companion: { name: string; center: number[]; half: number[] },
+) {
+  const document = new Document();
+  const buffer = document.createBuffer();
+  const material = document.createMaterial("metal");
+
+  const build = (parts: { center: number[]; half: number[] }[]) => {
+    const positions: number[] = [];
+    const indices: number[] = [];
+    for (const part of parts) {
+      const box = boxGeometry(part.center, part.half);
+      const base = positions.length / 3;
+      positions.push(...box.positions);
+      for (const index of box.indices) indices.push(index + base);
+    }
+    return document
+      .createPrimitive()
+      .setMaterial(material)
+      .setAttribute(
+        "POSITION",
+        document.createAccessor().setType("VEC3").setArray(Float32Array.from(positions)).setBuffer(buffer),
+      )
+      .setIndices(
+        document.createAccessor().setType("SCALAR").setArray(Uint32Array.from(indices)).setBuffer(buffer),
+      );
+  };
+
+  const scene = document.createScene();
+  scene.addChild(
+    document.createNode("body_metal").setMesh(document.createMesh("body_metal").addPrimitive(build(merged))),
+  );
+  scene.addChild(
+    document
+      .createNode(companion.name)
+      .setMesh(
+        document.createMesh(companion.name).addPrimitive(build([{ center: companion.center, half: companion.half }])),
+      ),
+  );
+  const bytes = await new NodeIO().writeBinary(document);
+  return createAssetBundle(name, new Uint8Array(bytes));
+}
+
+test("one primitive holding two welded bodies is judged body by body, not as one mesh", async () => {
+  /*
+   * 받침(y 0~50 mm) 위에 선 몸통(y 50~350 mm)과, 그 위 300 mm 에 떠 있는 몸통
+   * (y 650~850 mm)이 한 프리미티브에 들어 있다. 노드 단위로 보면 이 메시는 받침에
+   * 닿아 있으므로 아무 말도 나오지 않는다.
+   */
+  const bundle = await mergedBodiesBundle(
+    "welded-floating.glb",
+    [
+      { center: [0, 0.2, 0], half: [0.25, 0.15, 0.25] },
+      { center: [0, 0.75, 0], half: [0.2, 0.1, 0.2] },
+    ],
+    { name: "pedestal", center: [0, 0.025, 0], half: [0.5, 0.025, 0.5] },
+  );
+  const finding = one(inspectAsset(bundle).findings, "GEO-FLOATING-PART");
+  assert.equal(finding.severity, "WARNING");
+  assert.equal(finding.observed, "300 mm");
+  assert.equal(finding.threshold, `≤ ${CONTACT_TOLERANCE_MM} mm`);
+  // 조각은 <노드 이름>#<번호> 로 불리고, 재질·크기·중심이 문장에 실린다.
+  assert.match(finding.message, /body_metal#1/);
+  assert.match(finding.message, /metal, 400×200×400 mm/);
+  assert.match(finding.message, /밑면은 바닥에서 650 mm/);
+  assert.equal(finding.path, "/nodes/0#1");
+  assert.equal(inspectAsset(bundle).score.hardBlockerCount, 0);
+});
+
+test("two welded bodies that interpenetrate inside one primitive are measured against each other", async () => {
+  /*
+   * 1 m 상자를 120 × 180 mm 막대가 가로질러 뚫고 지나간다. 둘은 같은 프리미티브에
+   * 들어 있어 노드 번호가 같다 — 같은 노드라고 조립 관계로 보면 이 관통은 영영 안 잡힌다.
+   * 겹친 자리는 x 1000 · y 120 · z 180 mm 이고, 깊이는 그 가운데 가장 얕은 값이다.
+   */
+  const bundle = await mergedBodiesBundle(
+    "welded-intersection.glb",
+    [
+      { center: [0, 0.5, 0], half: [0.5, 0.5, 0.5] },
+      { center: [0, 0.55, 0.1], half: [1.0, 0.06, 0.09] },
+    ],
+    { name: "nameplate", center: [0.55, 0.25, -0.2], half: [0.05, 0.05, 0.05] },
+  );
+  const report = inspectAsset(bundle);
+  const finding = one(report.findings, "GEO-PART-INTERSECTION");
+  assert.equal(finding.observed, "120 mm");
+  assert.match(finding.message, /body_metal#1/);
+  assert.match(finding.message, /body_metal#0/);
+  assert.match(finding.message, /삼각형이 실제로 교차/);
+  assert.equal(report.score.hardBlockerCount, 0);
+});
+
+/**
+ * 성분으로 쪼개는 것은 "이 검사기가 애초에 판정에서 빼던 재질별 묶음"에만 한다.
+ * 부품 여럿이 든 멀쩡한 노드(cozy-fence-gate 의 `post_timbers` = 기둥 둘)를 쪼개면
+ * 기둥 하나가 파일 부피의 17%에서 1.5%로 떨어져 "몸통"이 아니게 되고, 경첩 핀이 55 mm
+ * 박힌 지적이 사라진다. 이 시험이 그 자리를 지킨다.
+ */
+test("splitting merged batches does not dissolve the joinery findings of small props", async () => {
+  const gate = inspectAsset(await market("cozy-fence-gate", "fence-gate.m1.clunk-optimized.glb"));
+  const pintles = one(gate.findings, "GEO-PART-INTERSECTION");
+  assert.equal(pintles.observed, "55 mm");
+  assert.match(pintles.message, /post_hinge_pintles/);
+  assert.match(pintles.message, /post_timbers/);
+  // 조각 번호가 붙지 않는다 — 이 노드들은 쪼개지 않는다.
+  assert.doesNotMatch(pintles.message, /#\d/);
 });

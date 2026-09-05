@@ -126,6 +126,35 @@ const MAX_PAIRS_PER_PART_PAIR = 48;
 /** 간격을 잴 때 한 부품에서 보는 최대 삼각형 수. */
 const GAP_TRIANGLE_SAMPLE = 512;
 
+/*
+ * ------------------------------------------------------------------ 용접 성분
+ *
+ * 왜 필요한가. 파는 파일 가운데 넷(hf-processing-line·hf-seeder-compact·
+ * hf-tractor-compact·hf-cultivator-compact)은 형상이 `body_metal`(10,480 삼각형)·
+ * `body_matte`(23,052 삼각형)처럼 재질별 거대 메시로 합쳐져 있다. 규칙이 노드 단위로
+ * 돌면 그 덩어리가 바닥에 닿는 데가 한 군데라도 있으면 "접지"로 통과하고, 그 안에
+ * 용접된 채 318.8 mm 떠 있는 탱크 다리는 영영 안 걸린다 — 2026-09-05 실측으로 이 네
+ * 파일의 GEO-* 지적이 전부 0건이었다. 같은 날 5 mm 틈이 걸린 작은 소품과 정반대다.
+ *
+ * 그래서 "합쳐 놓아 판정을 못 하던 메시"만 좌표로 용접해 연결 성분으로 되돌린다.
+ * 이미 부품으로 세고 있던 노드는 건드리지 않는다(문단 splitMergedBatches 참고).
+ */
+/** 꼭짓점을 한 점으로 볼 격자. 내보내기 도구가 하드 에지마다 좌표를 복제하므로 필요하다. */
+export const COMPONENT_WELD_MM = 0.1;
+/**
+ * 부스러기로 보고 지적 대상에서 빼는 조각.
+ *
+ * 삼각형 2개(판 한 장)까지는 재질 이음매나 데칼로 남은 조각인 경우가 많고, 어느 축으로도
+ * 2 mm가 안 되는 것은 사람이 화면에서 찾을 수 없다. 뺀 조각도 지오메트리로는 남는다 —
+ * 다른 부품이 거기 기대어 서 있으면 그 접촉은 그대로 인정된다.
+ */
+const COMPONENT_MIN_TRIANGLES = 3;
+const COMPONENT_MIN_EXTENT_MM = 2;
+/** 한 노드를 이보다 잘게 쪼개지는 않는다. 넘으면 통째로 두고 예전처럼 판정에서 뺀다. */
+const MAX_COMPONENTS_PER_NODE = 512;
+/** 한 파일에서 만들 조각 부품의 총량 상한. 넘으면 남은 병합 메시는 쪼개지 않는다. */
+const MAX_COMPONENT_PARTS = 2_048;
+
 // glTF JSON 은 스키마가 정의한 중첩 객체다. 여기가 그 경계다.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type GltfDocument = { [key: string]: any };
@@ -150,6 +179,12 @@ export interface PhysicalFloatingMeasurement {
   gapMm: number;
   nearestName: string;
   translationAnimated: boolean;
+  /** 병합 메시를 쪼갠 조각이면 재질·크기·중심을 적은 한 줄. 노드 하나짜리 부품이면 null. */
+  detail: string | null;
+  /** 조각 번호. 노드를 통째로 쓰는 부품이면 −1. */
+  componentIndex: number;
+  /** 이 부품의 밑면이 바닥에서 얼마나 떠 있는가(mm). */
+  bottomMm: number;
 }
 
 export interface PhysicalIntersectionMeasurement {
@@ -173,6 +208,9 @@ export interface PhysicalIntersectionMeasurement {
   /** 가장 깊어지는 애니메이션 위상(0..1). 정지 자세가 가장 깊으면 null. */
   atPhase: number | null;
   clipName: string | null;
+  /** 병합 메시를 쪼갠 조각이면 재질·크기·중심을 적은 한 줄. 아니면 null. */
+  aDetail: string | null;
+  bDetail: string | null;
 }
 
 export interface PhysicalInvertedMeshMeasurement {
@@ -206,7 +244,14 @@ export interface PhysicalLayout {
 export interface PhysicalMetrics {
   evaluated: boolean;
   skippedReason: string | null;
+  /** 접지·부양·관통이 실제로 견준 부품 수. 병합 메시를 쪼갠 뒤의 수다. */
   partCount: number;
+  /** 쪼개기 전, 메시를 가진 노드(와 인스턴스)의 수. */
+  nodePartCount: number;
+  /** 용접 성분으로 되돌린 병합 메시의 수. */
+  splitBatchCount: number;
+  /** 그 결과 생긴 조각 부품의 수. */
+  componentPartCount: number;
   triangleCount: number;
   /** 월드 꼭짓점에서 잰 장면 최저점(m). 상자 모서리가 아니라 실제 정점이다. */
   sceneMinY: number | null;
@@ -275,6 +320,21 @@ interface PhysicalPart {
   layoutUnit: number;
   /** 이 부품이 가리키는 mesh 의 번호. 없으면 −1. */
   meshIndex: number;
+  /**
+   * 노드를 통째로 쓰는 부품이면 −1, 병합 메시를 용접 성분으로 되돌린 조각이면 0부터의 번호.
+   *
+   * 이 번호가 붙은 부품만 이름 걸름망(NOT_A_PART)에서 풀려난다 — 쪼개고 나면 그 이름이
+   * 가리키던 "재질별 묶음"은 더 이상 존재하지 않기 때문이다.
+   */
+  componentIndex: number;
+  /** 이 부품이 나온 노드가 몇 조각으로 갈라졌는가. 안 갈라졌으면 1. */
+  componentCount: number;
+  /** 이 조각이 쓰는 재질 이름(여럿이면 앞의 둘). 모르면 null. */
+  materialName: string | null;
+  /** 부스러기(삼각형 3개 미만이거나 어느 축으로도 2 mm 미만)라 판정에서 빼는가. */
+  debris: boolean;
+  /** 삼각형마다의 재질 번호. 조각의 재질 이름을 붙이는 데만 쓴다. 없으면 null. */
+  triangleMaterials: Int32Array | null;
 }
 
 type Matrix4 = Float64Array;
@@ -301,6 +361,9 @@ export function inspectPhysicalPlausibility(source: PhysicalInspectionSource): P
     evaluated: false,
     skippedReason: null,
     partCount: 0,
+    nodePartCount: 0,
+    splitBatchCount: 0,
+    componentPartCount: 0,
     judgedPartCount: 0,
     excludedPartCount: 0,
     suppressedIntersections: 0,
@@ -406,6 +469,7 @@ export function inspectPhysicalPlausibility(source: PhysicalInspectionSource): P
 
   const totalTriangles = parts.reduce((sum, part) => sum + part.triangleCount, 0);
   metrics.partCount = parts.length;
+  metrics.nodePartCount = parts.length;
   metrics.triangleCount = totalTriangles;
 
   // 규칙 4 — 두께 0 판. 상자·간격 계산과 무관하므로 삼각형 상한 위에서도 돈다.
@@ -527,9 +591,19 @@ export function inspectPhysicalPlausibility(source: PhysicalInspectionSource): P
     );
   }
 
+  /*
+   * 재질별로 합쳐 놓은 메시를 용접 성분으로 되돌린다. 배치도 판별 뒤에 해야 한다 —
+   * 조각은 자기가 나온 노드의 배치도 단위 번호를 그대로 물려받기 때문이다.
+   */
+  const split = splitMergedBatches(source, parts);
+  const contactParts = split.parts;
+  metrics.partCount = contactParts.length;
+  metrics.splitBatchCount = split.splitBatches;
+  metrics.componentPartCount = split.componentParts;
+
   const nodeNames = nodes.map((node: GltfDocument) => (typeof node?.name === "string" ? node.name : ""));
-  const groups = parts.map((part) => groupOf(part, nodeNames));
-  const analysis = analyseContacts(source, parts, groups, animation.clips, sceneMinY, layout.isLayout);
+  const groups = contactParts.map((part) => groupOf(part, nodeNames));
+  const analysis = analyseContacts(source, contactParts, groups, animation.clips, sceneMinY, layout.isLayout);
   metrics.truncated = analysis.truncated;
   metrics.judgedPartCount = analysis.judgedPartCount;
   metrics.excludedPartCount = analysis.excludedPartCount;
@@ -551,7 +625,7 @@ export function inspectPhysicalPlausibility(source: PhysicalInspectionSource): P
         seam ? "INFO" : "WARNING",
         `/nodes/${hit.aNodeIndex}|/nodes/${hit.bNodeIndex}`,
         hit.buried ? "부품이 다른 부품 안에 묻혔음" : seam ? "부품이 얕게 맞물림" : "부품이 서로를 뚫고 지나감",
-        `${hit.aName} 과(와) ${hit.bName} 의 삼각형이 실제로 교차합니다 — 교차 삼각형 쌍 ${hit.trianglePairs}개, 겹친 깊이 ${hit.depthMm} mm.${phase} ${
+        `${hit.aName}${hit.aDetail ? ` (${hit.aDetail})` : ""} 과(와) ${hit.bName}${hit.bDetail ? ` (${hit.bDetail})` : ""} 의 삼각형이 실제로 교차합니다 — 교차 삼각형 쌍 ${hit.trianglePairs}개, 겹친 깊이 ${hit.depthMm} mm.${phase} ${
           hit.buried
             ? `${hit.aName} 은(는) ${hit.bName} 안에 통째로 들어가 있고 ${hit.bName} 은(는) 자기 상자의 ${hit.bodyFillRatio === null ? "알 수 없는" : `${Math.round(hit.bodyFillRatio * 100)}%`}를 채운 덩어리라, 사는 사람이 삼각형 값을 치르고 화면에서 아무것도 못 볼 수 있습니다.`
             : seam
@@ -589,9 +663,9 @@ export function inspectPhysicalPlausibility(source: PhysicalInspectionSource): P
       makeFinding(
         "GEO-FLOATING-PART",
         driven ? "INFO" : "WARNING",
-        `/nodes/${part.nodeIndex}`,
+        part.componentIndex < 0 ? `/nodes/${part.nodeIndex}` : `/nodes/${part.nodeIndex}#${part.componentIndex}`,
         driven ? "떨어져 있으나 translation 이 이 노드를 몬다" : "아무것과도 닿지 않는 부품",
-        `${part.name} 은(는) 바닥에도 다른 어떤 부품에도 닿지 않습니다 — 가장 가까운 것은 ${part.nearestName}, 간격 ${part.gapMm} mm.${driven ? " 이 노드는 애니메이션 translation 채널이 몰고 있으므로 정지 자세의 간격이 곧 결함은 아닙니다. 검토 필요." : ""}`,
+        `${part.name}${part.detail ? ` (${part.detail})` : ""} 은(는) 바닥에도 다른 어떤 부품에도 닿지 않습니다 — 가장 가까운 것은 ${part.nearestName}, 간격 ${part.gapMm} mm.${part.detail ? ` 이 조각의 밑면은 바닥에서 ${part.bottomMm} mm 입니다.` : ""}${driven ? " 이 노드는 애니메이션 translation 채널이 몰고 있으므로 정지 자세의 간격이 곧 결함은 아닙니다. 검토 필요." : ""}`,
         `${part.gapMm} mm`,
         `≤ ${CONTACT_TOLERANCE_MM} mm`,
         false,
@@ -837,6 +911,11 @@ function collectWorldParts(source: PhysicalInspectionSource, animation: Animatio
             worldDeterminantSign: matrixDeterminantSign(placement),
             layoutUnit: -1,
             meshIndex: Number(node.mesh),
+            componentIndex: -1,
+            componentCount: 1,
+            materialName: null,
+            debris: false,
+            triangleMaterials: local.triangleMaterials,
           });
         }
       }
@@ -851,12 +930,15 @@ function collectWorldParts(source: PhysicalInspectionSource, animation: Animatio
 interface LocalGeometry {
   positions: Float64Array;
   indices: Uint32Array;
+  /** 삼각형마다의 재질 번호. 재질이 없는 프리미티브는 −1. */
+  triangleMaterials: Int32Array;
 }
 
 function meshLocalGeometry(source: PhysicalInspectionSource, mesh: GltfDocument | undefined): LocalGeometry | null {
   if (!mesh || !Array.isArray(mesh.primitives)) return null;
   const positionChunks: Float64Array[] = [];
   const indexChunks: Uint32Array[] = [];
+  const materialPerTriangle: number[] = [];
   let vertexBase = 0;
   for (const primitive of mesh.primitives) {
     if ((primitive.mode ?? 4) !== 4) continue;
@@ -869,13 +951,15 @@ function meshLocalGeometry(source: PhysicalInspectionSource, mesh: GltfDocument 
     for (let index = 0; index < indices.length; index += 1) shifted[index] = indices[index] + vertexBase;
     positionChunks.push(positions);
     indexChunks.push(shifted);
+    const material = primitive.material === undefined ? -1 : Number(primitive.material);
+    for (let triangle = 0; triangle < indices.length / 3; triangle += 1) materialPerTriangle.push(material);
     vertexBase += vertexCount;
   }
   if (!positionChunks.length) return null;
   const positions = concatFloat(positionChunks);
   const indices = concatUint(indexChunks);
   if (!indices.length) return null;
-  return { positions, indices };
+  return { positions, indices, triangleMaterials: Int32Array.from(materialPerTriangle) };
 }
 
 function placementsOf(
@@ -905,6 +989,247 @@ function placementsOf(
     out.push({ matrix: multiply(world, instance), instance });
   }
   return out;
+}
+
+/* ------------------------------------------------------------------ 병합 메시 쪼개기 */
+
+/**
+ * "몸통"을 재는 기준 부피를 부품마다 돌려준다.
+ *
+ * 배치도에서는 상품 하나의 상자, 아니면 파일 전체의 상자다. 쪼개기와 판정이 같은 기준을
+ * 써야 하므로 한 군데서만 만든다.
+ */
+function bodyReferenceVolumes(parts: readonly PhysicalPart[], isLayout: boolean): (index: number) => number {
+  const boxVolumeOf = (indices: readonly number[]): number => {
+    const min: [number, number, number] = [Infinity, Infinity, Infinity];
+    const max: [number, number, number] = [-Infinity, -Infinity, -Infinity];
+    for (const index of indices) {
+      for (let axis = 0; axis < 3; axis += 1) {
+        min[axis] = Math.min(min[axis], parts[index].min[axis]);
+        max[axis] = Math.max(max[axis], parts[index].max[axis]);
+      }
+    }
+    return Math.max(1e-12, (max[0] - min[0]) * (max[1] - min[1]) * (max[2] - min[2]));
+  };
+  const wholeAll = boxVolumeOf(parts.map((_, index) => index));
+  if (!isLayout) return () => wholeAll;
+  const byUnit = new Map<number, number[]>();
+  parts.forEach((part, index) => {
+    if (part.layoutUnit < 0) return;
+    const bucket = byUnit.get(part.layoutUnit);
+    if (bucket) bucket.push(index);
+    else byUnit.set(part.layoutUnit, [index]);
+  });
+  const unitVolume = new Map<number, number>();
+  for (const [unit, indices] of byUnit) unitVolume.set(unit, boxVolumeOf(indices));
+  return (index: number) => unitVolume.get(parts[index].layoutUnit) ?? wholeAll;
+}
+
+/** 이 부품이 다른 부품 둘 이상을 자기 상자 안에 통째로 품고 있는 큰 덩어리인가. */
+function swallowsOtherParts(parts: readonly PhysicalPart[], index: number, reference: number): boolean {
+  if (volumeOf(parts[index]) < reference * BATCH_VOLUME_SHARE) return false;
+  let swallowed = 0;
+  for (let other = 0; other < parts.length && swallowed < BATCH_CONTAINS_PARTS; other += 1) {
+    if (other === index || volumeOf(parts[other]) <= 1e-9) continue;
+    if (containedIn(parts[other], parts[index])) swallowed += 1;
+  }
+  return swallowed >= BATCH_CONTAINS_PARTS;
+}
+
+/**
+ * 재질별로 합쳐 놓은 묶음인가 — 이름으로만 가린다.
+ *
+ * 왜 이름만인가. 판정에서 빠지는 길은 둘이다: 이름이 재질 묶음을 가리키거나
+ * (`body_metal`·`*_matte`·`collider`), 크기가 전체의 4분의 1을 넘으면서 다른 부품 둘
+ * 이상을 삼키거나. 뒤엣것으로 쪼개면 멀쩡한 부품 묶음이 부서진다 — 2026-09-05 실측:
+ * cozy-market-stall 의 `frame_timber`(기둥·도리 17개가 든 한 노드)를 쪼개자 기둥이
+ * 차양 천을 지나는 지적이 11건 났고, village-wall-straight 의 `wall_stones_*`(돌담
+ * 돌덩이)를 쪼개자 돌끼리 겹친다는 지적이 7건 났다. 둘 다 그렇게 만드는 것이다.
+ *
+ * 이름이 재질을 가리키는 묶음은 다르다. 거기엔 애초에 부품이라는 정보가 없고, 쪼개야만
+ * 그 안의 탱크 다리·호퍼·캐노피가 보인다.
+ */
+function isMergedBatch(parts: readonly PhysicalPart[], index: number): boolean {
+  const part = parts[index];
+  if (part.componentIndex >= 0) return false;
+  if (volumeOf(part) <= 1e-9) return false;
+  return NOT_A_PART.test(part.name);
+}
+
+/**
+ * 좌표로 용접한 연결 성분. 삼각형 번호의 묶음으로 돌려준다.
+ *
+ * 왜 좌표로 붙이는가. 내보내기 도구는 하드 에지마다 같은 자리의 꼭짓점을 복제하므로
+ * 색인만 따라가면 상자 하나가 여섯 조각으로 갈라진다. 0.1 mm 격자로 반올림해 같은 자리를
+ * 한 점으로 본 뒤에 붙인다 — tmp/audit/parts.mjs 가 실제 파일에서 쓰던 방식과 같다.
+ */
+function weldedComponents(part: PhysicalPart): Uint32Array[] {
+  const vertexCount = part.positions.length / 3;
+  const quantum = COMPONENT_WELD_MM / 1000;
+  const parent = new Int32Array(vertexCount);
+  const seen = new Map<string, number>();
+  for (let vertex = 0; vertex < vertexCount; vertex += 1) {
+    const key = `${Math.round(part.positions[vertex * 3] / quantum)},${Math.round(part.positions[vertex * 3 + 1] / quantum)},${Math.round(part.positions[vertex * 3 + 2] / quantum)}`;
+    const found = seen.get(key);
+    if (found === undefined) {
+      seen.set(key, vertex);
+      parent[vertex] = vertex;
+    } else {
+      parent[vertex] = found;
+    }
+  }
+  const find = (value: number): number => {
+    let node = value;
+    while (parent[node] !== node) {
+      parent[node] = parent[parent[node]];
+      node = parent[node];
+    }
+    return node;
+  };
+  const union = (a: number, b: number): void => {
+    const rootA = find(a);
+    const rootB = find(b);
+    if (rootA !== rootB) parent[rootA] = rootB;
+  };
+  const triangleCount = part.indices.length / 3;
+  for (let triangle = 0; triangle < triangleCount; triangle += 1) {
+    const offset = triangle * 3;
+    union(part.indices[offset], part.indices[offset + 1]);
+    union(part.indices[offset + 1], part.indices[offset + 2]);
+  }
+  const buckets = new Map<number, number[]>();
+  for (let triangle = 0; triangle < triangleCount; triangle += 1) {
+    const root = find(part.indices[triangle * 3]);
+    const bucket = buckets.get(root);
+    if (bucket) bucket.push(triangle);
+    else buckets.set(root, [triangle]);
+  }
+  return [...buckets.values()].map((list) => Uint32Array.from(list));
+}
+
+/** 성분 하나를 부품으로 만든다. 꼭짓점은 그 성분이 쓰는 것만 추려 다시 담는다. */
+function componentPart(
+  part: PhysicalPart,
+  triangles: Uint32Array,
+  materialNameOf: (index: number) => string | null,
+): PhysicalPart {
+  const mapped = new Map<number, number>();
+  const order: number[] = [];
+  const indices = new Uint32Array(triangles.length * 3);
+  for (let triangle = 0; triangle < triangles.length; triangle += 1) {
+    const offset = triangles[triangle] * 3;
+    for (let corner = 0; corner < 3; corner += 1) {
+      const original = part.indices[offset + corner];
+      let slot = mapped.get(original);
+      if (slot === undefined) {
+        slot = order.length;
+        mapped.set(original, slot);
+        order.push(original);
+      }
+      indices[triangle * 3 + corner] = slot;
+    }
+  }
+  const positions = new Float64Array(order.length * 3);
+  const localPositions = part.localPositions ? new Float64Array(order.length * 3) : null;
+  for (let slot = 0; slot < order.length; slot += 1) {
+    const source = order[slot] * 3;
+    for (let axis = 0; axis < 3; axis += 1) {
+      positions[slot * 3 + axis] = part.positions[source + axis];
+      if (localPositions && part.localPositions) localPositions[slot * 3 + axis] = part.localPositions[source + axis];
+    }
+  }
+  const bounds = boundsOf(positions);
+  const materials: string[] = [];
+  if (part.triangleMaterials) {
+    const distinct = new Set<number>();
+    for (const triangle of triangles) {
+      const material = part.triangleMaterials[triangle];
+      if (material === undefined || distinct.has(material)) continue;
+      distinct.add(material);
+      const name = materialNameOf(material);
+      if (name && materials.length < 2) materials.push(name);
+    }
+  }
+  const extentMm = Math.max(
+    (bounds.max[0] - bounds.min[0]) * 1000,
+    (bounds.max[1] - bounds.min[1]) * 1000,
+    (bounds.max[2] - bounds.min[2]) * 1000,
+  );
+  return {
+    ...part,
+    positions,
+    indices,
+    localPositions,
+    min: bounds.min,
+    max: bounds.max,
+    triangleCount: triangles.length,
+    componentIndex: 0,
+    componentCount: 1,
+    materialName: materials.length ? materials.join("+") : null,
+    debris: triangles.length < COMPONENT_MIN_TRIANGLES || extentMm < COMPONENT_MIN_EXTENT_MM,
+    triangleMaterials: null,
+  };
+}
+
+/**
+ * 합쳐 놓아 판정을 못 하던 메시만 골라 용접 성분으로 되돌린다.
+ *
+ * 왜 전부가 아니라 그것만인가. 이 검사기가 이미 부품으로 세고 있는 노드를 쪼개면 그 노드가
+ * 뜻하던 부품이 사라진다 — cozy-fence-gate 의 `post_timbers` 는 기둥 두 개가 든 노드이고,
+ * 통째로는 파일 부피의 17%라 "몸통"이지만 하나씩 떼면 1.5%가 되어 경첩 핀이 55 mm 박힌
+ * 지적이 사라진다(2026-09-05 실측). 반대로 `body_metal` 처럼 이 검사기가 애초에 판정에서
+ * 빼던 묶음은 쪼개도 잃을 판정이 없고, 쪼개야만 그 안의 부품이 보인다.
+ */
+function splitMergedBatches(
+  source: PhysicalInspectionSource,
+  parts: readonly PhysicalPart[],
+): { parts: PhysicalPart[]; splitBatches: number; componentParts: number } {
+  const materials: GltfDocument[] = Array.isArray(source.json.materials) ? source.json.materials : [];
+  const materialNameOf = (index: number): string | null => {
+    if (index < 0) return null;
+    const name = materials[index]?.name;
+    return typeof name === "string" && name.trim() ? name.trim() : null;
+  };
+  const out: PhysicalPart[] = [];
+  let splitBatches = 0;
+  let componentParts = 0;
+  for (let index = 0; index < parts.length; index += 1) {
+    const part = parts[index];
+    if (
+      componentParts >= MAX_COMPONENT_PARTS ||
+      part.triangleCount < 2 ||
+      !isMergedBatch(parts, index)
+    ) {
+      out.push(part);
+      continue;
+    }
+    const components = weldedComponents(part);
+    if (components.length < 2 || components.length > MAX_COMPONENTS_PER_NODE) {
+      out.push(part);
+      continue;
+    }
+    const pieces = components.map((triangles) => componentPart(part, triangles, materialNameOf));
+    // 조각 번호는 사람이 보고서와 뷰어에서 같은 것을 가리킬 수 있도록 자리 순으로 매긴다.
+    pieces.sort((a, b) => a.min[0] - b.min[0] || a.min[1] - b.min[1] || a.min[2] - b.min[2]);
+    pieces.forEach((piece, ordinal) => {
+      piece.componentIndex = ordinal;
+      piece.componentCount = pieces.length;
+      piece.name = `${part.name}#${ordinal}`;
+    });
+    splitBatches += 1;
+    componentParts += pieces.length;
+    for (const piece of pieces) out.push(piece);
+  }
+  return { parts: out, splitBatches, componentParts };
+}
+
+/** 조각 하나를 사람이 뷰어에서 찾을 수 있게 적은 한 줄. 노드 하나짜리 부품이면 null. */
+function partDetail(part: PhysicalPart): string | null {
+  if (part.componentIndex < 0) return null;
+  const size = [0, 1, 2].map((axis) => round1((part.max[axis] - part.min[axis]) * 1000));
+  const centre = [0, 1, 2].map((axis) => round1(((part.max[axis] + part.min[axis]) / 2) * 1000));
+  const material = part.materialName ? `${part.materialName}, ` : "";
+  return `${material}${size[0]}×${size[1]}×${size[2]} mm, 중심 x ${centre[0]} · y ${centre[1]} · z ${centre[2]} mm, 삼각형 ${part.triangleCount}개`;
 }
 
 /* ------------------------------------------------------------------ thin shells */
@@ -1270,6 +1595,12 @@ function volumeOf(part: PhysicalPart): number {
 }
 
 function relatedParts(a: PhysicalPart, b: PhysicalPart): boolean {
+  /*
+   * 같은 병합 메시에서 갈라 나온 두 조각은 부모–자식이 아니라 남남이다. 노드 번호가
+   * 같다고 조립 관계로 보면 `body_matte` 안의 호퍼가 같은 덩어리 안의 벨트를 뚫어도
+   * 영영 안 걸린다 — 그것이 바로 이 4종을 통과시키던 자리다.
+   */
+  if (a.componentIndex >= 0 && b.componentIndex >= 0 && a.nodeIndex === b.nodeIndex) return false;
   return a.nodeChain.includes(b.nodeIndex) || b.nodeChain.includes(a.nodeIndex);
 }
 
@@ -1290,19 +1621,6 @@ function analyseContacts(
   const grid = buildTriangleGrid(parts);
   const budget = { tests: 0, truncated: false };
 
-  const boxVolumeOf = (indices: readonly number[]): number => {
-    const min: [number, number, number] = [Infinity, Infinity, Infinity];
-    const max: [number, number, number] = [-Infinity, -Infinity, -Infinity];
-    for (const index of indices) {
-      for (let axis = 0; axis < 3; axis += 1) {
-        min[axis] = Math.min(min[axis], parts[index].min[axis]);
-        max[axis] = Math.max(max[axis], parts[index].max[axis]);
-      }
-    }
-    return Math.max(1e-12, (max[0] - min[0]) * (max[1] - min[1]) * (max[2] - min[2]));
-  };
-
-  const allIndices = parts.map((_, index) => index);
   /*
    * "몸통"을 재는 기준 부피.
    *
@@ -1311,20 +1629,7 @@ function analyseContacts(
    * 묻힌다 — 2026-09-05 실측: kit-mine-entrance 지적 0건, 그 안의 mine-cart 를
    * 따로 검사하면 GEO-PART-INTERSECTION 2건.
    */
-  const unitVolume = new Map<number, number>();
-  if (isLayout) {
-    const byUnit = new Map<number, number[]>();
-    parts.forEach((part, index) => {
-      if (part.layoutUnit < 0) return;
-      const bucket = byUnit.get(part.layoutUnit);
-      if (bucket) bucket.push(index);
-      else byUnit.set(part.layoutUnit, [index]);
-    });
-    for (const [unit, indices] of byUnit) unitVolume.set(unit, boxVolumeOf(indices));
-  }
-  const wholeAll = boxVolumeOf(allIndices);
-  const wholeFor = (index: number): number =>
-    (isLayout ? unitVolume.get(parts[index].layoutUnit) : undefined) ?? wholeAll;
+  const wholeFor = bodyReferenceVolumes(parts, isLayout);
   const sameUnit = (a: number, b: number): boolean =>
     !isLayout || (parts[a].layoutUnit >= 0 && parts[a].layoutUnit === parts[b].layoutUnit);
 
@@ -1333,17 +1638,13 @@ function analyseContacts(
      빼면 멀쩡히 붙어 있는 부품이 떠 있다고 나온다. */
   const judged = new Set<number>();
   parts.forEach((part, index) => {
+    if (part.debris) return;
     const volume = volumeOf(part);
     if (volume <= 1e-9) return;
-    if (NOT_A_PART.test(part.name)) return;
-    if (volume >= wholeFor(index) * BATCH_VOLUME_SHARE) {
-      let swallowed = 0;
-      for (let other = 0; other < parts.length && swallowed < BATCH_CONTAINS_PARTS; other += 1) {
-        if (other === index || volumeOf(parts[other]) <= 1e-9) continue;
-        if (containedIn(parts[other], part)) swallowed += 1;
-      }
-      if (swallowed >= BATCH_CONTAINS_PARTS) return;
-    }
+    /* 이름으로 거르는 것은 노드를 통째로 쓰는 부품에만 쓴다. 용접 성분으로 쪼갠 뒤에는
+       그 이름이 가리키던 "재질별 묶음"이 더는 존재하지 않고, 조각 하나하나가 부품이다. */
+    if (part.componentIndex < 0 && NOT_A_PART.test(part.name)) return;
+    if (swallowsOtherParts(parts, index, wholeFor(index))) return;
     judged.add(index);
   });
 
@@ -1370,7 +1671,10 @@ function analyseContacts(
   const reportablePair = (a: number, b: number): boolean => {
     if (!judged.has(a) || !judged.has(b)) return false;
     if (relatedParts(parts[a], parts[b])) return false;
-    if (groups[a] && groups[b] && groups[a] === groups[b]) return false;
+    /* 같은 덩어리 안은 조립이므로 세지 않는다 — 다만 병합 메시를 쪼갠 조각들끼리는
+       그 "덩어리"가 장면 뿌리일 뿐이라 조립을 뜻하지 않는다. */
+    const bothComponents = parts[a].componentIndex >= 0 && parts[b].componentIndex >= 0;
+    if (!bothComponents && groups[a] && groups[b] && groups[a] === groups[b]) return false;
     // 배치도에서 서로 다른 상품끼리는 조립 관계가 아니다. 겹치면 배치 간격 문제이고,
     // 그 경우는 애초에 배치도로 판정되지 않는다(LAYOUT_MIN_SEPARATION_MM).
     if (!sameUnit(a, b)) return false;
@@ -1404,9 +1708,29 @@ function analyseContacts(
       atRest: true,
       atPhase: null,
       clipName: null,
+      aDetail: partDetail(through),
+      bDetail: partDetail(body),
       rank: buried ? depthMm + 1e6 : depthMm,
     });
   });
+
+  /*
+   * 꼭짓점 거리만으로는 뚫고 지나가는 것을 놓친다.
+   *
+   * 실측: hf-windmill 의 windmillShaftSleeve 는 지붕 면을 271.6 mm 뚫고 지나가는데,
+   * 슬리브의 꼭짓점은 지붕면 양쪽으로 갈라져 있어 가장 가까운 꼭짓점이 18 mm 였다.
+   * 그래서 같은 파일이 "271.6 mm 관통"과 "18 mm 떠 있음"을 동시에 말했다. 면이 실제로
+   * 교차하면 거리는 0 이다 — 떠 있다고 말하기 전에 그것부터 본다.
+   *
+   * 이 검사를 간격 재기보다 먼저 돌린다. 답은 같고(뚫고 지나가는 부품은 어차피 부양
+   * 목록에 들어가지 않는다) 값이 훨씬 싸다 — 재질별 병합 메시를 성분으로 쪼개면 판정 대상이
+   * 열 몇 개에서 200개로 늘어나는데, 그 하나하나에 격자를 껍질째 넓혀 가며 거리를 재면
+   * hf-processing-line 이 4.5초를 쓴다.
+   */
+  for (const index of judged) {
+    if (touching.has(index)) continue;
+    if (partIntersectsAny(parts, grid, index, budget)) touching.add(index);
+  }
 
   const gaps = new Map<number, { index: number; distance: number; exact: boolean } | null>();
   for (const index of judged) {
@@ -1416,19 +1740,6 @@ function analyseContacts(
     const probe = nearestOther(parts, grid, index, contactEps, budget, isLayout ? sameUnit : null);
     gaps.set(index, probe);
     if (probe && probe.distance <= contactEps) touching.add(index);
-  }
-
-  /*
-   * 꼭짓점 거리만으로는 뚫고 지나가는 것을 놓친다.
-   *
-   * 실측: hf-windmill 의 windmillShaftSleeve 는 지붕 면을 271.6 mm 뚫고 지나가는데,
-   * 슬리브의 꼭짓점은 지붕면 양쪽으로 갈라져 있어 가장 가까운 꼭짓점이 18 mm 였다.
-   * 그래서 같은 파일이 "271.6 mm 관통"과 "18 mm 떠 있음"을 동시에 말했다. 면이 실제로
-   * 교차하면 거리는 0 이다 — 떠 있다고 말하기 전에 그것부터 본다.
-   */
-  for (const index of judged) {
-    if (touching.has(index)) continue;
-    if (partIntersectsAny(parts, grid, index, budget)) touching.add(index);
   }
 
   /*
@@ -1462,6 +1773,8 @@ function analyseContacts(
       atRest: existing !== undefined,
       atPhase: hit.phase,
       clipName: hit.clipName,
+      aDetail: partDetail(parts[throughIndex]),
+      bDetail: partDetail(parts[bodyIndex]),
       rank: hit.depthMm,
     });
   }
@@ -1488,10 +1801,14 @@ function analyseContacts(
       gapMm: round1(nearest.distance * 1000),
       nearestName: parts[nearest.index].name,
       translationAnimated: parts[index].translationAnimated,
+      detail: partDetail(parts[index]),
+      componentIndex: parts[index].componentIndex,
+      bottomMm: round1((parts[index].min[1] - floorY) * 1000),
     });
   }
 
   floating.sort((a, b) => b.gapMm - a.gapMm);
+
   const ranked = [...pairs.values()]
     .filter((hit) => hit.buried || hit.depthMm >= MIN_REPORTED_DEPTH_MM)
     .sort((a, b) => b.rank - a.rank);
