@@ -344,7 +344,11 @@ async function fixWindmill(): Promise<unknown> {
   const hub = bladeLumps
     .filter((l) => l.centre.distanceTo(discCentre) < 0.25 && Math.max(l.size.x, l.size.y) < 0.6)
     .sort((a, b) => b.indices.length - a.indices.length)[0];
-  let sleeve: { radiusMm: number; lengthMm: number; colour: string | null } | null = null;
+  let sleeve: {
+    radiusMm: number; lengthMm: number;
+    hubBackFaceZmm: number; frontFaceZmm: number; bearingDepthMm: number; wasBearingDepthMm: number;
+    colour: string | null;
+  } | null = null;
   if (hub) {
     const colourAttribute = blades.geometry.getAttribute('color') as THREE.BufferAttribute | undefined;
     let cr = 0; let cg = 0; let cb = 0;
