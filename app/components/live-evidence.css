@@ -1,0 +1,383 @@
+/* --------------------------------------------------------------------------
+   LiveEvidenceShowcase — 기계가 찍은 화면과 기계가 내린 판정
+
+   app/globals.css 의 .live-evidence-showcase-* 규칙(패널 틀·컨트롤·상태 칸)은
+   그대로 두고, 이 파일은 그 위에 두 가지만 더 얹는다.
+
+   1. 화면 갤러리. 예전 쇼룸의 그림은 배경이 비어 있는 한 장이라
+      .live-evidence-showcase-model 이 mix-blend-mode: screen 으로 어두운 지면에
+      녹여 쓸 수 있었다. 지금 그림은 래스터라이저가 자기 배경(#e9e6e0)까지 같이
+      구운 실제 증거 파일이다. 녹이면 원본이 아닌 것이 되므로, 밝은 판 위에 그대로
+      올려 놓고 한 픽셀도 건드리지 않는다.
+   2. 판정 톤 세 가지. pass / review / gap 을 서로 다른 색으로 가른다. globals 의
+      -gap 은 -review 와 같은 호박색이어서 둘을 나란히 놓으면 구분되지 않는다.
+   -------------------------------------------------------------------------- */
+
+/* 라벨이 영문이던 시절의 서식이 그대로 남아 있었다: uppercase + 0.08em 자간 + 고정폭.
+   한글에는 대문자가 없고, cv5 의 --font-mono 에는 한글 활자가 없어 낱자마다 고정폭으로
+   떨어진다("에 이 전 트 결 과"). 기계가 쓴 문자열(파일명·해시·픽셀·바이트)만 고정폭에
+   남기고, 사람이 읽는 한국어는 본문 활자로 되돌린다. */
+.live-evidence-showcase .live-evidence-showcase-topbar,
+.live-evidence-showcase .live-evidence-showcase-footer,
+.live-evidence-showcase .live-evidence-showcase-control-group > span,
+.live-evidence-showcase .live-evidence-showcase-zoom > span,
+.live-evidence-showcase .live-evidence-showcase-control-group button,
+.live-evidence-showcase .live-evidence-showcase-kicker,
+.live-evidence-showcase .live-evidence-showcase-proof span,
+.live-evidence-showcase .live-evidence-showcase-proof code,
+.live-evidence-showcase .live-evidence-showcase-status span,
+.live-evidence-showcase .live-evidence-showcase-status strong,
+.live-evidence-showcase .live-evidence-showcase-visual-meta strong,
+.live-evidence-showcase .live-evidence-note > span,
+.live-evidence-showcase .live-evidence-cutbar > span,
+.live-evidence-showcase .live-evidence-cutbar button,
+.live-evidence-showcase .live-evidence-caption b,
+.live-evidence-showcase .live-evidence-measures,
+.live-evidence-showcase .live-evidence-checks > summary,
+.live-evidence-showcase .live-evidence-checks li span,
+.live-evidence-showcase .live-evidence-checks li strong {
+  font-family: var(--font-sans);
+  letter-spacing: 0.005em;
+  text-transform: none;
+}
+
+.live-evidence-showcase .live-evidence-measures b {
+  font-family: var(--font-mono);
+}
+
+/* globals.css 의 좁은 화면 규칙은 뷰포트를 본다. 이 패널은 1440px 화면에서도 폭이
+   600px 남짓인 자리(에이전트 첫 화면의 오른쪽 칸)에 들어가므로, 뷰포트가 아니라 제
+   폭을 기준으로 접히게 한다. */
+.live-evidence-showcase {
+  container-type: inline-size;
+}
+
+@container (max-width: 660px) {
+  .live-evidence-showcase-topbar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 0;
+    padding: 9px 15px;
+  }
+
+  .live-evidence-showcase-footer {
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    min-height: 0;
+    padding: 10px 15px;
+  }
+
+  .live-evidence-showcase-footer-boundary {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+@container (max-width: 660px) {
+  .live-evidence-showcase-file { flex-wrap: wrap; }
+  .live-evidence-showcase-file-state { order: 3; width: 100%; }
+}
+
+@container (max-width: 520px) {
+  .live-evidence-showcase-body { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---- 화면 갤러리 ---- */
+.live-evidence-showcase-visual {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 44px 17px 15px;
+  gap: 11px;
+}
+
+/* 판은 그림을 감싸는 액자다. 늘려 놓으면 작은 컷 둘레에 빈 판만 남으므로, 그림
+   크기를 따라가게 두고 남는 자리는 패널 바탕으로 돌린다. */
+.live-evidence-figure {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-height: 0;
+  flex: 0 1 auto;
+  align-self: center;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid rgba(190, 222, 232, 0.22);
+  border-radius: 13px;
+  background: #0d2130;
+  box-shadow: 0 18px 40px -22px rgba(0, 0, 0, 0.85);
+}
+
+.live-evidence-cut {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  /* 원본보다 키우지 않는다. 512 px 렌더를 늘리면 없는 정보가 생긴 것처럼 보인다. */
+  max-height: min(420px, 100%);
+  image-rendering: auto;
+  transform-origin: center;
+  transition: transform 260ms var(--ease);
+}
+
+.live-evidence-inside {
+  position: absolute;
+  right: 9px;
+  bottom: 9px;
+  z-index: 2;
+  max-width: calc(100% - 18px);
+  padding: 5px 8px;
+  border: 1px solid rgba(232, 178, 108, 0.5);
+  border-radius: 6px;
+  background: rgba(10, 20, 28, 0.86);
+  color: #f0c188;
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.live-evidence-caption {
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  color: #8eb6bf;
+  font: 0.68rem var(--font-mono);
+  letter-spacing: 0.04em;
+}
+
+.live-evidence-caption b {
+  color: #dff0f3;
+  font-weight: 400;
+}
+
+.live-evidence-caption code {
+  overflow-wrap: anywhere;
+  color: #74ded0;
+  font: inherit;
+}
+
+.live-evidence-cutbar {
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.live-evidence-cutbar > span {
+  color: #8eb6bf;
+  font: 0.68rem var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.live-evidence-cutbar button {
+  padding: 5px 9px;
+  border: 1px solid rgba(190, 222, 232, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #cfe6ea;
+  font: 0.68rem var(--font-mono);
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.live-evidence-cutbar button:hover,
+.live-evidence-cutbar button:focus-visible {
+  border-color: rgba(116, 222, 208, 0.62);
+  color: #eafaf8;
+}
+
+.live-evidence-cutbar button.is-active {
+  border-color: rgba(116, 222, 208, 0.8);
+  background: rgba(116, 222, 208, 0.16);
+  color: #eafaf8;
+}
+
+/* 동작을 선언하지 않은 파일에는 03 단계가 없다. 눌리지 않는다는 것이 보여야 한다. */
+.live-evidence-showcase .live-evidence-showcase-control-group button:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.live-evidence-showcase .live-evidence-showcase-control-group button:disabled:hover {
+  border-color: transparent;
+  color: #7f9ba5;
+}
+
+/* 좁은 칸에서 파일 이름이 "tractor.co…"로 잘렸다. 이름은 줄을 바꾸는 편이 낫다. */
+.live-evidence-showcase .live-evidence-showcase-file strong { overflow: visible; overflow-wrap: anywhere; white-space: normal; text-overflow: clip; }
+
+/* 좁은 칸에서 "파일 검사"가 "파일…"로 잘리고 있었다. 라벨은 줄을 바꿔도 된다. */
+.live-evidence-showcase .live-evidence-showcase-status > div { flex-wrap: wrap; }
+.live-evidence-showcase .live-evidence-showcase-status span { overflow: visible; white-space: normal; text-overflow: clip; }
+
+/* ---- 판정 칸 아래 작은 측정값 ---- */
+.live-evidence-measures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 12px;
+  margin-top: 9px;
+  color: #6f8794;
+  font: 0.68rem var(--font-mono);
+}
+
+.live-evidence-measures b {
+  color: #17354a;
+  font-weight: 400;
+}
+
+/* ---- 측정 항목 펼치기 ---- */
+.live-evidence-checks {
+  margin-top: 11px;
+  border: 1px solid #dce8eb;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.live-evidence-checks > summary {
+  padding: 8px 10px;
+  color: #4d6874;
+  font: 0.7rem var(--font-mono);
+  cursor: pointer;
+  list-style: none;
+}
+
+.live-evidence-checks > summary::-webkit-details-marker {
+  display: none;
+}
+
+.live-evidence-checks > summary::before {
+  content: "▸ ";
+  color: #8aa5b0;
+}
+
+.live-evidence-checks[open] > summary::before {
+  content: "▾ ";
+}
+
+.live-evidence-checks > summary:focus-visible {
+  outline: 2px solid #19a6ad;
+  outline-offset: 2px;
+}
+
+.live-evidence-checks ul {
+  max-height: 190px;
+  margin: 0;
+  padding: 0 10px 9px;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.live-evidence-checks li {
+  padding: 7px 0;
+  border-top: 1px solid #eef4f5;
+}
+
+.live-evidence-checks li > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 8px;
+  align-items: baseline;
+}
+
+.live-evidence-checks li span {
+  color: #879ba5;
+  font: 0.68rem var(--font-mono);
+}
+
+.live-evidence-checks li strong {
+  font: 0.68rem var(--font-mono);
+}
+
+.live-evidence-checks li p {
+  margin: 4px 0 0;
+  color: #607688;
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
+.live-evidence-check-pass strong { color: #14856b; }
+.live-evidence-check-review strong { color: #9a6a12; }
+.live-evidence-check-gap strong { color: #a3453a; }
+.live-evidence-check-off strong { color: #7d919b; }
+
+/* ---- 그림에 대한 고지 ---- */
+.live-evidence-note {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  padding: 11px 17px 13px;
+  border-top: 1px solid rgba(190, 222, 232, 0.14);
+  background: rgba(255, 255, 255, 0.025);
+  color: #9fbcc5;
+  font-size: 0.7rem;
+  line-height: 1.55;
+}
+
+.live-evidence-note > span {
+  flex: 0 0 auto;
+  color: #74ded0;
+  font: 0.68rem var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.live-evidence-note > p {
+  margin: 0;
+  min-width: 0;
+}
+
+/* ---- 판정 톤: pass / review / gap ---- */
+.live-evidence-showcase-status-review strong { color: #9a6a12; }
+.live-evidence-showcase-status-gap strong { color: #a3453a; }
+
+:root[data-theme="dark"] .live-evidence-checks {
+  border-color: var(--line);
+  background: var(--ink-2);
+}
+
+:root[data-theme="dark"] .live-evidence-checks > summary { color: var(--text-muted); }
+:root[data-theme="dark"] .live-evidence-checks li { border-color: var(--line); }
+:root[data-theme="dark"] .live-evidence-checks li p,
+:root[data-theme="dark"] .live-evidence-measures b { color: var(--text-muted); }
+:root[data-theme="dark"] .live-evidence-check-pass strong { color: #3ddc9a; }
+:root[data-theme="dark"] .live-evidence-check-review strong { color: #e8b46c; }
+:root[data-theme="dark"] .live-evidence-check-gap strong { color: #f08a7a; }
+:root[data-theme="dark"] .live-evidence-showcase-status-review strong { color: #e8b46c; }
+:root[data-theme="dark"] .live-evidence-showcase-status-gap strong { color: #f08a7a; }
+
+.cv5-surface .live-evidence-checks {
+  border-color: var(--v5-line);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.cv5-surface .live-evidence-checks > summary { color: var(--v5-ink-dim); }
+.cv5-surface .live-evidence-checks li { border-color: var(--v5-line); }
+.cv5-surface .live-evidence-checks li p { color: var(--v5-ink-dim); }
+.cv5-surface .live-evidence-checks li span,
+.cv5-surface .live-evidence-measures { color: var(--v5-ink-faint); }
+.cv5-surface .live-evidence-measures b { color: var(--v5-ink); }
+.cv5-surface .live-evidence-check-pass strong { color: var(--v5-green); }
+.cv5-surface .live-evidence-check-review strong { color: var(--v5-amber); }
+.cv5-surface .live-evidence-check-gap strong { color: #f08a7a; }
+.cv5-surface .live-evidence-showcase-status-review strong { color: var(--v5-amber); }
+.cv5-surface .live-evidence-showcase-status-gap strong { color: #f08a7a; }
+
+@media (max-width: 780px) {
+  .live-evidence-showcase-visual { padding: 40px 14px 13px; }
+  .live-evidence-checks ul { max-height: 240px; }
+}
+
+@media (max-width: 560px) {
+  .live-evidence-note { flex-direction: column; gap: 5px; padding: 10px 13px 12px; }
+  .live-evidence-cutbar > span { flex: 1 0 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-evidence-cut { transition: none; }
+}

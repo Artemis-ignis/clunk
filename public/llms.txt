@@ -330,23 +330,45 @@ with exit `4`. The auditor measures the actual 46px HUD raster when `renderPx: 4
 it does not execute an engine import/runtime or player-facing frame. `assetAudit.status` and
 `playerFacing.status` therefore remain `NOT_EVALUATED` and must not be promoted to READY.
 
-## Asset inspection evidence v2
+## Asset inspection evidence v2 and v3
 
-The committed v2 evidence contract is `clunk.asset-inspection-evidence.v2`. It is separate from
-`clunk.frame-manifest.v1` and preserves the structural inspection identity: `inputHash`,
+Two evidence contracts are committed and both are read: `clunk.asset-inspection-evidence.v2` and
+`clunk.asset-inspection-evidence.v3`. v2 is still produced and still valid; v3 is the envelope for
+a run whose captures were made and measured by machine. Both are separate from
+`clunk.frame-manifest.v1` and preserve the structural inspection identity: `inputHash`,
 `resultDigest`, `byteLength`, `coreBuildId`, `ruleSetId`, `ruleSetVersion`, `profileId`,
 `profileHash`, and `inspectionRunId`. `source` repeats the input bytes/hash;
 `sourceOutputRelation` is `SOURCE`, `OUTPUT`, or `SOURCE_OUTPUT_PAIR` and never overwrites the
 source artifact.
 
-`evidenceKind` has two explicit lanes:
+`evidenceKind` has three explicit lanes:
 
-- `CONTRACT_FIXTURE`: structural/technical evidence only. It normalizes to
+- `CONTRACT_FIXTURE` (v2 and v3): structural/technical evidence only. It normalizes to
   `visualRuntime: GAP`, `playerFacing: NOT_EVALUATED`, `humanDecision: NOT_EVALUATED`, and
   `reviewStatus: NOT_EVALUATED`.
-- `PLAYER_FACING_CAPTURE`: requires hashed screenshot/frame evidence with bytes. It may retain
-  `humanDecision: NO_GO`, `PASS_WITH_FOLLOW_UP`, or `PASS`, but a numeric score never supplies a
-  human decision. A capture without a decision remains `reviewStatus: PENDING`.
+- `PLAYER_FACING_CAPTURE` (v2 and v3): requires hashed screenshot/frame evidence with bytes taken
+  on the shipped rendering path (`shippedPath: true`). It may retain `humanDecision: NO_GO`,
+  `PASS_WITH_FOLLOW_UP`, or `PASS`. A capture without a decision remains `reviewStatus: PENDING`.
+- `MACHINE_VISUAL_CAPTURE` (v3 only): hashed captures from Clunk's own offline software
+  rasteriser — six fixed cameras (engine three-quarter/front/side/top, then a 1.6 m eye height at
+  5 m and 15 m) plus three animation phases. Every capture carries `shippedPath: false` and a
+  `renderKind`, and the envelope repeats the boundary in
+  `captureLimitation: OFFLINE_SOFTWARE_RASTER_IS_NOT_AN_ENGINE_SCREENSHOT`. These frames are not
+  engine screenshots and must not be described as ones.
+
+v2 derives both visual lanes from `humanDecision`, so a capture nobody signed stays `PENDING` for
+ever. v3 derives `visualRuntime` and `playerFacing` from the measurements instead, and records who
+decided in `decisionAuthority` (`MACHINE` or `HUMAN`). `humanDecision` therefore gains two machine
+values — `NOT_REQUIRED` when the automatic verdict is PASS or FAIL, and `OPTIONAL_REVIEW` when it
+is REVIEW; the four v2 human values are still accepted when a person actually recorded one.
+`autoVerdict` holds the machine verdict the two lanes were derived from, and `visualEvidence`
+carries the renderer id, the camera rig hash, per-capture metrics, and every check with its
+`threshold`, `observed`, and `reason`, so a reader recomputes the status instead of trusting the
+summary. A v2 reader is handed the same inspection as a valid v2 `CONTRACT_FIXTURE`.
+
+The rule that did not change: a numeric structural score never supplies a visual verdict. What v3
+changes is who supplies it — a measured capture can, and a human decision is no longer the only
+thing that closes the two visual lanes.
 
 The envelope includes structured `findings[]` (`code`, `severity`, `observed`, `threshold`,
 `rationale`, `recommendation`, `ownership`, and `enforcement`) and optional `audioEvidence[]`
@@ -380,6 +402,19 @@ the authenticated validation endpoint is `POST /api/asset-inspection-evidence` f
 `byteVerification`; the API cannot read a caller's local path and rejects
 `PLAYER_FACING_CAPTURE` with HTTP 422. All surfaces validate and normalize evidence; none
 promotes visual status or replaces collaboration thread state.
+
+`MACHINE_VISUAL_CAPTURE` envelopes come from a separate local command that renders and measures
+in one pass:
+
+```powershell
+npm.cmd run asset:visual-evidence -- <asset.glb> --out outputs\visual-evidence --json
+```
+
+It exits `0` for PASS, `3` for REVIEW, `2` for FAIL, and `4` when the file could not be read, and
+writes the captures, a `<slug>.visual-evidence.json` envelope, and a readable report next to them.
+The published examples on this site are those files moved unchanged: the images under
+`/evidence/<slug>/` are byte-identical to the captures the run produced, so each `sha256` in the
+envelope is the hash of the file a reader downloads.
 
 ## Authenticated collaboration
 

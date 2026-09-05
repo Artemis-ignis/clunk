@@ -1,0 +1,1266 @@
+{
+  "schema": "clunk.asset-inspection-evidence.v3",
+  "schemaVersion": "3",
+  "operation": "inspect",
+  "evidenceKind": "MACHINE_VISUAL_CAPTURE",
+  "identity": {
+    "inputHash": "0504ffd078500509ecedf58086616181e0dc84ac0a812dfbc796c34352fff2e3",
+    "resultDigest": "abdd02cc417314ca73aac668562b8aa46ff7e80683b5e6e6accf9479f594136a",
+    "byteLength": 2833676,
+    "coreBuildId": "0.1.0",
+    "ruleSetId": "clunk-game-ready-v1",
+    "ruleSetVersion": "1.0.0",
+    "profileId": "web",
+    "profileHash": "d7cb0dbf940687d317a989dc217ff2b8e8a04415629ef08ea4d8eddd945e4b1f",
+    "inspectionRunId": "visual-evidence-clunk-heli-h145-01"
+  },
+  "source": {
+    "path": "/market/clunk-heli-h145/h145.glb",
+    "fileName": "h145.glb",
+    "bytes": 2833676,
+    "sha256": "0504ffd078500509ecedf58086616181e0dc84ac0a812dfbc796c34352fff2e3"
+  },
+  "sourceOutputRelation": {
+    "kind": "SOURCE",
+    "sourceHash": "0504ffd078500509ecedf58086616181e0dc84ac0a812dfbc796c34352fff2e3",
+    "sourceInspectionDigest": "abdd02cc417314ca73aac668562b8aa46ff7e80683b5e6e6accf9479f594136a"
+  },
+  "report": {
+    "schemaVersion": "1.0",
+    "coreVersion": "0.1.0",
+    "ruleSetId": "clunk-game-ready-v1",
+    "ruleSetVersion": "1.0.0",
+    "profileId": "web",
+    "fileName": "h145.glb",
+    "format": "glb",
+    "byteLength": 2833676,
+    "inputHash": "0504ffd078500509ecedf58086616181e0dc84ac0a812dfbc796c34352fff2e3",
+    "metrics": {
+      "sceneCount": 1,
+      "nodeCount": 82,
+      "maxDepth": 3,
+      "emptyNodeCount": 0,
+      "meshCount": 79,
+      "primitiveCount": 79,
+      "vertexCount": 61089,
+      "triangleCount": 85150,
+      "drawCallCount": 79,
+      "materialCount": 9,
+      "duplicateMaterialCount": 0,
+      "textureCount": 1,
+      "imageCount": 1,
+      "textureMaxDimension": 4,
+      "textureMemoryBytes": 64,
+      "animationCount": 2,
+      "skinCount": 0,
+      "missingNormalPrimitiveCount": 0,
+      "missingUvPrimitiveCount": 0,
+      "nonUnitScaleNodeCount": 0,
+      "zeroScaleNodeCount": 0,
+      "externalResourceCount": 0,
+      "unresolvedResourceCount": 0,
+      "remoteResourceCount": 0,
+      "extensionCount": 5,
+      "bounds": {
+        "min": [
+          -5.338442493299269,
+          0,
+          -8.140000343322754
+        ],
+        "max": [
+          5.266502303431431,
+          3.9500000121593475,
+          5.5
+        ],
+        "dimensions": [
+          10.604944796730699,
+          3.9500000121593475,
+          13.640000343322754
+        ]
+      }
+    },
+    "findings": [
+      {
+        "id": "FORMAT-GLTF2:/asset",
+        "ruleId": "FORMAT-GLTF2",
+        "category": "format",
+        "severity": "INFO",
+        "path": "/asset",
+        "title": "glTF 2.0 parsed",
+        "message": "GLB is a supported glTF 2.0 container.",
+        "observed": "GLB",
+        "threshold": "GLB or GLTF 2.0",
+        "autoFixable": false,
+        "action": "No action required."
+      },
+      {
+        "id": "GEO-FLOATING-PART:/nodes/26",
+        "ruleId": "GEO-FLOATING-PART",
+        "category": "geometry",
+        "severity": "WARNING",
+        "path": "/nodes/26",
+        "title": "아무것과도 닿지 않는 부품",
+        "message": "engine_intake_r 은(는) 바닥에도 다른 어떤 부품에도 닿지 않습니다 — 가장 가까운 것은 engine_cowling, 간격 5.3 mm.",
+        "observed": "5.3 mm",
+        "threshold": "≤ 5 mm",
+        "autoFixable": false,
+        "action": "허브·축·받침에 닿도록 원본에서 위치를 고치십시오."
+      },
+      {
+        "id": "GEO-FLOATING-PART:/nodes/27",
+        "ruleId": "GEO-FLOATING-PART",
+        "category": "geometry",
+        "severity": "WARNING",
+        "path": "/nodes/27",
+        "title": "아무것과도 닿지 않는 부품",
+        "message": "intake_grille_r 은(는) 바닥에도 다른 어떤 부품에도 닿지 않습니다 — 가장 가까운 것은 engine_intake_r, 간격 7 mm.",
+        "observed": "7 mm",
+        "threshold": "≤ 5 mm",
+        "autoFixable": false,
+        "action": "허브·축·받침에 닿도록 원본에서 위치를 고치십시오."
+      },
+      {
+        "id": "GEO-FLOATING-PART:/nodes/28",
+        "ruleId": "GEO-FLOATING-PART",
+        "category": "geometry",
+        "severity": "WARNING",
+        "path": "/nodes/28",
+        "title": "아무것과도 닿지 않는 부품",
+        "message": "engine_intake_l 은(는) 바닥에도 다른 어떤 부품에도 닿지 않습니다 — 가장 가까운 것은 engine_cowling, 간격 5.3 mm.",
+        "observed": "5.3 mm",
+        "threshold": "≤ 5 mm",
+        "autoFixable": false,
+        "action": "허브·축·받침에 닿도록 원본에서 위치를 고치십시오."
+      },
+      {
+        "id": "GEO-FLOATING-PART:/nodes/29",
+        "ruleId": "GEO-FLOATING-PART",
+        "category": "geometry",
+        "severity": "WARNING",
+        "path": "/nodes/29",
+        "title": "아무것과도 닿지 않는 부품",
+        "message": "intake_grille_l 은(는) 바닥에도 다른 어떤 부품에도 닿지 않습니다 — 가장 가까운 것은 engine_intake_l, 간격 7 mm.",
+        "observed": "7 mm",
+        "threshold": "≤ 5 mm",
+        "autoFixable": false,
+        "action": "허브·축·받침에 닿도록 원본에서 위치를 고치십시오."
+      },
+      {
+        "id": "GEO-FLOATING-PART:/nodes/30",
+        "ruleId": "GEO-FLOATING-PART",
+        "category": "geometry",
+        "severity": "WARNING",
+        "path": "/nodes/30",
+        "title": "아무것과도 닿지 않는 부품",
+        "message": "exhaust_r 은(는) 바닥에도 다른 어떤 부품에도 닿지 않습니다 — 가장 가까운 것은 engine_cowling, 간격 5.2 mm.",
+        "observed": "5.2 mm",
+        "threshold": "≤ 5 mm",
+        "autoFixable": false,
+        "action": "허브·축·받침에 닿도록 원본에서 위치를 고치십시오."
+      },
+      {
+        "id": "GEO-FLOATING-PART:/nodes/31",
+        "ruleId": "GEO-FLOATING-PART",
+        "category": "geometry",
+        "severity": "WARNING",
+        "path": "/nodes/31",
+        "title": "아무것과도 닿지 않는 부품",
+        "message": "exhaust_l 은(는) 바닥에도 다른 어떤 부품에도 닿지 않습니다 — 가장 가까운 것은 engine_cowling, 간격 5.2 mm.",
+        "observed": "5.2 mm",
+        "threshold": "≤ 5 mm",
+        "autoFixable": false,
+        "action": "허브·축·받침에 닿도록 원본에서 위치를 고치십시오."
+      },
+      {
+        "id": "GEO-FLOATING-PART:/nodes/51",
+        "ruleId": "GEO-FLOATING-PART",
+        "category": "geometry",
+        "severity": "WARNING",
+        "path": "/nodes/51",
+        "title": "아무것과도 닿지 않는 부품",
+        "message": "fenestron_stator 은(는) 바닥에도 다른 어떤 부품에도 닿지 않습니다 — 가장 가까운 것은 fenestron_duct, 간격 9.2 mm.",
+        "observed": "9.2 mm",
+        "threshold": "≤ 5 mm",
+        "autoFixable": false,
+        "action": "허브·축·받침에 닿도록 원본에서 위치를 고치십시오."
+      },
+      {
+        "id": "GEO-FLOATING-PART:/nodes/71",
+        "ruleId": "GEO-FLOATING-PART",
+        "category": "geometry",
+        "severity": "WARNING",
+        "path": "/nodes/71",
+        "title": "아무것과도 닿지 않는 부품",
+        "message": "pitot 은(는) 바닥에도 다른 어떤 부품에도 닿지 않습니다 — 가장 가까운 것은 fuselage, 간격 5.1 mm.",
+        "observed": "5.1 mm",
+        "threshold": "≤ 5 mm",
+        "autoFixable": false,
+        "action": "허브·축·받침에 닿도록 원본에서 위치를 고치십시오."
+      },
+      {
+        "id": "GEO-TRIANGLE-BUDGET:/meshes",
+        "ruleId": "GEO-TRIANGLE-BUDGET",
+        "category": "geometry",
+        "severity": "WARNING",
+        "path": "/meshes",
+        "title": "Triangle budget nearly exceeded",
+        "message": "The asset is close to the declared triangle budget.",
+        "observed": 85150,
+        "threshold": 100000,
+        "autoFixable": false,
+        "action": "Review the target platform budget before shipping."
+      },
+      {
+        "id": "RUNTIME-ANIMATION-SKIN:/animations|/skins",
+        "ruleId": "RUNTIME-ANIMATION-SKIN",
+        "category": "runtime",
+        "severity": "INFO",
+        "path": "/animations|/skins",
+        "title": "Animation or skin data present",
+        "message": "Animation and skin data are preserved by the lossless v1 optimizer.",
+        "observed": "2 animations / 0 skins",
+        "threshold": "Preserve",
+        "autoFixable": false,
+        "action": "No action required."
+      }
+    ],
+    "score": {
+      "score": 96,
+      "threshold": 90,
+      "ready": false,
+      "hardBlockerCount": 0,
+      "breakdown": {
+        "format": 100,
+        "scene": 100,
+        "geometry": 73,
+        "materials": 100,
+        "textures": 100,
+        "runtime": 100
+      },
+      "ruleSetId": "clunk-game-ready-v1",
+      "ruleSetVersion": "1.0.0"
+    },
+    "analysisId": "analysis-0504ffd07850-abdd02cc",
+    "resultDigest": "abdd02cc417314ca73aac668562b8aa46ff7e80683b5e6e6accf9479f594136a"
+  },
+  "findings": [
+    {
+      "id": "FORMAT-GLTF2:/asset",
+      "code": "FORMAT-GLTF2",
+      "category": "format",
+      "severity": "INFO",
+      "path": "/asset",
+      "title": "glTF 2.0 parsed",
+      "message": "GLB is a supported glTF 2.0 container.",
+      "observed": "GLB",
+      "threshold": "GLB or GLTF 2.0",
+      "rationale": "The finding is a structural contract observation; it does not prove player-facing quality.",
+      "recommendation": "No action required.",
+      "ownership": "asset",
+      "enforcement": "OFF",
+      "autoFixable": false
+    },
+    {
+      "id": "GEO-FLOATING-PART:/nodes/26",
+      "code": "GEO-FLOATING-PART",
+      "category": "geometry",
+      "severity": "WARNING",
+      "path": "/nodes/26",
+      "title": "아무것과도 닿지 않는 부품",
+      "message": "engine_intake_r 은(는) 바닥에도 다른 어떤 부품에도 닿지 않습니다 — 가장 가까운 것은 engine_cowling, 간격 5.3 mm.",
+      "observed": "5.3 mm",
+      "threshold": "≤ 5 mm",
+      "rationale": "The finding is a structural contract observation; it does not prove player-facing quality.",
+      "recommendation": "허브·축·받침에 닿도록 원본에서 위치를 고치십시오.",
+      "ownership": "asset",
+      "enforcement": "OFF",
+      "autoFixable": false
+    },
+    {
+      "id": "GEO-FLOATING-PART:/nodes/27",
+      "code": "GEO-FLOATING-PART",
+      "category": "geometry",
+      "severity": "WARNING",
+      "path": "/nodes/27",
+      "title": "아무것과도 닿지 않는 부품",
+      "message": "intake_grille_r 은(는) 바닥에도 다른 어떤 부품에도 닿지 않습니다 — 가장 가까운 것은 engine_intake_r, 간격 7 mm.",
+      "observed": "7 mm",
+      "threshold": "≤ 5 mm",
+      "rationale": "The finding is a structural contract observation; it does not prove player-facing quality.",
+      "recommendation": "허브·축·받침에 닿도록 원본에서 위치를 고치십시오.",
+      "ownership": "asset",
+      "enforcement": "OFF",
+      "autoFixable": false
+    },
+    {
+      "id": "GEO-FLOATING-PART:/nodes/28",
+      "code": "GEO-FLOATING-PART",
+      "category": "geometry",
+      "severity": "WARNING",
+      "path": "/nodes/28",
+      "title": "아무것과도 닿지 않는 부품",
+      "message": "engine_intake_l 은(는) 바닥에도 다른 어떤 부품에도 닿지 않습니다 — 가장 가까운 것은 engine_cowling, 간격 5.3 mm.",
+      "observed": "5.3 mm",
+      "threshold": "≤ 5 mm",
+      "rationale": "The finding is a structural contract observation; it does not prove player-facing quality.",
+      "recommendation": "허브·축·받침에 닿도록 원본에서 위치를 고치십시오.",
+      "ownership": "asset",
+      "enforcement": "OFF",
+      "autoFixable": false
+    },
+    {
+      "id": "GEO-FLOATING-PART:/nodes/29",
+      "code": "GEO-FLOATING-PART",
+      "category": "geometry",
+      "severity": "WARNING",
+      "path": "/nodes/29",
+      "title": "아무것과도 닿지 않는 부품",
+      "message": "intake_grille_l 은(는) 바닥에도 다른 어떤 부품에도 닿지 않습니다 — 가장 가까운 것은 engine_intake_l, 간격 7 mm.",
+      "observed": "7 mm",
+      "threshold": "≤ 5 mm",
+      "rationale": "The finding is a structural contract observation; it does not prove player-facing quality.",
+      "recommendation": "허브·축·받침에 닿도록 원본에서 위치를 고치십시오.",
+      "ownership": "asset",
+      "enforcement": "OFF",
+      "autoFixable": false
+    },
+    {
+      "id": "GEO-FLOATING-PART:/nodes/30",
+      "code": "GEO-FLOATING-PART",
+      "category": "geometry",
+      "severity": "WARNING",
+      "path": "/nodes/30",
+      "title": "아무것과도 닿지 않는 부품",
+      "message": "exhaust_r 은(는) 바닥에도 다른 어떤 부품에도 닿지 않습니다 — 가장 가까운 것은 engine_cowling, 간격 5.2 mm.",
+      "observed": "5.2 mm",
+      "threshold": "≤ 5 mm",
+      "rationale": "The finding is a structural contract observation; it does not prove player-facing quality.",
+      "recommendation": "허브·축·받침에 닿도록 원본에서 위치를 고치십시오.",
+      "ownership": "asset",
+      "enforcement": "OFF",
+      "autoFixable": false
+    },
+    {
+      "id": "GEO-FLOATING-PART:/nodes/31",
+      "code": "GEO-FLOATING-PART",
+      "category": "geometry",
+      "severity": "WARNING",
+      "path": "/nodes/31",
+      "title": "아무것과도 닿지 않는 부품",
+      "message": "exhaust_l 은(는) 바닥에도 다른 어떤 부품에도 닿지 않습니다 — 가장 가까운 것은 engine_cowling, 간격 5.2 mm.",
+      "observed": "5.2 mm",
+      "threshold": "≤ 5 mm",
+      "rationale": "The finding is a structural contract observation; it does not prove player-facing quality.",
+      "recommendation": "허브·축·받침에 닿도록 원본에서 위치를 고치십시오.",
+      "ownership": "asset",
+      "enforcement": "OFF",
+      "autoFixable": false
+    },
+    {
+      "id": "GEO-FLOATING-PART:/nodes/51",
+      "code": "GEO-FLOATING-PART",
+      "category": "geometry",
+      "severity": "WARNING",
+      "path": "/nodes/51",
+      "title": "아무것과도 닿지 않는 부품",
+      "message": "fenestron_stator 은(는) 바닥에도 다른 어떤 부품에도 닿지 않습니다 — 가장 가까운 것은 fenestron_duct, 간격 9.2 mm.",
+      "observed": "9.2 mm",
+      "threshold": "≤ 5 mm",
+      "rationale": "The finding is a structural contract observation; it does not prove player-facing quality.",
+      "recommendation": "허브·축·받침에 닿도록 원본에서 위치를 고치십시오.",
+      "ownership": "asset",
+      "enforcement": "OFF",
+      "autoFixable": false
+    },
+    {
+      "id": "GEO-FLOATING-PART:/nodes/71",
+      "code": "GEO-FLOATING-PART",
+      "category": "geometry",
+      "severity": "WARNING",
+      "path": "/nodes/71",
+      "title": "아무것과도 닿지 않는 부품",
+      "message": "pitot 은(는) 바닥에도 다른 어떤 부품에도 닿지 않습니다 — 가장 가까운 것은 fuselage, 간격 5.1 mm.",
+      "observed": "5.1 mm",
+      "threshold": "≤ 5 mm",
+      "rationale": "The finding is a structural contract observation; it does not prove player-facing quality.",
+      "recommendation": "허브·축·받침에 닿도록 원본에서 위치를 고치십시오.",
+      "ownership": "asset",
+      "enforcement": "OFF",
+      "autoFixable": false
+    },
+    {
+      "id": "GEO-TRIANGLE-BUDGET:/meshes",
+      "code": "GEO-TRIANGLE-BUDGET",
+      "category": "geometry",
+      "severity": "WARNING",
+      "path": "/meshes",
+      "title": "Triangle budget nearly exceeded",
+      "message": "The asset is close to the declared triangle budget.",
+      "observed": 85150,
+      "threshold": 100000,
+      "rationale": "The finding is a structural contract observation; it does not prove player-facing quality.",
+      "recommendation": "Review the target platform budget before shipping.",
+      "ownership": "asset",
+      "enforcement": "OFF",
+      "autoFixable": false
+    },
+    {
+      "id": "RUNTIME-ANIMATION-SKIN:/animations|/skins",
+      "code": "RUNTIME-ANIMATION-SKIN",
+      "category": "runtime",
+      "severity": "INFO",
+      "path": "/animations|/skins",
+      "title": "Animation or skin data present",
+      "message": "Animation and skin data are preserved by the lossless v1 optimizer.",
+      "observed": "2 animations / 0 skins",
+      "threshold": "Preserve",
+      "rationale": "The finding is a structural contract observation; it does not prove player-facing quality.",
+      "recommendation": "No action required.",
+      "ownership": "runtime",
+      "enforcement": "OFF",
+      "autoFixable": false
+    },
+    {
+      "id": "OBS-DRAW-CALLS:/metrics",
+      "code": "OBS-DRAW-CALLS",
+      "category": "quality",
+      "severity": "INFO",
+      "path": "/metrics",
+      "title": "OBS-DRAW-CALLS",
+      "message": "Observation recorded; it is not visual approval.",
+      "observed": 79,
+      "threshold": "not declared",
+      "rationale": "Draw calls are a runtime cost observation, not a visual approval signal.",
+      "recommendation": "Compare against the shipped renderer budget and capture the affected camera.",
+      "ownership": "runtime",
+      "enforcement": "OFF"
+    },
+    {
+      "id": "OBS-TRIANGLES:/metrics",
+      "code": "OBS-TRIANGLES",
+      "category": "quality",
+      "severity": "INFO",
+      "path": "/metrics",
+      "title": "OBS-TRIANGLES",
+      "message": "Observation recorded; it is not visual approval.",
+      "observed": 85150,
+      "threshold": "not declared",
+      "rationale": "Triangle count describes static geometry complexity only.",
+      "recommendation": "Review the target camera, LOD and frame cost before changing source bytes.",
+      "ownership": "asset",
+      "enforcement": "OFF"
+    },
+    {
+      "id": "OBS-MISSING-NORMALS:/metrics",
+      "code": "OBS-MISSING-NORMALS",
+      "category": "quality",
+      "severity": "INFO",
+      "path": "/metrics",
+      "title": "OBS-MISSING-NORMALS",
+      "message": "Observation recorded; it is not visual approval.",
+      "observed": 0,
+      "threshold": "not declared",
+      "rationale": "Missing normals can be intentional flat-shaded or procedural authoring; renderer ownership must be confirmed.",
+      "recommendation": "Confirm source shading and the target renderer before generating normals.",
+      "ownership": "unknown",
+      "enforcement": "OFF"
+    },
+    {
+      "id": "OBS-MISSING-UVS:/metrics",
+      "code": "OBS-MISSING-UVS",
+      "category": "quality",
+      "severity": "INFO",
+      "path": "/metrics",
+      "title": "OBS-MISSING-UVS",
+      "message": "Observation recorded; it is not visual approval.",
+      "observed": 0,
+      "threshold": "not declared",
+      "rationale": "Missing UVs may be valid for runtime-generated materials and are not automatically a texture defect.",
+      "recommendation": "Trace material ownership; add UVs only when the shipped material contract requires them.",
+      "ownership": "unknown",
+      "enforcement": "OFF"
+    },
+    {
+      "id": "OBS-TEXTURE-COUNT:/metrics",
+      "code": "OBS-TEXTURE-COUNT",
+      "category": "quality",
+      "severity": "INFO",
+      "path": "/metrics",
+      "title": "OBS-TEXTURE-COUNT",
+      "message": "Observation recorded; it is not visual approval.",
+      "observed": 1,
+      "threshold": "not declared",
+      "rationale": "A zero texture count can describe procedural/material authoring and is not a visual failure by itself.",
+      "recommendation": "Link the runtime material and a shipped frame before deciding whether a texture is missing.",
+      "ownership": "unknown",
+      "enforcement": "OFF"
+    },
+    {
+      "id": "OBS-NONUNIT-SCALE:/metrics",
+      "code": "OBS-NONUNIT-SCALE",
+      "category": "quality",
+      "severity": "INFO",
+      "path": "/metrics",
+      "title": "OBS-NONUNIT-SCALE",
+      "message": "Observation recorded; it is not visual approval.",
+      "observed": 0,
+      "threshold": "not declared",
+      "rationale": "Non-unit transforms can be an authored pivot contract or an engine import risk.",
+      "recommendation": "Confirm the target engine import policy and preserve named pivots before changing source bytes.",
+      "ownership": "runtime",
+      "enforcement": "OFF"
+    },
+    {
+      "id": "OBS-BOUNDS-ABS:/metrics",
+      "code": "OBS-BOUNDS-ABS",
+      "category": "quality",
+      "severity": "INFO",
+      "path": "/metrics",
+      "title": "OBS-BOUNDS-ABS",
+      "message": "Observation recorded; it is not visual approval.",
+      "observed": 8.140000343322754,
+      "threshold": "not declared",
+      "rationale": "Extreme accessor bounds can be quantized/raw bounds and require decode-aware runtime context.",
+      "recommendation": "Compare decoded runtime bounds and scene scale; do not optimize blindly.",
+      "ownership": "unknown",
+      "enforcement": "OFF"
+    },
+    {
+      "id": "OBS-RUNTIME-EVIDENCE:/metrics",
+      "code": "OBS-RUNTIME-EVIDENCE",
+      "category": "quality",
+      "severity": "INFO",
+      "path": "/metrics",
+      "title": "OBS-RUNTIME-EVIDENCE",
+      "message": "Observation recorded; it is not visual approval.",
+      "observed": false,
+      "threshold": "not declared",
+      "rationale": "A static inspection cannot prove that an asset is loaded or visible in a shipped frame.",
+      "recommendation": "Attach a shipped-path capture with renderer, viewport, camera and source-tree provenance.",
+      "ownership": "runtime",
+      "enforcement": "OFF"
+    }
+  ],
+  "qualityPolicy": {
+    "declared": null,
+    "status": "OFF",
+    "blockingViolationCount": 0,
+    "advisoryViolationCount": 0
+  },
+  "captureEvidence": [
+    {
+      "media": "screenshot",
+      "path": "/evidence/clunk-heli-h145/clunk-heli-h145__engine-three-quarter.png",
+      "sha256": "e5aeff7dba94f920b0f9acaa4e2fe585863972ab70ed33bd6d878faebf3c9ca2",
+      "bytes": 44672,
+      "renderer": "clunk-software-raster/1.0.0",
+      "viewport": {
+        "width": 512,
+        "height": 512
+      },
+      "cameraPoseHash": "a9935e9f0253482cc7618c769ece0bf0ce29d8367c20dc59e7077b9e9a25bc60",
+      "sourceTreeHash": "5411d49f5018c050e1558cf257088b847245cb74c7b2e1d4cd6be1ec04bf286f",
+      "shippedPath": false,
+      "renderKind": "clunk-software-raster",
+      "console": {
+        "errors": 0,
+        "warnings": 0
+      }
+    },
+    {
+      "media": "screenshot",
+      "path": "/evidence/clunk-heli-h145/clunk-heli-h145__engine-front.png",
+      "sha256": "1fbb1464220fd5dd69488779e62e269b36d8001ac3b7533a6d52ad654eebef79",
+      "bytes": 24710,
+      "renderer": "clunk-software-raster/1.0.0",
+      "viewport": {
+        "width": 512,
+        "height": 512
+      },
+      "cameraPoseHash": "be48b4bb7cb469e2feba158dd09400a87c273c68aa85ffeb81f8f1654d169b6d",
+      "sourceTreeHash": "5411d49f5018c050e1558cf257088b847245cb74c7b2e1d4cd6be1ec04bf286f",
+      "shippedPath": false,
+      "renderKind": "clunk-software-raster",
+      "console": {
+        "errors": 0,
+        "warnings": 0
+      }
+    },
+    {
+      "media": "screenshot",
+      "path": "/evidence/clunk-heli-h145/clunk-heli-h145__engine-side.png",
+      "sha256": "d02a075a4ae8e673bea69ac6ad894df3ce70d9eef87728f42b4f8e1ae108a38c",
+      "bytes": 26545,
+      "renderer": "clunk-software-raster/1.0.0",
+      "viewport": {
+        "width": 512,
+        "height": 512
+      },
+      "cameraPoseHash": "37f32e99b067ccb00309e9288481325bda804a05c300f17598be94ad7f6e9e8e",
+      "sourceTreeHash": "5411d49f5018c050e1558cf257088b847245cb74c7b2e1d4cd6be1ec04bf286f",
+      "shippedPath": false,
+      "renderKind": "clunk-software-raster",
+      "console": {
+        "errors": 0,
+        "warnings": 0
+      }
+    },
+    {
+      "media": "screenshot",
+      "path": "/evidence/clunk-heli-h145/clunk-heli-h145__engine-top.png",
+      "sha256": "4a156ffd5e04ed1614497094f476e43ca870359aeb93a6448a67cb1b93a6a305",
+      "bytes": 45717,
+      "renderer": "clunk-software-raster/1.0.0",
+      "viewport": {
+        "width": 512,
+        "height": 512
+      },
+      "cameraPoseHash": "6d85957024c3af2a1442d11614338e091dc625f84331131631a5a957201a1bf3",
+      "sourceTreeHash": "5411d49f5018c050e1558cf257088b847245cb74c7b2e1d4cd6be1ec04bf286f",
+      "shippedPath": false,
+      "renderKind": "clunk-software-raster",
+      "console": {
+        "errors": 0,
+        "warnings": 0
+      }
+    },
+    {
+      "media": "screenshot",
+      "path": "/evidence/clunk-heli-h145/clunk-heli-h145__player-5m.png",
+      "sha256": "d402e310dc3af17f6751c6ed60feb495af94d7d5d75959142fea6dd8cfa55874",
+      "bytes": 11438,
+      "renderer": "clunk-software-raster/1.0.0",
+      "viewport": {
+        "width": 640,
+        "height": 360
+      },
+      "cameraPoseHash": "ab023d6f229a90585fb6b2adaf9334f8b96215fe475c4371b5fcadf87ab1b3ef",
+      "sourceTreeHash": "5411d49f5018c050e1558cf257088b847245cb74c7b2e1d4cd6be1ec04bf286f",
+      "shippedPath": false,
+      "renderKind": "clunk-software-raster",
+      "console": {
+        "errors": 0,
+        "warnings": 0
+      }
+    },
+    {
+      "media": "screenshot",
+      "path": "/evidence/clunk-heli-h145/clunk-heli-h145__player-15m.png",
+      "sha256": "3ea908ff43656e019d8279065ca2167533ea6d03a76a53cc0bab323dfc14fb2b",
+      "bytes": 11456,
+      "renderer": "clunk-software-raster/1.0.0",
+      "viewport": {
+        "width": 640,
+        "height": 360
+      },
+      "cameraPoseHash": "3cc39a7398830f7d87b09f60b93b4ad340e6b2a04a78c2d222cab38fd27e27c8",
+      "sourceTreeHash": "5411d49f5018c050e1558cf257088b847245cb74c7b2e1d4cd6be1ec04bf286f",
+      "shippedPath": false,
+      "renderKind": "clunk-software-raster",
+      "console": {
+        "errors": 0,
+        "warnings": 0
+      }
+    }
+  ],
+  "audioEvidence": [],
+  "byteVerification": {
+    "method": "LOCAL_CLI_READ",
+    "source": {
+      "sha256": "0504ffd078500509ecedf58086616181e0dc84ac0a812dfbc796c34352fff2e3",
+      "bytes": 2833676,
+      "verified": true
+    },
+    "captures": [
+      {
+        "path": "/evidence/clunk-heli-h145/clunk-heli-h145__engine-three-quarter.png",
+        "sha256": "e5aeff7dba94f920b0f9acaa4e2fe585863972ab70ed33bd6d878faebf3c9ca2",
+        "bytes": 44672,
+        "verified": true
+      },
+      {
+        "path": "/evidence/clunk-heli-h145/clunk-heli-h145__engine-front.png",
+        "sha256": "1fbb1464220fd5dd69488779e62e269b36d8001ac3b7533a6d52ad654eebef79",
+        "bytes": 24710,
+        "verified": true
+      },
+      {
+        "path": "/evidence/clunk-heli-h145/clunk-heli-h145__engine-side.png",
+        "sha256": "d02a075a4ae8e673bea69ac6ad894df3ce70d9eef87728f42b4f8e1ae108a38c",
+        "bytes": 26545,
+        "verified": true
+      },
+      {
+        "path": "/evidence/clunk-heli-h145/clunk-heli-h145__engine-top.png",
+        "sha256": "4a156ffd5e04ed1614497094f476e43ca870359aeb93a6448a67cb1b93a6a305",
+        "bytes": 45717,
+        "verified": true
+      },
+      {
+        "path": "/evidence/clunk-heli-h145/clunk-heli-h145__player-5m.png",
+        "sha256": "d402e310dc3af17f6751c6ed60feb495af94d7d5d75959142fea6dd8cfa55874",
+        "bytes": 11438,
+        "verified": true
+      },
+      {
+        "path": "/evidence/clunk-heli-h145/clunk-heli-h145__player-15m.png",
+        "sha256": "3ea908ff43656e019d8279065ca2167533ea6d03a76a53cc0bab323dfc14fb2b",
+        "bytes": 11456,
+        "verified": true
+      }
+    ],
+    "audio": []
+  },
+  "statuses": {
+    "structural": "CONDITIONAL",
+    "visualRuntime": "APPROVED",
+    "playerFacing": "PASS",
+    "humanDecision": "NOT_REQUIRED",
+    "reviewStatus": "EVALUATED",
+    "autoVerdict": "PASS",
+    "decisionAuthority": "MACHINE"
+  },
+  "visualEvidence": {
+    "schema": "clunk.visual-evidence.v1",
+    "toolVersion": "clunk-visual-evidence/1.0.0",
+    "renderer": {
+      "id": "clunk-software-raster",
+      "version": "1.0.0",
+      "kind": "software-rasteriser",
+      "gpu": false,
+      "shading": "flat warm key + cool sky hemisphere + soft contact shadow",
+      "note": "A z-buffered software rasteriser with flat warm-key and cool-sky shading and one soft contact shadow. No PBR, no image-based lighting, no reflections, no ray-traced shadow, no ambient occlusion. It is not a screenshot from a game engine and must not be described as one.",
+      "note_ko": "깊이 버퍼를 쓰는 소프트웨어 래스터라이저입니다. 따뜻한 주광과 차가운 하늘빛의 평면 음영, 바닥 접촉 그림자 하나가 전부입니다. PBR·환경광·반사·광선추적 그림자·주변광 차폐는 없습니다. 게임 엔진에서 찍은 화면이 아니며 그렇게 부르면 안 됩니다."
+    },
+    "sceneDigest": "6b34400cb53ecc5665130c68647fb5f558f1a7c32f60b7275e5938f9e354ba74",
+    "cameraRigHash": "100d7c6d46b331a6db62116fc1d3036b1ec7a1e0352a041f4ba489efd4b4d4b5",
+    "sizeMetres": [
+      10.5249,
+      3.95,
+      13.64
+    ],
+    "triangleCount": 85150,
+    "captures": [
+      {
+        "id": "engine-three-quarter",
+        "lane": "visualRuntime",
+        "label": "Engine render, three-quarter",
+        "label_ko": "엔진 렌더 · 3/4",
+        "path": "/evidence/clunk-heli-h145/clunk-heli-h145__engine-three-quarter.png",
+        "sha256": "e5aeff7dba94f920b0f9acaa4e2fe585863972ab70ed33bd6d878faebf3c9ca2",
+        "bytes": 44672,
+        "width": 512,
+        "height": 512,
+        "camera": {
+          "eyeMetres": [
+            16.290757450479923,
+            12.466511652649633,
+            17.984381225344926
+          ],
+          "targetMetres": [
+            -0.07600069046020508,
+            1.975000023841858,
+            -1.320000171661377
+          ],
+          "fovYDeg": 30,
+          "eyeHeightMetres": null,
+          "groundDistanceMetres": null
+        },
+        "cameraPoseHash": "a9935e9f0253482cc7618c769ece0bf0ce29d8367c20dc59e7077b9e9a25bc60",
+        "cameraInsideAsset": false,
+        "metrics": {
+          "silhouetteFillRatio": 0.1228,
+          "boundingFillRatio": 0.8789,
+          "clippedEdgeCount": 0,
+          "subjectMeanLuma": 0.4771,
+          "subjectLumaP05": 0.0216,
+          "subjectLumaP95": 0.9625,
+          "subjectLumaRange": 0.9408,
+          "crushedBlackRatio": 0.0269,
+          "blownWhiteRatio": 0.0235,
+          "paletteColorCount": 45,
+          "backgroundSeparationDeltaE76": 42.61,
+          "groundContactColumnRatio": null,
+          "groundMedianGapRatio": null,
+          "groundMaxGapRatio": null,
+          "readability46": {
+            "luminanceRange": 0.5882,
+            "edgeDensity": 0.2903,
+            "meanGradient": 0.085,
+            "localContrastCoverage": 0.59
+          }
+        }
+      },
+      {
+        "id": "engine-front",
+        "lane": "visualRuntime",
+        "label": "Engine render, front",
+        "label_ko": "엔진 렌더 · 정면",
+        "path": "/evidence/clunk-heli-h145/clunk-heli-h145__engine-front.png",
+        "sha256": "1fbb1464220fd5dd69488779e62e269b36d8001ac3b7533a6d52ad654eebef79",
+        "bytes": 24710,
+        "width": 512,
+        "height": 512,
+        "camera": {
+          "eyeMetres": [
+            -0.07600069046020508,
+            7.861592283540499,
+            25.43723737242336
+          ],
+          "targetMetres": [
+            -0.07600069046020508,
+            1.975000023841858,
+            -1.320000171661377
+          ],
+          "fovYDeg": 30,
+          "eyeHeightMetres": null,
+          "groundDistanceMetres": null
+        },
+        "cameraPoseHash": "be48b4bb7cb469e2feba158dd09400a87c273c68aa85ffeb81f8f1654d169b6d",
+        "cameraInsideAsset": false,
+        "metrics": {
+          "silhouetteFillRatio": 0.0468,
+          "boundingFillRatio": 0.8799,
+          "clippedEdgeCount": 0,
+          "subjectMeanLuma": 0.4354,
+          "subjectLumaP05": 0.0318,
+          "subjectLumaP95": 0.9415,
+          "subjectLumaRange": 0.9097,
+          "crushedBlackRatio": 0.0378,
+          "blownWhiteRatio": 0.0206,
+          "paletteColorCount": 47,
+          "backgroundSeparationDeltaE76": 46.97,
+          "groundContactColumnRatio": null,
+          "groundMedianGapRatio": null,
+          "groundMaxGapRatio": null,
+          "readability46": {
+            "luminanceRange": 0.4647,
+            "edgeDensity": 0.1806,
+            "meanGradient": 0.0449,
+            "localContrastCoverage": 0.3837
+          }
+        }
+      },
+      {
+        "id": "engine-side",
+        "lane": "visualRuntime",
+        "label": "Engine render, side",
+        "label_ko": "엔진 렌더 · 측면",
+        "path": "/evidence/clunk-heli-h145/clunk-heli-h145__engine-side.png",
+        "sha256": "d02a075a4ae8e673bea69ac6ad894df3ce70d9eef87728f42b4f8e1ae108a38c",
+        "bytes": 26545,
+        "width": 512,
+        "height": 512,
+        "camera": {
+          "eyeMetres": [
+            26.681236853624533,
+            7.861592283540499,
+            -1.320000171661377
+          ],
+          "targetMetres": [
+            -0.07600069046020508,
+            1.975000023841858,
+            -1.320000171661377
+          ],
+          "fovYDeg": 30,
+          "eyeHeightMetres": null,
+          "groundDistanceMetres": null
+        },
+        "cameraPoseHash": "37f32e99b067ccb00309e9288481325bda804a05c300f17598be94ad7f6e9e8e",
+        "cameraInsideAsset": false,
+        "metrics": {
+          "silhouetteFillRatio": 0.0743,
+          "boundingFillRatio": 0.8799,
+          "clippedEdgeCount": 0,
+          "subjectMeanLuma": 0.4724,
+          "subjectLumaP05": 0.0166,
+          "subjectLumaP95": 0.9625,
+          "subjectLumaRange": 0.9459,
+          "crushedBlackRatio": 0.0633,
+          "blownWhiteRatio": 0.0159,
+          "paletteColorCount": 50,
+          "backgroundSeparationDeltaE76": 42.54,
+          "groundContactColumnRatio": null,
+          "groundMedianGapRatio": null,
+          "groundMaxGapRatio": null,
+          "readability46": {
+            "luminanceRange": 0.5318,
+            "edgeDensity": 0.3064,
+            "meanGradient": 0.0756,
+            "localContrastCoverage": 0.6948
+          }
+        }
+      },
+      {
+        "id": "engine-top",
+        "lane": "visualRuntime",
+        "label": "Engine render, top",
+        "label_ko": "엔진 렌더 · 위",
+        "path": "/evidence/clunk-heli-h145/clunk-heli-h145__engine-top.png",
+        "sha256": "4a156ffd5e04ed1614497094f476e43ca870359aeb93a6448a67cb1b93a6a305",
+        "bytes": 45717,
+        "width": 512,
+        "height": 512,
+        "camera": {
+          "eyeMetres": [
+            6.215954395934224,
+            27.142820369419574,
+            7.488736949290825
+          ],
+          "targetMetres": [
+            -0.07600069046020508,
+            1.975000023841858,
+            -1.320000171661377
+          ],
+          "fovYDeg": 30,
+          "eyeHeightMetres": null,
+          "groundDistanceMetres": null
+        },
+        "cameraPoseHash": "6d85957024c3af2a1442d11614338e091dc625f84331131631a5a957201a1bf3",
+        "cameraInsideAsset": false,
+        "metrics": {
+          "silhouetteFillRatio": 0.1475,
+          "boundingFillRatio": 0.8789,
+          "clippedEdgeCount": 0,
+          "subjectMeanLuma": 0.4603,
+          "subjectLumaP05": 0.0706,
+          "subjectLumaP95": 0.9625,
+          "subjectLumaRange": 0.8919,
+          "crushedBlackRatio": 0.0011,
+          "blownWhiteRatio": 0.0197,
+          "paletteColorCount": 34,
+          "backgroundSeparationDeltaE76": 45.08,
+          "groundContactColumnRatio": null,
+          "groundMedianGapRatio": null,
+          "groundMaxGapRatio": null,
+          "readability46": {
+            "luminanceRange": 0.6829,
+            "edgeDensity": 0.2058,
+            "meanGradient": 0.0675,
+            "localContrastCoverage": 0.4141
+          }
+        }
+      },
+      {
+        "id": "player-5m",
+        "lane": "playerFacing",
+        "label": "Player camera, 1.6 m eye height, 5 m away",
+        "label_ko": "게임 시점 · 눈높이 1.6 m · 5 m",
+        "path": "/evidence/clunk-heli-h145/clunk-heli-h145__player-5m.png",
+        "sha256": "d402e310dc3af17f6751c6ed60feb495af94d7d5d75959142fea6dd8cfa55874",
+        "bytes": 11438,
+        "width": 640,
+        "height": 360,
+        "camera": {
+          "eyeMetres": [
+            -0.07600069046020508,
+            1.6,
+            3.679999828338623
+          ],
+          "targetMetres": [
+            -0.07600069046020508,
+            1.975000023841858,
+            -1.320000171661377
+          ],
+          "fovYDeg": 55,
+          "eyeHeightMetres": 1.6,
+          "groundDistanceMetres": 5
+        },
+        "cameraPoseHash": "ab023d6f229a90585fb6b2adaf9334f8b96215fe475c4371b5fcadf87ab1b3ef",
+        "cameraInsideAsset": true,
+        "metrics": {
+          "silhouetteFillRatio": 0.9739,
+          "boundingFillRatio": 1.7778,
+          "clippedEdgeCount": 4,
+          "subjectMeanLuma": 0.0372,
+          "subjectLumaP05": 0.0112,
+          "subjectLumaP95": 0.0462,
+          "subjectLumaRange": 0.035,
+          "crushedBlackRatio": 0.3775,
+          "blownWhiteRatio": 0,
+          "paletteColorCount": 8,
+          "backgroundSeparationDeltaE76": 88.43,
+          "groundContactColumnRatio": null,
+          "groundMedianGapRatio": null,
+          "groundMaxGapRatio": null,
+          "readability46": {
+            "luminanceRange": 0.2138,
+            "edgeDensity": 0.0362,
+            "meanGradient": 0.0109,
+            "localContrastCoverage": 0.0777
+          }
+        }
+      },
+      {
+        "id": "player-15m",
+        "lane": "playerFacing",
+        "label": "Player camera, 1.6 m eye height, 15 m away",
+        "label_ko": "게임 시점 · 눈높이 1.6 m · 15 m",
+        "path": "/evidence/clunk-heli-h145/clunk-heli-h145__player-15m.png",
+        "sha256": "3ea908ff43656e019d8279065ca2167533ea6d03a76a53cc0bab323dfc14fb2b",
+        "bytes": 11456,
+        "width": 640,
+        "height": 360,
+        "camera": {
+          "eyeMetres": [
+            -0.07600069046020508,
+            1.6,
+            13.679999828338623
+          ],
+          "targetMetres": [
+            -0.07600069046020508,
+            1.975000023841858,
+            -1.320000171661377
+          ],
+          "fovYDeg": 55,
+          "eyeHeightMetres": 1.6,
+          "groundDistanceMetres": 15
+        },
+        "cameraPoseHash": "3cc39a7398830f7d87b09f60b93b4ad340e6b2a04a78c2d222cab38fd27e27c8",
+        "cameraInsideAsset": false,
+        "metrics": {
+          "silhouetteFillRatio": 0.0197,
+          "boundingFillRatio": 0.8361,
+          "clippedEdgeCount": 0,
+          "subjectMeanLuma": 0.305,
+          "subjectLumaP05": 0.0112,
+          "subjectLumaP95": 0.9157,
+          "subjectLumaRange": 0.9045,
+          "crushedBlackRatio": 0.2798,
+          "blownWhiteRatio": 0.0069,
+          "paletteColorCount": 47,
+          "backgroundSeparationDeltaE76": 59.96,
+          "groundContactColumnRatio": 0.0331,
+          "groundMedianGapRatio": 0.74,
+          "groundMaxGapRatio": 0.8145,
+          "readability46": {
+            "luminanceRange": 0.4843,
+            "edgeDensity": 0.1571,
+            "meanGradient": 0.0419,
+            "localContrastCoverage": 0.3756
+          }
+        }
+      }
+    ],
+    "motionPhases": [
+      {
+        "clip": "rotor_spin",
+        "phase": 0,
+        "path": "/evidence/clunk-heli-h145/clunk-heli-h145__motion-0.png",
+        "sha256": "0489166e0ab98ca2fb46d43b183df3de5f5e304d74aa66939faedda2e9eba4a9",
+        "bytes": 11426
+      },
+      {
+        "clip": "rotor_spin",
+        "phase": 0.42857142857142855,
+        "path": "/evidence/clunk-heli-h145/clunk-heli-h145__motion-1.png",
+        "sha256": "05b3aa465a59cb8a5f5d0ad4ea442a46aa2d456737f8f3b8a5b074a6273a4be7",
+        "bytes": 11293
+      },
+      {
+        "clip": "rotor_spin",
+        "phase": 0.8571428571428571,
+        "path": "/evidence/clunk-heli-h145/clunk-heli-h145__motion-2.png",
+        "sha256": "3829756e9cb172ac0c825afe230466c23a80f46c1554e472bf7e2afa7e09d39b",
+        "bytes": 10884
+      }
+    ],
+    "motion": {
+      "clip": "rotor_spin",
+      "durationSeconds": 1,
+      "movedPixelRatio": 0.1626,
+      "meanAbsLumaDelta": 0.069909
+    },
+    "checks": [
+      {
+        "id": "silhouette",
+        "lane": "visualRuntime",
+        "status": "PASS",
+        "observed": {
+          "minSilhouetteFillRatio": 0.0468,
+          "minBoundingFillRatio": 0.8789,
+          "maxBoundingFillRatio": 0.8799
+        },
+        "threshold": "minSilhouetteFillRatio >= 0.005 and boundingFillRatio in [0.75, 0.98] on every engine view",
+        "reason": "The asset fills 87.9%-88.0% of every engine view, as the framing solve intends.",
+        "reason_ko": "엔진 렌더 네 각도 모두에서 에셋이 화면의 87.9%~88.0% 를 채웁니다. 화면 맞춤이 의도대로 걸렸습니다.",
+        "captureIds": [
+          "engine-three-quarter",
+          "engine-front",
+          "engine-side",
+          "engine-top"
+        ]
+      },
+      {
+        "id": "framing",
+        "lane": "visualRuntime",
+        "status": "PASS",
+        "observed": {
+          "clippedEdgeCount": 0
+        },
+        "threshold": "clippedEdgeCount == 0 summed over the engine views",
+        "reason": "No engine view cuts the asset at the frame edge.",
+        "reason_ko": "엔진 렌더 어느 각도에서도 에셋이 화면 가장자리에서 잘리지 않습니다.",
+        "captureIds": [
+          "engine-three-quarter",
+          "engine-front",
+          "engine-side",
+          "engine-top"
+        ]
+      },
+      {
+        "id": "exposure",
+        "lane": "visualRuntime",
+        "status": "PASS",
+        "observed": {
+          "maxCrushedBlackRatio": 0.0633,
+          "maxBlownWhiteRatio": 0.0235,
+          "maxSubjectLumaRange": 0.9459
+        },
+        "threshold": "crushedBlackRatio <= 0.15 and blownWhiteRatio <= 0.15 and subjectLumaRange >= 0.12 (fail past 0.5 / 0.5 / below 0.05)",
+        "reason": "6.3% of the asset reads as solid black and 2.4% as solid white; the best-lit engine view spans 0.946 of luminance.",
+        "reason_ko": "완전한 검정으로 뭉개진 부분 6.3%, 완전한 흰색으로 날아간 부분 2.4%. 가장 잘 드러나는 각도에서 밝기 폭이 0.946 나옵니다.",
+        "captureIds": [
+          "engine-three-quarter",
+          "engine-front",
+          "engine-side",
+          "engine-top"
+        ]
+      },
+      {
+        "id": "palette",
+        "lane": "visualRuntime",
+        "status": "PASS",
+        "observed": {
+          "paletteColorCount": 50,
+          "backgroundSeparationDeltaE76": 46.97
+        },
+        "threshold": "paletteColorCount >= 5 and backgroundSeparationDeltaE76 >= 12 (fail below 2 / 5)",
+        "reason": "50 colours survive quantisation, and the asset sits 47.0 delta E from the neutral ground, so its silhouette reads.",
+        "reason_ko": "색을 뭉뚱그려도 50가지가 남고, 배경과의 색 차이가 ΔE 47.0 이라 실루엣이 배경에서 떨어져 보입니다.",
+        "captureIds": [
+          "engine-three-quarter",
+          "engine-front",
+          "engine-side",
+          "engine-top"
+        ]
+      },
+      {
+        "id": "motion",
+        "lane": "visualRuntime",
+        "status": "PASS",
+        "observed": {
+          "declaredClipCount": 2,
+          "movedPixelRatio": 0.1626,
+          "meanAbsLumaDelta": 0.069909
+        },
+        "threshold": "movedPixelRatio > 0 and >= 0.01 between phases 0, 3/7 and 6/7 of the first clip",
+        "reason": "Clip \"rotor_spin\" changes 16.3% of the frame between its sampled phases, so the motion is visible.",
+        "reason_ko": "동작 \"rotor_spin\" 이 위상 사이에서 화면의 16.3% 를 바꿉니다. 움직임이 실제로 보입니다.",
+        "captureIds": [
+          "motion-0",
+          "motion-1",
+          "motion-2"
+        ]
+      },
+      {
+        "id": "silhouette",
+        "lane": "playerFacing",
+        "status": "PASS",
+        "observed": {
+          "boundingFillRatio": 0.8361
+        },
+        "threshold": "boundingFillRatio >= 0.02 at the farthest player camera (fail below 0.005)",
+        "reason": "From the farthest player camera the asset still spans 83.6% of the frame height.",
+        "reason_ko": "가장 먼 게임 시점에서도 에셋이 화면 높이의 83.6% 를 차지합니다.",
+        "captureIds": [
+          "player-15m"
+        ]
+      },
+      {
+        "id": "readability46",
+        "lane": "playerFacing",
+        "status": "PASS",
+        "observed": {
+          "luminanceRange": 0.4843,
+          "edgeDensity": 0.1571,
+          "localContrastCoverage": 0.3756,
+          "meanGradient": 0.0419
+        },
+        "threshold": "at 46 px: luminanceRange >= 0.18, edgeDensity >= 0.015, localContrastCoverage >= 0.04 (fail below 0.12 / 0.01 / 0.02)",
+        "reason": "Shrunk to 46 px the asset keeps 0.484 of luminance range, 0.157 edge density and 0.376 local contrast, so it is still legible small.",
+        "reason_ko": "46픽셀로 줄여도 밝기 폭 0.484, 테두리 밀도 0.157, 국소 대비 0.376 이 남아 작게도 읽힙니다.",
+        "captureIds": [
+          "player-15m"
+        ]
+      },
+      {
+        "id": "groundContact",
+        "lane": "playerFacing",
+        "status": "PASS",
+        "observed": {
+          "originGroundOffsetRatio": 0,
+          "groundContactColumnRatio": 0.0331,
+          "groundMedianGapRatio": 0.74,
+          "groundMaxGapRatio": 0.8145
+        },
+        "threshold": "|bounds.min.y / height| <= 0.02 (fail past 0.25); a capture with contactColumnRatio 0 and medianGapRatio > 0.5 also asks for review",
+        "reason": "The asset's lowest point sits 0.00% of its own height from the engine floor at y = 0, so it lands where an engine drops it.",
+        "reason_ko": "에셋의 가장 낮은 점이 엔진 바닥(y = 0)에서 자기 높이의 0.00% 만큼 떨어져 있습니다. 엔진이 원점에 놓으면 바닥에 그대로 앉습니다.",
+        "captureIds": [
+          "player-15m"
+        ]
+      }
+    ],
+    "lanes": {
+      "visualRuntime": {
+        "verdict": "PASS",
+        "checkIds": [
+          "silhouette",
+          "framing",
+          "exposure",
+          "palette",
+          "motion"
+        ]
+      },
+      "playerFacing": {
+        "verdict": "PASS",
+        "checkIds": [
+          "silhouette",
+          "readability46",
+          "groundContact"
+        ]
+      }
+    },
+    "verdict": "PASS",
+    "summary": "All 8 automated visual checks pass. No human review is required before this asset is used.",
+    "summary_ko": "자동 화면 검사 8건이 모두 통과했습니다. 이 에셋을 쓰기 전에 사람이 따로 볼 필요는 없습니다.",
+    "timings": {
+      "decodeMs": 182,
+      "renderMs": 784,
+      "measureMs": 207,
+      "totalMs": 2327,
+      "peakHeapBytes": 19979672
+    },
+    "limits": [
+      "The frames come from Clunk's own offline rasteriser, not from a game engine's rendering path.",
+      "Materials are read as vertex colour times base colour; metal, roughness, transparency and emission are not simulated.",
+      "The ground-contact measurement reads one silhouette per camera. It cannot see a part that floats behind a part that is itself grounded.",
+      "Motion is sampled at three phases (0, 3/7, 6/7) of the first declared clip only; a clip that loops exactly seven times would still alias."
+    ],
+    "limits_ko": [
+      "여기 찍힌 화면은 Clunk 자체 오프라인 래스터라이저의 결과이지, 게임 엔진이 그린 화면이 아닙니다.",
+      "재질은 정점 색 × 기본 색으로만 읽습니다. 금속·거칠기·투명·발광은 계산하지 않습니다.",
+      "바닥 접지 측정은 카메라마다 실루엣 하나를 읽습니다. 바닥에 닿은 부품 뒤에 숨어 떠 있는 부품은 보지 못합니다.",
+      "움직임은 첫 번째 동작의 세 위상(0, 3/7, 6/7)만 표본으로 봅니다. 동작이 정확히 일곱 번 반복하는 경우에는 여전히 겹쳐 보일 수 있습니다."
+    ]
+  },
+  "validation": {
+    "valid": true,
+    "structuralValid": true,
+    "qualityPolicyValid": true
+  },
+  "readiness": "conditional",
+  "limitation": "STRUCTURAL_SCORE_IS_NOT_VISUAL_APPROVAL",
+  "captureLimitation": "OFFLINE_SOFTWARE_RASTER_IS_NOT_AN_ENGINE_SCREENSHOT"
+}

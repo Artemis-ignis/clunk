@@ -1,4 +1,6 @@
 import { BETA_MONTHLY_GRANT_CREDITS, SIGNUP_GRANT_CREDITS } from "./api/_lib/clunk";
+// 가입 직후 계량기는 가입분(SIGNUP_GRANT_CREDITS)과 그달 지급분(BETA_MONTHLY_GRANT_CREDITS, 첫 요청에
+// 바로 들어온다)의 합을 보여 준다(2026-09-05 QA 실측 55). 문장도 그 합을 말하고 내역을 괄호에 둔다.
 import { WORKSPACE_IMAGES_PER_DAY } from "./api/_lib/ai-budget";
 
 /**
@@ -50,7 +52,7 @@ export function isAuthIntent(value: unknown): value is AuthIntent {
 /** 처음 오는 사람이 받는 것 — 숫자는 전부 상수에서 온다. */
 const SIGNUP_FACTS = [
   "카드·비밀번호 없음",
-  `만들기·검사 ${SIGNUP_GRANT_CREDITS}회 즉시`,
+  `만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회 즉시`,
   `이미지 하루 ${WORKSPACE_IMAGES_PER_DAY}장`,
 ];
 
@@ -75,7 +77,7 @@ export const DEFAULT_AUTH_COPY: AuthIntentCopy = {
     facts: LOGIN_FACTS,
     providerSmall: LOGIN_PROVIDER_SMALL,
   },
-  welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS}회가 들어왔습니다 · 무엇을 만들지 골라 보세요`,
+  welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어왔습니다 · 무엇을 만들지 골라 보세요`,
 };
 
 export const INTENT_COPY: Record<AuthIntent, AuthIntentCopy> = {
@@ -83,7 +85,7 @@ export const INTENT_COPY: Record<AuthIntent, AuthIntentCopy> = {
     signup: {
       badge: "카드 없이 시작",
       h1: "첫 에셋 만들기부터",
-      lede: `계정 하나면 만들기 화면이 열립니다. 가입하는 그 자리에서 만들기·검사 ${SIGNUP_GRANT_CREDITS}회가 들어오고, 확인이 끝나면 만들던 화면으로 그대로 돌아갑니다.`,
+      lede: `계정 하나면 만들기 화면이 열립니다. 가입하는 그 자리에서 만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어오고, 확인이 끝나면 만들던 화면으로 그대로 돌아갑니다.`,
       facts: SIGNUP_FACTS,
       providerSmall: SIGNUP_PROVIDER_SMALL,
     },
@@ -94,13 +96,13 @@ export const INTENT_COPY: Record<AuthIntent, AuthIntentCopy> = {
       facts: LOGIN_FACTS,
       providerSmall: LOGIN_PROVIDER_SMALL,
     },
-    welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS}회가 들어왔습니다 · 첫 에셋을 만들어 보세요`,
+    welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어왔습니다 · 첫 에셋을 만들어 보세요`,
   },
   inspect: {
     signup: {
       badge: "카드 없이 시작",
       h1: "파일 검사부터",
-      lede: `파일 하나를 올리면 게임에 넣어도 되는지 확인해 드립니다. 가입하는 그 자리에서 만들기·검사 ${SIGNUP_GRANT_CREDITS}회가 들어오고, 확인이 끝나면 검사 화면으로 돌아갑니다.`,
+      lede: `파일 하나를 올리면 게임에 넣어도 되는지 확인해 드립니다. 가입하는 그 자리에서 만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어오고, 확인이 끝나면 검사 화면으로 돌아갑니다.`,
       facts: SIGNUP_FACTS,
       providerSmall: SIGNUP_PROVIDER_SMALL,
     },
@@ -111,7 +113,7 @@ export const INTENT_COPY: Record<AuthIntent, AuthIntentCopy> = {
       facts: LOGIN_FACTS,
       providerSmall: LOGIN_PROVIDER_SMALL,
     },
-    welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS}회가 들어왔습니다 · 파일 하나를 올려 검사해 보세요`,
+    welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어왔습니다 · 파일 하나를 올려 검사해 보세요`,
   },
   agents: {
     signup: {
@@ -128,7 +130,7 @@ export const INTENT_COPY: Record<AuthIntent, AuthIntentCopy> = {
       facts: LOGIN_FACTS,
       providerSmall: LOGIN_PROVIDER_SMALL,
     },
-    welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS}회가 들어왔습니다 · 키를 만들면 바로 연결됩니다`,
+    welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어왔습니다 · 키를 만들면 바로 연결됩니다`,
   },
   market: {
     signup: {
@@ -145,7 +147,7 @@ export const INTENT_COPY: Record<AuthIntent, AuthIntentCopy> = {
       facts: LOGIN_FACTS,
       providerSmall: LOGIN_PROVIDER_SMALL,
     },
-    welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS}회가 들어왔습니다 · 마켓에서 에셋을 받아 보세요`,
+    welcome: `만들기·검사 ${SIGNUP_GRANT_CREDITS + BETA_MONTHLY_GRANT_CREDITS}회(가입 ${SIGNUP_GRANT_CREDITS}회 + 이달 ${BETA_MONTHLY_GRANT_CREDITS}회)가 들어왔습니다 · 마켓에서 에셋을 받아 보세요`,
   },
 };
 

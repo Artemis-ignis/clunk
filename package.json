@@ -36,6 +36,7 @@
     "asset:copy-truth": "node scripts/listing-copy-truth.mjs",
     "site:sweep": "node scripts/site-copy-sweep.mjs",
     "asset:geometry": "node scripts/asset-geometry-audit.mjs",
+    "asset:visual-evidence": "node scripts/visual-evidence.mjs",
     "asset:palette-bake": "node scripts/palette-bake-sweep.mjs",
     "asset:r2-sync": "node scripts/market-r2-sync.mjs",
     "facts:test": "node --import tsx --test tests/listing-facts-contract.test.mjs tests/listing-facts-truth.test.mjs",

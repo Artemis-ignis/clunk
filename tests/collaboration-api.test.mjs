@@ -146,9 +146,12 @@ test("collaboration UI keeps capture integrity, asset audit, and human visual re
   // 2026-09-05(마스터 지시): 네 칸의 이름이 에이전트가 수행하는 네 단계로 갈렸다
   // (파일 검사 → 엔진 렌더 → 게임 시점 → 판정). 지켜야 할 것은 이름이 아니라 구분이므로
   // 지금 화면의 이름으로 같은 것을 검사한다.
-  assert.match(agents, /엔진 렌더[\s\S]*증거 없음/);
-  assert.match(agents, /게임 시점[\s\S]*확인 전/);
-  assert.match(agents, /판정[\s\S]*보류/);
+  // 2026-09-05: 네 칸은 상태가 아니라 에이전트가 수행하는 네 단계다. 빈 상태를 상수로 박아 두면
+  // 위의 쇼룸(실제 기계 판정)과 같은 화면에서 반대말을 하게 된다.
+  assert.match(agents, /엔진 렌더[\s\S]*4각도 렌더/);
+  assert.match(agents, /게임 시점[\s\S]*눈높이 5 m · 15 m/);
+  assert.match(agents, /판정[\s\S]*기계가 냅니다/);
+  assert.doesNotMatch(agents, /사람이 직접 보고 판단해야 합니다|증거 없음/);
   // 2026-09-04(마스터 지적): 같은 구분을 부정문("…말하지 않습니다") 대신 방문자에게
   // 무엇이 답을 주는지로 적는다. 지켜야 할 것은 문장 형태가 아니라 구분 자체다.
   assert.match(agents, /파일 검사는 규격을 봅니다[\s\S]*엔진에서 그린 화면과 게임 안에서 본 장면까지 모여야 판정/);

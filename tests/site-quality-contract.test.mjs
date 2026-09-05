@@ -119,13 +119,26 @@ test("the product showroom makes the file-to-decision loop interactive on public
   const showcase = await source("app/components/LiveEvidenceShowcase.tsx");
   assert.match(showcase, /data-testid="live-evidence-showcase"/);
   assert.match(showcase, /useState/);
-  // 2026-09-02: 쇼룸의 라벨이 전부 한국어로 갈렸다. 구조(2D/3D 전환 · 세 단계 ·
-  // 분리된 증거 칸)는 그대로이고 영어 문구만 바뀐 것이므로, 같은 것을 지금 문구로
-  // 검사한다. GAP 은 value="GAP" 대신 tone="gap" + "증거 없음"으로 남아 있다.
-  assert.match(showcase, /2D · 스프라이트/);
-  assert.match(showcase, /3D · GLB 모델/);
-  assert.match(showcase, /label="파일 검사" value="통과"[^>]*tone="pass"/);
-  assert.match(showcase, /label="엔진 렌더" value="증거 없음"[^>]*tone="gap"/);
+  // 2026-09-05: 네 칸의 값이 상수에서 파일로 옮겨졌다. 예전에는 "엔진 렌더 = 증거 없음"
+  // 이 소스에 못 박혀 있어 문자열로 검사할 수 있었지만, 지금은 오프라인 래스터라이저가
+  // 찍고 측정한 결과(app/data/evidence/<slug>.visual-evidence.json, 스키마
+  // clunk.asset-inspection-evidence.v3)에서 읽는다. 그래서 지켜야 할 것을 값이 아니라
+  // 출처로 건다: 네 칸이 여전히 갈라져 있고, 각 칸이 envelope 의 어느 statuses 에서
+  // 오는지.
+  // 포기한 보장: 2D 스프라이트 / 3D GLB 전환은 더는 없다. 그 자리에는 실제로 측정된
+  // 에셋 셋(트랙터 · 나무 상자 · 헬리콥터)의 결과를 고르는 전환이 걸린다.
+  for (const lane of ["파일 검사", "엔진 렌더", "게임 시점", "판정"]) {
+    assert.match(showcase, new RegExp(`label: "${lane}"`), `${lane} 칸이 사라졌다`);
+  }
+  assert.match(showcase, /statuses\.structural/);
+  assert.match(showcase, /statuses\.visualRuntime/);
+  assert.match(showcase, /statuses\.playerFacing/);
+  assert.match(showcase, /statuses\.humanDecision/);
+  assert.match(showcase, /decisionAuthority/);
+  assert.match(showcase, /data\/evidence\/hf-tractor-compact\.visual-evidence\.json/);
+  // 그림이 엔진 스크린샷이 아니라는 고지는 사람이 쓴 문장이 아니라 증거 파일의 것을 쓴다.
+  assert.match(showcase, /rendererNoteKo/);
+  assert.match(showcase, /renderer\.note_ko/);
   // 파일 검사 통과를 "게임에 넣어도 된다"로 부르지 않는다는 경계는 이 쇼룸의 핵심이다.
   assert.match(showcase, /예시가 통과해도 게임 화면 통과는 아닙니다/);
   assert.match(showcase, /aria-pressed/);
@@ -146,6 +159,29 @@ test("the product showroom makes the file-to-decision loop interactive on public
   // lanes, fed by the file the user just made.
   assert.match(studio, /AssetCreationWorkbench/);
   assert.match(await source("app/components/AssetCreationWorkbench.tsx"), /studio-lanes/);
+});
+
+/**
+ * 쇼룸이 보여 주는 그림은 "비슷한 렌더"가 아니라 판정을 내린 그 파일이어야 한다.
+ * 증거 envelope 이 적어 둔 sha256 과 사이트가 내려 주는 바이트가 같지 않으면, 화면
+ * 아래 찍히는 해시는 아무것도 증명하지 못한다. 옮기면서 다시 굽지 않았는지를 본다.
+ */
+test("the showroom ships the exact capture bytes the evidence envelope hashed", async () => {
+  const { createHash } = await import("node:crypto");
+  for (const slug of ["hf-tractor-compact", "cozy-crate-closed", "clunk-heli-h145"]) {
+    const record = JSON.parse(await source(path.join("app", "data", "evidence", `${slug}.visual-evidence.json`)));
+    assert.equal(record.schema, "clunk.asset-inspection-evidence.v3");
+    assert.equal(record.evidenceKind, "MACHINE_VISUAL_CAPTURE");
+    assert.equal(record.captureLimitation, "OFFLINE_SOFTWARE_RASTER_IS_NOT_AN_ENGINE_SCREENSHOT");
+    const frames = [...record.visualEvidence.captures, ...record.visualEvidence.motionPhases];
+    assert.ok(frames.length >= 6, `${slug} 의 화면이 여섯 장보다 적다`);
+    for (const frame of frames) {
+      assert.ok(frame.path.startsWith(`/evidence/${slug}/`), `${frame.path} 가 사이트 주소가 아니다`);
+      const bytes = await readFile(path.join(root, "public", ...frame.path.split("/")));
+      assert.equal(bytes.length, frame.bytes, `${frame.path} 의 크기가 다르다`);
+      assert.equal(createHash("sha256").update(bytes).digest("hex"), frame.sha256, `${frame.path} 가 다시 구워졌다`);
+    }
+  }
 });
 
 test("the product showroom has a real responsive and reduced-motion contract", async () => {

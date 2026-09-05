@@ -1,0 +1,944 @@
+{
+  "schema": "clunk.asset-inspection-evidence.v3",
+  "schemaVersion": "3",
+  "operation": "inspect",
+  "evidenceKind": "MACHINE_VISUAL_CAPTURE",
+  "identity": {
+    "inputHash": "bc9f332b1e10dc1c3d8f5e8552494ccae85dab1dce455d15378ced21842b0aa5",
+    "resultDigest": "c74ce24c77f63542686f43923bc712c03cc9f451e08c63eacca56ea139af23aa",
+    "byteLength": 72304,
+    "coreBuildId": "0.1.0",
+    "ruleSetId": "clunk-game-ready-v1",
+    "ruleSetVersion": "1.0.0",
+    "profileId": "web",
+    "profileHash": "d7cb0dbf940687d317a989dc217ff2b8e8a04415629ef08ea4d8eddd945e4b1f",
+    "inspectionRunId": "visual-evidence-cozy-crate-closed-01"
+  },
+  "source": {
+    "path": "/market/cozy-crate-closed/crate-closed.clunk-optimized.glb",
+    "fileName": "crate-closed.clunk-optimized.glb",
+    "bytes": 72304,
+    "sha256": "bc9f332b1e10dc1c3d8f5e8552494ccae85dab1dce455d15378ced21842b0aa5"
+  },
+  "sourceOutputRelation": {
+    "kind": "SOURCE",
+    "sourceHash": "bc9f332b1e10dc1c3d8f5e8552494ccae85dab1dce455d15378ced21842b0aa5",
+    "sourceInspectionDigest": "c74ce24c77f63542686f43923bc712c03cc9f451e08c63eacca56ea139af23aa"
+  },
+  "report": {
+    "schemaVersion": "1.0",
+    "coreVersion": "0.1.0",
+    "ruleSetId": "clunk-game-ready-v1",
+    "ruleSetVersion": "1.0.0",
+    "profileId": "web",
+    "fileName": "crate-closed.clunk-optimized.glb",
+    "format": "glb",
+    "byteLength": 72304,
+    "inputHash": "bc9f332b1e10dc1c3d8f5e8552494ccae85dab1dce455d15378ced21842b0aa5",
+    "metrics": {
+      "sceneCount": 1,
+      "nodeCount": 4,
+      "maxDepth": 2,
+      "emptyNodeCount": 0,
+      "meshCount": 3,
+      "primitiveCount": 3,
+      "vertexCount": 2100,
+      "triangleCount": 700,
+      "drawCallCount": 3,
+      "materialCount": 1,
+      "duplicateMaterialCount": 0,
+      "textureCount": 1,
+      "imageCount": 1,
+      "textureMaxDimension": 32,
+      "textureMemoryBytes": 4096,
+      "animationCount": 0,
+      "skinCount": 0,
+      "missingNormalPrimitiveCount": 0,
+      "missingUvPrimitiveCount": 0,
+      "nonUnitScaleNodeCount": 0,
+      "zeroScaleNodeCount": 0,
+      "externalResourceCount": 0,
+      "unresolvedResourceCount": 0,
+      "remoteResourceCount": 0,
+      "extensionCount": 0,
+      "bounds": {
+        "min": [
+          -0.2849999964237213,
+          0,
+          -0.21699999272823334
+        ],
+        "max": [
+          0.2849999964237213,
+          0.4339999854564667,
+          0.21699999272823334
+        ],
+        "dimensions": [
+          0.5699999928474426,
+          0.4339999854564667,
+          0.4339999854564667
+        ]
+      }
+    },
+    "findings": [
+      {
+        "id": "FORMAT-GLTF2:/asset",
+        "ruleId": "FORMAT-GLTF2",
+        "category": "format",
+        "severity": "INFO",
+        "path": "/asset",
+        "title": "glTF 2.0 parsed",
+        "message": "GLB is a supported glTF 2.0 container.",
+        "observed": "GLB",
+        "threshold": "GLB or GLTF 2.0",
+        "autoFixable": false,
+        "action": "No action required."
+      }
+    ],
+    "score": {
+      "score": 100,
+      "threshold": 90,
+      "ready": true,
+      "hardBlockerCount": 0,
+      "breakdown": {
+        "format": 100,
+        "scene": 100,
+        "geometry": 100,
+        "materials": 100,
+        "textures": 100,
+        "runtime": 100
+      },
+      "ruleSetId": "clunk-game-ready-v1",
+      "ruleSetVersion": "1.0.0"
+    },
+    "analysisId": "analysis-bc9f332b1e10-c74ce24c",
+    "resultDigest": "c74ce24c77f63542686f43923bc712c03cc9f451e08c63eacca56ea139af23aa"
+  },
+  "findings": [
+    {
+      "id": "FORMAT-GLTF2:/asset",
+      "code": "FORMAT-GLTF2",
+      "category": "format",
+      "severity": "INFO",
+      "path": "/asset",
+      "title": "glTF 2.0 parsed",
+      "message": "GLB is a supported glTF 2.0 container.",
+      "observed": "GLB",
+      "threshold": "GLB or GLTF 2.0",
+      "rationale": "The finding is a structural contract observation; it does not prove player-facing quality.",
+      "recommendation": "No action required.",
+      "ownership": "asset",
+      "enforcement": "OFF",
+      "autoFixable": false
+    },
+    {
+      "id": "OBS-DRAW-CALLS:/metrics",
+      "code": "OBS-DRAW-CALLS",
+      "category": "quality",
+      "severity": "INFO",
+      "path": "/metrics",
+      "title": "OBS-DRAW-CALLS",
+      "message": "Observation recorded; it is not visual approval.",
+      "observed": 3,
+      "threshold": "not declared",
+      "rationale": "Draw calls are a runtime cost observation, not a visual approval signal.",
+      "recommendation": "Compare against the shipped renderer budget and capture the affected camera.",
+      "ownership": "runtime",
+      "enforcement": "OFF"
+    },
+    {
+      "id": "OBS-TRIANGLES:/metrics",
+      "code": "OBS-TRIANGLES",
+      "category": "quality",
+      "severity": "INFO",
+      "path": "/metrics",
+      "title": "OBS-TRIANGLES",
+      "message": "Observation recorded; it is not visual approval.",
+      "observed": 700,
+      "threshold": "not declared",
+      "rationale": "Triangle count describes static geometry complexity only.",
+      "recommendation": "Review the target camera, LOD and frame cost before changing source bytes.",
+      "ownership": "asset",
+      "enforcement": "OFF"
+    },
+    {
+      "id": "OBS-MISSING-NORMALS:/metrics",
+      "code": "OBS-MISSING-NORMALS",
+      "category": "quality",
+      "severity": "INFO",
+      "path": "/metrics",
+      "title": "OBS-MISSING-NORMALS",
+      "message": "Observation recorded; it is not visual approval.",
+      "observed": 0,
+      "threshold": "not declared",
+      "rationale": "Missing normals can be intentional flat-shaded or procedural authoring; renderer ownership must be confirmed.",
+      "recommendation": "Confirm source shading and the target renderer before generating normals.",
+      "ownership": "unknown",
+      "enforcement": "OFF"
+    },
+    {
+      "id": "OBS-MISSING-UVS:/metrics",
+      "code": "OBS-MISSING-UVS",
+      "category": "quality",
+      "severity": "INFO",
+      "path": "/metrics",
+      "title": "OBS-MISSING-UVS",
+      "message": "Observation recorded; it is not visual approval.",
+      "observed": 0,
+      "threshold": "not declared",
+      "rationale": "Missing UVs may be valid for runtime-generated materials and are not automatically a texture defect.",
+      "recommendation": "Trace material ownership; add UVs only when the shipped material contract requires them.",
+      "ownership": "unknown",
+      "enforcement": "OFF"
+    },
+    {
+      "id": "OBS-TEXTURE-COUNT:/metrics",
+      "code": "OBS-TEXTURE-COUNT",
+      "category": "quality",
+      "severity": "INFO",
+      "path": "/metrics",
+      "title": "OBS-TEXTURE-COUNT",
+      "message": "Observation recorded; it is not visual approval.",
+      "observed": 1,
+      "threshold": "not declared",
+      "rationale": "A zero texture count can describe procedural/material authoring and is not a visual failure by itself.",
+      "recommendation": "Link the runtime material and a shipped frame before deciding whether a texture is missing.",
+      "ownership": "unknown",
+      "enforcement": "OFF"
+    },
+    {
+      "id": "OBS-NONUNIT-SCALE:/metrics",
+      "code": "OBS-NONUNIT-SCALE",
+      "category": "quality",
+      "severity": "INFO",
+      "path": "/metrics",
+      "title": "OBS-NONUNIT-SCALE",
+      "message": "Observation recorded; it is not visual approval.",
+      "observed": 0,
+      "threshold": "not declared",
+      "rationale": "Non-unit transforms can be an authored pivot contract or an engine import risk.",
+      "recommendation": "Confirm the target engine import policy and preserve named pivots before changing source bytes.",
+      "ownership": "runtime",
+      "enforcement": "OFF"
+    },
+    {
+      "id": "OBS-BOUNDS-ABS:/metrics",
+      "code": "OBS-BOUNDS-ABS",
+      "category": "quality",
+      "severity": "INFO",
+      "path": "/metrics",
+      "title": "OBS-BOUNDS-ABS",
+      "message": "Observation recorded; it is not visual approval.",
+      "observed": 0.4339999854564667,
+      "threshold": "not declared",
+      "rationale": "Extreme accessor bounds can be quantized/raw bounds and require decode-aware runtime context.",
+      "recommendation": "Compare decoded runtime bounds and scene scale; do not optimize blindly.",
+      "ownership": "unknown",
+      "enforcement": "OFF"
+    },
+    {
+      "id": "OBS-RUNTIME-EVIDENCE:/metrics",
+      "code": "OBS-RUNTIME-EVIDENCE",
+      "category": "quality",
+      "severity": "INFO",
+      "path": "/metrics",
+      "title": "OBS-RUNTIME-EVIDENCE",
+      "message": "Observation recorded; it is not visual approval.",
+      "observed": false,
+      "threshold": "not declared",
+      "rationale": "A static inspection cannot prove that an asset is loaded or visible in a shipped frame.",
+      "recommendation": "Attach a shipped-path capture with renderer, viewport, camera and source-tree provenance.",
+      "ownership": "runtime",
+      "enforcement": "OFF"
+    }
+  ],
+  "qualityPolicy": {
+    "declared": null,
+    "status": "OFF",
+    "blockingViolationCount": 0,
+    "advisoryViolationCount": 0
+  },
+  "captureEvidence": [
+    {
+      "media": "screenshot",
+      "path": "/evidence/cozy-crate-closed/cozy-crate-closed__engine-three-quarter.png",
+      "sha256": "38edcfe4a8e6650a7b2275b5c4171d907e23ad418789fdfebe8e61a386f53b2c",
+      "bytes": 37391,
+      "renderer": "clunk-software-raster/1.0.0",
+      "viewport": {
+        "width": 512,
+        "height": 512
+      },
+      "cameraPoseHash": "bc1acdc8b7838bece75ab328ccf38b1202e72388181c5f28fc0e6bab6a691795",
+      "sourceTreeHash": "70dfde41c8ddd0ccf83445abfdcede058c2425a5160341a4d17be548fb34a77b",
+      "shippedPath": false,
+      "renderKind": "clunk-software-raster",
+      "console": {
+        "errors": 0,
+        "warnings": 0
+      }
+    },
+    {
+      "media": "screenshot",
+      "path": "/evidence/cozy-crate-closed/cozy-crate-closed__engine-front.png",
+      "sha256": "56de2c186b0cadaeb1c45e67259bc2bdb73e32e6c316d1dbd2c11963be61ebeb",
+      "bytes": 21084,
+      "renderer": "clunk-software-raster/1.0.0",
+      "viewport": {
+        "width": 512,
+        "height": 512
+      },
+      "cameraPoseHash": "3c97307852dca9d3d7af0804867518161321b3831e9586208c00c4d9b0168aeb",
+      "sourceTreeHash": "70dfde41c8ddd0ccf83445abfdcede058c2425a5160341a4d17be548fb34a77b",
+      "shippedPath": false,
+      "renderKind": "clunk-software-raster",
+      "console": {
+        "errors": 0,
+        "warnings": 0
+      }
+    },
+    {
+      "media": "screenshot",
+      "path": "/evidence/cozy-crate-closed/cozy-crate-closed__engine-side.png",
+      "sha256": "862debef0baf9ccbe9d0a1d08ff609f08970685c4ec1332e98bfc1dafa261afb",
+      "bytes": 19175,
+      "renderer": "clunk-software-raster/1.0.0",
+      "viewport": {
+        "width": 512,
+        "height": 512
+      },
+      "cameraPoseHash": "053289e1d5860a091392cb98b0195145d5e098b8454f3f1e27ad4f45e2a673ab",
+      "sourceTreeHash": "70dfde41c8ddd0ccf83445abfdcede058c2425a5160341a4d17be548fb34a77b",
+      "shippedPath": false,
+      "renderKind": "clunk-software-raster",
+      "console": {
+        "errors": 0,
+        "warnings": 0
+      }
+    },
+    {
+      "media": "screenshot",
+      "path": "/evidence/cozy-crate-closed/cozy-crate-closed__engine-top.png",
+      "sha256": "481eab6e5274496e48bf4ff89055d74fc02422873ff36f3bedd792cd441c352b",
+      "bytes": 24095,
+      "renderer": "clunk-software-raster/1.0.0",
+      "viewport": {
+        "width": 512,
+        "height": 512
+      },
+      "cameraPoseHash": "2d42684e584068c0a6f0b8600bf6af839550e23fe9d18ce9366e658459b8c012",
+      "sourceTreeHash": "70dfde41c8ddd0ccf83445abfdcede058c2425a5160341a4d17be548fb34a77b",
+      "shippedPath": false,
+      "renderKind": "clunk-software-raster",
+      "console": {
+        "errors": 0,
+        "warnings": 0
+      }
+    },
+    {
+      "media": "screenshot",
+      "path": "/evidence/cozy-crate-closed/cozy-crate-closed__player-5m.png",
+      "sha256": "4f5b31374325871ec8a73cffff342b7583bc15f8fb6dd10d3e7f41c7c91ee758",
+      "bytes": 4143,
+      "renderer": "clunk-software-raster/1.0.0",
+      "viewport": {
+        "width": 640,
+        "height": 360
+      },
+      "cameraPoseHash": "62ceb2c66230880ab4f63f647398b34ed1c6c4d1516ebf23abf7e70a34eae7a6",
+      "sourceTreeHash": "70dfde41c8ddd0ccf83445abfdcede058c2425a5160341a4d17be548fb34a77b",
+      "shippedPath": false,
+      "renderKind": "clunk-software-raster",
+      "console": {
+        "errors": 0,
+        "warnings": 0
+      }
+    },
+    {
+      "media": "screenshot",
+      "path": "/evidence/cozy-crate-closed/cozy-crate-closed__player-15m.png",
+      "sha256": "699fab0706e6124abff3e4d2f4174c777a1944667a045bf1294ade9a9a03dde9",
+      "bytes": 1736,
+      "renderer": "clunk-software-raster/1.0.0",
+      "viewport": {
+        "width": 640,
+        "height": 360
+      },
+      "cameraPoseHash": "ca2a83a3c127fb7ef6b69248e91f056b5641fdb3102cb468e320e54ab0a5230e",
+      "sourceTreeHash": "70dfde41c8ddd0ccf83445abfdcede058c2425a5160341a4d17be548fb34a77b",
+      "shippedPath": false,
+      "renderKind": "clunk-software-raster",
+      "console": {
+        "errors": 0,
+        "warnings": 0
+      }
+    }
+  ],
+  "audioEvidence": [],
+  "byteVerification": {
+    "method": "LOCAL_CLI_READ",
+    "source": {
+      "sha256": "bc9f332b1e10dc1c3d8f5e8552494ccae85dab1dce455d15378ced21842b0aa5",
+      "bytes": 72304,
+      "verified": true
+    },
+    "captures": [
+      {
+        "path": "/evidence/cozy-crate-closed/cozy-crate-closed__engine-three-quarter.png",
+        "sha256": "38edcfe4a8e6650a7b2275b5c4171d907e23ad418789fdfebe8e61a386f53b2c",
+        "bytes": 37391,
+        "verified": true
+      },
+      {
+        "path": "/evidence/cozy-crate-closed/cozy-crate-closed__engine-front.png",
+        "sha256": "56de2c186b0cadaeb1c45e67259bc2bdb73e32e6c316d1dbd2c11963be61ebeb",
+        "bytes": 21084,
+        "verified": true
+      },
+      {
+        "path": "/evidence/cozy-crate-closed/cozy-crate-closed__engine-side.png",
+        "sha256": "862debef0baf9ccbe9d0a1d08ff609f08970685c4ec1332e98bfc1dafa261afb",
+        "bytes": 19175,
+        "verified": true
+      },
+      {
+        "path": "/evidence/cozy-crate-closed/cozy-crate-closed__engine-top.png",
+        "sha256": "481eab6e5274496e48bf4ff89055d74fc02422873ff36f3bedd792cd441c352b",
+        "bytes": 24095,
+        "verified": true
+      },
+      {
+        "path": "/evidence/cozy-crate-closed/cozy-crate-closed__player-5m.png",
+        "sha256": "4f5b31374325871ec8a73cffff342b7583bc15f8fb6dd10d3e7f41c7c91ee758",
+        "bytes": 4143,
+        "verified": true
+      },
+      {
+        "path": "/evidence/cozy-crate-closed/cozy-crate-closed__player-15m.png",
+        "sha256": "699fab0706e6124abff3e4d2f4174c777a1944667a045bf1294ade9a9a03dde9",
+        "bytes": 1736,
+        "verified": true
+      }
+    ],
+    "audio": []
+  },
+  "statuses": {
+    "structural": "PASS",
+    "visualRuntime": "APPROVED",
+    "playerFacing": "PASS",
+    "humanDecision": "NOT_REQUIRED",
+    "reviewStatus": "EVALUATED",
+    "autoVerdict": "PASS",
+    "decisionAuthority": "MACHINE"
+  },
+  "visualEvidence": {
+    "schema": "clunk.visual-evidence.v1",
+    "toolVersion": "clunk-visual-evidence/1.0.0",
+    "renderer": {
+      "id": "clunk-software-raster",
+      "version": "1.0.0",
+      "kind": "software-rasteriser",
+      "gpu": false,
+      "shading": "flat warm key + cool sky hemisphere + soft contact shadow",
+      "note": "A z-buffered software rasteriser with flat warm-key and cool-sky shading and one soft contact shadow. No PBR, no image-based lighting, no reflections, no ray-traced shadow, no ambient occlusion. It is not a screenshot from a game engine and must not be described as one.",
+      "note_ko": "깊이 버퍼를 쓰는 소프트웨어 래스터라이저입니다. 따뜻한 주광과 차가운 하늘빛의 평면 음영, 바닥 접촉 그림자 하나가 전부입니다. PBR·환경광·반사·광선추적 그림자·주변광 차폐는 없습니다. 게임 엔진에서 찍은 화면이 아니며 그렇게 부르면 안 됩니다."
+    },
+    "sceneDigest": "60276d6dd1f777a54816a8bf50cf88fc3f743100ea4118abcc16f76f91e883bf",
+    "cameraRigHash": "100d7c6d46b331a6db62116fc1d3036b1ec7a1e0352a041f4ba489efd4b4d4b5",
+    "sizeMetres": [
+      0.57,
+      0.434,
+      0.434
+    ],
+    "triangleCount": 700,
+    "captures": [
+      {
+        "id": "engine-three-quarter",
+        "lane": "visualRuntime",
+        "label": "Engine render, three-quarter",
+        "label_ko": "엔진 렌더 · 3/4",
+        "path": "/evidence/cozy-crate-closed/cozy-crate-closed__engine-three-quarter.png",
+        "sha256": "38edcfe4a8e6650a7b2275b5c4171d907e23ad418789fdfebe8e61a386f53b2c",
+        "bytes": 37391,
+        "width": 512,
+        "height": 512,
+        "camera": {
+          "eyeMetres": [
+            0.7756004928070646,
+            0.7141797958096849,
+            0.914810837669871
+          ],
+          "targetMetres": [
+            0,
+            0.21699999272823334,
+            0
+          ],
+          "fovYDeg": 30,
+          "eyeHeightMetres": null,
+          "groundDistanceMetres": null
+        },
+        "cameraPoseHash": "bc1acdc8b7838bece75ab328ccf38b1202e72388181c5f28fc0e6bab6a691795",
+        "cameraInsideAsset": false,
+        "metrics": {
+          "silhouetteFillRatio": 0.4974,
+          "boundingFillRatio": 0.8799,
+          "clippedEdgeCount": 0,
+          "subjectMeanLuma": 0.4866,
+          "subjectLumaP05": 0.2978,
+          "subjectLumaP95": 0.7402,
+          "subjectLumaRange": 0.4424,
+          "crushedBlackRatio": 0,
+          "blownWhiteRatio": 0,
+          "paletteColorCount": 31,
+          "backgroundSeparationDeltaE76": 44.63,
+          "groundContactColumnRatio": null,
+          "groundMedianGapRatio": null,
+          "groundMaxGapRatio": null,
+          "readability46": {
+            "luminanceRange": 0.592,
+            "edgeDensity": 0.168,
+            "meanGradient": 0.0419,
+            "localContrastCoverage": 0.6154
+          }
+        }
+      },
+      {
+        "id": "engine-front",
+        "lane": "visualRuntime",
+        "label": "Engine render, front",
+        "label_ko": "엔진 렌더 · 정면",
+        "path": "/evidence/cozy-crate-closed/cozy-crate-closed__engine-front.png",
+        "sha256": "56de2c186b0cadaeb1c45e67259bc2bdb73e32e6c316d1dbd2c11963be61ebeb",
+        "bytes": 21084,
+        "width": 512,
+        "height": 512,
+        "camera": {
+          "eyeMetres": [
+            0,
+            0.4959583434449784,
+            1.267992503257932
+          ],
+          "targetMetres": [
+            0,
+            0.21699999272823334,
+            0
+          ],
+          "fovYDeg": 30,
+          "eyeHeightMetres": null,
+          "groundDistanceMetres": null
+        },
+        "cameraPoseHash": "3c97307852dca9d3d7af0804867518161321b3831e9586208c00c4d9b0168aeb",
+        "cameraInsideAsset": false,
+        "metrics": {
+          "silhouetteFillRatio": 0.5217,
+          "boundingFillRatio": 0.8809,
+          "clippedEdgeCount": 0,
+          "subjectMeanLuma": 0.4208,
+          "subjectLumaP05": 0.2698,
+          "subjectLumaP95": 0.6906,
+          "subjectLumaRange": 0.4208,
+          "crushedBlackRatio": 0,
+          "blownWhiteRatio": 0,
+          "paletteColorCount": 23,
+          "backgroundSeparationDeltaE76": 49.64,
+          "groundContactColumnRatio": null,
+          "groundMedianGapRatio": null,
+          "groundMaxGapRatio": null,
+          "readability46": {
+            "luminanceRange": 0.4649,
+            "edgeDensity": 0.1847,
+            "meanGradient": 0.0424,
+            "localContrastCoverage": 0.5874
+          }
+        }
+      },
+      {
+        "id": "engine-side",
+        "lane": "visualRuntime",
+        "label": "Engine render, side",
+        "label_ko": "엔진 렌더 · 측면",
+        "path": "/evidence/cozy-crate-closed/cozy-crate-closed__engine-side.png",
+        "sha256": "862debef0baf9ccbe9d0a1d08ff609f08970685c4ec1332e98bfc1dafa261afb",
+        "bytes": 19175,
+        "width": 512,
+        "height": 512,
+        "camera": {
+          "eyeMetres": [
+            1.267992503257932,
+            0.4959583434449784,
+            0
+          ],
+          "targetMetres": [
+            0,
+            0.21699999272823334,
+            0
+          ],
+          "fovYDeg": 30,
+          "eyeHeightMetres": null,
+          "groundDistanceMetres": null
+        },
+        "cameraPoseHash": "053289e1d5860a091392cb98b0195145d5e098b8454f3f1e27ad4f45e2a673ab",
+        "cameraInsideAsset": false,
+        "metrics": {
+          "silhouetteFillRatio": 0.7102,
+          "boundingFillRatio": 0.8809,
+          "clippedEdgeCount": 0,
+          "subjectMeanLuma": 0.4664,
+          "subjectLumaP05": 0.3308,
+          "subjectLumaP95": 0.6996,
+          "subjectLumaRange": 0.3688,
+          "crushedBlackRatio": 0,
+          "blownWhiteRatio": 0,
+          "paletteColorCount": 24,
+          "backgroundSeparationDeltaE76": 46.48,
+          "groundContactColumnRatio": null,
+          "groundMedianGapRatio": null,
+          "groundMaxGapRatio": null,
+          "readability46": {
+            "luminanceRange": 0.4241,
+            "edgeDensity": 0.1178,
+            "meanGradient": 0.0283,
+            "localContrastCoverage": 0.4064
+          }
+        }
+      },
+      {
+        "id": "engine-top",
+        "lane": "visualRuntime",
+        "label": "Engine render, top",
+        "label_ko": "엔진 렌더 · 위",
+        "path": "/evidence/cozy-crate-closed/cozy-crate-closed__engine-top.png",
+        "sha256": "481eab6e5274496e48bf4ff89055d74fc02422873ff36f3bedd792cd441c352b",
+        "bytes": 24095,
+        "width": 512,
+        "height": 512,
+        "camera": {
+          "eyeMetres": [
+            0.2981679953784128,
+            1.4096719742418846,
+            0.4174351935297779
+          ],
+          "targetMetres": [
+            0,
+            0.21699999272823334,
+            0
+          ],
+          "fovYDeg": 30,
+          "eyeHeightMetres": null,
+          "groundDistanceMetres": null
+        },
+        "cameraPoseHash": "2d42684e584068c0a6f0b8600bf6af839550e23fe9d18ce9366e658459b8c012",
+        "cameraInsideAsset": false,
+        "metrics": {
+          "silhouetteFillRatio": 0.3909,
+          "boundingFillRatio": 0.8789,
+          "clippedEdgeCount": 0,
+          "subjectMeanLuma": 0.6718,
+          "subjectLumaP05": 0.409,
+          "subjectLumaP95": 0.7593,
+          "subjectLumaRange": 0.3503,
+          "crushedBlackRatio": 0,
+          "blownWhiteRatio": 0,
+          "paletteColorCount": 22,
+          "backgroundSeparationDeltaE76": 33.46,
+          "groundContactColumnRatio": null,
+          "groundMedianGapRatio": null,
+          "groundMaxGapRatio": null,
+          "readability46": {
+            "luminanceRange": 0.4044,
+            "edgeDensity": 0.1407,
+            "meanGradient": 0.0294,
+            "localContrastCoverage": 0.4848
+          }
+        }
+      },
+      {
+        "id": "player-5m",
+        "lane": "playerFacing",
+        "label": "Player camera, 1.6 m eye height, 5 m away",
+        "label_ko": "게임 시점 · 눈높이 1.6 m · 5 m",
+        "path": "/evidence/cozy-crate-closed/cozy-crate-closed__player-5m.png",
+        "sha256": "4f5b31374325871ec8a73cffff342b7583bc15f8fb6dd10d3e7f41c7c91ee758",
+        "bytes": 4143,
+        "width": 640,
+        "height": 360,
+        "camera": {
+          "eyeMetres": [
+            0,
+            1.6,
+            5
+          ],
+          "targetMetres": [
+            0,
+            0.21699999272823334,
+            0
+          ],
+          "fovYDeg": 55,
+          "eyeHeightMetres": 1.6,
+          "groundDistanceMetres": 5
+        },
+        "cameraPoseHash": "62ceb2c66230880ab4f63f647398b34ed1c6c4d1516ebf23abf7e70a34eae7a6",
+        "cameraInsideAsset": false,
+        "metrics": {
+          "silhouetteFillRatio": 0.0056,
+          "boundingFillRatio": 0.1111,
+          "clippedEdgeCount": 0,
+          "subjectMeanLuma": 0.4794,
+          "subjectLumaP05": 0.2776,
+          "subjectLumaP95": 0.7384,
+          "subjectLumaRange": 0.4608,
+          "crushedBlackRatio": 0,
+          "blownWhiteRatio": 0,
+          "paletteColorCount": 34,
+          "backgroundSeparationDeltaE76": 44.7,
+          "groundContactColumnRatio": 0.25,
+          "groundMedianGapRatio": 0.0616,
+          "groundMaxGapRatio": 0.0979,
+          "readability46": {
+            "luminanceRange": 0.4688,
+            "edgeDensity": 0.1439,
+            "meanGradient": 0.033,
+            "localContrastCoverage": 0.6017
+          }
+        }
+      },
+      {
+        "id": "player-15m",
+        "lane": "playerFacing",
+        "label": "Player camera, 1.6 m eye height, 15 m away",
+        "label_ko": "게임 시점 · 눈높이 1.6 m · 15 m",
+        "path": "/evidence/cozy-crate-closed/cozy-crate-closed__player-15m.png",
+        "sha256": "699fab0706e6124abff3e4d2f4174c777a1944667a045bf1294ade9a9a03dde9",
+        "bytes": 1736,
+        "width": 640,
+        "height": 360,
+        "camera": {
+          "eyeMetres": [
+            0,
+            1.6,
+            15
+          ],
+          "targetMetres": [
+            0,
+            0.21699999272823334,
+            0
+          ],
+          "fovYDeg": 55,
+          "eyeHeightMetres": 1.6,
+          "groundDistanceMetres": 15
+        },
+        "cameraPoseHash": "ca2a83a3c127fb7ef6b69248e91f056b5641fdb3102cb468e320e54ab0a5230e",
+        "cameraInsideAsset": false,
+        "metrics": {
+          "silhouetteFillRatio": 0.0006,
+          "boundingFillRatio": 0.0361,
+          "clippedEdgeCount": 0,
+          "subjectMeanLuma": 0.4839,
+          "subjectLumaP05": 0.2855,
+          "subjectLumaP95": 0.8134,
+          "subjectLumaRange": 0.5279,
+          "crushedBlackRatio": 0,
+          "blownWhiteRatio": 0,
+          "paletteColorCount": 34,
+          "backgroundSeparationDeltaE76": 43.33,
+          "groundContactColumnRatio": null,
+          "groundMedianGapRatio": null,
+          "groundMaxGapRatio": null,
+          "readability46": {
+            "luminanceRange": 0.5293,
+            "edgeDensity": 0.0742,
+            "meanGradient": 0.0168,
+            "localContrastCoverage": 0.3544
+          }
+        }
+      }
+    ],
+    "motionPhases": [],
+    "motion": null,
+    "checks": [
+      {
+        "id": "silhouette",
+        "lane": "visualRuntime",
+        "status": "PASS",
+        "observed": {
+          "minSilhouetteFillRatio": 0.3909,
+          "minBoundingFillRatio": 0.8789,
+          "maxBoundingFillRatio": 0.8809
+        },
+        "threshold": "minSilhouetteFillRatio >= 0.005 and boundingFillRatio in [0.75, 0.98] on every engine view",
+        "reason": "The asset fills 87.9%-88.1% of every engine view, as the framing solve intends.",
+        "reason_ko": "엔진 렌더 네 각도 모두에서 에셋이 화면의 87.9%~88.1% 를 채웁니다. 화면 맞춤이 의도대로 걸렸습니다.",
+        "captureIds": [
+          "engine-three-quarter",
+          "engine-front",
+          "engine-side",
+          "engine-top"
+        ]
+      },
+      {
+        "id": "framing",
+        "lane": "visualRuntime",
+        "status": "PASS",
+        "observed": {
+          "clippedEdgeCount": 0
+        },
+        "threshold": "clippedEdgeCount == 0 summed over the engine views",
+        "reason": "No engine view cuts the asset at the frame edge.",
+        "reason_ko": "엔진 렌더 어느 각도에서도 에셋이 화면 가장자리에서 잘리지 않습니다.",
+        "captureIds": [
+          "engine-three-quarter",
+          "engine-front",
+          "engine-side",
+          "engine-top"
+        ]
+      },
+      {
+        "id": "exposure",
+        "lane": "visualRuntime",
+        "status": "PASS",
+        "observed": {
+          "maxCrushedBlackRatio": 0,
+          "maxBlownWhiteRatio": 0,
+          "maxSubjectLumaRange": 0.4424
+        },
+        "threshold": "crushedBlackRatio <= 0.15 and blownWhiteRatio <= 0.15 and subjectLumaRange >= 0.12 (fail past 0.5 / 0.5 / below 0.05)",
+        "reason": "0.0% of the asset reads as solid black and 0.0% as solid white; the best-lit engine view spans 0.442 of luminance.",
+        "reason_ko": "완전한 검정으로 뭉개진 부분 0.0%, 완전한 흰색으로 날아간 부분 0.0%. 가장 잘 드러나는 각도에서 밝기 폭이 0.442 나옵니다.",
+        "captureIds": [
+          "engine-three-quarter",
+          "engine-front",
+          "engine-side",
+          "engine-top"
+        ]
+      },
+      {
+        "id": "palette",
+        "lane": "visualRuntime",
+        "status": "PASS",
+        "observed": {
+          "paletteColorCount": 31,
+          "backgroundSeparationDeltaE76": 49.64
+        },
+        "threshold": "paletteColorCount >= 5 and backgroundSeparationDeltaE76 >= 12 (fail below 2 / 5)",
+        "reason": "31 colours survive quantisation, and the asset sits 49.6 delta E from the neutral ground, so its silhouette reads.",
+        "reason_ko": "색을 뭉뚱그려도 31가지가 남고, 배경과의 색 차이가 ΔE 49.6 이라 실루엣이 배경에서 떨어져 보입니다.",
+        "captureIds": [
+          "engine-three-quarter",
+          "engine-front",
+          "engine-side",
+          "engine-top"
+        ]
+      },
+      {
+        "id": "motion",
+        "lane": "visualRuntime",
+        "status": "NOT_APPLICABLE",
+        "observed": {
+          "declaredClipCount": 0,
+          "movedPixelRatio": null
+        },
+        "threshold": "not evaluated when the file declares no animation clip",
+        "reason": "The file declares no animation clip, so there is no motion to show.",
+        "reason_ko": "파일에 동작(애니메이션)이 없어 볼 움직임이 없습니다.",
+        "captureIds": []
+      },
+      {
+        "id": "silhouette",
+        "lane": "playerFacing",
+        "status": "PASS",
+        "observed": {
+          "boundingFillRatio": 0.0361
+        },
+        "threshold": "boundingFillRatio >= 0.02 at the farthest player camera (fail below 0.005)",
+        "reason": "From the farthest player camera the asset still spans 3.6% of the frame height.",
+        "reason_ko": "가장 먼 게임 시점에서도 에셋이 화면 높이의 3.6% 를 차지합니다.",
+        "captureIds": [
+          "player-15m"
+        ]
+      },
+      {
+        "id": "readability46",
+        "lane": "playerFacing",
+        "status": "PASS",
+        "observed": {
+          "luminanceRange": 0.5293,
+          "edgeDensity": 0.0742,
+          "localContrastCoverage": 0.3544,
+          "meanGradient": 0.0168
+        },
+        "threshold": "at 46 px: luminanceRange >= 0.18, edgeDensity >= 0.015, localContrastCoverage >= 0.04 (fail below 0.12 / 0.01 / 0.02)",
+        "reason": "Shrunk to 46 px the asset keeps 0.529 of luminance range, 0.074 edge density and 0.354 local contrast, so it is still legible small.",
+        "reason_ko": "46픽셀로 줄여도 밝기 폭 0.529, 테두리 밀도 0.074, 국소 대비 0.354 이 남아 작게도 읽힙니다.",
+        "captureIds": [
+          "player-15m"
+        ]
+      },
+      {
+        "id": "groundContact",
+        "lane": "playerFacing",
+        "status": "PASS",
+        "observed": {
+          "originGroundOffsetRatio": 0,
+          "groundContactColumnRatio": 0.25,
+          "groundMedianGapRatio": 0.0616,
+          "groundMaxGapRatio": 0.0979
+        },
+        "threshold": "|bounds.min.y / height| <= 0.02 (fail past 0.25); a capture with contactColumnRatio 0 and medianGapRatio > 0.5 also asks for review",
+        "reason": "The asset's lowest point sits 0.00% of its own height from the engine floor at y = 0, so it lands where an engine drops it.",
+        "reason_ko": "에셋의 가장 낮은 점이 엔진 바닥(y = 0)에서 자기 높이의 0.00% 만큼 떨어져 있습니다. 엔진이 원점에 놓으면 바닥에 그대로 앉습니다.",
+        "captureIds": [
+          "player-5m"
+        ]
+      }
+    ],
+    "lanes": {
+      "visualRuntime": {
+        "verdict": "PASS",
+        "checkIds": [
+          "silhouette",
+          "framing",
+          "exposure",
+          "palette",
+          "motion"
+        ]
+      },
+      "playerFacing": {
+        "verdict": "PASS",
+        "checkIds": [
+          "silhouette",
+          "readability46",
+          "groundContact"
+        ]
+      }
+    },
+    "verdict": "PASS",
+    "summary": "All 7 automated visual checks pass. No human review is required before this asset is used.",
+    "summary_ko": "자동 화면 검사 7건이 모두 통과했습니다. 이 에셋을 쓰기 전에 사람이 따로 볼 필요는 없습니다.",
+    "timings": {
+      "decodeMs": 24,
+      "renderMs": 601,
+      "measureMs": 328,
+      "totalMs": 1028,
+      "peakHeapBytes": 23015176
+    },
+    "limits": [
+      "The frames come from Clunk's own offline rasteriser, not from a game engine's rendering path.",
+      "Materials are read as vertex colour times base colour; metal, roughness, transparency and emission are not simulated.",
+      "The ground-contact measurement reads one silhouette per camera. It cannot see a part that floats behind a part that is itself grounded.",
+      "Motion is sampled at three phases (0, 3/7, 6/7) of the first declared clip only; a clip that loops exactly seven times would still alias."
+    ],
+    "limits_ko": [
+      "여기 찍힌 화면은 Clunk 자체 오프라인 래스터라이저의 결과이지, 게임 엔진이 그린 화면이 아닙니다.",
+      "재질은 정점 색 × 기본 색으로만 읽습니다. 금속·거칠기·투명·발광은 계산하지 않습니다.",
+      "바닥 접지 측정은 카메라마다 실루엣 하나를 읽습니다. 바닥에 닿은 부품 뒤에 숨어 떠 있는 부품은 보지 못합니다.",
+      "움직임은 첫 번째 동작의 세 위상(0, 3/7, 6/7)만 표본으로 봅니다. 동작이 정확히 일곱 번 반복하는 경우에는 여전히 겹쳐 보일 수 있습니다."
+    ]
+  },
+  "validation": {
+    "valid": true,
+    "structuralValid": true,
+    "qualityPolicyValid": true
+  },
+  "readiness": "ready",
+  "limitation": "STRUCTURAL_SCORE_IS_NOT_VISUAL_APPROVAL",
+  "captureLimitation": "OFFLINE_SOFTWARE_RASTER_IS_NOT_AN_ENGINE_SCREENSHOT"
+}
