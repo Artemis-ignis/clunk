@@ -47,8 +47,8 @@ export function KitDetail({ kitId, salesOpen = false }: { kitId: string; salesOp
   if (state === "loading") {
     return (
       <div className={styles.state} role="status">
-        <strong>키트를 읽는 중입니다.</strong>
-        <small>공개된 부품에서 이 키트를 세우고 있습니다.</small>
+        <strong>키트를 불러오는 중입니다.</strong>
+        <small>잠시만 기다려 주세요.</small>
       </div>
     );
   }
@@ -57,7 +57,7 @@ export function KitDetail({ kitId, salesOpen = false }: { kitId: string; salesOp
     return (
       <div className={styles.state} role="alert">
         <strong>키트를 열 수 없습니다.</strong>
-        <small>목록을 내려받지 못했습니다. 잠시 뒤 다시 열어 보세요.</small>
+        <small>잠시 뒤 다시 열어 보세요. 낱개 부품은 에셋 마켓에서 바로 받습니다.</small>
         <Link className={`${styles.btn} ${styles.btnGhost}`} href="/kits">키트 목록으로</Link>
       </div>
     );
@@ -67,7 +67,7 @@ export function KitDetail({ kitId, salesOpen = false }: { kitId: string; salesOp
     return (
       <div className={styles.state}>
         <strong>이 키트는 지금 공개돼 있지 않습니다.</strong>
-        <small>부품이 둘 이상 공개돼 있어야 키트가 섭니다.</small>
+        <small>부품이 둘 이상 공개되면 키트로 열립니다.</small>
         <Link className={`${styles.btn} ${styles.btnGhost}`} href="/kits">키트 목록으로</Link>
       </div>
     );
@@ -132,7 +132,7 @@ function KitBody({ kit, salesOpen }: { kit: Kit<KitListing>; salesOpen: boolean 
               )}
             </span>
             <span className={styles.stageCaption}>
-              이 키트는 부품을 하나씩 따로 받습니다. 합친 한 파일은 아직 없습니다.
+              부품을 하나씩 따로 받습니다. 아래에서 필요한 것만 고르세요.
             </span>
           </div>
         )}

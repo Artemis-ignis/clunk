@@ -975,7 +975,7 @@ export function AssetCreationWorkbench({
                     ))}
                     {!visibleTemplates.length ? (
                       <p className="studio-templates-empty">
-                        「{query}」에 맞는 템플릿이 없습니다. 다른 말로 찾아 보십시오.
+                        「{query}」에 맞는 템플릿이 없습니다. 다른 말로 찾아 보세요.
                       </p>
                     ) : null}
                   </div>
@@ -1004,7 +1004,7 @@ export function AssetCreationWorkbench({
                 </>
               ) : (
                 <p className="studio-templates-empty">
-                  고를 수 있는 템플릿이 아직 없습니다. 지금은 이름에 따라 한 가지 모양으로 만들어집니다.
+                  고를 수 있는 템플릿이 아직 없습니다. 지금은 이름에 따라 한 가지 모양으로 나옵니다.
                 </p>
               )}
             </div>
@@ -1171,7 +1171,7 @@ export function AssetCreationWorkbench({
                     }}
                   />
                 ) : (
-                  <p className="studio-empty-line">이 파일은 화면에서 바로 볼 수 없습니다. 아래에서 받아 확인하세요.</p>
+                  <p className="studio-empty-line">이 파일은 화면에서 바로 볼 수 없습니다. 받아서 확인하세요.</p>
                 )}
               </div>
 
@@ -1226,7 +1226,7 @@ export function AssetCreationWorkbench({
                       렌더 환경이 없으면 이 값은 늘 같은 자리에서 "확인할 환경 없음"이라, 칸으로
                       두면 결과마다 못 끝낸 일이 하나 더 있는 것처럼 읽힌다. */}
                   {runtimeInspectionStatus(stage) === "PASS" || runtimeInspectionStatus(stage) === "NO_GO" ? (
-                    <Lane label="엔진 화면" value={runtimeInspectionStatus(stage)} detail="엔진에서 찍은 화면" />
+                    <Lane label="엔진 렌더" value={runtimeInspectionStatus(stage)} detail="엔진에서 그린 화면" />
                   ) : null}
                   {reviewStatus.humanDecision !== "NOT_EVALUATED" ? (
                     <Lane label="직접 확인" value={reviewStatus.humanDecision} detail="내가 남긴 판단" />
@@ -1240,7 +1240,7 @@ export function AssetCreationWorkbench({
                 <details className="studio-more">
                   <summary>이 결과로 새 버전 만들기 (리믹스)</summary>
                   <div>
-                    <p className="studio-field-hint">원본은 그대로 두고, 원본 번호와 지문을 기록한 새 파일을 만듭니다. Kit(모음집)에 담는 것은 <Link className="text-link" href="/bundles">모음집</Link>에서 합니다.</p>
+                    <p className="studio-field-hint">원본은 그대로 두고 새 파일을 만듭니다. 어느 파일에서 갈라져 나왔는지는 기록에 남습니다. 여러 파일을 한 벌로 묶는 것은 <Link className="text-link" href="/bundles">모음집</Link>에서 합니다.</p>
                     <label className="studio-field">
                       <span>변경 프롬프트</span>
                       <textarea value={remixPrompt} onChange={(event) => setRemixPrompt(event.target.value)} rows={2} maxLength={2_000} />
@@ -1257,7 +1257,7 @@ export function AssetCreationWorkbench({
                 <details className="studio-more">
                   <summary>직접 확인한 결과 남기기</summary>
                   <div>
-                    <p className="studio-field-hint">파일 검사 점수와 눈으로 본 결과는 따로 기록합니다. &ldquo;문제 없음&rdquo;을 고르려면 방금 찍은 화면의 확인 코드가 필요합니다.</p>
+                    <p className="studio-field-hint">파일 검사 점수와 눈으로 본 결과는 따로 남깁니다. &ldquo;문제 없음&rdquo;을 고르려면 방금 찍은 화면의 확인 코드가 필요합니다.</p>
                     <div className="studio-field-row">
                       {(["visualRuntime", "playerFacing", "humanDecision"] as const).map((key) => (
                         <label className="studio-field" key={key}>
@@ -1307,7 +1307,7 @@ export function AssetCreationWorkbench({
           ) : mineState === "unavailable" ? (
             <p className="studio-empty-line">목록을 불러오지 못했습니다.</p>
           ) : mine.length === 0 ? (
-            <p className="studio-empty-line">아직 만든 것이 없습니다. 왼쪽에서 첫 파일을 만들어 보세요.</p>
+            <p className="studio-empty-line">아직 만든 것이 없습니다. 첫 파일을 만들어 보세요.</p>
           ) : (
             <div className="studio-mine-grid">
               {mine.map((item) => (

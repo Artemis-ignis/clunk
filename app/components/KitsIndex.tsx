@@ -96,8 +96,8 @@ export function KitsIndex({ salesOpen = false }: { salesOpen?: boolean }) {
   if (state === "loading") {
     return (
       <div className={styles.state} role="status">
-        <strong>키트를 읽는 중입니다.</strong>
-        <small>공개된 부품에서 키트를 세우고 있습니다.</small>
+        <strong>키트를 불러오는 중입니다.</strong>
+        <small>잠시만 기다려 주세요.</small>
       </div>
     );
   }
@@ -106,7 +106,7 @@ export function KitsIndex({ salesOpen = false }: { salesOpen?: boolean }) {
     return (
       <div className={styles.state} role="alert">
         <strong>키트 목록을 열 수 없습니다.</strong>
-        <small>목록을 내려받지 못했습니다. 잠시 뒤 다시 열어 보세요.</small>
+        <small>잠시 뒤 다시 열어 보세요. 낱개 에셋은 에셋 마켓에서 바로 받습니다.</small>
         <Link className={`${styles.btn} ${styles.btnGhost}`} href="/marketplace">에셋 마켓으로</Link>
       </div>
     );
@@ -116,7 +116,7 @@ export function KitsIndex({ salesOpen = false }: { salesOpen?: boolean }) {
     return (
       <div className={styles.state}>
         <strong>지금 공개된 키트가 없습니다.</strong>
-        <small>부품이 둘 이상 공개되면 그 묶음이 여기에 섭니다. 낱개 에셋은 마켓에 있습니다.</small>
+        <small>부품이 둘 이상 공개되면 키트로 열립니다. 낱개 에셋은 에셋 마켓에서 바로 받으세요.</small>
         <Link className={`${styles.btn} ${styles.btnGhost}`} href="/marketplace">에셋 마켓으로</Link>
       </div>
     );

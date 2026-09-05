@@ -289,7 +289,7 @@ export default function Home() {
                   <div className="cv5-make-facts">
                     <div className="cv5-make-name">
                       <b>{FEATURED_MODEL.name}</b>
-                      <span>아래 숫자는 마켓에서 받는 파일에서 직접 측정한 값</span>
+                      <span>마켓에서 받는 파일에서 측정한 값입니다</span>
                     </div>
                     <div><span>폴리곤</span><b>{FEATURED_MODEL.measured.faces}개</b></div>
                     <div><span>파일 크기</span><b>{FEATURED_MODEL.measured.size}</b></div>
@@ -307,10 +307,10 @@ export default function Home() {
               <div className="cv5-sec-kicker"><span className="cv5-num">02</span><small>검사와 수정</small></div>
               <h2 id="sec-inspect">게임 에셋 검사 및 수정</h2>
               <p>
-                GLB 파일을 올리면 {RULE_COUNT}가지를 검사해 점수로 알려줍니다. 고치는 것도 여기서, 원본은 그대로.
+                GLB 파일을 올리면 {RULE_COUNT}가지 항목을 검사해 점수로 알려 드립니다. 걸린 것은 그 자리에서 고치고, 원본은 그대로 둡니다.
               </p>
               <ul className="cv5-points">
-                <li><b>실제 수치</b> — 폴리곤 수, 재질 수, 실제 크기를 파일에서 직접 읽습니다</li>
+                <li><b>실제 수치</b> — 폴리곤 수, 재질 수, 실제 크기를 파일에서 측정합니다</li>
                 {/* 이 화면(/app)이 받는 파일은 GLB·glTF뿐입니다(ClunkInspector accept=".glb,.gltf").
                     스프라이트 시트·본 애니메이션 검사는 로컬 MCP·명령줄 도구가 맡습니다
                     (integrations/mcp/server.ts의 clunk_asset_inspect·clunk_sprite_sheet_review). */}
@@ -394,7 +394,7 @@ export default function Home() {
                 {/* 3D는 /api/series가 템플릿 보관소에서 다시 구워 냅니다 — 문장이 모양을 만들지
                     않습니다(app/api/series/route.ts). 문장으로 그리는 것은 2D 이미지뿐입니다. */}
                 <li><b>에셋 제작</b> — 템플릿을 고르고 프롬프트를 입력하면 GLB가 나옵니다</li>
-                <li><b>검사</b> — 만든 파일을 바로 검사해 무엇이 걸렸는지 짚어 주고, 고칠지 물어봅니다</li>
+                <li><b>검사</b> — 만든 파일을 바로 검사하고, 걸린 것은 고칠지 물어봅니다</li>
                 <li><b>게임에 적용</b> — 통과한 파일을 Unity, Godot, Three.js에 바로 넣습니다</li>
               </ul>
               <div>
@@ -429,11 +429,11 @@ export default function Home() {
                 <h2 id="showcase-heading">마켓에 올라와 있는 에셋</h2>
               </div>
               <p>
-                게임 제작에 바로 쓸 수 있는 3D 모델, 2D 스프라이트 시트, 이어 붙여도 이음매가 안 보이는 텍스처입니다.
-                카드마다 폴리곤 수가 적혀 있고,{" "}
+                게임에 바로 넣는 3D 모델과 스프라이트 시트, 이어 붙여도 자국이 보이지 않는 텍스처입니다.
+                폴리곤 수는 파일에서 측정한 값입니다.{" "}
                 {salesOpen
-                  ? "B 등급은 누구나 바로 받고 A·S 등급은 구독하면 받을 수 있습니다."
-                  : "지금은 결제를 받지 않아 전부 무료로 받을 수 있습니다."}
+                  ? "B 등급은 로그인만 하면 받고, A·S 등급은 구독으로 열립니다."
+                  : "베타 기간에는 모든 에셋이 무료입니다."}
               </p>
             </div>
             {/* 이 진열장의 높이는 마켓이 몇 개를 돌려주느냐가 아니라 설계로 정한다.
@@ -473,15 +473,15 @@ export default function Home() {
             <div className="cv5-closer-doors">
               <Link href="/marketplace" prefetch={false}>
                 <b>마켓</b>
-                <span>폴리곤 수까지 적힌 실제 파일을 받습니다</span>
+                <span>폴리곤 수를 확인하고 바로 받습니다</span>
               </Link>
               <Link href="/signup?return_to=%2Fapp%3Fintent%3Dinspect" prefetch={false}>
                 <b>검사</b>
-                <span>GLB 한 개를 {RULE_COUNT}가지 항목으로 봅니다</span>
+                <span>GLB 한 개를 {RULE_COUNT}가지 항목으로 검사합니다</span>
               </Link>
               <Link href="/agents" prefetch={false}>
                 <b>에이전트</b>
-                <span>AI 도구 {AGENT_CLIENTS.length}곳의 연결 설정을 줍니다</span>
+                <span>AI 도구 {AGENT_CLIENTS.length}곳에 붙여 넣을 설정을 드립니다</span>
               </Link>
             </div>
           </div>

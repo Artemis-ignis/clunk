@@ -19,10 +19,13 @@ test("dashboard presents the four evidence decisions as separate lanes", async (
     /게임 화면에서 어떻게 보이는지는 아직 이 기록에 들어/,
     "app/components/DashboardClient.tsx: 파일 규격 통과가 게임 화면 승인이 아니라는 문장이 사라졌다",
   );
-  assert.match(
-    source,
-    /확인하지 않은 것을 확인했다고 적지 않습니다/,
-    "app/components/DashboardClient.tsx: 확인하지 않은 것을 확인했다고 적지 않는다는 약속이 사라졌다",
+  // 2026-09-05 문구 정리: "Clunk는 확인하지 않은 것을 확인했다고 적지 않습니다" 는 화면이
+  // 자기 자신에 대해 하는 말이라 본문에서 뺐다(docs/copy-glossary.ko.md 7절). 지켜야 하는
+  // 것은 그 말이 아니라 그 말이 약속하던 동작 — 판정이 나오지 않은 칸은 칸으로 세우지
+  // 않는다 — 이므로 이제 문장 대신 그 규칙을 못박는다.
+  assert.ok(
+    source.includes('.filter((lane) => lane.id === "structural-contract" || hasVerdict(lane.value))'),
+    "app/components/DashboardClient.tsx: 판정이 없는 칸을 판정처럼 세우지 않는다는 규칙이 사라졌다",
   );
   assert.doesNotMatch(
     source,

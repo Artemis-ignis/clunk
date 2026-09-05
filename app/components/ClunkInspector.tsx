@@ -653,7 +653,7 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
                     <strong>{choice.label}</strong>
                     <span>{choice.blurb}</span>
                     <small className="num">
-                      면 {budget.maxTriangles.toLocaleString()}개 · 재질 {budget.maxMaterials}개 · 텍스처{" "}
+                      폴리곤 {budget.maxTriangles.toLocaleString()}개 · 재질 {budget.maxMaterials}개 · 텍스처{" "}
                       {formatMegabytes(budget.maxTextureMemoryBytes)}
                     </small>
                   </button>
@@ -688,8 +688,8 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
             </label>
             {/* 저장소 안의 예제 경로를 화면에 적어 두었었다. 방문자가 열어 볼 수 없는 주소다. */}
             <p className="muted-note">
-              고른 기준으로 점수를 계산하며, 다음 검사부터 적용됩니다. 같은 기준 파일을 명령줄 도구와
-              AI 도구 연결에서도 그대로 쓸 수 있습니다. <Link className="text-link" href="/docs">쓰는 법 보기</Link>
+              고른 기준은 다음 검사부터 적용됩니다. 같은 기준 파일을 명령줄 도구와 AI 도구 연결에서도
+              그대로 씁니다. <Link className="text-link" href="/docs">쓰는 법 보기</Link>
             </p>
           </div>
 
@@ -823,15 +823,15 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
             <p className="score-note">
               {readiness
                 ? readinessNote(readiness)
-                : "점수는 실제 검사 보고서에서 계산됩니다. 화면 판정은 이 점수에 포함되지 않습니다."}
+                : "점수는 이 파일을 실제로 열어 계산합니다."}
             </p>
           </div>
 
           <div className="panel evidence-v2-card">
             <div className="panel-head">
               <div>
-                <span className="mono-label">검사 근거</span>
-                <h3>무엇을 보고 내린 판정인지</h3>
+                <span className="mono-label">검사 결과</span>
+                <h3>무엇을 보고 판단했는지</h3>
               </div>
               {report ? <span className="mono-label">검사 규칙 v{report.ruleSetVersion}</span> : null}
             </div>
@@ -841,12 +841,12 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
                     서 있으면, 방금 끝난 검사가 사람이 손대야 끝나는 반제품처럼 읽혔다.
                     실제로 판정이 나온 항목만 칸이 되고, 나머지는 아래 한 줄이 말한다. */}
                 <div className="evidence-v2-status-grid">
-                  <span><small>파일 구조</small><strong>{STATUS_TEXT[evidenceV2.statuses.structural] ?? evidenceV2.statuses.structural}</strong></span>
+                  <span><small>파일 검사</small><strong>{STATUS_TEXT[evidenceV2.statuses.structural] ?? evidenceV2.statuses.structural}</strong></span>
                   {hasVerdict(evidenceV2.statuses.visualRuntime) ? (
-                    <span><small>엔진 화면</small><strong>{STATUS_TEXT[evidenceV2.statuses.visualRuntime] ?? evidenceV2.statuses.visualRuntime}</strong></span>
+                    <span><small>엔진 렌더</small><strong>{STATUS_TEXT[evidenceV2.statuses.visualRuntime] ?? evidenceV2.statuses.visualRuntime}</strong></span>
                   ) : null}
                   {hasVerdict(evidenceV2.statuses.playerFacing) ? (
-                    <span><small>게임 화면</small><strong>{STATUS_TEXT[evidenceV2.statuses.playerFacing] ?? evidenceV2.statuses.playerFacing}</strong></span>
+                    <span><small>게임 시점</small><strong>{STATUS_TEXT[evidenceV2.statuses.playerFacing] ?? evidenceV2.statuses.playerFacing}</strong></span>
                   ) : null}
                   {hasVerdict(evidenceV2.statuses.humanDecision) ? (
                     <span><small>직접 확인</small><strong>{STATUS_TEXT[evidenceV2.statuses.humanDecision] ?? evidenceV2.statuses.humanDecision}</strong></span>
@@ -854,7 +854,7 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
                 </div>
                 <p className="score-note">이 판정은 파일 자체를 본 결과입니다. 게임 화면에서 어떻게 보이는지는 아직 이 기록에 들어 있지 않습니다.</p>
               </>
-            ) : <p className="score-note">파일을 검사하면 여기에 결과가 나타납니다.</p>}
+            ) : <p className="score-note">파일을 검사하면 결과가 나옵니다.</p>}
           </div>
 
           <div className="panel findings-card">
@@ -885,8 +885,8 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
             ) : (
               <div className="empty-block">
                 <Icon name="inspect" size={22} />
-                <strong>아직 실행한 에셋이 없습니다</strong>
-                <p>왼쪽에 파일을 놓거나 샘플을 고르면, 규칙 하나하나에 대해 무엇을 보고 판단했는지 여기에 나옵니다.</p>
+                <strong>아직 검사한 파일이 없습니다</strong>
+                <p>파일을 놓거나 샘플을 고르면 규칙마다 무엇을 보고 판단했는지 나옵니다.</p>
               </div>
             )}
           </div>
@@ -902,7 +902,7 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
               <Icon name="arrowUpRight" size={15} />
             </button>
             <p>
-              정해진 안전한 손질만 합니다. 아무것도 없는 빈 노드 제거, 똑같은 재질 합치기, 메타데이터 정리, 새 파일로 다시 묶기. 모양이나 그림이 바뀌는 손질(메시 다시 만들기, 텍스처 다시 굽기)은 하지 않습니다.
+              빈 노드 제거, 똑같은 재질 합치기, 메타데이터 정리, 새 파일로 다시 묶기만 합니다. 모양이나 그림이 바뀌는 손질은 하지 않고, 원본은 그대로 둡니다.
             </p>
           </div>
         </aside>
@@ -953,7 +953,7 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
       ) : null}
 
       <section className="evidence-chain" aria-label="증거 체인">
-        <h3>모든 결정은 흔적을 남깁니다</h3>
+        <h3>이 검사가 남긴 기록</h3>
         <dl>
           <EvidenceItem label="입력 파일 지문" value={report ? shortHash(report.inputHash) : "대기 중"} />
           <EvidenceItem label="규칙 세트" value={report ? report.ruleSetId : "실행 시 선언"} />

@@ -276,7 +276,7 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
                 ? "연결 상태를 확인하는 중입니다"
                 : "한 번 발급하고 모든 클라이언트에서 사용"}
           </strong>
-          <small>연결 주소 <code>{endpoint}</code> · 내 컴퓨터 파일 검사는 로컬 서버가 맡고, 기록은 HTTPS로 오갑니다</small>
+          <small>연결 주소 <code>{endpoint}</code> · 내 컴퓨터의 파일 검사는 설치해서 쓰는 도구가 맡습니다</small>
         </div>
         <div className="agent-connection-actions">
           {connectionState !== "ready" ? (
@@ -337,7 +337,7 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
         </article>
         <article className="agent-handshake-card agent-handshake-card-boundary">
           <span className="mono-label">03 · 경계</span>
-          <strong>분리 유지</strong>
+          <strong>서버 응답까지</strong>
           <p>이 확인은 서버가 제대로 응답한다는 뜻이지, 게임 화면까지 괜찮다는 승인은 아닙니다.</p>
         </article>
       </div>
@@ -389,7 +389,7 @@ export function AgentsClient({ initiallyAuthenticated = false }: { initiallyAuth
       <div className="agent-tab-purpose" aria-live="polite">
         <div>
           <span className="mono-label">2. 클라이언트 선택</span>
-          <strong>선택한 클라이언트: {selected.label}</strong>
+          <strong>고른 도구: {selected.label}</strong>
         </div>
         <p>{selected.description}</p>
       </div>

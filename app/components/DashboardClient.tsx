@@ -304,7 +304,7 @@ export function DashboardClient({ welcome }: { welcome?: string | null }) {
             <em>만들어 볼까요?</em>
           </h2>
           <p className="home-hello-lede">
-            Clunk는 게임에 넣을 파일을 만들고, 그 파일을 게임에 넣어도 되는지 검사합니다.
+            게임에 넣을 파일을 만들고, 넣어도 되는지 바로 검사합니다.
           </p>
         </div>
         <div className="home-meter" role="group" aria-label="내 잔여량">
@@ -336,7 +336,7 @@ export function DashboardClient({ welcome }: { welcome?: string | null }) {
             <small>모든 기능이 열려 있습니다</small>
           </div>
           <Link className="home-meter-link" href="/pricing">
-            이 숫자가 무슨 뜻인지 보기
+            요금 보기
             <Icon name="arrowRight" size={13} />
           </Link>
         </div>
@@ -413,10 +413,10 @@ export function DashboardClient({ welcome }: { welcome?: string | null }) {
         ) : (
           <div className="home-empty">
             <p>
-              아직 저장된 에셋이 없습니다. 위에서 하나 만들거나 파일을 검사하면 여기에 쌓입니다.
+              아직 저장된 에셋이 없습니다. 만들거나 검사한 파일이 계정에 저장됩니다.
             </p>
             <Link className="text-link" href="/app">
-              샘플 파일로 검사 흐름 먼저 보기
+              샘플 파일로 먼저 검사해 보기
               <Icon name="arrowRight" size={13} />
             </Link>
           </div>
@@ -432,9 +432,8 @@ export function DashboardClient({ welcome }: { welcome?: string | null }) {
         <div>
           <h3 id="home-mcp-heading">AI 도구 연결</h3>
           <p>
-            Claude Code, Cursor 같은 코딩 도구에서 Clunk를 바로 부를 수 있습니다. 도구에 연결해 두면
-            채팅창에서 &ldquo;이 GLB 검사해 줘&rdquo; 라고 말하는 것만으로 여기와 같은 검사가 돌아가고,
-            결과도 이 작업공간에 함께 쌓입니다.
+            Claude Code, Cursor 같은 코딩 도구에 연결해 두면 채팅창에서 &ldquo;이 GLB 검사해 줘&rdquo;
+            한 마디로 같은 검사가 돌아갑니다. 결과는 대시보드에 함께 쌓입니다.
           </p>
         </div>
         <Link className="button button-quiet button-sm" href="/agents">
@@ -456,9 +455,9 @@ function LatestInspection({ run, statuses }: { run: Run; statuses: EvidenceStatu
   // 서 있어서, 끝난 검사가 사람이 손대야 끝나는 반제품처럼 읽혔다. 아직 돌지 않은 확인은
   // 칸이 아니라 아래 한 줄이 말한다.
   const lanes = [
-    { id: "structural-contract", label: "파일 규격", detail: "파일 자체에 문제가 없는지", value: statuses.structural },
-    { id: "visual-runtime", label: "엔진 화면", detail: "엔진에서 찍은 화면", value: statuses.visualRuntime },
-    { id: "player-facing", label: "게임 화면", detail: "게임 안에서 잘 보이는지", value: statuses.playerFacing },
+    { id: "structural-contract", label: "파일 검사", detail: "파일 자체에 문제가 없는지", value: statuses.structural },
+    { id: "visual-runtime", label: "엔진 렌더", detail: "엔진에서 그린 화면", value: statuses.visualRuntime },
+    { id: "player-facing", label: "게임 시점", detail: "게임 안에서 잘 보이는지", value: statuses.playerFacing },
     { id: "human-review", label: "직접 확인", detail: "내가 남긴 판단", value: statuses.humanDecision },
   ].filter((lane) => lane.id === "structural-contract" || hasVerdict(lane.value));
 
@@ -491,9 +490,12 @@ function LatestInspection({ run, statuses }: { run: Run; statuses: EvidenceStatu
           </div>
         ))}
       </div>
+      {/* 확인하지 않은 것을 확인했다고 적지 않는다 — 그 약속은 위 lanes 의 hasVerdict
+          필터가 지킨다. 화면이 그 약속을 문장으로 자랑하지는 않는다
+          (docs/copy-glossary.ko.md 7절). */}
       <p className="home-latest-note" id="next-verification">
         이 판정은 파일 자체를 열어서 본 결과입니다. 게임 화면에서 어떻게 보이는지는 아직 이 기록에 들어
-        있지 않고, Clunk는 확인하지 않은 것을 확인했다고 적지 않습니다.
+        있지 않습니다.
       </p>
       <p className="home-latest-record">
         검사 기록 · 파일 지문 {shortHash(run.inputHash)}

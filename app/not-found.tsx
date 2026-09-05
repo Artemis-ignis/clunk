@@ -6,7 +6,7 @@ import { createPageMetadata } from "./components/site-metadata";
 
 export const metadata = createPageMetadata({
   title: "찾을 수 없는 주소",
-  description: "요청한 주소에 해당하는 Clunk 페이지가 없습니다. 마켓·검사·문서로 이어서 이동할 수 있습니다.",
+  description: "이 주소에는 아무것도 없습니다. 에셋 마켓과 에셋 검사, 문서로 이어서 갈 수 있습니다.",
   path: "/",
 });
 
@@ -25,8 +25,7 @@ export default function NotFound() {
           <span className="cv5-eyebrow">404 · 없는 주소</span>
           <h1>이 주소에는 <em>아무것도 없습니다.</em></h1>
           <p>
-            주소가 바뀌었거나 잘못 입력된 경로입니다. 파일과 검사 기록은 원래 자리에
-            그대로 있으니, 아래에서 가던 길을 이어가세요.
+            주소가 바뀌었거나 잘못 입력됐습니다. 받은 파일과 검사 기록은 그대로 있습니다.
           </p>
           <div className="cv5-cta-row">
             <Link className="cv5-btn cv5-btn-primary" href="/" prefetch={false}>

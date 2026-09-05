@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 export const metadata = createPageMetadata({
   title: "요금",
   description:
-    "Clunk 요금제는 무료와 구독 둘뿐이고, 에셋마다 값이 붙지 않습니다. 구독하면 전체 카탈로그를 내려받기 제한 없이 받고, 구독을 끊어도 받은 파일은 계정에 그대로 남습니다.",
+    "무료와 구독 둘뿐입니다. 구독하면 마켓 전체를 제한 없이 받고, 구독을 끊어도 받은 파일은 계정에 남습니다.",
   path: "/pricing",
 });
 
@@ -97,7 +97,7 @@ const PLANS: Plan[] = [
     name: "구독",
     priceKrw: 9_900,
     annualKrw: 99_000,
-    summary: "마켓 전체를 여는 자리. 하나씩 사는 길은 없습니다.",
+    summary: "마켓의 모든 에셋을 받습니다. 하나씩 사는 길은 없습니다.",
     credits: 300,
     images: 30,
     seats: 1,
@@ -125,7 +125,7 @@ const COMPARISON: { label: string; value: (plan: Plan) => string }[] = [
   { label: "상업적 이용", value: () => "허용" },
   { label: "AI 도구 연결(MCP)·API", value: () => "포함" },
   { label: "만들기·검사 / 달", value: (p) => `${p.credits.toLocaleString("ko-KR")}회` },
-  { label: "이미지 생성 / 하루", value: (p) => `${p.images}장` },
+  { label: "이미지 만들기 / 하루", value: (p) => `${p.images}장` },
 ];
 
 /**
@@ -162,11 +162,11 @@ const FAQ = [
   },
   {
     q: "지금 마켓에서 무엇을 받을 수 있나요?",
-    a: "지금은 결제를 받지 않아 등급 제한이 걸리지 않습니다. 로그인하면 A·S 등급까지 전부 받습니다. 위에 적힌 값은 구독이 시작되면 적용될 값입니다.",
+    a: "베타 기간에는 로그인만 하면 B·A·S 등급을 전부 받습니다. 요금은 구독이 시작될 때부터 적용됩니다.",
   },
   {
     q: "구독은 언제 시작하나요?",
-    a: "날짜는 아직 정해지지 않았습니다. 시작 최소 30일 전에 이 페이지와 이메일로 먼저 알려 드립니다. 그때까지 받은 파일은 그대로 두셔도 됩니다.",
+    a: "날짜는 아직 정해지지 않았습니다. 구독이 시작되기 최소 30일 전에 이메일로 먼저 알려 드립니다. 그때까지 받은 파일은 그대로 쓰셔도 됩니다.",
     href: "/terms",
     hrefLabel: "이용약관에서 이 약속 보기",
   },
@@ -229,7 +229,7 @@ export default function PricingPage() {
             <div className="cv5-frame">
               <div className={styles.sectionHead}>
                 <h2 id="plans-title">무료로 시작하고, 필요하면 구독합니다</h2>
-                <p>구독은 마켓 전체를 여는 한 장이고, 받은 파일은 구독을 끊어도 계정에 남습니다.</p>
+                <p>구독하면 마켓 전체가 열립니다. 받은 파일은 구독을 끊어도 계정에 남습니다.</p>
               </div>
               <div className={styles.planGrid}>
                 {PLANS.map((plan) => {
@@ -258,7 +258,7 @@ export default function PricingPage() {
                             결제 화면이 나올 것으로 읽힙니다. 결제가 닫혀 있는 동안에는 그 카드에서
                             무슨 일이 일어나는지 카드 안에서 한 줄로 말합니다. */}
                         {!salesOpen && !isFree ? (
-                          <p className={styles.planNote}>지금은 결제를 받지 않습니다. 가입만 하면 되고, 구독이 열리기 최소 30일 전에 먼저 알려 드립니다.</p>
+                          <p className={styles.planNote}>베타 기간에는 가입만 하면 됩니다. 구독이 열리기 최소 30일 전에 이메일로 먼저 알려 드립니다.</p>
                         ) : null}
                       </div>
 
@@ -296,7 +296,7 @@ export default function PricingPage() {
             <div className="cv5-frame">
               <div className={styles.sectionHead}>
                 <h2 id="compare-title">요금제 비교</h2>
-                <p>값이 다른 항목만 표에 남겼습니다. 두 요금제가 똑같은 것은 그 위에 한 번만 적습니다.</p>
+                <p>무료와 구독은 여기서 갈립니다. 두 요금제가 같은 것은 위에 한 번만 적었습니다.</p>
               </div>
 
               {/* 두 요금제가 같은 항목. 표 안에서 같은 값을 두 번 읽히는 대신 여기서 한 번 읽힙니다. */}
@@ -409,7 +409,7 @@ export default function PricingPage() {
                 <div>
                   <h2 id="closer-title">먼저 써 보고 정하세요</h2>
                   <p>
-                    지금은 결제를 받지 않습니다. 로그인하면 마켓의 모든 에셋이 열리고, 결제 정보는 묻지 않습니다.
+                    베타 기간에는 로그인만 하면 마켓의 모든 에셋이 열립니다. 카드도 계좌도 묻지 않습니다.
                   </p>
                 </div>
                 <div className={styles.closerActions}>

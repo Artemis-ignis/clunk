@@ -9,7 +9,7 @@ import { areSalesOpen } from "../api/_lib/sales-lock";
 export const dynamic = "force-dynamic";
 export const metadata = createPageMetadata({
   title: "설정",
-  description: "내 계정과, Clunk가 무엇을 저장하고 무엇을 저장하지 않는지 확인합니다.",
+  description: "내 계정 정보와 Clunk가 저장하는 것을 확인합니다.",
   path: "/settings",
 });
 

@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 
 /** 상품 행을 못 읽었을 때만 쓰는 일반 문구. 없는 이름을 지어내느니 이쪽이 낫다. */
 const FALLBACK_DESCRIPTION =
-  "Clunk 공개 에셋의 실제 미리보기, 파일 구성, 포맷, 라이선스, 그리고 어느 게임 엔진에서 열리는지를 확인합니다.";
+  "미리보기와 파일 구성, 라이선스, 어느 게임 엔진에서 열리는지를 확인하고 받으세요.";
 
 /**
  * A slug that is not a published listing used to answer 200 with a

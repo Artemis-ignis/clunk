@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata = createPageMetadata({
   title: "검수 뷰어",
-  description: "제작한 에셋을 브라우저에서 직접 검수합니다 — 3D GLB 회전·와이어프레임·클립 재생, 2D 스프라이트 상태별 실재생과 접지·기준 비교.",
+  description: "만든 에셋을 브라우저에서 직접 검수합니다. 3D 모델은 돌려 보고, 스프라이트 시트는 동작별로 재생해 봅니다.",
   path: "/review",
 });
 

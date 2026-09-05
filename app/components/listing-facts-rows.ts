@@ -122,7 +122,7 @@ export function movingRow(facts: ListingFacts): FactRow | null {
     return {
       id: "moving",
       head: `동작 ${facts.animations.length}개`,
-      tail: `${clipLabels(facts.animations).join(", ")} — 파일 안 애니메이션이 그대로 재생됩니다`,
+      tail: `${clipLabels(facts.animations).join(", ")} — 받은 파일에서 그대로 재생됩니다`,
     };
   }
   if (facts.animatedParts.length) {
@@ -191,7 +191,7 @@ export function factRows(facts: ListingFacts): FactRow[] {
     rows.push({
       id: "seam",
       head: `이음매 좌우 ×${t.seamLeftRight!.toFixed(2)} · 상하 ×${t.seamTopBottom!.toFixed(2)}`,
-      tail: `타일 안쪽 인접 픽셀차 대비 배율입니다. 1.0이면 이은 자리를 타일 내부와 구분할 수 없고, 1.15 이하를 이어붙는 것으로 봅니다${t.sharpness !== undefined ? ` · 선명도 ${t.sharpness}` : ""}`,
+      tail: `1.0에 가까울수록 이은 자국이 보이지 않습니다. 1.15 이하면 이어 붙는 타일로 봅니다${t.sharpness !== undefined ? ` · 선명도 ${t.sharpness}` : ""}`,
     });
   }
   const moving = movingRow(facts);
@@ -199,7 +199,7 @@ export function factRows(facts: ListingFacts): FactRow[] {
   rows.push({
     id: "license",
     head: "상업용 라이선스",
-    tail: "게임·앱·의뢰 작업 어디든 쓸 수 있고 출처 표기가 필요 없습니다 (원본 재판매와 에셋 생성기 학습만 금지)",
+    tail: "게임·앱·의뢰 작업 어디든 쓸 수 있고 출처 표기가 필요 없습니다. 원본 재판매와 에셋 생성기 학습만 금지합니다",
   });
   return rows;
 }

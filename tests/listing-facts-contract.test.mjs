@@ -237,7 +237,7 @@ test("a file with clips leads with its motions; a file with hinges leads with it
     animatedParts: ["pelvis", "spine"],
   }));
   assert.equal(rigged.head, "동작 2개");
-  assert.equal(rigged.tail, "걷기, 괭이질 — 파일 안 애니메이션이 그대로 재생됩니다");
+  assert.equal(rigged.tail, "걷기, 괭이질 — 받은 파일에서 그대로 재생됩니다");
 
   const hinged = movingRow(emptyFacts({ animatedParts: ["gate_pivot", "gate_hinge_straps"] }));
   assert.equal(hinged.head, "움직이는 부품 2개");

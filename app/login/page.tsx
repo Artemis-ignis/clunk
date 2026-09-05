@@ -35,7 +35,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata = createPageMetadata({
   title: "로그인",
-  description: "Google 또는 GitHub 계정으로 다시 들어옵니다. 비밀번호는 만들지도 보관하지도 않습니다.",
+  description: "Google이나 GitHub 계정으로 로그인합니다. 받은 에셋과 검사 기록을 계정 하나로 관리합니다.",
   path: "/login",
 });
 

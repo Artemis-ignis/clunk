@@ -979,7 +979,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
   });
 
   if (state === "loading") {
-    return <div className={styles.detailState} role="status"><span className="spinner" /><strong>상품 근거를 불러오는 중입니다</strong><small>실제 파일 구성과 공개 상태를 확인합니다.</small></div>;
+    return <div className={styles.detailState} role="status"><span className="spinner" /><strong>상품 정보를 불러오는 중입니다</strong><small>잠시만 기다려 주세요.</small></div>;
   }
   if (state === "error" || !listing) {
     return <div className={styles.detailState} role="alert"><strong>공개 상품을 열 수 없습니다.</strong><small>{message}</small><Link className={`${styles.btn} ${styles.btnGhost}`} href="/marketplace">마켓으로 돌아가기 <Icon name="arrowLeft" size={14} /></Link></div>;
@@ -1166,7 +1166,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
               있는 자리로 데려간다. */}
           {listing.facts?.kit === "harvest-frontier" ? (
             <p className={styles.playLine}>
-              이 에셋이 서 있는 게임을 브라우저에서 바로 해 볼 수 있습니다.{" "}
+              이 에셋이 들어간 게임을 브라우저에서 바로 해 볼 수 있습니다.{" "}
               <a href="https://play.clunk.games" target="_blank" rel="noreferrer">
                 하베스트 프론티어 열기 <Icon name="arrowUpRight" size={13} />
               </a>
@@ -1194,7 +1194,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
           <div className={styles.priceRow}><strong className={`${styles.accessBadge} ${styles.accessLarge} ${freeTier || beta ? styles.accessFree : styles.accessSub}`}>{freeTier ? "무료" : beta ? "지금은 무료" : "구독자 전용"}</strong><small>{listing.sellerName ?? "Clunk"} · {formatBytes(listing.byteLength)} · {listing.entryFileName}</small></div>
           {!freeTier && paymentUnavailable ? (
             <p className={styles.payState} data-payment-state={checkout?.status ?? "UNKNOWN"} role="status">
-              지금은 로그인만 하면 이 에셋을 받습니다. 구독이 시작되면 이 에셋은 구독자 전용이 되고, 구독하면 마켓의 모든 에셋과 앞으로 올라오는 것까지 함께 열립니다.
+              베타 기간에는 로그인만 하면 받습니다. 구독이 시작되면 구독으로 열리고, 구독 하나로 마켓의 모든 에셋과 앞으로 올라오는 것까지 받습니다.
             </p>
           ) : null}
           {!freeTier && !beta ? (
@@ -1372,7 +1372,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
 
             The draw-call count is gone from every buyer-facing surface: it is an engine word,
             and a shopper cannot act on it. The inspector still measures it. */}
-        <div className={styles.evidenceGrid}><EvidenceCard label="파일 규격" value={listing.evidence.static} detail={isModel ? "면 개수·재질 수·크기·구조를 파일에서 직접 읽었습니다" : "해상도·이어짐·파일 크기를 파일에서 직접 읽었습니다"} pending="아직 파일을 열어 측정하지 않았습니다" /><EvidenceCard label={isModel ? "화면에서 확인" : "그림으로 확인"} value={listing.evidence.visualRuntime} detail={isModel ? "실제 게임 렌더러에 띄워 확인했습니다" : "실제 화면에 띄워 눈으로 확인했습니다"} pending={isModel ? "게임 렌더러에 올려 본 기록이 없습니다. 페이지 위의 미리보기는 지금 여러분 브라우저가 그린 것입니다" : "화면에 띄워 확인한 기록이 없습니다"} /><EvidenceCard label="만든 곳 검토" value={listing.evidence.humanDecision} detail="Clunk(아르테미스)가 직접 만들고 검토했습니다" pending="만든 곳이 아직 검토하지 않았습니다" /></div>
+        <div className={styles.evidenceGrid}><EvidenceCard label="파일 규격" value={listing.evidence.static} detail={isModel ? "폴리곤 수·재질 수·크기·구조를 파일에서 측정했습니다" : "해상도·이어짐·파일 크기를 파일에서 측정했습니다"} pending="아직 파일을 열어 측정하지 않았습니다" /><EvidenceCard label={isModel ? "화면에서 확인" : "그림으로 확인"} value={listing.evidence.visualRuntime} detail={isModel ? "실제 게임 렌더러에 띄워 확인했습니다" : "실제 화면에 띄워 눈으로 확인했습니다"} pending={isModel ? "게임 렌더러에 올려 본 기록이 아직 없습니다. 미리보기는 브라우저가 지금 그린 화면입니다" : "화면에 띄워 확인한 기록이 아직 없습니다"} /><EvidenceCard label="만든 곳 검토" value={listing.evidence.humanDecision} detail="Clunk(아르테미스)가 직접 만들고 검토했습니다" pending="만든 곳이 아직 검토하지 않았습니다" /></div>
         {/* The one caveat the inspection raised, moved here out of the description. A listing
             whose file cleared every budget has nothing to add and shows nothing. */}
         {listing.facts?.inspection?.note ? (
@@ -1403,7 +1403,7 @@ function CatalogEmpty() {
     <section className={styles.emptyState} data-empty-state="marketplace" role="status" aria-live="polite">
       <Icon name="boxes" size={24} />
       <strong>지금 받을 수 있는 에셋이 없습니다.</strong>
-      <p>검사를 통과한 파일만 이 목록에 올라옵니다. 새 에셋이 올라오면 이 자리에 바로 나타납니다. 그동안 갖고 계신 파일을 Clunk로 검사해 보실 수 있습니다.</p>
+      <p>검사를 통과한 파일만 올라옵니다. 새 에셋은 준비되는 대로 공개합니다. 그동안 갖고 있는 파일을 먼저 검사해 보세요.</p>
       <div className={styles.emptyActions}>
         <Link className={`${styles.btn} ${styles.btnPrimary}`} href="/app">내 파일 검사하기 <Icon name="arrowUpRight" size={13} /></Link>
         <Link className={`${styles.btn} ${styles.btnGhost}`} href="/pricing">요금 보기 <Icon name="credit" size={13} /></Link>
@@ -1426,12 +1426,12 @@ function CatalogLoading() {
 function CatalogError() {
   return (
     <section className={styles.emptyState} data-catalog-state="error" role="alert">
-      <span className={styles.emptyEyebrow}>CATALOGUE · CONNECTION ERROR</span>
+      <span className={styles.emptyEyebrow}>연결 오류</span>
       <Icon name="circleAlert" size={24} />
       <strong>공개 카탈로그를 불러오지 못했습니다.</strong>
-      <p>상품을 임의로 채우지 않았습니다. 잠시 후 다시 시도하거나 Clunk 제품 사용 안내를 확인해 주세요.</p>
+      <p>잠시 뒤 다시 열어 보세요. 그동안 갖고 있는 파일은 바로 검사할 수 있습니다.</p>
       <div className={styles.emptyActions}>
-        <Link className={`${styles.btn} ${styles.btnPrimary}`} href="/app">Clunk 제품 사용하기 <Icon name="arrowUpRight" size={13} /></Link>
+        <Link className={`${styles.btn} ${styles.btnPrimary}`} href="/app">내 파일 검사하기 <Icon name="arrowUpRight" size={13} /></Link>
         <Link className={`${styles.btn} ${styles.btnGhost}`} href="/pricing">요금 보기 <Icon name="credit" size={13} /></Link>
       </div>
     </section>
@@ -1463,8 +1463,7 @@ function NoResults({ query, onReset }: { query: string; onReset: () => void }) {
       <Icon name="search" size={23} />
       <strong>{typed ? `“${typed}”에 맞는 에셋이 없습니다.` : "고른 조건에 맞는 에셋이 없습니다."}</strong>
       <p>
-        낱말을 줄여서 다시 찾아 보시거나(예: “나무 텍스처” 대신 “나무”), 아래 버튼으로 조건을 지우면
-        지금 받을 수 있는 에셋이 모두 나옵니다.
+        낱말을 줄여서 다시 찾아 보세요. 조건을 지우면 지금 받을 수 있는 에셋이 모두 나옵니다.
       </p>
       <div className={styles.emptyActions}>
         <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={onReset}>
@@ -1682,16 +1681,16 @@ function TileBench({ src, alt, texture }: { src: string; alt: string; texture: L
       </div>
       <p className={styles.flatNote}>
         {texture?.seamLeftRight !== undefined && texture.seamTopBottom !== undefined
-          ? `이은 자리를 측정했습니다 — 좌우 ×${texture.seamLeftRight.toFixed(2)}, 상하 ×${texture.seamTopBottom.toFixed(2)}. 타일 안쪽 인접 픽셀차 대비 배율이고 1.0이면 이은 자리를 내부와 구분할 수 없습니다. 위에서 직접 이어 붙여 확인해 보세요.`
+          ? `이은 자리를 측정했습니다 — 좌우 ×${texture.seamLeftRight.toFixed(2)}, 상하 ×${texture.seamTopBottom.toFixed(2)}. 1.0에 가까울수록 이은 자국이 보이지 않습니다.`
           : seamless
-            ? "이어 붙인 경계를 측정했을 때 자국이 남지 않았습니다. 위에서 직접 이어 붙여 확인해 보세요."
+            ? "이어 붙인 경계를 측정했을 때 자국이 남지 않았습니다."
             : "이어 붙인 경계에 옅은 자국이 남는 것으로 측정됐습니다."}
         {/* Two of the tiles ship as three mixable variants, and their preview is the 2x2
             those variants make — otherwise this bench would repeat one variant and show
             exactly the grid the variants exist to break. */}
         {texture?.colourVariants && texture.colourVariants > 1
-          ? ` 여기 보이는 그림은 섞어 깔 수 있는 변형 ${texture.colourVariants}장을 2×2로 배치한 공개용 미리보기이고, 받는 파일은 변형 ${texture.colourVariants}장이 각각 원본 해상도입니다.`
-          : " 여기 보이는 그림은 공개용 미리보기이고, 받는 파일은 원본 해상도입니다."}
+          ? ` 미리보기는 섞어 깔 수 있는 변형 ${texture.colourVariants}장을 2×2로 놓은 것이고, 받는 파일은 변형 ${texture.colourVariants}장이 각각 원본 해상도입니다.`
+          : " 미리보기는 줄인 그림이고, 받는 파일은 원본 해상도입니다."}
       </p>
     </div>
   );
@@ -1827,8 +1826,8 @@ function SheetBench({
       </div>
       <p className={styles.flatNote}>
         {playable
-          ? `한 칸 ${sheet.cell}×${sheet.cell}, ${sheet.directions}방향 × ${sheet.frames}프레임입니다. 방향 하나가 한 줄이라, 게임에서도 한 줄을 그대로 재생하면 됩니다. 위 재생은 이 시트의 실제 칸을 그대로 넘긴 것입니다.`
-          : `한 칸 ${sheet.cell}×${sheet.cell}, ${sheet.directions}방향${sheet.frames ? ` × ${sheet.frames}프레임` : ""}입니다. 여기 보이는 그림은 공개용 미리보기라 격자 그대로가 아니어서 재생은 받은 뒤에 확인할 수 있습니다.`}
+          ? `한 칸 ${sheet.cell}×${sheet.cell}, ${sheet.directions}방향 × ${sheet.frames}프레임입니다. 방향 하나가 한 줄이라, 게임에서도 한 줄을 그대로 재생하면 됩니다.`
+          : `한 칸 ${sheet.cell}×${sheet.cell}, ${sheet.directions}방향${sheet.frames ? ` × ${sheet.frames}프레임` : ""}입니다. 미리보기는 격자 그대로가 아니어서 재생은 받은 파일에서 확인합니다.`}
       </p>
     </div>
   );
@@ -1896,7 +1895,7 @@ function ColourMatches({ matches }: { matches: ColourMatch[] }) {
     <section className={styles.matches}>
       <h3 className={styles.matchesTitle}>색이 맞는 에셋</h3>
       <p className={styles.matchesNote}>
-        태그가 아니라 파일에서 측정한 색으로 고른 것입니다. 숫자는 색 거리이고, 0에 가까울수록 같은 팔레트입니다.
+        파일에서 측정한 색으로 고른 에셋입니다. 숫자가 0에 가까울수록 팔레트가 같습니다.
       </p>
       <ul className={styles.matchesList}>
         {matches.map((match) => (

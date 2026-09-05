@@ -28,7 +28,7 @@ const SERIES_CARDS: ReadonlyArray<{ id: string; title: string; description: stri
     title: "3D 모델 만들기",
     // /studio는 GET /api/series/templates 가 준 템플릿 중에서 고르게 하고, POST /api/series 는
     // 템플릿을 지정하지 않은 요청을 거절합니다. 코드 파일을 올리는 화면은 없습니다.
-    description: "만들 모양을 템플릿에서 고르면 GLB 파일이 나옵니다. 어디서 왔는지와 파일 지문이 함께 기록됩니다. 문장만으로 모양을 만들지는 못합니다.",
+    description: "만들 모양을 템플릿에서 고르면 GLB 파일이 나옵니다. 모양은 템플릿이 정하고, 어디서 왔는지와 파일 지문이 함께 기록됩니다.",
     href: "/studio?make=3d-model",
     action: "에셋 제작 열기",
   },
@@ -49,7 +49,7 @@ const SERIES_CARDS: ReadonlyArray<{ id: string; title: string; description: stri
   {
     id: "motion-lab",
     title: "애니메이션 클립 만들기",
-    description: "이름 붙인 관절을 각도만큼 돌려 움직임을 만듭니다. 내 컴퓨터에 필요한 프로그램이 없으면 없다고 그대로 말하고, 통과로 바꾸지 않습니다.",
+    description: "이름 붙인 관절을 각도만큼 돌려 움직임을 만듭니다. 내 컴퓨터에 필요한 프로그램이 없으면 없다고 알려 드립니다.",
     href: "/studio?make=animation-clip",
     action: "에셋 제작 열기",
   },
@@ -63,7 +63,7 @@ const SERIES_CARDS: ReadonlyArray<{ id: string; title: string; description: stri
   {
     id: "market",
     title: "에셋 마켓",
-    description: "공개된 에셋을 둘러보고 받습니다. 라이선스 상태와 지금 받을 수 있는지 여부를 숨기지 않고 그대로 표시합니다.",
+    description: "공개된 에셋을 둘러보고 받습니다. 라이선스와 지금 받을 수 있는지는 상품마다 표시합니다.",
     href: "/marketplace",
     action: "에셋 마켓 열기",
   },
