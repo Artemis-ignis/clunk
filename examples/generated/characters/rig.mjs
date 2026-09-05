@@ -179,10 +179,10 @@ export function layout(build = {}) {
   // hide the one the current clip is not using some other way. The way that works in every
   // engine is a bone with a scale track: each tool is a rigid island weighted 100% to its own
   // anchor, the anchor sits exactly on the right wrist with an identity bind rotation, and
-  // every clip carries a scale track for BOTH anchors — full size in the clip that uses the
-  // tool, 1e-4 everywhere else. (1e-4 rather than 0: a zero-scale bone gives a singular normal
-  // matrix, and some engines turn that into NaN lighting on the collapsed triangles. At 1e-4 a
-  // 1.2 m hoe is a tenth of a millimetre inside the fist — a hundredth of a pixel.)
+  // every clip carries a scale track for ALL THREE anchors — `TOOL_VISIBLE_SCALE` in the clip
+  // that uses the tool, `TOOL_HIDDEN_SCALE` everywhere else, and the rest pose is parked at
+  // `TOOL_HIDDEN_SCALE` as well, so a still of the file shows empty hands. See the note on
+  // those constants for why the stored geometry is shrunk rather than the anchor alone.
   //
   // Identity bind rotation and zero offset means the anchor's inverse bind matrix is just
   // translate(-wrist), so a tool authored in bind-world coordinates lands at
@@ -290,8 +290,35 @@ export const TOOL_ANCHORS = [
   { bone: "ToolBasket", clips: ["carry_idle", "harvest"] },
   { bone: "ToolCan", clips: ["water"] },
 ];
-/** Scale a hidden tool anchor is parked at. Not zero: see the note in `layout`. */
-export const TOOL_HIDDEN_SCALE = 1e-4;
+/**
+ * How small the tool geometry is STORED, and the two anchor scales that read it back.
+ *
+ * The props are authored in bind-world coordinates around the right wrist, which used to mean
+ * a 1.19 m hoe lay across the file's bind pose whether or not anything was holding it. Skinning
+ * hid it — but the shop's size measurement does not skin. `measureBoundsMetres` (and every
+ * other reader that walks node matrices over POSITION) put the hoe and the basket in the box
+ * and printed a 1.87 m farmer as 1.58 × 1.87 × 1.33 m: a man a metre and a third deep. The
+ * listing would have been quoting the reach of a tool nobody can see.
+ *
+ * So the stored geometry is shrunk 1000× toward the wrist and the anchor scales it back:
+ *
+ *   stored     p' = wrist + 1e-3 · (p − wrist)          a 1.2 mm speck inside the fist
+ *   visible    anchor scale 1000                        p' → p exactly
+ *   hidden     anchor scale 0.1                         0.12 mm, a hundredth of a pixel
+ *
+ * The inverse bind matrix is captured with the anchor at scale 1 (identity rotation, zero
+ * offset), so the anchor's bone matrix is exactly scale-about-the-wrist and the reconstruction
+ * is a single multiply. Stored coordinates sit at metre magnitude, so float32 gives about
+ * 0.1 mm of jitter on a reconstructed tool — a tenth of the modelling tolerance.
+ *
+ * Neither scale is zero: a zero-scale bone gives a singular normal matrix and some engines turn
+ * that into NaN lighting on the collapsed triangles.
+ */
+export const TOOL_BIND_SHRINK = 1e-3;
+/** Anchor scale in the clip that uses the tool. Undoes `TOOL_BIND_SHRINK` exactly. */
+export const TOOL_VISIBLE_SCALE = 1 / TOOL_BIND_SHRINK;
+/** Anchor scale everywhere else, including the rest pose the shop photographs. */
+export const TOOL_HIDDEN_SCALE = TOOL_VISIBLE_SCALE * 1e-4;
 
 /** Builds the actual THREE.Bone tree in bind pose. */
 export function buildSkeleton(world) {

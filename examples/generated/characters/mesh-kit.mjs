@@ -419,6 +419,7 @@ export function ellipsoid(part, opts) {
     yMin = -1,
     yMax = 1,
     invert = false,
+    arc = false,
   } = opts;
   const rowIds = [];
   const p = new THREE.Vector3();
@@ -438,7 +439,15 @@ export function ellipsoid(part, opts) {
     for (let j = 0; j < segs; j += 1) {
       const lon = (j / segs) * Math.PI * 2;
       const top = yMaxAt(lon);
-      const lat = Math.asin(Math.max(-1, Math.min(1, top + (yMinAt(lon) - top) * t)));
+      const bottom = yMinAt(lon);
+      // Where the rings go. The default walks the range in y, which is what a shaped band wants
+      // — its edges are given in y and its rows should follow them. A closed sphere wants the
+      // other thing: with rings walked in y, the row below the pole of a full sphere sits at
+      // y = 0.75, whose radius is already 0.66, so the crown is a 33-degree cone. Otto is bald
+      // and that cone was his head. `arc` walks the range in latitude instead, which spaces the
+      // rows evenly over the surface and closes the pole in a dome. Same vertex count.
+      const clamp = (value) => Math.asin(Math.max(-1, Math.min(1, value)));
+      const lat = arc ? clamp(top) + (clamp(bottom) - clamp(top)) * t : clamp(top + (bottom - top) * t);
       const cy = Math.sin(lat);
       const cr = Math.cos(lat);
       let x = Math.cos(lon) * cr;

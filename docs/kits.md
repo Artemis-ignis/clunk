@@ -34,6 +34,7 @@
 | 마을 광장 | `kit-village-square` | `village-` |
 | 낚시 부두 | `kit-fishing-dock` | `dock-` |
 | 광산 입구 | `kit-mine-entrance` | `mine-` |
+| 하베스트 포크(캐릭터) | `kit-harvest-folk` | `folk-` |
 
 부품 슬러그는 접두사 뒤에 그 물건의 이름을 붙입니다 (`village-well`,
 `dock-crane`, `mine-cart`). 접두사는 사람이 읽기 위한 것이고, 화면이 키트를 알아보는

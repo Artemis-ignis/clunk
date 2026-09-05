@@ -21,7 +21,7 @@
  * function evaluated half a cycle apart.
  */
 import * as THREE from "three";
-import { toolFrame, TOOL_ANCHORS, TOOL_HIDDEN_SCALE } from "./rig.mjs";
+import { toolFrame, TOOL_ANCHORS, TOOL_HIDDEN_SCALE, TOOL_VISIBLE_SCALE } from "./rig.mjs";
 
 const TAU = Math.PI * 2;
 const AX = new THREE.Vector3(1, 0, 0);
@@ -777,12 +777,16 @@ export function clipLibrary(world, spec) {
     lean: -0.5,
     // Distance from the lower (right) hand up the shaft to the upper (left) hand.
     // The upper hand sits this far down the shaft from the lower one, towards the butt. It is
-    // 13 cm and not 20 because the upper hand is the one that has to cross the body: at the top
-    // of the wind-up it ends up on the character's right at chest height, and every extra
-    // centimetre of span is a centimetre further across. At 20 cm that arm locked dead straight
-    // on all six characters and the solver had to drag the whole hoe 10 cm towards the chest to
-    // keep the grip; at 13 cm it works at 95% of reach and the tool is not moved at all.
-    span: 0.1 * s,
+    // not 20 cm because the upper hand is the one that has to cross the body: at the top of the
+    // wind-up it ends up on the character's right at chest height, and every extra centimetre of
+    // span is a centimetre further across. At 20 cm that arm locked dead straight on all six
+    // characters and the solver had to drag the whole hoe 10 cm towards the chest to keep the
+    // grip. It is not 10 cm either, which is what it used to be: a hand is about 16 cm from
+    // wrist to fingertip, so two fists 10 cm apart on a shaft overlap, and check.mjs found two
+    // to eleven triangles of one hand inside the other in every frame of `hoe` on every
+    // character. 12 cm clears them on all six and costs the solver at most 16 mm of tool shift
+    // (Benno, the widest of them), against 100 mm at 20 cm.
+    span: 0.12 * s,
   };
   const HOE_A = 0.86 * tool.hoe.head + tool.hoe.blade * Math.cos(tool.hoe.bladeAngle);
   const HOE_B = tool.hoe.blade * Math.sin(tool.hoe.bladeAngle);
@@ -1166,7 +1170,7 @@ export function bakeClip(clip, world, fps = 30) {
   // clips that use no tool at all — a clip that simply omits the track leaves whatever the
   // previously played clip set, and the buyer gets a farmer waving a hoe about.
   for (const anchor of TOOL_ANCHORS) {
-    const size = anchor.clips.includes(clip.tool) ? 1 : TOOL_HIDDEN_SCALE;
+    const size = anchor.clips.includes(clip.tool) ? TOOL_VISIBLE_SCALE : TOOL_HIDDEN_SCALE;
     const values = [];
     for (let i = 0; i < times.length; i += 1) values.push(size, size, size);
     tracks.push(new THREE.VectorKeyframeTrack(`${anchor.bone}.scale`, times, values));

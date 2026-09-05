@@ -15,7 +15,7 @@
  */
 import * as THREE from "three";
 import { SkinBuilder, skinChain, ellipsoid, slab, disc, ring, bridge, cap, dome, smoothstep } from "./mesh-kit.mjs";
-import { layout, buildSkeleton, toolFrame } from "./rig.mjs";
+import { layout, buildSkeleton, toolFrame, TOOL_ANCHORS, TOOL_BIND_SHRINK, TOOL_HIDDEN_SCALE } from "./rig.mjs";
 
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 const X = V(1, 0, 0);
@@ -313,7 +313,10 @@ export function buildCharacter(spec) {
     const cheek = 1 + 0.05 * smoothstep(0.35, -0.05, y) * (1 - Math.abs(cz));
     return [jaw * crown * cheek, 1, jaw * crown * backFlat * chin];
   };
-  ellipsoid(skinPart, { center: headC, radius: headR, segs: 12, rings: 8, weights: headWeights, shape: headShape });
+  // `arc` because the crown is the one place on this character where the rows have to be even:
+  // walked in y, the ring below the pole lands at 0.75 and the skull comes to a point. Otto has
+  // no hair to hide it.
+  ellipsoid(skinPart, { center: headC, radius: headR, segs: 12, rings: 8, weights: headWeights, shape: headShape, arc: true });
 
   /**
    * A point on the shaped head surface, from a height (-1..1) and a longitude (PI/2 is dead
@@ -727,6 +730,20 @@ export function buildCharacter(spec) {
   buildHair(H, spec, headC, headR, hr, s, P);
   buildGear(G, spec, world, headC, headR, hr, s, P, girth);
   const toolFrames = buildTools(TL, world, s, P);
+  // The props were modelled at full size in bind-world coordinates, which is what makes the
+  // grip correct by construction; they are STORED shrunk toward the wrist and the anchor's
+  // scale track reads them back. See `TOOL_BIND_SHRINK` in rig.mjs for why the file may not
+  // carry a full-size hoe lying across its bind pose.
+  {
+    const wrist = w("RightHand");
+    for (const part of TL.parts) {
+      for (let i = 0; i < part.pos.length; i += 3) {
+        part.pos[i] = wrist.x + (part.pos[i] - wrist.x) * TOOL_BIND_SHRINK;
+        part.pos[i + 1] = wrist.y + (part.pos[i + 1] - wrist.y) * TOOL_BIND_SHRINK;
+        part.pos[i + 2] = wrist.z + (part.pos[i + 2] - wrist.z) * TOOL_BIND_SHRINK;
+      }
+    }
+  }
 
   // ---------------------------------------------------------------- assemble
   const material = new THREE.MeshStandardMaterial({
@@ -756,6 +773,23 @@ export function buildCharacter(spec) {
     mesh.bind(skeleton);
     meshes.push(mesh);
   }
+
+  // Empty hands in the rest pose.
+  //
+  // Every clip carries a scale track for all three anchors, so a file being played is correct.
+  // A file being LOOKED AT is not: glTF's rest pose is whatever the nodes say, the anchors said
+  // scale 1, and so the shop photograph was a farmer holding a hoe, a basket and a watering can
+  // at the same time. The rest pose has to agree with the clips — nothing in hand until a clip
+  // asks for something.
+  //
+  // This runs after the last `mesh.bind(skeleton)` on purpose. `bind()` with no explicit bind
+  // matrix recomputes the skeleton's inverse bind matrices from the bones' CURRENT world
+  // matrices, so hiding the anchors before the final bind would bake a 1e4 scale into the
+  // inverse and a clip that scales back to 1 would hand the buyer a 12-kilometre hoe.
+  for (const anchor of TOOL_ANCHORS) {
+    bones.get(anchor.bone)?.scale.setScalar(TOOL_HIDDEN_SCALE);
+  }
+  group.updateMatrixWorld(true);
 
   return {
     group,
@@ -1028,16 +1062,22 @@ function buildBeard(B, spec, headC, headR, hr, headWeights, P, onHead, headOut) 
   // with a small ripple so the edge is not a machined horizontal line. Any higher and it
   // climbs the cheeks, and a flat shell on the cheeks reads as a surgical mask, not hair.
   const ripple = (lon) => 0.03 * Math.sin(5 * lon + 0.7);
-  // Below the jaw, not up the cheeks.
+  // Where the beard's top edge runs, and why it is not a constant height.
   //
-  // At -0.36 the full beard started level with the earlobe and climbed the cheekbones, and on a
-  // pale beard that is a surgical mask, which is what the review sheet showed on Otto. -0.60 is
-  // below the jawline all the way round, so the hair starts where a beard starts and everything
-  // above it is face. The remaining -0.08 at the front is the dip under the mouth; making that
-  // term any bigger tips the balance back and the sides start climbing the cheeks again.
+  // Two wrong answers came before this one. At a constant -0.36 the edge crossed the
+  // cheekbones and, on a pale beard, read as a surgical mask — which is what Otto looked like.
+  // At a constant -0.60 the edge cleared the cheeks but then ran as a straight pale strap from
+  // one ear to the other with bare skin above it: still a mask, worn lower.
+  //
+  // A beard's top edge is not level. It is high at the ear, where it meets the hair as a
+  // sideburn, and it dips at the front, under the mouth. Following that shape is what makes the
+  // hair on the sides continuous with the hair on the head, and a continuous edge cannot read
+  // as a strap. So the height is a function of `front`: -0.36 at the side and the back (the
+  // bald horseshoe's own lower edge is about -0.27 there, so the gap left is a sideburn's
+  // width), falling to -0.70 straight ahead, which is under the mouth.
   const topAt =
     style === "full"
-      ? (lon) => -0.6 - 0.08 * Math.max(0, Math.sin(lon)) ** 0.8 + ripple(lon)
+      ? (lon) => -0.36 - 0.34 * Math.max(0, Math.sin(lon)) ** 0.9 + ripple(lon)
       : (lon) => -0.46 - 0.12 * Math.max(0, Math.sin(lon)) + ripple(lon) * 0.5;
   // Thickness ramps from nothing at the sideburn to a real mass at the chin, and the last
   // rows hang below the jaw. A constant offset makes the beard read as paint on the skin.
@@ -1126,7 +1166,22 @@ function buildHair(H, spec, headC, headR, hr, s, P) {
     // front. The top and bottom edges are made to meet as they come forward, which collapses
     // the band to nothing over the brow. Without that clamp the band simply carried on across
     // the face and the character wore a mask.
-    const top = (lon) => 0.34 - 0.62 * front(lon) ** 1.2;
+    //
+    // KNOWN LIMIT, and why no character in the pack uses this style: "collapses to nothing" is
+    // not quite true. `shellBand` draws an outer and an inner ellipsoid `thickness` apart and
+    // bridges their rims, so where the two edges meet the band still has a rim a few
+    // millimetres wide. On a skull that rim traces a line from the temple down across the cheek
+    // — a pale strap on a silver-haired head, which is the mask this clamp was written to
+    // prevent, drawn thinner. Fixing it properly needs a per-longitude thickness in
+    // `shellBand`, which no other caller wants.
+    //
+    // How early they meet is the whole of it. The first curves closed only at dead ahead, so at
+    // 30 degrees off the nose the band was still a few centimetres tall — a pale silver strap
+    // running across Otto's cheek beside his eye, which is exactly the mask this clamp exists
+    // to prevent, just narrower. Squaring the falloff and steepening both edges closes the band
+    // about 65 degrees before the front, which is where a bald man's hair actually stops: at
+    // the temple, behind the eye.
+    const top = (lon) => 0.3 - 0.7 * front(lon) ** 1.8;
     shellBand(part, {
       center: headC,
       radius: capRadius,
@@ -1134,7 +1189,7 @@ function buildHair(H, spec, headC, headR, hr, s, P) {
       rings: 3,
       weights,
       yMax: top,
-      yMin: (lon) => Math.min(top(lon), -0.4 + 0.3 * front(lon) ** 1.2),
+      yMin: (lon) => Math.min(top(lon), -0.4 + 0.62 * front(lon) ** 1.8),
       thickness: 0.07,
     });
     return;
@@ -1311,11 +1366,18 @@ function buildGear(G, spec, world, headC, headR, hr, s, P, girth) {
       segs: 10,
       rings: 4,
       weights: headWeights,
-      yMin: (lon) => 0.36 + 0.05 * Math.sin(lon),
+      yMin: (lon) => 0.4 + 0.05 * Math.sin(lon),
       yMax: 1,
       thickness: 0.07,
     });
     // Peak.
+    //
+    // Height matters more than shape here. The first pass sloped the peak from 0.44 of the head
+    // radius down to 0.32, and the eyes sit at 0.10 with the brow at 0.25 — so from the
+    // three-quarter camera the storefront shoots from, which looks DOWN at the face, the peak
+    // covered both of Pim's eyes and one of Benno's. A cap over the eyes costs a character its
+    // face at every size. The peak now starts at 0.52 and falls only to 0.47, which clears the
+    // brow from above as well as from straight on.
     const peak = G.part(P.hat ?? CHAR_PALETTE.sageDark, "peak");
     const rows = [];
     const segs = 8;
@@ -1331,7 +1393,7 @@ function buildGear(G, spec, world, headC, headR, hr, s, P, girth) {
           peak.vert(
             V(
               headC.x + cx * headR[0] * 1.16 * (1 + t * 0.05),
-              headC.y + hr * 0.44 - t * hr * 0.12 - (t * 0.02 * s * Math.max(0, cz)),
+              headC.y + hr * 0.52 - t * hr * 0.05 - (t * 0.012 * s * Math.max(0, cz)),
               headC.z + cz * headR[2] * 1.16 * reach,
             ),
             headWeights,

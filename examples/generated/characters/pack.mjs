@@ -147,8 +147,12 @@ export const CHARACTERS = [
     title: "Pim, the farm kid",
     // A child is not an adult scaled down: the head keeps more of its size, the legs keep
     // less, and the shoulders stay narrow. Those three numbers are the whole difference.
-    build: { heightScale: 0.66, headSize: 1.46, shoulderSpread: 0.86, hipSpread: 0.96, legRatio: 0.84, armLength: 0.92 },
-    girth: { chest: 1.04, waist: 1.06, limb: 1.16 },
+    build: { heightScale: 0.66, headSize: 1.46, shoulderSpread: 0.86, hipSpread: 1.14, legRatio: 0.84, armLength: 0.92 },
+    // `limb` was 1.16 with `hipSpread` 0.96. On a 0.66-scale body that put the hip sockets
+    // 124 mm apart and the thighs 141 mm across the pair, so Pim's legs passed through each
+    // other by 17 mm in every frame of every clip — check.mjs found it in 72 of 64 poses.
+    // The child still has a child's soft limbs; the sockets moved out instead.
+    girth: { chest: 1.04, waist: 1.06, limb: 1.1 },
     sleeve: "short",
     legWear: "shorts",
     bootHeight: 0.07,
@@ -181,13 +185,23 @@ export const CHARACTERS = [
     legWear: "trousers",
     bootHeight: 0.1,
     beard: "full",
-    hair: "bald",
+    // Was "bald". A bald skull is the strongest silhouette in the pack and it is not what this
+    // says, so the change is worth stating: `shellBand` builds a hair band as an outer and an
+    // inner shell, and where the band's two edges meet the shells still stand `thickness` apart
+    // and draw a rim. On the horseshoe that rim ran forward across Otto's cheek — a pale strap
+    // from temple to chin that read as a surgical mask in every render of him. "wispy" is a
+    // receding hairline with no such seam on the face, and an old man reads from the hairline,
+    // the grey beard and the stoop together.
+    hair: "wispy",
     browTilt: 0.008,
     gear: ["vest", "scarf"],
     palette: {
       skin: C.skinMid,
       hair: C.hairSilver,
-      beard: C.hairGrey,
+      // Not `hairGrey`: at 0xb3aca2 against 0xe0b48d skin the two sit within a few percent of
+      // the same luminance under this pack's key light, and a beard the same brightness as the
+      // face reads as something worn rather than something grown.
+      beard: 0x8f8880,
       brow: C.hairGrey,
       top: C.canvas,
       collar: C.canvasDark,

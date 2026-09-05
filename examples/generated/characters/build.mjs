@@ -10,7 +10,7 @@
  */
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import * as THREE from "three";
 import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter.js";
 
@@ -37,11 +37,8 @@ import { clipLibrary, bakeClip } from "./anim.mjs";
 import { CHARACTERS, PACK } from "./pack.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const args = process.argv.slice(2);
-const outDir = resolve(here, argValue("--out") ?? ".");
-const only = argValue("--only");
 
-function argValue(flag) {
+function argValue(args, flag) {
   const i = args.indexOf(flag);
   return i >= 0 ? args[i + 1] : null;
 }
@@ -188,10 +185,15 @@ function freezeAt(scene, clip, time) {
   mixer.setTime(0);
   mixer.setTime(time);
   scene.updateMatrixWorld(true);
-  action.stop();
-  mixer.uncacheClip(clip);
-  // The mixer restores nothing on stop, which is exactly what is wanted here.
-  scene.updateMatrixWorld(true);
+  // The action is deliberately NOT stopped and the clip deliberately not uncached.
+  // `AnimationAction.stop()` deactivates every property binding, and a binding whose reference
+  // count reaches zero calls `restoreOriginalState()` — which puts the bones straight back
+  // into the bind pose. The previous version of this function did stop the action, so every
+  // "posed" preview it ever wrote was an A-pose. Dropping the mixer on the floor instead
+  // leaves the pose in the bones, which is the entire point of the call.
+  //
+  // The mixer is returned so a caller can hold it if it wants to; nothing needs it.
+  return mixer;
 }
 
 function countTriangles(group) {
@@ -223,88 +225,220 @@ async function exportGlb(scene, animations) {
   return Buffer.from(buffer);
 }
 
-const results = [];
-const packScene = new THREE.Group();
-packScene.name = PACK.slug;
-let packX = 0;
 
-await mkdir(outDir, { recursive: true });
+// --- the pack, as a library -----------------------------------------------------------------
+//
+// Everything above is machinery; everything below is the three things a caller wants. The kit
+// build in examples/generated/kits/harvest-folk/ imports them, so the marketplace files and the
+// files in this folder come out of one factory rather than two that drift apart.
 
-for (const spec of CHARACTERS) {
-  if (only && spec.slug !== only) continue;
+/**
+ * The skinned bounding box of a group in whatever pose its bones are in.
+ *
+ * `Box3.setFromObject` is the obvious call and the wrong one: a SkinnedMesh's geometry bounding
+ * box is in bind space and three does not skin it, so that route measures a pose the file never
+ * shows. This runs the skinning on the CPU, one vertex at a time.
+ *
+ * `skipTools` leaves the prop mesh out. Both numbers are wanted — the tools ship inside the
+ * file, but "how tall is this character" is a question about the body.
+ */
+export function skinnedBounds(group, { skipTools = false } = {}) {
+  const box = new THREE.Box3();
+  const p = new THREE.Vector3();
+  group.updateMatrixWorld(true);
+  group.traverse((node) => {
+    if (!node.isMesh) return;
+    if (skipTools && node.name.endsWith("_tools")) return;
+    if (node.isSkinnedMesh) node.skeleton.update();
+    const position = node.geometry.getAttribute("position");
+    for (let v = 0; v < position.count; v += 1) {
+      p.fromBufferAttribute(position, v);
+      if (node.isSkinnedMesh) node.applyBoneTransform(v, p);
+      p.applyMatrix4(node.matrixWorld);
+      box.expandByPoint(p);
+    }
+  });
+  const size = box.isEmpty()
+    ? [0, 0, 0]
+    : box.getSize(new THREE.Vector3()).toArray().map((value) => Number(value.toFixed(4)));
+  return { box, size, min: box.min.clone(), max: box.max.clone() };
+}
+
+/**
+ * One character: the rigged group, its clips already baked, compressed and dropped onto the
+ * floor, and everything measured off the scene rather than asserted.
+ */
+export function buildCharacterAsset(spec) {
   const built = buildCharacter(spec);
   const { clips } = clipLibrary(built.world, spec);
   const baked = Object.values(clips).map((clip) => compressTracks(bakeClip(clip, built.world)));
   const grounded = baked.map((clip) => ({ clip: clip.name, liftMetres: groundClip(built.group, clip) }));
-
   const counts = countTriangles(built.group);
-  const box = new THREE.Box3().setFromObject(built.group);
-  const size = box.getSize(new THREE.Vector3());
+  const rest = skinnedBounds(built.group, { skipTools: false });
+  const body = skinnedBounds(built.group, { skipTools: true });
+  return {
+    spec,
+    built,
+    clips: baked,
+    grounded,
+    counts,
+    boundsMetres: rest.size,
+    bodyBoundsMetres: body.size,
+    lowestYMetres: body.min.y,
+  };
+}
 
-  const glb = await exportGlb(built.group, baked);
-  const file = join(outDir, `${spec.slug}.glb`);
-  await writeFile(file, glb);
+/**
+ * A still of one character, CPU-skinned at a moment of a clip and handed back as plain meshes.
+ *
+ * The storefront renderer is a software rasteriser whose whole vertex stage is "multiply
+ * `position` by the node's world matrix". It does not skin, so it draws every rigged file in
+ * its bind pose no matter which clip is playing, and an A-pose is not a photograph of a
+ * character. So the shop's picture is taken of this: the skinning run once here, on the CPU,
+ * written out as static geometry. The file on sale keeps its rig.
+ */
+export function posedStill(spec, clipName, phase = 0) {
+  const asset = buildCharacterAsset(spec);
+  const clip = asset.clips.find((candidate) => candidate.name === clipName);
+  if (!clip) throw new Error(`${spec.slug} has no clip named ${clipName}`);
+  freezeAt(asset.built.group, clip, phase * clip.duration);
+  const bounds = skinnedBounds(asset.built.group, { skipTools: true });
+  const flat = flattenToStatic(asset.built.group, spec.slug);
+  return {
+    group: flat,
+    asset,
+    clip: clip.name,
+    phase,
+    seconds: Number((phase * clip.duration).toFixed(3)),
+    lowestYMetres: Number(bounds.min.y.toFixed(5)),
+    boundsMetres: bounds.size,
+  };
+}
 
-  results.push({
-    slug: spec.slug,
-    title: spec.title,
-    file,
-    bytes: glb.length,
-    bones: built.names.length,
-    ...counts,
-    heightMetres: Number(size.y.toFixed(4)),
-    widthMetres: Number(size.x.toFixed(4)),
-    depthMetres: Number(size.z.toFixed(4)),
-    clips: baked.map((clip, i) => ({
-      name: clip.name,
-      duration: Number(clip.duration.toFixed(3)),
-      tracks: clip.tracks.length,
-      groundLiftMetres: grounded[i].liftMetres,
-      tool: clip.userData?.tool ?? null,
-      grip: clip.userData?.grip ?? null,
-    })),
-  });
-  process.stdout.write(
-    `${spec.slug.padEnd(16)} ${String(counts.triangles).padStart(6)} tris  ${String(counts.drawCalls)} draws  ${counts.materials} mat  ${built.names.length} bones  ${(glb.length / 1024).toFixed(0)} KB\n`,
-  );
-
-  // --- pack copy, with slug-prefixed bones
-  //
-  // The pack file is a preview of the set, not the product: the six per-character GLBs are what
-  // a buyer actually drops into a project, and each of those carries the whole clip library.
-  // Six copies of six clips in one file cost 3 MB of keyframes to show a row of characters
-  // standing still, so the preview ships posed at the first frame of `idle` and carries no
-  // animation at all. That is the difference between a 4.5 MB download and a 1.6 MB one.
-  if (!only) {
-    const copy = buildCharacter(spec);
-    const { clips: copyClips } = clipLibrary(copy.world, spec);
-    const idle = compressTracks(bakeClip(copyClips.idle, copy.world));
-    groundClip(copy.group, idle);
-    freezeAt(copy.group, idle, 0);
-    const flat = flattenToStatic(copy.group, spec.slug);
-    flat.position.x = packX;
-    packX += 0.95;
-    packScene.add(flat);
+/**
+ * The whole set in one file, rig and clips intact.
+ *
+ * Six skeletons in one glTF that all call their root "Hips" is ambiguous for every animation
+ * retargeter that reads node names, so the bones carry the character's slug. The clips are
+ * merged by name rather than copied six times over: pressing "hoe" on the kit file has all six
+ * characters hoe together, which is what a set is for.
+ */
+export function buildKitScene(specs, { spacingMetres = 1.5, name = PACK.slug } = {}) {
+  const scene = new THREE.Group();
+  scene.name = name;
+  const byClip = new Map();
+  const members = [];
+  // One material for the row. Every character's material is the same three settings on vertex
+  // colour, so six of them is six copies of one thing — the inspector calls that out as
+  // MAT-DUPLICATES and it is right to.
+  const material = new THREE.MeshStandardMaterial({ name: `${name}_atlas`, vertexColors: true, roughness: 0.86, metalness: 0 });
+  let x = 0;
+  for (const spec of specs) {
+    const asset = buildCharacterAsset(spec);
+    for (const mesh of asset.meshes ?? []) mesh.material = material;
+    asset.built.group.traverse((node) => {
+      if (node.isMesh) node.material = material;
+    });
+    const prefix = `${spec.slug}_`;
+    asset.built.group.traverse((node) => {
+      if (node.isBone) node.name = prefix + node.name;
+    });
+    const stand = new THREE.Group();
+    stand.name = spec.slug;
+    stand.position.x = x;
+    stand.add(asset.built.group);
+    scene.add(stand);
+    for (const clip of asset.clips) {
+      for (const track of clip.tracks) track.name = prefix + track.name;
+      const list = byClip.get(clip.name) ?? [];
+      list.push(clip);
+      byClip.set(clip.name, list);
+    }
+    members.push({ slug: spec.slug, xMetres: x, triangles: asset.counts.triangles, bones: asset.built.names.length });
+    x += spacingMetres;
   }
+  // Centre the row so the file opens framed rather than off to one side.
+  const shift = (x - spacingMetres) / 2;
+  for (const child of scene.children) child.position.x -= shift;
+  for (const member of members) member.xMetres = Number((member.xMetres - shift).toFixed(3));
+  const clips = [...byClip].map(
+    ([clipName, list]) =>
+      new THREE.AnimationClip(clipName, Math.max(...list.map((clip) => clip.duration)), list.flatMap((clip) => clip.tracks)),
+  );
+  return { scene, clips, members, counts: countTriangles(scene) };
 }
 
-if (!only) {
-  // Centre the row so the pack file opens framed rather than off to one side.
-  const shift = (packX - 0.95) / 2;
-  for (const child of packScene.children) child.position.x -= shift;
-  const glb = await exportGlb(packScene, []);
-  const file = join(outDir, `${PACK.slug}.glb`);
-  await writeFile(file, glb);
-  const counts = countTriangles(packScene);
-  results.push({
-    slug: PACK.slug,
-    title: PACK.title,
-    file,
-    bytes: glb.length,
-    ...counts,
-    clips: 0,
-  });
-  process.stdout.write(`${PACK.slug.padEnd(16)} ${counts.triangles} tris  ${counts.drawCalls} draws  ${(glb.length / 1024).toFixed(0)} KB\n`);
+export { CHARACTERS, PACK, countTriangles, exportGlb, flattenToStatic, freezeAt };
+
+// --- CLI ------------------------------------------------------------------------------------
+
+async function main(argv) {
+  const outDir = resolve(here, argValue(argv, "--out") ?? ".");
+  const only = argValue(argv, "--only");
+  const results = [];
+  await mkdir(outDir, { recursive: true });
+
+  const packSpecs = [];
+  for (const spec of CHARACTERS) {
+    if (only && spec.slug !== only) continue;
+    packSpecs.push(spec);
+    const asset = buildCharacterAsset(spec);
+    const glb = await exportGlb(asset.built.group, asset.clips);
+    const file = join(outDir, `${spec.slug}.glb`);
+    await writeFile(file, glb);
+
+    results.push({
+      slug: spec.slug,
+      title: spec.title,
+      file,
+      bytes: glb.length,
+      bones: asset.built.names.length,
+      ...asset.counts,
+      heightMetres: asset.bodyBoundsMetres[1],
+      widthMetres: asset.bodyBoundsMetres[0],
+      depthMetres: asset.bodyBoundsMetres[2],
+      restBoundsMetres: asset.boundsMetres,
+      lowestYMetres: Number(asset.lowestYMetres.toFixed(5)),
+      clips: asset.clips.map((clip, i) => ({
+        name: clip.name,
+        duration: Number(clip.duration.toFixed(3)),
+        tracks: clip.tracks.length,
+        groundLiftMetres: asset.grounded[i].liftMetres,
+        tool: clip.userData?.tool ?? null,
+        grip: clip.userData?.grip ?? null,
+      })),
+    });
+    process.stdout.write(
+      `${spec.slug.padEnd(16)} ${String(asset.counts.triangles).padStart(6)} tris  ${String(asset.counts.drawCalls)} draws  ${asset.counts.materials} mat  ${asset.built.names.length} bones  ${(glb.length / 1024).toFixed(0)} KB\n`,
+    );
+  }
+
+  if (!only) {
+    const pack = buildKitScene(packSpecs);
+    const glb = await exportGlb(pack.scene, pack.clips);
+    const file = join(outDir, `${PACK.slug}.glb`);
+    await writeFile(file, glb);
+    results.push({
+      slug: PACK.slug,
+      title: PACK.title,
+      file,
+      bytes: glb.length,
+      ...pack.counts,
+      members: pack.members,
+      clips: pack.clips.map((clip) => ({
+        name: clip.name,
+        duration: Number(clip.duration.toFixed(3)),
+        tracks: clip.tracks.length,
+      })),
+    });
+    process.stdout.write(
+      `${PACK.slug.padEnd(16)} ${pack.counts.triangles} tris  ${pack.counts.drawCalls} draws  ${(glb.length / 1024).toFixed(0)} KB\n`,
+    );
+  }
+
+  await writeFile(join(outDir, "build-report.json"), `${JSON.stringify(results, null, 2)}\n`);
 }
 
-await writeFile(join(outDir, "build-report.json"), `${JSON.stringify(results, null, 2)}\n`);
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  await main(process.argv.slice(2));
+}
