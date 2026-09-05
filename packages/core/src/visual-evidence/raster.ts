@@ -53,6 +53,18 @@ export interface RenderInput {
   scene: VisualScene;
   bounds: SceneBounds;
   view: CaptureViewSpec;
+  /**
+   * Solve the orbit framing over these scenes instead of the one being drawn.
+   *
+   * Motion phases are the reason this exists. An orbit view reframes to fill 88 % of the frame,
+   * so three poses of the same character each get their own solve and a pose that moves the
+   * silhouette is partly cancelled by the camera pulling back to fit it — worst on a clip that
+   * translates the whole rig, where the frames come out nearly identical. Passing every phase
+   * here solves one framing over all of them and reuses it, so what changes between the frames is
+   * the asset. Left undefined the framing is solved per frame, which is what a single still
+   * capture and every rigid clip captured before 2026-09-05 do.
+   */
+  framingScenes?: readonly VisualScene[];
 }
 
 export interface RenderOutput extends RasterResult {
@@ -159,20 +171,22 @@ class Projector {
  * focal length and principal-point shift that put the subject at a chosen size, centred. No
  * iteration and no guess — the same solve the storefront hero render uses.
  */
-function fitOrbitCamera(projector: Projector, scene: VisualScene, width: number, height: number, targetFill: number): void {
+function fitOrbitCamera(projector: Projector, scenes: readonly VisualScene[], width: number, height: number, targetFill: number): void {
   let minX = Infinity;
   let maxX = -Infinity;
   let minY = Infinity;
   let maxY = -Infinity;
-  const positions = scene.positions;
-  const limit = scene.triangleCount * 9;
-  for (let i = 0; i < limit; i += 3) {
-    const p = projector.project(positions[i], positions[i + 1], positions[i + 2]);
-    if (!p) continue;
-    if (p.x < minX) minX = p.x;
-    if (p.x > maxX) maxX = p.x;
-    if (p.y < minY) minY = p.y;
-    if (p.y > maxY) maxY = p.y;
+  for (const scene of scenes) {
+    const positions = scene.positions;
+    const limit = scene.triangleCount * 9;
+    for (let i = 0; i < limit; i += 3) {
+      const p = projector.project(positions[i], positions[i + 1], positions[i + 2]);
+      if (!p) continue;
+      if (p.x < minX) minX = p.x;
+      if (p.x > maxX) maxX = p.x;
+      if (p.y < minY) minY = p.y;
+      if (p.y > maxY) maxY = p.y;
+    }
   }
   if (!Number.isFinite(minX) || !Number.isFinite(minY)) return;
   const extent = Math.max(maxX - minX, maxY - minY);
@@ -280,7 +294,9 @@ export function renderView(input: RenderInput): RenderOutput {
   const H = view.height * ss;
   const pose = placeCamera(view, bounds);
   const projector = new Projector(pose, W, H);
-  if (view.kind === "orbit") fitOrbitCamera(projector, scene, W, H, view.targetFill ?? 0.88);
+  if (view.kind === "orbit") {
+    fitOrbitCamera(projector, input.framingScenes ?? [scene], W, H, view.targetFill ?? 0.88);
+  }
 
   const positions = scene.positions;
   const colors = scene.colors;

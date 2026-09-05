@@ -9,8 +9,16 @@
 
 export const VISUAL_EVIDENCE_SCHEMA = "clunk.visual-evidence.v1" as const;
 export const VISUAL_EVIDENCE_TOOL_VERSION = "clunk-visual-evidence/1.0.0" as const;
-/** Bumped whenever a raster or metric change would move a capture hash. */
-export const VISUAL_EVIDENCE_RENDERER_VERSION = "1.0.0" as const;
+/**
+ * Bumped whenever a raster or metric change would move a capture hash.
+ *
+ * 1.1.0 (2026-09-05): skinned meshes are posed on the CPU by their skeleton before they are
+ * drawn, so every capture of a rigged file moves — it used to be the bind pose no matter what the
+ * clip said. A file with no skin renders byte-for-byte what 1.0.0 rendered, verified on
+ * hf-tractor-compact and cozy-fence-gate, but it still reports the new version, because a version
+ * that only sometimes changes is worse than useless for deciding whether two runs are comparable.
+ */
+export const VISUAL_EVIDENCE_RENDERER_VERSION = "1.1.0" as const;
 
 export type Vec3 = readonly [number, number, number];
 export type Rgb = readonly [number, number, number];
@@ -30,16 +38,38 @@ export interface SceneBounds {
 }
 
 export interface AnimationPhaseScene {
-  /** 0, 1/3, 2/3 of the clip. */
+  /** Where in the clip this pose was taken, as a fraction of its length. */
   phase: number;
   scene: VisualScene;
+  /** Lowest world-space vertex in this pose, metres. The floor is y = 0. */
+  minGroundYMetres: number;
 }
+
+/** How the clip behind the motion phases was picked. */
+export type AnimationClipChoice =
+  /** Rigid files: the first clip the file declares, as before skinning existed. */
+  | "declaration-order"
+  /** A caller (a listing, `--clip`) named it. */
+  | "requested"
+  /** Skinned default: the looping clip whose joints travel farthest. */
+  | "widest-moving-loop"
+  /** Skinned, nothing loops: the clip whose joints travel farthest. */
+  | "widest-moving";
 
 export interface AnimationSceneSet {
   clip: string;
   durationSeconds: number;
   trackCount: number;
   phases: AnimationPhaseScene[];
+  /** True when the clip had to be applied to vertices through a skeleton. */
+  skinned: boolean;
+  clipChoice: AnimationClipChoice;
+  /** The fractions of the clip the phases were taken at. */
+  phaseFractions: readonly number[];
+  /** glTF interpolation modes present in the chosen clip: LINEAR, STEP, CUBICSPLINE. */
+  interpolations: readonly string[];
+  /** Anything the choice had to fall back on, in Korean, for the evidence file. */
+  notes: readonly string[];
 }
 
 /** Everything the renderer needs. Produced by a decoder; consumed by pure code. */
@@ -50,6 +80,11 @@ export interface VisualSceneSet {
   sizeMetres: Vec3;
   meshCount: number;
   vertexColouredMeshCount: number;
+  /** Meshes the decoder had to skin on the CPU, and what they cost. */
+  skinnedMeshCount: number;
+  skinnedVertexCount: number;
+  /** Unique joints across every skeleton in the file. */
+  jointCount: number;
   /** Null when the file carries no animation, or when the decoder could not pose it. */
   animation: AnimationSceneSet | null;
   /** Every clip the file declares, whether or not it was sampled. */
@@ -223,6 +258,29 @@ export interface VisualEvidenceReport {
     durationSeconds: number;
     movedPixelRatio: number;
     meanAbsLumaDelta: number;
+    /** Where in the clip the three phases were taken. */
+    phases: readonly number[];
+    /** True when the pose had to be pushed through a skeleton onto the vertices. */
+    skinned: boolean;
+    jointCount: number;
+    skinnedVertexCount: number;
+    clipChoice: AnimationClipChoice;
+    /** Clips the file declares, so a reader can see what was not shown. */
+    declaredClips: readonly string[];
+    interpolations: readonly string[];
+    /**
+     * Largest share of the union silhouette that changes between two phases: the outline moved,
+     * not just the shading. Interior-only motion (a spinning wheel) reads near zero here and
+     * shows up in movedPixelRatio instead.
+     */
+    silhouetteChangeRatio: number;
+    /** Every phase pair, so an aliased sample is visible rather than averaged away. */
+    silhouetteChangePairs: readonly { from: number; to: number; ratio: number }[];
+    /** The lowest vertex any phase reached. Negative means it sank through the floor. */
+    minPhaseGroundYMetres: number;
+    /** "frozen" when the three phases share one camera solve so a pose change cannot be reframed away. */
+    framing: "per-phase" | "frozen";
+    notes: readonly string[];
   } | null;
   checks: VisualCheck[];
   lanes: {
@@ -234,6 +292,8 @@ export interface VisualEvidenceReport {
   summary_ko: string;
   timings: {
     decodeMs: number;
+    /** The slice of decodeMs spent sampling clips and skinning vertices. */
+    poseMs: number;
     renderMs: number;
     measureMs: number;
     totalMs: number;

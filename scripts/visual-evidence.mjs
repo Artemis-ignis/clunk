@@ -16,7 +16,11 @@
  *
  * 사용:
  *   node scripts/visual-evidence.mjs <파일.glb> [--out 폴더] [--profile web|mobile|pc]
- *                                    [--run-id 이름] [--slug 이름] [--json]
+ *                                    [--run-id 이름] [--slug 이름] [--clip 동작이름] [--json]
+ *
+ * --clip 은 뼈대가 있는 캐릭터처럼 동작을 여러 개 선언한 파일에서, 상품 설명이 앞세우는 동작을
+ * 지정한다. 지정하지 않으면 반복 동작 가운데 관절이 가장 크게 움직이는 것을 고른다. 뼈대가 없는
+ * 파일은 예전과 똑같이 첫 번째 동작을 쓴다.
  *
  * 나가는 값: 0 = PASS, 3 = REVIEW, 2 = FAIL, 4 = 파일을 열지 못함.
  */
@@ -35,13 +39,14 @@ const { captureVisualEvidence } = await import("../packages/core/src/visual-evid
 const EXIT = { pass: 0, fail: 2, review: 3, unreadable: 4 };
 
 function parseArgs(argv) {
-  const args = { file: null, out: null, profile: undefined, runId: undefined, slug: undefined, json: false };
+  const args = { file: null, out: null, profile: undefined, runId: undefined, slug: undefined, clip: undefined, json: false };
   for (let i = 0; i < argv.length; i += 1) {
     const value = argv[i];
     if (value === "--out") args.out = argv[++i];
     else if (value === "--profile") args.profile = argv[++i];
     else if (value === "--run-id") args.runId = argv[++i];
     else if (value === "--slug") args.slug = argv[++i];
+    else if (value === "--clip") args.clip = argv[++i];
     else if (value === "--json") args.json = true;
     else if (!value.startsWith("--") && !args.file) args.file = value;
     else throw new Error(`알 수 없는 인자: ${value}`);
@@ -70,7 +75,20 @@ function describe(result) {
   }
   lines.push("");
   lines.push(visual.summary_ko);
-  lines.push("");
+  const motion = visual.motion;
+  if (motion) {
+    const phases = motion.phases.map((phase) => `${Math.round(phase * 100)}%`).join(" · ");
+    lines.push(
+      `동작        "${motion.clip}" ${motion.durationSeconds.toFixed(2)}초 · 위상 ${phases}`
+      + `${motion.skinned ? ` · 뼈대 ${motion.jointCount}관절을 정점 ${motion.skinnedVertexCount.toLocaleString()}개에 적용` : ""}`,
+    );
+    lines.push(
+      `            실루엣 변화 ${(motion.silhouetteChangeRatio * 100).toFixed(1)}% · 화면 변화 `
+      + `${(motion.movedPixelRatio * 100).toFixed(1)}% · 가장 낮은 점 ${(motion.minPhaseGroundYMetres * 1000).toFixed(1)} mm`,
+    );
+    for (const note of motion.notes) lines.push(`            ${note}`);
+    lines.push("");
+  }
   lines.push(`화면 ${capturePaths.length}장 · 증거 ${evidencePath}`);
   return lines.join("\n");
 }
@@ -79,7 +97,7 @@ let args;
 try {
   args = parseArgs(process.argv.slice(2));
 } catch (error) {
-  process.stderr.write(`${error.message}\n사용: node scripts/visual-evidence.mjs <파일.glb> [--out 폴더] [--profile web|mobile|pc] [--run-id 이름] [--slug 이름] [--json]\n`);
+  process.stderr.write(`${error.message}\n사용: node scripts/visual-evidence.mjs <파일.glb> [--out 폴더] [--profile web|mobile|pc] [--run-id 이름] [--slug 이름] [--clip 동작이름] [--json]\n`);
   process.exit(EXIT.unreadable);
 }
 
@@ -93,6 +111,7 @@ try {
     outDir,
     slug,
     inspectionRunId: args.runId,
+    preferredClip: args.clip,
     policy: args.profile ? { profileId: args.profile } : undefined,
   });
 } catch (error) {

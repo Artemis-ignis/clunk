@@ -69,6 +69,30 @@ export const VISUAL_THRESHOLDS = {
   floatingBand: { columnRatio: 0, medianGapRatio: 0.5 },
   /** Share of the frame that changes between the sampled animation phases. */
   movedPixelRatio: { review: 0.01, fail: 0 },
+  /**
+   * Share of the union silhouette that changes between two posed phases — the outline moved, not
+   * just the shading.
+   *
+   * Measured 2026-09-05 at the phases each file is sampled at. farmer-tomas with the skin
+   * applied: harvest 0.686, run 0.528, walk 0.456, idle 0.177, carry_idle 0.063, wave 0.055. The
+   * same character's bind pose drawn three times — which is what this tool produced for every
+   * rigged file before it could skin — is 0.000. Rigid catalogue files: fence-gate swing 0.824,
+   * tractor drive 0.111.
+   *
+   * So 0.02 is below every clip in that list that moves at all and an order of magnitude above
+   * the file that does not move, and 0.002 is a tenth of that again: a rig that reaches it did
+   * not deform. The pass is not decided on this number alone — see the motion check.
+   */
+  silhouetteChangeRatio: { review: 0.02, fail: 0.002 },
+  /**
+   * How far below the engine floor a posed vertex may go, metres. A still asset is judged on
+   * where it was authored (originGroundOffsetRatio); a moving one has to stay out of the floor in
+   * every phase too, because a walk cycle that sinks a foot 4 cm into the ground is a bug no
+   * still capture can see. Measured 2026-09-05: the tractor's drive clip dips 2.6 mm under the
+   * floor at its lowest and farmer-tomas's clips reach 0.0 mm, so 5 mm passes the shipped files
+   * and still catches a foot buried in the ground.
+   */
+  phaseGroundSinkMetres: 0.005,
 } as const;
 
 function worst(statuses: readonly VisualCheckStatus[]): VisualVerdict {
@@ -105,7 +129,18 @@ export interface VerdictInput {
   groundView: PlayerViewSample | null;
   /** bounds.min.y divided by the asset's height. */
   originGroundOffsetRatio: number;
-  motion: { clip: string; movedPixelRatio: number; meanAbsLumaDelta: number } | null;
+  motion: {
+    clip: string;
+    movedPixelRatio: number;
+    meanAbsLumaDelta: number;
+    /** IoU distance between the posed silhouettes; the pair that differs most. */
+    silhouetteChangeRatio: number;
+    /** The lowest vertex any posed phase reached, metres, floor at y = 0. */
+    minPhaseGroundYMetres: number;
+    /** True when the clip had to be pushed through a skeleton onto the vertices. */
+    skinned: boolean;
+    phases: readonly number[];
+  } | null;
   /** Clips the file declares, so a file with animation that was not sampled is not called still. */
   declaredClipCount: number;
   /** Player views the rig had to drop because the camera stood inside the asset. */
@@ -258,24 +293,61 @@ export function evaluateChecks(input: VerdictInput): VisualCheck[] {
         [],
       ));
     } else {
+      /*
+       * Two numbers, because a clip can move in two different ways and either one counts.
+       *
+       * movedPixelRatio is any pixel that changed: it catches a wheel spinning inside a
+       * silhouette that never moves, which is most rigid props. silhouetteChangeRatio is the
+       * outline: it catches a skinned character whose legs swap places, and it is the number that
+       * cannot be faked by shading, so it is the one that says a skeleton really was applied.
+       * A clip that moves either way is motion a buyer can see, so the better of the two decides
+       * and both are written down. A file that sinks into the floor while it moves fails outright,
+       * whichever way it moved.
+       */
       const moved = input.motion.movedPixelRatio;
-      const status: VisualCheckStatus = moved <= T.movedPixelRatio.fail ? "FAIL" : moved < T.movedPixelRatio.review ? "REVIEW" : "PASS";
+      const silhouette = input.motion.silhouetteChangeRatio;
+      const sink = input.motion.minPhaseGroundYMetres;
+      const phases = input.motion.phases.map((phase) => `${(phase * 100).toFixed(0)}%`).join(", ");
+      const movedStatus: VisualCheckStatus = moved <= T.movedPixelRatio.fail ? "FAIL" : moved < T.movedPixelRatio.review ? "REVIEW" : "PASS";
+      const silhouetteStatus: VisualCheckStatus = silhouette <= T.silhouetteChangeRatio.fail
+        ? "FAIL"
+        : silhouette < T.silhouetteChangeRatio.review ? "REVIEW" : "PASS";
+      const best: VisualCheckStatus = movedStatus === "PASS" || silhouetteStatus === "PASS"
+        ? "PASS"
+        : movedStatus === "REVIEW" || silhouetteStatus === "REVIEW" ? "REVIEW" : "FAIL";
+      const sunk = sink < -T.phaseGroundSinkMetres;
+      const status: VisualCheckStatus = sunk ? "FAIL" : best;
+      const observed = {
+        declaredClipCount: input.declaredClipCount,
+        movedPixelRatio: moved,
+        meanAbsLumaDelta: input.motion.meanAbsLumaDelta,
+        silhouetteChangeRatio: silhouette,
+        minPhaseGroundYMetres: sink,
+        skinned: input.motion.skinned ? 1 : 0,
+      };
+      const rule = `posed frames only: movedPixelRatio >= ${T.movedPixelRatio.review} or silhouetteChangeRatio >= ${T.silhouetteChangeRatio.review}`
+        + ` (review above ${T.movedPixelRatio.fail} / ${T.silhouetteChangeRatio.fail}), and minPhaseGroundYMetres >= ${-T.phaseGroundSinkMetres}`
+        + `, at phases ${phases} of "${input.motion.clip}"`;
       checks.push(check(
         "motion",
         "visualRuntime",
         status,
-        { declaredClipCount: input.declaredClipCount, movedPixelRatio: moved, meanAbsLumaDelta: input.motion.meanAbsLumaDelta },
-        `movedPixelRatio > ${T.movedPixelRatio.fail} and >= ${T.movedPixelRatio.review} between phases 0, 3/7 and 6/7 of the first clip`,
-        status === "PASS"
-          ? `Clip "${input.motion.clip}" changes ${(moved * 100).toFixed(1)}% of the frame between its sampled phases, so the motion is visible.`
-          : status === "REVIEW"
-            ? `Clip "${input.motion.clip}" changes only ${(moved * 100).toFixed(2)}% of the frame between its sampled phases; the file carries motion a buyer would barely see from this camera.`
-            : `Clip "${input.motion.clip}" changes nothing at all between its sampled phases.`,
-        status === "PASS"
-          ? `동작 "${input.motion.clip}" 이 위상 사이에서 화면의 ${(moved * 100).toFixed(1)}% 를 바꿉니다. 움직임이 실제로 보입니다.`
-          : status === "REVIEW"
-            ? `동작 "${input.motion.clip}" 이 위상 사이에서 화면의 ${(moved * 100).toFixed(2)}% 만 바꿉니다. 파일에 동작은 있지만 이 각도에서는 사는 사람 눈에 거의 안 보입니다.`
-            : `동작 "${input.motion.clip}" 이 위상 사이에서 화면을 하나도 바꾸지 않습니다.`,
+        observed,
+        rule,
+        sunk
+          ? `Clip "${input.motion.clip}" pushes the asset ${(Math.abs(sink) * 1000).toFixed(0)} mm through the floor at one of its sampled phases.`
+          : status === "PASS"
+            ? `Clip "${input.motion.clip}" changes ${(moved * 100).toFixed(1)}% of the frame and ${(silhouette * 100).toFixed(1)}% of the silhouette between its posed phases, so the motion is visible.`
+            : status === "REVIEW"
+              ? `Clip "${input.motion.clip}" changes only ${(moved * 100).toFixed(2)}% of the frame and ${(silhouette * 100).toFixed(2)}% of the silhouette between its posed phases; the file carries motion a buyer would barely see from this camera.`
+              : `Clip "${input.motion.clip}" changes nothing at all between its posed phases.`,
+        sunk
+          ? `동작 "${input.motion.clip}" 이 어느 위상에서 에셋을 바닥 아래로 ${(Math.abs(sink) * 1000).toFixed(0)} mm 밀어 넣습니다.`
+          : status === "PASS"
+            ? `동작 "${input.motion.clip}" 이 자세를 바꿔 가며 화면의 ${(moved * 100).toFixed(1)}%, 실루엣의 ${(silhouette * 100).toFixed(1)}% 를 바꿉니다. 움직임이 실제로 보입니다.`
+            : status === "REVIEW"
+              ? `동작 "${input.motion.clip}" 이 위상 사이에서 화면의 ${(moved * 100).toFixed(2)}%, 실루엣의 ${(silhouette * 100).toFixed(2)}% 만 바꿉니다. 파일에 동작은 있지만 이 각도에서는 사는 사람 눈에 거의 안 보입니다.`
+              : `동작 "${input.motion.clip}" 이 위상 사이에서 화면을 하나도 바꾸지 않습니다.`,
         [...input.motionCaptureIds],
       ));
     }

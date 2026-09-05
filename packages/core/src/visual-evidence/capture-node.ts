@@ -23,7 +23,7 @@ import {
 } from "../index";
 import { decodeGlb } from "./glb-node";
 import { encodePng, placeCamera, renderView } from "./raster";
-import { digestScene, measureCapture, measureMotion } from "./metrics";
+import { digestScene, lowestVertexY, measureCapture, measureMotion, measureSilhouetteChange } from "./metrics";
 import {
   ALL_STILL_VIEWS,
   ENGINE_VIEWS,
@@ -64,13 +64,15 @@ const LIMITS = [
   "The frames come from Clunk's own offline rasteriser, not from a game engine's rendering path.",
   "Materials are read as vertex colour times base colour; metal, roughness, transparency and emission are not simulated.",
   "The ground-contact measurement reads one silhouette per camera. It cannot see a part that floats behind a part that is itself grounded.",
-  "Motion is sampled at three phases (0, 3/7, 6/7) of the first declared clip only; a clip that loops exactly seven times would still alias.",
+  "Motion is sampled at three phases of one clip only: a rigid file shows its first declared clip at 0, 3/7 and 6/7, where a clip that loops exactly seven times would still alias; a skinned file shows one chosen clip at 25/50/75 %, and the other clips it declares are not rendered.",
+  "Skinning is linear blend skinning on up to four joints per vertex, applied on the CPU. Morph targets, dual-quaternion skinning and any deformation a shader would do at runtime are not applied.",
 ];
 const LIMITS_KO = [
   "여기 찍힌 화면은 Clunk 자체 오프라인 래스터라이저의 결과이지, 게임 엔진이 그린 화면이 아닙니다.",
   "재질은 정점 색 × 기본 색으로만 읽습니다. 금속·거칠기·투명·발광은 계산하지 않습니다.",
   "바닥 접지 측정은 카메라마다 실루엣 하나를 읽습니다. 바닥에 닿은 부품 뒤에 숨어 떠 있는 부품은 보지 못합니다.",
-  "움직임은 첫 번째 동작의 세 위상(0, 3/7, 6/7)만 표본으로 봅니다. 동작이 정확히 일곱 번 반복하는 경우에는 여전히 겹쳐 보일 수 있습니다.",
+  "움직임은 동작 하나의 세 위상만 표본으로 봅니다. 뼈대가 없는 파일은 첫 번째 동작을 0, 3/7, 6/7 에서 보므로 동작이 정확히 일곱 번 반복하면 겹쳐 보일 수 있고, 뼈대가 있는 파일은 고른 동작 하나를 25/50/75% 에서 봅니다. 나머지 동작은 그리지 않습니다.",
+  "뼈대 변형은 정점 하나당 관절 넷까지의 선형 혼합 스키닝을 CPU 에서 계산한 것입니다. 모프 타깃, 듀얼 쿼터니언 스키닝, 실행 중 셰이더가 하는 변형은 반영하지 않습니다.",
 ];
 
 const zlibDeflate = (raw: Uint8Array): Uint8Array =>
@@ -83,6 +85,12 @@ export interface CaptureOptions {
   inspectionRunId?: string;
   /** Written into the evidence file name; defaults to the GLB's basename. */
   slug?: string;
+  /**
+   * The clip a listing names for this asset, for a rigged character that declares a wardrobe of
+   * them. Case-insensitive. Ignored for a file with no skin, which always shows its first
+   * declared clip.
+   */
+  preferredClip?: string;
 }
 
 export interface CaptureResult {
@@ -114,15 +122,23 @@ export async function captureVisualEvidence(options: CaptureOptions): Promise<Ca
   const slug = options.slug ?? fileName.replace(/\.(glb|gltf)$/i, "");
 
   const report = inspectAsset(createAssetBundle(fileName, bytes), options.policy ?? {});
-  const { sceneSet, decodeMs } = await decodeGlb(bytes);
+  const { sceneSet, decodeMs, poseMs } = await decodeGlb(bytes, { preferredClip: options.preferredClip });
 
   const sceneDigest = digestScene(sceneSet.rest);
+  /*
+   * The rig hash describes the rig that was actually used, not the rig that exists. A file with
+   * no skin is captured exactly as it was before skinning existed — same views, same phases — so
+   * it keeps the hash it had; a skinned file is captured at different phases with a frozen motion
+   * framing, and says so here, so the two are never compared as if they were the same rig.
+   */
+  const skinnedMotion = sceneSet.animation?.skinned === true;
   const rig = {
     rendererId: RENDERER_ID,
     rendererVersion: VISUAL_EVIDENCE_RENDERER_VERSION,
     views: ALL_STILL_VIEWS,
     motionView: MOTION_VIEW,
-    motionPhases: MOTION_PHASES,
+    motionPhases: sceneSet.animation?.phaseFractions ?? MOTION_PHASES,
+    ...(skinnedMotion ? { motionFraming: "frozen", motionClip: sceneSet.animation?.clip } : {}),
   };
   const cameraRigHash = sha256Hex(new TextEncoder().encode(stableStringify(rig)));
   const sourceTreeHash = sha256Hex(new TextEncoder().encode(stableStringify({
@@ -203,11 +219,17 @@ export async function captureVisualEvidence(options: CaptureOptions): Promise<Ca
   let motion: VisualEvidenceReport["motion"] = null;
   if (sceneSet.animation) {
     const renderStarted = Date.now();
+    // A skinned pose that moves must not be cancelled by the camera reframing to fit it.
+    const framingScenes = skinnedMotion ? sceneSet.animation.phases.map((phase) => phase.scene) : undefined;
     const frames = sceneSet.animation.phases.map((phase) =>
-      renderView({ scene: phase.scene, bounds: sceneSet.bounds, view: MOTION_VIEW }));
+      renderView({ scene: phase.scene, bounds: sceneSet.bounds, view: MOTION_VIEW, framingScenes }));
     renderMs += Date.now() - renderStarted;
     const measureStarted = Date.now();
     const measured = measureMotion(frames);
+    const silhouette = measureSilhouetteChange(frames);
+    const minPhaseGroundYMetres = Math.min(
+      ...sceneSet.animation.phases.map((phase) => phase.minGroundYMetres ?? lowestVertexY(phase.scene)),
+    );
     measureMs += Date.now() - measureStarted;
     for (const [index, frame] of frames.entries()) {
       const png = encodePng(frame.width, frame.height, frame.rgb, zlibDeflate);
@@ -227,6 +249,18 @@ export async function captureVisualEvidence(options: CaptureOptions): Promise<Ca
       durationSeconds: sceneSet.animation.durationSeconds,
       movedPixelRatio: measured.movedPixelRatio,
       meanAbsLumaDelta: measured.meanAbsLumaDelta,
+      phases: sceneSet.animation.phaseFractions,
+      skinned: sceneSet.animation.skinned,
+      jointCount: sceneSet.jointCount,
+      skinnedVertexCount: sceneSet.skinnedVertexCount,
+      clipChoice: sceneSet.animation.clipChoice,
+      declaredClips: sceneSet.declaredClips.map((clip) => clip.name),
+      interpolations: sceneSet.animation.interpolations,
+      silhouetteChangeRatio: silhouette.max,
+      silhouetteChangePairs: silhouette.pairs,
+      minPhaseGroundYMetres: Number(minPhaseGroundYMetres.toFixed(6)),
+      framing: skinnedMotion ? "frozen" : "per-phase",
+      notes: sceneSet.animation.notes,
     };
   }
 
@@ -242,7 +276,17 @@ export async function captureVisualEvidence(options: CaptureOptions): Promise<Ca
     readabilityView: sample(farthestUsable),
     groundView: sample(nearestUsable),
     originGroundOffsetRatio: Number((sceneSet.bounds.min[1] / height).toFixed(6)),
-    motion: motion ? { clip: motion.clip, movedPixelRatio: motion.movedPixelRatio, meanAbsLumaDelta: motion.meanAbsLumaDelta } : null,
+    motion: motion
+      ? {
+          clip: motion.clip,
+          movedPixelRatio: motion.movedPixelRatio,
+          meanAbsLumaDelta: motion.meanAbsLumaDelta,
+          silhouetteChangeRatio: motion.silhouetteChangeRatio,
+          minPhaseGroundYMetres: motion.minPhaseGroundYMetres,
+          skinned: motion.skinned,
+          phases: motion.phases,
+        }
+      : null,
     declaredClipCount: sceneSet.declaredClips.length,
     skippedPlayerViewIds,
     motionCaptureIds: motionPhases.map((phase, index) => `motion-${index}`),
@@ -281,6 +325,7 @@ export async function captureVisualEvidence(options: CaptureOptions): Promise<Ca
     summary_ko,
     timings: {
       decodeMs,
+      poseMs,
       renderMs,
       measureMs,
       totalMs: Date.now() - startedAt,

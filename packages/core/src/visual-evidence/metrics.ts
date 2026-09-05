@@ -327,6 +327,71 @@ export function measureMotion(frames: readonly { rgb: Uint8Array; width: number;
   };
 }
 
+export interface SilhouetteChangePair {
+  from: number;
+  to: number;
+  ratio: number;
+}
+
+export interface SilhouetteChangeMeasurement {
+  /** Every ordered pair of phases, in the order they were captured. */
+  pairs: SilhouetteChangePair[];
+  /** The pair that differs most, and the pair that differs least. */
+  max: number;
+  min: number;
+}
+
+/**
+ * How much the outline moves between posed frames.
+ *
+ * The subject mask of two frames is compared as a set: pixels covered in one and not the other,
+ * divided by the pixels covered in either. It is the intersection-over-union distance, so it is
+ * blind to the shading and to the asset's colour and reads only "is this a different shape".
+ *
+ * This is the measurement a skinned character needs and `measureMotion` cannot give. A walk cycle
+ * changes its outline; a bind pose drawn three times does not, however much the shading is
+ * dithered. Interior-only motion — a wheel spinning inside a fixed silhouette — reads near zero
+ * here on purpose, and is what movedPixelRatio is for.
+ */
+export function measureSilhouetteChange(
+  frames: readonly { alpha: Float32Array; width: number; height: number }[],
+): SilhouetteChangeMeasurement {
+  const pairs: SilhouetteChangePair[] = [];
+  if (frames.length < 2) return { pairs, max: 0, min: 0 };
+  const { width, height } = frames[0];
+  const pixels = width * height;
+  for (let a = 0; a < frames.length; a += 1) {
+    for (let b = a + 1; b < frames.length; b += 1) {
+      const first = frames[a];
+      const second = frames[b];
+      if (first.width !== width || first.height !== height) continue;
+      if (second.width !== width || second.height !== height) continue;
+      let differing = 0;
+      let union = 0;
+      for (let i = 0; i < pixels; i += 1) {
+        const inFirst = first.alpha[i] >= SUBJECT_ALPHA;
+        const inSecond = second.alpha[i] >= SUBJECT_ALPHA;
+        if (inFirst || inSecond) union += 1;
+        if (inFirst !== inSecond) differing += 1;
+      }
+      pairs.push({ from: a, to: b, ratio: round(union ? differing / union : 0) });
+    }
+  }
+  if (pairs.length === 0) return { pairs, max: 0, min: 0 };
+  const ratios = pairs.map((pair) => pair.ratio);
+  return { pairs, max: Math.max(...ratios), min: Math.min(...ratios) };
+}
+
+/** The lowest world-space vertex of a scene, metres. The engine floor is y = 0. */
+export function lowestVertexY(scene: VisualScene): number {
+  let lowest = Infinity;
+  const limit = scene.triangleCount * 9;
+  for (let i = 1; i < limit; i += 3) {
+    if (scene.positions[i] < lowest) lowest = scene.positions[i];
+  }
+  return Number.isFinite(lowest) ? lowest : 0;
+}
+
 /** A digest over the decoded triangle stream: same file plus same decoder, same digest. */
 export function digestScene(scene: VisualScene): string {
   const bytes = new Uint8Array(

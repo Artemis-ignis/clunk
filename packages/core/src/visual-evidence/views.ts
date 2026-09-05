@@ -151,6 +151,28 @@ export const MOTION_VIEW: CaptureViewSpec = {
  */
 export const MOTION_PHASES: readonly number[] = [0, 3 / 7, 6 / 7];
 
+/**
+ * Quarters, for a skeleton.
+ *
+ * The sevenths above defend a rigid pivot against aliasing: a wheel that spins a whole number of
+ * times per clip lands on the same pose at 0, 1/3, 2/3. A character clip has the opposite shape.
+ * It loops exactly once and returns to its start pose, so phase 0 and phase 6/7 can be the same
+ * moment of the loop seen twice — you pay for three frames and get two.
+ *
+ * Measured on farmer-tomas's eight clips, 2026-09-05, as the share of the silhouette between the
+ * closest pair of the three frames:
+ *
+ *          sevenths (0, 3/7, 6/7)   quarters (1/4, 1/2, 3/4)
+ *   harvest              0.013                      0.346
+ *   hoe                  0.019                      0.403
+ *   walk                 0.276                      0.172
+ *
+ * The two clips a character is most worth showing are exactly the two the sevenths collapse.
+ * 25 / 50 / 75 % of a one-loop walk cycle is left foot forward, feet crossed, right foot forward,
+ * and no phase sits on the loop seam where the clip repeats itself.
+ */
+export const SKINNED_MOTION_PHASES: readonly number[] = [0.25, 0.5, 0.75];
+
 /** The view the ground-contact band is measured on: the lowest, nearest player camera. */
 export const GROUND_CONTACT_VIEW_ID = "player-5m";
 
