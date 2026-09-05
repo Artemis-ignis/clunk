@@ -6,7 +6,12 @@ import { promisify } from "node:util";
 
 const run = promisify(execFile);
 const root = fileURLToPath(new URL("../", import.meta.url));
-const server = fileURLToPath(new URL("../.static-preview/clunk-mcp.mjs", import.meta.url));
+// The server runs from its source, the way tests/mcp-stdio.test.mjs runs it. The first cut
+// executed a bundle under .static-preview/, which is not in the repository and had gone stale
+// against integrations/mcp/server.ts — the test passed only on the machine that built it.
+const launch = process.platform === "win32"
+  ? ["cmd.exe", ["/d", "/s", "/c", "call", "npm.cmd", "run", "--silent", "mcp"]]
+  : ["npm", ["run", "--silent", "mcp"]];
 const pack = "examples/generated/harvest-frontier-trees/grove-tree-pack-vol1.glb";
 
 async function inspect(path) {
@@ -15,7 +20,7 @@ async function inspect(path) {
     JSON.stringify({ jsonrpc: "2.0", id: 2, method: "tools/call", params: { name: "clunk_inspect", arguments: { path } } }),
   ].join("\n");
 
-  const child = execFile("node", [server], { cwd: root, maxBuffer: 32 * 1024 * 1024 });
+  const child = execFile(launch[0], launch[1], { cwd: root, maxBuffer: 32 * 1024 * 1024 });
   child.stdin.end(`${requests}\n`);
   let out = "";
   child.stdout.on("data", (chunk) => { out += chunk; });
