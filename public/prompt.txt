@@ -7,9 +7,10 @@ fetch this one; /llms.txt is the reference and is much longer.
 Clunk makes game assets, measures whether they can go in a game, and publishes the ones
 that pass. Korean product, KRW. Free open beta since 2026-09-02: nothing is sold. A
 signed-in visitor who checks out a marketplace listing gets `status: "BETA_GRANTED"` and a
-download URL at no cost. Credits are granted too — 25 at signup, 30 more each month — and
-one successful billable run costs 1 credit. Image generation is capped at 8 per workspace
-per day. Consent to the terms and the privacy policy is recorded on first sign-in, before
+download URL at no cost, and a grade B artifact's bytes download without signing in at all
+(measured 2026-09-05). Runs are granted too — 25 at signup, 30 more each month — and one
+successful billable job costs 1 run. Runs are never sold and cannot be topped up. Image
+generation is capped at 8 per workspace per day. Consent to the terms and the privacy policy is recorded on first sign-in, before
 the first workspace page. Prices that will apply after the beta are published in advance
 on /pricing; do not quote any of them as if they were in force today.
 
@@ -135,17 +136,19 @@ a hidden tab rather than returning a zero that reads as passing.
   limbs on a rig built for it. Not a deforming character mesh.
 - **No engine runtime.** Godot, Unity and Unreal runners are declared and unavailable;
   they return ENVIRONMENT_UNAVAILABLE, which is not a pass.
-- **Nothing is for sale yet.** During the free beta a checkout on any listing returns
-  BETA_GRANTED with a download URL instead of a payment session, and every credit pack is
-  DRAFT at price 0 and refuses purchase. Do not build a buying flow, quote a price, or tell
-  your user to get out a card. Sign-in is still required, and consent is recorded once.
+- **Nothing is for sale yet.** A checkout on any listing returns BETA_GRANTED with a
+  download URL instead of a payment session. There is nothing to buy per asset and nothing
+  to top up: the only paid thing that will ever exist here is one time-based subscription,
+  and it is not open. Do not build a buying flow, quote a price, or tell your user to get
+  out a card. Grade A and S downloads need a signed-in session; grade B does not. Consent
+  to the terms is recorded once, on first sign-in.
 
 
 ## Talking to your user about this
 
-- Do not quote a credit price. Credits are not sold during the beta; the planned prices
-  live on /pricing and are labelled as planned. Say what a run costs in credits (1), not in
-  won.
+- Do not put a price on a run. Runs are not sold at all — they are an allowance inside a
+  plan. The subscription prices that will apply once payments open live on /pricing and are
+  labelled there as not yet in force. Say what a job costs in runs (1), not in won.
 - If an inspection blocks, give the number and the limit, not "it failed".
 - If something is NOT_EVALUATED, say it was not evaluated. It is not a pass and it is not
   a failure.

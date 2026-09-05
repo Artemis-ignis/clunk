@@ -5,7 +5,7 @@ import { ForceDarkTheme } from "../components/ForceDarkTheme";
 import { RevealObserver } from "../components/Reveal";
 import { createPageMetadata } from "../components/site-metadata";
 import { signUpPath } from "../auth";
-import { BETA_MONTHLY_GRANT_CREDITS } from "../api/_lib/clunk";
+import { BETA_MONTHLY_GRANT_CREDITS, SIGNUP_GRANT_CREDITS } from "../api/_lib/clunk";
 import { GRADE_ACCESS, GRADE_ROWS } from "../components/catalog-facts";
 import { WORKSPACE_IMAGES_PER_DAY } from "../api/_lib/ai-budget";
 import { areSalesOpen } from "../api/_lib/sales-lock";
@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 export const metadata = createPageMetadata({
   title: "요금",
   description:
-    "Clunk 요금. 무료 등급 에셋은 로그인만 하면 받고, 구독하면 전체 카탈로그를 횟수 제한 없이 받습니다. 구독을 끊어도 받은 파일은 그대로 남습니다.",
+    "Clunk 요금제는 무료와 구독 둘뿐이고, 에셋마다 값이 붙지 않습니다. 구독하면 전체 카탈로그를 내려받기 제한 없이 받고, 구독을 끊어도 받은 파일은 계정에 그대로 남습니다.",
   path: "/pricing",
 });
 
@@ -89,7 +89,8 @@ const PLANS: Plan[] = [
       "3D 뷰어·색 팔레트·파일 검사",
       "AI 도구 연결(MCP)과 API",
       "받은 에셋은 상업적으로 써도 됩니다",
-      `만들기·검사는 매달 ${BETA_MONTHLY_GRANT_CREDITS}회, 이미지는 하루 ${WORKSPACE_IMAGES_PER_DAY}장까지`,
+      `가입할 때 만들기·검사 ${SIGNUP_GRANT_CREDITS}회, 그 뒤로 매달 ${BETA_MONTHLY_GRANT_CREDITS}회`,
+      `이미지 만들기는 하루 ${WORKSPACE_IMAGES_PER_DAY}장`,
     ],
   },
   {
@@ -110,7 +111,7 @@ const PLANS: Plan[] = [
       "A·S 등급까지 전체 카탈로그 — 내려받기 제한 없음",
       "앞으로 올라오는 에셋도 그대로 포함",
       "구독을 끊어도 받은 파일은 계정에 그대로 남습니다",
-      "만들기·검사 매달 300회, 이미지 하루 30장",
+      "만들기·검사 매달 300회, 이미지 만들기 하루 30장",
     ],
   },
 ];
@@ -158,11 +159,11 @@ const FAQ = [
   },
   {
     q: "에셋을 하나만 살 수는 없나요?",
-    a: `없습니다. 파는 것은 기간 구독 하나이고, 에셋마다 값이 붙어 있지 않습니다. 만들기와 검사는 무료가 매달 ${BETA_MONTHLY_GRANT_CREDITS}회, 구독이 300회이며 실패한 작업은 세지 않습니다.`,
+    a: `없습니다. 파는 것은 기간 구독 하나이고, 에셋마다 값이 붙어 있지 않습니다. 만들기와 검사는 무료가 매달 ${BETA_MONTHLY_GRANT_CREDITS}회, 구독이 300회입니다. 성공한 작업 한 번에 ${RUNS_PER_SUCCESSFUL_JOB}회가 줄고, 실패한 작업은 세지 않습니다.`,
   },
   {
     q: "지금 마켓에서 무엇을 받을 수 있나요?",
-    a: "로그인하면 전부 받습니다. 등급 제한은 지금 걸리지 않습니다. 위에 적힌 값은 구독이 시작되면 적용될 값입니다.",
+    a: "지금은 결제를 받지 않아 등급 제한이 걸리지 않습니다. 로그인하면 A·S 등급까지 전부 받습니다. 위에 적힌 값은 구독이 시작되면 적용될 값입니다.",
   },
   {
     q: "구독은 언제 시작하나요?",
@@ -208,7 +209,7 @@ export default function PricingPage() {
               <p className={styles.lede}>
                 {salesOpen
                   ? "무료와 구독 둘뿐입니다. 에셋을 하나씩 사는 길은 없습니다."
-                  : "지금은 로그인만 하면 마켓의 모든 에셋이 열립니다. 아래는 구독이 시작되면 적용될 값입니다."}
+                  : "무료와 구독 둘뿐입니다. 에셋을 하나씩 사는 길은 없습니다. 지금은 결제를 받지 않아 마켓의 모든 에셋이 열려 있고, 아래는 구독이 시작되면 적용될 값입니다."}
               </p>
               {/* 무료의 기준을 숫자로 적는다. 카드에 붙은 등급과 같은 규칙이라 방문자가
                   마켓에서 바로 확인할 수 있다 — 규칙을 숨긴 무료는 미끼로 읽힌다.
@@ -244,7 +245,7 @@ export default function PricingPage() {
                       <div className={styles.planTop}>
                         <div className={styles.planNameRow}>
                           <h3 id={`plan-${plan.id}`} className={styles.planName}>{plan.name}</h3>
-                          {plan.featured ? <span className={styles.planTag}>가장 많이 고릅니다</span> : null}
+                          {plan.featured ? <span className={styles.planTag}>전체 이용</span> : null}
                         </div>
                         <PriceSlot priceKrw={plan.priceKrw} period={isFree ? "영구 무료" : "/ 월"} />
                         <p className={styles.planAnnual}>
@@ -255,6 +256,12 @@ export default function PricingPage() {
                               : `연 결제 ${won(plan.annualKrw)} · 열 달 값으로 열두 달`}
                         </p>
                         <p className={styles.planSummary}>{plan.summary}</p>
+                        {/* 값이 적힌 카드에 "가입하고 시작하기" 버튼이 붙어 있으면, 누르는 순간
+                            결제 화면이 나올 것으로 읽힙니다. 결제가 닫혀 있는 동안에는 그 카드에서
+                            무슨 일이 일어나는지 카드 안에서 한 줄로 말합니다. */}
+                        {!salesOpen && !isFree ? (
+                          <p className={styles.planNote}>지금은 결제를 받지 않습니다. 가입만 하면 되고, 구독이 열리기 최소 30일 전에 먼저 알려 드립니다.</p>
+                        ) : null}
                       </div>
 
                       {/* 결제가 열리면 유료 플랜의 이 버튼이 결제 화면으로 이어집니다. 그전까지는
@@ -354,7 +361,7 @@ export default function PricingPage() {
                   >
                     <p className={styles.compareCardName}>
                       {plan.name}
-                      {plan.featured ? <span className={styles.compareCardTag}>가장 많이 고릅니다</span> : null}
+                      {plan.featured ? <span className={styles.compareCardTag}>전체 이용</span> : null}
                     </p>
                     <dl>
                       {DIFFERING_ROWS.map((row) => (
@@ -404,7 +411,7 @@ export default function PricingPage() {
                 <div>
                   <h2 id="closer-title">먼저 써 보고 정하세요</h2>
                   <p>
-                    지금은 로그인만 하면 마켓의 모든 에셋이 열립니다. 결제 정보는 묻지 않습니다.
+                    지금은 결제를 받지 않습니다. 로그인하면 마켓의 모든 에셋이 열리고, 결제 정보는 묻지 않습니다.
                   </p>
                 </div>
                 <div className={styles.closerActions}>

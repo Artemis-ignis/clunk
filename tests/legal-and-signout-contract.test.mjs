@@ -299,7 +299,9 @@ test("결제 미개시 안내는 결제 provider 미설정 상태에서만 렌�
   // 2026-09-03(마스터 결정): 문장은 "베타 기간"이 아니라 사실만 말한다 — 결제가 아직
   // 없으므로 지금은 결제 없이 쓴다. 배지가 아니라 푸터의 평범한 한 문장으로 한 번만.
   const html = await (await render("/pricing")).text();
-  assert.ok(html.includes("지금은 결제 없이 모든 기능을 쓸 수 있습니다."), "결제 미설정 상태에서 안내 문장이 없습니다");
+  // 2026-09-05: "모든 기능"은 무료 계정의 월 한도(만들기·검사 30회)보다 넓은 말이라
+  // 사실만 남겼다. 게이트도 문장의 자리도 그대로다.
+  assert.ok(html.includes("지금은 결제를 받지 않습니다."), "결제 미설정 상태에서 안내 문장이 없습니다");
   assert.ok(!html.includes("베타"), "요금 화면에 베타 표현이 남아 있습니다");
   assert.ok(!html.includes("아직 유료 결제를 받지 않습니다"), "옛 결제 미개시 문구가 남아 있습니다");
   assert.ok(!html.includes("통신판매업 신고 절차 진행 중"), "옛 신고 절차 문구가 남아 있습니다");
@@ -418,7 +420,7 @@ test("/login과 /signup은 서로 다른 문이고, 영문 라벨이 남아 있�
   // 지켜야 할 것은 낱말이 아니라 "화면의 숫자가 원장이 집행하는 상수와 같다"는 것이다.
   assert.ok(signup.includes(`${signupGrant}회`), "가입 즉시 쓸 수 있는 횟수가 화면에 없습니다");
   assert.ok(signup.includes(`매달 ${monthlyGrant}회`), "매월 지급 횟수가 화면에 없습니다");
-  assert.ok(signup.includes(`${imagesPerDay}장까지`), "하루 이미지 한도가 화면에 없습니다");
+  assert.ok(signup.includes(`하루 ${imagesPerDay}장`), "하루 이미지 한도가 화면에 없습니다");
   for (const [name, html] of [["가입", signup], ["로그인", login]]) {
     assert.ok(!html.includes("크레딧"), `${name} 화면에 크레딧이라는 말이 되살아났습니다`);
   }

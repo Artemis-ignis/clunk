@@ -143,11 +143,15 @@ test("collaboration UI keeps capture integrity, asset audit, and human visual re
   // 2026-09-02: the page stopped printing API field names to visitors. The separation it
   // must keep — file audit is not engine proof is not human sign-off — is now said in Korean.
   assert.match(agents, /파일 검사 통과와[\s\S]*화면 통과는 다릅니다/);
-  assert.match(agents, /엔진 화면[\s\S]*증거 없음/);
-  assert.match(agents, /사람 검토[\s\S]*대기/);
+  // 2026-09-05(마스터 지시): 네 칸의 이름이 에이전트가 수행하는 네 단계로 갈렸다
+  // (파일 검사 → 엔진 렌더 → 게임 시점 → 판정). 지켜야 할 것은 이름이 아니라 구분이므로
+  // 지금 화면의 이름으로 같은 것을 검사한다.
+  assert.match(agents, /엔진 렌더[\s\S]*증거 없음/);
+  assert.match(agents, /게임 시점[\s\S]*확인 전/);
+  assert.match(agents, /판정[\s\S]*보류/);
   // 2026-09-04(마스터 지적): 같은 구분을 부정문("…말하지 않습니다") 대신 방문자에게
   // 무엇이 답을 주는지로 적는다. 지켜야 할 것은 문장 형태가 아니라 구분 자체다.
-  assert.match(agents, /파일 검사는 규격을 봅니다[\s\S]*엔진에서 찍은 최신 화면과 사람의 결정/);
+  assert.match(agents, /파일 검사는 규격을 봅니다[\s\S]*엔진에서 그린 화면과 게임 안에서 본 장면까지 모여야 판정/);
   assert.match(panel, /inspectionRunId/);
   assert.match(facts, /fresh HF.*inspectionRunId/);
   assert.match(facts, /profileId is required for CURRENT/);

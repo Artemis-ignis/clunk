@@ -9,7 +9,7 @@ import { getClunkSourceManifest } from "../../packages/clunk-series/src/source-m
 
 export const metadata = createPageMetadata({
   title: "Clunk 제품군",
-  description: "Clunk가 직접 실행하는 2D·3D 에셋 만들기, 검사, 묶기 도구 여섯 가지입니다.",
+  description: "Clunk가 갖춘 도구 여섯 가지 — 3D 모델·스프라이트 시트·2D 이미지·애니메이션 클립 만들기, 게임에 넣어도 되는지 검사, 그리고 에셋 마켓입니다.",
   path: "/series",
 });
 
@@ -31,44 +31,47 @@ const SERIES_CARDS: ReadonlyArray<{ id: string; title: string; description: stri
     // 템플릿을 지정하지 않은 요청을 거절합니다. 코드 파일을 올리는 화면은 없습니다.
     description: "만들 모양을 템플릿에서 고르면 GLB 파일이 나옵니다. 어디서 왔는지와 파일 지문이 함께 기록됩니다. 문장만으로 모양을 만들지는 못합니다.",
     href: "/studio?make=3d-model",
-    action: "만들기 화면 열기",
+    action: "에셋 제작 열기",
   },
   {
     id: "sprite-lab",
     title: "스프라이트 시트 만들기",
     description: "3D 모델을 여러 방향에서 찍어 한 장으로 굽습니다. 칸 좌표와 프레임 정보가 함께 나오고, 규격이 맞는지 그 자리에서 검사합니다.",
     href: "/studio?make=sprite-atlas",
-    action: "만들기 화면 열기",
+    action: "에셋 제작 열기",
   },
   {
     id: "material-lab",
     title: "2D 이미지 만들기",
     description: "원하는 그림을 문장으로 적으면 PNG 한 장이 나옵니다. 표면에 쓰는 이미지(색·거칠기·금속감·요철)도 같은 방식으로 만듭니다.",
     href: "/studio?make=2d-image",
-    action: "만들기 화면 열기",
+    action: "에셋 제작 열기",
   },
   {
     id: "motion-lab",
     title: "애니메이션 클립 만들기",
     description: "이름 붙인 관절을 각도만큼 돌려 움직임을 만듭니다. 내 컴퓨터에 필요한 프로그램이 없으면 없다고 그대로 말하고, 통과로 바꾸지 않습니다.",
     href: "/studio?make=animation-clip",
-    action: "만들기 화면 열기",
+    action: "에셋 제작 열기",
   },
   {
     id: "game-ready",
     title: "게임에 넣어도 되는지 검사",
     description: "파일 하나를 열어 파일 크기, 폴리곤 수, 재질 수, 크기, 규칙 위반을 한 번에 측정합니다. 결과는 숫자와 기준을 함께 보여 줍니다.",
     href: "/app",
-    action: "검사기 열기",
+    action: "에셋 검사 열기",
   },
   {
     id: "market",
-    title: "에셋 장터",
+    title: "에셋 마켓",
     description: "공개된 에셋을 둘러보고 받습니다. 라이선스 상태와 지금 받을 수 있는지 여부를 숨기지 않고 그대로 표시합니다.",
     href: "/marketplace",
-    action: "장터 열기",
+    action: "에셋 마켓 열기",
   },
 ];
+
+/** 여섯 장 중 만들기 화면으로 가는 장의 수. 화면이 세는 것을 화면이 직접 셉니다. */
+const makeCardCount = SERIES_CARDS.filter((card) => card.href.startsWith("/studio")).length;
 
 export default function SeriesPage() {
   const catalog = getClunkSeriesCatalog();
@@ -88,12 +91,12 @@ export default function SeriesPage() {
         >
           <div className="series-hero-copy">
             <div className="hero-status-line"><span className="status-dot status-dot-on" /><span>Clunk 제품군</span><code>2D + 3D</code></div>
-            <span className="eyebrow">Clunk 내부 시리즈 · 만들기 · 검사 · 묶기 · 내보내기</span>
+            <span className="eyebrow">Clunk 내부 시리즈 · 만들기 · 검사 · 마켓</span>
             <h1>Clunk를 이루는<br /><em>여섯 가지 도구.</em></h1>
             <p>
               여섯 가지 도구가 모두 같은 규칙을 씁니다. 파일을 직접 열어 읽는 데서 시작해,
-              검사 기록을 남기고, 팀에 넘길 수 있게 묶는 데까지 이어집니다.
-              공개된 에셋을 받아 쓰거나, 로그인한 뒤 실행 횟수로 직접 만들 수 있습니다.
+              검사 기록과 파일 지문을 남기는 데까지 이어집니다. 마켓에 올라온 에셋을 받아
+              쓰거나, 로그인한 뒤 남은 실행 횟수 안에서 직접 만들 수 있습니다.
             </p>
             <div className="series-hero-actions">
               <a className="button button-primary" href="#series-catalog">제품군 둘러보기</a>
@@ -101,17 +104,17 @@ export default function SeriesPage() {
             </div>
             <div className="series-hero-proof">
               <span>도구 <b>{catalog.length}</b>가지</span>
-              <span>Clunk가 직접 실행 <b>{catalog.length}</b>가지</span>
+              <span>직접 만들 수 있는 갈래 <b>{makeCardCount}</b>가지</span>
               <span>공개 저장소 기록 <b>{sources.length}</b>건</span>
             </div>
           </div>
           <div className="series-hero-board" aria-label="Clunk 작업 흐름">
             <div className="series-board-topline"><span>작업 흐름</span><strong>한 제품 · 도구 {catalog.length}가지</strong></div>
             <div className="series-board-flow">
-              <span>참고 자료</span><i>→</i><span>만들기</span><i>→</i><span>검사</span><i>→</i><span>묶기</span>
+              <span>참고 자료</span><i>→</i><span>만들기</span><i>→</i><span>검사</span><i>→</i><span>마켓</span>
             </div>
             <div className="series-board-output"><span className="series-board-orbit" /><strong>Clunk</strong><small>진짜 파일 · 파일 지문 · 검사 증명서</small></div>
-            <div className="series-board-note"><span>실행 방식</span><b>Clunk 안에서 직접 실행</b><small>외부 서비스에 맡기지 않습니다</small></div>
+            <div className="series-board-note"><span>실행 방식</span><b>Clunk 안에서 직접 실행</b><small>2D 이미지 한 장을 그릴 때만 이미지 모델을 부릅니다</small></div>
           </div>
         </header>
 
@@ -124,7 +127,7 @@ export default function SeriesPage() {
           <div className="series-section-heading">
             <div><span className="eyebrow">무엇을 할 수 있나요</span><h2 id="series-catalog-heading">여섯 도구가<br /><em>같은 규칙을 씁니다</em></h2></div>
             <p>
-              만들기, 검사하기, 묶어서 내보내기, 마켓에 올리기 — 하는 일은 달라도
+              만들기, 검사하기, 마켓에서 골라 받기 — 하는 일은 달라도
               출처 기록과 파일 지문, 검사 근거, 라이선스를 다루는 규칙은 모두 같습니다.
             </p>
           </div>

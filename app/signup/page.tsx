@@ -31,7 +31,7 @@ export const dynamic = "force-dynamic";
 export const metadata = createPageMetadata({
   title: "가입",
   description:
-    `Google이나 GitHub 계정으로 가입하면 실행 횟수 ${SIGNUP_GRANT_CREDITS}회가 바로 들어오고, 매달 ${BETA_MONTHLY_GRANT_CREDITS}회가 더 들어옵니다. 이미지 만들기는 하루 ${WORKSPACE_IMAGES_PER_DAY}장까지이고, 결제 수단은 묻지 않습니다.`,
+    `Google이나 GitHub 계정으로 가입하면 만들기·검사 ${SIGNUP_GRANT_CREDITS}회가 바로 들어오고, 그 뒤로 매달 ${BETA_MONTHLY_GRANT_CREDITS}회가 채워집니다. 이미지 만들기는 하루 ${WORKSPACE_IMAGES_PER_DAY}장이고, 결제 수단은 묻지 않습니다.`,
   path: "/signup",
 });
 
@@ -179,7 +179,9 @@ function AuthJourney({
                 </div>
                 {readyCount === 0 && !hostSiwc ? (
                   <p className="cv5-auth-hint">
-                    가입 연결을 준비하는 중입니다. 준비가 끝나면 위 버튼이 켜집니다.
+                    {"가입 연결을 준비하는 중입니다. 준비가 끝나면 위 버튼이 켜집니다. 그동안 "}
+                    <Link href="/marketplace">에셋 마켓</Link>
+                    {"은 그대로 둘러볼 수 있습니다."}
                   </p>
                 ) : null}
               </>

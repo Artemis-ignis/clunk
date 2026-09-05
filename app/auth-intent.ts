@@ -50,8 +50,8 @@ export function isAuthIntent(value: unknown): value is AuthIntent {
 /** 처음 오는 사람이 받는 것 — 숫자는 전부 상수에서 온다. */
 const SIGNUP_FACTS = [
   "카드·비밀번호 없음",
-  `실행 ${SIGNUP_GRANT_CREDITS}회 즉시`,
-  `이미지 하루 ${WORKSPACE_IMAGES_PER_DAY}장까지`,
+  `만들기·검사 ${SIGNUP_GRANT_CREDITS}회 즉시`,
+  `이미지 하루 ${WORKSPACE_IMAGES_PER_DAY}장`,
 ];
 
 const LOGIN_FACTS = ["비밀번호 없음", "보던 화면으로 복귀", "내 파일은 내 작업공간에만"];
@@ -64,7 +64,7 @@ export const DEFAULT_AUTH_COPY: AuthIntentCopy = {
   signup: {
     badge: "카드 없이 시작",
     h1: `가입하면 바로 씁니다`,
-    lede: `카드도 비밀번호도 묻지 않습니다. Google이나 GitHub 계정으로 한 번 들어오면 내 작업공간이 만들어지고, 매달 ${BETA_MONTHLY_GRANT_CREDITS}회가 더 들어옵니다.`,
+    lede: `카드도 비밀번호도 묻지 않습니다. Google이나 GitHub 계정으로 한 번 들어오면 내 작업공간이 만들어지고, 만들기·검사 ${SIGNUP_GRANT_CREDITS}회가 바로 들어옵니다. 그 뒤로는 매달 ${BETA_MONTHLY_GRANT_CREDITS}회가 채워집니다.`,
     facts: SIGNUP_FACTS,
     providerSmall: SIGNUP_PROVIDER_SMALL,
   },
@@ -176,7 +176,7 @@ export function intentFromReturnTo(returnTo: string): AuthIntent | null {
 export function returnLabel(path: string): string {
   if (path.startsWith("/dashboard")) return "내 작업공간";
   if (path.startsWith("/app")) return "에셋 검사";
-  if (path.startsWith("/studio")) return "에셋 만들기";
+  if (path.startsWith("/studio")) return "에셋 제작";
   if (path.startsWith("/marketplace")) return "에셋 마켓";
   if (path.startsWith("/agents")) return "에이전트 연결";
   if (path.startsWith("/review")) return "검수 뷰어";

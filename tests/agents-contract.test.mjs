@@ -24,13 +24,22 @@ test("server-renders the client connection guide", async () => {
   assert.match(html, /VS Code/);
   assert.match(html, /GitHub Copilot/);
   assert.match(html, /clunk_asset_inspect/); // the HTTP tool the page lists; clunk_inspect is the local stdio tool (2026-09-02)
-  assert.match(html, /Clunk가 직접 운영하는 HTTP MCP/);
-  assert.match(html, /HTTP 원격 도구\s*<!-- -->\d+<!-- -->개/);
-  assert.match(html, /로컬 stdio 도구/);
+  // 2026-09-05: 이 핀은 이미 어느 파일에도 없는 문장을 찾고 있었다("Clunk가 직접 운영하는
+  // HTTP MCP"). 지켜야 할 것은 그 글자가 아니라 "이 연결을 남에게 맡기지 않고 Clunk가
+  // 직접 운영한다"는 사실이므로, 화면이 지금 그것을 말하는 두 자리로 옮긴다.
+  assert.match(html, /Clunk가 직접 운영하는 연결 서버/);
+  assert.match(clientSource, /Clunk가 운영하는 연결/);
+  // 2026-09-05: 한 화면이 같은 두 가지를 두 벌의 말로 부르고 있어서 화면의 말로 통일했다
+  // ("웹으로 바로 쓰는 도구" / "내 컴퓨터에서 쓰는 도구"). 기술 용어는 괄호로 한 번만 남는다.
+  assert.match(html, /웹으로 바로 쓰는 도구 <!-- -->\d+<!-- -->개/);
+  assert.match(html, /로컬 stdio/);
   assert.match(clientSource, /Clunk 연결 키 만들기/);
   assert.match(clientSource, /const \[endpoint, setEndpoint\] = useState\("\/api\/mcp"\)/);
   assert.match(clientSource, /fetch\(endpoint, \{[\s\S]*method: "POST"/);
-  assert.match(clientSource, /키 발급 후 바로 연결/);
+  // 2026-09-05: AgentsClient 의 이 한 줄이 "키 발급 후 바로 연결" → "키를 만들면 바로
+  // 연결됩니다" 로 다듬어졌다. 지켜야 할 것은 "키가 있어야 연결이 산다"를 이 카드가
+  // 말한다는 것이므로 문구만 따라 옮긴다.
+  assert.match(clientSource, /키를 만들면 바로 연결됩니다/);
   assert.match(guideSource, /Authorization: Bearer/);
   assert.match(guideSource, /로컬 stdio/);
   assert.doesNotMatch(html, /Polyfork/);

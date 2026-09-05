@@ -32,11 +32,11 @@ const STAGES: Array<{ id: ShowcaseStage; index: string; label: string; eyebrow: 
   {
     id: "review",
     index: "03",
-    label: "검토",
-    eyebrow: "빠진 증거까지 보고 판단",
-    title: "다음 증거를 선택합니다.",
-    body: "파일 검사 통과를 게임에 넣어도 된다는 뜻으로 부르지 않습니다. 엔진 화면과 사람의 검토가 더해져야 다음 상태로 갑니다.",
-    proof: "엔진 화면 · 게임 화면 · 사람 검토",
+    label: "판정",
+    eyebrow: "빈 칸까지 그대로 보고 판단",
+    title: "무엇이 비어 있는지 그대로 봅니다.",
+    body: "파일 검사 통과를 게임에 넣어도 된다는 뜻으로 부르지 않습니다. 엔진 렌더와 게임 시점까지 채워져야 판정이 됩니다.",
+    proof: "엔진 렌더 · 게임 시점 · 판정",
   },
 ];
 
@@ -119,7 +119,7 @@ export function LiveEvidenceShowcase({ variant = "landing", compact = false }: {
           )}
           <div className="live-evidence-showcase-visual-meta">
             <span>{visualLabel}</span>
-            <strong>{stage === "source" ? "원본 파일" : stage === "inspect" ? "파일 검사" : "검토 대기"}</strong>
+            <strong>{stage === "source" ? "원본 파일" : stage === "inspect" ? "파일 검사" : "판정 전"}</strong>
           </div>
           <div className="live-evidence-showcase-bracket live-evidence-showcase-bracket-a" aria-hidden="true" />
           <div className="live-evidence-showcase-bracket live-evidence-showcase-bracket-b" aria-hidden="true" />
@@ -138,9 +138,9 @@ export function LiveEvidenceShowcase({ variant = "landing", compact = false }: {
 
           <div className="live-evidence-showcase-statuses" aria-label="분리된 증거 상태">
             <ShowcaseStatus label="파일 검사" value="통과" detail={family === "model" ? `${CLI_SAMPLE.score}/100 · 막는 문제 0건` : "미리 준비된 예시"} tone="pass" active={stage === "inspect"} />
-            <ShowcaseStatus label="엔진 화면" value="증거 없음" detail="엔진에서 찍은 화면 필요" tone="gap" active={stage === "review"} />
-            <ShowcaseStatus label="게임 화면" value="확인 전" detail="실제 게임 화면 전" tone="pending" active={false} />
-            <ShowcaseStatus label="사람 검토" value="확인 전" detail="사람이 직접 봐야 합니다" tone="pending" active={stage === "review"} />
+            <ShowcaseStatus label="엔진 렌더" value="증거 없음" detail="엔진에서 그린 화면이 아직 없습니다" tone="gap" active={stage === "review"} />
+            <ShowcaseStatus label="게임 시점" value="확인 전" detail="게임 안에서 본 장면이 아직 없습니다" tone="pending" active={false} />
+            <ShowcaseStatus label="판정" value="보류" detail="앞의 두 단계가 채워지면 판정합니다" tone="pending" active={stage === "review"} />
           </div>
 
           <div className="live-evidence-showcase-detail-footer">

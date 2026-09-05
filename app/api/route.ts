@@ -23,7 +23,7 @@ export function GET(request: Request) {
 
   const body = {
     name: "Clunk",
-    what: "게임 에셋을 만들고, 게임에 넣어도 되는지 검사하고, 파는 곳입니다.",
+    what: "게임 에셋을 만들고, 게임에 넣어도 되는지 검사하고, 마켓에서 골라 쓰는 곳입니다.",
     read_this_first: `${origin}/llms.txt`,
     read_this_first_note:
       "If you are a coding agent about to build something, fetch /prompt.txt instead: the same catalogue written as working instructions rather than as a reference.",
@@ -42,7 +42,7 @@ export function GET(request: Request) {
 
     endpoints: {
       "GET /api/marketplace": "every published listing; add ?slug= for one, with its artifacts and evidence",
-      "GET /api/marketplace/assets/{assetId}?file=": "the bytes of one artifact; free ones are open, paid ones need an entitlement",
+      "GET /api/marketplace/assets/{assetId}?file=": "the bytes of one artifact; a grade B artifact answers to any caller, grade A and S need a signed-in session with a live subscription",
       "GET /api/providers": "which generation and inspection rails are actually wired, and which are declared but unavailable",
       "GET /api/health": "liveness",
     },
@@ -75,7 +75,7 @@ export function GET(request: Request) {
     // rather than discovering it as a failed checkout.
     commerce: {
       currency: "KRW",
-      credit: "1 credit = 100 KRW",
+      sells: "one time-based subscription, nothing else. No per-asset price and no credit to top up; a run is an allowance inside a plan, never a purchase.",
       sales_open: areSalesOpen(),
       ...(areSalesOpen()
         ? {}

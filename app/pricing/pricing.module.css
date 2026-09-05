@@ -269,6 +269,17 @@
   color: var(--v5-ink-dim);
 }
 
+/* 값이 적힌 카드에서만, 결제가 닫혀 있는 동안 서는 한 줄. 요약문보다 한 칸 작고
+   흐리게 — 사실 고지이지 판매 문구가 아니다. */
+.planNote {
+  margin: 8px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--v5-line);
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--v5-ink-faint);
+}
+
 /* ---------------------------------------------------------------- buttons */
 .planBtn {
   display: inline-flex;

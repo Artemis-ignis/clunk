@@ -178,7 +178,9 @@ function AuthJourney({
                 </div>
                 {readyCount === 0 && !hostSiwc ? (
                   <p className="cv5-auth-hint">
-                    로그인 연결을 준비하는 중입니다. 준비가 끝나면 위 버튼이 켜집니다.
+                    {"로그인 연결을 준비하는 중입니다. 준비가 끝나면 위 버튼이 켜집니다. 그동안 "}
+                    <Link href="/marketplace">에셋 마켓</Link>
+                    {"은 그대로 둘러볼 수 있습니다."}
                   </p>
                 ) : null}
               </>

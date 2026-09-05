@@ -8,7 +8,9 @@ Status: Korea first, free open beta since 2026-09-02. Nothing is sold right now.
 
 - **Marketplace files are granted, not sold.** A signed-in visitor who checks out any listing
   gets `status: "BETA_GRANTED"` and a download URL. No price, no card, no consent-to-waive-
-  withdrawal step, because there is no sale. An unauthenticated caller still has to sign in.
+  withdrawal step, because there is no sale. A caller who is not signed in can still fetch a
+  grade B artifact's bytes directly (measured 2026-09-05); grade A and S need the human's own
+  signed-in browser session.
 - **Runs are granted, never bought.** A new account receives 25 runs at signup and 30 more each
   month. There is nothing to top up: the endpoints that sold credit packs were removed on
   2026-09-04, and no surface states a price per run. One successful billable run costs 1; a
@@ -23,7 +25,7 @@ Status: Korea first, free open beta since 2026-09-02. Nothing is sold right now.
   out of the catalogue grid; the parent listing's page is where it is offered. A listing with
   `variantOf: null` is a product of its own. Do not present a sheet as another asset to get.
 - **A listing is free or subscriber-only. There is no per-asset price.** The grade decides:
-  B opens to anyone signed in, A and S open with a subscription. The marketplace API carries no
+  B opens to anyone, signed in or not; A and S open with a subscription. The marketplace API carries no
   price field, so do not quote one. Subscription prices that will apply after the beta are
   published in advance on https://clunk.games/pricing.
 
@@ -32,13 +34,13 @@ Status: Korea first, free open beta since 2026-09-02. Nothing is sold right now.
 - [Clunk home](https://clunk.games/): sample-first product walkthrough and evidence states.
 - [Clunk Series](https://clunk.games/series): Clunk-native Forge, Sprite, Material, Motion, Game Ready, and Market surfaces with the audited GitHub source ledger.
 - [Asset Studio](https://clunk.games/studio): authenticated native series authoring, real artifact bytes, and review Draft flow.
-- [Kits](https://clunk.games/kits): authenticated projects and hash-only Clunk Kit manifests.
+- [Kits](https://clunk.games/kits): authenticated projects and hash-only Clunk Kit manifests; a signed-out caller is redirected to the marketplace.
 - [Asset detail](https://clunk.games/assets/:assetId): authenticated artifact hashes, provenance, evidence, and downloads.
-- [Connect](https://clunk.games/connect): official HTTP MCP setup and handshake entry point.
+- [Connect](https://clunk.games/connect): redirects to https://clunk.games/agents#connect, the one HTTP MCP setup and handshake screen.
 - [Documentation](https://clunk.gitbook.io/docs): contracts, asset families, and runtime boundaries. https://clunk.games/docs redirects here.
 
-Clunk HTTP MCP: shipped at `/api/mcp`. The official setup surfaces are `/connect` and
-`/agents#connect`; `/mcp` is not a public website connection route. It is Clunk's own streamable
+Clunk HTTP MCP: shipped at `/api/mcp`. The setup screen is `/agents#connect`; `/connect` and
+`/mcp` are redirects onto it, not separate pages. It is Clunk's own streamable
 HTTP route, authenticated with a workspace-scoped `Authorization: Bearer clunk_live_...` key issued
 from the setup screen. The route can
 inspect uploaded base64 asset bundles, store verified v2 evidence, and append frame manifests to
@@ -49,8 +51,8 @@ The Sites access policy still controls whether an external client can reach the 
 ### Browser WebMCP
 
 The site also contains a WebMCP bridge for an agent driving a real browser. When the browser
-exposes the current imperative API at `document.modelContext`, Clunk registers its in-page tools;
-older experimental browsers may expose the deprecated `navigator.modelContext` fallback. The page
+exposes the imperative API at `navigator.modelContext`, Clunk registers its in-page tools; it
+falls back to `document.modelContext`, which is the form the specification's own text uses. The page
 visibly reports `REGISTERED`, `UNAVAILABLE`, or `ERROR`, and the full manifest is published at
 `/webmcp`.
 
@@ -68,7 +70,7 @@ instead. They do not read a caller's local path or run `clunk_optimize`. A headl
 cannot drive a browser should use the HTTP endpoint below, which carries the same catalogue
 search and the same inspection contract.
 
-Client setup is generated per client from `/connect` (also available at `/agents#connect`) after sign-in: Claude Code receives a
+Client setup is generated per client from `/agents#connect` after sign-in: Claude Code receives a
 `claude mcp add --transport http clunk <endpoint> --header "Authorization: Bearer <key>"` command;
 Codex receives `codex mcp add clunk --url <endpoint> --bearer-token-env-var CLUNK_API_KEY` plus a
 PowerShell environment assignment; GitHub Copilot receives `copilot mcp add --transport http` with
@@ -111,7 +113,7 @@ The public catalog is `/series` and the authenticated creation surface is `/stud
 
 ### Clunk-owned remote HTTP
 
-Open `/connect` (or `/agents#connect`), sign in, click `Clunk 연결 키 만들기`, and use the generated client block. The
+Open `/agents#connect` (`/connect` redirects there), sign in, click `Clunk 연결 키 만들기`, and use the generated client block. The
 canonical endpoint is the same-origin `/api/mcp` route (production:
 `https://clunk.games/api/mcp`). The key is displayed once and can be revoked from the
 same page. A minimal request is:
@@ -219,8 +221,8 @@ Tools returned by local stdio `tools/list`:
 are not advertised by the current seven-tool catalog.
 
 Typical agent loop over HTTP: `initialize` -> `tools/list` -> `clunk_search_assets` (pick by
-theme, polygon budget and `freeOnly`) -> `clunk_asset_facts` (confirm the one) -> hand the
-`downloadUrl` to the human, whose signed-in browser fetches it.
+theme, polygon budget and `freeOnly`) -> `clunk_asset_facts` (confirm the one) -> fetch the
+`downloadUrl` directly when the grade is B, or hand it to the human when it is A or S.
 
 Typical agent loop over local stdio: `initialize` -> `tools/list` -> `clunk_asset_inspect` or
 `clunk_sprite_sheet_review` -> (if fixable) `clunk_optimize` -> fresh evidence review.

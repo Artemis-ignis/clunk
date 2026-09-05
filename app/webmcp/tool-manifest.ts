@@ -104,7 +104,7 @@ export const TOOL_DOCS: readonly ToolDoc[] = [
     inputs: [{ name: "slug", note: { en: "the listing's slug", ko: "상품 주소 이름" } }],
     returns: {
       en: "The full measured record. Anything the pipeline could not measure comes back as null, never as a guess.",
-      ko: "그 상품의 측정치 한 벌. 재지 못한 항목은 null 이고 채워 넣지 않습니다.",
+      ko: "그 상품의 측정치 한 벌. 측정하지 못한 항목은 null 이고 채워 넣지 않습니다.",
     },
   },
   {

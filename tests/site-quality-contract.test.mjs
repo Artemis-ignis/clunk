@@ -125,7 +125,7 @@ test("the product showroom makes the file-to-decision loop interactive on public
   assert.match(showcase, /2D · 스프라이트/);
   assert.match(showcase, /3D · GLB 모델/);
   assert.match(showcase, /label="파일 검사" value="통과"[^>]*tone="pass"/);
-  assert.match(showcase, /label="엔진 화면" value="증거 없음"[^>]*tone="gap"/);
+  assert.match(showcase, /label="엔진 렌더" value="증거 없음"[^>]*tone="gap"/);
   // 파일 검사 통과를 "게임에 넣어도 된다"로 부르지 않는다는 경계는 이 쇼룸의 핵심이다.
   assert.match(showcase, /예시가 통과해도 게임 화면 통과는 아닙니다/);
   assert.match(showcase, /aria-pressed/);

@@ -104,8 +104,12 @@ test("landing language covers the full 2D and 3D asset path", async () => {
   assert.match(html, /검사와 수정/);
   assert.match(html, /제작 에이전트/);
   assert.match(html, /스프라이트 시트[\s\S]*본 애니메이션/); // 2026-09-02: named in Korean
-  // 2026-09-04: 푸터가 요금 화면을 가리키는 말이 "크레딧"에서 "실행 횟수"로 바뀌었다.
-  assert.match(html, /실행 횟수/);
+  // 2026-09-04: 푸터가 요금 화면을 가리키는 말이 "크레딧"에서 벗어났다.
+  // 2026-09-05: 그 자리가 내비는 "요금", 푸터는 "요금 · 실행 횟수"로 갈라져 한 화면을 두
+  // 이름으로 부르고 있었다. 이름은 "요금" 하나로 통일했고, 여기서는 그 이름으로 요금
+  // 화면에 가는 길이 첫 화면에 있는지를 본다.
+  assert.match(html, /<a[^>]*href="\/pricing"[^>]*>요금</);
+  assert.doesNotMatch(html, /요금 · 실행 횟수/, "요금 화면을 두 이름으로 부르면 안 된다");
   assert.doesNotMatch(html, /크레딧/, "첫 화면에 옛 크레딧 표기가 남아 있으면 안 된다");
 });
 

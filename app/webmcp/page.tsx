@@ -7,8 +7,8 @@ import { WebMcpStatusPanel } from "./WebMcpStatusPanel";
 import styles from "./webmcp.module.css";
 
 export const metadata = createPageMetadata({
-  title: "WebMCP — tools this page hands to your agent",
-  description: "Clunk's pages register WebMCP tools in the browser, so a person and their agent use the same screen at the same time. English first, Korean below.",
+  title: "WebMCP 도구 목록",
+  description: "Clunk의 화면이 브라우저에서 직접 내주는 WebMCP 도구 목록입니다. 사람과 에이전트가 같은 화면을 동시에 씁니다. 영어가 먼저, 한국어가 그다음입니다.",
   path: "/webmcp",
 });
 
@@ -30,11 +30,11 @@ export default function WebMcpPage() {
             <h1>A person and their agent<br />using one screen.</h1>
             <p>
               Normally an agent talks to a server the person cannot see. These pages hand the agent
-              tools of their own, so when the agent pulls the lever the machine the human is watching
-              actually turns, and when it flips the model to wireframe the model in front of them
-              changes. Every number a tool returns was measured by the asset pipeline and is served
-              by the same API the page reads — nothing is estimated, and a figure that was never
-              measured comes back as <code>null</code> rather than as a guess.
+              tools of their own, so when the agent filters the catalogue the list the human is
+              watching actually changes, and when it flips the model to wireframe the model in front
+              of them changes. Every number a tool returns was measured by the asset pipeline and is
+              served by the same API the page reads — nothing is estimated, and a figure that was
+              never measured comes back as <code>null</code> rather than as a guess.
             </p>
             <p className={styles.ko}>
               보통 에이전트는 사람이 보는 화면과 다른 곳(서버)에 말을 겁니다. 이 사이트는 화면 자신이
@@ -156,8 +156,8 @@ export default function WebMcpPage() {
             </p>
             <p className={styles.foot}>
               로그인은 사람이 직접 합니다. 도구가 돌려주는 값은 전부 이 사이트가 측정한 것이고,
-              재지 못한 항목은 결과에서 빠집니다. 파일 검사는 규격을 봅니다 — 게임 화면에서
-              어떻게 보이는지는 엔진에서 찍은 최신 화면이 말해 줍니다.
+              측정하지 못한 항목은 결과에서 빠집니다. 파일 검사는 규격을 봅니다 — 게임 화면에서
+              어떻게 보이는지는 엔진에서 그린 최신 화면이 말해 줍니다.
             </p>
           </section>
         </main>

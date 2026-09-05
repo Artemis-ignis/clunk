@@ -25,13 +25,13 @@ const statusWord = (value: string) => STATUS_WORDS[value] ?? value;
 const STAGE_COPY: Record<SampleRunStageId, { label: string; title: string }> = {
   asset: { label: "원본 파일", title: "실제 파일에서 시작합니다" },
   inspection: { label: "검사", title: "검사 결과를 읽습니다" },
-  decision: { label: "검토", title: "다음에 확인할 것을 고릅니다" },
+  decision: { label: "판정", title: "무엇이 남았는지 봅니다" },
 };
 
 const NEXT_ACTION_WORDS: Record<string, string> = {
   "Inspect the source bytes": "원본 파일 내용 검사하기",
   "Attach a shipped frame": "엔진에서 찍은 화면 붙이기",
-  "Request human review": "사람 검토 요청하기",
+  "Request human review": "판정 요청하기",
 };
 
 export function SampleRunWorkbench({ compact = false }: { compact?: boolean }) {
@@ -65,8 +65,8 @@ export function SampleRunWorkbench({ compact = false }: { compact?: boolean }) {
             ))}
           </div>
           <span className="sample-workbench-kicker">{STAGE_COPY[stage].title}</span>
-          <h3>{stage === "asset" ? "실제 파일에서 시작합니다." : stage === "inspection" ? "검사 결과는 이렇게 쌓입니다." : "다음에 무엇을 확인할지 고릅니다."}</h3>
-          <p>{stage === "asset" ? "Clunk에 들어 있는 GLB 파일을 그대로 씁니다. 이 예시의 파일과 지문은 고정되어 있고, 예시가 통과했다고 해서 내 파일이 통과한 것은 아닙니다." : stage === "inspection" ? "검사 결과와 지적된 문제, 파일 지문은 한 화면에 모읍니다. 엔진에서 찍은 화면과 사람의 검토는 따로 남습니다." : "파일 검사를 통과해도 게임에 넣어도 된다는 뜻은 아닙니다. 실제 게임 화면을 찍고 사람이 확인해야 다음으로 갑니다."}</p>
+          <h3>{stage === "asset" ? "실제 파일에서 시작합니다." : stage === "inspection" ? "검사 결과는 이렇게 쌓입니다." : "무엇이 채워졌고 무엇이 비었는지 봅니다."}</h3>
+          <p>{stage === "asset" ? "Clunk에 들어 있는 GLB 파일을 그대로 씁니다. 이 예시의 파일과 지문은 고정되어 있고, 예시가 통과했다고 해서 내 파일이 통과한 것은 아닙니다." : stage === "inspection" ? "검사 결과와 지적된 문제, 파일 지문은 한 화면에 모읍니다. 엔진 렌더와 게임 시점은 따로 남습니다." : "파일 검사를 통과해도 게임에 넣어도 된다는 뜻은 아닙니다. 엔진에서 그린 화면과 게임 안에서 본 장면까지 채워져야 판정이 됩니다."}</p>
           <div className="sample-workbench-metadata">
             <div><span>파일 지문</span><strong>{CLI_SAMPLE.inputHash.slice(0, 16)}…</strong></div>
             <div><span>검사 점수</span><strong>{CLI_SAMPLE.score}/100</strong></div>
@@ -78,12 +78,12 @@ export function SampleRunWorkbench({ compact = false }: { compact?: boolean }) {
           </div>
           <EvidenceStatusGrid
             className="sample-evidence-status-grid"
-            ariaLabel="예시의 검사 상태 네 가지"
+            ariaLabel="예시의 네 단계 상태"
             items={[
               { label: "파일 검사", value: statusWord(view.staticStatus), detail: "파일 내용 · 지문 · 규칙", tone: "pass" },
-              { label: "엔진 화면", value: statusWord(view.visualRuntime), detail: "엔진에서 찍은 화면 필요", tone: "gap" },
-              { label: "게임 화면", value: statusWord(view.playerFacing), detail: "실제 게임 화면 전", tone: "pending" },
-              { label: "사람 검토", value: statusWord(view.humanDecision), detail: "사람 검토 대기", tone: "pending" },
+              { label: "엔진 렌더", value: statusWord(view.visualRuntime), detail: "엔진에서 그린 화면이 아직 없습니다", tone: "gap" },
+              { label: "게임 시점", value: statusWord(view.playerFacing), detail: "게임 안에서 본 장면이 아직 없습니다", tone: "pending" },
+              { label: "판정", value: statusWord(view.humanDecision), detail: "앞의 두 단계가 채워지면 판정합니다", tone: "pending" },
             ]}
           />
         </div>
@@ -101,5 +101,5 @@ function InspectionStage() {
 }
 
 function DecisionStage({ view }: { view: ReturnType<typeof getSampleRunView> }) {
-  return <div className="sample-stage sample-stage-decision"><div className="sample-decision-title"><span>3단계 · 내보내도 되는지</span><strong>점수 하나로<br />출시하지 않습니다.</strong></div><div className="sample-decision-lanes"><div className="sample-lane sample-lane-pass"><span>파일 검사</span><strong>{statusWord(view.staticStatus)}</strong><small>파일 내용 · 지문 · 다시 열어 확인</small></div><div className="sample-lane sample-lane-gap"><span>엔진 화면</span><strong>{statusWord(view.visualRuntime)}</strong><small>엔진에서 찍은 화면 필요</small></div><div className="sample-lane sample-lane-pending"><span>사람 검토</span><strong>{statusWord(view.humanDecision)}</strong><small>사람이 직접 판단</small></div></div></div>;
+  return <div className="sample-stage sample-stage-decision"><div className="sample-decision-title"><span>3단계 · 내보내도 되는지</span><strong>점수 하나로<br />출시하지 않습니다.</strong></div><div className="sample-decision-lanes"><div className="sample-lane sample-lane-pass"><span>파일 검사</span><strong>{statusWord(view.staticStatus)}</strong><small>파일 내용 · 지문 · 다시 열어 확인</small></div><div className="sample-lane sample-lane-gap"><span>엔진 렌더</span><strong>{statusWord(view.visualRuntime)}</strong><small>엔진에서 그린 화면이 아직 없음</small></div><div className="sample-lane sample-lane-pending"><span>판정</span><strong>{statusWord(view.humanDecision)}</strong><small>앞 단계가 채워지면 판정</small></div></div></div>;
 }
