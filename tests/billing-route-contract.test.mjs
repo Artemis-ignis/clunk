@@ -62,7 +62,13 @@ test("credits route exposes only the explicit demo grant and cannot debit arbitr
 });
 
 test("paid artifact delivery requires active entitlement while free listing delivery remains possible", async () => {
-  const route = await source("app/api/marketplace/assets/[assetId]/route.ts");
+  // 등급·로그인·구독·베타 기록 판정은 2026-09-05 부터 app/api/_lib/market-gate.ts 에 있다 —
+  // 라우트와 정적 경로의 문지기가 같은 함수를 부른다. 핀은 두 파일을 합쳐 본다.
+  const route = [
+    await source("app/api/marketplace/assets/[assetId]/route.ts"),
+    await source("app/api/_lib/market-gate.ts"),
+  ].join("
+");
   assert.match(route, /getCurrentUser|requireUser/);
   // 2026-09-04: 낱개 가격이 사라졌으므로 문지기는 값이 아니라 등급을 본다.
   assert.match(route, /isFreeGrade\(gradeOf\(/, "문지기가 등급 규칙을 불러야 한다");
@@ -86,7 +92,13 @@ test("paid artifact delivery requires active entitlement while free listing deli
  * 갖는다. 실제로 마스터 계정에 그날 13:30 헬리콥터 기록이 남아 있었다.
  */
 test("베타에서 눌러 생긴 기록은 판매가 열린 뒤 유료 에셋을 열지 않는다", async () => {
-  const route = await source("app/api/marketplace/assets/[assetId]/route.ts");
+  // 등급·로그인·구독·베타 기록 판정은 2026-09-05 부터 app/api/_lib/market-gate.ts 에 있다 —
+  // 라우트와 정적 경로의 문지기가 같은 함수를 부른다. 핀은 두 파일을 합쳐 본다.
+  const route = [
+    await source("app/api/marketplace/assets/[assetId]/route.ts"),
+    await source("app/api/_lib/market-gate.ts"),
+  ].join("
+");
   assert.match(route, /areSalesOpen/, "문지기가 지금 판매 중인지 알아야 베타 기록을 가릴 수 있다");
   assert.match(
     route,
