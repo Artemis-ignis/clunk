@@ -1,12 +1,12 @@
 {
   "schema": "clunk.landing-facts.v1",
-  "generatedAt": "2026-09-05T12:05:50.343Z",
+  "generatedAt": "2026-09-05T13:30:18.246Z",
   "facts": {
     "tractor": {
       "fileName": "tractor.compact.m1.glb",
       "path": "public/market/hf-tractor-compact/tractor.compact.m1.glb",
       "triangles": 59232,
-      "bytes": 1431316,
+      "bytes": 1431348,
       "faceLimit": 40000,
       "limitPercent": 148
     },

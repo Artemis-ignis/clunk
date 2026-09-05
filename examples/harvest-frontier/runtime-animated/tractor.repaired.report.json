@@ -582,6 +582,364 @@
     "chose": "turned the handwheel up rather than reducing the wheel lock, because the wheel lock is already Ackermann-correct (inner 12.4 deg, outer 9.5 deg)",
     "largestKeyStepDeg": 19
   },
+  "gaugeWheelLanes": {
+    "why": "both depth wheels stood in the outermost tine lane and were drawn through the C-shank and the sweep; a gauge wheel sets the sweeps depth and cannot share a lane with one",
+    "chose": "inboard into the tine01-tine02 and tine06-tine07 gaps, the same answer scripts/hf-export/gauge-wheel-repair.mjs reached for the standalone cultivator (the same meshes)",
+    "outboardRejected": "straight out, the left wheel still touches sweep1 at 240 mm and gets 20.7 mm at 300 mm, with the tyre then 15 mm past the toolbar end (z -1580) — wider machine, less daylight",
+    "searchedOn": "5 mm grid, 0..300 mm, triangle-to-triangle distance",
+    "trianglesAdded": 0,
+    "sides": [
+      {
+        "node": "pivotgaugeWheelLeft",
+        "moved": [
+          "pivotgaugeWheelLeft",
+          "gaugeWheelLeftfork",
+          "gaugeWheelLeftsupportFront",
+          "gaugeWheelLeftsupportRear"
+        ],
+        "chosenInboardMm": 140,
+        "before": {
+          "pivotZmm": -1220,
+          "wheelZmm": [
+            -1295,
+            -1145
+          ],
+          "nearest": [
+            {
+              "part": "tine1",
+              "gapMm": 0
+            },
+            {
+              "part": "sweep1",
+              "gapMm": 0
+            },
+            {
+              "part": "sweepMarker1",
+              "gapMm": 116.1
+            }
+          ],
+          "groundContact": {
+            "axleYmm": 248.7,
+            "radiusMm": 248.7,
+            "floorMm": 0
+          }
+        },
+        "after": {
+          "pivotZmm": -1080,
+          "wheelZmm": [
+            -1155,
+            -1005
+          ],
+          "nearest": [
+            {
+              "part": "sweep1",
+              "gapMm": 26
+            },
+            {
+              "part": "sweep2",
+              "gapMm": 27.5
+            },
+            {
+              "part": "tine1",
+              "gapMm": 75
+            },
+            {
+              "part": "tine2",
+              "gapMm": 90.4
+            },
+            {
+              "part": "sweepMarker1",
+              "gapMm": 117.4
+            }
+          ],
+          "carriersNearest": [
+            {
+              "part": "cultivatorFrame",
+              "gapMm": 0
+            },
+            {
+              "part": "cultivatorWingLeft",
+              "gapMm": 0
+            },
+            {
+              "part": "sweep1",
+              "gapMm": 26
+            },
+            {
+              "part": "sweep2",
+              "gapMm": 27.5
+            },
+            {
+              "part": "tineClamp1",
+              "gapMm": 46.9
+            },
+            {
+              "part": "tineBolt2-1",
+              "gapMm": 56.5
+            }
+          ],
+          "groundContact": {
+            "axleYmm": 248.7,
+            "radiusMm": 248.7,
+            "floorMm": 0
+          }
+        },
+        "checks": {
+          "tineAndSweepClearanceMm": 26,
+          "carrierToTineClearanceMm": 46.9,
+          "tineAndSweepBoxOverlaps": [
+            {
+              "part": "sweep2",
+              "boxOverlapMm": [
+                216.5,
+                82.8,
+                9.4
+              ],
+              "shallowestAxisMm": 9.4,
+              "surfaceGapMm": 27.5
+            }
+          ],
+          "crossesATine": false,
+          "deepestBoxOverlapMm": 9.4
+        },
+        "scanMm": [
+          {
+            "inboardMm": 0,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 20,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 40,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 60,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 80,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 100,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 120,
+            "clearanceMm": 6
+          },
+          {
+            "inboardMm": 140,
+            "clearanceMm": 26
+          },
+          {
+            "inboardMm": 160,
+            "clearanceMm": 8
+          },
+          {
+            "inboardMm": 180,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 200,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 220,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 240,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 260,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 280,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 300,
+            "clearanceMm": 0
+          }
+        ]
+      },
+      {
+        "node": "pivotgaugeWheelRight",
+        "moved": [
+          "pivotgaugeWheelRight",
+          "gaugeWheelRightfork",
+          "gaugeWheelRightsupportFront",
+          "gaugeWheelRightsupportRear"
+        ],
+        "chosenInboardMm": 175,
+        "before": {
+          "pivotZmm": 1220,
+          "wheelZmm": [
+            1145,
+            1295
+          ],
+          "nearest": [
+            {
+              "part": "tine7",
+              "gapMm": 0
+            },
+            {
+              "part": "sweep7",
+              "gapMm": 0
+            },
+            {
+              "part": "sweepMarker7",
+              "gapMm": 116.1
+            }
+          ],
+          "groundContact": {
+            "axleYmm": 248.7,
+            "radiusMm": 248.7,
+            "floorMm": 0
+          }
+        },
+        "after": {
+          "pivotZmm": 1045,
+          "wheelZmm": [
+            970,
+            1120
+          ],
+          "nearest": [
+            {
+              "part": "sweep6",
+              "gapMm": 11
+            },
+            {
+              "part": "sweep7",
+              "gapMm": 15.8
+            },
+            {
+              "part": "tine6",
+              "gapMm": 55.6
+            },
+            {
+              "part": "tine7",
+              "gapMm": 110
+            }
+          ],
+          "carriersNearest": [
+            {
+              "part": "cultivatorFrame",
+              "gapMm": 0
+            },
+            {
+              "part": "cultivatorWingRight",
+              "gapMm": 0
+            },
+            {
+              "part": "sweep6",
+              "gapMm": 11
+            },
+            {
+              "part": "sweep7",
+              "gapMm": 15.8
+            },
+            {
+              "part": "tineBolt6-1",
+              "gapMm": 22.4
+            },
+            {
+              "part": "tineClamp6",
+              "gapMm": 30
+            }
+          ],
+          "groundContact": {
+            "axleYmm": 248.7,
+            "radiusMm": 248.7,
+            "floorMm": 0
+          }
+        },
+        "checks": {
+          "tineAndSweepClearanceMm": 11,
+          "carrierToTineClearanceMm": 22.4,
+          "tineAndSweepBoxOverlaps": [],
+          "crossesATine": false,
+          "deepestBoxOverlapMm": 0
+        },
+        "scanMm": [
+          {
+            "inboardMm": 0,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 20,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 40,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 60,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 80,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 100,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 120,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 140,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 160,
+            "clearanceMm": 1.8
+          },
+          {
+            "inboardMm": 175,
+            "clearanceMm": 11
+          },
+          {
+            "inboardMm": 180,
+            "clearanceMm": 6
+          },
+          {
+            "inboardMm": 200,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 220,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 240,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 260,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 280,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 300,
+            "clearanceMm": 0
+          }
+        ]
+      }
+    ]
+  },
   "bakedInstances": [
     {
       "node": "treadLugs",

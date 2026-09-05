@@ -4,9 +4,9 @@
   "operation": "inspect",
   "evidenceKind": "MACHINE_VISUAL_CAPTURE",
   "identity": {
-    "inputHash": "3572402b5c4e5cc3fffda66c8f3245bcc7580b3a746184376d322824d379557f",
-    "resultDigest": "89f3f900cfa2f9b2203e6b5c8395056b8ec23cd8ff3d50677e85c65de5b8a78e",
-    "byteLength": 1431316,
+    "inputHash": "c9aa2f456d9a5785a7b384aeecfb76fcc7b36c7081fddf80a116204521d39876",
+    "resultDigest": "1472d6d735ca4f3812e44d58712055871772cdcec56c3e6299a3441b92ec83a4",
+    "byteLength": 1431348,
     "coreBuildId": "0.1.0",
     "ruleSetId": "clunk-game-ready-v1",
     "ruleSetVersion": "1.0.0",
@@ -17,13 +17,13 @@
   "source": {
     "path": "/market/hf-tractor-compact/tractor.compact.m1.glb",
     "fileName": "tractor.compact.m1.glb",
-    "bytes": 1431316,
-    "sha256": "3572402b5c4e5cc3fffda66c8f3245bcc7580b3a746184376d322824d379557f"
+    "bytes": 1431348,
+    "sha256": "c9aa2f456d9a5785a7b384aeecfb76fcc7b36c7081fddf80a116204521d39876"
   },
   "sourceOutputRelation": {
     "kind": "SOURCE",
-    "sourceHash": "3572402b5c4e5cc3fffda66c8f3245bcc7580b3a746184376d322824d379557f",
-    "sourceInspectionDigest": "89f3f900cfa2f9b2203e6b5c8395056b8ec23cd8ff3d50677e85c65de5b8a78e"
+    "sourceHash": "c9aa2f456d9a5785a7b384aeecfb76fcc7b36c7081fddf80a116204521d39876",
+    "sourceInspectionDigest": "1472d6d735ca4f3812e44d58712055871772cdcec56c3e6299a3441b92ec83a4"
   },
   "report": {
     "schemaVersion": "1.0",
@@ -33,8 +33,8 @@
     "profileId": "web",
     "fileName": "tractor.compact.m1.glb",
     "format": "glb",
-    "byteLength": 1431316,
-    "inputHash": "3572402b5c4e5cc3fffda66c8f3245bcc7580b3a746184376d322824d379557f",
+    "byteLength": 1431348,
+    "inputHash": "c9aa2f456d9a5785a7b384aeecfb76fcc7b36c7081fddf80a116204521d39876",
     "metrics": {
       "sceneCount": 1,
       "nodeCount": 90,
@@ -136,8 +136,8 @@
       "ruleSetId": "clunk-game-ready-v1",
       "ruleSetVersion": "1.0.0"
     },
-    "analysisId": "analysis-3572402b5c4e-89f3f900",
-    "resultDigest": "89f3f900cfa2f9b2203e6b5c8395056b8ec23cd8ff3d50677e85c65de5b8a78e"
+    "analysisId": "analysis-c9aa2f456d9a-1472d6d7",
+    "resultDigest": "1472d6d735ca4f3812e44d58712055871772cdcec56c3e6299a3441b92ec83a4"
   },
   "findings": [
     {
@@ -319,15 +319,15 @@
     {
       "media": "screenshot",
       "path": "/evidence/hf-tractor-compact/hf-tractor-compact__engine-three-quarter.png",
-      "sha256": "6ab6d7a28cea997fac6c2314734dc9e221edf48de97dc57d6e59f48507db6d23",
-      "bytes": 70782,
+      "sha256": "51c775885cec296d437b420aa1d7d85d3c0a1acc14851ae95e480528b2e397ff",
+      "bytes": 70483,
       "renderer": "clunk-software-raster/1.1.0",
       "viewport": {
         "width": 512,
         "height": 512
       },
       "cameraPoseHash": "dccc7b4065454119dcf07accb7ca1632426abb98c2210db3a55a698dd6cf5064",
-      "sourceTreeHash": "17d18b37d187545211f680e32987d04e85843241076d8b3bc4814364325f028e",
+      "sourceTreeHash": "c095635f8891ce759941bf0a1d681a89b4139db8eb9915abe2d16e94111d3769",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -338,15 +338,15 @@
     {
       "media": "screenshot",
       "path": "/evidence/hf-tractor-compact/hf-tractor-compact__engine-front.png",
-      "sha256": "c03fcacbb392718d45c16724e5c22ee820d8430561f42bdf8a6d0883ca55968a",
-      "bytes": 41852,
+      "sha256": "c6c6d643b4a367212bcb7f057f428d61e207380c0ebf6737d311059e59699f6c",
+      "bytes": 42059,
       "renderer": "clunk-software-raster/1.1.0",
       "viewport": {
         "width": 512,
         "height": 512
       },
       "cameraPoseHash": "44aa675e0a7225c8249b4ffb01850a273fd896dc0b8b2f5801dce7ca87f64ab3",
-      "sourceTreeHash": "17d18b37d187545211f680e32987d04e85843241076d8b3bc4814364325f028e",
+      "sourceTreeHash": "c095635f8891ce759941bf0a1d681a89b4139db8eb9915abe2d16e94111d3769",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -357,15 +357,15 @@
     {
       "media": "screenshot",
       "path": "/evidence/hf-tractor-compact/hf-tractor-compact__engine-side.png",
-      "sha256": "c35f1934d0d243fa3411f21a66eb3531e17dab13c0056c52e8643f17fd9558b8",
-      "bytes": 49863,
+      "sha256": "acaeba7bb45f7de115806c20eabd7dac7405d75bcf65019b1361fdf79ec8ddaf",
+      "bytes": 49312,
       "renderer": "clunk-software-raster/1.1.0",
       "viewport": {
         "width": 512,
         "height": 512
       },
       "cameraPoseHash": "ccf1ed9e8706fa2df295c1f603805da739b0349433ee89fb169ac9c63590fdbc",
-      "sourceTreeHash": "17d18b37d187545211f680e32987d04e85843241076d8b3bc4814364325f028e",
+      "sourceTreeHash": "c095635f8891ce759941bf0a1d681a89b4139db8eb9915abe2d16e94111d3769",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -376,15 +376,15 @@
     {
       "media": "screenshot",
       "path": "/evidence/hf-tractor-compact/hf-tractor-compact__engine-top.png",
-      "sha256": "0d23e3c5429b2e5b426de62891e3a658be2f25b92d83b27980ccfc0d97c87e20",
-      "bytes": 66613,
+      "sha256": "278c1a92eb3ce283d96551e228f777d20c49dadf82e3563d8215dd26f9eea3b1",
+      "bytes": 66800,
       "renderer": "clunk-software-raster/1.1.0",
       "viewport": {
         "width": 512,
         "height": 512
       },
       "cameraPoseHash": "8831eca61675cb51110e405a4d2ca7c4e061ae86ef6f02c37bfa52b6fbe87f7f",
-      "sourceTreeHash": "17d18b37d187545211f680e32987d04e85843241076d8b3bc4814364325f028e",
+      "sourceTreeHash": "c095635f8891ce759941bf0a1d681a89b4139db8eb9915abe2d16e94111d3769",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -395,15 +395,15 @@
     {
       "media": "screenshot",
       "path": "/evidence/hf-tractor-compact/hf-tractor-compact__player-5m.png",
-      "sha256": "1ae7a4a49aeabff176054c6b30c63b990ad4b8324c5995e3cf876397148296c0",
-      "bytes": 34641,
+      "sha256": "573c6297bfad0247bc156d063e43f2862b81d84378bbd208d34bb8431fc2f90f",
+      "bytes": 34663,
       "renderer": "clunk-software-raster/1.1.0",
       "viewport": {
         "width": 640,
         "height": 360
       },
       "cameraPoseHash": "1aaf90769b1401e08586a5fde07cb3f0c192b974cd784faa2efa1095622d7831",
-      "sourceTreeHash": "17d18b37d187545211f680e32987d04e85843241076d8b3bc4814364325f028e",
+      "sourceTreeHash": "c095635f8891ce759941bf0a1d681a89b4139db8eb9915abe2d16e94111d3769",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -414,15 +414,15 @@
     {
       "media": "screenshot",
       "path": "/evidence/hf-tractor-compact/hf-tractor-compact__player-15m.png",
-      "sha256": "bcba947b9e0631eb54187b5f913188fb9406037eaa0dd1b85b769acc46a6004b",
-      "bytes": 7661,
+      "sha256": "5211820ef750d0e6075041367de678b31efa06273177deb0787c8787942ff6a3",
+      "bytes": 7690,
       "renderer": "clunk-software-raster/1.1.0",
       "viewport": {
         "width": 640,
         "height": 360
       },
       "cameraPoseHash": "4a7820b71bfe38d9ef719859cca71d6cc85ca4f98f3c7ed7aa0c19b80d5faac3",
-      "sourceTreeHash": "17d18b37d187545211f680e32987d04e85843241076d8b3bc4814364325f028e",
+      "sourceTreeHash": "c095635f8891ce759941bf0a1d681a89b4139db8eb9915abe2d16e94111d3769",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -435,45 +435,45 @@
   "byteVerification": {
     "method": "LOCAL_CLI_READ",
     "source": {
-      "sha256": "3572402b5c4e5cc3fffda66c8f3245bcc7580b3a746184376d322824d379557f",
-      "bytes": 1431316,
+      "sha256": "c9aa2f456d9a5785a7b384aeecfb76fcc7b36c7081fddf80a116204521d39876",
+      "bytes": 1431348,
       "verified": true
     },
     "captures": [
       {
         "path": "/evidence/hf-tractor-compact/hf-tractor-compact__engine-three-quarter.png",
-        "sha256": "6ab6d7a28cea997fac6c2314734dc9e221edf48de97dc57d6e59f48507db6d23",
-        "bytes": 70782,
+        "sha256": "51c775885cec296d437b420aa1d7d85d3c0a1acc14851ae95e480528b2e397ff",
+        "bytes": 70483,
         "verified": true
       },
       {
         "path": "/evidence/hf-tractor-compact/hf-tractor-compact__engine-front.png",
-        "sha256": "c03fcacbb392718d45c16724e5c22ee820d8430561f42bdf8a6d0883ca55968a",
-        "bytes": 41852,
+        "sha256": "c6c6d643b4a367212bcb7f057f428d61e207380c0ebf6737d311059e59699f6c",
+        "bytes": 42059,
         "verified": true
       },
       {
         "path": "/evidence/hf-tractor-compact/hf-tractor-compact__engine-side.png",
-        "sha256": "c35f1934d0d243fa3411f21a66eb3531e17dab13c0056c52e8643f17fd9558b8",
-        "bytes": 49863,
+        "sha256": "acaeba7bb45f7de115806c20eabd7dac7405d75bcf65019b1361fdf79ec8ddaf",
+        "bytes": 49312,
         "verified": true
       },
       {
         "path": "/evidence/hf-tractor-compact/hf-tractor-compact__engine-top.png",
-        "sha256": "0d23e3c5429b2e5b426de62891e3a658be2f25b92d83b27980ccfc0d97c87e20",
-        "bytes": 66613,
+        "sha256": "278c1a92eb3ce283d96551e228f777d20c49dadf82e3563d8215dd26f9eea3b1",
+        "bytes": 66800,
         "verified": true
       },
       {
         "path": "/evidence/hf-tractor-compact/hf-tractor-compact__player-5m.png",
-        "sha256": "1ae7a4a49aeabff176054c6b30c63b990ad4b8324c5995e3cf876397148296c0",
-        "bytes": 34641,
+        "sha256": "573c6297bfad0247bc156d063e43f2862b81d84378bbd208d34bb8431fc2f90f",
+        "bytes": 34663,
         "verified": true
       },
       {
         "path": "/evidence/hf-tractor-compact/hf-tractor-compact__player-15m.png",
-        "sha256": "bcba947b9e0631eb54187b5f913188fb9406037eaa0dd1b85b769acc46a6004b",
-        "bytes": 7661,
+        "sha256": "5211820ef750d0e6075041367de678b31efa06273177deb0787c8787942ff6a3",
+        "bytes": 7690,
         "verified": true
       }
     ],
@@ -500,7 +500,7 @@
       "note": "A z-buffered software rasteriser with flat warm-key and cool-sky shading and one soft contact shadow. No PBR, no image-based lighting, no reflections, no ray-traced shadow, no ambient occlusion. It is not a screenshot from a game engine and must not be described as one.",
       "note_ko": "깊이 버퍼를 쓰는 소프트웨어 래스터라이저입니다. 따뜻한 주광과 차가운 하늘빛의 평면 음영, 바닥 접촉 그림자 하나가 전부입니다. PBR·환경광·반사·광선추적 그림자·주변광 차폐는 없습니다. 게임 엔진에서 찍은 화면이 아니며 그렇게 부르면 안 됩니다."
     },
-    "sceneDigest": "129750f89a273e9094d5381a6cba1c278df6b8305d1653c89cfd90a549c037fb",
+    "sceneDigest": "db4debd3ac13c8ed13f94430f39282bd9ecf4e3e328179adc5b6405db33e3bf5",
     "cameraRigHash": "a4cf96074e15287802162c142a02e03a9c994df9d59153ac7fb7417d1bb1fb77",
     "sizeMetres": [
       5.2396,
@@ -515,8 +515,8 @@
         "label": "Engine render, three-quarter",
         "label_ko": "엔진 렌더 · 3/4",
         "path": "/evidence/hf-tractor-compact/hf-tractor-compact__engine-three-quarter.png",
-        "sha256": "6ab6d7a28cea997fac6c2314734dc9e221edf48de97dc57d6e59f48507db6d23",
-        "bytes": 70782,
+        "sha256": "51c775885cec296d437b420aa1d7d85d3c0a1acc14851ae95e480528b2e397ff",
+        "bytes": 70483,
         "width": 512,
         "height": 512,
         "camera": {
@@ -537,25 +537,25 @@
         "cameraPoseHash": "dccc7b4065454119dcf07accb7ca1632426abb98c2210db3a55a698dd6cf5064",
         "cameraInsideAsset": false,
         "metrics": {
-          "silhouetteFillRatio": 0.3668,
+          "silhouetteFillRatio": 0.365,
           "boundingFillRatio": 0.8809,
           "clippedEdgeCount": 0,
-          "subjectMeanLuma": 0.3054,
+          "subjectMeanLuma": 0.3068,
           "subjectLumaP05": 0.1022,
-          "subjectLumaP95": 0.5908,
-          "subjectLumaRange": 0.4886,
+          "subjectLumaP95": 0.5979,
+          "subjectLumaRange": 0.4956,
           "crushedBlackRatio": 0,
           "blownWhiteRatio": 0,
           "paletteColorCount": 37,
-          "backgroundSeparationDeltaE76": 59.8,
+          "backgroundSeparationDeltaE76": 59.66,
           "groundContactColumnRatio": null,
           "groundMedianGapRatio": null,
           "groundMaxGapRatio": null,
           "readability46": {
             "luminanceRange": 0.7722,
-            "edgeDensity": 0.2696,
-            "meanGradient": 0.0663,
-            "localContrastCoverage": 0.679
+            "edgeDensity": 0.2699,
+            "meanGradient": 0.0662,
+            "localContrastCoverage": 0.6778
           }
         }
       },
@@ -565,8 +565,8 @@
         "label": "Engine render, front",
         "label_ko": "엔진 렌더 · 정면",
         "path": "/evidence/hf-tractor-compact/hf-tractor-compact__engine-front.png",
-        "sha256": "c03fcacbb392718d45c16724e5c22ee820d8430561f42bdf8a6d0883ca55968a",
-        "bytes": 41852,
+        "sha256": "c6c6d643b4a367212bcb7f057f428d61e207380c0ebf6737d311059e59699f6c",
+        "bytes": 42059,
         "width": 512,
         "height": 512,
         "camera": {
@@ -590,21 +590,21 @@
           "silhouetteFillRatio": 0.2621,
           "boundingFillRatio": 0.8809,
           "clippedEdgeCount": 0,
-          "subjectMeanLuma": 0.2603,
+          "subjectMeanLuma": 0.2613,
           "subjectLumaP05": 0.1022,
           "subjectLumaP95": 0.5547,
           "subjectLumaRange": 0.4525,
           "crushedBlackRatio": 0,
           "blownWhiteRatio": 0.0002,
-          "paletteColorCount": 37,
-          "backgroundSeparationDeltaE76": 64.57,
+          "paletteColorCount": 38,
+          "backgroundSeparationDeltaE76": 64.47,
           "groundContactColumnRatio": null,
           "groundMedianGapRatio": null,
           "groundMaxGapRatio": null,
           "readability46": {
-            "luminanceRange": 0.7977,
-            "edgeDensity": 0.2762,
-            "meanGradient": 0.0769,
+            "luminanceRange": 0.7974,
+            "edgeDensity": 0.2754,
+            "meanGradient": 0.0768,
             "localContrastCoverage": 0.7045
           }
         }
@@ -615,8 +615,8 @@
         "label": "Engine render, side",
         "label_ko": "엔진 렌더 · 측면",
         "path": "/evidence/hf-tractor-compact/hf-tractor-compact__engine-side.png",
-        "sha256": "c35f1934d0d243fa3411f21a66eb3531e17dab13c0056c52e8643f17fd9558b8",
-        "bytes": 49863,
+        "sha256": "acaeba7bb45f7de115806c20eabd7dac7405d75bcf65019b1361fdf79ec8ddaf",
+        "bytes": 49312,
         "width": 512,
         "height": 512,
         "camera": {
@@ -637,24 +637,24 @@
         "cameraPoseHash": "ccf1ed9e8706fa2df295c1f603805da739b0349433ee89fb169ac9c63590fdbc",
         "cameraInsideAsset": false,
         "metrics": {
-          "silhouetteFillRatio": 0.3837,
+          "silhouetteFillRatio": 0.3939,
           "boundingFillRatio": 0.8809,
           "clippedEdgeCount": 0,
-          "subjectMeanLuma": 0.3112,
+          "subjectMeanLuma": 0.3109,
           "subjectLumaP05": 0.0787,
           "subjectLumaP95": 0.6248,
           "subjectLumaRange": 0.546,
           "crushedBlackRatio": 0,
           "blownWhiteRatio": 0,
-          "paletteColorCount": 43,
-          "backgroundSeparationDeltaE76": 58.88,
+          "paletteColorCount": 41,
+          "backgroundSeparationDeltaE76": 58.91,
           "groundContactColumnRatio": null,
           "groundMedianGapRatio": null,
           "groundMaxGapRatio": null,
           "readability46": {
-            "luminanceRange": 0.7484,
-            "edgeDensity": 0.2971,
-            "meanGradient": 0.0774,
+            "luminanceRange": 0.7521,
+            "edgeDensity": 0.2974,
+            "meanGradient": 0.0761,
             "localContrastCoverage": 0.7472
           }
         }
@@ -665,8 +665,8 @@
         "label": "Engine render, top",
         "label_ko": "엔진 렌더 · 위",
         "path": "/evidence/hf-tractor-compact/hf-tractor-compact__engine-top.png",
-        "sha256": "0d23e3c5429b2e5b426de62891e3a658be2f25b92d83b27980ccfc0d97c87e20",
-        "bytes": 66613,
+        "sha256": "278c1a92eb3ce283d96551e228f777d20c49dadf82e3563d8215dd26f9eea3b1",
+        "bytes": 66800,
         "width": 512,
         "height": 512,
         "camera": {
@@ -687,24 +687,24 @@
         "cameraPoseHash": "8831eca61675cb51110e405a4d2ca7c4e061ae86ef6f02c37bfa52b6fbe87f7f",
         "cameraInsideAsset": false,
         "metrics": {
-          "silhouetteFillRatio": 0.3802,
+          "silhouetteFillRatio": 0.3812,
           "boundingFillRatio": 0.8809,
           "clippedEdgeCount": 0,
-          "subjectMeanLuma": 0.407,
-          "subjectLumaP05": 0.1275,
-          "subjectLumaP95": 0.5908,
-          "subjectLumaRange": 0.4633,
+          "subjectMeanLuma": 0.4079,
+          "subjectLumaP05": 0.128,
+          "subjectLumaP95": 0.5953,
+          "subjectLumaRange": 0.4673,
           "crushedBlackRatio": 0,
           "blownWhiteRatio": 0.0005,
           "paletteColorCount": 29,
-          "backgroundSeparationDeltaE76": 50.83,
+          "backgroundSeparationDeltaE76": 50.74,
           "groundContactColumnRatio": null,
           "groundMedianGapRatio": null,
           "groundMaxGapRatio": null,
           "readability46": {
             "luminanceRange": 0.6985,
-            "edgeDensity": 0.2441,
-            "meanGradient": 0.0549,
+            "edgeDensity": 0.2446,
+            "meanGradient": 0.0545,
             "localContrastCoverage": 0.5671
           }
         }
@@ -715,8 +715,8 @@
         "label": "Player camera, 1.6 m eye height, 5 m away",
         "label_ko": "게임 시점 · 눈높이 1.6 m · 5 m",
         "path": "/evidence/hf-tractor-compact/hf-tractor-compact__player-5m.png",
-        "sha256": "1ae7a4a49aeabff176054c6b30c63b990ad4b8324c5995e3cf876397148296c0",
-        "bytes": 34641,
+        "sha256": "573c6297bfad0247bc156d063e43f2862b81d84378bbd208d34bb8431fc2f90f",
+        "bytes": 34663,
         "width": 640,
         "height": 360,
         "camera": {
@@ -737,25 +737,25 @@
         "cameraPoseHash": "1aaf90769b1401e08586a5fde07cb3f0c192b974cd784faa2efa1095622d7831",
         "cameraInsideAsset": false,
         "metrics": {
-          "silhouetteFillRatio": 0.2495,
+          "silhouetteFillRatio": 0.2486,
           "boundingFillRatio": 1.1958,
           "clippedEdgeCount": 0,
-          "subjectMeanLuma": 0.2236,
-          "subjectLumaP05": 0.0978,
+          "subjectMeanLuma": 0.2254,
+          "subjectLumaP05": 0.098,
           "subjectLumaP95": 0.4805,
-          "subjectLumaRange": 0.3827,
+          "subjectLumaRange": 0.3825,
           "crushedBlackRatio": 0,
           "blownWhiteRatio": 0,
-          "paletteColorCount": 34,
-          "backgroundSeparationDeltaE76": 68.39,
+          "paletteColorCount": 35,
+          "backgroundSeparationDeltaE76": 68.2,
           "groundContactColumnRatio": 0.2158,
           "groundMedianGapRatio": 0.0349,
           "groundMaxGapRatio": 0.3406,
           "readability46": {
             "luminanceRange": 0.8005,
-            "edgeDensity": 0.2629,
-            "meanGradient": 0.0793,
-            "localContrastCoverage": 0.6563
+            "edgeDensity": 0.2612,
+            "meanGradient": 0.079,
+            "localContrastCoverage": 0.6553
           }
         }
       },
@@ -765,8 +765,8 @@
         "label": "Player camera, 1.6 m eye height, 15 m away",
         "label_ko": "게임 시점 · 눈높이 1.6 m · 15 m",
         "path": "/evidence/hf-tractor-compact/hf-tractor-compact__player-15m.png",
-        "sha256": "bcba947b9e0631eb54187b5f913188fb9406037eaa0dd1b85b769acc46a6004b",
-        "bytes": 7661,
+        "sha256": "5211820ef750d0e6075041367de678b31efa06273177deb0787c8787942ff6a3",
+        "bytes": 7690,
         "width": 640,
         "height": 360,
         "camera": {
@@ -790,22 +790,22 @@
           "silhouetteFillRatio": 0.0207,
           "boundingFillRatio": 0.3528,
           "clippedEdgeCount": 0,
-          "subjectMeanLuma": 0.2391,
+          "subjectMeanLuma": 0.2398,
           "subjectLumaP05": 0.1022,
-          "subjectLumaP95": 0.5169,
-          "subjectLumaRange": 0.4147,
+          "subjectLumaP95": 0.517,
+          "subjectLumaRange": 0.4148,
           "crushedBlackRatio": 0,
           "blownWhiteRatio": 0,
           "paletteColorCount": 39,
-          "backgroundSeparationDeltaE76": 66.69,
+          "backgroundSeparationDeltaE76": 66.61,
           "groundContactColumnRatio": null,
           "groundMedianGapRatio": null,
           "groundMaxGapRatio": null,
           "readability46": {
             "luminanceRange": 0.7977,
-            "edgeDensity": 0.293,
+            "edgeDensity": 0.2925,
             "meanGradient": 0.0788,
-            "localContrastCoverage": 0.6877
+            "localContrastCoverage": 0.6887
           }
         }
       }
@@ -815,29 +815,29 @@
         "clip": "drive",
         "phase": 0,
         "path": "/evidence/hf-tractor-compact/hf-tractor-compact__motion-0.png",
-        "sha256": "1a734f19ec4b2f202471db1020a5458358aea67a7e32145947b11a855da72da6",
-        "bytes": 13693
+        "sha256": "76be809be7b62cb73438358750ba8ffaa0a770aa83102636b6bbecde4ec9f4e1",
+        "bytes": 13513
       },
       {
         "clip": "drive",
         "phase": 0.42857142857142855,
         "path": "/evidence/hf-tractor-compact/hf-tractor-compact__motion-1.png",
-        "sha256": "3d35f527660590a92f2eb295920347b2206b42fc12bc802fbb7ac03470c122ce",
-        "bytes": 13517
+        "sha256": "7a4fd0ab9a473650647042c15db76ca485ae581abff72a4c33d7fbab26ddf3ef",
+        "bytes": 13383
       },
       {
         "clip": "drive",
         "phase": 0.8571428571428571,
         "path": "/evidence/hf-tractor-compact/hf-tractor-compact__motion-2.png",
-        "sha256": "da86494b4d3a199fdd84f2d216396b14d76ae7610f3983299aff81992e210ecf",
-        "bytes": 13902
+        "sha256": "fea0272f45125d32b621086b298e27f98163a9d3d40bac38a5f3f38ccd641d09",
+        "bytes": 13716
       }
     ],
     "motion": {
       "clip": "drive",
       "durationSeconds": 2.346,
-      "movedPixelRatio": 0.2177,
-      "meanAbsLumaDelta": 0.029259,
+      "movedPixelRatio": 0.2153,
+      "meanAbsLumaDelta": 0.028937,
       "phases": [
         0,
         0.42857142857142855,
@@ -854,22 +854,22 @@
       "interpolations": [
         "LINEAR"
       ],
-      "silhouetteChangeRatio": 0.1055,
+      "silhouetteChangeRatio": 0.1053,
       "silhouetteChangePairs": [
         {
           "from": 0,
           "to": 1,
-          "ratio": 0.1055
+          "ratio": 0.1053
         },
         {
           "from": 0,
           "to": 2,
-          "ratio": 0.0359
+          "ratio": 0.0345
         },
         {
           "from": 1,
           "to": 2,
-          "ratio": 0.1023
+          "ratio": 0.101
         }
       ],
       "minPhaseGroundYMetres": -0.000012,
@@ -937,12 +937,12 @@
         "lane": "visualRuntime",
         "status": "PASS",
         "observed": {
-          "paletteColorCount": 43,
-          "backgroundSeparationDeltaE76": 64.57
+          "paletteColorCount": 41,
+          "backgroundSeparationDeltaE76": 64.47
         },
         "threshold": "paletteColorCount >= 5 and backgroundSeparationDeltaE76 >= 12 (fail below 2 / 5)",
-        "reason": "43 colours survive quantisation, and the asset sits 64.6 delta E from the neutral ground, so its silhouette reads.",
-        "reason_ko": "색을 뭉뚱그려도 43가지가 남고, 배경과의 색 차이가 ΔE 64.6 이라 실루엣이 배경에서 떨어져 보입니다.",
+        "reason": "41 colours survive quantisation, and the asset sits 64.5 delta E from the neutral ground, so its silhouette reads.",
+        "reason_ko": "색을 뭉뚱그려도 41가지가 남고, 배경과의 색 차이가 ΔE 64.5 이라 실루엣이 배경에서 떨어져 보입니다.",
         "captureIds": [
           "engine-three-quarter",
           "engine-front",
@@ -956,15 +956,15 @@
         "status": "PASS",
         "observed": {
           "declaredClipCount": 2,
-          "movedPixelRatio": 0.2177,
-          "meanAbsLumaDelta": 0.029259,
-          "silhouetteChangeRatio": 0.1055,
+          "movedPixelRatio": 0.2153,
+          "meanAbsLumaDelta": 0.028937,
+          "silhouetteChangeRatio": 0.1053,
           "minPhaseGroundYMetres": -0.000012,
           "skinned": 0
         },
         "threshold": "posed frames only: movedPixelRatio >= 0.01 or silhouetteChangeRatio >= 0.02 (review above 0 / 0.002), and minPhaseGroundYMetres >= -0.005, at phases 0%, 43%, 86% of \"drive\"",
-        "reason": "Clip \"drive\" changes 21.8% of the frame and 10.5% of the silhouette between its posed phases, so the motion is visible.",
-        "reason_ko": "동작 \"drive\" 이 자세를 바꿔 가며 화면의 21.8%, 실루엣의 10.5% 를 바꿉니다. 움직임이 실제로 보입니다.",
+        "reason": "Clip \"drive\" changes 21.5% of the frame and 10.5% of the silhouette between its posed phases, so the motion is visible.",
+        "reason_ko": "동작 \"drive\" 이 자세를 바꿔 가며 화면의 21.5%, 실루엣의 10.5% 를 바꿉니다. 움직임이 실제로 보입니다.",
         "captureIds": [
           "motion-0",
           "motion-1",
@@ -991,13 +991,13 @@
         "status": "PASS",
         "observed": {
           "luminanceRange": 0.7977,
-          "edgeDensity": 0.293,
-          "localContrastCoverage": 0.6877,
+          "edgeDensity": 0.2925,
+          "localContrastCoverage": 0.6887,
           "meanGradient": 0.0788
         },
         "threshold": "at 46 px: luminanceRange >= 0.18, edgeDensity >= 0.015, localContrastCoverage >= 0.04 (fail below 0.12 / 0.01 / 0.02)",
-        "reason": "Shrunk to 46 px the asset keeps 0.798 of luminance range, 0.293 edge density and 0.688 local contrast, so it is still legible small.",
-        "reason_ko": "46픽셀로 줄여도 밝기 폭 0.798, 테두리 밀도 0.293, 국소 대비 0.688 이 남아 작게도 읽힙니다.",
+        "reason": "Shrunk to 46 px the asset keeps 0.798 of luminance range, 0.292 edge density and 0.689 local contrast, so it is still legible small.",
+        "reason_ko": "46픽셀로 줄여도 밝기 폭 0.798, 테두리 밀도 0.292, 국소 대비 0.689 이 남아 작게도 읽힙니다.",
         "captureIds": [
           "player-15m"
         ]
@@ -1044,12 +1044,12 @@
     "summary": "All 8 automated visual checks pass. No human review is required before this asset is used.",
     "summary_ko": "자동 화면 검사 8건이 모두 통과했습니다. 이 에셋을 쓰기 전에 사람이 따로 볼 필요는 없습니다.",
     "timings": {
-      "decodeMs": 249,
-      "poseMs": 91,
-      "renderMs": 1844,
-      "measureMs": 459,
-      "totalMs": 3996,
-      "peakHeapBytes": 55600208
+      "decodeMs": 152,
+      "poseMs": 55,
+      "renderMs": 1420,
+      "measureMs": 292,
+      "totalMs": 2892,
+      "peakHeapBytes": 30065000
     },
     "limits": [
       "The frames come from Clunk's own offline rasteriser, not from a game engine's rendering path.",

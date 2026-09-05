@@ -83,6 +83,32 @@
  *  12. THE SYMMETRY WAS READ FROM THE LUG COUNT, 360/48 = 7.5 deg, but the lug ring
  *      repeats every 15 deg with the instances expanded — so the file on sale ended
  *      `drive` with its front wheels half a lug pitch from where they started.
+ *
+ * 2026-09-05 implement pass. The owner asked what the mounted implement is and whether it is
+ * mounted right. It is a 3-point-hitch field cultivator: seven C-shank tines with sweeps
+ * loosen the topsoil, and two small gauge wheels roll on the ground to hold the sweeps at a
+ * constant depth. Measured on the delivered file:
+ *
+ *  13. BOTH GAUGE WHEELS STOOD IN A TINE LANE. gaugeWheelLeft (z -1290..-1150) was inside
+ *      pivottine01_metal (z -1405..-1155) AND sweep1 (z -1434..-1176) — 0.0 mm triangle to
+ *      triangle, so the wheel is drawn through the shank and the blade; the right wheel did
+ *      the same to tine 7. A depth wheel never shares a lane with a shank. Both move
+ *      sideways into the gap between the first two tines, the distance searched rather than
+ *      written down, exactly as the standalone cultivator's pass does with the same meshes.
+ *
+ * THE FOUR COMMANDS THAT REBUILD THE FILE ON SALE. The default IN used to be the file in the
+ * shop, which was true the first time this pass ran and has not been since: the shop now
+ * holds this pass's own output, whose `chassis` and the rest are merged into `body_metal`, so
+ * that default threw at step 1. It is the packaged export now, and the chain from it is
+ * (verified byte-for-byte against the delivered files, 2026-09-05):
+ *
+ *   node scripts/hf-export/tractor-repair.mjs
+ *   node scripts/hf-export/package-machine-glb.mjs examples/harvest-frontier/runtime-animated/tractor.repaired.glb
+ *   node tmp/hf-speed/finish.mjs examples/harvest-frontier/runtime-animated/tractor.repaired.m1.glb public/market/hf-tractor-compact/tractor.compact.m1.glb
+ *   # the landing page opens a lighter copy of the SAME file: re-package the sale file and copy it
+ *   cp public/market/hf-tractor-compact/tractor.compact.m1.glb tmp/hf-speed/landing-tractor.glb
+ *   node scripts/hf-export/package-machine-glb.mjs tmp/hf-speed/landing-tractor.glb
+ *   cp tmp/hf-speed/landing-tractor.m1.glb public/landing/tractor.compact.m1.glb
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -93,6 +119,10 @@ import {
   axleHubJoint, boxSpan, moveBoxCentreTo, cylGeo, radiusAbout,
   wheelSymmetryDeg, retimeClip, solveGroundLoop,
 } from './machine-lib.mjs';
+/* the triangle-to-triangle distance the gauge-wheel pass needs. It lives in the surgery
+ * toolbox because that is where the cultivator's own gauge-wheel repair measured with it;
+ * one implementation, so the two machines' numbers can be compared. */
+import { soupDist } from './glb-surgery.mjs';
 
 /* A lugged tyre is not a circle. Seating it on the box of its rest pose leaves the lug
  * tips below the floor a third of a turn later — the 2026-09-05 render caught the gauge
@@ -113,7 +143,9 @@ function seatWheelOnItsLugs(scene, wheelNode, mover) {
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, '../..');
-const IN = process.argv[2] ?? path.join(REPO, 'public/market/hf-tractor-compact/tractor.compact.m1.glb');
+/* The packaged export, NOT the file in the shop. The shop holds this pass's own output, whose
+ * `chassis` and the rest are merged into `body_metal`, so the old default threw at step 1. */
+const IN = process.argv[2] ?? path.join(REPO, 'examples/harvest-frontier/runtime-animated/tractor.compact.m1.glb');
 const OUT = process.argv[3] ?? path.join(REPO, 'examples/harvest-frontier/runtime-animated/tractor.repaired.glb');
 
 const gltf = await loadGlb(IN);
@@ -615,6 +647,217 @@ report.ground = { beforeMm: mm(beforeGround), afterMm: mm(exactBox(scene).min.y)
     ratioNow: +((WANT / lock)).toFixed(1),
     chose: 'turned the handwheel up rather than reducing the wheel lock, because the wheel lock is already Ackermann-correct (inner 12.4 deg, outer 9.5 deg)',
     largestKeyStepDeg: +stepDeg.toFixed(1),
+  };
+}
+
+/* ------------------- 6c. the gauge wheels get out of the outer tine lanes (2026-09-05) */
+/* A field cultivator's gauge wheels set working depth: they roll on the ground so the
+ * sweeps cut at a constant depth under it. They are not allowed to share a lane with a
+ * shank, and on a real machine they sit either outboard of the outermost shank or in a
+ * gap between two of them.
+ *
+ * On this tractor both of them were standing in the outermost lane. Measured on the file
+ * that was on sale (public/market/hf-tractor-compact/tractor.compact.m1.glb):
+ *
+ *   gaugeWheelLeft_rubber   z -1290..-1150   pivottine01_metal z -1405..-1155, sweep1 z -1434..-1176
+ *   gaugeWheelRight_rubber  z  1150.. 1290   pivottine07_metal z  1155.. 1405, sweep7 z  1126.. 1384
+ *
+ * — the tyre, the rim and the hub all measure 0.0 mm to the tine's C-shank AND to its
+ * sweep, so the wheel is drawn through both. Triangle-level, not a box overlap.
+ *
+ * The same defect was fixed on the standalone cultivator (the SAME meshes, sold as
+ * hf-cultivator-compact) by scripts/hf-export/gauge-wheel-repair.mjs: the wheel moves
+ * inboard into the tine01-tine02 gap, and the distance is searched on a 5 mm grid rather
+ * than written down, because the sweeps sit 25.2 mm off their own tines' centres and the
+ * left and right answers therefore differ. The same search is done here so the tractor's
+ * implement and the one sold on its own end up in the same place.
+ *
+ * Why inboard and not outboard. Measured on the sale file, straight out from where it
+ * stands the left wheel does not clear sweep1 until 300 mm out, and 20.7 mm is all it gets
+ * there — while pushing the tyre to z -1595, past the toolbar's own end at -1580, which
+ * would widen the machine. Inboard it is clear after 120 mm and best at 140 (26.0 mm).
+ * Less travel, more daylight, and the advertised width does not move.
+ *
+ * Nothing is added or removed: the two pivots and the three parts that carry each wheel
+ * (fork, front support, rear support) are translated sideways by one distance. The wheel's
+ * rolling radius, its axle height and its spin rate are all untouched — 6a seated it on its
+ * own lug tips and 6b keyed it to the ground distance, and neither depends on z. */
+{
+  const SIDES = [['Left', +1], ['Right', -1]];   // sign: which way is inboard for that side
+  const CARRIERS = ['fork', 'supportFront', 'supportRear'];
+  const GRID_MM = 5;
+  const REACH_MM = 300;
+  const CAP = 0.120;                              // 120 mm: past that a part is not in the way
+
+  /** Every triangle of a subtree, in world space, instances expanded. */
+  const worldTris = (object) => {
+    object.updateMatrixWorld(true);
+    const out = [];
+    object.traverse((n) => {
+      if (!n.isMesh) return;
+      const position = n.geometry.getAttribute('position');
+      const index = n.geometry.getIndex();
+      const count = index ? index.count : position.count;
+      const copies = n.isInstancedMesh ? n.count : 1;
+      const matrix = new THREE.Matrix4();
+      const instance = new THREE.Matrix4();
+      const vertex = new THREE.Vector3();
+      for (let c = 0; c < copies; c += 1) {
+        matrix.copy(n.matrixWorld);
+        if (n.isInstancedMesh) { n.getMatrixAt(c, instance); matrix.multiply(instance); }
+        for (let i = 0; i < count; i += 3) {
+          const triangle = [];
+          for (let k = 0; k < 3; k += 1) {
+            const v = index ? index.getX(i + k) : i + k;
+            triangle.push(vertex.fromBufferAttribute(position, v).applyMatrix4(matrix).toArray());
+          }
+          out.push(triangle);
+        }
+      }
+    });
+    return out;
+  };
+  const triLo = (t, i) => Math.min(t[0][i], t[1][i], t[2][i]);
+  const triHi = (t, i) => Math.max(t[0][i], t[1][i], t[2][i]);
+  const soupBox = (tris) => ({
+    lo: [0, 1, 2].map((i) => Math.min(...tris.map((t) => triLo(t, i)))),
+    hi: [0, 1, 2].map((i) => Math.max(...tris.map((t) => triHi(t, i)))),
+  });
+  /** The lowest point the tyre reaches at ANY angle of its own spin. */
+  const rollingFloorOf = (wheel) => {
+    wheel.updateMatrixWorld(true);
+    const centre = new THREE.Vector3().setFromMatrixPosition(wheel.matrixWorld);
+    return { axleYmm: mm(centre.y), radiusMm: mm(radiusAbout(wheel, centre, [0, 0, 1])), floorMm: mm(centre.y - radiusAbout(wheel, centre, [0, 0, 1])) };
+  };
+
+  const partsOf = (side) => [node(scene, `pivotgaugeWheel${side}`), ...CARRIERS.map((c) => node(scene, `gaugeWheel${side}${c}`))];
+  const movingMeshes = new Set();
+  for (const [side] of SIDES) for (const part of partsOf(side)) part.traverse((n) => { if (n.isMesh) movingMeshes.add(n); });
+
+  /* the parts that must not be touched, named, so the report can say WHICH one is nearest */
+  const named = [];
+  for (const m of meshes(scene)) {
+    if (movingMeshes.has(m)) continue;
+    named.push({ name: m.name, tris: worldTris(m) });
+  }
+
+  const shiftZ = (object, dz) => {
+    object.parent.updateMatrixWorld(true);
+    const world = new THREE.Vector3().setFromMatrixPosition(object.matrixWorld);
+    object.position.copy(object.parent.worldToLocal(world.setZ(world.z + dz)));
+    scene.updateMatrixWorld(true);
+  };
+
+  const sides = [];
+  for (const [side, sign] of SIDES) {
+    const parts = partsOf(side);
+    const pivot = parts[0];
+    const wheel = node(scene, `gaugeWheel${side}`);
+    const moving = parts.flatMap((p) => worldTris(p));
+    const wheelOnly = worldTris(pivot);
+    const window = soupBox(moving);
+    /* The move is purely sideways, so which parts can ever be in the way does not depend on
+       the distance: only what shares this wheel's x and y window can be. Filtering once,
+       per triangle, is what makes a 5 mm grid over 300 mm affordable. */
+    const inWindow = [];
+    for (const other of named) {
+      const kept = other.tris.filter((t) => triHi(t, 0) >= window.lo[0] - CAP && triLo(t, 0) <= window.hi[0] + CAP
+        && triHi(t, 1) >= window.lo[1] - CAP && triLo(t, 1) <= window.hi[1] + CAP);
+      if (kept.length) inWindow.push({ name: other.name, tris: kept });
+    }
+    const obstacles = inWindow.flatMap((o) => o.tris);
+    const nearest = (tris, limit = 6) => inWindow
+      .map((o) => ({ part: o.name, gapMm: mm(soupDist(tris, o.tris, CAP)) }))
+      .filter((r) => r.gapMm < mm(CAP))
+      .sort((a, b) => a.gapMm - b.gapMm)
+      .slice(0, limit);
+
+    const beforeBox = soupBox(wheelOnly);
+    const before = {
+      pivotZmm: mm(new THREE.Vector3().setFromMatrixPosition(pivot.matrixWorld).z),
+      wheelZmm: [mm(beforeBox.lo[2]), mm(beforeBox.hi[2])],
+      nearest: nearest(wheelOnly),
+      groundContact: rollingFloorOf(wheel),
+    };
+
+    /* The search is run on the WHEEL, not on the three parts that carry it: the fork and the
+       supports are BOLTED to the frame and measure 0.0 mm to it wherever they stand, so a
+       search that included them would read every offset as a collision. They follow the
+       wheel by the same distance and are checked against the tines separately below. */
+    const scan = [];
+    let best = { offsetMm: 0, gap: -1 };
+    for (let d = 0; d <= REACH_MM; d += GRID_MM) {
+      const moved = wheelOnly.map((t) => t.map((p) => [p[0], p[1], p[2] + (sign * d) / 1000]));
+      const gap = soupDist(moved, obstacles, CAP);
+      scan.push({ inboardMm: d, clearanceMm: mm(gap) });
+      if (gap > best.gap) best = { offsetMm: d, gap };
+    }
+    if (best.gap < 0.005) throw new Error(`pivotgaugeWheel${side}: no offset within ${REACH_MM} mm gives 5 mm of daylight`);
+
+    for (const part of parts) shiftZ(part, (sign * best.offsetMm) / 1000);
+
+    const afterWheel = worldTris(pivot);
+    const afterAll = parts.flatMap((p) => worldTris(p));
+    const afterBox = soupBox(afterWheel);
+    const tineTris = inWindow.filter((o) => /^(pivottine|tine|sweep)/i.test(o.name)).flatMap((o) => o.tris);
+    const tineGap = soupDist(afterWheel, tineTris, CAP);
+    const carrierTineGap = soupDist(parts.slice(1).flatMap((p) => worldTris(p)), tineTris, CAP);
+    /* The box check as well, because that is the coarse one a buyer's own tools run first.
+       A sweep is a wing that tapers to a point, so its box holds a lot of air: at the gap
+       centre the wheel's box still shares a few millimetres with sweep2's box while the two
+       surfaces are tens of millimetres apart. That is the box being coarse, not a crossing —
+       it is recorded with its depth so nobody has to take the word for it, and the pass only
+       stops if a box overlap is deep enough (40 mm, the same threshold
+       scripts/asset-geometry-audit.mjs uses) to mean the wheel is really inside something. */
+    const boxCrossings = [];
+    for (const o of named) {
+      if (!/^(pivottine|tine|sweep)/i.test(o.name)) continue;
+      const b = soupBox(o.tris);
+      const overlap = [0, 1, 2].map((i) => Math.min(afterBox.hi[i], b.hi[i]) - Math.max(afterBox.lo[i], b.lo[i]));
+      if (overlap.every((v) => v > 0)) {
+        boxCrossings.push({
+          part: o.name,
+          boxOverlapMm: overlap.map(mm),
+          shallowestAxisMm: mm(Math.min(...overlap)),
+          surfaceGapMm: mm(soupDist(afterWheel, o.tris, CAP)),
+        });
+      }
+    }
+    sides.push({
+      node: pivot.name,
+      moved: parts.map((p) => p.name),
+      chosenInboardMm: best.offsetMm,
+      before,
+      after: {
+        pivotZmm: mm(new THREE.Vector3().setFromMatrixPosition(pivot.matrixWorld).z),
+        wheelZmm: [mm(afterBox.lo[2]), mm(afterBox.hi[2])],
+        nearest: nearest(afterWheel),
+        carriersNearest: nearest(afterAll),
+        groundContact: rollingFloorOf(wheel),
+      },
+      checks: {
+        tineAndSweepClearanceMm: mm(tineGap),
+        carrierToTineClearanceMm: mm(carrierTineGap),
+        tineAndSweepBoxOverlaps: boxCrossings,
+        crossesATine: tineGap === 0 || carrierTineGap === 0,
+        deepestBoxOverlapMm: boxCrossings.length ? Math.max(...boxCrossings.map((c) => c.shallowestAxisMm)) : 0,
+      },
+      scanMm: scan.filter((r) => r.inboardMm % 20 === 0 || r.inboardMm === best.offsetMm),
+    });
+    if (tineGap === 0) throw new Error(`pivotgaugeWheel${side} still touches a tine after moving ${best.offsetMm} mm`);
+    if (carrierTineGap === 0) throw new Error(`gaugeWheel${side}'s fork or supports touch a tine after moving ${best.offsetMm} mm`);
+    const deepest = boxCrossings.length ? Math.max(...boxCrossings.map((c) => c.shallowestAxisMm)) : 0;
+    if (deepest >= 40) throw new Error(`pivotgaugeWheel${side}: a tine box still overlaps the wheel's by ${deepest} mm`);
+    const floor = rollingFloorOf(wheel);
+    if (Math.abs(floor.floorMm) > 1) throw new Error(`gaugeWheel${side} would reach ${floor.floorMm} mm off the ground while it turns`);
+  }
+  report.gaugeWheelLanes = {
+    why: 'both depth wheels stood in the outermost tine lane and were drawn through the C-shank and the sweep; a gauge wheel sets the sweeps depth and cannot share a lane with one',
+    chose: 'inboard into the tine01-tine02 and tine06-tine07 gaps, the same answer scripts/hf-export/gauge-wheel-repair.mjs reached for the standalone cultivator (the same meshes)',
+    outboardRejected: 'straight out, the left wheel still touches sweep1 at 240 mm and gets 20.7 mm at 300 mm, with the tyre then 15 mm past the toolbar end (z -1580) — wider machine, less daylight',
+    searchedOn: `${GRID_MM} mm grid, 0..${REACH_MM} mm, triangle-to-triangle distance`,
+    trianglesAdded: 0,
+    sides,
   };
 }
 
