@@ -37,6 +37,7 @@
         "animatedParts": [],
         "animations": [],
         "kit": null,
+        "theme": "마을",
         "kitSize": 6,
         "members": [
           "village-well",
@@ -582,6 +583,7 @@
         "animatedParts": [],
         "animations": [],
         "kit": null,
+        "theme": "광산",
         "kitSize": 4,
         "members": [
           "mine-cart",
