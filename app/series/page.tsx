@@ -42,7 +42,7 @@ const SERIES_CARDS: ReadonlyArray<{ id: string; title: string; description: stri
   {
     id: "material-lab",
     title: "2D 이미지 만들기",
-    description: "원하는 그림을 문장으로 적으면 PNG 한 장이 나옵니다. 표면에 쓰는 이미지(색·거칠기·금속감·요철)도 같은 방식으로 만듭니다.",
+    description: "원하는 그림을 프롬프트로 적으면 PNG 한 장이 나옵니다. 표면에 쓰는 이미지(색·거칠기·금속감·요철)도 같은 방식으로 만듭니다.",
     href: "/studio?make=2d-image",
     action: "에셋 제작 열기",
   },

@@ -155,7 +155,7 @@ const PRIMARY_ACTIONS = [
     href: "/studio",
     icon: "boxes" as const,
     title: "에셋 제작",
-    detail: "문장으로 2D 이미지를, 코드로 3D 모델과 스프라이트 시트를 만듭니다.",
+    detail: "프롬프트로 2D 이미지를, 템플릿으로 3D 모델과 스프라이트 시트를 만듭니다.",
     cost: "실행 1회",
     costNote: "성공했을 때만 차감",
   },

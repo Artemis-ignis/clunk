@@ -156,7 +156,7 @@ const MAKE_TABS: readonly { id: AssetKind; label: string; result: string; icon: 
  * so the screen may not dress them up as AI.
  */
 const KIND_TRUTH: Record<AssetKind, string> = {
-  "2d-image": "문장으로 AI가 그림 한 장을 만듭니다.",
+  "2d-image": "프롬프트로 AI가 그림 한 장을 만듭니다.",
   "3d-model": "템플릿을 골라 코드로 조립합니다. AI가 아닙니다. 문장은 기록에만 남습니다.",
   "sprite-atlas": "템플릿을 골라 코드로 조립합니다. AI가 아닙니다. 문장은 기록에만 남습니다.",
   "animation-clip": "템플릿을 골라 코드로 조립합니다. AI가 아닙니다. 문장은 기록에만 남습니다.",
@@ -571,7 +571,7 @@ export function AssetCreationWorkbench({
     const promptNow = typedPrompt || templateNote;
     if (!promptNow) {
       const error = assetKindNow === "2d-image"
-        ? "무엇을 그릴지 한 문장으로 적어 주세요."
+        ? "무엇을 그릴지 프롬프트로 적어 주세요."
         : "먼저 템플릿을 고르세요. 메모는 적지 않아도 됩니다.";
       setPhase("error");
       setMessageTone("error");

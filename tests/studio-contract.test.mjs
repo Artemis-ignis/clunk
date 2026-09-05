@@ -103,7 +103,7 @@ test("each lane says what it really produces before the credit is spent", async 
   // Only 2D draws from the sentence. The other three assemble a file in code —
   // a box GLB, a drawn sheet — and the screen may not dress that up as AI.
   assert.match(workbench, /KIND_TRUTH/);
-  assert.match(workbench, /문장으로 AI가 그림 한 장을 만듭니다/);
+  assert.match(workbench, /프롬프트로 AI가 그림 한 장을 만듭니다/);
   assert.match(workbench, /템플릿을 골라 코드로 조립합니다/);
   assert.match(workbench, /AI가 아닙니다/);
   assert.match(workbench, /문장은 기록에만 남습니다/);

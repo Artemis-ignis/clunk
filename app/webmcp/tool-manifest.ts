@@ -215,7 +215,7 @@ export const TOOL_DOCS: readonly ToolDoc[] = [
     },
     inputs: [
       { name: "kind", note: { en: "2d-image / 3d-model / sprite-atlas / animation-clip", ko: "2d-image / 3d-model / sprite-atlas / animation-clip" } },
-      { name: "prompt", note: { en: "one sentence; only the 2D lane draws from it", ko: "한 문장. 2D 만 이 문장으로 그립니다" } },
+      { name: "prompt", note: { en: "one sentence; only the 2D lane draws from it", ko: "프롬프트. 2D 만 이 문장으로 그립니다" } },
       { name: "templateId", note: { en: "required for every lane but 2d-image", ko: "2D 가 아니면 필요합니다" } },
       { name: "paletteId", note: { en: "palette offered by that template", ko: "그 템플릿의 팔레트" } },
       { name: "sizeId", note: { en: "size offered by that template", ko: "그 템플릿의 크기" } },
