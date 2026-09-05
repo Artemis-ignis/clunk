@@ -1,6 +1,6 @@
 {
   "schema": "clunk.landing-facts.v1",
-  "generatedAt": "2026-09-05T07:40:42.284Z",
+  "generatedAt": "2026-09-05T08:35:25.079Z",
   "facts": {
     "tractor": {
       "fileName": "tractor.compact.m1.glb",
@@ -42,7 +42,7 @@
       "name": "창고 헛간",
       "path": "public/market/cozy-storage-shed/storage-shed.m1.clunk-optimized.glb",
       "triangles": 1768,
-      "bytes": 148528
+      "bytes": 149372
     },
     {
       "slug": "haystack",
@@ -116,5 +116,88 @@
       "triangles": 748,
       "bytes": 68188
     }
-  ]
+  ],
+  "families": {
+    "sprite": {
+      "slug": "tex-grass-meadow-v1",
+      "name": "초원 잔디 타일",
+      "aria": "초원 잔디 타일, 에셋 마켓에 있는 텍스처",
+      "image": "/market/tex-grass-meadow-v1/preview-tex-grass-meadow-v1.webp",
+      "imagePath": "public/market/tex-grass-meadow-v1/preview-tex-grass-meadow-v1.webp",
+      "imageWidth": 512,
+      "imageHeight": 512,
+      "fit": "cover",
+      "caption": "1024×1024 · PNG 2.7 MB",
+      "numbers": {
+        "resolution": "1024×1024",
+        "byteLength": 2709425,
+        "format": "PNG"
+      }
+    },
+    "atlas": {
+      "slug": "farmhand-walk-sprites",
+      "name": "농부 걷기",
+      "aria": "농부 걷기, 에셋 마켓에 있는 스프라이트 시트",
+      "image": "/market/farmhand-walk-sprites/threejs-factory-v1.sheet.card.png",
+      "imagePath": "public/market/farmhand-walk-sprites/threejs-factory-v1.sheet.card.png",
+      "imageWidth": 576,
+      "imageHeight": 512,
+      "fit": "contain",
+      "caption": "64×64 · 8방향 × 8프레임",
+      "numbers": {
+        "cell": 64,
+        "directions": 8,
+        "frames": 8
+      }
+    },
+    "spine": {
+      "slug": "hf-player-farmhand",
+      "name": "밀짚모자 농부",
+      "aria": "밀짚모자 농부, 에셋 마켓에 있는 본 애니메이션 캐릭터",
+      "image": "/market/hf-player-farmhand/hero-hf-player-farmhand.png",
+      "imagePath": "public/market/hf-player-farmhand/hero-hf-player-farmhand.png",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "fit": "contain",
+      "caption": "동작 6개 · 움직이는 부품 16개",
+      "numbers": {
+        "clips": 6,
+        "parts": 16
+      }
+    },
+    "motion": {
+      "slug": "cozy-fence-gate-swing-sprites",
+      "name": "울타리 문",
+      "aria": "울타리 문 여닫기, 에셋 마켓에 있는 애니메이션 클립 시트",
+      "image": "/market/cozy-fence-gate-swing-sprites/fence-gate.m1.clunk-optimized.sheet.card.png",
+      "imagePath": "public/market/cozy-fence-gate-swing-sprites/fence-gate.m1.clunk-optimized.sheet.card.png",
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "fit": "contain",
+      "caption": "여닫기 1.0초 · 8프레임",
+      "numbers": {
+        "clipSlug": "cozy-fence-gate",
+        "clip": "swing",
+        "seconds": 1,
+        "frames": 8
+      }
+    },
+    "model": {
+      "slug": "hf-tractor-compact",
+      "name": "소형 트랙터",
+      "aria": "소형 트랙터, 에셋 마켓에 있는 3D 모델",
+      "image": "/landing/tractor-hero.png",
+      "imagePath": "public/landing/tractor-hero.png",
+      "imageWidth": 1600,
+      "imageHeight": 1200,
+      "fit": "contain",
+      "caption": "폴리곤 58,156개 · 재질 8개 · 동작 2개",
+      "numbers": {
+        "path": "public/landing/tractor.compact.m1.glb",
+        "triangles": 58156,
+        "materials": 8,
+        "clips": 2
+      }
+    }
+  }
 }

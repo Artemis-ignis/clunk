@@ -21,6 +21,10 @@
  * Construction rules inherited from the series kit: no node ever carries scale, no part floats
  * (every element lands on the piers, the sill, the sheathing or the deck), and the interior is
  * a closed dark box so an opened door does not reveal a hollow shell.
+ *
+ * The door is a real moving part and the file carries its motion: `door_pivot` sits on the
+ * hinge line and the factory bakes the `open` clip onto it, the same keys the template library
+ * uses for this door, so a buyer gets the swing and not just a socket to guess at.
  */
 import { createKit, place, selectMaterials, summarize } from "./farm-kit.mjs";
 
@@ -48,6 +52,19 @@ const SHEATH_W = 0.975;
 const SHEATH_D = 0.775;
 const SILL_TOP = 0.26; // siding and door start here; below is pier + sill + skirt
 const PLATE_Y = 2.1; // top of the walls
+/*
+ * The two members that lap the doorway. The sill beam runs across the opening at the bottom
+ * and the lintel across the top, and both used to bury the leaf's edge inside themselves —
+ * 10 mm of the leaf's head in the lintel, 4.5 mm of its foot in the sill beam. A door that
+ * turns about a vertical axis never changes height, so those laps are not clearance, they are
+ * the door welded to its own frame. The leaf below stops short of both.
+ */
+const SILL_BEAM_Y = 0.22;
+const SILL_BEAM_H = 0.12;
+const SILL_BEAM_TOP = SILL_BEAM_Y + SILL_BEAM_H / 2; // 0.28
+const LINTEL_Y = PLATE_Y + 0.01;
+const LINTEL_H = 0.16;
+const LINTEL_SOFFIT = LINTEL_Y - LINTEL_H / 2; // 2.03
 
 // --- Lap siding -------------------------------------------------------------------------
 // Eight courses of real boards. Each board is tilted so its lower edge stands proud of the
@@ -67,6 +84,57 @@ const DOOR_HALF = 0.45; // opening half-width
 const DOOR_W = 0.88;
 const DOOR_H = PLATE_Y - SILL_TOP; // 1.84 m clear opening
 const JAMB_X = 0.485;
+/*
+ * The leaf and its hinge line.
+ *
+ * The 2026-09-05 mechanism audit measured two things here. The hinge node sat on z = 0.845,
+ * the leaf's INNER face, so opening the door drove the leaf's outer 35.5 mm through the frame
+ * instead of swinging it clear; and the leaf's hinge edge stood 10 mm off the jamb, which is
+ * a slot, not a joint. An outward-opening door hung on strap hinges turns about the line where
+ * the leaf's OUTER face meets the jamb — that is where the straps and their knuckles are, at
+ * z 0.8625..0.926 — so that is where door_pivot goes.
+ *
+ * Everything under the pivot is still authored in the frame the leaf was drawn in (x from the
+ * jamb's inner face, z from the leaf's inner face) and stepped back by these two numbers at the
+ * end, exactly as the fence gate does. World positions do not move; the axis does.
+ */
+const DOOR_LEAF_GAP = 0.005; // leaf hinge edge to jamb face
+const DOOR_LEAF_T = 0.035;
+const DOOR_LEAF_Z = 0.018; // leaf-local z of the planks' mid-plane
+const HINGE_DX = DOOR_LEAF_GAP;
+const HINGE_DZ = DOOR_LEAF_Z + DOOR_LEAF_T / 2;
+/*
+ * Four planks and three 9 mm shadow gaps, filling a DOOR_W leaf that starts DOOR_LEAF_GAP off
+ * the hinge jamb and ends where it always did (leaf-local 0.885, 15 mm off the latch jamb).
+ * The planks grew 1.25 mm each to close the hinge slot; nothing else about the leaf moved.
+ */
+const DOOR_PLANK_COUNT = 4;
+const DOOR_PLANK_GAP = 0.009;
+const DOOR_PLANK_W = (DOOR_W - (DOOR_PLANK_COUNT - 1) * DOOR_PLANK_GAP) / DOOR_PLANK_COUNT;
+const DOOR_PLANK_PITCH = DOOR_PLANK_W + DOOR_PLANK_GAP;
+/*
+ * 3 mm of air at head and foot. The leaf now runs from just above the sill beam to just under
+ * the lintel soffit instead of into both, and neither opening it leaves is a hole: the sill
+ * beam still closes the foot from y 0.28 down and the lintel still closes the head from 2.03
+ * up, both across the full z of the wall. Leaf-local, so y = 0 is SILL_TOP.
+ */
+const DOOR_LEAF_SWING_GAP = 0.003;
+const DOOR_LEAF_Y0 = SILL_BEAM_TOP + DOOR_LEAF_SWING_GAP - SILL_TOP;
+const DOOR_LEAF_H = LINTEL_SOFFIT - DOOR_LEAF_SWING_GAP - (SILL_BEAM_TOP + DOOR_LEAF_SWING_GAP);
+/*
+ * The published motion of the leaf: shut, 105 degrees open, held, shut again in 3.6 s. These
+ * are the very keys scripts/template-library/templates.mjs bakes for `storage-shed-door`, so
+ * the model on sale and every colourway the library bakes from this factory move the same way.
+ * The name is the one the product page already publishes for this slug
+ * (app/api/_lib/listing-variants.ts LISTING_CLIPS: "open").
+ */
+const DOOR_CLIP_NAME = "open";
+const DOOR_CLIP_KEYS = [
+  { time: 0, degrees: 0 },
+  { time: 1.4, degrees: -105 },
+  { time: 2.2, degrees: -105 },
+  { time: 3.6, degrees: 0 },
+];
 
 // --- Roof -------------------------------------------------------------------------------
 const RIDGE_Y = 2.76;
@@ -119,8 +187,10 @@ export function createStorageShed(THREE) {
     scaleMeters: 1,
     sockets: ["door_pivot"],
     socketNotes: {
-      door_pivot: "Hinge node on the left jamb. Rotate about +Y; negative angles swing the door outward (+Z). Zero is shut.",
+      door_pivot:
+        "Hinge node on the hinge line of the left jamb — the leaf's outer face, x -0.445, z 0.8805. Rotate about +Y; negative angles swing the leaf outward (+Z). Zero is shut and latched; the open clip plays shut → 105° open → held → shut in 3.6 s.",
     },
+    clips: [DOOR_CLIP_NAME],
   };
 
   // --- Piers and sill -------------------------------------------------------------------
@@ -161,10 +231,10 @@ export function createStorageShed(THREE) {
 
   foundation.add(
     kit.merged("sill_beam", mat.woodFrame, [
-      place(kit.box(2.1, 0.12, 0.1), [0, 0.22, 0.8]),
-      place(kit.box(2.1, 0.12, 0.1), [0, 0.22, -0.8]),
-      place(kit.box(0.1, 0.12, 1.6), [1.0, 0.22, 0]),
-      place(kit.box(0.1, 0.12, 1.6), [-1.0, 0.22, 0]),
+      place(kit.box(2.1, SILL_BEAM_H, 0.1), [0, SILL_BEAM_Y, 0.8]),
+      place(kit.box(2.1, SILL_BEAM_H, 0.1), [0, SILL_BEAM_Y, -0.8]),
+      place(kit.box(0.1, SILL_BEAM_H, 1.6), [1.0, SILL_BEAM_Y, 0]),
+      place(kit.box(0.1, SILL_BEAM_H, 1.6), [-1.0, SILL_BEAM_Y, 0]),
     ]),
   );
 
@@ -378,26 +448,45 @@ export function createStorageShed(THREE) {
       place(kit.box(0.07, DOOR_H + 0.08, 0.11), [JAMB_X, SILL_TOP + DOOR_H / 2, HALF_D - 0.015]),
       // The lintel reaches BELOW the head of the opening so it laps the top of the leaf.
       // Sized flush, the 0.06 m head gap became a lit slot straight into the shed.
-      place(kit.box(1.05, 0.16, 0.11), [0, PLATE_Y + 0.01, HALF_D - 0.015]),
+      place(kit.box(1.05, LINTEL_H, 0.11), [0, LINTEL_Y, HALF_D - 0.015]),
     ]),
   );
   // The keeper stays on the frame, not on the leaf — it is what the latch closes against.
   doorway.add(kit.solo("door_latch_keeper", mat.iron, kit.box(0.05, 0.11, 0.05), [JAMB_X - 0.02, 1.46, HALF_D + 0.05]));
 
-  // Animation socket. Local origin is the hinge line at the left jamb; the leaf lives on +X.
-  const doorPivot = kit.group("door_pivot", [-DOOR_HALF, SILL_TOP, HALF_D - 0.005]);
+  // Animation socket. The origin is the hinge line: the leaf's outer face where it meets the
+  // left jamb. The leaf lives on +X and is authored in the frame described at HINGE_DX above,
+  // then stepped back onto this axis at the end of the block.
+  const doorPivot = kit.group("door_pivot", [-DOOR_HALF + HINGE_DX, SILL_TOP, HALF_D - 0.005 + HINGE_DZ]);
   doorPivot.userData = { socket: "door_pivot", axis: "+Y", closedRadians: 0, opensNegative: true };
   doorway.add(doorPivot);
 
   const leafX = 0.01 + DOOR_W / 2;
   const planks = [];
-  for (let plank = 0; plank < 4; plank += 1) {
-    planks.push(place(kit.box(0.212, DOOR_H - 0.06, 0.035), [0.01 + 0.106 + plank * 0.221, (DOOR_H - 0.06) / 2, 0.018]));
+  for (let plank = 0; plank < DOOR_PLANK_COUNT; plank += 1) {
+    planks.push(
+      place(kit.box(DOOR_PLANK_W, DOOR_LEAF_H, DOOR_LEAF_T), [
+        DOOR_LEAF_GAP + DOOR_PLANK_W / 2 + plank * DOOR_PLANK_PITCH,
+        DOOR_LEAF_Y0 + DOOR_LEAF_H / 2,
+        DOOR_LEAF_Z,
+      ]),
+    );
   }
   doorPivot.add(kit.merged("door_planks", mat.woodCrate, planks));
 
-  // Ledged and braced: two ledges and one diagonal, mounted on the outer face where they can
-  // actually be seen. The brace is what stops the door reading as a flat rectangle.
+  /*
+   * Ledged and braced: two ledges and one diagonal, mounted on the outer face where they can
+   * actually be seen. The brace is what stops the door reading as a flat rectangle.
+   *
+   * These stay exactly where they were, and the swing sampling says what that costs: the leaf's
+   * planks clear the jamb by 3.0 mm the whole way, but the ledge stands 29.5 mm proud of the
+   * hinge line and the door opens PAST square, so at the 105 degree extreme the ledge's
+   * hinge-side corner reaches 2.6 mm into the jamb's corner. Letting the ledge into the planks
+   * to clear it would leave the strap hinge — which is seated flush ON the ledge's outer face,
+   * both at y 0.28 and y 1.5 — floating over it, and the strap's own knuckle is 25 mm inside
+   * that jamb at rest anyway, because that is what a strap hinge's knuckle is for. 2.6 mm is a
+   * seam, below the 5 mm the inspector itself calls a seam; a floating hinge would not be.
+   */
   const braceRise = 1.5 - 0.28;
   doorPivot.add(
     kit.merged("door_ledges_and_brace", mat.woodFrame, [
@@ -422,6 +511,14 @@ export function createStorageShed(THREE) {
     ]),
   );
   doorPivot.add(kit.solo("door_latch_bar", mat.iron, kit.box(0.22, 0.05, 0.025), [0.8, 1.2, 0.058], [0, 0, 0.42]));
+
+  // The leaf above is authored on the old frame — x from the jamb face, z on the leaf's inner
+  // face. The pivot now sits on the hinge line, so every leaf part steps back by the same two
+  // numbers: world positions are unchanged, the axis is not.
+  for (const part of doorPivot.children) {
+    part.position.x -= HINGE_DX;
+    part.position.z -= HINGE_DZ;
+  }
 
   // --- Window -------------------------------------------------------------------------
   const windowGroup = kit.group("window");
@@ -482,6 +579,20 @@ export function createStorageShed(THREE) {
       place(kit.box(0.68, 0.05, 0.02), [0, 1.34, -0.888]),
     ]),
   );
+
+  // The swing, keyed on the pivot's quaternion about +Y (negative opens toward +Z).
+  const doorTimes = new Float32Array(DOOR_CLIP_KEYS.map((key) => key.time));
+  const doorValues = new Float32Array(
+    DOOR_CLIP_KEYS.flatMap(({ degrees }) => {
+      const half = (degrees * Math.PI) / 360;
+      return [0, Math.sin(half), 0, Math.cos(half)];
+    }),
+  );
+  root.animations = [
+    new THREE.AnimationClip(DOOR_CLIP_NAME, DOOR_CLIP_KEYS[DOOR_CLIP_KEYS.length - 1].time, [
+      new THREE.QuaternionKeyframeTrack("door_pivot.quaternion", doorTimes, doorValues),
+    ]),
+  ];
 
   root.userData.measured = summarize(THREE, root);
   return root;
