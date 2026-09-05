@@ -1,0 +1,612 @@
+{
+  "schema": "clunk.listing-facts.v1",
+  "note": "app/data/listing-facts.json 의 facts 에 합칠 조각입니다. kit 값 'kit-mine-entrance' 는 scripts/listing-facts-cli.ts 의 KitId 합집합에 아직 없습니다 — 등록부에 넣는 것은 지휘자 몫입니다.",
+  "generatedAt": "2026-09-05",
+  "sources": [
+    "outputs/kits/mine-entrance/build-report.json (배달 바이트에서 다시 측정한 값)",
+    "tmp/kits/mine-entrance/qa/<slug>.json (로컬 stdio MCP clunk_inspect, profile web/mobile)"
+  ],
+  "facts": {
+    "mine-portal": {
+      "triangles": 992,
+      "materials": 1,
+      "boundsMetres": [
+        4.1932,
+        3.45,
+        0.9441
+      ],
+      "byteLength": 112040,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 17,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "vertex",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "mine-support": {
+      "triangles": 576,
+      "materials": 1,
+      "boundsMetres": [
+        2.18,
+        2.44,
+        0.71
+      ],
+      "byteLength": 66232,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 17,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "vertex",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "mine-cart": {
+      "triangles": 1548,
+      "materials": 1,
+      "boundsMetres": [
+        1.02,
+        0.75,
+        0.65
+      ],
+      "byteLength": 173464,
+      "format": "GLB",
+      "animatedParts": [
+        "axle_front",
+        "axle_rear"
+      ],
+      "animations": [
+        {
+          "name": "wheels_roll",
+          "seconds": 2
+        }
+      ],
+      "kit": "kit-mine-entrance",
+      "kitSize": 17,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "vertex",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 99,
+        "mobileScore": 99,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "mine-cart-ore": {
+      "triangles": 1764,
+      "materials": 1,
+      "boundsMetres": [
+        1.02,
+        0.9712,
+        0.65
+      ],
+      "byteLength": 197716,
+      "format": "GLB",
+      "animatedParts": [
+        "axle_front",
+        "axle_rear"
+      ],
+      "animations": [
+        {
+          "name": "wheels_roll",
+          "seconds": 2
+        }
+      ],
+      "kit": "kit-mine-entrance",
+      "kitSize": 17,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "vertex",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 99,
+        "mobileScore": 99,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "mine-tool-rack": {
+      "triangles": 508,
+      "materials": 1,
+      "boundsMetres": [
+        0.9,
+        1.1547,
+        0.3427
+      ],
+      "byteLength": 58896,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 17,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "vertex",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "mine-rail-straight": {
+      "triangles": 656,
+      "materials": 1,
+      "boundsMetres": [
+        1.2,
+        0.11,
+        1.0992
+      ],
+      "byteLength": 74940,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 17,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "vertex",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "mine-rail-curve": {
+      "triangles": 1388,
+      "materials": 1,
+      "boundsMetres": [
+        1.9531,
+        0.11,
+        1.6185
+      ],
+      "byteLength": 154088,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 17,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "vertex",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "mine-rail-stop": {
+      "triangles": 584,
+      "materials": 1,
+      "boundsMetres": [
+        0.7145,
+        0.42,
+        1.0863
+      ],
+      "byteLength": 68016,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 17,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "vertex",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "mine-ladder": {
+      "triangles": 560,
+      "materials": 1,
+      "boundsMetres": [
+        0.47,
+        2.3908,
+        0.2893
+      ],
+      "byteLength": 63472,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 17,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "vertex",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "mine-lantern": {
+      "triangles": 384,
+      "materials": 1,
+      "boundsMetres": [
+        0.728,
+        1.8,
+        0.62
+      ],
+      "byteLength": 47020,
+      "format": "GLB",
+      "animatedParts": [
+        "lantern_body"
+      ],
+      "animations": [
+        {
+          "name": "lantern_swing",
+          "seconds": 2.4
+        }
+      ],
+      "kit": "kit-mine-entrance",
+      "kitSize": 17,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "vertex",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "mine-powder-keg": {
+      "triangles": 404,
+      "materials": 1,
+      "boundsMetres": [
+        0.426,
+        0.6494,
+        0.4146
+      ],
+      "byteLength": 46624,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 17,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "vertex",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "mine-rock-large": {
+      "triangles": 280,
+      "materials": 1,
+      "boundsMetres": [
+        1.2982,
+        0.6947,
+        1.0027
+      ],
+      "byteLength": 32420,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 17,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "vertex",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "mine-rock-small": {
+      "triangles": 200,
+      "materials": 1,
+      "boundsMetres": [
+        0.6758,
+        0.422,
+        0.6057
+      ],
+      "byteLength": 23776,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 17,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "vertex",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "mine-ore-copper": {
+      "triangles": 168,
+      "materials": 1,
+      "boundsMetres": [
+        0.4204,
+        0.3003,
+        0.3287
+      ],
+      "byteLength": 21324,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 17,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "vertex",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "mine-ore-iron": {
+      "triangles": 168,
+      "materials": 1,
+      "boundsMetres": [
+        0.4079,
+        0.2896,
+        0.3194
+      ],
+      "byteLength": 21316,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 17,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "vertex",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "mine-ore-gold": {
+      "triangles": 168,
+      "materials": 1,
+      "boundsMetres": [
+        0.4406,
+        0.3194,
+        0.3449
+      ],
+      "byteLength": 21312,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 17,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "vertex",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    },
+    "kit-mine-entrance": {
+      "triangles": 8512,
+      "materials": 5,
+      "boundsMetres": [
+        6.9732,
+        3.45,
+        8.1602
+      ],
+      "byteLength": 963944,
+      "format": "GLB",
+      "animatedParts": [],
+      "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 17,
+      "members": 16,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "vertex",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
+    }
+  }
+}
