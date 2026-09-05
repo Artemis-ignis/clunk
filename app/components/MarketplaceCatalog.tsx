@@ -940,10 +940,10 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
         goToLogin();
         return;
       }
-      if (payload.status === "PAID_WITH_CREDITS" || payload.status === "ALREADY_OWNED" || payload.status === "ALREADY_PAID" || payload.status === "BETA_GRANTED") {
+      if (payload.status === "PAID_WITH_CREDITS" || payload.status === "ALREADY_OWNED" || payload.status === "ALREADY_PAID" || payload.status === "BETA_GRANTED" || payload.status === "FREE_DOWNLOAD") {
         setOwnedIds((current) => new Set(current).add(purchase.id));
         setMessage(
-          payload.status === "BETA_GRANTED"
+          payload.status === "BETA_GRANTED" || payload.status === "FREE_DOWNLOAD"
               ? `${purchase.label} — 받았습니다. 내려받기가 시작됩니다. 시작되지 않으면 내려받기 버튼을 누르세요.`
               : `${purchase.label} — 이미 받은 상품입니다. 내려받기가 시작됩니다.`,
         );

@@ -22,6 +22,7 @@ import {
 import { getRuntimeEnvironment } from "../../../runtime-environment";
 
 import { areSalesOpen, SALES_LOCKED_BODY } from "../../_lib/sales-lock";
+import { resolveListingAccess } from "../../_lib/market-gate";
 
 export const dynamic = "force-dynamic";
 
@@ -56,7 +57,12 @@ export async function POST(request: Request) {
       sellerUserId: string;
     }>();
     if (!listing) throw new ClunkHttpError("공개된 상품을 찾을 수 없습니다.", 404);
-    if (listing.priceCents === 0) {
+    // 무료인가는 저장된 값이 아니라 등급이 정한다 — 문지기(market-gate.resolveListingAccess)와
+    // 같은 함수다. 낱개 값을 없앤 뒤 price_cents 가 0 인 행이 49개인데 그중 A·S 등급이 섞여
+    // 있어, 값만 보고 FREE_DOWNLOAD 로 끝내면 베타 기록이 안 생기고 문지기는 그 파일에
+    // 403 을 돌려준다. 화면은 "받았습니다" 라고 말하는데 파일은 오지 않던 구멍이다.
+    const { paid } = await resolveListingAccess(db, listing.assetId);
+    if (!paid) {
       return privateJson({
         ok: true,
         schema: "clunk.marketplace-checkout.v1",

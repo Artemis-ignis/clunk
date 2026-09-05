@@ -114,3 +114,22 @@ test("베타에서 눌러 생긴 기록은 판매가 열린 뒤 유료 에셋을
   assert.match(checkout, /'beta'/, "베타 지급은 자기 provider 로 남아야 나중에 가려낼 수 있다");
   assert.match(checkout, /amount_cents.*0|0, \?\)/u, "베타 지급은 0원으로 남아야 한다");
 });
+
+/**
+ * 무료인가는 값이 아니라 등급이 정한다 — 결제 라우트도 문지기와 같은 함수를 불러야 한다.
+ *
+ * 2026-09-05 로그인 QA: A·S 등급인데 price_cents 가 0 으로 시드된 상품 13개(마을·부두·광산
+ * 키트와 부품)에서 "받기"가 파일을 주지 않았다. checkout 이 값만 보고 FREE_DOWNLOAD 로
+ * 끝내 베타 기록을 남기지 않았고, 문지기는 등급을 보고 403 을 돌려줬다. 화면은
+ * "받았습니다" 라고 말했다.
+ */
+test("checkout 은 저장된 값이 아니라 문지기와 같은 등급 규칙으로 무료를 가른다", async () => {
+  const checkout = await source("app/api/marketplace/checkout/route.ts");
+  assert.ok(checkout.includes("resolveListingAccess(db, listing.assetId)"), "checkout 이 market-gate.resolveListingAccess 를 불러야 한다");
+  assert.ok(!checkout.includes("priceCents === 0"), "값이 0 이라고 무료로 끝내면 안 된다");
+  const grantIndex = checkout.indexOf("BETA_GRANTED");
+  const freeIndex = checkout.indexOf("FREE_DOWNLOAD");
+  assert.ok(freeIndex > -1 && grantIndex > freeIndex, "무료 등급은 FREE_DOWNLOAD, 그 위는 베타 기록(BETA_GRANTED)");
+  const client = await source("app/components/MarketplaceCatalog.tsx");
+  assert.ok(client.includes('payload.status === "FREE_DOWNLOAD"'), "화면도 FREE_DOWNLOAD 답에 내려받기를 시작해야 한다");
+});
