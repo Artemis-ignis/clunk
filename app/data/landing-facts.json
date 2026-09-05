@@ -1,6 +1,6 @@
 {
   "schema": "clunk.landing-facts.v1",
-  "generatedAt": "2026-09-05T02:09:39.847Z",
+  "generatedAt": "2026-09-05T03:25:15.864Z",
   "facts": {
     "tractor": {
       "fileName": "tractor.compact.m1.glb",
@@ -33,24 +33,24 @@
       "listing": "cozy-greenhouse",
       "name": "온실",
       "path": "public/market/cozy-greenhouse/greenhouse.m1.clunk-optimized.glb",
-      "triangles": 5756,
-      "bytes": 555256
+      "triangles": 6124,
+      "bytes": 518500
     },
     {
       "slug": "storage-shed",
       "listing": "cozy-storage-shed",
       "name": "창고 헛간",
       "path": "public/market/cozy-storage-shed/storage-shed.m1.clunk-optimized.glb",
-      "triangles": 1620,
-      "bytes": 138020
+      "triangles": 1768,
+      "bytes": 148528
     },
     {
       "slug": "haystack",
       "listing": "cozy-haystack-full",
       "name": "건초 더미",
       "path": "public/market/cozy-haystack-full/haystack-full.clunk-optimized.glb",
-      "triangles": 1322,
-      "bytes": 132432
+      "triangles": 1328,
+      "bytes": 118172
     },
     {
       "slug": "fence-gate",
@@ -65,8 +65,8 @@
       "listing": "cozy-crate-produce",
       "name": "농산물 상자",
       "path": "public/market/cozy-crate-produce/crate-produce.clunk-optimized.glb",
-      "triangles": 882,
-      "bytes": 90476
+      "triangles": 930,
+      "bytes": 84224
     },
     {
       "slug": "broadleaf-full",
@@ -113,8 +113,8 @@
       "listing": "cozy-crate-closed",
       "name": "뚜껑 상자",
       "path": "public/market/cozy-crate-closed/crate-closed.clunk-optimized.glb",
-      "triangles": 700,
-      "bytes": 72304
+      "triangles": 748,
+      "bytes": 68188
     }
   ]
 }

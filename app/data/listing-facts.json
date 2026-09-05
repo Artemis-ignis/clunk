@@ -1,11 +1,11 @@
 {
   "schema": "clunk.listing-facts.v1",
-  "generatedAt": "2026-09-05T03:17:21.105Z",
+  "generatedAt": "2026-09-05T03:36:31.062Z",
   "sources": [
     "outputs\\market-launch\\wave1\\upload-manifest.json",
     "tmp\\listings-snapshot.json",
     "배달 파일에서 다시 잰 항목 30건",
-    "이전 판에서 유지한 항목 7건",
+    "이전 판에서 유지한 항목 56건",
     "examples/generated/kits/*/listing-facts.fragment.json → public/market 파일에서 재측정 (scripts/merge-kit-facts.mjs)"
   ],
   "facts": {
@@ -63,14 +63,14 @@
       "inspection": null
     },
     "cozy-crate-closed": {
-      "triangles": 700,
+      "triangles": 748,
       "materials": 1,
       "boundsMetres": [
         0.57,
         0.434,
-        0.434
+        0.446
       ],
-      "byteLength": 72304,
+      "byteLength": 68188,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -121,14 +121,14 @@
       "inspection": null
     },
     "cozy-crate-open": {
-      "triangles": 516,
+      "triangles": 564,
       "materials": 1,
       "boundsMetres": [
         0.56,
         0.41,
-        0.434
+        0.446
       ],
-      "byteLength": 53760,
+      "byteLength": 51836,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -179,14 +179,14 @@
       "inspection": null
     },
     "cozy-crate-produce": {
-      "triangles": 882,
+      "triangles": 930,
       "materials": 1,
       "boundsMetres": [
         0.56,
         0.5308,
-        0.434
+        0.446
       ],
-      "byteLength": 90476,
+      "byteLength": 84224,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -237,10 +237,10 @@
       "inspection": null
     },
     "cozy-farm-set-vol1": {
-      "triangles": 2456,
-      "materials": 11,
+      "triangles": 4312,
+      "materials": 16,
       "boundsMetres": null,
-      "byteLength": 215248,
+      "byteLength": 243336,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -371,14 +371,14 @@
       "inspection": null
     },
     "cozy-greenhouse": {
-      "triangles": 5756,
+      "triangles": 6124,
       "materials": 1,
       "boundsMetres": [
         8.4158,
         4.24,
         6.5112
       ],
-      "byteLength": 555256,
+      "byteLength": 518500,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -428,14 +428,14 @@
       "inspection": null
     },
     "cozy-haystack-full": {
-      "triangles": 1322,
+      "triangles": 1328,
       "materials": 1,
       "boundsMetres": [
-        1.5861,
+        1.4315,
         1.4782,
-        1.6796
+        1.5899
       ],
-      "byteLength": 132432,
+      "byteLength": 118172,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -485,14 +485,14 @@
       "inspection": null
     },
     "cozy-haystack-used": {
-      "triangles": 1410,
+      "triangles": 1416,
       "materials": 1,
       "boundsMetres": [
-        1.4354,
+        1.2977,
         1.4706,
-        1.5773
+        1.5547
       ],
-      "byteLength": 141004,
+      "byteLength": 125712,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -598,14 +598,14 @@
       "inspection": null
     },
     "cozy-storage-shed": {
-      "triangles": 1620,
+      "triangles": 1768,
       "materials": 9,
       "boundsMetres": [
         2.595,
         2.9325,
         2.23
       ],
-      "byteLength": 138020,
+      "byteLength": 148528,
       "format": "GLB",
       "animatedParts": [
         "door_pivot",
@@ -1318,14 +1318,14 @@
       "inspection": null
     },
     "hf-barn": {
-      "triangles": 15080,
+      "triangles": 15332,
       "materials": 5,
       "boundsMetres": [
         11.04,
         6.39,
         7.8503
       ],
-      "byteLength": 1275524,
+      "byteLength": 1300328,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
@@ -1917,18 +1917,20 @@
         3.45,
         8.1602
       ],
-      "byteLength": 963944,
+      "byteLength": 771560,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
       "engine": {
         "requires": [],
         "uses": [],
-        "colour": "vertex",
+        "colour": "texture",
         "modes": [
           4
         ],
-        "imageTypes": []
+        "imageTypes": [
+          "image/png"
+        ]
       },
       "kit": "kit-mine-entrance",
       "kitSize": 16,
@@ -2030,7 +2032,7 @@
         0.75,
         0.65
       ],
-      "byteLength": 173464,
+      "byteLength": 137708,
       "format": "GLB",
       "animatedParts": [
         "axle_front",
@@ -2045,11 +2047,13 @@
       "engine": {
         "requires": [],
         "uses": [],
-        "colour": "vertex",
+        "colour": "texture",
         "modes": [
           4
         ],
-        "imageTypes": []
+        "imageTypes": [
+          "image/png"
+        ]
       },
       "kit": "kit-mine-entrance",
       "kitSize": 16,
@@ -2072,7 +2076,7 @@
         0.9712,
         0.65
       ],
-      "byteLength": 197716,
+      "byteLength": 157232,
       "format": "GLB",
       "animatedParts": [
         "axle_front",
@@ -2087,11 +2091,13 @@
       "engine": {
         "requires": [],
         "uses": [],
-        "colour": "vertex",
+        "colour": "texture",
         "modes": [
           4
         ],
-        "imageTypes": []
+        "imageTypes": [
+          "image/png"
+        ]
       },
       "kit": "kit-mine-entrance",
       "kitSize": 16,
@@ -2114,18 +2120,20 @@
         2.3908,
         0.2893
       ],
-      "byteLength": 63472,
+      "byteLength": 51028,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
       "engine": {
         "requires": [],
         "uses": [],
-        "colour": "vertex",
+        "colour": "texture",
         "modes": [
           4
         ],
-        "imageTypes": []
+        "imageTypes": [
+          "image/png"
+        ]
       },
       "kit": "kit-mine-entrance",
       "kitSize": 16,
@@ -2148,7 +2156,7 @@
         1.8,
         0.62
       ],
-      "byteLength": 47020,
+      "byteLength": 38092,
       "format": "GLB",
       "animatedParts": [
         "lantern_body"
@@ -2162,11 +2170,13 @@
       "engine": {
         "requires": [],
         "uses": [],
-        "colour": "vertex",
+        "colour": "texture",
         "modes": [
           4
         ],
-        "imageTypes": []
+        "imageTypes": [
+          "image/png"
+        ]
       },
       "kit": "kit-mine-entrance",
       "kitSize": 16,
@@ -2189,18 +2199,20 @@
         0.3003,
         0.3287
       ],
-      "byteLength": 21324,
+      "byteLength": 17404,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
       "engine": {
         "requires": [],
         "uses": [],
-        "colour": "vertex",
+        "colour": "texture",
         "modes": [
           4
         ],
-        "imageTypes": []
+        "imageTypes": [
+          "image/png"
+        ]
       },
       "kit": "kit-mine-entrance",
       "kitSize": 16,
@@ -2223,18 +2235,20 @@
         0.3194,
         0.3449
       ],
-      "byteLength": 21312,
+      "byteLength": 17416,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
       "engine": {
         "requires": [],
         "uses": [],
-        "colour": "vertex",
+        "colour": "texture",
         "modes": [
           4
         ],
-        "imageTypes": []
+        "imageTypes": [
+          "image/png"
+        ]
       },
       "kit": "kit-mine-entrance",
       "kitSize": 16,
@@ -2257,18 +2271,20 @@
         0.2896,
         0.3194
       ],
-      "byteLength": 21316,
+      "byteLength": 17372,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
       "engine": {
         "requires": [],
         "uses": [],
-        "colour": "vertex",
+        "colour": "texture",
         "modes": [
           4
         ],
-        "imageTypes": []
+        "imageTypes": [
+          "image/png"
+        ]
       },
       "kit": "kit-mine-entrance",
       "kitSize": 16,
@@ -2291,18 +2307,20 @@
         3.45,
         0.9441
       ],
-      "byteLength": 112040,
+      "byteLength": 89560,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
       "engine": {
         "requires": [],
         "uses": [],
-        "colour": "vertex",
+        "colour": "texture",
         "modes": [
           4
         ],
-        "imageTypes": []
+        "imageTypes": [
+          "image/png"
+        ]
       },
       "kit": "kit-mine-entrance",
       "kitSize": 16,
@@ -2325,18 +2343,20 @@
         0.6494,
         0.4146
       ],
-      "byteLength": 46624,
+      "byteLength": 37868,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
       "engine": {
         "requires": [],
         "uses": [],
-        "colour": "vertex",
+        "colour": "texture",
         "modes": [
           4
         ],
-        "imageTypes": []
+        "imageTypes": [
+          "image/png"
+        ]
       },
       "kit": "kit-mine-entrance",
       "kitSize": 16,
@@ -2359,18 +2379,20 @@
         0.11,
         1.6185
       ],
-      "byteLength": 154088,
+      "byteLength": 123060,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
       "engine": {
         "requires": [],
         "uses": [],
-        "colour": "vertex",
+        "colour": "texture",
         "modes": [
           4
         ],
-        "imageTypes": []
+        "imageTypes": [
+          "image/png"
+        ]
       },
       "kit": "kit-mine-entrance",
       "kitSize": 16,
@@ -2393,18 +2415,20 @@
         0.42,
         1.0863
       ],
-      "byteLength": 68016,
+      "byteLength": 54728,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
       "engine": {
         "requires": [],
         "uses": [],
-        "colour": "vertex",
+        "colour": "texture",
         "modes": [
           4
         ],
-        "imageTypes": []
+        "imageTypes": [
+          "image/png"
+        ]
       },
       "kit": "kit-mine-entrance",
       "kitSize": 16,
@@ -2427,18 +2451,20 @@
         0.11,
         1.0992
       ],
-      "byteLength": 74940,
+      "byteLength": 60356,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
       "engine": {
         "requires": [],
         "uses": [],
-        "colour": "vertex",
+        "colour": "texture",
         "modes": [
           4
         ],
-        "imageTypes": []
+        "imageTypes": [
+          "image/png"
+        ]
       },
       "kit": "kit-mine-entrance",
       "kitSize": 16,
@@ -2461,18 +2487,20 @@
         0.6947,
         1.0027
       ],
-      "byteLength": 32420,
+      "byteLength": 26212,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
       "engine": {
         "requires": [],
         "uses": [],
-        "colour": "vertex",
+        "colour": "texture",
         "modes": [
           4
         ],
-        "imageTypes": []
+        "imageTypes": [
+          "image/png"
+        ]
       },
       "kit": "kit-mine-entrance",
       "kitSize": 16,
@@ -2495,18 +2523,20 @@
         0.422,
         0.6057
       ],
-      "byteLength": 23776,
+      "byteLength": 19416,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
       "engine": {
         "requires": [],
         "uses": [],
-        "colour": "vertex",
+        "colour": "texture",
         "modes": [
           4
         ],
-        "imageTypes": []
+        "imageTypes": [
+          "image/png"
+        ]
       },
       "kit": "kit-mine-entrance",
       "kitSize": 16,
@@ -2529,18 +2559,20 @@
         2.44,
         0.71
       ],
-      "byteLength": 66232,
+      "byteLength": 53280,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
       "engine": {
         "requires": [],
         "uses": [],
-        "colour": "vertex",
+        "colour": "texture",
         "modes": [
           4
         ],
-        "imageTypes": []
+        "imageTypes": [
+          "image/png"
+        ]
       },
       "kit": "kit-mine-entrance",
       "kitSize": 16,
@@ -2563,18 +2595,20 @@
         1.1547,
         0.3427
       ],
-      "byteLength": 58896,
+      "byteLength": 47420,
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
       "engine": {
         "requires": [],
         "uses": [],
-        "colour": "vertex",
+        "colour": "texture",
         "modes": [
           4
         ],
-        "imageTypes": []
+        "imageTypes": [
+          "image/png"
+        ]
       },
       "kit": "kit-mine-entrance",
       "kitSize": 16,
