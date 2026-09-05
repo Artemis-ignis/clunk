@@ -42,7 +42,8 @@ async function entryGlb(slug) {
   } catch {
     return null;
   }
-  const glb = names.filter((n) => n.toLowerCase().endsWith(".glb"));
+  // preview-*.glb 는 비로그인 뷰어용 미리보기다(scripts/market-preview-glb.mjs). 판매 파일이 아니므로 세지 않는다.
+  const glb = names.filter((n) => n.toLowerCase().endsWith(".glb") && !/^preview-/i.test(n));
   if (glb.length !== 1) return null; // 여러 개면 어느 것이 대표인지 여기서 정하지 않는다
   return `${MARKET}/${slug}/${glb[0]}`;
 }
@@ -401,7 +402,9 @@ test("/agents 다섯 칸이 파는 파일을 보여 주고, 밑줄의 숫자가 
       if (n.byteLength >= 1_000_000) pieces.push(`${(n.byteLength / 1_000_000).toFixed(1)} MB`);
     } else if (kind === "atlas") {
       for (const key of ["cell", "directions", "frames"]) same(key, n[key], fact.sheet?.[key]);
-      pieces.push(String(n.cell), String(n.directions), String(n.frames));
+      // 돌려 찍은 시트(8방향 × 1장)는 프레임 수가 없다 — 없는 수는 밑줄에 없어야 맞다.
+      pieces.push(String(n.cell), String(n.directions));
+      if (n.frames) pieces.push(String(n.frames));
     } else if (kind === "spine") {
       same("동작 수", n.clips, fact.animations.length);
       same("움직이는 부품 수", n.parts, fact.animatedParts.length);

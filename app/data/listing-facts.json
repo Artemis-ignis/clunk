@@ -1,13 +1,12 @@
 {
   "schema": "clunk.listing-facts.v1",
-  "generatedAt": "2026-09-05T09:16:59.072Z",
+  "generatedAt": "2026-09-05T09:39:42.366Z",
   "sources": [
     "outputs\\market-launch\\wave1\\upload-manifest.json",
     "tmp\\listings-snapshot.json",
     "배달 파일에서 다시 잰 항목 79건",
     "이전 판의 키트 표식을 유지한 항목 49건 (scripts/merge-kit-facts.mjs 가 적은 것)",
-    "이전 판에서 유지한 항목 1건",
-    "examples/generated/kits/*/listing-facts.fragment.json → public/market 파일에서 재측정 (scripts/merge-kit-facts.mjs)"
+    "이전 판에서 유지한 항목 8건"
   ],
   "facts": {
     "clunk-heli-h145": {
@@ -750,6 +749,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -759,12 +764,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -784,6 +783,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -793,12 +798,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -818,6 +817,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -827,12 +832,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -852,6 +851,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -861,12 +866,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -886,6 +885,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -895,12 +900,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -927,6 +926,12 @@
           "seconds": 3.2
         }
       ],
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -936,12 +941,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -968,6 +967,12 @@
           "seconds": 6
         }
       ],
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -977,12 +982,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -1002,6 +1001,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1011,12 +1016,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -1036,6 +1035,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1045,12 +1050,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -1070,6 +1069,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1079,12 +1084,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -1104,6 +1103,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1113,12 +1118,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -1138,6 +1137,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1147,12 +1152,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -1172,6 +1171,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1181,12 +1186,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -1206,6 +1205,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1215,12 +1220,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -1247,6 +1246,12 @@
           "seconds": 4
         }
       ],
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1256,12 +1261,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-fishing-dock",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -2117,14 +2116,14 @@
       }
     },
     "hf-cultivator-compact": {
-      "triangles": 27668,
+      "triangles": 27800,
       "materials": 4,
       "boundsMetres": [
         1.3495,
         1.6869,
         3.16
       ],
-      "byteLength": 485372,
+      "byteLength": 427976,
       "format": "GLB",
       "animatedParts": [
         "gaugeWheelLeft",
@@ -2351,14 +2350,14 @@
       }
     },
     "hf-seeder-compact": {
-      "triangles": 52066,
+      "triangles": 52546,
       "materials": 4,
       "boundsMetres": [
-        1.9572,
-        2.2454,
+        1.9387,
+        2.2452,
         3.8
       ],
-      "byteLength": 1019452,
+      "byteLength": 1663448,
       "format": "GLB",
       "animatedParts": [
         "openerDisc01Left",
@@ -2454,14 +2453,14 @@
       }
     },
     "hf-tractor-compact": {
-      "triangles": 58156,
+      "triangles": 59232,
       "materials": 8,
       "boundsMetres": [
         5.2396,
         2.9149,
         3.1601
       ],
-      "byteLength": 1528692,
+      "byteLength": 1431320,
       "format": "GLB",
       "animatedParts": [
         "wheelFrontLeft",
@@ -2568,11 +2567,11 @@
       "triangles": 1656,
       "materials": 2,
       "boundsMetres": [
-        3.3537,
-        5.0014,
+        3.3536,
+        4.981,
         3.51
       ],
-      "byteLength": 155288,
+      "byteLength": 155360,
       "format": "GLB",
       "animatedParts": [
         "blades_pivot"
@@ -2591,7 +2590,12 @@
       "texture": null,
       "engine": {
         "requires": [],
-        "uses": [],
+        "uses": [
+          "KHR_materials_clearcoat",
+          "KHR_materials_emissive_strength",
+          "KHR_materials_transmission",
+          "KHR_materials_unlit"
+        ],
         "colour": "vertex",
         "modes": [
           4
@@ -2634,15 +2638,6 @@
           "seconds": 4
         }
       ],
-      "engine": {
-        "requires": [],
-        "uses": [],
-        "colour": "material",
-        "modes": [
-          4
-        ],
-        "imageTypes": []
-      },
       "kit": "kit-fishing-dock",
       "kitSize": 15,
       "members": [
@@ -2665,6 +2660,15 @@
       "viewYawDegrees": 40.3,
       "sheet": null,
       "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3089,17 +3093,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "engine": {
-        "requires": [],
-        "uses": [],
-        "colour": "texture",
-        "modes": [
-          4
-        ],
-        "imageTypes": [
-          "image/png"
-        ]
-      },
       "kit": "kit-mine-entrance",
       "kitSize": 16,
       "members": [
@@ -3123,6 +3116,17 @@
       "viewYawDegrees": 40.3,
       "sheet": null,
       "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "texture",
+        "modes": [
+          4
+        ],
+        "imageTypes": [
+          "image/png"
+        ]
+      },
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3156,15 +3160,6 @@
           "seconds": 3.6
         }
       ],
-      "engine": {
-        "requires": [],
-        "uses": [],
-        "colour": "material",
-        "modes": [
-          4
-        ],
-        "imageTypes": []
-      },
       "kit": "kit-village-square",
       "kitSize": 15,
       "members": [
@@ -3187,6 +3182,15 @@
       "viewYawDegrees": null,
       "sheet": null,
       "texture": null,
+      "engine": {
+        "requires": [],
+        "uses": [],
+        "colour": "material",
+        "modes": [
+          4
+        ],
+        "imageTypes": []
+      },
       "inspection": {
         "webScore": 100,
         "mobileScore": 97,
@@ -3214,6 +3218,12 @@
           "seconds": 2
         }
       ],
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3225,12 +3235,6 @@
           "image/png"
         ]
       },
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 99,
         "mobileScore": 99,
@@ -3258,6 +3262,12 @@
           "seconds": 2
         }
       ],
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3269,12 +3279,6 @@
           "image/png"
         ]
       },
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 99,
         "mobileScore": 99,
@@ -3294,6 +3298,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3305,12 +3315,6 @@
           "image/png"
         ]
       },
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3337,6 +3341,12 @@
           "seconds": 2.4
         }
       ],
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3348,12 +3358,6 @@
           "image/png"
         ]
       },
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3373,6 +3377,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3384,12 +3394,6 @@
           "image/png"
         ]
       },
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3409,6 +3413,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3420,12 +3430,6 @@
           "image/png"
         ]
       },
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3445,6 +3449,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3456,12 +3466,6 @@
           "image/png"
         ]
       },
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3481,6 +3485,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3492,12 +3502,6 @@
           "image/png"
         ]
       },
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3517,6 +3521,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3528,12 +3538,6 @@
           "image/png"
         ]
       },
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3553,6 +3557,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3564,12 +3574,6 @@
           "image/png"
         ]
       },
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3589,6 +3593,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3600,12 +3610,6 @@
           "image/png"
         ]
       },
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3625,6 +3629,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3636,12 +3646,6 @@
           "image/png"
         ]
       },
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3661,6 +3665,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3672,12 +3682,6 @@
           "image/png"
         ]
       },
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3697,6 +3701,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3708,12 +3718,6 @@
           "image/png"
         ]
       },
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3733,6 +3737,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3744,12 +3754,6 @@
           "image/png"
         ]
       },
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3769,6 +3773,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3780,12 +3790,6 @@
           "image/png"
         ]
       },
-      "kit": "kit-mine-entrance",
-      "kitSize": 16,
-      "members": null,
-      "viewYawDegrees": 40.3,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -3970,6 +3974,12 @@
           "seconds": 2.7
         }
       ],
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3979,12 +3989,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 97,
@@ -4004,6 +4008,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4013,12 +4023,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -4038,6 +4042,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4047,12 +4057,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -4072,6 +4076,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4081,12 +4091,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -4106,6 +4110,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4115,12 +4125,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -4140,6 +4144,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4149,12 +4159,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -4174,6 +4178,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4183,12 +4193,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -4208,6 +4212,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4217,12 +4227,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -4242,6 +4246,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4251,12 +4261,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 97,
@@ -4276,6 +4280,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4285,12 +4295,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -4310,6 +4314,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4319,12 +4329,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -4344,6 +4348,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4353,12 +4363,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -4378,6 +4382,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4387,12 +4397,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -4412,6 +4416,12 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4421,12 +4431,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 100,
@@ -4454,6 +4458,12 @@
           "seconds": 3.6
         }
       ],
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -4463,12 +4473,6 @@
         ],
         "imageTypes": []
       },
-      "kit": "kit-village-square",
-      "kitSize": 15,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "inspection": {
         "webScore": 100,
         "mobileScore": 97,
