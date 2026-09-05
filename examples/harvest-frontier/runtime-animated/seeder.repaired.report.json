@@ -496,6 +496,780 @@
       }
     ]
   },
+  "openerAxleBoss": {
+    "why": "the disc's axle boss was drawn 142 mm outboard along its own axle and ran into the depth wheel's hub barrel coming the other way; the disc itself was 54 mm clear all along",
+    "clearanceMm": 20,
+    "cut": [
+      {
+        "part": "openerHub",
+        "disc": "openerDisc01Left",
+        "stopsBefore": "openerDisc01Right",
+        "zWasMm": [
+          -1285.2,
+          -1142.8
+        ],
+        "zNowMm": [
+          -1285.2,
+          -1200
+        ],
+        "lengthWasMm": 142.5,
+        "lengthNowMm": 85.2,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerHubCap",
+        "disc": "openerDisc01Left",
+        "stopsBefore": "openerDisc01Right",
+        "zWasMm": [
+          -1279.6,
+          -1118.4
+        ],
+        "zNowMm": [
+          -1279.6,
+          -1200
+        ],
+        "lengthWasMm": 161.2,
+        "lengthNowMm": 79.6,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt1",
+        "disc": "openerDisc01Left",
+        "stopsBefore": "openerDisc01Right",
+        "zWasMm": [
+          -1247,
+          -1142
+        ],
+        "zNowMm": [
+          -1247,
+          -1200
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 47,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt2",
+        "disc": "openerDisc01Left",
+        "stopsBefore": "openerDisc01Right",
+        "zWasMm": [
+          -1247,
+          -1142
+        ],
+        "zNowMm": [
+          -1247,
+          -1200
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 47,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt3",
+        "disc": "openerDisc01Left",
+        "stopsBefore": "openerDisc01Right",
+        "zWasMm": [
+          -1247,
+          -1142
+        ],
+        "zNowMm": [
+          -1247,
+          -1200
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 47,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt4",
+        "disc": "openerDisc01Left",
+        "stopsBefore": "openerDisc01Right",
+        "zWasMm": [
+          -1247,
+          -1142
+        ],
+        "zNowMm": [
+          -1247,
+          -1200
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 47,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerHub_1",
+        "disc": "openerDisc01Right",
+        "stopsBefore": "gaugeWheel01",
+        "zWasMm": [
+          -1149.2,
+          -1006.8
+        ],
+        "zNowMm": [
+          -1149.2,
+          -1068.4
+        ],
+        "lengthWasMm": 142.5,
+        "lengthNowMm": 80.9,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerHubCap_1",
+        "disc": "openerDisc01Right",
+        "stopsBefore": "gaugeWheel01",
+        "zWasMm": [
+          -1143.6,
+          -982.4
+        ],
+        "zNowMm": [
+          -1143.6,
+          -1068.4
+        ],
+        "lengthWasMm": 161.2,
+        "lengthNowMm": 75.2,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt1_1",
+        "disc": "openerDisc01Right",
+        "stopsBefore": "gaugeWheel01",
+        "zWasMm": [
+          -1111,
+          -1006
+        ],
+        "zNowMm": [
+          -1111,
+          -1068.4
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 42.6,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt2_1",
+        "disc": "openerDisc01Right",
+        "stopsBefore": "gaugeWheel01",
+        "zWasMm": [
+          -1111,
+          -1006
+        ],
+        "zNowMm": [
+          -1111,
+          -1068.4
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 42.6,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt3_1",
+        "disc": "openerDisc01Right",
+        "stopsBefore": "gaugeWheel01",
+        "zWasMm": [
+          -1111,
+          -1006
+        ],
+        "zNowMm": [
+          -1111,
+          -1068.4
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 42.6,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt4_1",
+        "disc": "openerDisc01Right",
+        "stopsBefore": "gaugeWheel01",
+        "zWasMm": [
+          -1111,
+          -1006
+        ],
+        "zNowMm": [
+          -1111,
+          -1068.4
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 42.6,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerHub_2",
+        "disc": "openerDisc02Left",
+        "stopsBefore": "openerDisc02Right",
+        "zWasMm": [
+          -485.2,
+          -342.8
+        ],
+        "zNowMm": [
+          -485.2,
+          -400
+        ],
+        "lengthWasMm": 142.5,
+        "lengthNowMm": 85.2,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerHubCap_2",
+        "disc": "openerDisc02Left",
+        "stopsBefore": "openerDisc02Right",
+        "zWasMm": [
+          -479.6,
+          -318.4
+        ],
+        "zNowMm": [
+          -479.6,
+          -400
+        ],
+        "lengthWasMm": 161.2,
+        "lengthNowMm": 79.6,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt1_2",
+        "disc": "openerDisc02Left",
+        "stopsBefore": "openerDisc02Right",
+        "zWasMm": [
+          -447,
+          -342
+        ],
+        "zNowMm": [
+          -447,
+          -400
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 47,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt2_2",
+        "disc": "openerDisc02Left",
+        "stopsBefore": "openerDisc02Right",
+        "zWasMm": [
+          -447,
+          -342
+        ],
+        "zNowMm": [
+          -447,
+          -400
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 47,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt3_2",
+        "disc": "openerDisc02Left",
+        "stopsBefore": "openerDisc02Right",
+        "zWasMm": [
+          -447,
+          -342
+        ],
+        "zNowMm": [
+          -447,
+          -400
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 47,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt4_2",
+        "disc": "openerDisc02Left",
+        "stopsBefore": "openerDisc02Right",
+        "zWasMm": [
+          -447,
+          -342
+        ],
+        "zNowMm": [
+          -447,
+          -400
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 47,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerHub_3",
+        "disc": "openerDisc02Right",
+        "stopsBefore": "gaugeWheel02",
+        "zWasMm": [
+          -349.2,
+          -206.8
+        ],
+        "zNowMm": [
+          -349.2,
+          -268.4
+        ],
+        "lengthWasMm": 142.5,
+        "lengthNowMm": 80.9,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerHubCap_3",
+        "disc": "openerDisc02Right",
+        "stopsBefore": "gaugeWheel02",
+        "zWasMm": [
+          -343.6,
+          -182.4
+        ],
+        "zNowMm": [
+          -343.6,
+          -268.4
+        ],
+        "lengthWasMm": 161.2,
+        "lengthNowMm": 75.2,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt1_3",
+        "disc": "openerDisc02Right",
+        "stopsBefore": "gaugeWheel02",
+        "zWasMm": [
+          -311,
+          -206
+        ],
+        "zNowMm": [
+          -311,
+          -268.4
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 42.6,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt2_3",
+        "disc": "openerDisc02Right",
+        "stopsBefore": "gaugeWheel02",
+        "zWasMm": [
+          -311,
+          -206
+        ],
+        "zNowMm": [
+          -311,
+          -268.4
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 42.6,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt3_3",
+        "disc": "openerDisc02Right",
+        "stopsBefore": "gaugeWheel02",
+        "zWasMm": [
+          -311,
+          -206
+        ],
+        "zNowMm": [
+          -311,
+          -268.4
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 42.6,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt4_3",
+        "disc": "openerDisc02Right",
+        "stopsBefore": "gaugeWheel02",
+        "zWasMm": [
+          -311,
+          -206
+        ],
+        "zNowMm": [
+          -311,
+          -268.4
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 42.6,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerHub_4",
+        "disc": "openerDisc03Left",
+        "stopsBefore": "openerDisc03Right",
+        "zWasMm": [
+          314.8,
+          457.2
+        ],
+        "zNowMm": [
+          314.8,
+          400
+        ],
+        "lengthWasMm": 142.5,
+        "lengthNowMm": 85.2,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerHubCap_4",
+        "disc": "openerDisc03Left",
+        "stopsBefore": "openerDisc03Right",
+        "zWasMm": [
+          320.4,
+          481.6
+        ],
+        "zNowMm": [
+          320.4,
+          400
+        ],
+        "lengthWasMm": 161.2,
+        "lengthNowMm": 79.6,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt1_4",
+        "disc": "openerDisc03Left",
+        "stopsBefore": "openerDisc03Right",
+        "zWasMm": [
+          353,
+          458
+        ],
+        "zNowMm": [
+          353,
+          400
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 47,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt2_4",
+        "disc": "openerDisc03Left",
+        "stopsBefore": "openerDisc03Right",
+        "zWasMm": [
+          353,
+          458
+        ],
+        "zNowMm": [
+          353,
+          400
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 47,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt3_4",
+        "disc": "openerDisc03Left",
+        "stopsBefore": "openerDisc03Right",
+        "zWasMm": [
+          353,
+          458
+        ],
+        "zNowMm": [
+          353,
+          400
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 47,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt4_4",
+        "disc": "openerDisc03Left",
+        "stopsBefore": "openerDisc03Right",
+        "zWasMm": [
+          353,
+          458
+        ],
+        "zNowMm": [
+          353,
+          400
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 47,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerHub_5",
+        "disc": "openerDisc03Right",
+        "stopsBefore": "gaugeWheel03",
+        "zWasMm": [
+          450.8,
+          593.2
+        ],
+        "zNowMm": [
+          450.8,
+          531.6
+        ],
+        "lengthWasMm": 142.5,
+        "lengthNowMm": 80.9,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerHubCap_5",
+        "disc": "openerDisc03Right",
+        "stopsBefore": "gaugeWheel03",
+        "zWasMm": [
+          456.4,
+          617.6
+        ],
+        "zNowMm": [
+          456.4,
+          531.6
+        ],
+        "lengthWasMm": 161.2,
+        "lengthNowMm": 75.2,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt1_5",
+        "disc": "openerDisc03Right",
+        "stopsBefore": "gaugeWheel03",
+        "zWasMm": [
+          489,
+          594
+        ],
+        "zNowMm": [
+          489,
+          531.6
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 42.6,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt2_5",
+        "disc": "openerDisc03Right",
+        "stopsBefore": "gaugeWheel03",
+        "zWasMm": [
+          489,
+          594
+        ],
+        "zNowMm": [
+          489,
+          531.6
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 42.6,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt3_5",
+        "disc": "openerDisc03Right",
+        "stopsBefore": "gaugeWheel03",
+        "zWasMm": [
+          489,
+          594
+        ],
+        "zNowMm": [
+          489,
+          531.6
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 42.6,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt4_5",
+        "disc": "openerDisc03Right",
+        "stopsBefore": "gaugeWheel03",
+        "zWasMm": [
+          489,
+          594
+        ],
+        "zNowMm": [
+          489,
+          531.6
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 42.6,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerHub_6",
+        "disc": "openerDisc04Left",
+        "stopsBefore": "openerDisc04Right",
+        "zWasMm": [
+          1114.8,
+          1257.2
+        ],
+        "zNowMm": [
+          1114.8,
+          1200
+        ],
+        "lengthWasMm": 142.5,
+        "lengthNowMm": 85.2,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerHubCap_6",
+        "disc": "openerDisc04Left",
+        "stopsBefore": "openerDisc04Right",
+        "zWasMm": [
+          1120.4,
+          1281.6
+        ],
+        "zNowMm": [
+          1120.4,
+          1200
+        ],
+        "lengthWasMm": 161.2,
+        "lengthNowMm": 79.6,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt1_6",
+        "disc": "openerDisc04Left",
+        "stopsBefore": "openerDisc04Right",
+        "zWasMm": [
+          1153,
+          1258
+        ],
+        "zNowMm": [
+          1153,
+          1200
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 47,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt2_6",
+        "disc": "openerDisc04Left",
+        "stopsBefore": "openerDisc04Right",
+        "zWasMm": [
+          1153,
+          1258
+        ],
+        "zNowMm": [
+          1153,
+          1200
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 47,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt3_6",
+        "disc": "openerDisc04Left",
+        "stopsBefore": "openerDisc04Right",
+        "zWasMm": [
+          1153,
+          1258
+        ],
+        "zNowMm": [
+          1153,
+          1200
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 47,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt4_6",
+        "disc": "openerDisc04Left",
+        "stopsBefore": "openerDisc04Right",
+        "zWasMm": [
+          1153,
+          1258
+        ],
+        "zNowMm": [
+          1153,
+          1200
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 47,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerHub_7",
+        "disc": "openerDisc04Right",
+        "stopsBefore": "gaugeWheel04",
+        "zWasMm": [
+          1250.8,
+          1393.2
+        ],
+        "zNowMm": [
+          1250.8,
+          1331.6
+        ],
+        "lengthWasMm": 142.5,
+        "lengthNowMm": 80.9,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerHubCap_7",
+        "disc": "openerDisc04Right",
+        "stopsBefore": "gaugeWheel04",
+        "zWasMm": [
+          1256.4,
+          1417.6
+        ],
+        "zNowMm": [
+          1256.4,
+          1331.6
+        ],
+        "lengthWasMm": 161.2,
+        "lengthNowMm": 75.2,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt1_7",
+        "disc": "openerDisc04Right",
+        "stopsBefore": "gaugeWheel04",
+        "zWasMm": [
+          1289,
+          1394
+        ],
+        "zNowMm": [
+          1289,
+          1331.6
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 42.6,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt2_7",
+        "disc": "openerDisc04Right",
+        "stopsBefore": "gaugeWheel04",
+        "zWasMm": [
+          1289,
+          1394
+        ],
+        "zNowMm": [
+          1289,
+          1331.6
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 42.6,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt3_7",
+        "disc": "openerDisc04Right",
+        "stopsBefore": "gaugeWheel04",
+        "zWasMm": [
+          1289,
+          1394
+        ],
+        "zNowMm": [
+          1289,
+          1331.6
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 42.6,
+        "clearanceMm": 20
+      },
+      {
+        "part": "openerBolt4_7",
+        "disc": "openerDisc04Right",
+        "stopsBefore": "gaugeWheel04",
+        "zWasMm": [
+          1289,
+          1394
+        ],
+        "zNowMm": [
+          1289,
+          1331.6
+        ],
+        "lengthWasMm": 105,
+        "lengthNowMm": 42.6,
+        "clearanceMm": 20
+      }
+    ]
+  },
   "invertedWinding": {
     "why": "all four hopper bodies enclose a negative signed volume, so on an engine that culls back faces the bins vanish",
     "flipped": [

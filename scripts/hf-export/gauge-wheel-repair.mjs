@@ -1,6 +1,12 @@
 /**
  * hf-seeder-compact / hf-cultivator-compact — 2026-09-05 게이지 휠 접지 수리.
  *
+ * 이 패스는 더 이상 판매 파일 파이프라인에 들어 있지 않다(2026-09-05). 여기서 하던 일은
+ * seeder-repair.mjs 의 3b·3e3 과 cultivator-repair.mjs 의 2a 안으로 들어갔고, 두 리페어
+ * 패스가 판매 파일을 처음부터 다시 만든다. 지금 이 스크립트를 판매 파일 위에 다시 돌리면
+ * 이미 내려앉은 바퀴를 한 번 더 내리게 된다. 아래 측정 기록은 남겨 둔다 — 시더의 111.2 mm
+ * 와 컬티베이터의 102.5 mm 가 어디서 온 값인지는 저 두 패스의 근거이기도 하다.
+ *
  * 팔고 있는 파일에서 직접 잰 것(public/market/.../seeder.compact.m1.glb,
  * cultivator.compact.m1.glb):
  *

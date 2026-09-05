@@ -1,6 +1,6 @@
 {
   "schema": "clunk.listing-facts.v1",
-  "generatedAt": "2026-09-05T13:55:00.334Z",
+  "generatedAt": "2026-09-05T14:21:37.973Z",
   "sources": [
     "outputs\\market-launch\\wave1\\upload-manifest.json",
     "tmp\\listings-snapshot.json",
@@ -2171,7 +2171,7 @@
         1.6869,
         3.16
       ],
-      "byteLength": 427976,
+      "byteLength": 427952,
       "format": "GLB",
       "animatedParts": [
         "gaugeWheelLeft",
@@ -2409,7 +2409,7 @@
         2.2452,
         3.8
       ],
-      "byteLength": 1663468,
+      "byteLength": 1675160,
       "format": "GLB",
       "animatedParts": [
         "openerDisc01Left",

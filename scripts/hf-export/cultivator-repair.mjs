@@ -21,6 +21,32 @@
  *      apart.
  *
  *   3. THE MACHINE FLOATS 19.3 mm. The root is dropped so the sweep tips touch.
+ *
+ * 2026-09-05 penetration pass. The inspector's new GEO-PART-PENETRATION rule read the file
+ * this pass had just put on sale and found one crossing left in it:
+ *
+ *   4. THE RIGHT DEPTH WHEEL WAS STILL IN TINE 7'S LANE. `gaugeWheelRight_rubber` crosses
+ *      `sweep7` — a 148.8 x 77 x 10.2 mm overlap box, 21 triangle pairs actually intersecting.
+ *      The left one is clear by 21.8 mm, so it is not the drop or the fork: it is where the
+ *      pass before this one chose to put them. It measured a lane between two whole tine
+ *      BOXES (141.4 mm) that is 0.4 mm wider than the wheel (141.0), let that through on a
+ *      12 mm slack, moved each wheel 14.7 mm off that centre to make the pair symmetric, and
+ *      then bolted the spokes on afterwards, adding 3.3 mm to each side of a wheel the
+ *      placement had already measured. Step 2a is re-cut: the spokes go on first and the
+ *      distance is searched on a 5 mm grid by triangle-to-triangle clearance, with the
+ *      direction decided for the pair. Left 145 mm inboard (26.7 mm clear), right 175 mm
+ *      (15.2 mm), the two carriers 100 and 70 mm off the nearest tine.
+ *
+ * THE THREE COMMANDS THAT REBUILD THE FILE ON SALE (verified byte-for-byte against the
+ * delivered file before this pass changed it, 2026-09-05):
+ *
+ *   node scripts/hf-export/cultivator-repair.mjs examples/harvest-frontier/runtime-animated/cultivator.compact.m1.glb
+ *   node scripts/hf-export/package-machine-glb.mjs examples/harvest-frontier/runtime-animated/cultivator.repaired.glb
+ *   node tmp/hf-speed/finish.mjs examples/harvest-frontier/runtime-animated/cultivator.repaired.m1.glb public/market/hf-cultivator-compact/cultivator.compact.m1.glb
+ *
+ * The default IN below is the file in the shop, which was true the first time this pass ran
+ * and has not been since: the shop holds this pass's own output now, whose `cultivatorFrame`
+ * and the rest are merged into `body_metal`. Pass the packaged export as argv[2], as above.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -31,6 +57,7 @@ import {
   wheelSymmetryDeg, retimeClip, solveGroundLoop,
   matOf, colourOf, addMesh, boxGeo, boxSpan,
 } from './machine-lib.mjs';
+import { soupDist } from './glb-surgery.mjs';
 
 /* The floor a wheel rolls on is its lug circle, not the box of its rest pose. */
 const rollingFloor = [];
@@ -189,99 +216,6 @@ root.position.y -= beforeGround;
 scene.updateMatrixWorld(true);
 report.ground = { beforeMm: mm(beforeGround), afterMm: mm(exactBox(scene).min.y) };
 
-/* -------------------------- 2a. the depth wheels run on the ground, between the tines */
-/* Measured on this file: `gaugeWheelLeft/Right` hang with their lowest vertex at y 102.5 mm.
- * The wheel that sets working depth was 102 mm above the ground it sets that depth against.
- * Dropping it alone is not enough - at ground level it cuts straight through sweep1 / sweep7 -
- * so each wheel is first moved into the clear lane between two tine ranks (found by measuring
- * the tine boxes, not by a constant: the ranks are not mirror images), and then dropped until
- * its own largest radius touches. The fork and the two supports follow it in, and their lower
- * ends are stretched down to the new axle so the wheel stays carried. */
-{
-  const wheels = [];
-  /* The lanes between the tine ranks, measured on the tines themselves. They are NOT mirror
-     images: every sweep is bolted 25.2 mm to one side of its own shank, so the left lane
-     centres on -1084.7 and the right on +1055.3. The wheels go on the SAME |z| — the mean of
-     the two — because a machine with one wheel 29 mm further out than the other is the defect
-     the audit reported; the residual clearance to the nearest sweep is measured and reported. */
-  const tineBoxes = [];
-  for (let t = 1; t <= 7; t += 1) tineBoxes.push(exactBox(node(scene, `pivottine${String(t).padStart(2, '0')}`)));
-  const laneCentres = {};
-  for (const [side, sign] of [['Left', -1], ['Right', 1]]) {
-    const wheelBox = exactBox(node(scene, `gaugeWheel${side}`));
-    const halfWidth = (wheelBox.max.z - wheelBox.min.z) / 2;
-    const lanes = tineBoxes.map((b) => ({ min: b.min.z, max: b.max.z })).sort((a, b) => a.min - b.min);
-    let best = null;
-    for (let i = 0; i + 1 < lanes.length; i += 1) {
-      const width = lanes[i + 1].min - lanes[i].max;
-      if (width < halfWidth * 2 - 0.012) continue;   // the tine box is its widest sweep, not its width at wheel height
-      const centre = (lanes[i].max + lanes[i + 1].min) / 2;
-      if (sign * centre <= 0) continue;
-      const move = Math.abs(centre - (wheelBox.min.z + wheelBox.max.z) / 2);
-      if (!best || move < best.move) best = { centre, width, move };
-    }
-    if (!best) throw new Error(`gaugeWheel${side}: no clear lane between the tines`);
-    laneCentres[side] = best;
-  }
-  const symmetric = (Math.abs(laneCentres.Left.centre) + Math.abs(laneCentres.Right.centre)) / 2;
-  for (const [side, sign] of [['Left', -1], ['Right', 1]]) {
-    const pivot = node(scene, `pivotgaugeWheel${side}`);
-    const wheel = node(scene, `gaugeWheel${side}`);
-    const wheelBox = exactBox(wheel);
-    const halfWidth = (wheelBox.max.z - wheelBox.min.z) / 2;
-    const best = { centre: sign * symmetric, width: laneCentres[side].width };
-    const deltaZ = best.centre - (wheelBox.min.z + wheelBox.max.z) / 2;
-    const axleWorld = new THREE.Vector3().setFromMatrixPosition(wheel.matrixWorld);
-    const radius = radiusAbout(wheel, axleWorld, [0, 0, 1]);
-    const deltaY = -(axleWorld.y - radius);
-    for (const name of [`pivotgaugeWheel${side}`, `collidergaugeWheel${side}`, `gaugeWheel${side}fork`]) {
-      const part = scene.getObjectByName(name);
-      if (!part) continue;
-      part.position.z += deltaZ;
-      part.position.y += deltaY;
-    }
-    for (const name of [`gaugeWheel${side}supportFront`, `gaugeWheel${side}supportRear`]) {
-      const part = node(scene, name);
-      const box = exactBox(part);
-      const height = box.max.y - box.min.y;
-      part.position.z += deltaZ;
-      part.scale.y *= (height - deltaY) / height;
-      scene.updateMatrixWorld(true);
-      const now = exactBox(part);
-      part.position.y += box.max.y - now.max.y;
-    }
-    scene.updateMatrixWorld(true);
-    wheel.updateMatrixWorld(true);
-    rollingFloor.push(new THREE.Vector3().setFromMatrixPosition(wheel.matrixWorld).y - radius);
-    /* how close the wheel now runs to the sweeps either side of it, on the sweeps' own boxes */
-    const now = exactBox(wheel);
-    let nearest = Infinity; let nearestName = null;
-    for (let t = 1; t <= 7; t += 1) {
-      const sweep = exactBox(node(scene, `sweep${String(t).padStart(2, '0')}`));
-      const dz = Math.max(sweep.min.z - now.max.z, now.min.z - sweep.max.z);
-      const dx = Math.max(sweep.min.x - now.max.x, now.min.x - sweep.max.x);
-      const dy = Math.max(sweep.min.y - now.max.y, now.min.y - sweep.max.y);
-      const clearance = Math.max(dx, dy, dz);
-      if (clearance < nearest) { nearest = clearance; nearestName = `sweep${String(t).padStart(2, '0')}`; }
-    }
-    wheels.push({
-      node: pivot.name,
-      bottomWasMm: mm(wheelBox.min.y), bottomNowMm: mm(now.min.y),
-      droppedMm: mm(-deltaY), movedInboardMm: mm(-sign * deltaZ),
-      laneCentreMm: mm(laneCentres[side].centre), placedAtMm: mm(best.centre),
-      wheelWidthMm: mm(halfWidth * 2), radiusMm: mm(radius),
-      axleZmm: mm(new THREE.Vector3().setFromMatrixPosition(wheel.matrixWorld).z),
-      nearestSweep: nearestName, clearanceToSweepMm: mm(nearest),
-    });
-  }
-  report.gaugeWheels = {
-    why: 'the part that sets working depth ran 102.5 mm clear of the ground, and at ground level it cut through sweep1 and sweep7',
-    wheels,
-    axleSymmetryMm: +Math.abs(Math.abs(wheels[0].axleZmm) - Math.abs(wheels[1].axleZmm)).toFixed(1),
-    note: 'the two lanes are 29.4 mm apart in |z| because every sweep is bolted 25.2 mm to one side of its own shank; the wheels are placed on the mean so the machine is symmetric, and the box overlap that leaves against the nearest sweep is reported above',
-  };
-}
-
 /* ------------------ 2b. a smooth wheel turning looks like one standing still */
 {
   const spoked = [];
@@ -302,6 +236,247 @@ report.ground = { beforeMm: mm(beforeGround), afterMm: mm(exactBox(scene).min.y)
   }
   scene.updateMatrixWorld(true);
   report.wheelSpokes = { why: 'the only round thing that moves on this machine had no feature to follow', wheels: spoked };
+}
+
+/* ------- 2a. the depth wheels run on the ground, in the lane the clearance is measured in */
+/* Measured on the packaged export: `gaugeWheelLeft/Right` hang with their lowest vertex at
+ * y 102.5 mm — the wheel that sets working depth was 102 mm above the ground it sets that
+ * depth against. Dropping it alone is not enough: at ground level it cuts straight through
+ * sweep1 / sweep7. So each wheel is dropped until its own largest radius touches, and then
+ * moved sideways into the lane between two tine ranks. The fork and the two supports follow
+ * it, and the supports' lower ends are stretched down to the new axle so the wheel stays
+ * carried.
+ *
+ * 2026-09-05, second cut. The pass before this one chose the lane from the tines' own boxes
+ * and then put BOTH wheels on the mean of the two |z| values, so that the machine would be
+ * symmetric. Its own report recorded what that cost: -14.9 mm of box overlap on each side.
+ * The inspector's new GEO-PART-PENETRATION rule then measured the right-hand one at the
+ * triangles and found it real — `gaugeWheelRight_rubber` through `sweep7`, a 148.8 × 77 ×
+ * 10.2 mm overlap box and 21 crossing triangle pairs. Three things were wrong with it:
+ *
+ *   - the lane it measured is the gap between two whole tine BOXES, 141.4 mm wide, and the
+ *     wheel is 141.0 mm wide: 0.2 mm a side even at the lane's own centre, and the `- 0.012`
+ *     slack in the width test let that count as clear;
+ *   - the mean then moved each wheel 14.7 mm off that centre, which is 14.5 mm more than the
+ *     lane had;
+ *   - and the spokes went on AFTER the placement, adding 3.3 mm to each side of the wheel
+ *     that the placement never saw.
+ *
+ * All three are one mistake: a distance was reasoned about instead of measured. This pass
+ * measures. The spokes go on before the search (2b runs first now), and the offset is chosen
+ * on a 5 mm grid by the triangle-to-triangle clearance the wheel actually has there —
+ * `soupDist`, the same search the tractor's implement uses — with the smallest move winning
+ * among offsets that measure the same. On this file the right wheel's best lane position
+ * measures 15.2 mm of daylight and the left's 26.7 mm, and the two are NOT at mirrored |z|:
+ * every sweep is bolted 25.2 mm to one side of its own shank, so the clear lane is displaced
+ * the same way on both sides of the machine. Forcing the pair onto one |z| costs half of it —
+ * the best mirrored placement measures 7.3 mm. The asymmetry that leaves is reported.
+ *
+ * Outboard of the last tine there is far more room, 101 mm, and it is not reachable: the two
+ * supports that carry each wheel reach z 1265 and the machine's own end plate stops at 1580,
+ * so any offset big enough to clear sweep7 that way hangs the supports off the end of the
+ * frame. The search is capped at the machine's own half width, and that cap is measured on
+ * the parts that do not move rather than written down. */
+{
+  const GRID_MM = 5;
+  const REACH_MM = 300;
+  const CAP = 0.120;                    // 120 mm: past that a part is not in this wheel's way
+  const SIDES = [['Left', -1], ['Right', 1]];
+  const CARRIERS = ['fork', 'supportFront', 'supportRear'];
+
+  /** Every triangle of a subtree, in world space. */
+  const worldTris = (object) => {
+    object.updateMatrixWorld(true);
+    const out = [];
+    object.traverse((n) => {
+      if (!n.isMesh) return;
+      const position = n.geometry.getAttribute('position');
+      const index = n.geometry.getIndex();
+      const count = index ? index.count : position.count;
+      const vertex = new THREE.Vector3();
+      for (let i = 0; i < count; i += 3) {
+        const triangle = [];
+        for (let k = 0; k < 3; k += 1) {
+          const v = index ? index.getX(i + k) : i + k;
+          triangle.push(vertex.fromBufferAttribute(position, v).applyMatrix4(n.matrixWorld).toArray());
+        }
+        out.push(triangle);
+      }
+    });
+    return out;
+  };
+  const triLo = (t, i) => Math.min(t[0][i], t[1][i], t[2][i]);
+  const triHi = (t, i) => Math.max(t[0][i], t[1][i], t[2][i]);
+  const soupBox = (tris) => ({
+    lo: [0, 1, 2].map((i) => Math.min(...tris.map((t) => triLo(t, i)))),
+    hi: [0, 1, 2].map((i) => Math.max(...tris.map((t) => triHi(t, i)))),
+  });
+  /* how far from the centreline a triangle soup reaches. An empty soup reaches nowhere: the
+     collider proxies were deleted in step 2 and their marker nodes are still here, carrying
+     no geometry at all. */
+  const halfSpan = (tris) => {
+    if (!tris.length) return 0;
+    const b = soupBox(tris);
+    return Math.max(Math.abs(b.lo[2]), Math.abs(b.hi[2]));
+  };
+
+  const partsOf = (side) => [
+    node(scene, `pivotgaugeWheel${side}`),
+    ...CARRIERS.map((c) => scene.getObjectByName(`gaugeWheel${side}${c}`)),
+    scene.getObjectByName(`collidergaugeWheel${side}`),
+  ].filter(Boolean);
+
+  /* Both wheels move, so neither is an obstacle for the other. */
+  const movingMeshes = new Set();
+  for (const [side] of SIDES) for (const part of partsOf(side)) part.traverse((n) => { if (n.isMesh) movingMeshes.add(n); });
+
+  /* The machine's own width, measured on the parts that do NOT move: nothing that moves here
+     may end up outside it, or this fix would widen what is on sale. */
+  let machineHalfZ = 0;
+  const named = [];
+  for (const m of meshes(scene)) {
+    if (movingMeshes.has(m)) continue;
+    const tris = worldTris(m);
+    if (!tris.length) continue;
+    machineHalfZ = Math.max(machineHalfZ, halfSpan(tris));
+    named.push({ name: m.name, tris });
+  }
+
+  /* 1. down first: the drop does not depend on z, and the search wants the wheel at the height
+        it will ship at. */
+  const dropped = {};
+  for (const [side] of SIDES) {
+    const wheel = node(scene, `gaugeWheel${side}`);
+    const bottomWasMm = mm(exactBox(wheel).min.y);
+    const axleWorld = new THREE.Vector3().setFromMatrixPosition(wheel.matrixWorld);
+    const radius = radiusAbout(wheel, axleWorld, [0, 0, 1]);
+    const deltaY = -(axleWorld.y - radius);
+    for (const name of [`pivotgaugeWheel${side}`, `collidergaugeWheel${side}`, `gaugeWheel${side}fork`]) {
+      const part = scene.getObjectByName(name);
+      if (part) part.position.y += deltaY;
+    }
+    for (const name of [`gaugeWheel${side}supportFront`, `gaugeWheel${side}supportRear`]) {
+      const part = node(scene, name);
+      const box = exactBox(part);
+      const height = box.max.y - box.min.y;
+      part.scale.y *= (height - deltaY) / height;
+      scene.updateMatrixWorld(true);
+      part.position.y += box.max.y - exactBox(part).max.y;
+    }
+    scene.updateMatrixWorld(true);
+    dropped[side] = { deltaY, radius, bottomWasMm };
+  }
+
+  /* 2. then sideways, by measurement.
+   *
+   * Both wheels have to end up in the SAME lane — a machine with one depth wheel between two
+   * shanks and the other hanging off the far end of the frame is not a machine. So the
+   * direction is decided for the pair before either wheel moves: each side is scanned inboard
+   * and outboard, and the direction each side can offer is scored by the side that offers
+   * less. Measured on this file, inboard scores 15.2 mm and outboard 10.2 — the right-hand
+   * wheel does have 47.2 mm out past sweep7, but its opposite number does not: sweep1 reaches
+   * 50 mm further out than sweep7 does, and by the time the left wheel would clear it the
+   * wheel is outside the machine's own 1580 mm half width. Inboard wins on the measurement,
+   * and inside that direction each side then takes its own best distance. */
+  const measure = {};
+  for (const [side, sign] of SIDES) {
+    const pivot = node(scene, `pivotgaugeWheel${side}`);
+    const parts = partsOf(side);
+    const wheelTris = worldTris(pivot);
+    const window = soupBox(wheelTris);
+    /* The move is purely sideways, so only what shares this wheel's x and y window can ever be
+       in the way. Filtering once, per triangle, is what makes a 5 mm grid affordable. */
+    const inWindow = [];
+    for (const other of named) {
+      const kept = other.tris.filter((t) => triHi(t, 0) >= window.lo[0] - CAP && triLo(t, 0) <= window.hi[0] + CAP
+        && triHi(t, 1) >= window.lo[1] - CAP && triLo(t, 1) <= window.hi[1] + CAP);
+      if (kept.length) inWindow.push({ name: other.name, tris: kept });
+    }
+    const obstacles = inWindow.flatMap((o) => o.tris);
+    /* how far this side may still travel outward before the wheel, its fork or a support
+       leaves the machine */
+    const outwardRoomMm = mm(machineHalfZ - Math.max(...parts.map((p) => halfSpan(worldTris(p)))));
+
+    /* `inboard` is positive towards the centreline on BOTH sides, so the two profiles can be
+       compared to each other. Distances nearest to where the wheel already stands come first,
+       so the smallest move wins among distances that measure the same. */
+    const scan = [];
+    for (let i = 0; i <= REACH_MM; i += GRID_MM) {
+      for (const inboard of i === 0 ? [0] : [i, -i]) {
+        const dz = (-sign * inboard) / 1000;
+        if (-inboard > outwardRoomMm) { scan.push({ inboardMm: inboard, clearanceMm: null, why: 'the wheel or a support would be outside the machine' }); continue; }
+        const moved = wheelTris.map((t) => t.map((p) => [p[0], p[1], p[2] + dz]));
+        scan.push({ inboardMm: inboard, clearanceMm: mm(soupDist(moved, obstacles, CAP)) });
+      }
+    }
+    const bestIn = scan.filter((s) => s.clearanceMm !== null && s.inboardMm > 0).reduce((a, b) => (b.clearanceMm > a.clearanceMm ? b : a), { clearanceMm: -1 });
+    const bestOut = scan.filter((s) => s.clearanceMm !== null && s.inboardMm < 0).reduce((a, b) => (b.clearanceMm > a.clearanceMm ? b : a), { clearanceMm: -1 });
+    measure[side] = { pivot, parts, wheelTris, inWindow, obstacles, window, outwardRoomMm, scan, bestIn, bestOut };
+  }
+
+  const inboardScore = Math.min(measure.Left.bestIn.clearanceMm, measure.Right.bestIn.clearanceMm);
+  const outboardScore = Math.min(measure.Left.bestOut.clearanceMm, measure.Right.bestOut.clearanceMm);
+  const direction = inboardScore >= outboardScore ? 'inboard' : 'outboard';
+
+  const wheels = [];
+  for (const [side, sign] of SIDES) {
+    const m = measure[side];
+    const pivot = m.pivot;
+    const parts = m.parts;
+    const wheel = node(scene, `gaugeWheel${side}`);
+    const carriers = parts.filter((p) => p !== pivot);
+    const nearest = (tris, limit = 6) => m.inWindow
+      .map((o) => ({ part: o.name, gapMm: mm(soupDist(tris, o.tris, CAP)) }))
+      .filter((r) => r.gapMm < mm(CAP))
+      .sort((a, b) => a.gapMm - b.gapMm)
+      .slice(0, limit);
+
+    const chosen = direction === 'inboard' ? m.bestIn : m.bestOut;
+    if (!chosen || chosen.clearanceMm < 5) {
+      throw new Error(`pivotgaugeWheel${side}: no ${direction} distance within ${REACH_MM} mm gives 5 mm of daylight (best ${chosen?.clearanceMm} mm)`);
+    }
+    const before = { wheelZmm: [mm(m.window.lo[2]), mm(m.window.hi[2])], nearest: nearest(m.wheelTris) };
+    for (const part of parts) part.position.z += (-sign * chosen.inboardMm) / 1000;
+    scene.updateMatrixWorld(true);
+
+    const afterWheel = worldTris(pivot);
+    const afterCarriers = carriers.flatMap((p) => worldTris(p));
+    const afterBox = soupBox(afterWheel);
+    const axleAfter = new THREE.Vector3().setFromMatrixPosition(wheel.matrixWorld);
+    rollingFloor.push(axleAfter.y - dropped[side].radius);
+    const tineTris = m.inWindow.filter((o) => /^(pivottine|tine|sweep)/i.test(o.name)).flatMap((o) => o.tris);
+    wheels.push({
+      node: pivot.name,
+      moved: parts.map((p) => p.name),
+      bottomWasMm: dropped[side].bottomWasMm,
+      bottomNowMm: mm(exactBox(wheel).min.y),
+      droppedMm: mm(-dropped[side].deltaY),
+      movedInboardMm: chosen.inboardMm,
+      radiusMm: mm(dropped[side].radius),
+      wheelWidthMm: mm(afterBox.hi[2] - afterBox.lo[2]),
+      axleZmm: mm(axleAfter.z),
+      wheelZmm: [mm(afterBox.lo[2]), mm(afterBox.hi[2])],
+      before,
+      surfaceClearanceMm: chosen.clearanceMm,
+      tineAndSweepClearanceMm: mm(soupDist(afterWheel, tineTris, CAP)),
+      carrierToTineClearanceMm: mm(soupDist(afterCarriers, tineTris, CAP)),
+      nearest: nearest(afterWheel),
+      bestInboardMm: m.bestIn.clearanceMm,
+      bestOutboardMm: m.bestOut.clearanceMm,
+      roomToMachineEdgeMm: mm(machineHalfZ - Math.max(...parts.map((p) => halfSpan(worldTris(p))))),
+      scan: m.scan,
+    });
+  }
+  report.gaugeWheels = {
+    why: 'the part that sets working depth ran 102.5 mm clear of the ground, and at ground level it cut through sweep1 and sweep7',
+    placedBy: `soupDist on a ${GRID_MM} mm grid over +-${REACH_MM} mm, capped by the machine's own half width`,
+    machineHalfZmm: mm(machineHalfZ),
+    direction,
+    directionScoreMm: { inboard: inboardScore, outboard: outboardScore },
+    wheels,
+    axleAsymmetryMm: +Math.abs(Math.abs(wheels[0].axleZmm) - Math.abs(wheels[1].axleZmm)).toFixed(1),
+    note: 'the two wheels do not sit on one |z|: every sweep is bolted 25.2 mm to one side of its own shank, so the clear lane is displaced the same way on both sides of the machine and a mirrored pair puts one wheel in a blade. Measured here, the best mirrored placement leaves 7.3 mm; letting each side take its own lane centre leaves 26.7 and 15.2 and moves the pair 30 mm apart in |z|.',
+  };
 }
 
 /* ---------------------- 3a. the gauge wheels roll at a real ground speed (2026-09-05) */

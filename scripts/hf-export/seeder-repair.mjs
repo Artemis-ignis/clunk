@@ -34,6 +34,31 @@
  * can land on a whole multiple of its own symmetry angle, the clip length follows from it,
  * and the two ground-driven mechanisms — the seed meter shaft and the hopper agitator —
  * are re-keyed to the same travel so the seed rate per metre does not change with it.
+ *
+ * 2026-09-05 penetration pass. The inspector's new GEO-PART-PENETRATION rule read the file
+ * this pass had just put on sale and found the same crossing on all four rows, 8 findings:
+ *
+ *   4. THE OPENER DISC'S AXLE BOSS RAN THROUGH THE DEPTH WHEEL. Reported as
+ *      `gaugeWheel0N_rubber` through `openerDisc0NRight_metal`, 113.3 mm. Measured part by
+ *      part it is not the wheel and not the disc: the blade is 54.1 mm clear of the wheel and
+ *      its rim 83.5 mm, exactly as a planter is built. What crosses is the boss on the disc's
+ *      own axle — a 142.4 mm barrel, a 161.2 mm cap and four 105 mm bolts, all pointing
+ *      outboard into a depth wheel whose own hub barrel reaches back the other way. Two
+ *      bosses on two axles, pointed at each other. Each boss is cut back along its axle to
+ *      stop 20 mm short of the part outboard of it — the depth wheel for the right disc, the
+ *      right disc for the left one, whose boss measured 0.0 mm to it and was never reported
+ *      because the two discs share a name stem. Step 3e3. No triangle is added or removed.
+ *
+ * THE THREE COMMANDS THAT REBUILD THE FILE ON SALE (verified byte-for-byte against the
+ * delivered file before this pass changed it, 2026-09-05):
+ *
+ *   node scripts/hf-export/seeder-repair.mjs examples/harvest-frontier/runtime-animated/seeder.compact.m1.glb
+ *   node scripts/hf-export/package-machine-glb.mjs examples/harvest-frontier/runtime-animated/seeder.repaired.glb
+ *   node tmp/hf-speed/finish.mjs examples/harvest-frontier/runtime-animated/seeder.repaired.m1.glb public/market/hf-seeder-compact/seeder.compact.m1.glb
+ *
+ * The default IN below is the file in the shop, which was true the first time this pass ran
+ * and has not been since: the shop holds this pass's own output now, whose row units are
+ * merged into `body_metal`. Pass the packaged export as argv[2], as above.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -327,6 +352,93 @@ scene.updateMatrixWorld(true);
   report.wheelSpokes = {
     why: 'the render measured 0.3 % of silhouette change over the whole sow clip: everything that moves on this machine is a smooth circle',
     wheels: spoked,
+  };
+}
+
+/* ------------- 3e3. the opener disc's axle boss stops before the depth wheel (2026-09-05) */
+/* The inspector's new GEO-PART-PENETRATION rule reads `gaugeWheel0N_rubber` as passing
+ * through `openerDisc0NRight_metal` by 113.3 mm on all four rows (8 findings). Measured on
+ * the packaged export, part by part, the wheel is NOT in the disc's lane — the disc itself is
+ * the clearest thing near it:
+ *
+ *   openerPlate_1    the disc,      z -1169.5..-1094.5    54.1 mm clear of the wheel
+ *   openerDiscRim_1                 z -1147.6..-1116.4    83.5 mm
+ *   openerWearFace_1                z -1180.0..-1168.0   127.6 mm
+ *   openerHub_1      the axle boss, z -1149.2..-1006.8     4.1 mm
+ *   openerHubCap_1                  z -1143.6.. -982.4     0.0 mm   <- drawn through
+ *   openerBolt3_1                   z -1111.0.. -1006.0    0.0 mm   <- drawn through
+ *
+ * The gauge wheel runs beside its disc exactly as a planter's does, 54 mm off the blade's
+ * face. What crosses is the disc's OWN axle boss: a 142.4 mm barrel with a 161.2 mm cap and
+ * four 105 mm bolts, all pointing outboard along the axle — straight into the depth wheel,
+ * whose own hub barrel reaches back the other way to z -1040.4 (-1048.4 with its spokes).
+ * Two bosses on two different axles, pointed at each other, overlapping by 66 mm. Moving the
+ * wheel out of that is not possible and would not be right: measured on a 5 mm grid over
+ * +-400 mm, the only offset at which the wheel is clear of everything is +160 mm, which is
+ * outside its own row unit and inside the next row's spring, and it would take the depth
+ * wheel off the blade whose depth it sets.
+ *
+ * The LEFT disc has the same boss and it reaches z -1118.4, which measures 0.0 mm to the
+ * RIGHT disc's plate: the same defect one part further in. The rule does not report that one
+ * because the two discs share a name stem, but it is the same mistake and it is fixed here
+ * with the same rule.
+ *
+ * Each boss is cut back along its own axle until it stops CLEAR_MM short of the nearest
+ * surface outboard of it on that axle — the depth wheel for the right disc, the right disc for
+ * the left one — with its inboard end left exactly where it is. The limit is measured on this
+ * file every run, not written down. No triangle is added or removed and nothing else moves:
+ * each boss is a cylinder along its visual node's local +Y, which that node's 90 deg X
+ * rotation maps to world +z, so only that node's scale.y and position.y change. The eight
+ * discs share one geometry for each part, which is why this is done per node and never on the
+ * vertices. */
+{
+  const CLEAR_MM = 20;
+  const BOSS = /^opener(HubCap|Hub|Bolt\d)(_\d+)?$/;
+  const bosses = [];
+  for (let r = 1; r <= 4; r += 1) {
+    const tag = String(r).padStart(2, '0');
+    /* what stands outboard of each disc on its own axle, measured, including the spokes the
+       step above put on the wheel */
+    const outboardOf = {
+      Right: `gaugeWheel${tag}`,
+      Left: `openerDisc${tag}Right`,
+    };
+    for (const side of ['Left', 'Right']) {
+      const neighbour = node(scene, outboardOf[side]);
+      const limit = exactBox(neighbour).min.z - CLEAR_MM / 1000;
+      const disc = node(scene, `openerDisc${tag}${side}`);
+      const parts = [];
+      disc.traverse((n) => { if (n.isMesh && BOSS.test(n.name)) parts.push(n); });
+      if (!parts.length) throw new Error(`openerDisc${tag}${side}: no axle boss to cut`);
+      for (const part of parts) {
+        const before = exactBox(part);
+        if (before.max.z <= limit) continue;                      // already short enough
+        const centre = new THREE.Vector3().setFromMatrixPosition(part.matrixWorld);
+        const halfBefore = before.max.z - centre.z;
+        const halfAfter = (limit - before.min.z) / 2;
+        if (halfAfter <= 0) throw new Error(`${part.name}: the limit ${mm(limit)} mm is inboard of the boss's own root`);
+        part.scale.y *= halfAfter / halfBefore;
+        part.position.y += (before.min.z + halfAfter) - centre.z;
+        scene.updateMatrixWorld(true);
+        const after = exactBox(part);
+        if (Math.abs(after.min.z - before.min.z) > 0.0001 || Math.abs(after.max.z - limit) > 0.0001) {
+          throw new Error(`${part.name}: the cut did not land — ${mm(after.min.z)}..${mm(after.max.z)} against ${mm(before.min.z)}..${mm(limit)}`);
+        }
+        bosses.push({
+          part: part.name, disc: `openerDisc${tag}${side}`,
+          stopsBefore: outboardOf[side],
+          zWasMm: [mm(before.min.z), mm(before.max.z)], zNowMm: [mm(after.min.z), mm(after.max.z)],
+          lengthWasMm: mm(before.max.z - before.min.z), lengthNowMm: mm(after.max.z - after.min.z),
+          clearanceMm: mm(exactBox(neighbour).min.z - after.max.z),
+        });
+      }
+    }
+  }
+  scene.updateMatrixWorld(true);
+  report.openerAxleBoss = {
+    why: 'the disc\'s axle boss was drawn 142 mm outboard along its own axle and ran into the depth wheel\'s hub barrel coming the other way; the disc itself was 54 mm clear all along',
+    clearanceMm: CLEAR_MM,
+    cut: bosses,
   };
 }
 

@@ -208,41 +208,6 @@
     "beforeMm": 22.3,
     "afterMm": 0
   },
-  "gaugeWheels": {
-    "why": "the part that sets working depth ran 102.5 mm clear of the ground, and at ground level it cut through sweep1 and sweep7",
-    "wheels": [
-      {
-        "node": "pivotgaugeWheelLeft",
-        "bottomWasMm": 102.5,
-        "bottomNowMm": 6.2,
-        "droppedMm": 96.3,
-        "movedInboardMm": 150,
-        "laneCentreMm": -1084.7,
-        "placedAtMm": -1070,
-        "wheelWidthMm": 141,
-        "radiusMm": 248.7,
-        "axleZmm": -1070,
-        "nearestSweep": "sweep02",
-        "clearanceToSweepMm": -14.9
-      },
-      {
-        "node": "pivotgaugeWheelRight",
-        "bottomWasMm": 102.5,
-        "bottomNowMm": 6.2,
-        "droppedMm": 96.3,
-        "movedInboardMm": 150,
-        "laneCentreMm": 1055.3,
-        "placedAtMm": 1070,
-        "wheelWidthMm": 141,
-        "radiusMm": 248.7,
-        "axleZmm": 1070,
-        "nearestSweep": "sweep07",
-        "clearanceToSweepMm": -14.9
-      }
-    ],
-    "axleSymmetryMm": 0,
-    "note": "the two lanes are 29.4 mm apart in |z| because every sweep is bolted 25.2 mm to one side of its own shank; the wheels are placed on the mean so the machine is symmetric, and the box overlap that leaves against the nearest sweep is reported above"
-  },
   "wheelSpokes": {
     "why": "the only round thing that moves on this machine had no feature to follow",
     "wheels": [
@@ -257,6 +222,1132 @@
         "colour": "#0f120c"
       }
     ]
+  },
+  "gaugeWheels": {
+    "why": "the part that sets working depth ran 102.5 mm clear of the ground, and at ground level it cut through sweep1 and sweep7",
+    "placedBy": "soupDist on a 5 mm grid over +-300 mm, capped by the machine's own half width",
+    "machineHalfZmm": 1580,
+    "direction": "inboard",
+    "directionScoreMm": {
+      "inboard": 15.2,
+      "outboard": 10.2
+    },
+    "wheels": [
+      {
+        "node": "pivotgaugeWheelLeft",
+        "moved": [
+          "pivotgaugeWheelLeft",
+          "gaugeWheelLeftfork",
+          "gaugeWheelLeftsupportFront",
+          "gaugeWheelLeftsupportRear",
+          "collidergaugeWheelLeft"
+        ],
+        "bottomWasMm": 102.5,
+        "bottomNowMm": 6.2,
+        "droppedMm": 96.3,
+        "movedInboardMm": 145,
+        "radiusMm": 248.7,
+        "wheelWidthMm": 147.6,
+        "axleZmm": -1075,
+        "wheelZmm": [
+          -1148.8,
+          -1001.2
+        ],
+        "before": {
+          "wheelZmm": [
+            -1293.8,
+            -1146.2
+          ],
+          "nearest": [
+            {
+              "part": "tine1",
+              "gapMm": 0
+            },
+            {
+              "part": "sweep1",
+              "gapMm": 0
+            },
+            {
+              "part": "sweepMarker1",
+              "gapMm": 116.1
+            }
+          ]
+        },
+        "surfaceClearanceMm": 26.7,
+        "tineAndSweepClearanceMm": 26.7,
+        "carrierToTineClearanceMm": 100,
+        "nearest": [
+          {
+            "part": "sweep2",
+            "gapMm": 26.7
+          },
+          {
+            "part": "sweep1",
+            "gapMm": 27.2
+          },
+          {
+            "part": "tine1",
+            "gapMm": 76.2
+          },
+          {
+            "part": "tine2",
+            "gapMm": 86.2
+          },
+          {
+            "part": "sweepMarker1",
+            "gapMm": 118.8
+          }
+        ],
+        "bestInboardMm": 26.7,
+        "bestOutboardMm": 10.2,
+        "roomToMachineEdgeMm": 431.2,
+        "scan": [
+          {
+            "inboardMm": 0,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 5,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -5,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 10,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -10,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 15,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -15,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 20,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -20,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 25,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -25,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 30,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -30,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 35,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -35,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 40,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -40,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 45,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -45,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 50,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -50,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 55,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -55,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 60,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -60,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 65,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -65,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 70,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -70,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 75,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -75,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 80,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -80,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 85,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -85,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 90,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -90,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 95,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -95,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 100,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -100,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 105,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -105,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 110,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -110,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 115,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -115,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 120,
+            "clearanceMm": 2.2
+          },
+          {
+            "inboardMm": -120,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 125,
+            "clearanceMm": 7.2
+          },
+          {
+            "inboardMm": -125,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 130,
+            "clearanceMm": 12.2
+          },
+          {
+            "inboardMm": -130,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 135,
+            "clearanceMm": 17.2
+          },
+          {
+            "inboardMm": -135,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 140,
+            "clearanceMm": 22.2
+          },
+          {
+            "inboardMm": -140,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 145,
+            "clearanceMm": 26.7
+          },
+          {
+            "inboardMm": -145,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 150,
+            "clearanceMm": 21.8
+          },
+          {
+            "inboardMm": -150,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 155,
+            "clearanceMm": 16.9
+          },
+          {
+            "inboardMm": -155,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 160,
+            "clearanceMm": 12
+          },
+          {
+            "inboardMm": -160,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 165,
+            "clearanceMm": 7.3
+          },
+          {
+            "inboardMm": -165,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 170,
+            "clearanceMm": 2.8
+          },
+          {
+            "inboardMm": -170,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 175,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -175,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 180,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -180,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 185,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -185,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 190,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -190,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 195,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -195,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 200,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -200,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 205,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -205,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 210,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -210,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 215,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -215,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 220,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -220,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 225,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -225,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 230,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -230,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 235,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -235,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 240,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -240,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 245,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -245,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 250,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -250,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 255,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -255,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 260,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -260,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 265,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -265,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 270,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -270,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 275,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -275,
+            "clearanceMm": 1.1
+          },
+          {
+            "inboardMm": 280,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -280,
+            "clearanceMm": 5.6
+          },
+          {
+            "inboardMm": 285,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -285,
+            "clearanceMm": 10.2
+          },
+          {
+            "inboardMm": 290,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -290,
+            "clearanceMm": null,
+            "why": "the wheel or a support would be outside the machine"
+          },
+          {
+            "inboardMm": 295,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -295,
+            "clearanceMm": null,
+            "why": "the wheel or a support would be outside the machine"
+          },
+          {
+            "inboardMm": 300,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -300,
+            "clearanceMm": null,
+            "why": "the wheel or a support would be outside the machine"
+          }
+        ]
+      },
+      {
+        "node": "pivotgaugeWheelRight",
+        "moved": [
+          "pivotgaugeWheelRight",
+          "gaugeWheelRightfork",
+          "gaugeWheelRightsupportFront",
+          "gaugeWheelRightsupportRear",
+          "collidergaugeWheelRight"
+        ],
+        "bottomWasMm": 102.5,
+        "bottomNowMm": 6.2,
+        "droppedMm": 96.3,
+        "movedInboardMm": 175,
+        "radiusMm": 248.7,
+        "wheelWidthMm": 147.6,
+        "axleZmm": 1045,
+        "wheelZmm": [
+          971.2,
+          1118.8
+        ],
+        "before": {
+          "wheelZmm": [
+            1146.2,
+            1293.8
+          ],
+          "nearest": [
+            {
+              "part": "tine7",
+              "gapMm": 0
+            },
+            {
+              "part": "sweep7",
+              "gapMm": 0
+            },
+            {
+              "part": "sweepMarker7",
+              "gapMm": 116.1
+            }
+          ]
+        },
+        "surfaceClearanceMm": 15.2,
+        "tineAndSweepClearanceMm": 15.2,
+        "carrierToTineClearanceMm": 70,
+        "nearest": [
+          {
+            "part": "sweep6",
+            "gapMm": 15.2
+          },
+          {
+            "part": "sweep7",
+            "gapMm": 19.9
+          },
+          {
+            "part": "tine6",
+            "gapMm": 56.2
+          },
+          {
+            "part": "tine7",
+            "gapMm": 106.2
+          }
+        ],
+        "bestInboardMm": 15.2,
+        "bestOutboardMm": 47.2,
+        "roomToMachineEdgeMm": 461.2,
+        "scan": [
+          {
+            "inboardMm": 0,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 5,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -5,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 10,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -10,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 15,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -15,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 20,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -20,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 25,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -25,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 30,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -30,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 35,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -35,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 40,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -40,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 45,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -45,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 50,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -50,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 55,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -55,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 60,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -60,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 65,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -65,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 70,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -70,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 75,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -75,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 80,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -80,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 85,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -85,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 90,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -90,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 95,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -95,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 100,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -100,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 105,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -105,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 110,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -110,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 115,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -115,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 120,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -120,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 125,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -125,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 130,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -130,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 135,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -135,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 140,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -140,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 145,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -145,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 150,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -150,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 155,
+            "clearanceMm": 1.1
+          },
+          {
+            "inboardMm": -155,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 160,
+            "clearanceMm": 5.6
+          },
+          {
+            "inboardMm": -160,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 165,
+            "clearanceMm": 10.2
+          },
+          {
+            "inboardMm": -165,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 170,
+            "clearanceMm": 15
+          },
+          {
+            "inboardMm": -170,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 175,
+            "clearanceMm": 15.2
+          },
+          {
+            "inboardMm": -175,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 180,
+            "clearanceMm": 10.2
+          },
+          {
+            "inboardMm": -180,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 185,
+            "clearanceMm": 5.2
+          },
+          {
+            "inboardMm": -185,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 190,
+            "clearanceMm": 0.2
+          },
+          {
+            "inboardMm": -190,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 195,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -195,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 200,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -200,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 205,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -205,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 210,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -210,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 215,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -215,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 220,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -220,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 225,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -225,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 230,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -230,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 235,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -235,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": 240,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -240,
+            "clearanceMm": 2.2
+          },
+          {
+            "inboardMm": 245,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -245,
+            "clearanceMm": 7.2
+          },
+          {
+            "inboardMm": 250,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -250,
+            "clearanceMm": 12.2
+          },
+          {
+            "inboardMm": 255,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -255,
+            "clearanceMm": 17.2
+          },
+          {
+            "inboardMm": 260,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -260,
+            "clearanceMm": 22.2
+          },
+          {
+            "inboardMm": 265,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -265,
+            "clearanceMm": 27.2
+          },
+          {
+            "inboardMm": 270,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -270,
+            "clearanceMm": 32.2
+          },
+          {
+            "inboardMm": 275,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -275,
+            "clearanceMm": 37.2
+          },
+          {
+            "inboardMm": 280,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -280,
+            "clearanceMm": 42.2
+          },
+          {
+            "inboardMm": 285,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -285,
+            "clearanceMm": 47.2
+          },
+          {
+            "inboardMm": 290,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -290,
+            "clearanceMm": null,
+            "why": "the wheel or a support would be outside the machine"
+          },
+          {
+            "inboardMm": 295,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -295,
+            "clearanceMm": null,
+            "why": "the wheel or a support would be outside the machine"
+          },
+          {
+            "inboardMm": 300,
+            "clearanceMm": 0
+          },
+          {
+            "inboardMm": -300,
+            "clearanceMm": null,
+            "why": "the wheel or a support would be outside the machine"
+          }
+        ]
+      }
+    ],
+    "axleAsymmetryMm": 30,
+    "note": "the two wheels do not sit on one |z|: every sweep is bolted 25.2 mm to one side of its own shank, so the clear lane is displaced the same way on both sides of the machine and a mirrored pair puts one wheel in a blade. Measured here, the best mirrored placement leaves 7.3 mm; letting each side take its own lane centre leaves 26.7 and 15.2 and moves the pair 30 mm apart in |z|."
   },
   "tineSwingRate": {
     "why": "the tines flexed three times per clip at 26.5 km/h; over a third of the ground the same three flexes would be three times the flexing per metre of soil",
