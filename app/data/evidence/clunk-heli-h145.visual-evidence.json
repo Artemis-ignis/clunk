@@ -1276,12 +1276,12 @@
     "summary": "All 8 automated visual checks pass. No human review is required before this asset is used.",
     "summary_ko": "자동 화면 검사 8건이 모두 통과했습니다. 이 에셋을 쓰기 전에 사람이 따로 볼 필요는 없습니다.",
     "timings": {
-      "decodeMs": 268,
-      "poseMs": 87,
-      "renderMs": 820,
-      "measureMs": 283,
-      "totalMs": 3663,
-      "peakHeapBytes": 32050440
+      "decodeMs": 438,
+      "poseMs": 102,
+      "renderMs": 1041,
+      "measureMs": 358,
+      "totalMs": 4376,
+      "peakHeapBytes": 52215960
     },
     "limits": [
       "The frames come from Clunk's own offline rasteriser, not from a game engine's rendering path.",

@@ -27,6 +27,13 @@
  *          see them.
  *
  *   3. THE OPENERS SIT 13.6 mm UNDER THE GROUND at rest. The root is raised.
+ *
+ * 2026-09-05 speed pass. The mechanism pass left the twenty rolling parts agreeing with
+ * each other at 6.42 m/s — 23.1 km/h, three times what a seed drill sows at. `sow` is
+ * re-cut to 7.5 km/h (2.083 m/s): the ground distance is chosen from the ones every part
+ * can land on a whole multiple of its own symmetry angle, the clip length follows from it,
+ * and the two ground-driven mechanisms — the seed meter shaft and the hopper agitator —
+ * are re-keyed to the same travel so the seed rate per metre does not change with it.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -34,7 +41,8 @@ import { fileURLToPath } from 'node:url';
 import {
   THREE, loadGlb, saveGlb, meshes, node, worldBox, exactBox, mm, matOf, drawnTris,
   mergeByAnchor, pruneEmpty, dropHiddenProxies, bakeInstances, unshareGeometry, boxGeo, cylGeo, colourOf, addMesh,
-  quatTrack, setTrack, radiusAbout, boxSpan, angularSymmetryDeg, fixInvertedWinding,
+  quatTrack, setTrack, radiusAbout, boxSpan, fixInvertedWinding,
+  wheelSymmetryDeg, retimeClip, solveGroundLoop,
 } from './machine-lib.mjs';
 
 /* The floor a wheel rolls on is its lug circle, not the box of its rest pose. */
@@ -335,12 +343,23 @@ root.position.y -= beforeGround;
 scene.updateMatrixWorld(true);
 report.ground = { beforeMm: mm(beforeGround), afterMm: mm(exactBox(scene).min.y) };
 
-/* ---------------------------------------- 3e. one ground speed for every rolling part */
+/* ------------------- 3e. one ground speed for every rolling part, and a real one (2026-09-05) */
 /* Measured after seating: the ground is y = 0, so a wheel that touches it has a rolling
- * radius equal to the height of its own axle. The opener discs set the distance (7 whole
- * turns, the count the clip already had); the gauge and closing wheels are given the angle
- * that covers the SAME distance, snapped to their own segment spacing so the loop closes on
- * a pose that looks identical to the first frame. */
+ * radius equal to the height of its own axle.
+ *
+ * The pass before this one made the twenty rolling parts agree on one distance and took that
+ * distance from the clip as it was authored — seven whole turns of an opener disc, 11.2 m in
+ * 1.75 s. That is 6.42 m/s: 23 km/h, on a machine that sows at 6-8. The distance now comes
+ * from the speed. 7.5 km/h = 2.083 m/s, and the clip length follows from the distance every
+ * part can land on a whole multiple of its own symmetry angle (`solveGroundLoop`). Those
+ * angles are coarse here — three spokes make the gauge and closing wheels 120-degree
+ * symmetric, 400 mm and 343 mm of ground per step — which is exactly why the length has to
+ * move: 3.6 m cannot be cut into whole steps by both at once.
+ *
+ * The two mechanisms that are driven off the ground follow it:
+ *   - the seed meter shaft keeps the ratio to wheel travel the clip already carried, and
+ *   - the hopper agitator keeps its turns per metre of travel,
+ * both snapped to their own symmetry so the loop still closes. */
 {
   const rolling = [];
   for (let r = 1; r <= 4; r += 1) {
@@ -351,37 +370,129 @@ report.ground = { beforeMm: mm(beforeGround), afterMm: mm(exactBox(scene).min.y)
   const data = {};
   for (const name of rolling) {
     const wheel = node(scene, name);
-    const axis = new THREE.Vector3(0, 0, 1);
     data[name] = {
       radiusMm: mm(new THREE.Vector3().setFromMatrixPosition(wheel.matrixWorld).y),
-      stepDeg: angularSymmetryDeg(wheel, axis),
+      stepDeg: wheelSymmetryDeg(wheel, [0, 0, 1]),
     };
   }
-  const OPENER_TURNS = 7;
-  const distance = OPENER_TURNS * 2 * Math.PI * (data.openerDisc01Right.radiusMm / 1000);
+
+  /* the total turn a track carries, unwrapped: the quaternions are stored wrapped, so the
+     last key of a seven-turn spin reads the same as the first. */
+  const unwrappedDeg = (track, axis) => {
+    let total = 0;
+    let prev = null;
+    for (let i = 0; i < track.times.length; i += 1) {
+      const q = new THREE.Quaternion(track.values[i * 4], track.values[i * 4 + 1], track.values[i * 4 + 2], track.values[i * 4 + 3]);
+      const e = new THREE.Euler().setFromQuaternion(q, 'XYZ');
+      const cur = ([e.x, e.y, e.z][axis] * 180) / Math.PI;
+      if (prev !== null) {
+        let d = cur - prev;
+        while (d > 180) d -= 360;
+        while (d < -180) d += 360;
+        total += d;
+      }
+      prev = cur;
+    }
+    return Math.abs(total);
+  };
+  const trackOf = (name) => {
+    const t = sow.tracks.find((x) => x.name === `${name}.quaternion`);
+    if (!t) throw new Error(`${name} has no track in \`sow\``);
+    return t;
+  };
+  const wasMeterDeg = unwrappedDeg(trackOf('pivotseedMeterShaft01'), 2);
+  const wasAgitatorDeg = unwrappedDeg(trackOf('hopperAgitatorPivot01'), 0);
+
+  const TARGET_MS = 25 / 12;                                   // 7.5 km/h, a seed drill sowing
+  const WAS_OPENER_TURNS = 7;
+  const wasDistanceM = WAS_OPENER_TURNS * 2 * Math.PI * (data.openerDisc01Right.radiusMm / 1000);
+  const wasSpeedMs = wasDistanceM / sow.duration;
+  const wasGaugeDeg = unwrappedDeg(trackOf('gaugeWheel01'), 2);
+
+  const solved = solveGroundLoop({
+    targetMs: TARGET_MS,
+    currentDuration: sow.duration,
+    parts: rolling.map((name) => ({ name, radiusMetres: data[name].radiusMm / 1000, symmetryDeg: data[name].stepDeg })),
+    minFactor: 0.6,
+    maxFactor: 1.4,
+  });
+  const retimed = retimeClip(sow, solved.durationSeconds);
+
   const keys = 67;
   const times2 = Array.from({ length: keys }, (_, i) => (i / (keys - 1)) * sow.duration);
   const table = {};
-  for (const name of rolling) {
-    const d = data[name];
-    const idealDeg = (distance / (d.radiusMm / 1000)) * (180 / Math.PI);
-    const degrees = Math.max(d.stepDeg, Math.round(idealDeg / d.stepDeg) * d.stepDeg);
-    const total = THREE.MathUtils.degToRad(degrees);
-    setTrack(sow, name, 'quaternion', quatTrack(name, times2, times2.map((t) => [0, 0, -(t / sow.duration) * total])));
-    const travel = (degrees * Math.PI / 180) * (d.radiusMm / 1000);
-    table[name] = {
-      degrees: +degrees.toFixed(2), radiusMm: d.radiusMm, segmentDeg: +d.stepDeg.toFixed(2),
-      travelM: +travel.toFixed(3), speedMs: +(travel / sow.duration).toFixed(3),
+  for (const part of solved.parts) {
+    const total = THREE.MathUtils.degToRad(part.degrees);
+    setTrack(sow, part.name, 'quaternion', quatTrack(part.name, times2, times2.map((t) => [0, 0, -(t / sow.duration) * total])));
+    table[part.name] = {
+      degrees: +part.degrees.toFixed(2),
+      radiusMm: data[part.name].radiusMm,
+      segmentDeg: +data[part.name].stepDeg.toFixed(2),
+      segmentSteps: part.steps,
+      loopRemainderDeg: +(part.degrees % data[part.name].stepDeg).toFixed(6),
+      travelM: +part.travelMetres.toFixed(4),
+      speedMs: +part.speedMs.toFixed(4),
+      speedKmh: +(part.speedMs * 3.6).toFixed(2),
+      maxStepDeg: +(part.degrees / (keys - 1)).toFixed(1),
+      degreesPerRenderPhase: +(part.degrees / 8).toFixed(2),
     };
   }
-  const travels = Object.values(table).map((t) => t.travelM);
+  const travels = solved.parts.map((p) => p.travelMetres);
   report.rollingSpeed = {
-    why: 'the opener discs implied 6.41 m/s, the gauge wheels 6.13 and the closing wheels 5.86 — 9.4 % of slip between parts that all roll on the same ground',
-    setBy: `openerDisc*Right at ${OPENER_TURNS} whole turns`,
-    groundDistanceM: +distance.toFixed(3),
-    spreadPercent: +(((Math.max(...travels) - Math.min(...travels)) / Math.max(...travels)) * 100).toFixed(2),
+    why: 'the twenty rolling parts agreed with each other and every one of them was doing 23.1 km/h: three times what a seed drill sows at',
+    targetKmh: +(TARGET_MS * 3.6).toFixed(1),
+    wasKmh: +(wasSpeedMs * 3.6).toFixed(2),
+    nowKmh: +((solved.distanceMetres / sow.duration) * 3.6).toFixed(2),
+    setBy: 'solveGroundLoop: the ground distance every rolling part can land on a whole multiple of its own symmetry angle',
+    groundDistanceM: { was: +wasDistanceM.toFixed(3), now: +solved.distanceMetres.toFixed(3) },
+    clipSeconds: retimed,
+    spreadPercent: +(((Math.max(...travels) - Math.min(...travels)) / Math.max(...travels)) * 100).toFixed(3),
     perPart: table,
   };
+
+  /* ------------------------------------------------ the seed meter is driven off the ground */
+  /* It has to be: a meter that turns on a timer sows a different seed spacing every time the
+     machine changes speed. The clip carried 3 turns of the shaft against 9.33 turns of the
+     gauge wheel — 0.321 shaft turns per wheel turn, one turn of the disc every 3.7 m — and
+     that ratio is kept, snapped to the shaft's own 45-degree symmetry so the loop closes. */
+  {
+    const gaugeDegNow = solved.parts.find((p) => p.name === 'gaugeWheel01').degrees;
+    const ratio = wasMeterDeg / wasGaugeDeg;
+    const shaftSym = wheelSymmetryDeg(node(scene, 'pivotseedMeterShaft01'), [0, 0, 1]);
+    const ideal = ratio * gaugeDegNow;
+    const meterDeg = Math.max(shaftSym, Math.round(ideal / shaftSym) * shaftSym);
+    const meterKeys = 55;
+    const meterTimes = Array.from({ length: meterKeys }, (_, i) => (i / (meterKeys - 1)) * sow.duration);
+    for (let r = 1; r <= 4; r += 1) {
+      const name = `pivotseedMeterShaft${String(r).padStart(2, '0')}`;
+      setTrack(sow, name, 'quaternion', quatTrack(name, meterTimes,
+        meterTimes.map((t) => [0, 0, -(t / sow.duration) * THREE.MathUtils.degToRad(meterDeg)])));
+    }
+    report.seedMeterDrive = {
+      why: 'a metering shaft that keeps its own speed while the machine slows to a third sows three times the seed per metre',
+      ratioShaftTurnsPerGaugeTurn: +ratio.toFixed(4),
+      chose: `the ratio the clip already carried, kept as near as the shaft 45 deg symmetry allows: one shaft turn per ${(solved.distanceMetres / (meterDeg / 360)).toFixed(2)} m of travel (was ${(wasDistanceM / (wasMeterDeg / 360)).toFixed(2)} m)`,
+      symmetryDeg: +shaftSym.toFixed(2),
+      degrees: { was: +wasMeterDeg.toFixed(1), idealNow: +ideal.toFixed(1), now: +meterDeg.toFixed(1) },
+      turnsPerMetre: { was: +(wasMeterDeg / 360 / wasDistanceM).toFixed(4), now: +(meterDeg / 360 / solved.distanceMetres).toFixed(4) },
+      loopRemainderDeg: +(meterDeg % shaftSym).toFixed(6),
+    };
+
+    /* the agitator hangs off the same drive; whole turns only, its crank arm has no symmetry */
+    const agitatorTurns = Math.max(1, Math.round((wasAgitatorDeg / 360 / wasDistanceM) * solved.distanceMetres));
+    const agKeys = 65;
+    const agTimes = Array.from({ length: agKeys }, (_, i) => (i / (agKeys - 1)) * sow.duration);
+    for (let h = 1; h <= 4; h += 1) {
+      const name = `hopperAgitatorPivot${String(h).padStart(2, '0')}`;
+      setTrack(sow, name, 'quaternion', quatTrack(name, agTimes,
+        agTimes.map((t) => [(t / sow.duration) * agitatorTurns * Math.PI * 2, 0, 0])));
+    }
+    report.hopperAgitator.groundDrive = {
+      why: 'the agitator is turned by the same ground drive as the meter, so it slows with the machine',
+      turnsPerClip: { was: +(wasAgitatorDeg / 360).toFixed(2), now: agitatorTurns },
+      turnsPerMetre: { was: +(wasAgitatorDeg / 360 / wasDistanceM).toFixed(4), now: +(agitatorTurns / solved.distanceMetres).toFixed(4) },
+    };
+  }
 }
 
 /* ------------------------------------------------------------------ 4. draw calls */

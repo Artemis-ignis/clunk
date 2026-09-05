@@ -110,7 +110,18 @@
         ],
         "turnsPerClip": 4
       }
-    ]
+    ],
+    "groundDrive": {
+      "why": "the agitator is turned by the same ground drive as the meter, so it slows with the machine",
+      "turnsPerClip": {
+        "was": 4,
+        "now": 2
+      },
+      "turnsPerMetre": {
+        "was": 0.3566,
+        "now": 0.4161
+      }
+    }
   },
   "seedMeterShaft": {
     "why": "the shaft orbited a point 244 mm away and flew out of its own housing every clip",
@@ -499,152 +510,279 @@
     "afterMm": 0.4
   },
   "rollingSpeed": {
-    "why": "the opener discs implied 6.41 m/s, the gauge wheels 6.13 and the closing wheels 5.86 — 9.4 % of slip between parts that all roll on the same ground",
-    "setBy": "openerDisc*Right at 7 whole turns",
-    "groundDistanceM": 11.215,
-    "spreadPercent": 0.28,
+    "why": "the twenty rolling parts agreed with each other and every one of them was doing 23.1 km/h: three times what a seed drill sows at",
+    "targetKmh": 7.5,
+    "wasKmh": 23.11,
+    "nowKmh": 7.5,
+    "setBy": "solveGroundLoop: the ground distance every rolling part can land on a whole multiple of its own symmetry angle",
+    "groundDistanceM": {
+      "was": 11.215,
+      "now": 4.806
+    },
+    "clipSeconds": {
+      "wasSeconds": 1.747,
+      "nowSeconds": 2.307,
+      "factor": 1.320541
+    },
+    "spreadPercent": 0.174,
     "perPart": {
       "gaugeWheel01": {
-        "degrees": 3360,
+        "degrees": 1440,
         "radiusMm": 191,
-        "segmentDeg": 12,
-        "travelM": 11.201,
-        "speedMs": 6.411
+        "segmentDeg": 120,
+        "segmentSteps": 12,
+        "loopRemainderDeg": 0,
+        "travelM": 4.8004,
+        "speedMs": 2.0808,
+        "speedKmh": 7.49,
+        "maxStepDeg": 21.8,
+        "degreesPerRenderPhase": 180
       },
       "openerDisc01Left": {
-        "degrees": 2520,
+        "degrees": 1080,
         "radiusMm": 255,
-        "segmentDeg": 7.5,
-        "travelM": 11.215,
-        "speedMs": 6.42
+        "segmentDeg": 90,
+        "segmentSteps": 12,
+        "loopRemainderDeg": 0,
+        "travelM": 4.8066,
+        "speedMs": 2.0835,
+        "speedKmh": 7.5,
+        "maxStepDeg": 16.4,
+        "degreesPerRenderPhase": 135
       },
       "closingWheel01Left": {
-        "degrees": 3924,
+        "degrees": 1680,
         "radiusMm": 164,
-        "segmentDeg": 12,
-        "travelM": 11.232,
-        "speedMs": 6.429
+        "segmentDeg": 120,
+        "segmentSteps": 14,
+        "loopRemainderDeg": 0,
+        "travelM": 4.8087,
+        "speedMs": 2.0844,
+        "speedKmh": 7.5,
+        "maxStepDeg": 25.5,
+        "degreesPerRenderPhase": 210
       },
       "openerDisc01Right": {
-        "degrees": 2520,
+        "degrees": 1080,
         "radiusMm": 255,
-        "segmentDeg": 7.5,
-        "travelM": 11.215,
-        "speedMs": 6.42
+        "segmentDeg": 90,
+        "segmentSteps": 12,
+        "loopRemainderDeg": 0,
+        "travelM": 4.8066,
+        "speedMs": 2.0835,
+        "speedKmh": 7.5,
+        "maxStepDeg": 16.4,
+        "degreesPerRenderPhase": 135
       },
       "closingWheel01Right": {
-        "degrees": 3924,
+        "degrees": 1680,
         "radiusMm": 164,
-        "segmentDeg": 12,
-        "travelM": 11.232,
-        "speedMs": 6.429
+        "segmentDeg": 120,
+        "segmentSteps": 14,
+        "loopRemainderDeg": 0,
+        "travelM": 4.8087,
+        "speedMs": 2.0844,
+        "speedKmh": 7.5,
+        "maxStepDeg": 25.5,
+        "degreesPerRenderPhase": 210
       },
       "gaugeWheel02": {
-        "degrees": 3360,
+        "degrees": 1440,
         "radiusMm": 191,
-        "segmentDeg": 12,
-        "travelM": 11.201,
-        "speedMs": 6.411
+        "segmentDeg": 120,
+        "segmentSteps": 12,
+        "loopRemainderDeg": 0,
+        "travelM": 4.8004,
+        "speedMs": 2.0808,
+        "speedKmh": 7.49,
+        "maxStepDeg": 21.8,
+        "degreesPerRenderPhase": 180
       },
       "openerDisc02Left": {
-        "degrees": 2520,
+        "degrees": 1080,
         "radiusMm": 255,
-        "segmentDeg": 7.5,
-        "travelM": 11.215,
-        "speedMs": 6.42
+        "segmentDeg": 90,
+        "segmentSteps": 12,
+        "loopRemainderDeg": 0,
+        "travelM": 4.8066,
+        "speedMs": 2.0835,
+        "speedKmh": 7.5,
+        "maxStepDeg": 16.4,
+        "degreesPerRenderPhase": 135
       },
       "closingWheel02Left": {
-        "degrees": 3924,
+        "degrees": 1680,
         "radiusMm": 164,
-        "segmentDeg": 12,
-        "travelM": 11.232,
-        "speedMs": 6.429
+        "segmentDeg": 120,
+        "segmentSteps": 14,
+        "loopRemainderDeg": 0,
+        "travelM": 4.8087,
+        "speedMs": 2.0844,
+        "speedKmh": 7.5,
+        "maxStepDeg": 25.5,
+        "degreesPerRenderPhase": 210
       },
       "openerDisc02Right": {
-        "degrees": 2520,
+        "degrees": 1080,
         "radiusMm": 255,
-        "segmentDeg": 7.5,
-        "travelM": 11.215,
-        "speedMs": 6.42
+        "segmentDeg": 90,
+        "segmentSteps": 12,
+        "loopRemainderDeg": 0,
+        "travelM": 4.8066,
+        "speedMs": 2.0835,
+        "speedKmh": 7.5,
+        "maxStepDeg": 16.4,
+        "degreesPerRenderPhase": 135
       },
       "closingWheel02Right": {
-        "degrees": 3924,
+        "degrees": 1680,
         "radiusMm": 164,
-        "segmentDeg": 12,
-        "travelM": 11.232,
-        "speedMs": 6.429
+        "segmentDeg": 120,
+        "segmentSteps": 14,
+        "loopRemainderDeg": 0,
+        "travelM": 4.8087,
+        "speedMs": 2.0844,
+        "speedKmh": 7.5,
+        "maxStepDeg": 25.5,
+        "degreesPerRenderPhase": 210
       },
       "gaugeWheel03": {
-        "degrees": 3360,
+        "degrees": 1440,
         "radiusMm": 191,
-        "segmentDeg": 12,
-        "travelM": 11.201,
-        "speedMs": 6.411
+        "segmentDeg": 120,
+        "segmentSteps": 12,
+        "loopRemainderDeg": 0,
+        "travelM": 4.8004,
+        "speedMs": 2.0808,
+        "speedKmh": 7.49,
+        "maxStepDeg": 21.8,
+        "degreesPerRenderPhase": 180
       },
       "openerDisc03Left": {
-        "degrees": 2520,
+        "degrees": 1080,
         "radiusMm": 255,
-        "segmentDeg": 7.5,
-        "travelM": 11.215,
-        "speedMs": 6.42
+        "segmentDeg": 90,
+        "segmentSteps": 12,
+        "loopRemainderDeg": 0,
+        "travelM": 4.8066,
+        "speedMs": 2.0835,
+        "speedKmh": 7.5,
+        "maxStepDeg": 16.4,
+        "degreesPerRenderPhase": 135
       },
       "closingWheel03Left": {
-        "degrees": 3924,
+        "degrees": 1680,
         "radiusMm": 164,
-        "segmentDeg": 12,
-        "travelM": 11.232,
-        "speedMs": 6.429
+        "segmentDeg": 120,
+        "segmentSteps": 14,
+        "loopRemainderDeg": 0,
+        "travelM": 4.8087,
+        "speedMs": 2.0844,
+        "speedKmh": 7.5,
+        "maxStepDeg": 25.5,
+        "degreesPerRenderPhase": 210
       },
       "openerDisc03Right": {
-        "degrees": 2520,
+        "degrees": 1080,
         "radiusMm": 255,
-        "segmentDeg": 7.5,
-        "travelM": 11.215,
-        "speedMs": 6.42
+        "segmentDeg": 90,
+        "segmentSteps": 12,
+        "loopRemainderDeg": 0,
+        "travelM": 4.8066,
+        "speedMs": 2.0835,
+        "speedKmh": 7.5,
+        "maxStepDeg": 16.4,
+        "degreesPerRenderPhase": 135
       },
       "closingWheel03Right": {
-        "degrees": 3924,
+        "degrees": 1680,
         "radiusMm": 164,
-        "segmentDeg": 12,
-        "travelM": 11.232,
-        "speedMs": 6.429
+        "segmentDeg": 120,
+        "segmentSteps": 14,
+        "loopRemainderDeg": 0,
+        "travelM": 4.8087,
+        "speedMs": 2.0844,
+        "speedKmh": 7.5,
+        "maxStepDeg": 25.5,
+        "degreesPerRenderPhase": 210
       },
       "gaugeWheel04": {
-        "degrees": 3360,
+        "degrees": 1440,
         "radiusMm": 191,
-        "segmentDeg": 12,
-        "travelM": 11.201,
-        "speedMs": 6.411
+        "segmentDeg": 120,
+        "segmentSteps": 12,
+        "loopRemainderDeg": 0,
+        "travelM": 4.8004,
+        "speedMs": 2.0808,
+        "speedKmh": 7.49,
+        "maxStepDeg": 21.8,
+        "degreesPerRenderPhase": 180
       },
       "openerDisc04Left": {
-        "degrees": 2520,
+        "degrees": 1080,
         "radiusMm": 255,
-        "segmentDeg": 7.5,
-        "travelM": 11.215,
-        "speedMs": 6.42
+        "segmentDeg": 90,
+        "segmentSteps": 12,
+        "loopRemainderDeg": 0,
+        "travelM": 4.8066,
+        "speedMs": 2.0835,
+        "speedKmh": 7.5,
+        "maxStepDeg": 16.4,
+        "degreesPerRenderPhase": 135
       },
       "closingWheel04Left": {
-        "degrees": 3924,
+        "degrees": 1680,
         "radiusMm": 164,
-        "segmentDeg": 12,
-        "travelM": 11.232,
-        "speedMs": 6.429
+        "segmentDeg": 120,
+        "segmentSteps": 14,
+        "loopRemainderDeg": 0,
+        "travelM": 4.8087,
+        "speedMs": 2.0844,
+        "speedKmh": 7.5,
+        "maxStepDeg": 25.5,
+        "degreesPerRenderPhase": 210
       },
       "openerDisc04Right": {
-        "degrees": 2520,
+        "degrees": 1080,
         "radiusMm": 255,
-        "segmentDeg": 7.5,
-        "travelM": 11.215,
-        "speedMs": 6.42
+        "segmentDeg": 90,
+        "segmentSteps": 12,
+        "loopRemainderDeg": 0,
+        "travelM": 4.8066,
+        "speedMs": 2.0835,
+        "speedKmh": 7.5,
+        "maxStepDeg": 16.4,
+        "degreesPerRenderPhase": 135
       },
       "closingWheel04Right": {
-        "degrees": 3924,
+        "degrees": 1680,
         "radiusMm": 164,
-        "segmentDeg": 12,
-        "travelM": 11.232,
-        "speedMs": 6.429
+        "segmentDeg": 120,
+        "segmentSteps": 14,
+        "loopRemainderDeg": 0,
+        "travelM": 4.8087,
+        "speedMs": 2.0844,
+        "speedKmh": 7.5,
+        "maxStepDeg": 25.5,
+        "degreesPerRenderPhase": 210
       }
     }
+  },
+  "seedMeterDrive": {
+    "why": "a metering shaft that keeps its own speed while the machine slows to a third sows three times the seed per metre",
+    "ratioShaftTurnsPerGaugeTurn": 0.3333,
+    "chose": "the ratio the clip already carried, kept as near as the shaft 45 deg symmetry allows: one shaft turn per 3.50 m of travel (was 3.74 m)",
+    "symmetryDeg": 45,
+    "degrees": {
+      "was": 1080,
+      "idealNow": 480,
+      "now": 495
+    },
+    "turnsPerMetre": {
+      "was": 0.2675,
+      "now": 0.2861
+    },
+    "loopRemainderDeg": 0
   },
   "bakedInstances": [],
   "merge": [

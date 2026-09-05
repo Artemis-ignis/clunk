@@ -258,27 +258,68 @@
       }
     ]
   },
+  "tineSwingRate": {
+    "why": "the tines flexed three times per clip at 26.5 km/h; over a third of the ground the same three flexes would be three times the flexing per metre of soil",
+    "cyclesPerClip": {
+      "was": 3,
+      "now": 1
+    },
+    "cyclesPerMetre": {
+      "was": 0.2505,
+      "now": 0.2743
+    },
+    "hz": {
+      "was": 1.844,
+      "now": 0.648
+    },
+    "swingDegrees": 4.87,
+    "metresPerSwing": {
+      "was": 3.993,
+      "now": 3.646
+    }
+  },
   "rollingSpeed": {
-    "why": "eight whole turns over a clip the render samples at eight phases gave eight pixel-identical frames",
-    "matchedTo": "gaugeWheelLeft/Right on hf-tractor-compact, 7.487 m/s",
+    "why": "the gauge wheels were matched to the tractor, and the tractor was doing 26.9 km/h: a cultivator works at 7-10",
+    "targetKmh": 8.5,
+    "wasKmh": 26.5,
+    "nowKmh": 8.5,
+    "setBy": "solveGroundLoop: the ground distance the wheel can land on a whole multiple of its own 120 deg spoke symmetry",
+    "groundDistanceM": {
+      "was": 11.978,
+      "now": 3.646
+    },
+    "clipSeconds": {
+      "wasSeconds": 1.627,
+      "nowSeconds": 1.544,
+      "factor": 0.948988
+    },
+    "spreadPercent": 0,
     "perPart": {
       "gaugeWheelLeft": {
-        "wasDegrees": 2880,
-        "degrees": 2760,
+        "wasDegrees": 2760,
+        "degrees": 840,
         "radiusMm": 248.7,
         "segmentDeg": 120,
-        "travelM": 11.978,
-        "speedMs": 7.362,
-        "degreesPerRenderPhase": 345
+        "segmentSteps": 7,
+        "loopRemainderDeg": 0,
+        "travelM": 3.6456,
+        "speedMs": 2.3611,
+        "speedKmh": 8.5,
+        "maxStepDeg": 14,
+        "degreesPerRenderPhase": 105
       },
       "gaugeWheelRight": {
-        "wasDegrees": 2880,
-        "degrees": 2760,
+        "wasDegrees": 2760,
+        "degrees": 840,
         "radiusMm": 248.7,
         "segmentDeg": 120,
-        "travelM": 11.978,
-        "speedMs": 7.362,
-        "degreesPerRenderPhase": 345
+        "segmentSteps": 7,
+        "loopRemainderDeg": 0,
+        "travelM": 3.6456,
+        "speedMs": 2.3611,
+        "speedKmh": 8.5,
+        "maxStepDeg": 14,
+        "degreesPerRenderPhase": 105
       }
     }
   },

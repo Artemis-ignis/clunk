@@ -353,123 +353,222 @@
       }
     ]
   },
+  "tineSwingRate": {
+    "why": "the tines flexed three times per clip at 27 km/h; at 9 km/h the clip covers a third of the ground, and three flexes over it would be three times the flexing per metre of soil",
+    "cyclesPerClip": {
+      "was": 3,
+      "now": 1
+    },
+    "cyclesPerMetre": {
+      "was": 0.1845,
+      "now": 0.1705
+    },
+    "hz": {
+      "was": 1.382,
+      "now": 0.426
+    },
+    "swingDegrees": 8
+  },
   "rollingSpeed": {
-    "why": "the front wheels covered 11.259 m while the rears covered 16.199 m in the same clip: a 31.0 % slip that no tractor has",
-    "setBy": "wheelRear* at 3 whole turns",
+    "why": "every wheel agreed with every other wheel, and all six were doing 26.9 km/h: three times what a compact tractor works a field at",
+    "targetKmh": 9,
+    "wasKmh": 26.97,
+    "nowKmh": 9,
+    "setBy": "solveGroundLoop: the ground distance every wheel can land on a whole multiple of its own symmetry angle",
+    "groundDistanceM": {
+      "was": 16.262,
+      "now": 5.865
+    },
+    "clipSeconds": {
+      "drive": {
+        "wasSeconds": 2.1706,
+        "nowSeconds": 2.346,
+        "factor": 1.080834
+      },
+      "steer": {
+        "wasSeconds": 4.3411,
+        "nowSeconds": 4.692,
+        "factor": 1.080834
+      }
+    },
+    "spreadPercent": 0.21,
+    "symmetryReadFrom": "wheelSymmetryDeg, lug instances expanded (the lug COUNT said 7.5 deg; the ring repeats every 15)",
     "perClip": {
       "drive": {
         "wheelFrontLeft": {
-          "degrees": 2077.5,
-          "wasDegrees": 1440,
+          "degrees": 750,
+          "wasDegrees": 2077.5,
           "radiusMm": 447.9,
           "lugs": 48,
-          "travelM": 16.241,
-          "speedMs": 7.482,
-          "maxStepDeg": 31.5
+          "symmetryDeg": 15,
+          "symmetrySteps": 50,
+          "loopRemainderDeg": 0,
+          "travelM": 5.863,
+          "speedMs": 2.4991,
+          "speedKmh": 9,
+          "maxStepDeg": 11.4,
+          "degreesPerRenderPhase": 93.75
         },
         "wheelFrontRight": {
-          "degrees": 2077.5,
-          "wasDegrees": null,
+          "degrees": 750,
+          "wasDegrees": 2077.5,
           "radiusMm": 447.9,
           "lugs": 48,
-          "travelM": 16.241,
-          "speedMs": 7.482,
-          "maxStepDeg": 31.5
+          "symmetryDeg": 15,
+          "symmetrySteps": 50,
+          "loopRemainderDeg": 0,
+          "travelM": 5.863,
+          "speedMs": 2.4991,
+          "speedKmh": 9,
+          "maxStepDeg": 11.4,
+          "degreesPerRenderPhase": 93.75
         },
         "wheelRearLeft": {
-          "degrees": 1080,
+          "degrees": 390,
           "wasDegrees": 1080,
           "radiusMm": 862.7,
           "lugs": 48,
-          "travelM": 16.262,
-          "speedMs": 7.492,
-          "maxStepDeg": 16.4
+          "symmetryDeg": 15,
+          "symmetrySteps": 26,
+          "loopRemainderDeg": 0,
+          "travelM": 5.8722,
+          "speedMs": 2.5031,
+          "speedKmh": 9.01,
+          "maxStepDeg": 5.9,
+          "degreesPerRenderPhase": 48.75
         },
         "wheelRearRight": {
-          "degrees": 1080,
-          "wasDegrees": null,
+          "degrees": 390,
+          "wasDegrees": 1080,
           "radiusMm": 862.7,
           "lugs": 48,
-          "travelM": 16.262,
-          "speedMs": 7.492,
-          "maxStepDeg": 16.4
+          "symmetryDeg": 15,
+          "symmetrySteps": 26,
+          "loopRemainderDeg": 0,
+          "travelM": 5.8722,
+          "speedMs": 2.5031,
+          "speedKmh": 9.01,
+          "maxStepDeg": 5.9,
+          "degreesPerRenderPhase": 48.75
         },
         "gaugeWheelLeft": {
-          "degrees": 3750,
-          "wasDegrees": 3600,
+          "degrees": 1350,
+          "wasDegrees": 3750,
           "radiusMm": 248.7,
           "lugs": 12,
-          "travelM": 16.277,
-          "speedMs": 7.499,
-          "maxStepDeg": 56.8
+          "symmetryDeg": 30,
+          "symmetrySteps": 45,
+          "loopRemainderDeg": 0,
+          "travelM": 5.8599,
+          "speedMs": 2.4978,
+          "speedKmh": 8.99,
+          "maxStepDeg": 20.5,
+          "degreesPerRenderPhase": 168.75
         },
         "gaugeWheelRight": {
-          "degrees": 3750,
-          "wasDegrees": null,
+          "degrees": 1350,
+          "wasDegrees": 3750,
           "radiusMm": 248.7,
           "lugs": 12,
-          "travelM": 16.277,
-          "speedMs": 7.499,
-          "maxStepDeg": 56.8
+          "symmetryDeg": 30,
+          "symmetrySteps": 45,
+          "loopRemainderDeg": 0,
+          "travelM": 5.8599,
+          "speedMs": 2.4978,
+          "speedKmh": 8.99,
+          "maxStepDeg": 20.5,
+          "degreesPerRenderPhase": 168.75
         },
-        "groundDistanceM": 16.262
+        "groundDistanceM": 5.865,
+        "clipSeconds": 2.346
       },
       "steer": {
         "wheelFrontLeft": {
-          "degrees": 4162.5,
+          "degrees": 1500,
           "wasDegrees": null,
           "radiusMm": 447.9,
           "lugs": 48,
-          "travelM": 32.54,
-          "speedMs": 7.496,
-          "maxStepDeg": 31.5
+          "symmetryDeg": 15,
+          "symmetrySteps": 100,
+          "loopRemainderDeg": 0,
+          "travelM": 11.726,
+          "speedMs": 2.4991,
+          "speedKmh": 9,
+          "maxStepDeg": 11.4,
+          "degreesPerRenderPhase": 187.5
         },
         "wheelFrontRight": {
-          "degrees": 4162.5,
+          "degrees": 1500,
           "wasDegrees": null,
           "radiusMm": 447.9,
           "lugs": 48,
-          "travelM": 32.54,
-          "speedMs": 7.496,
-          "maxStepDeg": 31.5
+          "symmetryDeg": 15,
+          "symmetrySteps": 100,
+          "loopRemainderDeg": 0,
+          "travelM": 11.726,
+          "speedMs": 2.4991,
+          "speedKmh": 9,
+          "maxStepDeg": 11.4,
+          "degreesPerRenderPhase": 187.5
         },
         "wheelRearLeft": {
-          "degrees": 2160,
+          "degrees": 780,
           "wasDegrees": null,
           "radiusMm": 862.7,
           "lugs": 48,
-          "travelM": 32.523,
-          "speedMs": 7.492,
-          "maxStepDeg": 16.4
+          "symmetryDeg": 15,
+          "symmetrySteps": 52,
+          "loopRemainderDeg": 0,
+          "travelM": 11.7444,
+          "speedMs": 2.5031,
+          "speedKmh": 9.01,
+          "maxStepDeg": 5.9,
+          "degreesPerRenderPhase": 97.5
         },
         "wheelRearRight": {
-          "degrees": 2160,
+          "degrees": 780,
           "wasDegrees": null,
           "radiusMm": 862.7,
           "lugs": 48,
-          "travelM": 32.523,
-          "speedMs": 7.492,
-          "maxStepDeg": 16.4
+          "symmetryDeg": 15,
+          "symmetrySteps": 52,
+          "loopRemainderDeg": 0,
+          "travelM": 11.7444,
+          "speedMs": 2.5031,
+          "speedKmh": 9.01,
+          "maxStepDeg": 5.9,
+          "degreesPerRenderPhase": 97.5
         },
         "gaugeWheelLeft": {
-          "degrees": 7500,
+          "degrees": 2700,
           "wasDegrees": null,
           "radiusMm": 248.7,
           "lugs": 12,
-          "travelM": 32.555,
-          "speedMs": 7.499,
-          "maxStepDeg": 56.8
+          "symmetryDeg": 30,
+          "symmetrySteps": 90,
+          "loopRemainderDeg": 0,
+          "travelM": 11.7197,
+          "speedMs": 2.4978,
+          "speedKmh": 8.99,
+          "maxStepDeg": 20.5,
+          "degreesPerRenderPhase": 337.5
         },
         "gaugeWheelRight": {
-          "degrees": 7500,
+          "degrees": 2700,
           "wasDegrees": null,
           "radiusMm": 248.7,
           "lugs": 12,
-          "travelM": 32.555,
-          "speedMs": 7.499,
-          "maxStepDeg": 56.8
+          "symmetryDeg": 30,
+          "symmetrySteps": 90,
+          "loopRemainderDeg": 0,
+          "travelM": 11.7197,
+          "speedMs": 2.4978,
+          "speedKmh": 8.99,
+          "maxStepDeg": 20.5,
+          "degreesPerRenderPhase": 337.5
         },
-        "groundDistanceM": 32.523
+        "groundDistanceM": 11.73,
+        "clipSeconds": 4.692
       }
     }
   },

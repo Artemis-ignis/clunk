@@ -1001,12 +1001,12 @@
     "summary": "3 of 7 automated visual checks fail: silhouette, exposure, groundContact. The asset is rejected on the captures, not on a pending opinion.",
     "summary_ko": "자동 화면 검사 7건 가운데 3건이 떨어졌습니다: silhouette, exposure, groundContact. 판정 대기가 아니라, 찍은 화면을 근거로 떨어진 것입니다.",
     "timings": {
-      "decodeMs": 5,
+      "decodeMs": 7,
       "poseMs": 0,
-      "renderMs": 375,
-      "measureMs": 369,
-      "totalMs": 789,
-      "peakHeapBytes": 21631216
+      "renderMs": 448,
+      "measureMs": 406,
+      "totalMs": 912,
+      "peakHeapBytes": 31438704
     },
     "limits": [
       "The frames come from Clunk's own offline rasteriser, not from a game engine's rendering path.",

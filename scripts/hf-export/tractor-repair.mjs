@@ -68,6 +68,21 @@
  *
  *  10. THE IMPLEMENT DID NOT REACH THE GROUND. Gauge wheels 16.8 mm up, cultivator
  *      sweeps 22.3 mm up. Both seated.
+ *
+ * 2026-09-05 speed pass. Everything above left the six wheels agreeing with each other at
+ * 7.49 m/s — 26.9 km/h, three times what a compact tractor works a field at. `drive` is
+ * re-cut to 9.0 km/h (2.50 m/s):
+ *
+ *  11. THE CLIP LENGTH IS NOW THE FREE VARIABLE. A wheel may only stop on a whole multiple
+ *      of its own symmetry angle, and at a third of the distance those angles are too
+ *      coarse to cut 5.4 m three ways within half a percent. The distance is chosen from
+ *      the ones every wheel can land on and the clip length follows from it, so the speed
+ *      asked for is the speed delivered. `steer` keeps its shape, stretched by the same
+ *      factor: its handwheel, its kingpin lock and its 2:1 length are untouched.
+ *
+ *  12. THE SYMMETRY WAS READ FROM THE LUG COUNT, 360/48 = 7.5 deg, but the lug ring
+ *      repeats every 15 deg with the instances expanded — so the file on sale ended
+ *      `drive` with its front wheels half a lug pitch from where they started.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -76,6 +91,7 @@ import {
   THREE, loadGlb, saveGlb, meshes, node, worldBox, exactBox, mm, drawnTris, matOf, boxGeo, colourOf, addMesh,
   mergeByAnchor, pruneEmpty, dropHiddenProxies, bakeInstances, unshareGeometry, quatTrack, setTrack,
   axleHubJoint, boxSpan, moveBoxCentreTo, cylGeo, radiusAbout,
+  wheelSymmetryDeg, retimeClip, solveGroundLoop,
 } from './machine-lib.mjs';
 
 /* A lugged tyre is not a circle. Seating it on the box of its rest pose leaves the lug
@@ -432,12 +448,29 @@ report.ground = { beforeMm: mm(beforeGround), afterMm: mm(exactBox(scene).min.y)
   };
 }
 
-/* -------------------------------------------- 6b. one ground speed for every wheel */
-/* Measured on this file after seating: the ground is y = 0, so a wheel that touches it
- * has a rolling radius equal to the height of its own pivot. The rear pair sets the
- * distance (3 whole turns, the count the clip already had); every other rolling part is
- * given the angle that covers the SAME distance, snapped to its own lug spacing so the
- * loop still closes on an identical frame. */
+/* ------------------------ 6b. one ground speed for every wheel, and a real one (2026-09-05) */
+/* Measured on this file after seating: the ground is y = 0, so a wheel that touches it has a
+ * rolling radius equal to the height of its own pivot.
+ *
+ * The pass before this one made all six wheels agree on one distance, and took that distance
+ * from the clip as it was authored — three whole turns of the rear wheel, 16.26 m in 2.17 s.
+ * That is 7.49 m/s: 27 km/h, on a machine that works a field at 6-10. The distance now comes
+ * from the speed instead. 9.0 km/h = 2.50 m/s.
+ *
+ * The clip length is what pays for it. A wheel may only stop on a whole multiple of its own
+ * symmetry angle or the last frame of the loop is not the first one, and at a third of the
+ * distance those angles are a coarse ruler: the gauge wheel repeats every 30 degrees, which
+ * is 130 mm of ground, so 5.4 m cannot be cut into whole steps by all three radii at once
+ * and still land within half a percent. `solveGroundLoop` searches the distances every wheel
+ * CAN land on, keeps the one they disagree over least, and the clip length falls out of it —
+ * length = distance / speed, so the speed asked for is the speed delivered. Everything else
+ * in both clips is stretched onto the new length by `retimeClip`, so the steering and the
+ * tine swing keep the shape they had.
+ *
+ * The symmetry angle is measured with the lug instances expanded (`wheelSymmetryDeg`). The
+ * old code took 360/48 = 7.5 degrees from the lug COUNT, but the ring repeats every 15, so
+ * the file on sale ended `drive` with its front wheels half a lug pitch from where they
+ * started. */
 {
   const steer = clips.find((c) => c.name === 'steer');
   if (!steer) throw new Error('the `steer` clip is gone');
@@ -450,42 +483,104 @@ report.ground = { beforeMm: mm(beforeGround), afterMm: mm(exactBox(scene).min.y)
     wheelData[name] = {
       radiusMm: mm(new THREE.Vector3().setFromMatrixPosition(wheel.matrixWorld).y),
       lugs,
-      stepDeg: lugs > 2 ? 360 / lugs : 0.5,
+      stepDeg: wheelSymmetryDeg(wheel, [0, 0, 1]),
       bottomYmm: mm(exactBox(wheel).min.y),
     };
   }
-  const REAR_TURNS = 3;
+  const TARGET_MS = 2.50;                                     // 9.0 km/h, a compact tractor working a field
+  const WAS_REAR_TURNS = 3;
   const rRear = wheelData.wheelRearLeft.radiusMm / 1000;
+  const wasDistanceM = WAS_REAR_TURNS * 2 * Math.PI * rRear;
+  const wasSpeedMs = wasDistanceM / drive.duration;
+  const steerRatio = steer.duration / drive.duration;         // the steer clip covers two of these
+
+  const solved = solveGroundLoop({
+    targetMs: TARGET_MS,
+    currentDuration: drive.duration,
+    parts: rolling.map((name) => ({
+      name,
+      radiusMetres: wheelData[name].radiusMm / 1000,
+      symmetryDeg: wheelData[name].stepDeg,
+    })),
+    minFactor: 0.75,
+    maxFactor: 1.35,
+  });
+  const retimed = {
+    drive: retimeClip(drive, solved.durationSeconds),
+    steer: retimeClip(steer, solved.durationSeconds * steerRatio),
+  };
+
   const table = { drive: {}, steer: {} };
-  for (const clip of [drive, steer]) {
-    const scale = clip.duration / drive.duration;
-    const distance = REAR_TURNS * 2 * Math.PI * rRear * scale;
+  for (const [clip, scale] of [[drive, 1], [steer, steerRatio]]) {
     const keys = Math.max(33, Math.round(66 * scale) + 1);
-    const times = Array.from({ length: keys }, (_, i) => (i / (keys - 1)) * clip.duration);
-    for (const name of rolling) {
-      const d = wheelData[name];
-      const idealDeg = (distance / (d.radiusMm / 1000)) * (180 / Math.PI);
-      const degrees = Math.round(idealDeg / d.stepDeg) * d.stepDeg;
+    const clipTimes = Array.from({ length: keys }, (_, i) => (i / (keys - 1)) * clip.duration);
+    let distance = 0;
+    for (const part of solved.parts) {
+      const step = wheelData[part.name].stepDeg;
+      const degrees = Math.round((part.degrees * scale) / step) * step;   // a whole number of steps at 2x as well
       const total = THREE.MathUtils.degToRad(degrees);
-      setTrack(clip, name, 'quaternion', quatTrack(name, times,
-        times.map((t) => [0, 0, -(t / clip.duration) * total])));
-      table[clip.name][name] = {
+      setTrack(clip, part.name, 'quaternion', quatTrack(part.name, clipTimes,
+        clipTimes.map((t) => [0, 0, -(t / clip.duration) * total])));
+      const travel = (degrees * Math.PI / 180) * part.radiusMetres;
+      distance += travel / solved.parts.length;
+      table[clip.name][part.name] = {
         degrees: +degrees.toFixed(2),
         wasDegrees: null,
-        radiusMm: d.radiusMm, lugs: d.lugs,
-        travelM: +((degrees * Math.PI / 180) * (d.radiusMm / 1000)).toFixed(3),
-        speedMs: +(((degrees * Math.PI / 180) * (d.radiusMm / 1000)) / clip.duration).toFixed(3),
+        radiusMm: wheelData[part.name].radiusMm,
+        lugs: wheelData[part.name].lugs,
+        symmetryDeg: +step.toFixed(3),
+        symmetrySteps: Math.round(degrees / step),
+        loopRemainderDeg: +(degrees % step).toFixed(6),
+        travelM: +travel.toFixed(4),
+        speedMs: +(travel / clip.duration).toFixed(4),
+        speedKmh: +((travel / clip.duration) * 3.6).toFixed(2),
         maxStepDeg: +(degrees / (keys - 1)).toFixed(1),
+        degreesPerRenderPhase: +(degrees / 8).toFixed(2),
       };
     }
-    table[clip.name].groundDistanceM = +distance.toFixed(3);
+    table[clip.name].groundDistanceM = +distance.toFixed(4);
+    table[clip.name].clipSeconds = +clip.duration.toFixed(4);
   }
-  table.drive.wheelFrontLeft.wasDegrees = 1440;
+  table.drive.wheelFrontLeft.wasDegrees = 2077.5;
+  table.drive.wheelFrontRight.wasDegrees = 2077.5;
   table.drive.wheelRearLeft.wasDegrees = 1080;
-  table.drive.gaugeWheelLeft.wasDegrees = 3600;
+  table.drive.wheelRearRight.wasDegrees = 1080;
+  table.drive.gaugeWheelLeft.wasDegrees = 3750;
+  table.drive.gaugeWheelRight.wasDegrees = 3750;
+
+  /* The mounted cultivator's tines flex once per so many metres of soil, not once per second:
+     the swing keeps the rate per metre of travel it had, which at a third of the speed is a
+     third of the cycles in a clip. Whole cycles only, or the last frame is not the first. */
+  const WAS_TINE_CYCLES = 3;
+  const tineCyclesPerMetreWas = WAS_TINE_CYCLES / wasDistanceM;
+  const tineCycles = Math.max(1, Math.round(tineCyclesPerMetreWas * solved.distanceMetres));
+  const tineTimes = Array.from({ length: KEYS }, (_, i) => (i / (KEYS - 1)) * drive.duration);
+  for (let t = 1; t <= 7; t += 1) {
+    const name = `pivottine${String(t).padStart(2, '0')}`;
+    const phase = ((t - 1) / 7) * Math.PI * 2;
+    setTrack(drive, name, 'quaternion', quatTrack(name, tineTimes, tineTimes.map((time) => {
+      const u = (time / drive.duration) * tineCycles * Math.PI * 2 + phase;
+      return [0, 0, ((1 - Math.cos(u)) / 2) * LIFT];
+    })));
+  }
+  report.tineSwingRate = {
+    why: 'the tines flexed three times per clip at 27 km/h; at 9 km/h the clip covers a third of the ground, and three flexes over it would be three times the flexing per metre of soil',
+    cyclesPerClip: { was: WAS_TINE_CYCLES, now: tineCycles },
+    cyclesPerMetre: { was: +tineCyclesPerMetreWas.toFixed(4), now: +(tineCycles / solved.distanceMetres).toFixed(4) },
+    hz: { was: +(WAS_TINE_CYCLES / retimed.drive.wasSeconds).toFixed(3), now: +(tineCycles / drive.duration).toFixed(3) },
+    swingDegrees: +((LIFT * 180) / Math.PI).toFixed(2),
+  };
+
   report.rollingSpeed = {
-    why: 'the front wheels covered 11.259 m while the rears covered 16.199 m in the same clip: a 31.0 % slip that no tractor has',
-    setBy: `wheelRear* at ${REAR_TURNS} whole turns`,
+    why: 'every wheel agreed with every other wheel, and all six were doing 26.9 km/h: three times what a compact tractor works a field at',
+    targetKmh: +(TARGET_MS * 3.6).toFixed(1),
+    wasKmh: +(wasSpeedMs * 3.6).toFixed(2),
+    nowKmh: +((solved.distanceMetres / drive.duration) * 3.6).toFixed(2),
+    setBy: 'solveGroundLoop: the ground distance every wheel can land on a whole multiple of its own symmetry angle',
+    groundDistanceM: { was: +wasDistanceM.toFixed(3), now: +solved.distanceMetres.toFixed(3) },
+    clipSeconds: retimed,
+    spreadPercent: +solved.spreadPercent.toFixed(3),
+    symmetryReadFrom: 'wheelSymmetryDeg, lug instances expanded (the lug COUNT said 7.5 deg; the ring repeats every 15)',
     perClip: table,
   };
 

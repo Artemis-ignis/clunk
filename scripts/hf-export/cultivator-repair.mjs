@@ -27,7 +27,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   THREE, loadGlb, saveGlb, meshes, node, worldBox, mm, mergeByAnchor, pruneEmpty, bakeInstances, unshareGeometry,
-  dropHiddenProxies, exactBox, quatTrack, setTrack, drawnTris, radiusAbout, angularSymmetryDeg,
+  dropHiddenProxies, exactBox, quatTrack, setTrack, drawnTris, radiusAbout,
+  wheelSymmetryDeg, retimeClip, solveGroundLoop,
   matOf, colourOf, addMesh, boxGeo, boxSpan,
 } from './machine-lib.mjs';
 
@@ -303,36 +304,101 @@ report.ground = { beforeMm: mm(beforeGround), afterMm: mm(exactBox(scene).min.y)
   report.wheelSpokes = { why: 'the only round thing that moves on this machine had no feature to follow', wheels: spoked };
 }
 
-/* -------------------------------- 3a. the gauge wheels roll at a real ground speed */
-/* 2,880 deg over 1.627 s is eight WHOLE turns, so eight evenly spaced frames of the clip
- * land on the same wheel angle and the render saw eight identical pictures. The angle is
- * re-cut to the ground speed the same gauge wheel has on hf-tractor-compact (7.487 m/s),
- * snapped to the wheel own lug spacing so the loop still closes on an identical pose. */
+/* ---------------------- 3a. the gauge wheels roll at a real ground speed (2026-09-05) */
+/* Two passes ago this clip turned the wheels 2,880 deg over 1.627 s — eight WHOLE turns, so
+ * eight evenly spaced frames of the clip landed on the same wheel angle and the render saw
+ * eight identical pictures. The pass after it re-cut the angle to the ground speed the same
+ * gauge wheel has on hf-tractor-compact, 7.487 m/s. That number was itself 27 km/h: the
+ * tractor was wrong too.
+ *
+ * A cultivator works at 7-10 km/h. This one is re-cut to 8.5 km/h (2.361 m/s), and because
+ * the wheel carries three spokes it repeats only every 120 deg — 521 mm of ground per step —
+ * the clip length is what gives: the distance is picked from the ones the wheel can land on
+ * (`solveGroundLoop`) and the length follows from it, so the speed asked for is the speed
+ * delivered exactly. The rest of the clip is stretched onto the new length by `retimeClip`.
+ *
+ * The tine swing goes with it. A spring tine flexes over the ground it is dragged through,
+ * not over the clock, so the swing keeps its cycles per metre of travel — as near as whole
+ * cycles allow, because a fraction of a cycle would leave the last frame off the first. */
 {
-  const TARGET_MS = 7.487;
+  const TARGET_MS = 8.5 / 3.6;                    // 8.5 km/h
+  const WAS_TARGET_MS = 7.487;                    // what the pass before this one matched
   const rolled = {};
-  const keys = 61;
-  const times2 = Array.from({ length: keys }, (_, i) => (i / (keys - 1)) * work.duration);
-  for (const side of ['Left', 'Right']) {
-    const name = `gaugeWheel${side}`;
+  const wheels = ['gaugeWheelLeft', 'gaugeWheelRight'];
+  const wheelData = {};
+  for (const name of wheels) {
     const wheel = node(scene, name);
-    const radius = new THREE.Vector3().setFromMatrixPosition(wheel.matrixWorld).y;
-    const step = angularSymmetryDeg(wheel, new THREE.Vector3(0, 0, 1));
-    const ideal = ((TARGET_MS * work.duration) / radius) * (180 / Math.PI);
-    let degrees = Math.round(ideal / step) * step;
-    if (Math.abs((degrees / 45) - Math.round(degrees / 45)) < 1e-6) degrees += step;
-    const total = THREE.MathUtils.degToRad(degrees);
-    setTrack(work, name, 'quaternion', quatTrack(name, times2, times2.map((t) => [0, 0, -(t / work.duration) * total])));
-    rolled[name] = {
-      wasDegrees: 2880, degrees: +degrees.toFixed(2), radiusMm: mm(radius), segmentDeg: +step.toFixed(2),
-      travelM: +((degrees * Math.PI / 180) * radius).toFixed(3),
-      speedMs: +(((degrees * Math.PI / 180) * radius) / work.duration).toFixed(3),
-      degreesPerRenderPhase: +(degrees / 8).toFixed(1),
+    wheelData[name] = {
+      radiusM: new THREE.Vector3().setFromMatrixPosition(wheel.matrixWorld).y,
+      stepDeg: wheelSymmetryDeg(wheel, [0, 0, 1]),
     };
   }
+  /* what the file on sale carries, by the rule that built it */
+  const wasIdeal = ((WAS_TARGET_MS * work.duration) / wheelData.gaugeWheelLeft.radiusM) * (180 / Math.PI);
+  let wasDegrees = Math.round(wasIdeal / wheelData.gaugeWheelLeft.stepDeg) * wheelData.gaugeWheelLeft.stepDeg;
+  if (Math.abs((wasDegrees / 45) - Math.round(wasDegrees / 45)) < 1e-6) wasDegrees += wheelData.gaugeWheelLeft.stepDeg;
+  const wasDistanceM = ((wasDegrees * Math.PI) / 180) * wheelData.gaugeWheelLeft.radiusM;
+  const wasSpeedMs = wasDistanceM / work.duration;
+
+  const solved = solveGroundLoop({
+    targetMs: TARGET_MS,
+    currentDuration: work.duration,
+    parts: wheels.map((name) => ({ name, radiusMetres: wheelData[name].radiusM, symmetryDeg: wheelData[name].stepDeg })),
+    minFactor: 0.8,
+    maxFactor: 1.3,
+  });
+  const retimed = retimeClip(work, solved.durationSeconds);
+
+  const keys = 61;
+  const times2 = Array.from({ length: keys }, (_, i) => (i / (keys - 1)) * work.duration);
+  for (const part of solved.parts) {
+    const total = THREE.MathUtils.degToRad(part.degrees);
+    setTrack(work, part.name, 'quaternion', quatTrack(part.name, times2, times2.map((t) => [0, 0, -(t / work.duration) * total])));
+    rolled[part.name] = {
+      wasDegrees: +wasDegrees.toFixed(2),
+      degrees: +part.degrees.toFixed(2),
+      radiusMm: mm(part.radiusMetres),
+      segmentDeg: +wheelData[part.name].stepDeg.toFixed(2),
+      segmentSteps: part.steps,
+      loopRemainderDeg: +(part.degrees % wheelData[part.name].stepDeg).toFixed(6),
+      travelM: +part.travelMetres.toFixed(4),
+      speedMs: +part.speedMs.toFixed(4),
+      speedKmh: +(part.speedMs * 3.6).toFixed(2),
+      maxStepDeg: +(part.degrees / (keys - 1)).toFixed(1),
+      degreesPerRenderPhase: +(part.degrees / 8).toFixed(2),
+    };
+  }
+
+  /* the tines keep their swing per metre of soil */
+  const cyclesPerMetreWas = CYCLES / wasDistanceM;
+  const cyclesNow = Math.max(1, Math.round(cyclesPerMetreWas * solved.distanceMetres));
+  const tineTimes = Array.from({ length: KEYS }, (_, i) => (i / (KEYS - 1)) * work.duration);
+  for (let t = 1; t <= TINES; t += 1) {
+    const name = `pivottine${String(t).padStart(2, '0')}`;
+    const phase = ((t - 1) / TINES) * Math.PI * 2;
+    setTrack(work, name, 'quaternion', quatTrack(name, tineTimes, tineTimes.map((time) => {
+      const u = (time / work.duration) * cyclesNow * Math.PI * 2 + phase;
+      return [0, 0, ((1 - Math.cos(u)) / 2) * LIFT];
+    })));
+  }
+  report.tineSwingRate = {
+    why: 'the tines flexed three times per clip at 26.5 km/h; over a third of the ground the same three flexes would be three times the flexing per metre of soil',
+    cyclesPerClip: { was: CYCLES, now: cyclesNow },
+    cyclesPerMetre: { was: +cyclesPerMetreWas.toFixed(4), now: +(cyclesNow / solved.distanceMetres).toFixed(4) },
+    hz: { was: +(CYCLES / retimed.wasSeconds).toFixed(3), now: +(cyclesNow / work.duration).toFixed(3) },
+    swingDegrees: +((LIFT * 180) / Math.PI).toFixed(2),
+    metresPerSwing: { was: +(wasDistanceM / CYCLES).toFixed(3), now: +(solved.distanceMetres / cyclesNow).toFixed(3) },
+  };
+
   report.rollingSpeed = {
-    why: 'eight whole turns over a clip the render samples at eight phases gave eight pixel-identical frames',
-    matchedTo: 'gaugeWheelLeft/Right on hf-tractor-compact, 7.487 m/s',
+    why: 'the gauge wheels were matched to the tractor, and the tractor was doing 26.9 km/h: a cultivator works at 7-10',
+    targetKmh: +(TARGET_MS * 3.6).toFixed(1),
+    wasKmh: +(wasSpeedMs * 3.6).toFixed(2),
+    nowKmh: +((solved.distanceMetres / work.duration) * 3.6).toFixed(2),
+    setBy: 'solveGroundLoop: the ground distance the wheel can land on a whole multiple of its own 120 deg spoke symmetry',
+    groundDistanceM: { was: +wasDistanceM.toFixed(3), now: +solved.distanceMetres.toFixed(3) },
+    clipSeconds: retimed,
+    spreadPercent: +solved.spreadPercent.toFixed(3),
     perPart: rolled,
   };
 }

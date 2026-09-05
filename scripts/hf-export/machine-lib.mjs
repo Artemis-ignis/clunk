@@ -676,3 +676,150 @@ export function fixInvertedWinding(object) {
   }
   return flipped;
 }
+
+/* ============================================ ground speed and loop closure (2026-09-05)
+ *
+ * Additive only: nothing above this line changed. `angularSymmetryDeg` stays exactly as the
+ * other repair scripts call it.
+ *
+ * Why these three. The 2026-09-05 pass made every wheel on a machine agree on one ground
+ * distance, but the distance itself came from the clip that was authored — 3 whole turns of
+ * the tractor's rear wheel, 7 of the seeder's opener — and those clips implied 23-27 km/h.
+ * Bringing the speed down to what a compact tractor actually works at (6-10 km/h) shortens
+ * the distance by a factor of three, and at a third of the distance the wheel's own symmetry
+ * angle stops being a fine ruler: a cultivator gauge wheel with three spokes repeats only
+ * every 120 degrees, which is 521 mm of travel, and 3.8 m of ground cannot be cut into
+ * whole 521 mm steps and still land within half a percent of the speed asked for.
+ *
+ * So the clip length becomes the free variable. `solveGroundLoop` searches the distances
+ * every wheel CAN land on, keeps the one where they disagree least, and hands back the clip
+ * length that makes that distance the requested speed. `retimeClip` then stretches the rest
+ * of the clip — tine swings, steering, agitators — onto the new length, so nothing else
+ * about the motion changes.
+ */
+
+/**
+ * The smallest turn that leaves a wheel looking identical, with instanced parts expanded.
+ *
+ * `angularSymmetryDeg` reads `mesh.matrixWorld` only, so an InstancedMesh of 48 lugs is
+ * measured as ONE lug: it reported 180 degrees for a tractor wheel whose lug ring repeats
+ * every 15. That mattered here — the file on sale ended `drive` with the front wheels
+ * 7.5 degrees, half a lug pitch, from where they started.
+ */
+export function wheelSymmetryDeg(object, axisWorld, fallback = 0.5) {
+  object.updateMatrixWorld(true);
+  const origin = new THREE.Vector3().setFromMatrixPosition(object.matrixWorld);
+  const axis = new THREE.Vector3().fromArray(Array.isArray(axisWorld) ? axisWorld : axisWorld.toArray()).normalize();
+  const u = Math.abs(axis.x) < 0.9 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0);
+  const e1 = new THREE.Vector3().crossVectors(axis, u).normalize();
+  const e2 = new THREE.Vector3().crossVectors(axis, e1).normalize();
+  const points = [];
+  const v = new THREE.Vector3();
+  const m = new THREE.Matrix4();
+  let maxR = 0;
+  object.traverse((n) => {
+    if (!n.isMesh) return;
+    const pos = n.geometry.getAttribute('position');
+    const copies = n.isInstancedMesh ? n.count : 1;
+    for (let c = 0; c < copies; c += 1) {
+      if (n.isInstancedMesh) { n.getMatrixAt(c, m); m.premultiply(n.matrixWorld); } else m.copy(n.matrixWorld);
+      for (let i = 0; i < pos.count; i += 1) {
+        v.fromBufferAttribute(pos, i).applyMatrix4(m).sub(origin);
+        const p = new THREE.Vector2(v.dot(e1), v.dot(e2));
+        maxR = Math.max(maxR, p.length());
+        points.push(p);
+      }
+    }
+  });
+  const angles = new Set();
+  for (const p of points) {
+    if (p.length() < maxR * 0.35) continue;                 // hub and cap centres carry no angle
+    angles.add(Math.round(((((Math.atan2(p.y, p.x) * 180) / Math.PI) + 360) % 360) * 4) / 4);
+  }
+  if (!angles.size) return fallback;
+  const set = [...angles].sort((a, b) => a - b);
+  const has = (x) => {
+    const t = ((x % 360) + 360) % 360;
+    for (const a of set) if (Math.abs(a - t) < 0.3 || Math.abs(a - t - 360) < 0.3 || Math.abs(a - t + 360) < 0.3) return true;
+    return false;
+  };
+  for (let n = 360; n >= 1; n -= 1) {
+    const shift = 360 / n;
+    let ok = true;
+    for (const a of set) { if (!has(a + shift)) { ok = false; break; } }
+    if (ok) return Math.max(fallback, shift);
+  }
+  return 360;
+}
+
+/**
+ * Stretch or shrink a clip onto a new length, keeping every pose where it was in the clip.
+ * Key times are scaled, values are untouched: a swing that took a third of the clip still
+ * takes a third of it.
+ */
+export function retimeClip(clip, newDuration) {
+  const was = clip.duration;
+  if (!(was > 0) || !(newDuration > 0)) throw new Error(`retimeClip: bad durations ${was} -> ${newDuration}`);
+  const k = newDuration / was;
+  for (const track of clip.tracks) {
+    const times = Float32Array.from(track.times, (t) => t * k);
+    track.times = times;
+  }
+  clip.duration = newDuration;
+  return { wasSeconds: +was.toFixed(4), nowSeconds: +newDuration.toFixed(4), factor: +k.toFixed(6) };
+}
+
+/**
+ * The ground distance a machine can cover in one loop at a given speed.
+ *
+ * Every rolling part may only stop on a whole multiple of its own symmetry angle, or the
+ * last frame of the loop is not the first one. Each part therefore has a distance quantum
+ * (symmetry angle x rolling radius); the machine's distance has to be near a multiple of
+ * ALL of them at once. The search walks the first part's multiples inside the clip lengths
+ * allowed, rounds every other part to its own nearest multiple, and keeps the candidate
+ * whose parts disagree least. The clip length comes out of the answer: length = distance /
+ * speed, so the speed asked for is the speed delivered.
+ *
+ * `phases` is the number of evenly spaced frames the render and the geometry audit sample.
+ * A part that turns a whole number of symmetry steps per phase shows the audit the same
+ * picture every time, which is how eight identical frames got shipped in the first place.
+ */
+export function solveGroundLoop({ targetMs, currentDuration, parts, minFactor = 0.75, maxFactor = 1.35, phases = 8 }) {
+  if (!parts?.length) throw new Error('solveGroundLoop: no parts');
+  const quantum = parts.map((p) => ((p.symmetryDeg * Math.PI) / 180) * p.radiusMetres);
+  const minDistance = targetMs * currentDuration * minFactor;
+  const maxDistance = targetMs * currentDuration * maxFactor;
+  let best = null;
+  for (let n = 1; n <= 100000; n += 1) {
+    const probe = n * quantum[0];
+    if (probe < minDistance) continue;
+    if (probe > maxDistance) break;
+    const steps = quantum.map((q) => Math.max(1, Math.round(probe / q)));
+    if (steps.some((s) => s % phases === 0)) continue;
+    const travels = steps.map((s, i) => s * quantum[i]);
+    const hi = Math.max(...travels);
+    const lo = Math.min(...travels);
+    const spread = (hi - lo) / hi;
+    const distance = travels.reduce((a, b) => a + b, 0) / travels.length;
+    const duration = distance / targetMs;
+    const row = { steps, travels, spread, distance, duration };
+    const better = !best
+      || row.spread < best.spread - 1e-9
+      || (Math.abs(row.spread - best.spread) <= 1e-9
+        && Math.abs(row.duration - currentDuration) < Math.abs(best.duration - currentDuration));
+    if (better) best = row;
+  }
+  if (!best) throw new Error(`solveGroundLoop: no distance every part can land on between ${minDistance.toFixed(2)} and ${maxDistance.toFixed(2)} m`);
+  return {
+    distanceMetres: best.distance,
+    durationSeconds: best.duration,
+    spreadPercent: best.spread * 100,
+    parts: parts.map((p, i) => ({
+      ...p,
+      steps: best.steps[i],
+      degrees: +(best.steps[i] * p.symmetryDeg).toFixed(4),
+      travelMetres: best.travels[i],
+      speedMs: best.travels[i] / best.duration,
+    })),
+  };
+}

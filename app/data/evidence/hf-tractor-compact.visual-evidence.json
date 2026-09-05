@@ -4,9 +4,9 @@
   "operation": "inspect",
   "evidenceKind": "MACHINE_VISUAL_CAPTURE",
   "identity": {
-    "inputHash": "787c73c024bc0d2a8651b62f699e50111c7ee638a456371e7f1006824231fd17",
-    "resultDigest": "4df71aef28ca9b90570aa3a911d144caafb726773b23fd182201e60392dcdb24",
-    "byteLength": 1431320,
+    "inputHash": "3572402b5c4e5cc3fffda66c8f3245bcc7580b3a746184376d322824d379557f",
+    "resultDigest": "89f3f900cfa2f9b2203e6b5c8395056b8ec23cd8ff3d50677e85c65de5b8a78e",
+    "byteLength": 1431316,
     "coreBuildId": "0.1.0",
     "ruleSetId": "clunk-game-ready-v1",
     "ruleSetVersion": "1.0.0",
@@ -17,13 +17,13 @@
   "source": {
     "path": "/market/hf-tractor-compact/tractor.compact.m1.glb",
     "fileName": "tractor.compact.m1.glb",
-    "bytes": 1431320,
-    "sha256": "787c73c024bc0d2a8651b62f699e50111c7ee638a456371e7f1006824231fd17"
+    "bytes": 1431316,
+    "sha256": "3572402b5c4e5cc3fffda66c8f3245bcc7580b3a746184376d322824d379557f"
   },
   "sourceOutputRelation": {
     "kind": "SOURCE",
-    "sourceHash": "787c73c024bc0d2a8651b62f699e50111c7ee638a456371e7f1006824231fd17",
-    "sourceInspectionDigest": "4df71aef28ca9b90570aa3a911d144caafb726773b23fd182201e60392dcdb24"
+    "sourceHash": "3572402b5c4e5cc3fffda66c8f3245bcc7580b3a746184376d322824d379557f",
+    "sourceInspectionDigest": "89f3f900cfa2f9b2203e6b5c8395056b8ec23cd8ff3d50677e85c65de5b8a78e"
   },
   "report": {
     "schemaVersion": "1.0",
@@ -33,8 +33,8 @@
     "profileId": "web",
     "fileName": "tractor.compact.m1.glb",
     "format": "glb",
-    "byteLength": 1431320,
-    "inputHash": "787c73c024bc0d2a8651b62f699e50111c7ee638a456371e7f1006824231fd17",
+    "byteLength": 1431316,
+    "inputHash": "3572402b5c4e5cc3fffda66c8f3245bcc7580b3a746184376d322824d379557f",
     "metrics": {
       "sceneCount": 1,
       "nodeCount": 90,
@@ -136,8 +136,8 @@
       "ruleSetId": "clunk-game-ready-v1",
       "ruleSetVersion": "1.0.0"
     },
-    "analysisId": "analysis-787c73c024bc-4df71aef",
-    "resultDigest": "4df71aef28ca9b90570aa3a911d144caafb726773b23fd182201e60392dcdb24"
+    "analysisId": "analysis-3572402b5c4e-89f3f900",
+    "resultDigest": "89f3f900cfa2f9b2203e6b5c8395056b8ec23cd8ff3d50677e85c65de5b8a78e"
   },
   "findings": [
     {
@@ -327,7 +327,7 @@
         "height": 512
       },
       "cameraPoseHash": "dccc7b4065454119dcf07accb7ca1632426abb98c2210db3a55a698dd6cf5064",
-      "sourceTreeHash": "3f4fe249fdaf5cb98a628d489f26f9e5f1dd03965d1c84140b767f23c1764a25",
+      "sourceTreeHash": "17d18b37d187545211f680e32987d04e85843241076d8b3bc4814364325f028e",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -346,7 +346,7 @@
         "height": 512
       },
       "cameraPoseHash": "44aa675e0a7225c8249b4ffb01850a273fd896dc0b8b2f5801dce7ca87f64ab3",
-      "sourceTreeHash": "3f4fe249fdaf5cb98a628d489f26f9e5f1dd03965d1c84140b767f23c1764a25",
+      "sourceTreeHash": "17d18b37d187545211f680e32987d04e85843241076d8b3bc4814364325f028e",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -365,7 +365,7 @@
         "height": 512
       },
       "cameraPoseHash": "ccf1ed9e8706fa2df295c1f603805da739b0349433ee89fb169ac9c63590fdbc",
-      "sourceTreeHash": "3f4fe249fdaf5cb98a628d489f26f9e5f1dd03965d1c84140b767f23c1764a25",
+      "sourceTreeHash": "17d18b37d187545211f680e32987d04e85843241076d8b3bc4814364325f028e",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -384,7 +384,7 @@
         "height": 512
       },
       "cameraPoseHash": "8831eca61675cb51110e405a4d2ca7c4e061ae86ef6f02c37bfa52b6fbe87f7f",
-      "sourceTreeHash": "3f4fe249fdaf5cb98a628d489f26f9e5f1dd03965d1c84140b767f23c1764a25",
+      "sourceTreeHash": "17d18b37d187545211f680e32987d04e85843241076d8b3bc4814364325f028e",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -403,7 +403,7 @@
         "height": 360
       },
       "cameraPoseHash": "1aaf90769b1401e08586a5fde07cb3f0c192b974cd784faa2efa1095622d7831",
-      "sourceTreeHash": "3f4fe249fdaf5cb98a628d489f26f9e5f1dd03965d1c84140b767f23c1764a25",
+      "sourceTreeHash": "17d18b37d187545211f680e32987d04e85843241076d8b3bc4814364325f028e",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -422,7 +422,7 @@
         "height": 360
       },
       "cameraPoseHash": "4a7820b71bfe38d9ef719859cca71d6cc85ca4f98f3c7ed7aa0c19b80d5faac3",
-      "sourceTreeHash": "3f4fe249fdaf5cb98a628d489f26f9e5f1dd03965d1c84140b767f23c1764a25",
+      "sourceTreeHash": "17d18b37d187545211f680e32987d04e85843241076d8b3bc4814364325f028e",
       "shippedPath": false,
       "renderKind": "clunk-software-raster",
       "console": {
@@ -435,8 +435,8 @@
   "byteVerification": {
     "method": "LOCAL_CLI_READ",
     "source": {
-      "sha256": "787c73c024bc0d2a8651b62f699e50111c7ee638a456371e7f1006824231fd17",
-      "bytes": 1431320,
+      "sha256": "3572402b5c4e5cc3fffda66c8f3245bcc7580b3a746184376d322824d379557f",
+      "bytes": 1431316,
       "verified": true
     },
     "captures": [
@@ -822,22 +822,22 @@
         "clip": "drive",
         "phase": 0.42857142857142855,
         "path": "/evidence/hf-tractor-compact/hf-tractor-compact__motion-1.png",
-        "sha256": "781923148f5e69959b3a3300682c4de63b2614d1afafa6d6019822234d51c93f",
-        "bytes": 13368
+        "sha256": "3d35f527660590a92f2eb295920347b2206b42fc12bc802fbb7ac03470c122ce",
+        "bytes": 13517
       },
       {
         "clip": "drive",
         "phase": 0.8571428571428571,
         "path": "/evidence/hf-tractor-compact/hf-tractor-compact__motion-2.png",
-        "sha256": "52685c313a4bfca7783ec366f102b021d9e2cd1d27e910725c7d047d012bb175",
-        "bytes": 13479
+        "sha256": "da86494b4d3a199fdd84f2d216396b14d76ae7610f3983299aff81992e210ecf",
+        "bytes": 13902
       }
     ],
     "motion": {
       "clip": "drive",
-      "durationSeconds": 2.171,
-      "movedPixelRatio": 0.2309,
-      "meanAbsLumaDelta": 0.04365,
+      "durationSeconds": 2.346,
+      "movedPixelRatio": 0.2177,
+      "meanAbsLumaDelta": 0.029259,
       "phases": [
         0,
         0.42857142857142855,
@@ -854,25 +854,25 @@
       "interpolations": [
         "LINEAR"
       ],
-      "silhouetteChangeRatio": 0.1086,
+      "silhouetteChangeRatio": 0.1055,
       "silhouetteChangePairs": [
         {
           "from": 0,
           "to": 1,
-          "ratio": 0.0989
+          "ratio": 0.1055
         },
         {
           "from": 0,
           "to": 2,
-          "ratio": 0.1086
+          "ratio": 0.0359
         },
         {
           "from": 1,
           "to": 2,
-          "ratio": 0.0583
+          "ratio": 0.1023
         }
       ],
-      "minPhaseGroundYMetres": -0.000001,
+      "minPhaseGroundYMetres": -0.000012,
       "framing": "per-phase",
       "notes": []
     },
@@ -956,15 +956,15 @@
         "status": "PASS",
         "observed": {
           "declaredClipCount": 2,
-          "movedPixelRatio": 0.2309,
-          "meanAbsLumaDelta": 0.04365,
-          "silhouetteChangeRatio": 0.1086,
-          "minPhaseGroundYMetres": -0.000001,
+          "movedPixelRatio": 0.2177,
+          "meanAbsLumaDelta": 0.029259,
+          "silhouetteChangeRatio": 0.1055,
+          "minPhaseGroundYMetres": -0.000012,
           "skinned": 0
         },
         "threshold": "posed frames only: movedPixelRatio >= 0.01 or silhouetteChangeRatio >= 0.02 (review above 0 / 0.002), and minPhaseGroundYMetres >= -0.005, at phases 0%, 43%, 86% of \"drive\"",
-        "reason": "Clip \"drive\" changes 23.1% of the frame and 10.9% of the silhouette between its posed phases, so the motion is visible.",
-        "reason_ko": "동작 \"drive\" 이 자세를 바꿔 가며 화면의 23.1%, 실루엣의 10.9% 를 바꿉니다. 움직임이 실제로 보입니다.",
+        "reason": "Clip \"drive\" changes 21.8% of the frame and 10.5% of the silhouette between its posed phases, so the motion is visible.",
+        "reason_ko": "동작 \"drive\" 이 자세를 바꿔 가며 화면의 21.8%, 실루엣의 10.5% 를 바꿉니다. 움직임이 실제로 보입니다.",
         "captureIds": [
           "motion-0",
           "motion-1",
@@ -1044,12 +1044,12 @@
     "summary": "All 8 automated visual checks pass. No human review is required before this asset is used.",
     "summary_ko": "자동 화면 검사 8건이 모두 통과했습니다. 이 에셋을 쓰기 전에 사람이 따로 볼 필요는 없습니다.",
     "timings": {
-      "decodeMs": 240,
-      "poseMs": 102,
-      "renderMs": 2010,
-      "measureMs": 504,
-      "totalMs": 4258,
-      "peakHeapBytes": 22344608
+      "decodeMs": 249,
+      "poseMs": 91,
+      "renderMs": 1844,
+      "measureMs": 459,
+      "totalMs": 3996,
+      "peakHeapBytes": 55600208
     },
     "limits": [
       "The frames come from Clunk's own offline rasteriser, not from a game engine's rendering path.",
