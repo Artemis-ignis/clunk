@@ -281,7 +281,8 @@ test("each client guide is generated from one Clunk endpoint and one issued key"
   assert.match(byKey.get("stdio")?.code ?? "", /npm\.cmd/);
   assert.match(byKey.get("stdio")?.code ?? "", /"run"/);
   // 도구를 늘렸을 때 이 숫자를 손으로 고치게 두면, 고치는 것을 잊은 만큼 안내가 틀립니다.
-  assert.match(byKey.get("api")?.code ?? "", new RegExp(`${MCP_HTTP_TOOL_COUNT} remote-safe tools`));
+  // 안내문은 한국어다(2026-09-05 출시 전 점검: 방문자 화면의 영어 도구 낱말 제거).
+  assert.match(byKey.get("api")?.code ?? "", new RegExp(`웹으로 쓰는 도구 ${MCP_HTTP_TOOL_COUNT}개`));
   assert.ok(guides.filter((guide) => guide.key !== "stdio").every((guide) => !guide.code.includes("<CLUNK_ROOT>")));
 });
 
