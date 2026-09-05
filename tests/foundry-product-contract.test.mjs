@@ -55,7 +55,7 @@ test("public landing is asset-first without pretending to generate", async () =>
   assert.match(landing, /CLUNK<br \/>하나로|CLUNK 하나로/);
   assert.match(landing, /무료로 시작하기/);
   assert.match(landing, /마켓 둘러보기/);
-  assert.match(landing, /const FLOW = \["생성", "검사", "수정", "게시", "에이전트"\]/);
+  assert.match(landing, /const FLOW = \["제작", "검사", "수정", "적용", "에이전트"\]/);
   for (const heading of ["게임 에셋 제작", "게임 에셋 검사 및 수정", "게임 제작 에이전트", "마켓에 올라와 있는 에셋"]) {
     assert.match(landing, new RegExp(heading));
   }

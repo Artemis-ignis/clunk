@@ -29,7 +29,11 @@ export const metadata = createPageMetadata({
  * deliberately replaced with measured facts.
  */
 
-const FLOW = ["생성", "검사", "수정", "게시", "에이전트"] as const;
+/* 04 는 "게시" 였다. 이용자가 자기 파일을 공개 마켓에 올리는 경로는 이 제품에 없다
+   (2026-09-05 확인: 마켓 등록은 운영자의 시드 SQL 뿐) — 없는 단계를 첫 화면 띠에 세우지
+   않는다. 네 번째 칸은 운영자가 말한 사슬(제작 → 검사 → 게임에 적용)의 마지막이다.
+   01 이 "생성" 이던 것은 내비·용어집(docs/copy-glossary.ko.md)이 "제작" 이라 맞춘다. */
+const FLOW = ["제작", "검사", "수정", "적용", "에이전트"] as const;
 
 /**
  * The one model section 01 shows, in one place. Swap `src` and `name` here and
@@ -47,6 +51,7 @@ const FLOW = ["생성", "검사", "수정", "게시", "에이전트"] as const;
  */
 import landingFacts from "./data/landing-facts.json";
 import { formatBytes } from "./components/listing-facts-rows";
+import { areSalesOpen } from "./api/_lib/sales-lock";
 
 /**
  * 첫 화면이 보여 주는 파일의 숫자. 손으로 적지 않는다.
@@ -102,7 +107,7 @@ const AGENT_CLIENTS = ["Claude Code", "Codex", "Cursor", "GitHub Copilot", "Clau
  * 1440x900 에서 첫 화면의 아래 322px 이 빈 채로 남아 있었고(알약 바닥 y=578, 화면 900),
  * 운영자가 "첫화면 밑이 비어 보인다"고 지적했다. 그 자리를 장식으로 메우는 대신 알약을
  * 첫 화면 맨 아래를 가로지르는 띠로 옮기고, 각 단계가 실제로 무엇을 하는지 한 줄씩
- * 붙였다. 다섯 줄 모두 이 페이지의 다른 곳이 이미 하는 말이다 — 01·04 는 섹션 01,
+ * 붙였다. 다섯 줄 모두 이 페이지의 다른 곳이 이미 하는 말이다 — 01 은 섹션 01, 04 는 섹션 03 의 '게임에 적용' 항목,
  * 02 는 섹션 02(항목 수는 코드에서 세는 RULE_COUNT), 03 은 섹션 02 의 수정 목록,
  * 05 는 바로 위 AGENT_CLIENTS 의 길이다. 손으로 적은 숫자는 없다.
  */
@@ -110,8 +115,8 @@ const FLOW_NOTES = [
   "한 줄이면 2D, 몇 초면 3D 파일",
   `GLB를 ${RULE_COUNT}가지 항목으로`,
   "걸린 것만 고쳐 새 파일로",
-  "만든 파일 그대로 마켓에",
-  `AI 도구 ${AGENT_CLIENTS.length}곳에 그대로`,
+  "Unity·Godot·Three.js에 그대로",
+  `AI 도구 ${AGENT_CLIENTS.length}곳에서 같은 규칙으로`,
 ] as const;
 
 /**
@@ -138,6 +143,9 @@ function ShowcaseImg({ slug, name, eager }: { slug: string; name: string; eager?
 }
 
 export default function Home() {
+  // 결제가 열리기 전과 후에 마켓 문장이 달라진다. "베타 기간" 같은 이름 대신 사실만
+  // 말한다(2026-09-03 운영자 결정, 법적 문서와 같은 규칙).
+  const salesOpen = areSalesOpen();
   return (
     /* `cv5-snap` 은 "이 페이지의 여섯 섹션은 저마다 화면 한 판"이라는 선언이다.
        규칙은 app/site-v5.css 한 곳에 있고, 여기 붙은 클래스가 그 규칙을 켠다.
@@ -417,7 +425,10 @@ export default function Home() {
               </div>
               <p>
                 게임 제작에 바로 쓸 수 있는 3D 모델, 2D 스프라이트 시트, 이어 붙여도 이음매가 안 보이는 텍스처입니다.
-                카드마다 폴리곤 수가 적혀 있고, 베타 기간에는 로그인만 하면 무료로 받을 수 있습니다.
+                카드마다 폴리곤 수가 적혀 있고,{" "}
+                {salesOpen
+                  ? "B 등급은 누구나 바로 받고 A·S 등급은 구독하면 받을 수 있습니다."
+                  : "지금은 결제를 받지 않아 전부 무료로 받을 수 있습니다."}
               </p>
             </div>
             {/* 이 진열장의 높이는 마켓이 몇 개를 돌려주느냐가 아니라 설계로 정한다.
