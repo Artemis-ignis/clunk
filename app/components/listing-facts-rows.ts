@@ -85,6 +85,9 @@ export type FactRow = { id: string; head: string; tail: string | null };
  * 묶여 있던 옛 키트를 위한 것이다.
  */
 export const KIT_NAMES: Readonly<Record<string, string>> = {
+  "kit-village-square": "마을 광장 키트",
+  "kit-fishing-dock": "부두·낚시터 키트",
+  "kit-mine-entrance": "광산 입구 키트",
   "cozy-farm-set": "코지 팜 세트",
   "harvest-frontier": "하베스트 프론티어 세트",
   "grove-tree-pack": "그로브 트리 팩",

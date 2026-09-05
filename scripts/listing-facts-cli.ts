@@ -37,7 +37,17 @@ const glbReader = new NodeIO()
   .registerDependencies({ "meshopt.decoder": MeshoptDecoder, "meshopt.encoder": MeshoptEncoder });
 
 /** The three families whose members are meant to be bought together. */
-export type KitId = "cozy-farm-set" | "harvest-frontier" | "grove-tree-pack";
+/**
+ * 팩 가족. 앞의 셋은 wave-1 매니페스트의 configurationGroup 에서 오고, kit-* 셋은
+ * examples/generated/kits/<kit>/ 의 키트 빌드에서 온다(scripts/merge-kit-facts.mjs 가 합친다).
+ */
+export type KitId =
+  | "cozy-farm-set"
+  | "harvest-frontier"
+  | "grove-tree-pack"
+  | "kit-village-square"
+  | "kit-fishing-dock"
+  | "kit-mine-entrance";
 
 export type ListingFact = {
   /** Triangles the file stores. Null for a listing whose product is not geometry. */
@@ -236,6 +246,9 @@ export const KIT_NAMES: Readonly<Record<KitId, string>> = {
   "cozy-farm-set": "코지 팜 세트",
   "harvest-frontier": "하베스트 프론티어 세트",
   "grove-tree-pack": "그로브 트리 팩",
+  "kit-village-square": "마을 광장 키트",
+  "kit-fishing-dock": "부두·낚시터 키트",
+  "kit-mine-entrance": "광산 입구 키트",
 };
 
 /** "GLB" / "PNG", from a file name or a content type. Never invented. */
