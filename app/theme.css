@@ -116,6 +116,60 @@
   --t-shadow-panel: 0 2px 4px rgba(0, 0, 0, 0.4), 0 18px 44px rgba(0, 0, 0, 0.5);
   --t-shadow-lift: 0 4px 12px rgba(0, 0, 0, 0.46), 0 30px 70px rgba(0, 0, 0, 0.6);
   --t-shadow-accent: 0 10px 26px -14px rgba(108, 111, 242, 0.5);
+
+  /* legacy 다리 — app/globals·foundry·workspace·live-evidence 가 들고 있던
+     사다리. 기본값은 그 파일들이 실제로 쓰던 값이고, 화이트·블랙은 새 색을
+     짓지 않고 위 팔레트를 가리킨다. */
+  --t-lg-bg-void:      #071722;
+  --t-lg-bg-deep:      #0b1724;
+  --t-lg-bg:           #102435;
+  --t-lg-bg-raise:     #123347;
+  --t-lg-bg-lift:      #1c4459;
+  --t-lg-bg-edge:      #285465;
+  --t-lg-paper:        #f0f8fd;
+  --t-lg-paper-2:      #dce8eb;
+  --t-lg-ink:          #f0f8fd;
+  --t-lg-ink-soft:     #cfe6ea;
+  --t-lg-ink-dim:      #8eb6bf;
+  --t-lg-ink-faint:    #7f9ba5;
+  --t-lg-ink-deep:     #4d6874;
+  --t-lg-ink-dark:     #17354a;
+  --t-lg-ink-cool:     #a2b8c9;
+  --t-lg-cyan:         #4bccec;
+  --t-lg-teal:         #74ded0;
+  --t-lg-mint:         #63dfb7;
+  --t-lg-amber:        #e8b46c;
+  --t-lg-coral:        #f08a7a;
+  --t-lg-violet:       #8a7bff;
+  --t-lg-sea:          #19a6ad;
+  --t-lg-moss:         #14856b;
+  --t-lg-rust:         #a3453a;
+  --t-lg-bronze:       #9a6a12;
+  --t-lg-rose:         #e5a4a4;
+  --t-fd-paper:        #f1eee6;
+  --t-fd-paper-2:      #e9e0d2;
+  --t-fd-deep:         #202725;
+  --t-fd-ink:          #46504a;
+  --t-fd-ink-soft:     #9ba89d;
+  --t-fd-line:         #aeb8ad;
+  --t-fd-orange:       #d66c29;
+
+  /* 알파와 함께 쓰이는 밑색 — 알파는 그대로 두고 밑색만 뒤집힌다. */
+  --t-lg-line-rgb:     190, 222, 232;
+  --t-lg-tint-rgb:     151, 187, 218;
+  --t-lg-shade-rgb:    15, 33, 51;
+  --t-lg-cyan-rgb:     75, 204, 236;
+  --t-lg-teal-rgb:     116, 222, 208;
+  --t-lg-mint-rgb:     99, 223, 183;
+  --t-lg-amber-rgb:    232, 180, 108;
+  --t-lg-coral-rgb:    240, 138, 122;
+  --t-lg-violet-rgb:   138, 123, 255;
+  --t-lg-sea-rgb:      25, 107, 126;
+  --t-lg-moss-rgb:     11, 122, 82;
+  --t-lg-bronze-rgb:   138, 90, 6;
+  --t-lg-rust-rgb:     179, 33, 60;
+  --t-lg-rose-rgb:     232, 139, 139;
+  --t-fd-warm-rgb:     47, 38, 28;
 }
 
 /* ---------------------------------------------------------------- 화이트 */
@@ -204,6 +258,60 @@
   --t-shadow-panel: 0 2px 4px rgba(15, 23, 33, 0.05), 0 18px 44px rgba(15, 23, 33, 0.1);
   --t-shadow-lift: 0 4px 12px rgba(15, 23, 33, 0.08), 0 30px 70px rgba(15, 23, 33, 0.14);
   --t-shadow-accent: 0 10px 26px -14px rgba(108, 111, 242, 0.45);
+
+  /* legacy 다리 — app/globals·foundry·workspace·live-evidence 가 들고 있던
+     사다리. 기본값은 그 파일들이 실제로 쓰던 값이고, 화이트·블랙은 새 색을
+     짓지 않고 위 팔레트를 가리킨다. */
+  --t-lg-bg-void:      var(--t-bg0);
+  --t-lg-bg-deep:      var(--t-bg1);
+  --t-lg-bg:           var(--t-bg2);
+  --t-lg-bg-raise:     var(--t-bg3);
+  --t-lg-bg-lift:      var(--t-bg4);
+  --t-lg-bg-edge:      var(--t-bg4);
+  --t-lg-paper:        var(--t-bg1);
+  --t-lg-paper-2:      var(--t-bg3);
+  --t-lg-ink:          var(--t-ink);
+  --t-lg-ink-soft:     rgba(var(--t-ink-rgb), 0.86);
+  --t-lg-ink-dim:      rgba(var(--t-ink-rgb), 0.74);
+  --t-lg-ink-faint:    rgba(var(--t-ink-rgb), 0.66);
+  --t-lg-ink-deep:     rgba(var(--t-ink-rgb), 0.6);
+  --t-lg-ink-dark:     var(--t-ink);
+  --t-lg-ink-cool:     rgba(var(--t-ink-rgb), 0.8);
+  --t-lg-cyan:         var(--t-cyan);
+  --t-lg-teal:         var(--t-cyan);
+  --t-lg-mint:         var(--t-green);
+  --t-lg-amber:        var(--t-amber);
+  --t-lg-coral:        var(--t-red);
+  --t-lg-violet:       var(--t-violet);
+  --t-lg-sea:          var(--t-cyan);
+  --t-lg-moss:         var(--t-green);
+  --t-lg-rust:         var(--t-red);
+  --t-lg-bronze:       var(--t-amber);
+  --t-lg-rose:         var(--t-red);
+  --t-fd-paper:        var(--t-bg1);
+  --t-fd-paper-2:      var(--t-bg3);
+  --t-fd-deep:         var(--t-bg2);
+  --t-fd-ink:          var(--t-ink);
+  --t-fd-ink-soft:     rgba(var(--t-ink-rgb), 0.74);
+  --t-fd-line:         var(--t-line-strong);
+  --t-fd-orange:       var(--t-amber);
+
+  /* 알파와 함께 쓰이는 밑색 — 알파는 그대로 두고 밑색만 뒤집힌다. */
+  --t-lg-line-rgb:     var(--t-on-rgb);
+  --t-lg-tint-rgb:     var(--t-on-rgb);
+  --t-lg-shade-rgb:    var(--t-shadow-rgb);
+  --t-lg-cyan-rgb:     var(--t-cyan-rgb);
+  --t-lg-teal-rgb:     var(--t-cyan-rgb);
+  --t-lg-mint-rgb:     var(--t-green-rgb);
+  --t-lg-amber-rgb:    var(--t-amber-rgb);
+  --t-lg-coral-rgb:    var(--t-red-rgb);
+  --t-lg-violet-rgb:   var(--t-accent-rgb);
+  --t-lg-sea-rgb:      var(--t-cyan-rgb);
+  --t-lg-moss-rgb:     var(--t-green-rgb);
+  --t-lg-bronze-rgb:   var(--t-amber-rgb);
+  --t-lg-rust-rgb:     var(--t-red-rgb);
+  --t-lg-rose-rgb:     var(--t-red-rgb);
+  --t-fd-warm-rgb:     var(--t-shadow-rgb);
 }
 
 /* ---------------------------------------------------------------- 블랙 */
@@ -286,6 +394,60 @@
   --t-shadow-panel: 0 2px 4px rgba(0, 0, 0, 0.55), 0 18px 44px rgba(0, 0, 0, 0.65);
   --t-shadow-lift: 0 4px 12px rgba(0, 0, 0, 0.6), 0 30px 70px rgba(0, 0, 0, 0.75);
   --t-shadow-accent: 0 10px 26px -14px rgba(108, 111, 242, 0.55);
+
+  /* legacy 다리 — app/globals·foundry·workspace·live-evidence 가 들고 있던
+     사다리. 기본값은 그 파일들이 실제로 쓰던 값이고, 화이트·블랙은 새 색을
+     짓지 않고 위 팔레트를 가리킨다. */
+  --t-lg-bg-void:      var(--t-bg0);
+  --t-lg-bg-deep:      var(--t-bg1);
+  --t-lg-bg:           var(--t-bg2);
+  --t-lg-bg-raise:     var(--t-bg3);
+  --t-lg-bg-lift:      var(--t-bg4);
+  --t-lg-bg-edge:      var(--t-bg4);
+  --t-lg-paper:        var(--t-bg2);
+  --t-lg-paper-2:      var(--t-bg3);
+  --t-lg-ink:          var(--t-ink);
+  --t-lg-ink-soft:     rgba(var(--t-ink-rgb), 0.86);
+  --t-lg-ink-dim:      rgba(var(--t-ink-rgb), 0.74);
+  --t-lg-ink-faint:    rgba(var(--t-ink-rgb), 0.66);
+  --t-lg-ink-deep:     rgba(var(--t-ink-rgb), 0.6);
+  --t-lg-ink-dark:     var(--t-ink);
+  --t-lg-ink-cool:     rgba(var(--t-ink-rgb), 0.8);
+  --t-lg-cyan:         var(--t-cyan);
+  --t-lg-teal:         var(--t-cyan);
+  --t-lg-mint:         var(--t-green);
+  --t-lg-amber:        var(--t-amber);
+  --t-lg-coral:        var(--t-red);
+  --t-lg-violet:       var(--t-violet);
+  --t-lg-sea:          var(--t-cyan);
+  --t-lg-moss:         var(--t-green);
+  --t-lg-rust:         var(--t-red);
+  --t-lg-bronze:       var(--t-amber);
+  --t-lg-rose:         var(--t-red);
+  --t-fd-paper:        var(--t-bg2);
+  --t-fd-paper-2:      var(--t-bg3);
+  --t-fd-deep:         var(--t-bg1);
+  --t-fd-ink:          var(--t-ink);
+  --t-fd-ink-soft:     rgba(var(--t-ink-rgb), 0.74);
+  --t-fd-line:         var(--t-line-strong);
+  --t-fd-orange:       var(--t-amber);
+
+  /* 알파와 함께 쓰이는 밑색 — 알파는 그대로 두고 밑색만 뒤집힌다. */
+  --t-lg-line-rgb:     var(--t-on-rgb);
+  --t-lg-tint-rgb:     var(--t-on-rgb);
+  --t-lg-shade-rgb:    var(--t-shadow-rgb);
+  --t-lg-cyan-rgb:     var(--t-cyan-rgb);
+  --t-lg-teal-rgb:     var(--t-cyan-rgb);
+  --t-lg-mint-rgb:     var(--t-green-rgb);
+  --t-lg-amber-rgb:    var(--t-amber-rgb);
+  --t-lg-coral-rgb:    var(--t-red-rgb);
+  --t-lg-violet-rgb:   var(--t-accent-rgb);
+  --t-lg-sea-rgb:      var(--t-cyan-rgb);
+  --t-lg-moss-rgb:     var(--t-green-rgb);
+  --t-lg-bronze-rgb:   var(--t-amber-rgb);
+  --t-lg-rust-rgb:     var(--t-red-rgb);
+  --t-lg-rose-rgb:     var(--t-red-rgb);
+  --t-fd-warm-rgb:     var(--t-shadow-rgb);
 }
 
 /* ============================================================================
@@ -470,6 +632,8 @@
    잉크·선 토큰을 무대용으로 되돌린다. */
 .cv5-bench,
 .cv5-embed3d,
+/* 첫 화면의 3D 무대(.cv5-make-stage)도 세 테마 모두 어둡다 — 그 위 도구 줄이 화이트에서 1.22:1 이었다(2026-09-05). */
+.cv5-make-stage,
 .sample-workbench,
 .live-evidence-showcase,
 .asset-family-visual,
@@ -494,4 +658,190 @@
   --text-dim: rgba(232, 236, 241, 0.6);
   --line: rgba(255, 255, 255, 0.1);
   --line-strong: rgba(255, 255, 255, 0.18);
+}
+
+/* ============================================================================
+   무대·신호색 (--t-fx-*)  — 세 테마가 같은 값을 쓴다
+   ---------------------------------------------------------------------------
+   렌더가 검게 구워져 들어오는 무대(.live-evidence-*, .sample-workbench,
+   .agent-code-card, .cv5-bench …) 위의 글자·선과, 터미널 신호등처럼 색 자체가
+   뜻인 자리다. 테마를 따라가면 안 되므로 세 팔레트가 같은 값을 쓴다. 그래도
+   여기 모아 두는 이유는 이 파일이 배색의 유일한 원본이라서다 — 무대 색을
+   손볼 때 globals.css 를 뒤지지 않아도 된다.
+   이름은 색 자체에서 나온다: 색상 가족 + L*(밝기), 알파가 있으면 -aNN.
+   ========================================================================= */
+:root[data-theme] {
+  --t-fx-mint-45-a34:        rgba(11, 122, 82, 0.34);
+  --t-fx-navy-12-a13:        rgba(15, 33, 51, 0.13);
+  --t-fx-navy-74-a13:        rgba(151, 187, 218, 0.13);
+  --t-fx-warm-60:            #e36e6e;
+  --t-fx-amber-79:           #e8bd66;
+  --t-fx-mint-74:            #5cc99b;
+  --t-fx-navy-68-4:          #91a8bc;
+  --t-fx-grey-100:           #ffffff;
+  --t-fx-navy-25-a06:        rgba(26, 62, 82, 0.06);
+  --t-fx-grey-97-2:          #f0f8fd;
+  --t-fx-navy-68-2:          #91a9bc;
+  --t-fx-teal-89:            #b8e8f4;
+  --t-fx-teal-77-a12:        rgba(72, 205, 240, 0.12);
+  --t-fx-teal-81:            #6bd9f2;
+  --t-fx-navy-70:            #9aafc2;
+  --t-fx-mint-75-a10:        rgba(62, 207, 154, 0.1);
+  --t-fx-mint-80-2:          #61dab0;
+  --t-fx-navy-74-a15:        rgba(151, 187, 218, 0.15);
+  --t-fx-navy-15:            #1a2638;
+  --t-fx-navy-67:            #8ea7bd;
+  --t-fx-navy-39:            #416078;
+  --t-fx-navy-74-a21:        rgba(151, 187, 218, 0.21);
+  --t-fx-navy-77-a60:        rgba(75, 204, 242, 0.6);
+  --t-fx-navy-77-a10:        rgba(75, 204, 242, 0.1);
+  --t-fx-grey-91-3:          #d7e7f1;
+  --t-fx-navy-74-a11:        rgba(151, 187, 218, 0.11);
+  --t-fx-navy-67-2:          #8da5b8;
+  --t-fx-navy-68:            #92aabd;
+  --t-fx-teal-77-2:          #4bccec;
+  --t-fx-teal-72:            #8fb8c5;
+  --t-fx-mint-83-2:          #73e2b9;
+  --t-fx-teal-88:            #9be8ff;
+  --t-fx-teal-78-a14:        rgba(76, 210, 240, 0.14);
+  --t-fx-teal-85:            #7ce5f4;
+  --t-fx-teal-86-a14:        rgba(177, 222, 236, 0.14);
+  --t-fx-teal-75-a30:        rgba(134, 193, 205, 0.3);
+  --t-fx-navy-12-2:          #0b2130;
+  --t-fx-grey-96:            #eaf7f7;
+  --t-fx-grey-98-3:          #f4fbfb;
+  --t-fx-grey-92:            #e9e9e9;
+  --t-fx-teal-90:            #cfe6ea;
+  --t-fx-teal-77-a32:        rgba(121, 203, 209, 0.32);
+  --t-fx-navy-09:            #0a1a27;
+  --t-fx-grey-97-4:          #eaf9f7;
+  --t-fx-teal-27-a16:        rgba(18, 69, 82, 0.16);
+  --t-fx-navy-68-3:          #8daab7;
+  --t-fx-grey-93:            #d8eeee;
+  --t-fx-mint-81-2:          #63dfb7;
+  --t-fx-mint-81-a12:        rgba(99, 223, 183, 0.12);
+  --t-fx-teal-68-a22:        rgba(55, 180, 193, 0.22);
+  --t-fx-navy-20:            #123347;
+  --t-fx-navy-07-3:          #091621;
+  --t-fx-mint-81-3:          #70d9d1;
+  --t-fx-grey-99-2:          #f0fffd;
+  --t-fx-grey-98-2:          #f8fbfa;
+  --t-fx-navy-23:            #173b4b;
+  --t-fx-navy-58-2:          #78909a;
+  --t-fx-grey-73:            #a5b5ba;
+  --t-fx-teal-44:            #1c7280;
+  --t-fx-teal-55:            #1591a1;
+  --t-fx-teal-30:            #164c5a;
+  --t-fx-navy-23-2:          #123b4a;
+  --t-fx-navy-47:            #5b727b;
+  --t-fx-grey-91-2:          #dce8e8;
+  --t-fx-grey-63:            #8a9ca2;
+  --t-fx-teal-32:            #1d5261;
+  --t-fx-teal-84-a16:        rgba(157, 219, 224, 0.16);
+  --t-fx-navy-06-a66:        rgba(6, 20, 30, 0.66);
+  --t-fx-mint-80:            #62d8c9;
+  --t-fx-grey-95-4:          #def4f0;
+  --t-fx-teal-66:            #85a5ad;
+  --t-fx-mint-96-a18:        rgba(222, 249, 245, 0.18);
+  --t-fx-coal-00-a18:        rgba(0, 0, 0, 0.18);
+  --t-fx-mint-81:            #78dbcb;
+  --t-fx-grey-99:            #f2fffd;
+  --t-fx-teal-83:            #bcd3d8;
+  --t-fx-navy-33:            #285465;
+  --t-fx-navy-27:            #1c4459;
+  --t-fx-navy-20-3:          #103346;
+  --t-fx-teal-53-2:          #6d8288;
+  --t-fx-amber-49:           #9a6a13;
+  --t-fx-navy-21:            #17364c;
+  --t-fx-navy-07:            #0b1724;
+  --t-fx-grey-94:            #dff0f3;
+  --t-fx-navy-19-a20:        rgba(19, 50, 70, 0.2);
+  --t-fx-teal-69:            #90aeb9;
+  --t-fx-teal-87-a14:        rgba(190, 222, 232, 0.14);
+  --t-fx-grey-95-2:          #e5f5f4;
+  --t-fx-mint-77:            #57d2b6;
+  --t-fx-mint-77-a12:        rgba(87, 210, 182, 0.12);
+  --t-fx-mint-77-a62:        rgba(87, 210, 182, 0.62);
+  --t-fx-teal-87-a12:        rgba(190, 222, 232, 0.12);
+  --t-fx-navy-58-3:          #71919d;
+  --t-fx-teal-62:            #7f9ba5;
+  --t-fx-grey-95-3:          #e0f5f4;
+  --t-fx-teal-78-a35:        rgba(95, 211, 207, 0.35);
+  --t-fx-teal-78-a46:        rgba(95, 211, 207, 0.46);
+  --t-fx-teal-65-a18:        rgba(47, 172, 183, 0.18);
+  --t-fx-mint-90:            #a9f0e4;
+  --t-fx-teal-78-2:          #5fd3cf;
+  --t-fx-mint-95:            #dff6f1;
+  --t-fx-teal-55-a28:        rgba(39, 143, 162, 0.28);
+  --t-fx-navy-20-2:          #143344;
+  --t-fx-navy-13:            #0b2433;
+  --t-fx-navy-07-2:          #081723;
+  --t-fx-teal-83-a15:        rgba(135, 220, 226, 0.15);
+  --t-fx-teal-72-2:          #8eb6bf;
+  --t-fx-mint-83-a28:        rgba(103, 225, 207, 0.28);
+  --t-fx-navy-05-a60:        rgba(4, 18, 28, 0.6);
+  --t-fx-mint-82:            #74ded0;
+  --t-fx-grey-98:            #f8fbfc;
+  --t-fx-navy-14:            #10243a;
+  --t-fx-grey-91:            #dce8eb;
+  --t-fx-teal-84:            #a9d9da;
+  --t-fx-grey-96-2:          #e9f7f6;
+  --t-fx-teal-54:            #148f9b;
+  --t-fx-navy-21-2:          #17354a;
+  --t-fx-navy-58:            #78909b;
+  --t-fx-grey-95:            #e4f6ee;
+  --t-fx-mint-47:            #177d62;
+  --t-fx-teal-53:            #128ca0;
+  --t-fx-navy-17:            #102d42;
+  --t-fx-navy-49:            #607688;
+  --t-fx-grey-66:            #92a4ac;
+  --t-fx-teal-47:            #277b88;
+  --t-fx-teal-81-2:          #8cd7d1;
+  --t-fx-grey-97:            #effaf8;
+  --t-fx-navy-63:            #879ba5;
+  --t-fx-navy-50:            #607b87;
+  --t-fx-navy-59:            #7d919b;
+  --t-fx-mint-49:            #14856b;
+  --t-fx-grey-91-4:          #d8e7eb;
+  --t-fx-teal-62-2:          #19a6ad;
+  --t-fx-navy-60:            #7896a2;
+  --t-fx-teal-77-3:          #55cfc8;
+  --t-fx-amber-73:           #d7ab70;
+  --t-fx-navy-10:            #101d2b;
+  --t-fx-teal-79-a32:        rgba(91, 214, 218, 0.32);
+  --t-fx-navy-74-a12:        rgba(46, 196, 240, 0.12);
+  --t-fx-navy-43:            #526a78;
+  --t-fx-mint-40:            #0b6b54;
+  --t-fx-teal-44-2:          #0b7188;
+  --t-fx-teal-83-2:          #b7d3d8;
+  --t-fx-amber-16-a10:       rgba(47, 38, 28, 0.1);
+  --t-fx-grey-100-a04:       rgba(255, 255, 255, 0.04);
+  --t-fx-coal-11:            #111f25;
+  --t-fx-grey-96-5:          #edf4f2;
+  --t-fx-teal-78:            #63d3d0;
+  --t-fx-grey-96-3:          #e7f7f5;
+  --t-fx-mint-83:            #73e2d3;
+  --t-fx-teal-77:            #55cddd;
+  --t-fx-teal-85-a20:        rgba(145, 224, 239, 0.2);
+  --t-fx-teal-67:            #83aab4;
+  --t-fx-teal-79-a45:        rgba(82, 211, 230, 0.45);
+  --t-fx-teal-45-a16:        rgba(18, 117, 141, 0.16);
+  --t-fx-mint-81-a40:        rgba(92, 224, 177, 0.4);
+  --t-fx-mint-49-a14:        rgba(34, 132, 111, 0.14);
+  --t-fx-teal-74-2:          #9ebbc0;
+  --t-fx-teal-87-a22:        rgba(190, 222, 232, 0.22);
+  --t-fx-navy-12:            #0d2130;
+  --t-fx-coal-00-a85:        rgba(0, 0, 0, 0.85);
+  --t-fx-mint-82-a62:        rgba(116, 222, 208, 0.62);
+  --t-fx-grey-97-3:          #eafaf8;
+  --t-fx-mint-82-a80:        rgba(116, 222, 208, 0.8);
+  --t-fx-mint-82-a16:        rgba(116, 222, 208, 0.16);
+  --t-fx-navy-55:            #6f8794;
+  --t-fx-navy-42:            #4d6874;
+  --t-fx-navy-66:            #8aa5b0;
+  --t-fx-grey-96-4:          #eef4f5;
+  --t-fx-teal-74:            #9fbcc5;
+  --t-fx-amber-49-2:         #9a6a12;
+  --t-fx-mint-79:            #3ddc9a;
+  --t-fx-amber-77:           #e8b46c;
 }

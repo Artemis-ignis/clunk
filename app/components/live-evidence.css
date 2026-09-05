@@ -106,10 +106,10 @@
   max-width: 100%;
   margin: 0;
   overflow: hidden;
-  border: 1px solid rgba(190, 222, 232, 0.22);
+  border: 1px solid var(--t-fx-teal-87-a22);
   border-radius: 13px;
-  background: #0d2130;
-  box-shadow: 0 18px 40px -22px rgba(0, 0, 0, 0.85);
+  background: var(--t-fx-navy-12);
+  box-shadow: 0 18px 40px -22px var(--t-fx-coal-00-a85);
 }
 
 .live-evidence-cut {
@@ -131,10 +131,10 @@
   z-index: 2;
   max-width: calc(100% - 18px);
   padding: 5px 8px;
-  border: 1px solid rgba(232, 178, 108, 0.5);
+  border: 1px solid rgba(var(--t-lg-amber-rgb), 0.5);
   border-radius: 6px;
-  background: rgba(10, 20, 28, 0.86);
-  color: #f0c188;
+  background: rgba(var(--t-ground-rgb), 0.86);
+  color: var(--t-lg-amber);
   font-size: 0.68rem;
   line-height: 1.4;
 }
@@ -144,19 +144,19 @@
   display: flex;
   flex-wrap: wrap;
   gap: 4px 12px;
-  color: #8eb6bf;
+  color: var(--t-fx-teal-72-2);
   font: 0.68rem var(--font-mono);
   letter-spacing: 0.04em;
 }
 
 .live-evidence-caption b {
-  color: #dff0f3;
+  color: var(--t-fx-grey-94);
   font-weight: 400;
 }
 
 .live-evidence-caption code {
   overflow-wrap: anywhere;
-  color: #74ded0;
+  color: var(--t-fx-mint-82);
   font: inherit;
 }
 
@@ -169,7 +169,7 @@
 }
 
 .live-evidence-cutbar > span {
-  color: #8eb6bf;
+  color: var(--t-fx-teal-72-2);
   font: 0.68rem var(--font-mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -177,10 +177,10 @@
 
 .live-evidence-cutbar button {
   padding: 5px 9px;
-  border: 1px solid rgba(190, 222, 232, 0.22);
+  border: 1px solid var(--t-fx-teal-87-a22);
   border-radius: 999px;
   background: rgba(var(--t-on-rgb), 0.04);
-  color: #cfe6ea;
+  color: var(--t-fx-teal-90);
   font: 0.68rem var(--font-mono);
   cursor: pointer;
   transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
@@ -188,14 +188,14 @@
 
 .live-evidence-cutbar button:hover,
 .live-evidence-cutbar button:focus-visible {
-  border-color: rgba(116, 222, 208, 0.62);
-  color: #eafaf8;
+  border-color: var(--t-fx-mint-82-a62);
+  color: var(--t-fx-grey-97-3);
 }
 
 .live-evidence-cutbar button.is-active {
-  border-color: rgba(116, 222, 208, 0.8);
-  background: rgba(116, 222, 208, 0.16);
-  color: #eafaf8;
+  border-color: var(--t-fx-mint-82-a80);
+  background: var(--t-fx-mint-82-a16);
+  color: var(--t-fx-grey-97-3);
 }
 
 /* 동작을 선언하지 않은 파일에는 03 단계가 없다. 눌리지 않는다는 것이 보여야 한다. */
@@ -206,7 +206,7 @@
 
 .live-evidence-showcase .live-evidence-showcase-control-group button:disabled:hover {
   border-color: transparent;
-  color: #7f9ba5;
+  color: var(--t-fx-teal-62);
 }
 
 /* 좁은 칸에서 파일 이름이 "tractor.co…"로 잘렸다. 이름은 줄을 바꾸는 편이 낫다. */
@@ -222,26 +222,26 @@
   flex-wrap: wrap;
   gap: 3px 12px;
   margin-top: 9px;
-  color: #6f8794;
+  color: var(--t-fx-navy-55);
   font: 0.68rem var(--font-mono);
 }
 
 .live-evidence-measures b {
-  color: #17354a;
+  color: var(--t-fx-navy-21-2);
   font-weight: 400;
 }
 
 /* ---- 측정 항목 펼치기 ---- */
 .live-evidence-checks {
   margin-top: 11px;
-  border: 1px solid #dce8eb;
+  border: 1px solid var(--t-fx-grey-91);
   border-radius: 8px;
-  background: #fff;
+  background: var(--t-fx-grey-100);
 }
 
 .live-evidence-checks > summary {
   padding: 8px 10px;
-  color: #4d6874;
+  color: var(--t-fx-navy-42);
   font: 0.7rem var(--font-mono);
   cursor: pointer;
   list-style: none;
@@ -253,7 +253,7 @@
 
 .live-evidence-checks > summary::before {
   content: "▸ ";
-  color: #8aa5b0;
+  color: var(--t-fx-navy-66);
 }
 
 .live-evidence-checks[open] > summary::before {
@@ -261,7 +261,7 @@
 }
 
 .live-evidence-checks > summary:focus-visible {
-  outline: 2px solid #19a6ad;
+  outline: 2px solid var(--t-fx-teal-62-2);
   outline-offset: 2px;
 }
 
@@ -275,7 +275,7 @@
 
 .live-evidence-checks li {
   padding: 7px 0;
-  border-top: 1px solid #eef4f5;
+  border-top: 1px solid var(--t-fx-grey-96-4);
 }
 
 .live-evidence-checks li > div {
@@ -286,7 +286,7 @@
 }
 
 .live-evidence-checks li span {
-  color: #879ba5;
+  color: var(--t-fx-navy-63);
   font: 0.68rem var(--font-mono);
 }
 
@@ -296,15 +296,15 @@
 
 .live-evidence-checks li p {
   margin: 4px 0 0;
-  color: #607688;
+  color: var(--t-fx-navy-49);
   font-size: 0.7rem;
   line-height: 1.5;
 }
 
-.live-evidence-check-pass strong { color: #14856b; }
-.live-evidence-check-review strong { color: #9a6a12; }
-.live-evidence-check-gap strong { color: #a3453a; }
-.live-evidence-check-off strong { color: #7d919b; }
+.live-evidence-check-pass strong { color: var(--t-fx-mint-49); }
+.live-evidence-check-review strong { color: var(--t-lg-bronze); }
+.live-evidence-check-gap strong { color: var(--t-lg-rust); }
+.live-evidence-check-off strong { color: var(--t-lg-ink-faint); }
 
 /* ---- 그림에 대한 고지 ---- */
 .live-evidence-note {
@@ -312,16 +312,16 @@
   gap: 11px;
   align-items: flex-start;
   padding: 11px 17px 13px;
-  border-top: 1px solid rgba(190, 222, 232, 0.14);
+  border-top: 1px solid var(--t-fx-teal-87-a14);
   background: rgba(var(--t-on-rgb), 0.025);
-  color: #9fbcc5;
+  color: var(--t-fx-teal-74);
   font-size: 0.7rem;
   line-height: 1.55;
 }
 
 .live-evidence-note > span {
   flex: 0 0 auto;
-  color: #74ded0;
+  color: var(--t-fx-mint-82);
   font: 0.68rem var(--font-mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -333,23 +333,23 @@
 }
 
 /* ---- 판정 톤: pass / review / gap ---- */
-.live-evidence-showcase-status-review strong { color: #9a6a12; }
-.live-evidence-showcase-status-gap strong { color: #a3453a; }
+.live-evidence-showcase-status-review strong { color: var(--t-fx-amber-49-2); }
+.live-evidence-showcase-status-gap strong { color: var(--t-lg-rust); }
 
-:root:not([data-theme="light"]) .live-evidence-checks {
+.live-evidence-checks {
   border-color: var(--line);
   background: var(--ink-2);
 }
 
-:root:not([data-theme="light"]) .live-evidence-checks > summary { color: var(--text-muted); }
-:root:not([data-theme="light"]) .live-evidence-checks li { border-color: var(--line); }
-:root:not([data-theme="light"]) .live-evidence-checks li p,
-:root:not([data-theme="light"]) .live-evidence-measures b { color: var(--text-muted); }
-:root:not([data-theme="light"]) .live-evidence-check-pass strong { color: #3ddc9a; }
-:root:not([data-theme="light"]) .live-evidence-check-review strong { color: #e8b46c; }
-:root:not([data-theme="light"]) .live-evidence-check-gap strong { color: #f08a7a; }
-:root:not([data-theme="light"]) .live-evidence-showcase-status-review strong { color: #e8b46c; }
-:root:not([data-theme="light"]) .live-evidence-showcase-status-gap strong { color: #f08a7a; }
+.live-evidence-checks > summary { color: var(--text-muted); }
+.live-evidence-checks li { border-color: var(--line); }
+.live-evidence-checks li p,
+.live-evidence-measures b { color: var(--text-muted); }
+.live-evidence-check-pass strong { color: var(--t-fx-mint-79); }
+.live-evidence-check-review strong { color: var(--t-lg-amber); }
+.live-evidence-check-gap strong { color: var(--t-lg-coral); }
+.live-evidence-showcase-status-review strong { color: var(--t-fx-amber-77); }
+.live-evidence-showcase-status-gap strong { color: var(--t-lg-coral); }
 
 .cv5-surface .live-evidence-checks {
   border-color: var(--v5-line);
@@ -364,9 +364,9 @@
 .cv5-surface .live-evidence-measures b { color: var(--v5-ink); }
 .cv5-surface .live-evidence-check-pass strong { color: var(--v5-green); }
 .cv5-surface .live-evidence-check-review strong { color: var(--v5-amber); }
-.cv5-surface .live-evidence-check-gap strong { color: #f08a7a; }
+.cv5-surface .live-evidence-check-gap strong { color: var(--t-lg-coral); }
 .cv5-surface .live-evidence-showcase-status-review strong { color: var(--v5-amber); }
-.cv5-surface .live-evidence-showcase-status-gap strong { color: #f08a7a; }
+.cv5-surface .live-evidence-showcase-status-gap strong { color: var(--t-lg-coral); }
 
 @media (max-width: 780px) {
   .live-evidence-showcase-visual { padding: 40px 14px 13px; }
