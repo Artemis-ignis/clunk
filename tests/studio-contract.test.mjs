@@ -52,7 +52,8 @@ test("Asset Studio opens on the tool, not on an explanation", async () => {
   const shell = await source("app/components/WorkspaceShell.tsx");
 
   assert.match(page, /requireChatGPTUser/);
-  assert.match(client, /에셋 만들기/);
+  // 2026-09-06 마스터: 화면 이름은 나브·용어집과 같은 "에셋 제작".
+  assert.match(client, /에셋 제작/);
   assert.match(shell, /\/studio/);
 
   // Three columns, and the make button pinned so it stays on the first screen.
