@@ -35,7 +35,9 @@ import { isPublicMarketFile, parseMarketPath, previewGlbFileName } from "../app/
 const ROOT = new URL("../", import.meta.url);
 const MARKET_DIR = new URL("public/market/", ROOT);
 /** 미리보기와 대표 그림은 원래 공개다 — 카드가 그것을 그린다. 195개를 셀 때 쓴 그 잣대. */
-const PREVIEW = /^(preview-|hero-)/u;
+// 미리보기로 치는 파일: hero-* · preview-* 와 시트의 카드 축소본(*.card.png, D1 역할 preview).
+// 나머지(GLB · 원본 시트 PNG · 텍스처)는 판매 파일이라 문 없이 나가면 안 된다.
+const PREVIEW = /^(preview-|hero-)|\.card\.png$/iu;
 
 function marketPath(url) {
   return url.pathname.replace(/^\/([A-Za-z]:)/u, "$1");
