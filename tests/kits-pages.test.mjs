@@ -79,9 +79,10 @@ test("/kit/<id> 는 없는 키트에 404 를 돌려준다", async () => {
 
 test("키트 화면은 전체 장면과 부품 격자를 같은 사실에서 그린다", async () => {
   const detail = await source("app/components/KitDetail.tsx");
-  // 합본이 있는 키트는 그 파일을 그대로 돌려 보여 준다 — 상품 상세와 같은 주소 꼴.
+  // 합본이 있는 키트는 그 파일을 그대로 돌려 보여 준다 — 어느 주소(문 안의 판매 파일·문 밖의 미리보기)를 열지는 model-source 가 정한다.
   assert.match(detail, /EmbeddedGlbViewer/);
-  assert.match(detail, /`\/market\/\$\{product\.slug\}\/\$\{product\.entryFileName\}`/);
+  assert.ok(detail.includes("useModelSource(product ?? null, kit.free, salesOpen)"), "키트 상세도 model-source 로 뷰어 주소를 정한다");
+  assert.ok(detail.includes("previewModelUrl(product.slug, product.entryFileName)"), "문에 막히면 미리보기로 물러나는 안전망이 있어야 한다");
   assert.match(detail, /키트 전체 장면 · 드래그 회전 · 휠 줌/);
   // 합본이 없는 키트는 없는 파일을 지어내지 않고 대표 그림과 한 줄을 세운다.
   assert.match(detail, /부품을 하나씩 따로 받습니다/);
