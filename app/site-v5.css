@@ -125,8 +125,11 @@ html:has(.cv5) body { background: var(--v5-bg0, #17181b); }
    2026-09-04 마스터가 그 어색함을 짚었다.
    바탕을 거의 불투명하게 올려 밑이 안 비치게 하고, 실선 대신 짧은 그라데이션 꼬리로
    페이지에 이어 붙인다. 흐림은 남긴다 — 스크롤 중에 색이 은은히 배어 나오는 편이 좋다. */
+/* 높이는 바 자신(68px)이다. app/globals.css 의 같은 선택자가 height: 136px 를 주는데, 위의
+   inset: 0 은 top/bottom 만 겹쳐 쓰고 height 는 그대로 남아 바탕이 바보다 68px 더 내려왔다 —
+   스크롤하면 메뉴 아래에 빈 검은 띠가 하나 더 깔렸다(2026-09-05 마스터가 짚음). */
 .cv5 .sitenav-dock::before {
-  content: ""; position: absolute; inset: 0;
+  content: ""; position: absolute; inset: 0; height: auto;
   background: rgba(23, 24, 27, 0.96);
   backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
   border-bottom: 0;

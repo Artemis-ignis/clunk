@@ -639,9 +639,27 @@ async function main() {
   try {
     const previous = JSON.parse(readFileSync(outPath, "utf8")) as ListingFactsFile;
     let carried = 0;
+    let kitKept = 0;
     for (const [slug, fact] of Object.entries(previous.facts ?? {})) {
       const rebuilt = built.facts[slug];
-      if (rebuilt && !isShell(rebuilt)) continue;
+      if (rebuilt && !isShell(rebuilt)) {
+        // 키트 계약(kit · kitSize · members · viewYawDegrees)은 파일이 말해 주지 않는다 —
+        // scripts/merge-kit-facts.mjs 가 키트 조각에서 적는 것이고, 이 실행은 매니페스트 밖의
+        // 키트를 모르므로 kit: null 로 다시 짓는다. 2026-09-05 그렇게 마을·부두·광산 키트
+        // 세 벌(부품 46개)이 등록부에서 키트 표식을 잃고 라이브 키트 탭에서 사라졌다.
+        // 이 실행이 키트를 모르고 이전 판이 알면, 측정값은 새것을 쓰되 키트 표식은 남긴다.
+        if (!rebuilt.kit && fact.kit) {
+          built.facts[slug] = {
+            ...rebuilt,
+            kit: fact.kit,
+            kitSize: fact.kitSize,
+            members: fact.members,
+            viewYawDegrees: rebuilt.viewYawDegrees ?? fact.viewYawDegrees,
+          };
+          kitKept += 1;
+        }
+        continue;
+      }
       if (isShell(rebuilt) && isShell(fact)) continue;
       // Keep what this run did measure (byteLength, format) on top of the known-good fact.
       built.facts[slug] = rebuilt
@@ -653,6 +671,7 @@ async function main() {
         : fact;
       carried += 1;
     }
+    if (kitKept) built.sources.push(`이전 판의 키트 표식을 유지한 항목 ${kitKept}건 (scripts/merge-kit-facts.mjs 가 적은 것)`);
     if (carried) {
       built.sources.push(`이전 판에서 유지한 항목 ${carried}건`);
       built.facts = Object.fromEntries(Object.entries(built.facts).sort(([a], [b]) => a.localeCompare(b)));

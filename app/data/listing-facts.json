@@ -1,11 +1,12 @@
 {
   "schema": "clunk.listing-facts.v1",
-  "generatedAt": "2026-09-05T04:15:22.694Z",
+  "generatedAt": "2026-09-05T07:21:11.256Z",
   "sources": [
     "outputs\\market-launch\\wave1\\upload-manifest.json",
     "tmp\\listings-snapshot.json",
     "배달 파일에서 다시 잰 항목 79건",
-    "이전 판에서 유지한 항목 1건"
+    "이전 판에서 유지한 항목 1건",
+    "examples/generated/kits/*/listing-facts.fragment.json → public/market 파일에서 재측정 (scripts/merge-kit-facts.mjs)"
   ],
   "facts": {
     "clunk-heli-h145": {
@@ -733,12 +734,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -748,7 +743,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "dock-buoy-red": {
       "triangles": 542,
@@ -762,12 +768,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -777,7 +777,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "dock-buoy-white": {
       "triangles": 494,
@@ -791,12 +802,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -806,7 +811,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "dock-fish-crate-closed": {
       "triangles": 776,
@@ -820,12 +836,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -835,7 +845,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "dock-fish-crate-open": {
       "triangles": 1268,
@@ -849,12 +870,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -864,7 +879,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "dock-lantern-post": {
       "triangles": 720,
@@ -885,12 +911,6 @@
           "seconds": 3.2
         }
       ],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -900,7 +920,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "dock-lighthouse": {
       "triangles": 1364,
@@ -921,12 +952,6 @@
           "seconds": 6
         }
       ],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -936,7 +961,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "dock-net-pile": {
       "triangles": 1264,
@@ -950,12 +986,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -965,7 +995,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "dock-piling": {
       "triangles": 216,
@@ -979,12 +1020,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -994,7 +1029,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "dock-plank-corner": {
       "triangles": 1488,
@@ -1008,12 +1054,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1023,7 +1063,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "dock-plank-end": {
       "triangles": 1236,
@@ -1037,12 +1088,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1052,7 +1097,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "dock-plank-straight": {
       "triangles": 828,
@@ -1066,12 +1122,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1081,7 +1131,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "dock-rod-rack": {
       "triangles": 1340,
@@ -1095,12 +1156,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1110,7 +1165,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "dock-rope-coil": {
       "triangles": 680,
@@ -1124,12 +1190,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1139,7 +1199,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "dock-rowboat": {
       "triangles": 1160,
@@ -1160,12 +1231,6 @@
           "seconds": 4
         }
       ],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1175,7 +1240,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "farmhand-walk-sprites": {
       "triangles": null,
@@ -1801,12 +1877,6 @@
           "seconds": 4
         }
       ],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1816,7 +1886,34 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-fishing-dock",
+      "kitSize": 15,
+      "members": [
+        "dock-bollard",
+        "dock-buoy-red",
+        "dock-buoy-white",
+        "dock-fish-crate-closed",
+        "dock-fish-crate-open",
+        "dock-lantern-post",
+        "dock-lighthouse",
+        "dock-net-pile",
+        "dock-piling",
+        "dock-plank-corner",
+        "dock-plank-end",
+        "dock-plank-straight",
+        "dock-rod-rack",
+        "dock-rope-coil",
+        "dock-rowboat"
+      ],
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "kit-mine-entrance": {
       "triangles": 8512,
@@ -1830,12 +1927,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1847,7 +1938,35 @@
           "image/png"
         ]
       },
-      "inspection": null
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": [
+        "mine-cart",
+        "mine-cart-ore",
+        "mine-ladder",
+        "mine-lantern",
+        "mine-ore-copper",
+        "mine-ore-gold",
+        "mine-ore-iron",
+        "mine-portal",
+        "mine-powder-keg",
+        "mine-rail-curve",
+        "mine-rail-stop",
+        "mine-rail-straight",
+        "mine-rock-large",
+        "mine-rock-small",
+        "mine-support",
+        "mine-tool-rack"
+      ],
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "kit-village-square": {
       "triangles": 12880,
@@ -1873,12 +1992,6 @@
           "seconds": 3.6
         }
       ],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1888,7 +2001,34 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": [
+        "village-bell-tower",
+        "village-bench",
+        "village-fountain",
+        "village-lamp-post",
+        "village-noticeboard",
+        "village-path-corner",
+        "village-path-crossing",
+        "village-path-straight",
+        "village-planter-box",
+        "village-planter-urn",
+        "village-postbox",
+        "village-signpost",
+        "village-wall-corner",
+        "village-wall-straight",
+        "village-well"
+      ],
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 97,
+        "hardBlockers": 1,
+        "note": null
+      }
     },
     "mine-cart": {
       "triangles": 1548,
@@ -1910,12 +2050,6 @@
           "seconds": 2
         }
       ],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1927,7 +2061,18 @@
           "image/png"
         ]
       },
-      "inspection": null
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 99,
+        "mobileScore": 99,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "mine-cart-ore": {
       "triangles": 1764,
@@ -1949,12 +2094,6 @@
           "seconds": 2
         }
       ],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1966,7 +2105,18 @@
           "image/png"
         ]
       },
-      "inspection": null
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 99,
+        "mobileScore": 99,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "mine-ladder": {
       "triangles": 560,
@@ -1980,12 +2130,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -1997,7 +2141,18 @@
           "image/png"
         ]
       },
-      "inspection": null
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "mine-lantern": {
       "triangles": 384,
@@ -2018,12 +2173,6 @@
           "seconds": 2.4
         }
       ],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2035,7 +2184,18 @@
           "image/png"
         ]
       },
-      "inspection": null
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "mine-ore-copper": {
       "triangles": 168,
@@ -2049,12 +2209,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2066,7 +2220,18 @@
           "image/png"
         ]
       },
-      "inspection": null
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "mine-ore-gold": {
       "triangles": 168,
@@ -2080,12 +2245,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2097,7 +2256,18 @@
           "image/png"
         ]
       },
-      "inspection": null
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "mine-ore-iron": {
       "triangles": 168,
@@ -2111,12 +2281,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2128,7 +2292,18 @@
           "image/png"
         ]
       },
-      "inspection": null
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "mine-portal": {
       "triangles": 992,
@@ -2142,12 +2317,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2159,7 +2328,18 @@
           "image/png"
         ]
       },
-      "inspection": null
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "mine-powder-keg": {
       "triangles": 404,
@@ -2173,12 +2353,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2190,7 +2364,18 @@
           "image/png"
         ]
       },
-      "inspection": null
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "mine-rail-curve": {
       "triangles": 1388,
@@ -2204,12 +2389,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2221,7 +2400,18 @@
           "image/png"
         ]
       },
-      "inspection": null
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "mine-rail-stop": {
       "triangles": 584,
@@ -2235,12 +2425,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2252,7 +2436,18 @@
           "image/png"
         ]
       },
-      "inspection": null
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "mine-rail-straight": {
       "triangles": 656,
@@ -2266,12 +2461,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2283,7 +2472,18 @@
           "image/png"
         ]
       },
-      "inspection": null
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "mine-rock-large": {
       "triangles": 280,
@@ -2297,12 +2497,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2314,7 +2508,18 @@
           "image/png"
         ]
       },
-      "inspection": null
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "mine-rock-small": {
       "triangles": 200,
@@ -2328,12 +2533,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2345,7 +2544,18 @@
           "image/png"
         ]
       },
-      "inspection": null
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "mine-support": {
       "triangles": 576,
@@ -2359,12 +2569,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2376,7 +2580,18 @@
           "image/png"
         ]
       },
-      "inspection": null
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "mine-tool-rack": {
       "triangles": 508,
@@ -2390,12 +2605,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2407,7 +2616,18 @@
           "image/png"
         ]
       },
-      "inspection": null
+      "kit": "kit-mine-entrance",
+      "kitSize": 16,
+      "members": null,
+      "viewYawDegrees": 40.3,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "tex-dirt-path-v1": {
       "triangles": null,
@@ -2585,12 +2805,6 @@
           "seconds": 2.7
         }
       ],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2600,7 +2814,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 97,
+        "hardBlockers": 1,
+        "note": null
+      }
     },
     "village-bench": {
       "triangles": 544,
@@ -2614,12 +2839,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2629,7 +2848,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "village-fountain": {
       "triangles": 1816,
@@ -2643,12 +2873,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2658,7 +2882,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "village-lamp-post": {
       "triangles": 412,
@@ -2672,12 +2907,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2687,7 +2916,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "village-noticeboard": {
       "triangles": 420,
@@ -2701,12 +2941,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2716,7 +2950,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "village-path-corner": {
       "triangles": 588,
@@ -2730,12 +2975,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2745,7 +2984,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "village-path-crossing": {
       "triangles": 456,
@@ -2759,12 +3009,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2774,7 +3018,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "village-path-straight": {
       "triangles": 636,
@@ -2788,12 +3043,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2803,7 +3052,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "village-planter-box": {
       "triangles": 1396,
@@ -2817,12 +3077,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2832,7 +3086,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 97,
+        "hardBlockers": 1,
+        "note": null
+      }
     },
     "village-planter-urn": {
       "triangles": 844,
@@ -2846,12 +3111,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2861,7 +3120,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "village-postbox": {
       "triangles": 444,
@@ -2875,12 +3145,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2890,7 +3154,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "village-signpost": {
       "triangles": 444,
@@ -2904,12 +3179,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2919,7 +3188,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "village-wall-corner": {
       "triangles": 1260,
@@ -2933,12 +3213,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2948,7 +3222,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "village-wall-straight": {
       "triangles": 924,
@@ -2962,12 +3247,6 @@
       "format": "GLB",
       "animatedParts": [],
       "animations": [],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -2977,7 +3256,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 100,
+        "hardBlockers": 0,
+        "note": null
+      }
     },
     "village-well": {
       "triangles": 1692,
@@ -2998,12 +3288,6 @@
           "seconds": 3.6
         }
       ],
-      "kit": null,
-      "kitSize": 0,
-      "members": null,
-      "viewYawDegrees": null,
-      "sheet": null,
-      "texture": null,
       "engine": {
         "requires": [],
         "uses": [],
@@ -3013,7 +3297,18 @@
         ],
         "imageTypes": []
       },
-      "inspection": null
+      "kit": "kit-village-square",
+      "kitSize": 15,
+      "members": null,
+      "viewYawDegrees": null,
+      "sheet": null,
+      "texture": null,
+      "inspection": {
+        "webScore": 100,
+        "mobileScore": 97,
+        "hardBlockers": 1,
+        "note": null
+      }
     }
   }
 }
