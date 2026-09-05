@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
@@ -20,6 +21,13 @@ import {
   polygonsOf,
   previewImageUrlOf,
   themeById,
+  isKitProduct,
+  kitIdOfPart,
+  kitMemberCount,
+  kitMemberSlugs,
+  kitOfPart,
+  kitOfProduct,
+  kitsFrom,
 } from "../app/components/catalog-facts.ts";
 
 /**
@@ -302,4 +310,122 @@ test("미리보기는 상점이 이미 공개해 둔 주소 그대로다", () =>
   assert.equal(previewImageUrlOf({ assetId: "a", previewFileName: "tractor.glb" }), null);
   assert.equal(licenseLabelOf("cleared"), "상업적 이용 가능");
   assert.equal(licenseLabelOf(null), null);
+});
+
+
+/* ---------------------------------------------------------------------------
+   키트 (docs/kits.md)
+
+   표본은 tests/fixtures/kits/contract-kits.json — 세 에이전트가 동시에 만들고 있는 그
+   계약을 그대로 옮긴 것이다. 실제 상품이 아니라 화면 계산이 계약대로 도는지 확인하는
+   자리이고, 진짜 키트가 들어오면 같은 계산이 그대로 돈다.
+   ------------------------------------------------------------------------- */
+
+const KIT_FIXTURE = JSON.parse(
+  await readFile(new URL("./fixtures/kits/contract-kits.json", import.meta.url), "utf8"),
+);
+const KIT_ROWS = KIT_FIXTURE.listings;
+const kitById = (id) => kitsFrom(KIT_ROWS).find((kit) => kit.id === id) ?? null;
+
+test("키트는 상품이 스스로 적어 둔 사실로만 알아본다", () => {
+  // 슬러그 접두사가 아니라 members / kit 필드가 근거다. 접두사로 묶으면 이름을 바꾸는
+  // 순간 키트가 흩어진다.
+  const product = KIT_ROWS.find((row) => row.slug === "kit-village-square");
+  const part = KIT_ROWS.find((row) => row.slug === "village-well");
+  assert.equal(isKitProduct(product), true);
+  assert.equal(isKitProduct(part), false);
+  assert.equal(kitIdOfPart(part), "kit-village-square", "부품의 kit 이 곧 키트 상품의 슬러그다");
+  assert.equal(kitIdOfPart(product), null, "키트는 자기 자신의 부품이 아니다");
+
+  assert.deepEqual(kitMemberSlugs(["a", "b"]), ["a", "b"]);
+  assert.deepEqual(kitMemberSlugs(3), [], "개수만 적힌 옛 묶음은 부품을 말하지 못한다");
+  assert.equal(kitMemberCount(["a", "b"]), 2);
+  assert.equal(kitMemberCount(3), 3, "옛 묶음도 개수는 그대로 말할 수 있다");
+  assert.equal(kitMemberCount(null), null);
+});
+
+test("키트의 부품 수는 지금 공개된 부품의 수다", () => {
+  const kits = kitsFrom(KIT_ROWS);
+  assert.deepEqual(
+    kits.map((kit) => kit.id).sort(),
+    ["kit-fishing-dock", "kit-mine-entrance", "kit-village-square"],
+    "부품이 하나뿐인 키트와 키트에 속하지 않는 상품은 키트가 되지 않는다",
+  );
+
+  const mine = kitById("kit-mine-entrance");
+  // 표본의 kit-mine-entrance 는 부품 넷을 적어 두었지만 mine-lantern 은 아직 DRAFT 다.
+  assert.equal(mine.parts.length, 3, "공개되지 않은 부품은 세지 않는다");
+  assert.equal(
+    KIT_ROWS.find((row) => row.slug === "mine-cart").facts.kitSize,
+    4,
+    "facts 의 kitSize 는 빌드 매니페스트가 센 값이라 넷이라고 적혀 있다",
+  );
+  assert.ok(
+    !mine.parts.some((part) => part.slug === "mine-lantern"),
+    "화면이 세는 수와 화면이 거는 카드의 수가 어긋나면 안 된다",
+  );
+});
+
+test("키트의 합계는 부품의 합이고, 등급은 가장 높은 부품의 등급이다", () => {
+  const village = kitById("kit-village-square");
+  assert.equal(village.name, "마을 광장 키트", "이름은 합쳐 파는 상품의 제목에서 온다");
+  assert.equal(village.parts.length, 6);
+  // 1840 + 620 + 480 + 720 + 1320 + 540
+  assert.equal(village.triangles, 5520, "합계는 부품의 합 — 합친 파일의 값을 더하면 두 번 센다");
+  assert.equal(village.byteLength, 129788);
+  // 부품 중 village-well 만 1,500개를 넘는다.
+  assert.equal(village.grade, "A");
+  assert.equal(village.free, false, "A 등급 키트는 구독으로 열린다");
+  assert.equal(village.product.slug, "kit-village-square");
+  assert.equal(village.href, "/marketplace/kit-village-square");
+
+  // 합친 파일 자신은 9,420개라 홀로 두면 S 가 되지만, 키트의 등급은 부품이 정한다.
+  assert.equal(gradeOf(village.product).letter, "S");
+  assert.notEqual(village.grade, gradeOf(village.product).letter);
+
+  // 움직이는 부품이 든 키트는 S 로 올라간다.
+  assert.equal(kitById("kit-fishing-dock").grade, "S");
+});
+
+test("부품에서 키트로, 키트에서 부품으로 오갈 수 있다", () => {
+  const kits = kitsFrom(KIT_ROWS);
+  const part = KIT_ROWS.find((row) => row.slug === "dock-boat");
+  const kit = kitOfPart(part, kits);
+  assert.equal(kit.id, "kit-fishing-dock");
+  assert.ok(kit.parts.some((row) => row.slug === "dock-crane"), "같은 키트의 다른 부품으로 갈 수 있다");
+  assert.equal(kitOfProduct(kit.product, kits).id, "kit-fishing-dock");
+  assert.equal(kitOfPart(kit.product, kits), null, "키트 상품은 자기 자신의 부품이 아니다");
+  assert.equal(
+    kitOfPart({ slug: "tex-sample-v1" }, kits),
+    null,
+    "키트에 속하지 않는 상품은 키트 줄을 얻지 않는다",
+  );
+});
+
+test("합쳐 파는 상품이 없는 키트는 목록을 그 키트로 좁혀 보여 준다", () => {
+  // 하베스트 프론티어처럼 부품만 파는 키트. 없는 상품 페이지를 지어내지 않는다.
+  const rows = [
+    { ...MEADOW, id: "l-a", slug: "hf-barn", title: "헛간", entryFileName: "barn.glb", facts: { triangles: 15080, byteLength: 100, kit: "harvest-frontier", kitSize: 9, members: null } },
+    { ...MEADOW, id: "l-b", slug: "hf-windmill", title: "풍차", entryFileName: "windmill.glb", facts: { triangles: 1656, byteLength: 100, kit: "harvest-frontier", kitSize: 9, members: null } },
+  ];
+  const [kit] = kitsFrom(rows);
+  assert.equal(kit.id, "harvest-frontier");
+  assert.equal(kit.name, "하베스트 프론티어 세트", "상품이 없으면 이름표에서 이름을 가져온다");
+  assert.equal(kit.product, null);
+  assert.equal(kit.href, "/marketplace?kit=harvest-frontier#catalog");
+  assert.equal(kit.parts.length, 2);
+
+  // 그룹 이름으로만 묶여 있던 옛 키트는 대응표를 거쳐 합본 상품에 닿는다.
+  const legacy = kitsFrom([
+    ...rows.map((row, index) => ({ ...row, id: `c-${index}`, slug: index ? "cozy-market-stall" : "cozy-fence-gate", facts: { ...row.facts, kit: "cozy-farm-set", kitSize: 3 } })),
+    { ...FARM_SET, facts: { triangles: 4596, byteLength: 214584, kit: null, kitSize: 0, members: 3 } },
+  ]);
+  assert.equal(legacy.length, 1);
+  assert.equal(legacy[0].id, "cozy-farm-set");
+  assert.equal(legacy[0].product.slug, "cozy-farm-set-vol1");
+  assert.equal(legacy[0].href, "/marketplace/cozy-farm-set-vol1");
+  assert.ok(
+    !legacy[0].parts.some((part) => part.slug === "cozy-farm-set-vol1"),
+    "합본 상품이 자기 부품 목록에 들어가면 안 된다",
+  );
 });

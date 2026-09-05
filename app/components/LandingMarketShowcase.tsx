@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "./NativeLink";
 import { isVariantSlug } from "../api/_lib/listing-variants";
-import { categoryOf, gradeOf, isFreeGrade, type CatalogListing, type CategoryId } from "./catalog-facts";
+import { categoryOf, gradeOf, isFreeGrade, type CategoryId } from "./catalog-facts";
+import type { ListingFacts } from "./listing-facts-rows";
 
 /**
  * The landing used to carry a hand-written copy of the catalogue: twelve slugs,
@@ -31,8 +32,8 @@ type Listing = {
   assetId: string;
   entryFileName: string;
   previewFileName?: string | null;
-  /** 등급을 매기는 측정값. 목록 응답이 factsFor(slug)로 실어 준다. */
-  facts?: CatalogListing["facts"];
+  /** 등급과 카드의 숫자를 정하는 측정값. 목록 응답이 factsFor(slug)로 실어 준다. */
+  facts?: ListingFacts | null;
 };
 
 export type ShowcaseCategory = "all" | CategoryId;
@@ -49,18 +50,31 @@ const CATEGORIES: readonly { id: ShowcaseCategory; label: string }[] = [
    same rule the shop grid and the agent tools apply, not a second hand-kept list. */
 
 /**
- * The measured head clause the pipeline wrote, or nothing. Never a guess.
- * The patterns mirror the plain-Korean sentences build-manifest.mjs writes; 폴리곤 is
- * the word game people already use; no gloss after it (the operator asked for none).
+ * The measured head clause, or nothing. Never a guess.
+ *
+ * 2026-09-05: 이 함수는 설명 문장에서만 숫자를 읽었다. 그런데 D1 설명문에서 측정
+ * 문장("잰 값으로 폴리곤 2,456개…")이 사라진 뒤로 어느 상품에서도 아무것도 읽지 못했고,
+ * 첫 화면의 카드 열두 장이 전부 "GLB" 한 글자만 달고 서 있었다. 숫자는 마켓 카드와
+ * 같은 자리 — 목록 응답이 실어 주는 측정값(listing.facts) — 에서 읽는다. 옛 문장 꼴은
+ * 그 문장이 남아 있는 상품을 위해 뒤에 그대로 둔다.
  */
 function trisOf(listing: Listing): string | null {
+  const facts = listing.facts;
+  if (typeof facts?.triangles === "number" && facts.triangles > 0) {
+    return `폴리곤 ${facts.triangles.toLocaleString("ko-KR")}개`;
+  }
+  if (facts?.sheet) {
+    return facts.sheet.cuts === null
+      ? `스프라이트 시트 ${facts.sheet.cell}×${facts.sheet.cell} · ${facts.sheet.directions}방향`
+      : `스프라이트 시트 ${facts.sheet.cell}×${facts.sheet.cell} · ${facts.sheet.cuts}컷`;
+  }
+  if (facts?.texture) return `${facts.texture.resolution} 이어붙는 타일`;
   const solid = listing.description.match(/잰 값으로 폴리곤 ([\d,]+)개/u);
   if (solid) return `폴리곤 ${solid[1]}개`;
   const bundle = listing.description.match(/합쳐 폴리곤 ([\d,]+)개/u);
   if (bundle) return `모두 합쳐 폴리곤 ${bundle[1]}개`;
   const perTemplate = listing.description.match(/한 그루에 폴리곤 ([\d,]+~[\d,]+)개/u);
   if (perTemplate) return `한 그루당 폴리곤 ${perTemplate[1]}개`;
-  if (listing.description.includes("이음매 없는")) return "1024×1024 이음매 없는 타일";
   const sheet = listing.description.match(/(\d+)×(\d+) PNG (\d+)컷/u);
   if (sheet) return `스프라이트 시트 ${sheet[1]}×${sheet[2]} · ${sheet[3]}컷`;
   return null;

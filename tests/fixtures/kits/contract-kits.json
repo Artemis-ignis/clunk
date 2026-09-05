@@ -1,0 +1,909 @@
+{
+  "schema": "clunk.kit-fixture.v1",
+  "note": "docs/kits.md 의 키트 계약을 그대로 옮긴 임시 표본입니다. 실제 상품이 아니고, 화면 계산(kitsFrom)이 계약대로 도는지 확인하는 데만 씁니다.",
+  "listings": [
+    {
+      "id": "listing-kit-village-square",
+      "slug": "kit-village-square",
+      "title": "마을 광장 키트",
+      "description": "마을 광장 키트입니다.",
+      "priceCents": 0,
+      "currency": "KRW",
+      "status": "PUBLISHED",
+      "assetId": "asset-kit-village-square",
+      "entryFileName": "kit-village-square.glb",
+      "previewFileName": "preview-kit-village-square.webp",
+      "licenseStatus": "cleared",
+      "byteLength": 208114,
+      "variantOf": null,
+      "variants": [],
+      "clips": [],
+      "palette": [
+        {
+          "hex": "#8a6a44",
+          "share": 0.6
+        }
+      ],
+      "facts": {
+        "triangles": 9420,
+        "materials": 3,
+        "boundsMetres": [
+          1.2,
+          1.8,
+          1.2
+        ],
+        "byteLength": 208114,
+        "format": "GLB",
+        "animatedParts": [],
+        "animations": [],
+        "kit": null,
+        "kitSize": 6,
+        "members": [
+          "village-well",
+          "village-notice-board",
+          "village-lamp",
+          "village-bench",
+          "village-cart",
+          "village-planter"
+        ],
+        "viewYawDegrees": null,
+        "sheet": null,
+        "texture": null,
+        "engine": null,
+        "inspection": null
+      }
+    },
+    {
+      "id": "listing-village-well",
+      "slug": "village-well",
+      "title": "마을 우물",
+      "description": "마을 우물입니다.",
+      "priceCents": 0,
+      "currency": "KRW",
+      "status": "PUBLISHED",
+      "assetId": "asset-village-well",
+      "entryFileName": "village-well.glb",
+      "previewFileName": "preview-village-well.webp",
+      "licenseStatus": "cleared",
+      "byteLength": 41208,
+      "variantOf": null,
+      "variants": [],
+      "clips": [],
+      "palette": [
+        {
+          "hex": "#8a6a44",
+          "share": 0.6
+        }
+      ],
+      "facts": {
+        "triangles": 1840,
+        "materials": 3,
+        "boundsMetres": [
+          1.2,
+          1.8,
+          1.2
+        ],
+        "byteLength": 41208,
+        "format": "GLB",
+        "animatedParts": [],
+        "animations": [],
+        "kit": "kit-village-square",
+        "kitSize": 6,
+        "members": null,
+        "viewYawDegrees": null,
+        "sheet": null,
+        "texture": null,
+        "engine": null,
+        "inspection": null
+      }
+    },
+    {
+      "id": "listing-village-notice-board",
+      "slug": "village-notice-board",
+      "title": "마을 게시판",
+      "description": "마을 게시판입니다.",
+      "priceCents": 0,
+      "currency": "KRW",
+      "status": "PUBLISHED",
+      "assetId": "asset-village-notice-board",
+      "entryFileName": "village-notice-board.glb",
+      "previewFileName": "preview-village-notice-board.webp",
+      "licenseStatus": "cleared",
+      "byteLength": 15040,
+      "variantOf": null,
+      "variants": [],
+      "clips": [],
+      "palette": [
+        {
+          "hex": "#8a6a44",
+          "share": 0.6
+        }
+      ],
+      "facts": {
+        "triangles": 620,
+        "materials": 3,
+        "boundsMetres": [
+          1.2,
+          1.8,
+          1.2
+        ],
+        "byteLength": 15040,
+        "format": "GLB",
+        "animatedParts": [],
+        "animations": [],
+        "kit": "kit-village-square",
+        "kitSize": 6,
+        "members": null,
+        "viewYawDegrees": null,
+        "sheet": null,
+        "texture": null,
+        "engine": null,
+        "inspection": null
+      }
+    },
+    {
+      "id": "listing-village-lamp",
+      "slug": "village-lamp",
+      "title": "마을 가로등",
+      "description": "마을 가로등입니다.",
+      "priceCents": 0,
+      "currency": "KRW",
+      "status": "PUBLISHED",
+      "assetId": "asset-village-lamp",
+      "entryFileName": "village-lamp.glb",
+      "previewFileName": "preview-village-lamp.webp",
+      "licenseStatus": "cleared",
+      "byteLength": 12180,
+      "variantOf": null,
+      "variants": [],
+      "clips": [],
+      "palette": [
+        {
+          "hex": "#8a6a44",
+          "share": 0.6
+        }
+      ],
+      "facts": {
+        "triangles": 480,
+        "materials": 3,
+        "boundsMetres": [
+          1.2,
+          1.8,
+          1.2
+        ],
+        "byteLength": 12180,
+        "format": "GLB",
+        "animatedParts": [],
+        "animations": [],
+        "kit": "kit-village-square",
+        "kitSize": 6,
+        "members": null,
+        "viewYawDegrees": null,
+        "sheet": null,
+        "texture": null,
+        "engine": null,
+        "inspection": null
+      }
+    },
+    {
+      "id": "listing-village-bench",
+      "slug": "village-bench",
+      "title": "마을 벤치",
+      "description": "마을 벤치입니다.",
+      "priceCents": 0,
+      "currency": "KRW",
+      "status": "PUBLISHED",
+      "assetId": "asset-village-bench",
+      "entryFileName": "village-bench.glb",
+      "previewFileName": "preview-village-bench.webp",
+      "licenseStatus": "cleared",
+      "byteLength": 16920,
+      "variantOf": null,
+      "variants": [],
+      "clips": [],
+      "palette": [
+        {
+          "hex": "#8a6a44",
+          "share": 0.6
+        }
+      ],
+      "facts": {
+        "triangles": 720,
+        "materials": 3,
+        "boundsMetres": [
+          1.2,
+          1.8,
+          1.2
+        ],
+        "byteLength": 16920,
+        "format": "GLB",
+        "animatedParts": [],
+        "animations": [],
+        "kit": "kit-village-square",
+        "kitSize": 6,
+        "members": null,
+        "viewYawDegrees": null,
+        "sheet": null,
+        "texture": null,
+        "engine": null,
+        "inspection": null
+      }
+    },
+    {
+      "id": "listing-village-cart",
+      "slug": "village-cart",
+      "title": "마을 손수레",
+      "description": "마을 손수레입니다.",
+      "priceCents": 0,
+      "currency": "KRW",
+      "status": "PUBLISHED",
+      "assetId": "asset-village-cart",
+      "entryFileName": "village-cart.glb",
+      "previewFileName": "preview-village-cart.webp",
+      "licenseStatus": "cleared",
+      "byteLength": 30460,
+      "variantOf": null,
+      "variants": [],
+      "clips": [],
+      "palette": [
+        {
+          "hex": "#8a6a44",
+          "share": 0.6
+        }
+      ],
+      "facts": {
+        "triangles": 1320,
+        "materials": 3,
+        "boundsMetres": [
+          1.2,
+          1.8,
+          1.2
+        ],
+        "byteLength": 30460,
+        "format": "GLB",
+        "animatedParts": [],
+        "animations": [],
+        "kit": "kit-village-square",
+        "kitSize": 6,
+        "members": null,
+        "viewYawDegrees": null,
+        "sheet": null,
+        "texture": null,
+        "engine": null,
+        "inspection": null
+      }
+    },
+    {
+      "id": "listing-village-planter",
+      "slug": "village-planter",
+      "title": "마을 화단",
+      "description": "마을 화단입니다.",
+      "priceCents": 0,
+      "currency": "KRW",
+      "status": "PUBLISHED",
+      "assetId": "asset-village-planter",
+      "entryFileName": "village-planter.glb",
+      "previewFileName": "preview-village-planter.webp",
+      "licenseStatus": "cleared",
+      "byteLength": 13980,
+      "variantOf": null,
+      "variants": [],
+      "clips": [],
+      "palette": [
+        {
+          "hex": "#8a6a44",
+          "share": 0.6
+        }
+      ],
+      "facts": {
+        "triangles": 540,
+        "materials": 3,
+        "boundsMetres": [
+          1.2,
+          1.8,
+          1.2
+        ],
+        "byteLength": 13980,
+        "format": "GLB",
+        "animatedParts": [],
+        "animations": [],
+        "kit": "kit-village-square",
+        "kitSize": 6,
+        "members": null,
+        "viewYawDegrees": null,
+        "sheet": null,
+        "texture": null,
+        "engine": null,
+        "inspection": null
+      }
+    },
+    {
+      "id": "listing-kit-fishing-dock",
+      "slug": "kit-fishing-dock",
+      "title": "낚시 부두 키트",
+      "description": "낚시 부두 키트입니다.",
+      "priceCents": 0,
+      "currency": "KRW",
+      "status": "PUBLISHED",
+      "assetId": "asset-kit-fishing-dock",
+      "entryFileName": "kit-fishing-dock.glb",
+      "previewFileName": "preview-kit-fishing-dock.webp",
+      "licenseStatus": "cleared",
+      "byteLength": 184220,
+      "variantOf": null,
+      "variants": [],
+      "clips": [],
+      "palette": [
+        {
+          "hex": "#8a6a44",
+          "share": 0.6
+        }
+      ],
+      "facts": {
+        "triangles": 7180,
+        "materials": 3,
+        "boundsMetres": [
+          1.2,
+          1.8,
+          1.2
+        ],
+        "byteLength": 184220,
+        "format": "GLB",
+        "animatedParts": [],
+        "animations": [],
+        "kit": null,
+        "kitSize": 4,
+        "members": [
+          "dock-crane",
+          "dock-pier",
+          "dock-boat",
+          "dock-crate-stack"
+        ],
+        "viewYawDegrees": null,
+        "sheet": null,
+        "texture": null,
+        "engine": null,
+        "inspection": null
+      }
+    },
+    {
+      "id": "listing-dock-crane",
+      "slug": "dock-crane",
+      "title": "부두 기중기",
+      "description": "부두 기중기입니다.",
+      "priceCents": 0,
+      "currency": "KRW",
+      "status": "PUBLISHED",
+      "assetId": "asset-dock-crane",
+      "entryFileName": "dock-crane.glb",
+      "previewFileName": "preview-dock-crane.webp",
+      "licenseStatus": "cleared",
+      "byteLength": 58400,
+      "variantOf": null,
+      "variants": [],
+      "clips": [],
+      "palette": [
+        {
+          "hex": "#8a6a44",
+          "share": 0.6
+        }
+      ],
+      "facts": {
+        "triangles": 2480,
+        "materials": 3,
+        "boundsMetres": [
+          1.2,
+          1.8,
+          1.2
+        ],
+        "byteLength": 58400,
+        "format": "GLB",
+        "animatedParts": [],
+        "animations": [
+          {
+            "name": "crane_swing",
+            "seconds": 2.4
+          }
+        ],
+        "kit": "kit-fishing-dock",
+        "kitSize": 4,
+        "members": null,
+        "viewYawDegrees": null,
+        "sheet": null,
+        "texture": null,
+        "engine": null,
+        "inspection": null
+      }
+    },
+    {
+      "id": "listing-dock-pier",
+      "slug": "dock-pier",
+      "title": "부두 잔교",
+      "description": "부두 잔교입니다.",
+      "priceCents": 0,
+      "currency": "KRW",
+      "status": "PUBLISHED",
+      "assetId": "asset-dock-pier",
+      "entryFileName": "dock-pier.glb",
+      "previewFileName": "preview-dock-pier.webp",
+      "licenseStatus": "cleared",
+      "byteLength": 27100,
+      "variantOf": null,
+      "variants": [],
+      "clips": [],
+      "palette": [
+        {
+          "hex": "#8a6a44",
+          "share": 0.6
+        }
+      ],
+      "facts": {
+        "triangles": 1180,
+        "materials": 3,
+        "boundsMetres": [
+          1.2,
+          1.8,
+          1.2
+        ],
+        "byteLength": 27100,
+        "format": "GLB",
+        "animatedParts": [],
+        "animations": [],
+        "kit": "kit-fishing-dock",
+        "kitSize": 4,
+        "members": null,
+        "viewYawDegrees": null,
+        "sheet": null,
+        "texture": null,
+        "engine": null,
+        "inspection": null
+      }
+    },
+    {
+      "id": "listing-dock-boat",
+      "slug": "dock-boat",
+      "title": "작은 배",
+      "description": "작은 배입니다.",
+      "priceCents": 0,
+      "currency": "KRW",
+      "status": "PUBLISHED",
+      "assetId": "asset-dock-boat",
+      "entryFileName": "dock-boat.glb",
+      "previewFileName": "preview-dock-boat.webp",
+      "licenseStatus": "cleared",
+      "byteLength": 44300,
+      "variantOf": null,
+      "variants": [],
+      "clips": [],
+      "palette": [
+        {
+          "hex": "#8a6a44",
+          "share": 0.6
+        }
+      ],
+      "facts": {
+        "triangles": 1960,
+        "materials": 3,
+        "boundsMetres": [
+          1.2,
+          1.8,
+          1.2
+        ],
+        "byteLength": 44300,
+        "format": "GLB",
+        "animatedParts": [],
+        "animations": [],
+        "kit": "kit-fishing-dock",
+        "kitSize": 4,
+        "members": null,
+        "viewYawDegrees": null,
+        "sheet": null,
+        "texture": null,
+        "engine": null,
+        "inspection": null
+      }
+    },
+    {
+      "id": "listing-dock-crate-stack",
+      "slug": "dock-crate-stack",
+      "title": "부두 궤짝 더미",
+      "description": "부두 궤짝 더미입니다.",
+      "priceCents": 0,
+      "currency": "KRW",
+      "status": "PUBLISHED",
+      "assetId": "asset-dock-crate-stack",
+      "entryFileName": "dock-crate-stack.glb",
+      "previewFileName": "preview-dock-crate-stack.webp",
+      "licenseStatus": "cleared",
+      "byteLength": 15600,
+      "variantOf": null,
+      "variants": [],
+      "clips": [],
+      "palette": [
+        {
+          "hex": "#8a6a44",
+          "share": 0.6
+        }
+      ],
+      "facts": {
+        "triangles": 640,
+        "materials": 3,
+        "boundsMetres": [
+          1.2,
+          1.8,
+          1.2
+        ],
+        "byteLength": 15600,
+        "format": "GLB",
+        "animatedParts": [],
+        "animations": [],
+        "kit": "kit-fishing-dock",
+        "kitSize": 4,
+        "members": null,
+        "viewYawDegrees": null,
+        "sheet": null,
+        "texture": null,
+        "engine": null,
+        "inspection": null
+      }
+    },
+    {
+      "id": "listing-kit-mine-entrance",
+      "slug": "kit-mine-entrance",
+      "title": "광산 입구 키트",
+      "description": "광산 입구 키트입니다.",
+      "priceCents": 0,
+      "currency": "KRW",
+      "status": "PUBLISHED",
+      "assetId": "asset-kit-mine-entrance",
+      "entryFileName": "kit-mine-entrance.glb",
+      "previewFileName": "preview-kit-mine-entrance.webp",
+      "licenseStatus": "cleared",
+      "byteLength": 161000,
+      "variantOf": null,
+      "variants": [],
+      "clips": [],
+      "palette": [
+        {
+          "hex": "#8a6a44",
+          "share": 0.6
+        }
+      ],
+      "facts": {
+        "triangles": 6420,
+        "materials": 3,
+        "boundsMetres": [
+          1.2,
+          1.8,
+          1.2
+        ],
+        "byteLength": 161000,
+        "format": "GLB",
+        "animatedParts": [],
+        "animations": [],
+        "kit": null,
+        "kitSize": 4,
+        "members": [
+          "mine-cart",
+          "mine-headframe",
+          "mine-support-arch",
+          "mine-lantern"
+        ],
+        "viewYawDegrees": null,
+        "sheet": null,
+        "texture": null,
+        "engine": null,
+        "inspection": null
+      }
+    },
+    {
+      "id": "listing-mine-cart",
+      "slug": "mine-cart",
+      "title": "광차",
+      "description": "광차입니다.",
+      "priceCents": 0,
+      "currency": "KRW",
+      "status": "PUBLISHED",
+      "assetId": "asset-mine-cart",
+      "entryFileName": "mine-cart.glb",
+      "previewFileName": "preview-mine-cart.webp",
+      "licenseStatus": "cleared",
+      "byteLength": 26800,
+      "variantOf": null,
+      "variants": [],
+      "clips": [],
+      "palette": [
+        {
+          "hex": "#8a6a44",
+          "share": 0.6
+        }
+      ],
+      "facts": {
+        "triangles": 1120,
+        "materials": 3,
+        "boundsMetres": [
+          1.2,
+          1.8,
+          1.2
+        ],
+        "byteLength": 26800,
+        "format": "GLB",
+        "animatedParts": [],
+        "animations": [],
+        "kit": "kit-mine-entrance",
+        "kitSize": 4,
+        "members": null,
+        "viewYawDegrees": null,
+        "sheet": null,
+        "texture": null,
+        "engine": null,
+        "inspection": null
+      }
+    },
+    {
+      "id": "listing-mine-headframe",
+      "slug": "mine-headframe",
+      "title": "광산 권양탑",
+      "description": "광산 권양탑입니다.",
+      "priceCents": 0,
+      "currency": "KRW",
+      "status": "PUBLISHED",
+      "assetId": "asset-mine-headframe",
+      "entryFileName": "mine-headframe.glb",
+      "previewFileName": "preview-mine-headframe.webp",
+      "licenseStatus": "cleared",
+      "byteLength": 71200,
+      "variantOf": null,
+      "variants": [],
+      "clips": [],
+      "palette": [
+        {
+          "hex": "#8a6a44",
+          "share": 0.6
+        }
+      ],
+      "facts": {
+        "triangles": 3260,
+        "materials": 3,
+        "boundsMetres": [
+          1.2,
+          1.8,
+          1.2
+        ],
+        "byteLength": 71200,
+        "format": "GLB",
+        "animatedParts": [],
+        "animations": [],
+        "kit": "kit-mine-entrance",
+        "kitSize": 4,
+        "members": null,
+        "viewYawDegrees": null,
+        "sheet": null,
+        "texture": null,
+        "engine": null,
+        "inspection": null
+      }
+    },
+    {
+      "id": "listing-mine-support-arch",
+      "slug": "mine-support-arch",
+      "title": "갱도 지보공",
+      "description": "갱도 지보공입니다.",
+      "priceCents": 0,
+      "currency": "KRW",
+      "status": "PUBLISHED",
+      "assetId": "asset-mine-support-arch",
+      "entryFileName": "mine-support-arch.glb",
+      "previewFileName": "preview-mine-support-arch.webp",
+      "licenseStatus": "cleared",
+      "byteLength": 21400,
+      "variantOf": null,
+      "variants": [],
+      "clips": [],
+      "palette": [
+        {
+          "hex": "#8a6a44",
+          "share": 0.6
+        }
+      ],
+      "facts": {
+        "triangles": 880,
+        "materials": 3,
+        "boundsMetres": [
+          1.2,
+          1.8,
+          1.2
+        ],
+        "byteLength": 21400,
+        "format": "GLB",
+        "animatedParts": [],
+        "animations": [],
+        "kit": "kit-mine-entrance",
+        "kitSize": 4,
+        "members": null,
+        "viewYawDegrees": null,
+        "sheet": null,
+        "texture": null,
+        "engine": null,
+        "inspection": null
+      }
+    },
+    {
+      "id": "listing-mine-lantern",
+      "slug": "mine-lantern",
+      "title": "광부 램프",
+      "description": "광부 램프입니다.",
+      "priceCents": 0,
+      "currency": "KRW",
+      "status": "DRAFT",
+      "assetId": "asset-mine-lantern",
+      "entryFileName": "mine-lantern.glb",
+      "previewFileName": "preview-mine-lantern.webp",
+      "licenseStatus": "cleared",
+      "byteLength": 9800,
+      "variantOf": null,
+      "variants": [],
+      "clips": [],
+      "palette": [
+        {
+          "hex": "#8a6a44",
+          "share": 0.6
+        }
+      ],
+      "facts": {
+        "triangles": 320,
+        "materials": 3,
+        "boundsMetres": [
+          1.2,
+          1.8,
+          1.2
+        ],
+        "byteLength": 9800,
+        "format": "GLB",
+        "animatedParts": [],
+        "animations": [],
+        "kit": "kit-mine-entrance",
+        "kitSize": 4,
+        "members": null,
+        "viewYawDegrees": null,
+        "sheet": null,
+        "texture": null,
+        "engine": null,
+        "inspection": null
+      }
+    },
+    {
+      "id": "listing-kit-lonely-shed",
+      "slug": "kit-lonely-shed",
+      "title": "외딴 헛간 키트",
+      "description": "외딴 헛간 키트입니다.",
+      "priceCents": 0,
+      "currency": "KRW",
+      "status": "PUBLISHED",
+      "assetId": "asset-kit-lonely-shed",
+      "entryFileName": "kit-lonely-shed.glb",
+      "previewFileName": "preview-kit-lonely-shed.webp",
+      "licenseStatus": "cleared",
+      "byteLength": 22000,
+      "variantOf": null,
+      "variants": [],
+      "clips": [],
+      "palette": [
+        {
+          "hex": "#8a6a44",
+          "share": 0.6
+        }
+      ],
+      "facts": {
+        "triangles": 900,
+        "materials": 3,
+        "boundsMetres": [
+          1.2,
+          1.8,
+          1.2
+        ],
+        "byteLength": 22000,
+        "format": "GLB",
+        "animatedParts": [],
+        "animations": [],
+        "kit": null,
+        "kitSize": 1,
+        "members": [
+          "lonely-shed-body"
+        ],
+        "viewYawDegrees": null,
+        "sheet": null,
+        "texture": null,
+        "engine": null,
+        "inspection": null
+      }
+    },
+    {
+      "id": "listing-lonely-shed-body",
+      "slug": "lonely-shed-body",
+      "title": "외딴 헛간 몸체",
+      "description": "외딴 헛간 몸체입니다.",
+      "priceCents": 0,
+      "currency": "KRW",
+      "status": "PUBLISHED",
+      "assetId": "asset-lonely-shed-body",
+      "entryFileName": "lonely-shed-body.glb",
+      "previewFileName": "preview-lonely-shed-body.webp",
+      "licenseStatus": "cleared",
+      "byteLength": 22000,
+      "variantOf": null,
+      "variants": [],
+      "clips": [],
+      "palette": [
+        {
+          "hex": "#8a6a44",
+          "share": 0.6
+        }
+      ],
+      "facts": {
+        "triangles": 900,
+        "materials": 3,
+        "boundsMetres": [
+          1.2,
+          1.8,
+          1.2
+        ],
+        "byteLength": 22000,
+        "format": "GLB",
+        "animatedParts": [],
+        "animations": [],
+        "kit": "kit-lonely-shed",
+        "kitSize": 1,
+        "members": null,
+        "viewYawDegrees": null,
+        "sheet": null,
+        "texture": null,
+        "engine": null,
+        "inspection": null
+      }
+    },
+    {
+      "id": "listing-tex-sample-v1",
+      "slug": "tex-sample-v1",
+      "title": "표본 텍스처",
+      "description": "표본 텍스처입니다.",
+      "priceCents": 0,
+      "currency": "KRW",
+      "status": "PUBLISHED",
+      "assetId": "asset-tex-sample-v1",
+      "entryFileName": "tex-sample-v1.png",
+      "previewFileName": "preview-tex-sample-v1.webp",
+      "licenseStatus": "cleared",
+      "byteLength": 2600000,
+      "variantOf": null,
+      "variants": [],
+      "clips": [],
+      "palette": [
+        {
+          "hex": "#8a6a44",
+          "share": 0.6
+        }
+      ],
+      "facts": {
+        "triangles": null,
+        "materials": null,
+        "boundsMetres": null,
+        "byteLength": 2600000,
+        "format": "PNG",
+        "animatedParts": [],
+        "animations": [],
+        "kit": null,
+        "kitSize": 0,
+        "members": null,
+        "viewYawDegrees": null,
+        "sheet": null,
+        "texture": {
+          "resolution": "1024×1024",
+          "seamless": true
+        },
+        "engine": null,
+        "inspection": null
+      }
+    }
+  ]
+}

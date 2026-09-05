@@ -8,6 +8,7 @@ import {
   factRows,
   hasMotion,
   kitLine,
+  memberCount,
   motionNote,
   movingRow,
   reconcileMeasured,
@@ -262,9 +263,64 @@ test("the card shows one measured line and a motion mark only when the file move
 });
 
 test("the kit line names the set and counts its real members", () => {
-  assert.equal(kitLine(emptyFacts({ kit: "cozy-farm-set", kitSize: 3 })), "코지 팜 세트의 일부 · 같은 팔레트·같은 축척의 부품 3개");
-  assert.equal(kitLine(emptyFacts({ kit: "harvest-frontier", kitSize: 9 })), "하베스트 프론티어 세트의 일부 · 같은 팔레트·같은 축척의 부품 9개");
+  assert.equal(
+    kitLine(emptyFacts({ kit: "cozy-farm-set", kitSize: 3 })),
+    "코지 팜 세트의 부품입니다. 같은 팔레트, 같은 축척으로 만든 부품 3개 가운데 하나입니다.",
+  );
+  assert.equal(
+    kitLine(emptyFacts({ kit: "harvest-frontier", kitSize: 9 })),
+    "하베스트 프론티어 세트의 부품입니다. 같은 팔레트, 같은 축척으로 만든 부품 9개 가운데 하나입니다.",
+  );
   assert.equal(kitLine(emptyFacts()), null);
+
+  // 목록에서 실제로 찾아낸 수가 있으면 그것이 먼저다. facts 의 kitSize 는 빌드
+  // 매니페스트가 센 값이라, 부품 하나를 공개에서 내리면 아홉이라 적고 여덟을 보여 준다
+  // (docs/kits.md 3절).
+  assert.match(
+    kitLine(emptyFacts({ kit: "harvest-frontier", kitSize: 9 }), { name: "하베스트 프론티어 세트", count: 8 }),
+    /부품 8개 가운데 하나/u,
+  );
+  // 이름을 모르는 키트는 슬러그를 보여 주지 않는다 — 슬러그는 사람에게 이름이 아니다.
+  const unnamed = kitLine(emptyFacts({ kit: "kit-village-square", kitSize: 6 }));
+  assert.doesNotMatch(unnamed, /kit-village-square/u);
+  assert.match(unnamed, /부품 6개 가운데 하나/u);
+  // 이름을 알아냈으면 그 이름으로 적는다.
+  assert.match(
+    kitLine(emptyFacts({ kit: "kit-village-square", kitSize: 6 }), { name: "마을 광장 키트", count: 6 }),
+    /^마을 광장 키트의 부품입니다\./u,
+  );
+});
+
+test("a kit states its parts as slugs; an old bundle only knows how many files it hands over", () => {
+  // 계약이 바뀌는 중이라 한 자리에 두 모양이 있다(docs/kits.md 3절).
+  assert.equal(memberCount(["village-well", "village-lamp"]), 2);
+  assert.equal(memberCount(3), 3);
+  assert.equal(memberCount(null), null);
+  assert.equal(memberCount(0), null);
+
+  const kitFile = factRows(emptyFacts({
+    triangles: 9420, materials: 12, byteLength: 208_114,
+    members: ["village-well", "village-notice-board", "village-lamp"],
+  }));
+  assert.equal(kitFile[1].tail, "바로 넣는 3D 파일 · 묶음 3종", "부품 슬러그를 적어도 개수는 그대로 읽힌다");
+});
+
+test("the card states the file size, because the grid offers to sort by it", () => {
+  // 목록에 "파일 작은순" 정렬이 있는데 카드가 용량을 한 번도 적지 않았다 — 정렬을 걸어도
+  // 무엇이 왜 앞에 왔는지 카드에서 확인할 수 없었다.
+  assert.equal(
+    cardSpec(emptyFacts({ triangles: 2456, materials: 11, byteLength: 214_584 })),
+    "폴리곤 2,456개 · 재질 11개 · 214.6 KB",
+  );
+  assert.equal(
+    cardSpec(emptyFacts({ byteLength: 2_600_000, texture: { resolution: "1024×1024", seamless: true } })),
+    "1024×1024 · 이어붙는 타일 · 2.6 MB",
+  );
+  // 단위는 상세 화면과 같은 함수 하나에서 나온다. 두 화면이 같은 파일을 다른 단위로
+  // 적으면 어느 쪽이 맞는지 사는 사람이 알 수 없다.
+  const rows = factRows(emptyFacts({ triangles: 2456, byteLength: 214_584 }));
+  assert.ok(cardSpec(emptyFacts({ triangles: 2456, byteLength: 214_584 })).endsWith("214.6 KB"));
+  assert.ok(rows.find((row) => row.id === "file").head.includes("214.6 KB"));
 });
 
 test("the browser's own reading is reported as agreeing or as differing, never silently", () => {

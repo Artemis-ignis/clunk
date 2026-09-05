@@ -42,6 +42,8 @@ export type CatalogListing = {
     triangles?: number | null; materials?: number | null; boundsMetres?: readonly number[] | null;
     byteLength?: number | null; format?: string | null; animatedParts?: readonly string[] | null;
     animations?: readonly { name: string; seconds?: number }[] | null; kit?: string | null;
+    /** 키트 계약(docs/kits.md). 부품이 몇 개인 키트에 속하는지, 그리고 키트 상품이면 그 부품들. */
+    kitSize?: number | null; members?: number | readonly string[] | null;
   } | null;
 };
 
@@ -94,7 +96,7 @@ export function categoryOf(listing: Pick<CatalogListing, "slug">): CategoryId {
  * 선반에 걸 상품만 남긴다: 공개된 상품이면서, 3D 모델에서 구운 스프라이트 시트가
  * 아닌 것. 시트는 그 모델 카드 안에 "스프라이트 시트 N종 포함" 으로만 적힌다.
  */
-export function drawableListings(listings: readonly CatalogListing[]): CatalogListing[] {
+export function drawableListings<T extends Pick<CatalogListing, "slug" | "status" | "variantOf">>(listings: readonly T[]): T[] {
   return listings.filter((row) => row.status === "PUBLISHED" && !isVariantSlug(row.slug) && !row.variantOf);
 }
 
@@ -292,4 +294,219 @@ export function previewImageUrlOf(
   if (!fileName || !/\.(?:png|jpe?g|webp|avif|gif)$/iu.test(fileName)) return null;
   return `/api/marketplace/assets/${encodeURIComponent(listing.assetId)}`
     + `?file=${encodeURIComponent(fileName)}&preview=1`;
+}
+
+/* ---------------------------------------------------------------------------
+   키트 — 부품 여러 개를 한 테마로 묶어 파는 상품 단위. 계약은 docs/kits.md.
+
+   키트를 알아보는 근거는 슬러그 접두사가 아니라 상품이 스스로 적어 둔 사실이다:
+   `members` 에 부품 슬러그가 배열로 적혀 있으면 키트 상품이고, `kit` 에 키트 슬러그가
+   적혀 있으면 그 키트의 부품이다. 접두사로 묶으면 이름을 바꾸는 순간 키트가 흩어진다.
+
+   여기서 세는 부품 수는 늘 "목록 응답에서 실제로 찾아낸 공개 부품"이다. facts 의
+   kitSize 는 빌드 매니페스트가 센 수라, 부품 하나를 내리면 화면이 아홉이라 적고 여덟을
+   보여 주게 된다.
+   ------------------------------------------------------------------------- */
+
+/** 키트 상품이 부품을 적어 두는 자리. 옛 묶음은 개수(숫자)만 적혀 있다. */
+export type KitMembers = number | readonly string[] | null | undefined;
+
+/** 부품 슬러그. 숫자만 적힌 옛 묶음은 부품을 알 수 없으므로 빈 배열이다. */
+export function kitMemberSlugs(members: KitMembers): string[] {
+  if (!Array.isArray(members)) return [];
+  return members.filter((slug): slug is string => typeof slug === "string" && slug.trim().length > 0);
+}
+
+/** 부품이 몇 개라고 적혀 있는지. 배열이면 그 길이, 숫자면 그 값. */
+export function kitMemberCount(members: KitMembers): number | null {
+  if (Array.isArray(members)) return kitMemberSlugs(members).length || null;
+  return typeof members === "number" && members > 0 ? members : null;
+}
+
+type KitFactHolder = Pick<CatalogListing, "slug"> & {
+  facts?: { kit?: string | null; members?: number | readonly string[] | null } | null;
+};
+
+/** 이 상품이 키트 상품인가 — 부품 슬러그를 배열로 적어 둔 것만. */
+export function isKitProduct(listing: KitFactHolder): boolean {
+  return kitMemberSlugs(listing.facts?.members).length > 0;
+}
+
+/**
+ * 이 상품이 속한 키트의 식별자. 키트 상품 자신은 부품이 아니므로 null 이다.
+ *
+ * 새 계약에서는 이 값이 곧 키트 상품의 슬러그이고, 옛 데이터에서는 빌드 매니페스트의
+ * 그룹 이름("cozy-farm-set", "harvest-frontier")이다. 둘 다 아래 LEGACY_KIT_PRODUCTS 를
+ * 거쳐 같은 자리로 모인다.
+ */
+export function kitIdOfPart(listing: KitFactHolder): string | null {
+  if (isKitProduct(listing)) return null;
+  const kit = listing.facts?.kit;
+  return typeof kit === "string" && kit.trim() ? kit.trim() : null;
+}
+
+/**
+ * 그룹 이름으로만 묶여 있던 옛 키트의 합본 상품.
+ *
+ * 새 계약은 부품의 `kit` 이 곧 키트 상품의 슬러그라 이 표가 필요 없다. 여기 남은 한 줄은
+ * 계약 이전에 만들어진 코지 팜 세트를 위한 것이고, 그 상품의 facts 에 members 배열이
+ * 적히는 순간 지울 수 있다(docs/kits.md 8절).
+ */
+const LEGACY_KIT_PRODUCTS: Readonly<Record<string, string>> = {
+  "cozy-farm-set": "cozy-farm-set-vol1",
+};
+
+/** 사는 사람에게 보이는 키트 이름. 합본 상품이 있으면 그 상품의 이름이 먼저다. */
+const LEGACY_KIT_NAMES: Readonly<Record<string, string>> = {
+  "cozy-farm-set": "코지 팜 세트",
+  "harvest-frontier": "하베스트 프론티어 세트",
+  "grove-tree-pack": "그로브 트리 팩",
+};
+
+/**
+ * 키트를 세우는 데 실제로 읽는 필드만. 카탈로그 화면의 행과 상세 화면의 행은 서로 조금씩
+ * 다른 모양인데(값 컬럼이 없는 쪽, 시트를 실은 쪽), 키트 계산에 필요한 것은 양쪽 모두
+ * 갖고 있다. 그래서 전체 상품 타입 대신 이만큼만 요구한다.
+ */
+export type KitSource = Pick<
+  CatalogListing,
+  "slug" | "title" | "description" | "status" | "assetId" | "entryFileName"
+  | "previewFileName" | "variantOf" | "licenseStatus" | "byteLength" | "variants" | "clips" | "facts"
+>;
+
+export type Kit<T extends KitSource = KitSource> = {
+  /** 키트 상품의 슬러그, 또는 옛 그룹 이름. 주소와 필터가 쓰는 값이다. */
+  id: string;
+  name: string;
+  /** 갈래 이름(농장 구조물·소품·나무·텍스처). 카드의 테마 줄에 적힌다. */
+  themeName: string;
+  /** 부품을 합쳐 한 파일로 파는 상품. 없는 키트도 있다(하베스트 프론티어). */
+  product: T | null;
+  /** 지금 마켓에 공개돼 있는 부품. 이 배열의 길이가 화면이 적는 부품 수다. */
+  parts: T[];
+  /** 부품 폴리곤의 합. 하나도 못 읽었으면 null 이라 줄째로 빠진다. */
+  triangles: number | null;
+  /** 부품 용량의 합. */
+  byteLength: number | null;
+  /** 가장 높은 부품 등급. 합본 파일이 커서 S 가 되는 것과는 무관하다. */
+  grade: GradeLetter;
+  free: boolean;
+  heroUrl: string | null;
+  href: string;
+  licenseStatus: string | null;
+};
+
+const GRADE_ORDER: Readonly<Record<GradeLetter, number>> = { B: 0, A: 1, S: 2 };
+
+function sumFacts<T>(parts: readonly T[], read: (listing: T) => number | null): number | null {
+  let total = 0;
+  let found = false;
+  for (const part of parts) {
+    const value = read(part);
+    if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+      total += value;
+      found = true;
+    }
+  }
+  return found ? total : null;
+}
+
+/**
+ * 목록 응답에서 키트를 세운다.
+ *
+ * 부품이 둘 미만인 키트는 돌려주지 않는다 — 부품 하나짜리 키트는 키트가 아니라 상품
+ * 하나이고, 그것을 키트 탭에 세우면 탭이 상품 목록의 사본이 된다.
+ */
+export function kitsFrom<T extends KitSource>(listings: readonly T[]): Kit<T>[] {
+  const drawable = drawableListings(listings);
+  const bySlug = new Map(drawable.map((listing) => [listing.slug, listing]));
+  const groups = new Map<string, { product: T | null; parts: T[] }>();
+  const groupFor = (id: string) => {
+    const existing = groups.get(id);
+    if (existing) return existing;
+    const created = { product: null as T | null, parts: [] as T[] };
+    groups.set(id, created);
+    return created;
+  };
+
+  // 1) 키트 상품이 스스로 적어 둔 부품. 적힌 순서가 격자 순서다.
+  for (const listing of drawable) {
+    const members = kitMemberSlugs(listing.facts?.members);
+    if (!members.length) continue;
+    const group = groupFor(listing.slug);
+    group.product = listing;
+    for (const slug of members) {
+      const part = bySlug.get(slug);
+      if (part && !group.parts.includes(part)) group.parts.push(part);
+    }
+  }
+
+  // 2) 부품이 스스로 적어 둔 소속. 키트 상품이 빠뜨린 부품도 여기서 붙는다.
+  for (const listing of drawable) {
+    const id = kitIdOfPart(listing);
+    if (!id) continue;
+    const group = groupFor(id);
+    if (!group.parts.includes(listing)) group.parts.push(listing);
+  }
+
+  // 3) 합본 상품 붙이기 — 새 계약은 슬러그가 곧 키트 식별자, 옛 데이터는 대응표.
+  for (const [id, group] of groups) {
+    if (group.product) continue;
+    const productSlug = bySlug.has(id) ? id : LEGACY_KIT_PRODUCTS[id];
+    const product = productSlug ? bySlug.get(productSlug) ?? null : null;
+    // 합본 상품은 자기 자신의 부품이 아니다.
+    if (product) {
+      group.product = product;
+      group.parts = group.parts.filter((part) => part.slug !== product.slug);
+    }
+  }
+
+  const kits: Kit<T>[] = [];
+  for (const [id, group] of groups) {
+    if (group.parts.length < 2) continue;
+    const anchor = group.product ?? group.parts[0];
+    const grade = group.parts.reduce<GradeLetter>((best, part) => {
+      const letter = gradeOf(part).letter;
+      return GRADE_ORDER[letter] > GRADE_ORDER[best] ? letter : best;
+    }, "B");
+    const largest = [...group.parts].sort((a, b) => (b.facts?.triangles ?? 0) - (a.facts?.triangles ?? 0))[0];
+    kits.push({
+      id,
+      // 이름표가 있는 옛 키트는 그 이름이 먼저다. 합본 상품의 제목은 상품 이름이라
+      // 키트 이름으로 문장에 넣으면 겹친다 — "코지 팜 세트 Vol.1 (3종 묶음)의 부품
+      // 3개 가운데 하나" 처럼 같은 수를 두 번 말하게 된다. 새 키트에는 이름표가 없고,
+      // 그때는 상품 제목이 곧 키트 이름이다(docs/kits.md 8절).
+      name: LEGACY_KIT_NAMES[id] ?? group.product?.title ?? id,
+      themeName: themeById(categoryOf(anchor)).name,
+      product: group.product,
+      parts: group.parts,
+      triangles: sumFacts(group.parts, (part) => part.facts?.triangles ?? null),
+      byteLength: sumFacts(group.parts, (part) => part.facts?.byteLength ?? part.byteLength ?? null),
+      grade,
+      free: isFreeGrade(grade),
+      heroUrl: previewImageUrlOf(group.product ?? largest ?? anchor),
+      href: group.product
+        ? `/marketplace/${encodeURIComponent(group.product.slug)}`
+        : `/marketplace?kit=${encodeURIComponent(id)}#catalog`,
+      licenseStatus: (group.product ?? anchor).licenseStatus ?? null,
+    });
+  }
+  // 부품이 많은 키트가 먼저. 같으면 이름 순서로 고정해 새로고침마다 순서가 바뀌지 않게 한다.
+  return kits.sort((a, b) => b.parts.length - a.parts.length || a.name.localeCompare(b.name, "ko-KR"));
+}
+
+/** 이 상품이 속한 키트. 부품이 아니거나 키트가 서지 못하면 null. */
+export function kitOfPart<T extends KitSource>(
+  listing: Pick<CatalogListing, "slug">,
+  kits: readonly Kit<T>[],
+): Kit<T> | null {
+  return kits.find((kit) => kit.parts.some((part) => part.slug === listing.slug)) ?? null;
+}
+
+/** 이 상품이 곧 키트인 경우의 그 키트. */
+export function kitOfProduct<T extends KitSource>(
+  listing: Pick<CatalogListing, "slug">,
+  kits: readonly Kit<T>[],
+): Kit<T> | null {
+  return kits.find((kit) => kit.product?.slug === listing.slug) ?? null;
 }

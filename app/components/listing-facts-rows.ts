@@ -20,9 +20,17 @@ export type ListingFacts = {
   format: string;
   animatedParts: string[];
   animations: GltfClipFact[];
+  /** 이 상품이 속한 키트의 식별자(=키트 상품의 슬러그). 계약은 docs/kits.md. */
   kit: string | null;
+  /** 그 키트의 부품 수. 빌드 매니페스트가 센 값이라 화면은 목록에서 다시 센 수를 먼저 쓴다. */
   kitSize: number;
-  members: number | null;
+  /**
+   * 키트 상품이면 부품 슬러그 배열, 옛 묶음이면 파일 개수(숫자), 그 밖은 null.
+   *
+   * 숫자와 배열이 한 자리에 있는 것은 계약이 바뀌는 중이기 때문이다 — 새로 만드는 키트는
+   * 배열로 적고(docs/kits.md 3절), 개수만 적힌 옛 묶음도 개수는 그대로 말할 수 있다.
+   */
+  members: number | readonly string[] | null;
   viewYawDegrees?: number | null;
   sheet: { cell: number; directions: number; frames: number | null; cuts: number | null } | null;
   /**
@@ -69,12 +77,24 @@ export type ListingFacts = {
 /** A row of the specification list: a bold head, and the plain clause that qualifies it. */
 export type FactRow = { id: string; head: string; tail: string | null };
 
-/** Buyer-facing kit names, matching KIT_NAMES in scripts/listing-facts-cli.ts. */
+/**
+ * Buyer-facing kit names, matching KIT_NAMES in scripts/listing-facts-cli.ts.
+ *
+ * 새 계약(docs/kits.md)에서는 부품의 `kit` 이 곧 키트 상품의 슬러그라, 이름은 그 상품의
+ * 제목에서 온다 — 여기 적을 필요가 없다. 이 표는 상품 슬러그가 아닌 그룹 이름으로만
+ * 묶여 있던 옛 키트를 위한 것이다.
+ */
 export const KIT_NAMES: Readonly<Record<string, string>> = {
   "cozy-farm-set": "코지 팜 세트",
   "harvest-frontier": "하베스트 프론티어 세트",
   "grove-tree-pack": "그로브 트리 팩",
 };
+
+/** 부품이 몇 개라고 적혀 있는지. 배열이면 그 길이, 개수만 적힌 옛 묶음이면 그 숫자. */
+export function memberCount(members: ListingFacts["members"]): number | null {
+  if (Array.isArray(members)) return members.length || null;
+  return typeof members === "number" && members > 0 ? members : null;
+}
 
 export function formatBytes(value: number): string {
   if (value < 1_000) return `${value} B`;
@@ -133,10 +153,11 @@ export function fileRow(facts: ListingFacts): FactRow {
     else if (t.maps?.length) parts.push("노멀·러프니스 맵 포함");
     return { id: "file", head, tail: parts.join(" · ") };
   }
+  const members = memberCount(facts.members);
   return {
     id: "file",
     head,
-    tail: facts.members ? `바로 넣는 3D 파일 · 묶음 ${facts.members}종` : "바로 넣는 3D 파일",
+    tail: members ? `바로 넣는 3D 파일 · 묶음 ${members}종` : "바로 넣는 3D 파일",
   };
 }
 
@@ -178,30 +199,54 @@ export function factRows(facts: ListingFacts): FactRow[] {
   return rows;
 }
 
-/** "코지 팜 세트의 일부 · 같은 팔레트·같은 축척의 부품 3개", or null when the product stands alone. */
-export function kitLine(facts: ListingFacts): string | null {
-  if (!facts.kit || !facts.kitSize) return null;
-  const name = KIT_NAMES[facts.kit] ?? facts.kit;
-  return `${name}의 일부 · 같은 팔레트·같은 축척의 부품 ${facts.kitSize}개`;
+/**
+ * 이 상품이 어느 키트의 부품인지 한 줄로. 낱개로 서는 상품에는 없는 줄이다.
+ *
+ * 부품 수는 목록에서 실제로 찾아낸 공개 부품 수를 먼저 쓴다(`resolved`). facts 의
+ * kitSize 는 빌드 매니페스트가 센 값이라, 부품 하나를 공개에서 내리면 화면이 "부품
+ * 9개"라고 적으면서 여덟 개만 보여 주게 된다 (docs/kits.md 3절).
+ *
+ * 이름을 모르는 키트는 이름 자리를 비운다. 슬러그("kit-village-square")를 사람에게
+ * 보여 주는 것은 이름을 지어내는 것만큼이나 이름이 아니다.
+ */
+export function kitLine(
+  facts: ListingFacts,
+  resolved?: { name?: string | null; count?: number | null } | null,
+): string | null {
+  if (!facts.kit) return null;
+  const count = resolved?.count ?? facts.kitSize;
+  if (!count) return null;
+  const name = resolved?.name ?? KIT_NAMES[facts.kit] ?? null;
+  const tail = `같은 팔레트, 같은 축척으로 만든 부품 ${count}개 가운데 하나입니다.`;
+  return name ? `${name}의 부품입니다. ${tail}` : `키트의 부품입니다. ${tail}`;
 }
 
-/** The one line a card gets under its title. Null when nothing was measured for this listing. */
+/**
+ * The one line a card gets under its title.
+ *
+ * 2026-09-05: 용량이 붙었다. 목록에 "파일 작은순" 정렬이 있는데 카드는 용량을 한 번도
+ * 적지 않아, 정렬을 걸어도 무엇이 왜 앞에 왔는지 카드에서 확인할 수 없었다. 단위는
+ * 상세 화면과 같은 formatBytes 하나를 쓴다 — 두 화면이 같은 파일을 다른 단위로 적으면
+ * 어느 쪽이 맞는지 사는 사람이 알 수 없다.
+ */
 export function cardSpec(facts: ListingFacts | null | undefined): string | null {
   if (!facts) return null;
+  const size = facts.byteLength > 0 ? formatBytes(facts.byteLength) : null;
+  const withSize = (head: string) => (size ? `${head} · ${size}` : head);
   if (facts.triangles !== null) {
-    return `폴리곤 ${facts.triangles.toLocaleString("ko-KR")}개${facts.materials !== null ? ` · 재질 ${facts.materials}개` : ""}`;
+    return withSize(`폴리곤 ${facts.triangles.toLocaleString("ko-KR")}개${facts.materials !== null ? ` · 재질 ${facts.materials}개` : ""}`);
   }
   if (facts.sheet) {
-    return facts.sheet.cuts === null
+    return withSize(facts.sheet.cuts === null
       ? `${facts.sheet.cell}×${facts.sheet.cell} · ${facts.sheet.directions}방향`
-      : `${facts.sheet.cell}×${facts.sheet.cell} · ${facts.sheet.cuts}컷`;
+      : `${facts.sheet.cell}×${facts.sheet.cell} · ${facts.sheet.cuts}컷`);
   }
   if (facts.texture) {
-    return facts.texture.colourVariants && facts.texture.colourVariants > 1
+    return withSize(facts.texture.colourVariants && facts.texture.colourVariants > 1
       ? `${facts.texture.resolution} · 이어붙는 타일 ${facts.texture.colourVariants}장`
-      : `${facts.texture.resolution} · 이어붙는 타일`;
+      : `${facts.texture.resolution} · 이어붙는 타일`);
   }
-  return null;
+  return size;
 }
 
 /**

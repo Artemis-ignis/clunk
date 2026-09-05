@@ -53,6 +53,14 @@ export default async function KitsPage({
               받는 사람은 어떤 파일이 들어 있는지, 그 파일이 어떤 검사를 통과했는지 함께 봅니다.
               원본 파일은 그대로 두고, 묶음에는 어떤 파일을 담았는지만 적힙니다.
             </p>
+            {/* 이 화면의 "묶음"(내 파일을 모아 팀에 넘기는 것)과 마켓의 "키트"(한 테마로
+                묶어 파는 상품)는 이름이 비슷해 헷갈린다. 두 낱말의 차이는 docs/kits.md 에
+                적혀 있고, 방문자에게는 한 문장이면 된다. */}
+            <p>
+              마켓에서 파는 <strong>키트</strong>는 이것과 다릅니다. 키트는 Clunk가 같은 팔레트, 같은 축척으로
+              만들어 한 테마로 묶어 둔 에셋 한 벌이고, <Link href="/marketplace?cat=kit">에셋 마켓의 키트 탭</Link>에서
+              보실 수 있습니다.
+            </p>
           </div>
         </div>
         <div className="workspace-asset-header-actions">

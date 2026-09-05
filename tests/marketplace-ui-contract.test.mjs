@@ -102,3 +102,63 @@ test("public marketplace UI is aligned with the published listing and checkout c
   assert.doesNotMatch(delivery, /ENTITLEMENT_REQUIRED/u, `${deliveryFile}: 낱개 구매를 전제한 옛 코드가 되살아나면 안 된다`);
   assert.match(delivery, /getCatalogAccessForUser/u, `${deliveryFile}: 문을 여는 판정이 구독이 아니다`);
 });
+
+/* ---------------------------------------------------------------------------
+   키트 — 계약은 docs/kits.md, 계산의 계약은 tests/catalog-facts-contract.test.mjs.
+   여기서는 화면이 그 계산을 실제로 쓰고 있는지만 본다.
+   ------------------------------------------------------------------------- */
+
+test("the shop sells kits as a unit: a tab, a card, and a way back from a part", async () => {
+  const catalog = await source("app/components/MarketplaceCatalog.tsx");
+
+  // 키트는 탭 하나로 서고, 그 탭은 상품이 아니라 키트를 센다.
+  assert.match(catalog, /\{ id: "kit", label: "키트" \}/u, "목록에 키트 탭이 없다");
+  assert.match(catalog, /키트 \$\{filteredKits\.length\}개/u, "키트 탭이 키트가 아니라 상품을 세고 있다");
+  assert.match(catalog, /function KitCard/u, "키트 카드가 없다");
+  assert.match(catalog, /부품 \{kit\.parts\.length\}개/u, "키트 카드가 부품 수를 말하지 않는다");
+
+  // 부품에서 키트로 돌아가는 길. 부품 한 장을 보고 "나머지는 어디 있나"를 묻게 두면 안 된다.
+  assert.match(catalog, /이 키트의 일부/u, "부품 상세가 어느 키트의 것인지 말하지 않는다");
+  assert.match(catalog, /키트로 돌아가기/u, "부품 상세에서 키트로 돌아가는 길이 없다");
+  assert.match(catalog, /function KitParts/u, "키트 상세에 부품 격자가 없다");
+  assert.match(catalog, /이 키트에 들어 있는 부품/u);
+  assert.match(catalog, /같은 키트의 다른 부품/u);
+});
+
+test("kit membership is read from the listing's own facts, never from a slug prefix", async () => {
+  const catalog = await source("app/components/MarketplaceCatalog.tsx");
+  const facts = await source("app/components/catalog-facts.ts");
+
+  assert.match(catalog, /kitsFrom|kitOfPart|kitOfProduct/u, "화면이 키트 계산을 쓰지 않는다");
+  // 접두사로 묶으면 상품 이름을 바꾸는 순간 키트가 흩어진다. 근거는 facts 뿐이다.
+  for (const prefix of ["village-", "dock-", "mine-", "kit-village", "kit-fishing", "kit-mine"]) {
+    assert.doesNotMatch(catalog, new RegExp(prefix, "u"), `화면이 ${prefix} 접두사로 키트를 알아보려 한다`);
+    assert.doesNotMatch(facts, new RegExp(prefix, "u"), `계산이 ${prefix} 접두사로 키트를 알아보려 한다`);
+  }
+  // 부품 수는 늘 목록에서 찾아낸 공개 부품의 수다. facts 의 kitSize 는 빌드 매니페스트가
+  // 센 값이라 공개를 내린 부품까지 세고 있다(docs/kits.md 3절).
+  assert.match(catalog, /count: partKit\.parts\.length/u, "부품 수를 목록에서 다시 세지 않는다");
+});
+
+test("an empty result tells the visitor what to do next instead of describing our API", async () => {
+  const catalog = await source("app/components/MarketplaceCatalog.tsx");
+
+  assert.match(catalog, /조건 지우고 전체 보기/u, "찾은 것이 없을 때 누를 것이 없다");
+  assert.doesNotMatch(catalog, /API가 반환한 listing만 표시됩니다/u, "우리 사정을 방문자에게 설명하지 않는다");
+  assert.match(catalog, /지금 받을 수 있는 에셋이 없습니다/u);
+  // 낱개로 사고파는 말은 이 화면에서 사라졌다(4c8bb6b).
+  assert.doesNotMatch(catalog, /구매 가능한 공개 에셋/u);
+});
+
+test("the kit contract is written down where the kit agents can read it", async () => {
+  const doc = await source("docs/kits.md");
+
+  for (const slug of ["kit-village-square", "kit-fishing-dock", "kit-mine-entrance"]) {
+    assert.match(doc, new RegExp(slug, "u"), `계약 문서에 ${slug} 가 없다`);
+  }
+  assert.match(doc, /public\/market\/<slug>\/<file>\.glb/u, "파일 자리 규칙이 없다");
+  assert.match(doc, /hero-<slug>\.png/u);
+  assert.match(doc, /preview-<slug>\.webp/u);
+  assert.match(doc, /가장 높은 부품 등급/u, "키트 등급 규칙이 없다");
+  assert.match(doc, /kitSize/u, "kitSize 가 무엇을 세는 값인지 적혀 있지 않다");
+});

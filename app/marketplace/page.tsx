@@ -16,7 +16,7 @@ export const metadata = createPageMetadata({
   title: "에셋 마켓",
   // 2026-09-03: 공개 카탈로그는 3D GLB 15개와 2D PNG 텍스처 8개(그리고 각 모델의 스프라이트
   // 시트 파생본)입니다. "3D 에셋"만 적으면 목록의 3분의 1이 문구에서 사라집니다.
-  description: "Clunk가 직접 만든 가벼운 3D 모델과 이어붙는 2D 텍스처. 얼마나 무거운지 측정한 값을 보고, 직접 돌리거나 이어 붙여 본 뒤 받으세요. 로그인만 하면 무료입니다.",
+  description: "Clunk가 직접 만든 가벼운 3D 모델과 이어붙는 2D 텍스처, 그리고 한 벌로 쓰는 키트. 폴리곤 수와 용량은 파일을 열어 측정한 값입니다. 직접 돌려 보고 이어 붙여 본 뒤 받으세요. 로그인만 하면 무료입니다.",
   path: "/marketplace",
 });
 
@@ -57,7 +57,7 @@ export default function MarketplacePage() {
                   <em>3D 모델과 2D 텍스처</em>
                 </h1>
                 <p className={styles.heroLede}>
-                  얼마나 무거운지 측정한 값과 용량을 보고, 모델은 돌려 보고 텍스처는 이어 붙여 본 뒤 받으세요.
+                  폴리곤 수와 용량은 파일을 열어 측정한 값입니다. 모델은 돌려 보고, 텍스처는 이어 붙여 본 뒤 받으세요.
                   {salesOpen ? "" : " 로그인만 하면 무료입니다."}
                 </p>
                 <div className={styles.heroActions}>
@@ -71,6 +71,9 @@ export default function MarketplacePage() {
                 <div className="cv5-flow" aria-label="공개 마켓 원칙">
                   <span><b>GLB</b> 즉시 사용</span>
                   <span><b>3D</b> 미리보기</span>
+                  {/* 키트는 상품 하나가 아니라 한 벌이다. 목록의 키트 탭이 그것을 세우고,
+                      이 자리는 그런 것이 있다는 사실만 말한다(docs/kits.md). */}
+                  <span><b>키트</b> 한 벌씩</span>
                   <span>{salesOpen ? <><b>구독</b> 전체 열림</> : <><b>로그인</b> 무료</>}</span>
                 </div>
               </div>
@@ -113,7 +116,7 @@ export default function MarketplacePage() {
                 <h2 id="marketplace-catalog-heading">
                   지금 받을 수 있는 <em>에셋</em>
                 </h2>
-                <p>얼마나 무거운지, 파일 크기는 얼마인지, 라이선스(어디까지 써도 되는지)를 상품마다 적어 두었습니다.</p>
+                <p>폴리곤 수와 파일 크기, 그리고 어디까지 써도 되는지를 상품마다 적어 두었습니다. 한 장면을 통째로 꾸미려면 목록 위의 “키트” 탭에서 한 벌씩 보실 수 있습니다.</p>
               </div>
               <MarketplaceCatalog salesOpen={salesOpen} />
             </div>
