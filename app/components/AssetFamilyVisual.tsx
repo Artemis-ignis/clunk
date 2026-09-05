@@ -2,7 +2,7 @@ import Image from "next/image";
 
 import landingFacts from "../data/landing-facts.json";
 
-export type AssetFamilyVisualKind = "sprite" | "atlas" | "spine" | "motion" | "model";
+export type AssetFamilyVisualKind = "sprite" | "atlas" | "motion" | "model";
 
 type AssetFamily = {
   /** 마켓에 올라와 있는 상품의 슬러그. 그림도 숫자도 이 상품의 것이다. */
@@ -18,7 +18,7 @@ type AssetFamily = {
 };
 
 /**
- * 다섯 종류를 보여 주는 칸. 다섯 칸 모두 마켓에 실제로 올라와 있는 파일이고,
+ * 네 종류를 보여 주는 칸. 네 칸 모두 마켓에 실제로 올라와 있는 파일이고,
  * 밑줄의 숫자는 scripts/landing-facts.mjs 가 상품 기록에서 옮겨 적은 것이다
  * (app/data/landing-facts.json 의 families). 화면에서 숫자를 만들지 않는다.
  */
