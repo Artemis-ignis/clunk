@@ -24,6 +24,12 @@
  * 부품 수백 개짜리 파일에서 몇 분이 걸린다. 상자가 겹쳐도 실제로는 안 닿는 경우가
  * 있으므로, 나온 것은 사람이 렌더로 확인한다 — 이 검사는 어디를 볼지 알려 주는 것이다.
  *
+ * 이 판정은 2026-09-05 에 packages/core/src/geometry-rules.ts 로 옮겨졌다. 거기서는 상자가
+ * 아니라 삼각형 대 삼각형으로 재고, 애니메이션 위상까지 돌려 보며, /app 검사기와 두
+ * MCP 표면이 같은 findings 를 낸다(GEO-GROUND-CONTACT / GEO-FLOATING-PART /
+ * GEO-PART-INTERSECTION / GEO-THIN-SHELL). 이 스크립트는 출력 형식을 그대로 쓰는 곳이
+ * 있어 남겨 둔 것이고, 판정 기준을 고칠 일이 있으면 코어 쪽을 고친다.
+ *
  * 사용:
  *   node scripts/asset-geometry-audit.mjs                     public/market 전부
  *   node scripts/asset-geometry-audit.mjs hf-processing-line  상품 하나

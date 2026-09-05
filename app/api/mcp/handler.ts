@@ -1,4 +1,5 @@
 import {
+  PHYSICAL_RULE_IDS,
   inspectAsset,
   inspectAssetForTarget,
   type AssetKind,
@@ -46,6 +47,9 @@ import {
 } from "./catalog";
 
 export const dynamic = "force-dynamic";
+
+/** 물리적 타당성 규칙의 id. 어느 것도 hardBlocker가 아니라는 사실을 응답이 직접 말합니다. */
+const PHYSICAL_RULE_ID_SET: ReadonlySet<string> = new Set<string>(PHYSICAL_RULE_IDS);
 
 const CORS_HEADERS = {
   "access-control-allow-origin": "*",
@@ -213,10 +217,32 @@ async function runTool(
             scoreBasis: structural
               ? "clunk-game-ready-v1 structural rules over the uploaded bytes"
               : "no structural score: this asset kind is not scored by the 3D rule set",
+            /*
+             * 무엇이 hard 인가.
+             *
+             * hardBlockerCount는 ERROR/CRITICAL만 셉니다. 물리적 타당성 규칙
+             * (GEO-FLOATING-PART / GEO-PART-INTERSECTION / GEO-GROUND-CONTACT /
+             * GEO-THIN-SHELL)은 어느 것도 그 등급이 아니므로 이 숫자를 바꾸지 않습니다.
+             * 같은 측정이 어떤 파일에서는 결함이고 다른 파일에서는 의도이기 때문입니다 —
+             * 땅 밑으로 내려간 나무 뿌리, 베어링을 지나는 축, 옷 안에 든 몸, 잎사귀 카드.
+             * 그래서 값과 노드 이름을 실어 보내고 판단은 사람이나 에이전트가 합니다.
+             */
+            physicalPlausibility: structural
+              ? {
+                  countedInHardBlockers: false,
+                  reason:
+                    "GEO-GROUND-CONTACT, GEO-FLOATING-PART, GEO-PART-INTERSECTION and GEO-THIN-SHELL are WARNING or INFO by design: the same measurement is a defect in one file and the author's intent in the next (roots under the ground, a shaft through its bearing, a body inside a jacket, a leaf card). They carry the measured millimetres and the node names instead of a verdict.",
+                  findings: structural.findings.filter((item) => PHYSICAL_RULE_ID_SET.has(item.ruleId)),
+                }
+              : null,
           }
         : {}),
       evidence,
       ...(structural ? { metrics: structural.metrics } : {}),
+      // AssetEvidence의 findings는 id·심각도·메시지만 싣습니다. 물리적 타당성 규칙은
+      // 재 온 값(간격 mm, 관통 깊이 mm)과 그 값이 나온 노드 이름이 본문이므로,
+      // observed/threshold/title이 붙은 구조 리포트의 findings를 그대로 함께 보냅니다.
+      ...(structural ? { findings: structural.findings } : {}),
       bundle: summarizeAssetBundle(parsed),
       source: "HTTP_UPLOAD",
       visualRuntime: "GAP",

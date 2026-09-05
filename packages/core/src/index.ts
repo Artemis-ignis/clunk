@@ -6,6 +6,12 @@
  * deterministic, serializable result.
  */
 
+import {
+  PHYSICAL_RULE_IDS,
+  inspectPhysicalPlausibility,
+  type PhysicalRuleId,
+} from "./geometry-rules";
+
 export type { BillingProvider, CheckoutReference, PaymentResult } from "./billing";
 export * from "./assetops-contract";
 export * from "./assetops-profiles";
@@ -19,7 +25,9 @@ export * from "./product-contract";
 export * from "./product-authoring";
 export * from "./foundry-contract";
 export * from "./analyzers/asset-analyzers";
+export * from "./geometry-rules";
 export * from "./semantic-contracts/harvest-frontier";
+export * from "./visual-evidence";
 
 export const CORE_VERSION = "0.1.0";
 export const RULE_SET_ID = "clunk-game-ready-v1";
@@ -91,6 +99,15 @@ export const RULE_CATALOG: readonly RuleDescriptor[] = [
 ];
 
 export const RULE_IDS: readonly RuleId[] = RULE_CATALOG.map((rule) => rule.id);
+
+/**
+ * 커스텀 프로파일이 켜고 끄고 등급을 바꿀 수 있는 id 전부.
+ *
+ * `RULE_IDS` 는 그대로 둔다 — 문서와 마케팅 표면이 그 길이를 세고 있고, 그 목록은
+ * "예전부터 있던 구조 규칙"이라는 뜻을 갖고 있다. 물리적 타당성 묶음은 자기 등록부
+ * (`PHYSICAL_RULE_IDS`)를 갖고, 프로파일 검증만 둘을 합쳐서 본다.
+ */
+export type AnyRuleId = RuleId | PhysicalRuleId;
 
 export interface AssetBundle {
   entry: string;
@@ -166,7 +183,7 @@ export interface CustomProfileDefinition {
   label?: string;
   description?: string;
   thresholds?: CustomProfileThresholds;
-  rules?: Partial<Record<RuleId, CustomProfileRuleOverride>>;
+  rules?: Partial<Record<AnyRuleId, CustomProfileRuleOverride>>;
   qualityPolicy?: QualityPolicy;
 }
 
@@ -185,7 +202,7 @@ export interface CustomProfile {
   label: string | null;
   description: string | null;
   thresholds: Required<CustomProfileThresholds>;
-  rules: Partial<Record<RuleId, ResolvedRuleSetting>>;
+  rules: Partial<Record<AnyRuleId, ResolvedRuleSetting>>;
   qualityPolicy?: QualityPolicy;
 }
 
@@ -372,7 +389,7 @@ interface ProfileBudget {
 interface ResolvedPolicy extends ProfileBudget {
   ruleSetId: string;
   ruleSetVersion: string;
-  rules: Partial<Record<RuleId, ResolvedRuleSetting>>;
+  rules: Partial<Record<AnyRuleId, ResolvedRuleSetting>>;
   qualityPolicy?: QualityPolicy;
 }
 
@@ -579,13 +596,13 @@ export function createCustomProfile(definition: unknown): CustomProfile {
   const ruleSource = source.rules === undefined
     ? {}
     : requireProfileObject(source.rules, "custom profile rules");
-  const rules: Partial<Record<RuleId, ResolvedRuleSetting>> = {};
+  const rules: Partial<Record<AnyRuleId, ResolvedRuleSetting>> = {};
   for (const key of Object.keys(ruleSource).sort()) {
     if (key.startsWith("_")) continue;
     if (!RULE_ID_SET.has(key)) {
       throw new Error(`Custom profile rule id is not recognized: ${key}`);
     }
-    const ruleId = key as RuleId;
+    const ruleId = key as AnyRuleId;
     const override = requireProfileObject(ruleSource[key], `custom profile rule ${ruleId}`);
     assertKnownKeys(override, CUSTOM_PROFILE_RULE_KEYS, `custom profile rule ${ruleId}`);
     rules[ruleId] = {
@@ -639,9 +656,9 @@ const QUALITY_POLICY_KEYS = [
 ];
 const QUALITY_POLICY_RULE_KEYS = ["value", "mode", "rationale"];
 const PROFILE_IDENTIFIER_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
-const RULE_ID_SET: ReadonlySet<string> = new Set(RULE_IDS);
+const RULE_ID_SET: ReadonlySet<string> = new Set<string>([...RULE_IDS, ...PHYSICAL_RULE_IDS]);
 const SEVERITY_VALUES: readonly Severity[] = ["INFO", "WARNING", "ERROR", "CRITICAL"];
-const EMPTY_RULE_SETTINGS: Partial<Record<RuleId, ResolvedRuleSetting>> = {};
+const EMPTY_RULE_SETTINGS: Partial<Record<AnyRuleId, ResolvedRuleSetting>> = {};
 
 function requireProfileObject(value: unknown, name: string): Record<string, unknown> {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
@@ -694,7 +711,7 @@ function requireScoreThreshold(value: unknown, fallback: number): number {
   return threshold;
 }
 
-function requireEnabled(value: unknown, ruleId: RuleId): boolean {
+function requireEnabled(value: unknown, ruleId: AnyRuleId): boolean {
   if (value === undefined) return true;
   if (typeof value !== "boolean") {
     throw new Error(`Custom profile rule ${ruleId} enabled must be a boolean: ${describeValue(value)}`);
@@ -702,7 +719,7 @@ function requireEnabled(value: unknown, ruleId: RuleId): boolean {
   return value;
 }
 
-function requireSeverityOverride(value: unknown, ruleId: RuleId): Severity | null {
+function requireSeverityOverride(value: unknown, ruleId: AnyRuleId): Severity | null {
   if (value === undefined) return null;
   if (typeof value !== "string" || !SEVERITY_VALUES.includes(value as Severity)) {
     throw new Error(
@@ -1225,6 +1242,31 @@ function buildFindings(
       false,
       "No action required.",
     );
+  }
+
+  /*
+   * 물리적 타당성 묶음. 여기서부터가 "부품이 서로에 대해 어디 놓였는가"다.
+   *
+   * 예전 규칙은 파일이 열리는지, 예산 안에 드는지만 봤다. 마스터가 지난 며칠 손으로
+   * 잡은 결함 — 허브 위 150 mm 에 뜬 앞바퀴, 밀폐 탱크를 293 mm 지나는 컨베이어,
+   * 물통에서 194 mm 떨어져 선 사다리 — 은 그 규칙 어디에도 걸리지 않았다.
+   *
+   * 어느 것도 ERROR 가 아니므로 `hardBlockerCount` 와 `validateAsset` 의 valid 는
+   * 바뀌지 않는다. 커스텀 프로파일은 여기 id 도 끄고 등급을 바꿀 수 있다.
+   * 이 묶음이 던지더라도 리포트 전체를 잃지 않는다 — 못 잰 것은 안 잰 것으로 남긴다.
+   */
+  try {
+    const physical = inspectPhysicalPlausibility({
+      json: parsed.json,
+      bufferViewBytes: (index) => bufferViewBytes(parsed.json, index, parsed),
+    });
+    for (const finding of physical.findings) {
+      const setting = policy.rules[finding.ruleId as AnyRuleId];
+      if (setting && !setting.enabled) continue;
+      findings.push(setting?.severity ? { ...finding, severity: setting.severity } : finding);
+    }
+  } catch {
+    // 형태 검사가 실패해도 구조 리포트는 그대로 나간다.
   }
 
   return findings.sort((a, b) =>

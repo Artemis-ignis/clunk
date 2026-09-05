@@ -86,7 +86,8 @@ export const SURFACES = [
 /**
  * Local stdio tools exposed by `integrations/mcp/server.ts`. Legacy clunk_validate and
  * clunk_passport calls remain backward-compatible handlers, while tools/list exposes this
- * seven-tool product surface including local scene and sprite review.
+ * eight-tool product surface including local scene and sprite review and the offline
+ * visual-evidence capture that decides the engine-render and player-view lanes by machine.
  */
 export const MCP_TOOLS = [
   {
@@ -138,6 +139,14 @@ export const MCP_TOOLS = [
     summary: "Pixi sprite sheet를 실제 로컬 바이트에서 재해시하고 pixel contract와 runtime/human 상태를 분리합니다.",
     input: "manifestPath 또는 manifest",
     output: "pixel metrics, quality, readiness, visualRuntime/playerFacing/humanDecision",
+  },
+  {
+    name: "clunk_visual_evidence",
+    description:
+      "Render a real GLB from a fixed camera rig, hash and measure every frame, and return clunk.asset-inspection-evidence.v3 with visualRuntime and playerFacing already decided by machine.",
+    summary: "엔진 렌더 6각도와 게임 시점, 동작 3위상을 오프라인으로 그려 접지·가독성·노출·팔레트·실루엣을 측정하고 판정까지 냅니다. 사람 검토는 NOT_REQUIRED 또는 OPTIONAL_REVIEW 로 기록되며 게이트가 아닙니다.",
+    input: "path, outputDirectory, profile?, slug?",
+    output: "evidence(v3), captures, checks, verdicts, humanDecision",
   },
 ] as const;
 

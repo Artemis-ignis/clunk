@@ -13,7 +13,7 @@
     "test": "npm run typecheck && npm run core:test && npm run surface:test && npm run profile:test && npm run generation:test && npm run assetops:test && npm run collaboration:test && npm run product:test && npm run series:test && npm run foundry:test && npm run consumer:test && npm run oauth:test && npm run provider:test && npm run billing:test && node --test tests/studio-contract.test.mjs && npm run build && node --test tests/rendered-html.test.mjs tests/auth-dashboard-contract.test.mjs tests/agents-contract.test.mjs && npm run auth:boundary:test && npm run legal:test && npm run facts:test && npm run orphan:test",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern .netlify --ignore-pattern .output",
     "typecheck": "tsc --noEmit",
-    "core:test": "tsx tests/core.test.ts && tsx tests/assetops-contract.test.ts && tsx tests/asset-inspection-evidence.test.ts && tsx tests/player-facing-quality.test.ts && tsx tests/sprite-sheet-review.test.ts",
+    "core:test": "tsx tests/core.test.ts && tsx tests/core-geometry-rules.test.ts && tsx tests/assetops-contract.test.ts && tsx tests/asset-inspection-evidence.test.ts && tsx tests/player-facing-quality.test.ts && tsx tests/sprite-sheet-review.test.ts",
     "surface:test": "tsx tests/surface-parity.test.ts && node --test tests/webmcp-and-agent-surface.test.mjs tests/netlify-config.test.mjs tests/health-route-contract.test.mjs tests/no-gacha-contract.test.mjs tests/frontend-backend-boundary.test.mjs tests/public-journeys-contract.test.mjs tests/ui-readability-contract.test.mjs tests/site-quality-contract.test.mjs",
     "profile:test": "tsx tests/custom-profile.test.ts",
     "generation:test": "tsx tests/assetops-generation.test.ts && tsx tests/assetops-authoring.test.ts",
