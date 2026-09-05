@@ -35,6 +35,12 @@ async function market(slug: string, file: string) {
   return createAssetBundle(file, bytes);
 }
 
+/** 저장소 어디에 있는 파일이든 그 자리에서 읽어 번들로 만든다(키트 재현 파일용). */
+async function bundleAt(path: string) {
+  const bytes = new Uint8Array(await readFile(path));
+  return createAssetBundle(path.split("/").pop() ?? path, bytes);
+}
+
 function byRule(findings: readonly Finding[], ruleId: string): Finding[] {
   return findings.filter((finding) => finding.ruleId === ruleId);
 }
@@ -53,8 +59,10 @@ test("the physical rule registry is separate from the legacy structural registry
     "GEO-FLOATING-PART",
     "GEO-PART-INTERSECTION",
     "GEO-THIN-SHELL",
+    "GEO-INVERTED-WINDING",
     "SCENE-ANIMATED-SCALE",
     "SCENE-UNNAMED-MESH",
+    "SCENE-LAYOUT-FILE",
     "FORMAT-EXTENSION-REQUIRED",
     "GEO-ANALYSIS-LIMIT",
   ]);
@@ -271,4 +279,145 @@ test("real market models report the intersections a human found by eye", async (
     .find((finding) => finding.message.includes("siloHardware") && finding.message.includes("barnRoof"));
   assert.ok(silo, "the silo-through-roof intersection is missing");
   assert.equal(silo.observed, "1094.5 mm");
+});
+
+/*
+ * ------------------------------------------------------------------ 뒤집힌 감김
+ *
+ * 이 규칙이 없던 동안 무엇을 놓쳤나. 광산 키트 첫 빌드에서 레일 두 개의 면이 전부
+ * 안쪽을 봤는데, 뒷면을 그리는 우리 히어로 렌더에서는 완전히 정상으로 보였고 세 검사
+ * 경로가 모두 통과시켰다(tmp/kits/mine-entrance/product-gaps.md 1절). 그림으로 찾을 수
+ * 없는 결함이므로 재는 수밖에 없다.
+ */
+test("a closed mesh whose faces point inward is reported with its signed volume", async () => {
+  const report = inspectAsset(await fixture("inside-out-box.glb"));
+  const finding = one(report.findings, "GEO-INVERTED-WINDING");
+  // 뒷면 컬링을 켜면 사라지는 결함이므로 단면 재질에서는 WARNING 이 최소다.
+  assert.equal(finding.severity, "WARNING");
+  assert.match(finding.message, /insideOutCrate/);
+  assert.match(finding.message, /-0\.008/);
+  assert.equal(finding.observed, "1/2 메시");
+  // 다른 물리 규칙과 같은 원칙 — hardBlocker 가 아니다.
+  assert.equal(report.score.hardBlockerCount, 0);
+  assert.equal(validateAsset(await fixture("inside-out-box.glb")).valid, true);
+});
+
+test("an inverted mesh whose material draws both sides is INFO, not a warning", async () => {
+  const report = inspectAsset(await fixture("inside-out-double-sided.glb"));
+  const finding = one(report.findings, "GEO-INVERTED-WINDING");
+  assert.equal(finding.severity, "INFO");
+  assert.match(finding.message, /doubleSided/);
+});
+
+/*
+ * glTF 규격: 노드 전역 변환의 행렬식이 음수이면 감김을 뒤집어 그린다. 그래서 거울
+ * 인스턴스는 월드 좌표에서 잰 부호가 음수여도 결함이 아니다. 월드 부호만 보고 판정하면
+ * 여기서 가짜 지적이 난다.
+ */
+test("a mirrored instance is not reported: the spec already reverses its winding", async () => {
+  const report = inspectAsset(await fixture("mirrored-instance.glb"));
+  assert.equal(byRule(report.findings, "GEO-INVERTED-WINDING").length, 0);
+});
+
+test("open meshes are left alone: a signed volume means nothing on a card", async () => {
+  // thin-card.glb 의 카드는 삼각형 두 개짜리 열린 면이다. 부호 있는 부피는 원점을
+  // 어디 두느냐에 따라 부호가 바뀌므로 재지 않는다.
+  const report = inspectAsset(await fixture("thin-card.glb"));
+  assert.equal(byRule(report.findings, "GEO-INVERTED-WINDING").length, 0);
+  assert.equal(byRule(report.findings, "GEO-THIN-SHELL").length, 1);
+});
+
+test("the repro file from the mine kit is caught and the shipped rail is clean", async () => {
+  const broken = inspectAsset(await bundleAt("tmp/kits/mine-entrance/repro/inside-out-rail.glb"));
+  const finding = one(broken.findings, "GEO-INVERTED-WINDING");
+  assert.equal(finding.severity, "WARNING");
+  assert.match(finding.message, /rails/);
+  const shipped = inspectAsset(await market("mine-rail-straight", "mine-rail-straight.glb"));
+  assert.equal(byRule(shipped.findings, "GEO-INVERTED-WINDING").length, 0);
+});
+
+/*
+ * ------------------------------------------------------------------ 배치도(팩/키트)
+ *
+ * 한 파일에 독립 상품 여럿을 늘어놓은 파일에서는 "서로 안 닿는다"가 결함이 아니다.
+ * 반대로 파일 전체 상자가 커서 상품 *안*의 관통이 4% 문턱에 걸려 통째로 묻혔다.
+ */
+test("a layout file judges floating inside one product, not between products", async () => {
+  const report = inspectAsset(await fixture("layout-pack.glb"));
+  const layout = one(report.findings, "SCENE-LAYOUT-FILE");
+  assert.equal(layout.severity, "INFO");
+  assert.equal(layout.observed, "4 units");
+  const floating = byRule(report.findings, "GEO-FLOATING-PART");
+  // 상품 넷 가운데 셋은 메시가 하나뿐이고 서로 2 m 떨어져 있다. 지적은 상품 A 안에서
+  // 몸통 위 20 mm 에 떠 있는 뚜껑 하나뿐이어야 한다.
+  assert.equal(floating.length, 1);
+  assert.match(floating[0].message, /loose_cap/);
+  assert.match(floating[0].message, /crate_a/);
+  assert.equal(floating[0].observed, "20 mm");
+});
+
+test("the four real packs are recognised as layouts and assemblies are not", async () => {
+  const packs = [
+    { slug: "kit-mine-entrance", file: "kit-mine-entrance.glb", units: 16 },
+    { slug: "kit-village-square", file: "kit-village-square.glb", units: 15 },
+    { slug: "grove-tree-pack-vol1", file: "grove-tree-pack-vol1.glb", units: 6 },
+    { slug: "cozy-farm-set-vol1", file: "cozy-farm-set-vol1.glb", units: 3 },
+  ];
+  for (const pack of packs) {
+    const report = inspectAsset(await market(pack.slug, pack.file));
+    const finding = one(report.findings, "SCENE-LAYOUT-FILE");
+    assert.equal(finding.observed, `${pack.units} units`, pack.slug);
+    // 배치도에서는 상품끼리 안 닿는 것이 정상이므로 부양 지적이 없어야 한다.
+    assert.equal(byRule(report.findings, "GEO-FLOATING-PART").length, 0, pack.slug);
+  }
+  // 지붕·차양처럼 공중에 있는 부분이 있는 조립품은 배치도가 아니다.
+  for (const item of [
+    { slug: "cozy-storage-shed", file: "storage-shed.m1.clunk-optimized.glb" },
+    { slug: "cozy-market-stall", file: "market-stall.m1.clunk-optimized.glb" },
+  ]) {
+    const report = inspectAsset(await market(item.slug, item.file));
+    assert.equal(byRule(report.findings, "SCENE-LAYOUT-FILE").length, 0, item.slug);
+  }
+});
+
+/*
+ * 팩이 자기 부품의 결함을 삼키지 않는지. 2026-09-05 실측: 고치기 전에는
+ * kit-mine-entrance 가 지적 0건·100점·ready true 였는데, 그 안에 든 mine-cart 를 따로
+ * 검사하면 GEO-PART-INTERSECTION 이 2건 나왔다 — 파일 전체 부피로 "몸통"을 재는 바람에
+ * 상품 하나하나가 4% 문턱에 못 미쳐 전부 걸러졌기 때문이다.
+ */
+test("a pack no longer swallows the defects of the products inside it", async () => {
+  const kit = inspectAsset(await market("kit-mine-entrance", "kit-mine-entrance.glb"));
+  const cart = inspectAsset(await market("mine-cart", "mine-cart.glb"));
+  const cartHits = byRule(cart.findings, "GEO-PART-INTERSECTION");
+  assert.ok(cartHits.length > 0, "mine-cart should still report its own intersections");
+  const kitHits = byRule(kit.findings, "GEO-PART-INTERSECTION");
+  assert.ok(
+    kitHits.length >= cartHits.length,
+    `the kit reported ${kitHits.length} intersections but the cart alone reports ${cartHits.length}`,
+  );
+});
+
+/*
+ * ------------------------------------------------------------------ 속 빈 것에 "묻혔다"고 말하지 않기
+ *
+ * 부두 키트 보고서 6절: 살 8개와 유리 8장으로 된 속 빈 등롱 안의 회전등이
+ * "상자 안에 통째로 들어가 화면에서 아무것도 못 볼 수 있습니다"로 나왔다. 등은
+ * 유리 너머로 잘 보인다 — 상자(AABB)만 보고 판정했기 때문이다.
+ */
+test("a hollow cage does not bury what stands inside it", async () => {
+  const report = inspectAsset(await fixture("caged-lamp.glb"));
+  const finding = one(report.findings, "GEO-PART-INTERSECTION");
+  // 삼각형은 실제로 20 mm 겹치므로 지적 자체는 남는다. 다만 "묻혔다"가 아니다.
+  assert.equal(finding.observed, "20 mm");
+  assert.doesNotMatch(finding.message, /통째로 들어가 있고/);
+  assert.match(finding.title, /뚫고 지나감/);
+});
+
+test("the buried verdict carries the measured fill of the enclosing part", async () => {
+  // 우리는 자기 상자의 1.8%만 채운다. 꽉 찬 덩어리(sealedTank)는 100%다.
+  const caged = inspectAsset(await fixture("caged-lamp.glb"));
+  assert.equal(caged.findings.filter((item) => item.title.includes("묻혔음")).length, 0);
+  const solid = inspectAsset(await fixture("penetrating-rod.glb"));
+  assert.equal(one(solid.findings, "GEO-PART-INTERSECTION").observed, "200 mm");
 });

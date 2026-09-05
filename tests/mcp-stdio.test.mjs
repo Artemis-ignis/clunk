@@ -67,7 +67,16 @@ test("canonical Windows MCP command keeps stdout JSON-RPC clean", async () => {
   assert.equal(lines.length, 6, `unexpected stdout: ${stdout}`);
   const messages = lines.map((line) => JSON.parse(line));
   assert.equal(messages[0].result.serverInfo.name, "clunk");
-  assert.equal(messages[1].result.tools.length, 8);
+  /*
+   * 도구 목록은 이 서버가 실제로 답하는 것 전부여야 한다. 2026-09-05 지적:
+   * clunk_validate 와 clunk_passport 는 답하는데 목록에 없어서, 도구 목록만 보고 붙는
+   * 에이전트는 그 이름을 알 방법이 없었다.
+   */
+  const toolNames = messages[1].result.tools.map((tool) => tool.name);
+  assert.equal(messages[1].result.tools.length, 10);
+  for (const name of ["clunk_inspect", "clunk_validate", "clunk_optimize", "clunk_passport", "clunk_asset_inspect"]) {
+    assert.ok(toolNames.includes(name), `tools/list is missing ${name}, which this server answers`);
+  }
   const inspect = JSON.parse(messages[2].result.content[0].text);
   assert.equal(inspect.inputHash, "181473ff49e2a753b3c22198a0ef76f6052ab1efc38ac03a57c58bc62ae8fdf1");
   const evidence = JSON.parse(messages[3].result.content[0].text);
@@ -95,6 +104,36 @@ test("canonical Windows MCP command keeps stdout JSON-RPC clean", async () => {
   assert.match(pierced.message, /conveyorBelt/);
   assert.match(pierced.message, /200 mm/);
   assert.equal(target.stages.policy.status, "pass", "a physical warning must not fail the policy gate");
+
+  /*
+   * 무엇이 돌았고 무엇이 못 돌았는가.
+   *
+   * unity 프로파일에는 에디터를 몰 러너가 없다. 파일만으로 도는 레인은 끝까지 돌았고
+   * 엔진 레인은 아예 안 돌았다는 사실이 응답에 따로 적혀 있어야 한다 — 위쪽 status 하나로는
+   * "환경이 없어 못 돌았다"와 "돌았는데 통과했다"를 가를 수 없다.
+   */
+  assert.equal(target.schema, "clunk.asset-evidence.v1");
+  assert.equal(target.status, "ENVIRONMENT_UNAVAILABLE");
+  assert.equal(target.coverage.schema, "clunk.evidence-coverage.v1");
+  assert.deepEqual([...target.coverage.ranLanes], ["bytes", "structure", "policy"]);
+  assert.equal(target.coverage.fileContract, "PASS");
+  assert.equal(target.coverage.engineEnvironment, "NOT_RUN");
+  assert.equal(target.coverage.scoreBasis, "FILE_ONLY");
+  assert.deepEqual(
+    target.coverage.skippedLanes.map((lane) => [lane.id, lane.kind, lane.status]),
+    [["import", "engine-environment", "ENVIRONMENT_UNAVAILABLE"], ["runtime", "engine-environment", "ENVIRONMENT_UNAVAILABLE"]],
+  );
+  // 안 돈 레인이 있는데 "전부 돌았다"고 말하는 응답은 나올 수 없다.
+  for (const lane of target.coverage.lanes) {
+    if (lane.kind !== "engine-environment") continue;
+    assert.notEqual(lane.status, "RAN", `${lane.id} claims to have run without an engine runner`);
+  }
+  // 실제로 평가한 규칙 id 가 응답에 있어야 "이 검사가 무엇을 봤는가"를 물을 수 있다.
+  for (const ruleId of ["GEO-INVERTED-WINDING", "GEO-PART-INTERSECTION", "MAT-MATERIAL-BUDGET"]) {
+    assert.ok(target.coverage.ranRules.includes(ruleId), `${ruleId} is missing from coverage.ranRules`);
+  }
+  // unity 는 HF 납품 계약이 아니므로 HF-* 는 돌지 않았다고 말해야 한다.
+  assert.ok(!target.coverage.ranRules.includes("HF-MESHOPT"));
 
   assert.doesNotMatch(stdout, /npm (notice|warn|error)|^>/m);
 });
@@ -133,7 +172,7 @@ test("local MCP authors a real Spine bundle and preserves environment-unavailabl
     const [exitCode] = await once(child, "close");
     assert.equal(exitCode, 0, stderr);
     const messages = stdout.trim().split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line));
-    assert.equal(messages[0].result.tools.length, 8);
+    assert.equal(messages[0].result.tools.length, 10);
     const result = JSON.parse(messages[1].result.content[0].text);
     assert.equal(result.schema, "clunk.asset-generation-result.v1");
     assert.equal(result.generationStatus, "GENERATED");

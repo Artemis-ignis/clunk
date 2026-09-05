@@ -1,4 +1,7 @@
 import {
+  PHYSICAL_RULE_IDS,
+  RULE_IDS,
+  RULE_SET_ID,
   inspectAsset,
   sha256Hex,
   type AssetBundle,
@@ -10,6 +13,7 @@ import {
   type AssetEvidence,
   type AssetEvidenceFinding,
   type AssetEvidenceRecipe,
+  type AssetEvidenceScore,
   type AssetQualityWarning,
   type AssetEvidenceStages,
   type AssetKind,
@@ -131,6 +135,56 @@ const ATLAS_KINDS = new Set<AssetKind>(["sprite-atlas"]);
 const SPINE_KINDS = new Set<AssetKind>(["spine-project"]);
 const ANIMATION_KINDS = new Set<AssetKind>(["animation-clip"]);
 
+/*
+ * 분석기별로 실제로 평가하는 규칙 id.
+ *
+ * "무엇이 돌았는가"를 응답이 말하려면 목록이 있어야 한다. 이 목록에 없는 id 는
+ * 이 응답이 아무 말도 하지 않았다는 뜻이고, 그 사실이 coverage.ranRules 로 나간다.
+ * 모델 쪽은 packages/core 의 두 등록부(RULE_IDS · PHYSICAL_RULE_IDS)를 그대로 쓴다 —
+ * 여기 손으로 다시 적으면 규칙을 늘릴 때마다 두 곳이 갈라진다.
+ */
+const IMAGE_RULE_IDS = ["IMAGE-PARSE", "IMAGE-FORMAT"] as const;
+const ATLAS_RULE_IDS = ["ATLAS-PARSE", "ATLAS-MISSING-PAGE"] as const;
+const SPINE_RULE_IDS = [
+  "SPINE-PARSE",
+  "SPINE-UNSUPPORTED-BINARY",
+  "SPINE-NO-BONES",
+  "SPINE-NO-SLOTS",
+  "SPINE-MISSING-ATLAS",
+  "SPINE-MISSING-ANIMATION",
+] as const;
+const ANIMATION_RULE_IDS = [
+  "ANIM-PARSE",
+  "ANIM-FORMAT",
+  "ANIM-NONE",
+  "ANIM-ZERO-DURATION",
+  "ANIM-CLIP-BUDGET",
+  "ANIM-REQUIRED-CLIP",
+  "ANIM-ROOT-MOTION",
+] as const;
+const HARVEST_FRONTIER_RULE_IDS = [
+  "HF-ROOT-NODE",
+  "HF-ATTACHMENT-SOCKET",
+  "HF-COLLIDER",
+  "HF-PIVOT",
+  "HF-MESHOPT",
+] as const;
+/** 목표 프로파일이 무엇이든 입력 계약 자체를 보는 두 규칙. */
+const TARGET_CONTRACT_RULE_IDS = ["TARGET-FORMAT", "TARGET-ASSET-KIND"] as const;
+
+/**
+ * 이 목표 프로파일이 구조 검사기에 넘기는 예산.
+ *
+ * HTTP·stdio 표면이 같은 예산으로 점수를 매길 수 있도록 밖으로 낸다. 2026-09-05
+ * 실측: 원격 clunk_asset_validate 는 목표 프로파일과 무관하게 기본 `web` 예산으로
+ * 점수를 냈다 — unreal 과 web-three-mobile 이 같은 파일에 같은 99 점을 돌려주었다.
+ */
+export function targetInspectionPolicy(targetProfileId: string): AssetPolicy {
+  const target = getBuiltInTargetProfile(targetProfileId);
+  if (!target) throw new Error(`Unknown target profile: ${targetProfileId}`);
+  return legacyPolicy(target);
+}
+
 export function inspectAssetForTarget(request: InspectAssetForTargetRequest): AssetEvidence {
   const target = getBuiltInTargetProfile(request.targetProfileId);
   if (!target) throw new Error(`Unknown target profile: ${request.targetProfileId}`);
@@ -141,8 +195,8 @@ export function inspectAssetForTarget(request: InspectAssetForTargetRequest): As
   const findings: AssetEvidenceFinding[] = [];
   const targetAcceptsFormat = target.acceptedFormats.includes(format);
   const targetAcceptsKind = target.assetKinds.includes(assetKind);
-  if (!targetAcceptsFormat) findings.push(finding("TARGET-FORMAT", "ERROR", `.${format || "unknown"} is not accepted by ${target.id}.`, request.fileName));
-  if (!targetAcceptsKind) findings.push(finding("TARGET-ASSET-KIND", "ERROR", `${assetKind} is not declared by ${target.id}.`, request.fileName));
+  if (!targetAcceptsFormat) findings.push({ ...finding("TARGET-FORMAT", "ERROR", `.${format || "unknown"} is not accepted by ${target.id}.`, request.fileName), ruleId: "TARGET-FORMAT" });
+  if (!targetAcceptsKind) findings.push({ ...finding("TARGET-ASSET-KIND", "ERROR", `${assetKind} is not declared by ${target.id}.`, request.fileName), ruleId: "TARGET-ASSET-KIND" });
 
   const bytesStage = !sourceBytes.byteLength
     ? gate("fail", "Input bytes are empty.", [evidence("bytes", sourceBytes.byteLength)])
@@ -153,6 +207,10 @@ export function inspectAssetForTarget(request: InspectAssetForTargetRequest): As
   let structuralStage: GateResult;
   let policyStage: GateResult;
   const bundle = bundleFor(request);
+  /* 무엇이 실제로 평가되었는지 응답이 말할 수 있도록 모아 둔다. */
+  const ruleSetsRun: string[] = [];
+  const ranRules: string[] = [...TARGET_CONTRACT_RULE_IDS];
+  let score: AssetEvidenceScore | undefined;
 
   if (!targetAcceptsFormat || !targetAcceptsKind) {
     structuralStage = gate("unsupported", "Structural analyzer was not run because the target contract rejected this input.", []);
@@ -162,31 +220,44 @@ export function inspectAssetForTarget(request: InspectAssetForTargetRequest): As
     structuralStage = result.gate;
     policyStage = result.gate;
     findings.push(...result.findings.map(toEvidenceFinding));
+    ruleSetsRun.push("clunk-assetops-2d-image-v1");
+    ranRules.push(...IMAGE_RULE_IDS);
   } else if (ATLAS_KINDS.has(assetKind)) {
     const result = analyzeSpriteAtlas({ entry: request.fileName, files: bundle.files, target });
     structuralStage = result.gate;
     policyStage = result.gate;
     findings.push(...result.findings.map(toEvidenceFinding));
+    ruleSetsRun.push("clunk-assetops-sprite-atlas-v1");
+    ranRules.push(...ATLAS_RULE_IDS);
   } else if (SPINE_KINDS.has(assetKind)) {
     const result = analyzeSpineProject({ entry: request.fileName, files: bundle.files, target });
     structuralStage = result.gate;
     policyStage = result.gate;
     findings.push(...result.findings.map(toEvidenceFinding));
+    ruleSetsRun.push("clunk-assetops-spine-project-v1");
+    ranRules.push(...SPINE_RULE_IDS);
   } else if (ANIMATION_KINDS.has(assetKind)) {
     const result = analyzeAnimation({ bundle, target });
     structuralStage = result.gate;
     policyStage = result.gate;
     findings.push(...result.findings.map(toEvidenceFinding));
+    ruleSetsRun.push("clunk-assetops-animation-clip-v1");
+    ranRules.push(...ANIMATION_RULE_IDS);
   } else {
     const result = inspectModel(bundle, target);
     structuralStage = result.structure;
     policyStage = result.policy;
     findings.push(...result.findings);
+    score = result.score;
+    ruleSetsRun.push(RULE_SET_ID);
+    ranRules.push(...RULE_IDS, ...PHYSICAL_RULE_IDS);
     if (target.semanticRules?.includes("harvest-frontier-runtime-v1")) {
       const document = parseGltfJson(sourceBytes, format);
       if (document) {
         const semantic = inspectHarvestFrontierSemanticContract(document);
         findings.push(...semantic.findings.map(toEvidenceFinding));
+        ruleSetsRun.push("harvest-frontier-runtime-v1");
+        ranRules.push(...HARVEST_FRONTIER_RULE_IDS);
         if (semantic.gate.status === "fail") {
           structuralStage = mergeGateFailure(structuralStage, semantic.gate, "Harvest Frontier semantic contract failed.");
           policyStage = mergeGateFailure(policyStage, semantic.gate, "Harvest Frontier semantic contract failed.");
@@ -227,6 +298,9 @@ export function inspectAssetForTarget(request: InspectAssetForTargetRequest): As
       stages,
       findings,
       qualityWarnings,
+      ...(score ? { score } : {}),
+      ruleSetsRun,
+      ranRules,
     }),
   };
 }
@@ -235,6 +309,7 @@ function inspectModel(bundle: AssetBundle, target: TargetProfile): {
   structure: GateResult;
   policy: GateResult;
   findings: AssetEvidenceFinding[];
+  score: AssetEvidenceScore;
 } {
   const report = inspectAsset(bundle, legacyPolicy(target));
   const blockingFormat = report.findings.some((item) => item.category === "format" && isBlocking(item.severity));
@@ -251,6 +326,13 @@ function inspectModel(bundle: AssetBundle, target: TargetProfile): {
       [evidence("score", report.score.score), evidence("hardBlockerCount", report.score.hardBlockerCount), evidence("legacyRuleSetId", report.ruleSetId)],
     ),
     findings: report.findings.map(toLegacyFinding),
+    score: {
+      score: report.score.score,
+      threshold: report.score.threshold,
+      ready: report.score.ready,
+      hardBlockerCount: report.score.hardBlockerCount,
+      ruleSetId: report.ruleSetId,
+    },
   };
 }
 
@@ -357,11 +439,13 @@ function finding(id: string, severity: AssetEvidenceFinding["severity"], message
 }
 
 function toEvidenceFinding(value: { id: string; severity: AssetEvidenceFinding["severity"]; message: string; path?: string }): AssetEvidenceFinding {
-  return finding(value.id, value.severity, value.message, value.path);
+  // 분석기·시맨틱 계약의 id 는 이미 규칙 id 자체다(HF-MESHOPT, IMAGE-FORMAT 처럼).
+  return { ...finding(value.id, value.severity, value.message, value.path), ruleId: value.id.split(":")[0] };
 }
 
 function toLegacyFinding(value: Finding): AssetEvidenceFinding {
-  return finding(value.id, value.severity, value.message, value.path);
+  // ruleId 를 그대로 실어 보낸다 — 받는 쪽이 `id` 를 잘라 쓰거나 메시지를 긁지 않게.
+  return { ...finding(value.id, value.severity, value.message, value.path), ruleId: value.ruleId };
 }
 
 function toQualityWarning(value: AssetEvidenceFinding): AssetQualityWarning {

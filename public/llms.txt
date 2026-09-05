@@ -159,7 +159,7 @@ normalizes shipped frame metadata and `clunk_sprite_sheet_review` normalizes the
 manifest; HTTP remains `DECLARED_METADATA_ONLY` and never rehashes local paths. It never promotes
 `reviewStatus`, `visualRuntime`, `playerFacing`, or `humanDecision`.
 
-The local stdio surface contains 8 advertised tools, including `clunk_inspect`, `clunk_optimize`,
+The local stdio surface contains 10 advertised tools, including `clunk_inspect`, `clunk_validate`, `clunk_optimize`, `clunk_passport`,
 `clunk_visual_evidence` (renders the file offline from six cameras plus three animation phases, measures
 ground contact, readability, exposure, palette and silhouette, and writes a clunk.asset-inspection-evidence.v3
 whose visualRuntime and playerFacing lanes carry a machine verdict — humanDecision is NOT_REQUIRED or
@@ -223,8 +223,8 @@ Tools returned by local stdio `tools/list`:
 - `clunk_sprite_sheet_review` - Rehash a local RGBA sprite sheet and validate the Pixi sprite
   contract, motion, clipping, alpha spill, border, silhouette, runtime-size, and provenance gates.
 
-`clunk_validate` and `clunk_passport` remain backward-compatible calls in the local server but
-are not advertised by the current eight-tool catalog.
+`clunk_validate` and `clunk_passport` are advertised in tools/list as of 2026-09-05 (they answered before
+but were not listed).
 
 Typical agent loop over HTTP: `initialize` -> `tools/list` -> `clunk_search_assets` (pick by
 theme, polygon budget and `freeOnly`) -> `clunk_asset_facts` (confirm the one) -> fetch the

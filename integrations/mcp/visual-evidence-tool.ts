@@ -28,7 +28,8 @@
 import { resolve } from "node:path";
 import { captureVisualEvidence } from "../../packages/core/src/visual-evidence/capture-node";
 import type { AssetInspectionEvidenceV3 } from "../../packages/core/src/visual-evidence/evidence";
-import type { AssetPolicy, ProfileId } from "../../packages/core/src/index";
+import type { AssetPolicy } from "../../packages/core/src/index";
+import { resolveProfilePolicy } from "../shared/custom-profile";
 
 export const VISUAL_EVIDENCE_TOOL = {
   name: "clunk_visual_evidence",
@@ -48,6 +49,7 @@ export const VISUAL_EVIDENCE_TOOL = {
       path: { type: "string", description: "Absolute path to the .glb or .gltf on this machine." },
       outputDirectory: { type: "string", description: "Absolute directory the capture PNGs and the evidence JSON are written to. Required: this tool writes files and will not guess where." },
       profile: { type: "string", enum: ["web", "mobile", "pc"], description: "Policy profile for the structural half — the triangle/material/texture budget. Not an engine id." },
+      profileFile: { type: "string", description: "Absolute path to a custom profile JSON for the structural half, the same file clunk_inspect accepts. Cannot be combined with profile." },
       slug: { type: "string", description: "Name stem for the written files. Defaults to the asset's file name." },
       inspectionRunId: { type: "string" },
       includeCaptureMetrics: { type: "boolean", description: "Return every per-capture measurement. Default true; set false for a smaller payload with the checks and the verdict only." },
@@ -76,13 +78,6 @@ function optionalString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value : undefined;
 }
 
-function policyFor(profile: string | undefined): AssetPolicy | undefined {
-  if (!profile) return undefined;
-  if (profile !== "web" && profile !== "mobile" && profile !== "pc") {
-    throw new Error(`'${profile}' is not a policy profile. Valid values: web, mobile, pc.`);
-  }
-  return { profileId: profile as ProfileId };
-}
 
 export async function handleVisualEvidenceTool(args: Record<string, unknown>): Promise<VisualEvidenceToolResult> {
   const glbPath = resolve(requiredString(args.path, "path"));
@@ -92,7 +87,9 @@ export async function handleVisualEvidenceTool(args: Record<string, unknown>): P
     outDir,
     slug: optionalString(args.slug),
     inspectionRunId: optionalString(args.inspectionRunId),
-    policy: policyFor(optionalString(args.profile)),
+    // 구조 검사 절반은 다른 stdio 도구와 같은 규칙으로 프로파일을 고른다 — 내장 이름 셋 또는
+    // 사용자 프로파일 파일(profileFile). 둘을 같이 주면 resolveProfilePolicy 가 거절한다.
+    policy: (await resolveProfilePolicy({ profile: optionalString(args.profile), profileFile: optionalString(args.profileFile) })) as AssetPolicy,
   });
 
   const includeMetrics = args.includeCaptureMetrics !== false;

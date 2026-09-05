@@ -1,9 +1,4 @@
-import {
-  PHYSICAL_RULE_IDS,
-  inspectAsset,
-  inspectAssetForTarget,
-  type AssetKind,
-} from "../../../packages/core/src/index";
+import { type AssetKind } from "../../../packages/core/src/index";
 import {
   evaluatePlayerFacingSceneReview,
   normalizeFrameManifest,
@@ -35,8 +30,8 @@ import {
   ASSET_INSPECTION_REQUEST_V1,
   ASSET_INSPECTION_REQUEST_V2,
   parseAssetInspectionRequest,
-  summarizeAssetBundle,
 } from "../assetops/inspect/bundle-contract";
+import { buildAssetInspectionPayload } from "./inspection-response";
 import {
   CATALOG_THEME_IDS,
   GRADE_RULE_EN,
@@ -47,9 +42,6 @@ import {
 } from "./catalog";
 
 export const dynamic = "force-dynamic";
-
-/** 물리적 타당성 규칙의 id. 어느 것도 hardBlocker가 아니라는 사실을 응답이 직접 말합니다. */
-const PHYSICAL_RULE_ID_SET: ReadonlySet<string> = new Set<string>(PHYSICAL_RULE_IDS);
 
 const CORS_HEADERS = {
   "access-control-allow-origin": "*",
@@ -187,71 +179,7 @@ async function runTool(
       assetKind: args.assetKind as AssetKind | undefined,
       runId: args.runId,
     });
-    const evidence = inspectAssetForTarget({
-      ...(parsed.runId ? { runId: parsed.runId } : {}),
-      sourcePath: `http-upload:${parsed.entryFileName}`,
-      fileName: parsed.entryFileName,
-      bytes: parsed.entryBytes,
-      targetProfileId: parsed.targetProfileId,
-      ...(parsed.assetKind ? { assetKind: parsed.assetKind } : {}),
-      bundleFiles: parsed.bundleFiles,
-    });
-    // AssetEvidence는 게이트 상태만 싣고 측정 수치는 싣지 않습니다. 2026-09-05 실측: 에이전트가
-    // "이 GLB 폴리곤 몇 개냐"를 물으면 응답 어디에도 답이 없었습니다. 모델일 때는 같은
-    // 바이트를 구조 검사기에도 통과시켜 metrics와 점수를 함께 돌려줍니다.
-    const structural = structuralReportFor(parsed.entryFileName, parsed.bundleFiles);
-    const blocking = (structural?.findings ?? []).filter((item) => item.severity === "ERROR");
-    return textResult({
-      schema: "clunk.asset-inspection-response.v2",
-      operation: name === "clunk_asset_validate" ? "validate" : "inspect",
-      ...(name === "clunk_asset_validate"
-        ? {
-            // /agents가 이 도구에 대해 "valid, score, hardBlockers"를 약속하고 있었는데
-            // 응답에는 그 셋 중 무엇도 없었습니다. 약속한 것을 실제로 싣습니다.
-            valid: structural
-              ? structural.score.hardBlockerCount === 0
-              : evidence.status !== "BLOCKED" && evidence.status !== "UNSUPPORTED",
-            score: structural?.score.score ?? null,
-            hardBlockerCount: structural?.score.hardBlockerCount ?? null,
-            blockingFindings: blocking,
-            scoreBasis: structural
-              ? "clunk-game-ready-v1 structural rules over the uploaded bytes"
-              : "no structural score: this asset kind is not scored by the 3D rule set",
-            /*
-             * 무엇이 hard 인가.
-             *
-             * hardBlockerCount는 ERROR/CRITICAL만 셉니다. 물리적 타당성 규칙
-             * (GEO-FLOATING-PART / GEO-PART-INTERSECTION / GEO-GROUND-CONTACT /
-             * GEO-THIN-SHELL)은 어느 것도 그 등급이 아니므로 이 숫자를 바꾸지 않습니다.
-             * 같은 측정이 어떤 파일에서는 결함이고 다른 파일에서는 의도이기 때문입니다 —
-             * 땅 밑으로 내려간 나무 뿌리, 베어링을 지나는 축, 옷 안에 든 몸, 잎사귀 카드.
-             * 그래서 값과 노드 이름을 실어 보내고 판단은 사람이나 에이전트가 합니다.
-             */
-            physicalPlausibility: structural
-              ? {
-                  countedInHardBlockers: false,
-                  reason:
-                    "GEO-GROUND-CONTACT, GEO-FLOATING-PART, GEO-PART-INTERSECTION and GEO-THIN-SHELL are WARNING or INFO by design: the same measurement is a defect in one file and the author's intent in the next (roots under the ground, a shaft through its bearing, a body inside a jacket, a leaf card). They carry the measured millimetres and the node names instead of a verdict.",
-                  findings: structural.findings.filter((item) => PHYSICAL_RULE_ID_SET.has(item.ruleId)),
-                }
-              : null,
-          }
-        : {}),
-      evidence,
-      ...(structural ? { metrics: structural.metrics } : {}),
-      // AssetEvidence의 findings는 id·심각도·메시지만 싣습니다. 물리적 타당성 규칙은
-      // 재 온 값(간격 mm, 관통 깊이 mm)과 그 값이 나온 노드 이름이 본문이므로,
-      // observed/threshold/title이 붙은 구조 리포트의 findings를 그대로 함께 보냅니다.
-      ...(structural ? { findings: structural.findings } : {}),
-      bundle: summarizeAssetBundle(parsed),
-      source: "HTTP_UPLOAD",
-      visualRuntime: "GAP",
-      playerFacing: "NOT_EVALUATED",
-      humanDecision: "NOT_EVALUATED",
-      reviewBoundary:
-        "These three stay unevaluated on purpose: nothing here rendered the asset. A structural pass is not a statement that it looks right in a game.",
-      rawBytesPersisted: false,
-    });
+    return textResult(buildAssetInspectionPayload(name === "clunk_asset_validate" ? "validate" : "inspect", parsed));
   }
 
   if (name === "clunk_asset_inspection_evidence") {
@@ -344,22 +272,6 @@ async function persistInspectionEvidence(workspaceId: string, evidence: ReturnTy
       ),
   ]);
   return { stored: true, assetId, analysisId, rawBytesPersisted: false };
-}
-
-/**
- * 업로드한 바이트의 구조 리포트. 모델(.glb/.gltf)이 아니면 null.
- *
- * inspectAsset은 glTF 컨테이너를 전제로 하므로, 스프라이트 시트나 Spine JSON을 넘기면
- * 실패 리포트를 만들어 냅니다. 그 실패는 에셋의 문제가 아니라 잘못된 검사기를 부른
- * 것이므로, 확장자를 보고 부를 수 있을 때만 부릅니다.
- */
-function structuralReportFor(entryFileName: string, files: ReadonlyMap<string, Uint8Array>) {
-  if (!/\.(?:glb|gltf)$/iu.test(entryFileName)) return null;
-  try {
-    return inspectAsset({ entry: entryFileName, files });
-  } catch {
-    return null;
-  }
 }
 
 /**

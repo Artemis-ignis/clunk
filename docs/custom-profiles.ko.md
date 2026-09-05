@@ -67,7 +67,47 @@ Clunk의 기본 정책은 `web` / `mobile` / `pc` 세 가지 내장 프로파일
 
 이 표는 `packages/core`의 `RULE_CATALOG` / `RULE_IDS` export와 같은 목록입니다.
 
+물리적 타당성 규칙은 자기 등록부(`PHYSICAL_RULE_CATALOG` / `PHYSICAL_RULE_IDS`)를 쓰고, 커스텀 프로파일의 `rules`는 두 등록부의 id를 모두 받습니다.
+
+| 규칙 id | 카테고리 | 기본 severity | 무엇을 재는가 |
+| --- | --- | --- | --- |
+| `GEO-GROUND-CONTACT` | geometry | WARNING | 장면 최저점이 y = 0 에서 몇 mm인가 |
+| `GEO-FLOATING-PART` | geometry | WARNING | 바닥에도 다른 부품에도 닿지 않는 부품과 가장 가까운 것까지의 간격(mm) |
+| `GEO-PART-INTERSECTION` | geometry | WARNING (겹침 ≤ 5 mm 는 INFO) | 삼각형이 실제로 교차하는 부품 쌍과 관통 깊이(mm)·애니메이션 위상 |
+| `GEO-THIN-SHELL` | geometry | WARNING (전부 doubleSided 면 INFO) | 두께 0.5 mm 미만인 판의 수와 단면 여부 |
+| `GEO-INVERTED-WINDING` | geometry | WARNING (전부 doubleSided 면 INFO) | 닫힌 메시의 부호 있는 부피 Σ a·(b×c)/6 가 음수인 것 = 면이 안쪽을 봄 |
+| `SCENE-ANIMATED-SCALE` | scene | INFO | scale 채널을 모는 클립과 노드 이름 |
+| `SCENE-UNNAMED-MESH` | scene | INFO | 이름 없는 메시 노드의 몫 |
+| `SCENE-LAYOUT-FILE` | scene | INFO | 이 파일이 독립 상품 여럿을 늘어놓은 배치도(팩·키트)인가 |
+| `FORMAT-EXTENSION-REQUIRED` | format | WARNING | `extensionsRequired` 에 선언된 확장 |
+| `GEO-ANALYSIS-LIMIT` | geometry | INFO | 상한에 걸려 못 잰 부분이 있다는 사실 |
+
+이 묶음은 어느 것도 ERROR/CRITICAL이 아닙니다. 같은 측정이 어떤 파일에서는 결함이고 다른 파일에서는 의도이기 때문입니다 — 땅 밑으로 내려간 나무 뿌리, 베어링을 지나는 축, 옷 안에 든 몸, 잎사귀 카드. 그래서 `hardBlockerCount` 와 `validateAsset` 의 `valid` 는 이 묶음 때문에 바뀌지 않습니다. 프로파일에서 `severity` 를 ERROR로 올리면 그때부터는 바뀝니다.
+
+**`GEO-INVERTED-WINDING` 이 보는 것과 보지 않는 것.** 닫힌 메시(붙인 꼭짓점 기준으로 모든 모서리가 정방향 한 번·역방향 한 번씩만 쓰인 것)만 잽니다. 열린 면(잎사귀 카드, 천, 벽 한 장)에서는 부호 있는 부피가 원점 위치에 따라 부호가 바뀌어 아무 뜻이 없으므로 아예 재지 않습니다. glTF 규격대로 노드 전역 변환의 행렬식이 음수인 거울 인스턴스는 감김이 뒤집혀 그려지므로 결함이 아니며, 판정은 그 부호를 되돌린 뒤에 합니다.
+
+**`SCENE-LAYOUT-FILE` 의 판별 기준.** 장면 뿌리에서 내려가 처음으로 형제가 둘 이상 나오는 층을 "단위"로 보고, 그 단위가 3개 이상이며 ①단위마다 자기 최저점이 바닥에서 ±5 mm 안에 있고 ②단위끼리 한 축 이상에서 50 mm 넘게 떨어져 있으면 배치도입니다. 배치도로 판정되면 부양은 같은 단위 안에서만 보고(상품끼리 안 닿는 것은 결함이 아닙니다), 관통의 "몸통" 기준 부피도 파일 전체가 아니라 단위 하나로 잽니다. 지붕·차양·경첩처럼 공중에 있는 부분이 있는 조립품은 ①에서 걸러집니다.
+
 **조정할 수 없는 규칙**: `INPUT-MISSING`, `FORMAT-PARSE`. 바이트를 아예 파싱하지 못했을 때 나오는 CRITICAL 판정이므로, 프로파일이 낮추거나 끌 수 없습니다. 프로파일에 적으면 "rule id is not recognized" 오류가 납니다.
+
+## 1-1. 무엇이 돌았고 무엇이 못 돌았는가 (레인)
+
+검사 결과(`AssetEvidence`)는 게이트를 두 갈래로 갈라 `coverage` 필드에 적습니다.
+
+| 레인 | 종류 | 언제 도는가 |
+| --- | --- | --- |
+| `bytes` · `structure` · `policy` | `file-only` | 바이트만 있으면 언제나 끝까지 돕니다(형식·구조·예산·재질·텍스처·물리). |
+| `import` · `runtime` · `device` | `engine-environment` | 엔진 설치본을 몰 러너가 있어야 돕니다. 없으면 `ENVIRONMENT_UNAVAILABLE`. |
+
+- `coverage.ranLanes` / `coverage.skippedLanes` — 어느 레인이 답을 냈고 어느 레인이 못 돌았는지.
+- `coverage.fileContract` — 파일만으로 도는 레인의 판정(`PASS` / `FAIL` / `NOT_RUN`).
+- `coverage.engineEnvironment` — 엔진 레인이 실제로 돌았는가(`RAN` / `NOT_RUN`).
+- `coverage.scoreBasis` — 상위 `valid` / `score` 가 무엇의 결과인가(`FILE_ONLY` / `FILE_AND_ENGINE` / `NOT_SCORED`).
+- `coverage.ranRules` — 이 응답이 실제로 평가한 규칙 id 전부. 여기 없는 id에 대해 이 응답은 아무 말도 하지 않은 것입니다.
+
+엔진 러너를 붙이지 않은 지금, 모든 내장 프로파일의 `import` · `runtime` 은 `ENVIRONMENT_UNAVAILABLE` 이고 `scoreBasis` 는 `FILE_ONLY` 입니다. 그래서 점수 100 은 "파일 계약을 통과했다"이지 "이 엔진에서 열린다"가 아닙니다.
+
+**HF 프로파일은 검사 기준이 아니라 납품 계약입니다.** `harvest-frontier-web-three` 는 HF 런타임이 요구하는 노드 이름 규약(`HF-ROOT-NODE`·`HF-ATTACHMENT-SOCKET`·`HF-COLLIDER`)과 `EXT_meshopt_compression`(`HF-MESHOPT`)을 ERROR로 요구하므로, 압축하지 않은 일반 GLB는 언제나 BLOCKED가 됩니다. 일반 검사에는 `web-three-mobile`(웹·모바일) 또는 `unity` / `godot-4` / `unreal` 을 쓰십시오.
 
 ## 2. CLI 사용법
 

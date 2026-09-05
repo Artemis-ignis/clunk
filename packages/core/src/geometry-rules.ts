@@ -29,8 +29,10 @@ export type PhysicalRuleId =
   | "GEO-FLOATING-PART"
   | "GEO-PART-INTERSECTION"
   | "GEO-THIN-SHELL"
+  | "GEO-INVERTED-WINDING"
   | "SCENE-ANIMATED-SCALE"
   | "SCENE-UNNAMED-MESH"
+  | "SCENE-LAYOUT-FILE"
   | "FORMAT-EXTENSION-REQUIRED"
   | "GEO-ANALYSIS-LIMIT";
 
@@ -52,8 +54,10 @@ export const PHYSICAL_RULE_CATALOG: readonly PhysicalRuleDescriptor[] = [
   { id: "GEO-FLOATING-PART", category: "geometry", defaultSeverity: "WARNING" },
   { id: "GEO-PART-INTERSECTION", category: "geometry", defaultSeverity: "WARNING" },
   { id: "GEO-THIN-SHELL", category: "geometry", defaultSeverity: "WARNING" },
+  { id: "GEO-INVERTED-WINDING", category: "geometry", defaultSeverity: "WARNING" },
   { id: "SCENE-ANIMATED-SCALE", category: "scene", defaultSeverity: "INFO" },
   { id: "SCENE-UNNAMED-MESH", category: "scene", defaultSeverity: "INFO" },
+  { id: "SCENE-LAYOUT-FILE", category: "scene", defaultSeverity: "INFO" },
   { id: "FORMAT-EXTENSION-REQUIRED", category: "format", defaultSeverity: "WARNING" },
   { id: "GEO-ANALYSIS-LIMIT", category: "geometry", defaultSeverity: "INFO" },
 ];
@@ -87,6 +91,31 @@ const MIN_REPORTED_DEPTH_MM = 0.1;
 export const THIN_SHELL_MM = 0.5;
 /** 애니메이션이 있을 때 겹침을 확인하는 최소 위상 수. */
 export const ANIMATION_PHASES = 8;
+
+/*
+ * 배치도(팩/키트) 판별.
+ *
+ * 한 파일에 독립 상품 여럿을 일부러 떨어뜨려 늘어놓은 파일이 있다 —
+ * kit-mine-entrance(16종), kit-village-square(15종), grove-tree-pack-vol1(6종),
+ * cozy-farm-set-vol1(3종). 그런 파일에서 "이 부품은 아무것과도 안 닿는다"는
+ * 결함이 아니라 배치도의 정의다. 반대로 그 파일들은 전체 바운딩 상자가 커서
+ * 부품 하나하나가 BODY_VOLUME_SHARE(4%)에 못 미쳐 상품 *안*의 관통이 통째로
+ * 묻힌다 — 2026-09-05 실측: kit-mine-entrance 는 지적 0건인데, 그 안에 든
+ * mine-cart 를 따로 검사하면 GEO-PART-INTERSECTION 2건이 나온다.
+ *
+ * 그래서 배치도로 판정되면 (1) 부양은 같은 상품 안에서만 보고, (2) 관통의
+ * "몸통" 기준을 파일 전체가 아니라 상품 하나의 부피로 잰다.
+ */
+/** 배치도로 부르려면 독립 단위가 최소 이만큼 있어야 한다. */
+export const LAYOUT_MIN_UNITS = 3;
+/**
+ * 단위끼리 이만큼은 떨어져 있어야 배치도다.
+ *
+ * 50 mm. CONTACT_TOLERANCE_MM(5 mm)의 10배로, 조립품의 부품 간격과 배치도의
+ * 상품 간격을 가른다. 실측: 위 네 팩의 이웃 간격은 최소 152 mm(cozy-farm-set-vol1)
+ * 이고, 조립품 쪽에서 이 문턱을 넘는 것은 이미 GEO-FLOATING-PART 로 잡힌다.
+ */
+export const LAYOUT_MIN_SEPARATION_MM = 50;
 
 /** 이 이상 큰 파일에서는 겹침·부양 계산을 건너뛰고 그 사실을 INFO 로 남긴다. */
 const TRIANGLE_ANALYSIS_LIMIT = 400_000;
@@ -130,13 +159,48 @@ export interface PhysicalIntersectionMeasurement {
   bNodeIndex: number;
   depthMm: number;
   trianglePairs: number;
-  /** 작은 쪽이 큰 쪽 상자 안에 통째로 들어가 화면에서 보이지 않는가. */
+  /** 작은 쪽이 큰 쪽 안에 통째로 묻혀 화면에서 보이지 않는가. */
   buried: boolean;
+  /**
+   * 감싸는 쪽이 자기 상자를 얼마나 채우고 있는가(닫힌 메시의 |부피| / 상자 부피).
+   *
+   * 상자만 보면 속 빈 등롱·유리 진열장·재질별로 흩어진 덩어리가 작은 부품을 "묻었다"고
+   * 나온다. 닫히지 않아 부피를 잴 수 없으면 null 이고, 그때는 상자 판정을 그대로 쓴다.
+   */
+  bodyFillRatio: number | null;
   /** 정지 자세에서도 닿는가. false 면 도는 동안에만 닿는다. */
   atRest: boolean;
   /** 가장 깊어지는 애니메이션 위상(0..1). 정지 자세가 가장 깊으면 null. */
   atPhase: number | null;
   clipName: string | null;
+}
+
+export interface PhysicalInvertedMeshMeasurement {
+  name: string;
+  nodeIndex: number;
+  meshIndex: number;
+  /** 로컬 좌표에서 잰 부호 있는 부피(m³). 음수면 면이 안쪽을 본다. */
+  signedVolumeM3: number;
+  triangleCount: number;
+  /** 이 메시의 모든 프리미티브가 doubleSided 인가. 그러면 화면에서는 티가 안 난다. */
+  doubleSided: boolean;
+}
+
+export interface PhysicalLayoutUnit {
+  name: string;
+  nodeIndex: number;
+  partCount: number;
+  min: readonly [number, number, number];
+  max: readonly [number, number, number];
+}
+
+export interface PhysicalLayout {
+  /** 이 파일이 여러 독립 상품을 늘어놓은 배치도인가. */
+  isLayout: boolean;
+  reason: string;
+  units: readonly PhysicalLayoutUnit[];
+  /** 이웃한 단위 사이의 가장 좁은 간격(mm). 단위가 2개 미만이면 null. */
+  minSeparationMm: number | null;
 }
 
 export interface PhysicalMetrics {
@@ -156,6 +220,13 @@ export interface PhysicalMetrics {
   thinShellPrimitiveCount: number;
   thinShellSingleSidedCount: number;
   thinShellNames: readonly string[];
+  /** 닫힌 메시 가운데 부호 있는 부피가 음수인 것. 열린 메시는 여기 들어오지 않는다. */
+  invertedMeshes: readonly PhysicalInvertedMeshMeasurement[];
+  /** 부호 있는 부피를 실제로 잰(= 닫혀 있어 잴 수 있었던) 메시 수. */
+  closedMeshCount: number;
+  /** 열려 있어 부호 있는 부피를 재지 않은 메시 수. */
+  openMeshCount: number;
+  layout: PhysicalLayout;
   unnamedMeshNodeCount: number;
   meshNodeCount: number;
   animatedScaleChannelCount: number;
@@ -192,6 +263,18 @@ interface PhysicalPart {
   instanceMatrix: Matrix4;
   /** 이 부품에 걸린 월드 배율 가운데 가장 큰 축. 로컬 상자를 월드 mm 로 옮길 때 쓴다. */
   worldScaleMax: number;
+  /**
+   * 월드 변환 3×3 행렬식의 부호(+1 / −1).
+   *
+   * glTF 규격은 "노드의 전역 변환 행렬식이 음수이면 삼각형의 감김 순서를 뒤집어
+   * 그린다"고 못박는다. 그래서 거울로 뒤집은 인스턴스는 월드 좌표에서 잰 부호 있는
+   * 부피가 음수여도 화면에서는 바르게 보인다 — 뒤집힘 판정은 이 부호로 되돌린 뒤에 한다.
+   */
+  worldDeterminantSign: number;
+  /** 이 부품이 속한 배치도 단위의 번호. 배치도가 아니면 −1. */
+  layoutUnit: number;
+  /** 이 부품이 가리키는 mesh 의 번호. 없으면 −1. */
+  meshIndex: number;
 }
 
 type Matrix4 = Float64Array;
@@ -229,6 +312,10 @@ export function inspectPhysicalPlausibility(source: PhysicalInspectionSource): P
     thinShellPrimitiveCount: 0,
     thinShellSingleSidedCount: 0,
     thinShellNames: [],
+    invertedMeshes: [],
+    closedMeshCount: 0,
+    openMeshCount: 0,
+    layout: { isLayout: false, reason: "배치도인지 아직 보지 않았습니다.", units: [], minSeparationMm: null },
     unnamedMeshNodeCount: meshNodes.unnamed,
     meshNodeCount: meshNodes.total,
     animatedScaleChannelCount: animation.scaleChannels.length,
@@ -342,6 +429,39 @@ export function inspectPhysicalPlausibility(source: PhysicalInspectionSource): P
     );
   }
 
+  /*
+   * 규칙 8 — 안팎이 뒤집힌 지오메트리. 삼각형 수만큼의 곱셈이라 상한 위에서도 돈다.
+   *
+   * 등급. 다른 물리 규칙과 같은 원칙(hard blocker 는 없다)을 따르되, 단면 재질이면
+   * WARNING 이 최소다 — 뒷면 컬링을 켜는 엔진에서 그 부품이 사라지거나 뒤집혀 보이고,
+   * 뒷면을 그리는 우리 히어로 렌더에서는 눈으로 절대 찾을 수 없기 때문이다.
+   */
+  const winding = analyseWinding(source, parts);
+  metrics.invertedMeshes = winding.inverted;
+  metrics.closedMeshCount = winding.closed;
+  metrics.openMeshCount = winding.open;
+  if (winding.inverted.length > 0) {
+    const singleSided = winding.inverted.filter((mesh) => !mesh.doubleSided);
+    const names = winding.inverted.slice(0, 6).map((mesh) => mesh.name);
+    findings.push(
+      makeFinding(
+        "GEO-INVERTED-WINDING",
+        singleSided.length > 0 ? "WARNING" : "INFO",
+        `/nodes/${winding.inverted[0].nodeIndex}`,
+        "면이 안쪽을 보는 메시가 있음",
+        `닫힌 메시 ${winding.closed}개 가운데 ${winding.inverted.length}개의 부호 있는 부피(Σ a·(b×c)/6)가 음수입니다 — 면이 전부 안쪽을 봅니다(${names.join(", ")}${winding.inverted.length > 6 ? " 외" : ""}). 가장 큰 것이 ${winding.inverted[0].name}, ${winding.inverted[0].signedVolumeM3} m³. ${
+          singleSided.length > 0
+            ? `그 가운데 ${singleSided.length}개는 단면 재질이라 뒷면 컬링을 켜는 엔진에서 사라지거나 뒤집혀 보입니다. 뒷면을 그리는 렌더에서는 정상으로 보이므로 그림으로는 찾을 수 없습니다.`
+            : "전부 doubleSided 재질이라 화면에서는 티가 나지 않습니다 — 뒷면까지 그리는 값을 치르고 있다는 뜻이라 정보로 냅니다."
+        }`,
+        `${winding.inverted.length}/${winding.closed} 메시`,
+        0,
+        false,
+        "원본에서 면 방향을 뒤집어(flip normals) 다시 내보내거나, 의도한 것이면 재질을 doubleSided 로 두십시오.",
+      ),
+    );
+  }
+
   if (totalTriangles > TRIANGLE_ANALYSIS_LIMIT) {
     metrics.skippedReason = `삼각형 ${totalTriangles.toLocaleString()}개는 이 검사기의 상한 ${TRIANGLE_ANALYSIS_LIMIT.toLocaleString()}개를 넘습니다.`;
     findings.push(
@@ -385,9 +505,31 @@ export function inspectPhysicalPlausibility(source: PhysicalInspectionSource): P
     );
   }
 
+  /*
+   * 배치도 판별. 부양·관통을 재기 전에 해야 한다 — 배치도면 "같은 상품 안"이
+   * 판정의 단위가 되고, 관통의 몸통 기준도 파일 전체가 아니라 상품 하나로 바뀐다.
+   */
+  const layout = detectLayout(source, parts, sceneMinY > 0 ? sceneMinY : 0);
+  metrics.layout = layout;
+  if (layout.isLayout) {
+    findings.push(
+      makeFinding(
+        "SCENE-LAYOUT-FILE",
+        "INFO",
+        "/scenes",
+        "여러 상품을 늘어놓은 배치도로 봅니다",
+        `${layout.reason} 그래서 부양은 같은 단위(${layout.units.map((unit) => unit.name).slice(0, 6).join(", ")}${layout.units.length > 6 ? " 외" : ""}) 안에서만 보고, 관통의 "몸통" 기준도 파일 전체가 아니라 단위 하나의 부피로 잽니다. 단위끼리 안 닿는 것은 결함이 아닙니다.`,
+        `${layout.units.length} units`,
+        `≥ ${LAYOUT_MIN_UNITS} units`,
+        false,
+        "한 상품만 검사하려면 그 상품의 파일을 따로 넣으십시오.",
+      ),
+    );
+  }
+
   const nodeNames = nodes.map((node: GltfDocument) => (typeof node?.name === "string" ? node.name : ""));
   const groups = parts.map((part) => groupOf(part, nodeNames));
-  const analysis = analyseContacts(source, parts, groups, animation.clips, sceneMinY);
+  const analysis = analyseContacts(source, parts, groups, animation.clips, sceneMinY, layout.isLayout);
   metrics.truncated = analysis.truncated;
   metrics.judgedPartCount = analysis.judgedPartCount;
   metrics.excludedPartCount = analysis.excludedPartCount;
@@ -411,7 +553,7 @@ export function inspectPhysicalPlausibility(source: PhysicalInspectionSource): P
         hit.buried ? "부품이 다른 부품 안에 묻혔음" : seam ? "부품이 얕게 맞물림" : "부품이 서로를 뚫고 지나감",
         `${hit.aName} 과(와) ${hit.bName} 의 삼각형이 실제로 교차합니다 — 교차 삼각형 쌍 ${hit.trianglePairs}개, 겹친 깊이 ${hit.depthMm} mm.${phase} ${
           hit.buried
-            ? `${hit.aName} 은(는) ${hit.bName} 의 상자 안에 통째로 들어가 있어, 사는 사람이 삼각형 값을 치르고 화면에서 아무것도 못 볼 수 있습니다.`
+            ? `${hit.aName} 은(는) ${hit.bName} 안에 통째로 들어가 있고 ${hit.bName} 은(는) 자기 상자의 ${hit.bodyFillRatio === null ? "알 수 없는" : `${Math.round(hit.bodyFillRatio * 100)}%`}를 채운 덩어리라, 사는 사람이 삼각형 값을 치르고 화면에서 아무것도 못 볼 수 있습니다.`
             : seam
               ? `${SEAM_DEPTH_MM} mm 이하는 축이 베어링을 지나는 것 같은 이음매일 수 있어 정보로 냅니다.`
               : "축이 베어링을 지나는 이음매인지, 컨베이어가 밀폐 탱크를 지나는 결함인지는 렌더를 보고 판단하십시오."
@@ -692,6 +834,9 @@ function collectWorldParts(source: PhysicalInspectionSource, animation: Animatio
             nodeChain: nextChain,
             instanceMatrix: instance,
             worldScaleMax: matrixMaxScale(placement),
+            worldDeterminantSign: matrixDeterminantSign(placement),
+            layoutUnit: -1,
+            meshIndex: Number(node.mesh),
           });
         }
       }
@@ -801,6 +946,260 @@ function collectThinShells(source: PhysicalInspectionSource, parts: readonly Phy
   return { count, singleSided, names };
 }
 
+/* ------------------------------------------------------------------ inverted winding */
+
+/**
+ * 안팎이 뒤집힌 지오메트리.
+ *
+ * 왜 부호 있는 부피인가. 닫힌 메시의 부피는 Σ a·(b×c)/6 으로 나오고, 면이 바깥을 보면
+ * 양수, 안쪽을 보면 음수다. 삼각형 수만큼의 곱셈이면 끝나고, 법선이나 재질을 믿지 않는다.
+ *
+ * 왜 닫힌 메시만 보는가. 열린 면(잎사귀 카드, 천, 벽 한 장, 지붕)에서는 이 합이
+ * 원점을 어디 두느냐에 따라 부호가 바뀌므로 아무 뜻이 없다. 그래서 "모든 모서리가
+ * 정확히 두 삼각형에 한 번씩 반대 방향으로 쓰였는가"를 먼저 보고, 아니면 재지 않는다.
+ * 실측(2026-09-05, 마켓 GLB 80개): 이 걸름망이 없으면 열린 메시 다수가 부호만 보고
+ * 뒤집혔다고 나온다.
+ *
+ * 꼭짓점 붙이기. 상자를 면마다 다른 법선으로 내보내면 꼭짓점이 24개가 되어 색인만으로는
+ * 모든 모서리가 한 번씩만 쓰인 것으로 보인다. 좌표를 1 µm 로 반올림해 같은 자리의
+ * 꼭짓점을 하나로 붙인 뒤에 모서리를 센다. 프리미티브가 여럿인 메시(재질별로 쪼갠 상자)도
+ * 이 붙이기 덕에 한 덩어리로 닫힌다.
+ *
+ * doubleSided. 뒷면도 그리는 재질이면 뒤집혀도 화면에서 사라지지 않는다. 결함이 아니라
+ * 삼각형 값을 두 배로 치르는 선택이므로 INFO 로 낸다. 단면 재질이면 엔진이 뒷면 컬링을
+ * 켜는 순간 사라지므로 WARNING 이다.
+ */
+const WELD_QUANTUM = 1e-6;
+/** 부호가 뜻을 갖기에 너무 작은 부피. 상자 부피의 이 비율 아래면 판정하지 않는다. */
+const MIN_VOLUME_SHARE = 1e-4;
+
+function analyseWinding(source: PhysicalInspectionSource, parts: readonly PhysicalPart[]): {
+  inverted: PhysicalInvertedMeshMeasurement[];
+  closed: number;
+  open: number;
+} {
+  const json = source.json;
+  const meshes: GltfDocument[] = Array.isArray(json.meshes) ? json.meshes : [];
+  const materials: GltfDocument[] = Array.isArray(json.materials) ? json.materials : [];
+  const inverted: PhysicalInvertedMeshMeasurement[] = [];
+  const seen = new Set<number>();
+  let closed = 0;
+  let open = 0;
+  for (const part of parts) {
+    const key = part.meshIndex >= 0 ? part.meshIndex : -1 - part.nodeIndex;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const shape = signedVolumeOf(part);
+    if (!shape.closed) {
+      open += 1;
+      continue;
+    }
+    closed += 1;
+    // 월드에서 잰 부호를 거울 변환으로 되돌려 메시 데이터 자체의 방향을 본다.
+    const dataVolume = shape.volume * part.worldDeterminantSign;
+    const boxVolume = volumeOf(part);
+    if (boxVolume <= 0 || Math.abs(dataVolume) < boxVolume * MIN_VOLUME_SHARE) continue;
+    if (dataVolume >= 0) continue;
+    const mesh = part.meshIndex >= 0 ? meshes[part.meshIndex] : undefined;
+    const primitives: GltfDocument[] = Array.isArray(mesh?.primitives) ? mesh.primitives : [];
+    const doubleSided = primitives.length > 0 && primitives.every((primitive) => {
+      const material = primitive.material === undefined ? undefined : materials[Number(primitive.material)];
+      return material?.doubleSided === true;
+    });
+    inverted.push({
+      name: part.name,
+      nodeIndex: part.nodeIndex,
+      meshIndex: part.meshIndex,
+      // 월드 부피를 그대로 싣는다. 거울 인스턴스에서는 데이터 부피와 부호가 다를 수 있다.
+      signedVolumeM3: Math.round(dataVolume * 1e9) / 1e9,
+      triangleCount: part.triangleCount,
+      doubleSided,
+    });
+  }
+  inverted.sort((a, b) => a.signedVolumeM3 - b.signedVolumeM3);
+  return { inverted, closed, open };
+}
+
+/**
+ * 닫혀 있는지 보고, 닫혀 있으면 부호 있는 부피를 낸다.
+ *
+ * 닫힘 = 붙인 꼭짓점 기준으로 모든 모서리가 정방향 한 번, 역방향 한 번씩만 쓰였다.
+ * 그 조건이면 방향이 일관된 폐곡면이고, 부호 있는 부피가 뜻을 갖는다.
+ */
+function signedVolumeOf(part: PhysicalPart): { closed: boolean; volume: number } {
+  const weld = new Map<string, number>();
+  const ids = new Int32Array(part.positions.length / 3);
+  for (let vertex = 0; vertex < ids.length; vertex += 1) {
+    const x = Math.round(part.positions[vertex * 3] / WELD_QUANTUM);
+    const y = Math.round(part.positions[vertex * 3 + 1] / WELD_QUANTUM);
+    const z = Math.round(part.positions[vertex * 3 + 2] / WELD_QUANTUM);
+    const key = `${x},${y},${z}`;
+    let id = weld.get(key);
+    if (id === undefined) {
+      id = weld.size;
+      weld.set(key, id);
+    }
+    ids[vertex] = id;
+  }
+  const edges = new Map<string, number>();
+  let volume = 0;
+  for (let triangle = 0; triangle < part.indices.length; triangle += 3) {
+    const ia = ids[part.indices[triangle]];
+    const ib = ids[part.indices[triangle + 1]];
+    const ic = ids[part.indices[triangle + 2]];
+    // 붙이고 나서 같은 자리로 모인 삼각형은 넓이가 0 이라 닫힘에도 부피에도 기여하지 않는다.
+    if (ia === ib || ib === ic || ia === ic) continue;
+    for (const [from, to] of [[ia, ib], [ib, ic], [ic, ia]] as const) {
+      const forward = from < to;
+      const key = forward ? `${from}:${to}` : `${to}:${from}`;
+      const delta = forward ? 1 : -1;
+      const seen = edges.get(key);
+      if (seen === undefined) edges.set(key, delta);
+      else if (seen + delta !== 0) return { closed: false, volume: 0 };
+      else edges.set(key, 0);
+    }
+    const ax = part.positions[part.indices[triangle] * 3];
+    const ay = part.positions[part.indices[triangle] * 3 + 1];
+    const az = part.positions[part.indices[triangle] * 3 + 2];
+    const bx = part.positions[part.indices[triangle + 1] * 3];
+    const by = part.positions[part.indices[triangle + 1] * 3 + 1];
+    const bz = part.positions[part.indices[triangle + 1] * 3 + 2];
+    const cx = part.positions[part.indices[triangle + 2] * 3];
+    const cy = part.positions[part.indices[triangle + 2] * 3 + 1];
+    const cz = part.positions[part.indices[triangle + 2] * 3 + 2];
+    volume += (ax * (by * cz - bz * cy) + ay * (bz * cx - bx * cz) + az * (bx * cy - by * cx)) / 6;
+  }
+  for (const balance of edges.values()) if (balance !== 0) return { closed: false, volume: 0 };
+  if (!edges.size) return { closed: false, volume: 0 };
+  return { closed: true, volume };
+}
+
+/* ------------------------------------------------------------------ layout files */
+
+/**
+ * 이 파일이 독립 상품 여럿을 늘어놓은 배치도인가.
+ *
+ * 판별 기준(전부 만족해야 한다):
+ *   1. 장면 뿌리에서 내려가 처음으로 형제가 둘 이상 나오는 층을 "단위"로 본다.
+ *      팩 파일은 뿌리 하나 아래에 상품별 노드가 나란히 달려 있다.
+ *   2. 단위가 LAYOUT_MIN_UNITS(3)개 이상이어야 한다.
+ *   3. 단위마다 자기 최저점이 바닥에서 GROUND_TOLERANCE_MM 안에 있어야 한다
+ *      — 배치도는 상품을 전부 바닥에 세워 늘어놓는다. 조립품은 지붕·차양·경첩처럼
+ *      공중에 있는 부분이 반드시 있으므로 여기서 걸린다.
+ *   4. 단위끼리 한 축 이상에서 LAYOUT_MIN_SEPARATION_MM(50 mm)보다 떨어져 있어야 한다
+ *      — 조립품의 부품은 서로 닿거나 겹친다.
+ */
+function detectLayout(
+  source: PhysicalInspectionSource,
+  parts: PhysicalPart[],
+  floorY: number,
+): PhysicalLayout {
+  const json = source.json;
+  const nodes: GltfDocument[] = Array.isArray(json.nodes) ? json.nodes : [];
+  const scenes: GltfDocument[] = Array.isArray(json.scenes) ? json.scenes : [];
+  let candidates: number[] = [];
+  for (const scene of scenes) for (const node of scene.nodes ?? []) candidates.push(Number(node));
+  if (!candidates.length && nodes.length) candidates = [0];
+  // 뿌리가 하나뿐이고 그 자신이 메시가 아니면 한 층 내려간다. 팩 파일은 언제나 그 모양이다.
+  let guard = 0;
+  while (candidates.length === 1 && guard < 16) {
+    const only = nodes[candidates[0]];
+    if (!only || only.mesh !== undefined || !Array.isArray(only.children) || !only.children.length) break;
+    candidates = only.children.map((child: unknown) => Number(child));
+    guard += 1;
+  }
+  const none: PhysicalLayout = { isLayout: false, reason: "", units: [], minSeparationMm: null };
+  if (candidates.length < LAYOUT_MIN_UNITS) {
+    return { ...none, reason: `장면 뿌리 아래 독립 단위가 ${candidates.length}개입니다(배치도로 보려면 ${LAYOUT_MIN_UNITS}개 이상).` };
+  }
+  const unitOf = new Map<number, number>();
+  candidates.forEach((node, index) => unitOf.set(node, index));
+  const bounds = candidates.map(() => ({
+    min: [Infinity, Infinity, Infinity] as [number, number, number],
+    max: [-Infinity, -Infinity, -Infinity] as [number, number, number],
+    parts: 0,
+  }));
+  const assigned = new Int32Array(parts.length).fill(-1);
+  parts.forEach((part, index) => {
+    for (const node of part.nodeChain) {
+      const unit = unitOf.get(node);
+      if (unit === undefined) continue;
+      assigned[index] = unit;
+      const box = bounds[unit];
+      box.parts += 1;
+      for (let axis = 0; axis < 3; axis += 1) {
+        box.min[axis] = Math.min(box.min[axis], part.min[axis]);
+        box.max[axis] = Math.max(box.max[axis], part.max[axis]);
+      }
+      return;
+    }
+  });
+  const populated = bounds.map((box, index) => ({ box, index })).filter((entry) => entry.box.parts > 0);
+  if (populated.length < LAYOUT_MIN_UNITS) {
+    return { ...none, reason: `메시를 가진 독립 단위가 ${populated.length}개입니다(배치도로 보려면 ${LAYOUT_MIN_UNITS}개 이상).` };
+  }
+  const groundTolerance = GROUND_TOLERANCE_MM / 1000;
+  for (const entry of populated) {
+    if (entry.box.min[1] - floorY > groundTolerance) {
+      const name = nodeLabel(nodes, candidates[entry.index]);
+      return {
+        ...none,
+        reason: `단위 ${name} 의 최저점이 바닥에서 ${round1((entry.box.min[1] - floorY) * 1000)} mm 떠 있습니다 — 배치도가 아니라 조립품으로 봅니다.`,
+      };
+    }
+  }
+  const separation = LAYOUT_MIN_SEPARATION_MM / 1000;
+  let minSeparation = Infinity;
+  for (let a = 0; a < populated.length; a += 1) {
+    for (let b = a + 1; b < populated.length; b += 1) {
+      const gap = Math.max(...[0, 1, 2].map((axis) =>
+        Math.max(populated[a].box.min[axis] - populated[b].box.max[axis], populated[b].box.min[axis] - populated[a].box.max[axis]),
+      ));
+      minSeparation = Math.min(minSeparation, gap);
+      if (gap <= separation) {
+        return {
+          ...none,
+          reason: `단위 ${nodeLabel(nodes, candidates[populated[a].index])} 과(와) ${nodeLabel(nodes, candidates[populated[b].index])} 의 간격이 ${round1(gap * 1000)} mm 입니다 — 배치도가 아니라 조립품으로 봅니다.`,
+        };
+      }
+    }
+  }
+  parts.forEach((part, index) => {
+    part.layoutUnit = assigned[index];
+  });
+  return {
+    isLayout: true,
+    reason: `장면 뿌리 아래 독립 단위 ${populated.length}개가 전부 바닥에 서 있고 서로 ${round1(minSeparation * 1000)} mm 이상 떨어져 있습니다.`,
+    units: populated.map((entry) => ({
+      name: nodeLabel(nodes, candidates[entry.index]),
+      nodeIndex: candidates[entry.index],
+      partCount: entry.box.parts,
+      min: [...entry.box.min] as [number, number, number],
+      max: [...entry.box.max] as [number, number, number],
+    })),
+    minSeparationMm: round1(minSeparation * 1000),
+  };
+}
+
+function nodeLabel(nodes: readonly GltfDocument[], index: number): string {
+  const name = nodes[index]?.name;
+  return typeof name === "string" && name.trim() ? name.trim() : `node ${index}`;
+}
+
+/**
+ * 3×3 부분 행렬식의 부호.
+ *
+ * 음수는 거울 변환이다. glTF 규격이 그때 감김 순서를 뒤집어 그리라고 하므로,
+ * 뒤집힘 판정은 월드에서 잰 부호를 이 값으로 되돌려서 한다.
+ */
+function matrixDeterminantSign(matrix: Matrix4): number {
+  const determinant =
+    matrix[0] * (matrix[5] * matrix[10] - matrix[6] * matrix[9]) -
+    matrix[4] * (matrix[1] * matrix[10] - matrix[2] * matrix[9]) +
+    matrix[8] * (matrix[1] * matrix[6] - matrix[2] * matrix[5]);
+  return determinant < 0 ? -1 : 1;
+}
+
 /** 열 벡터 세 개의 길이 가운데 가장 큰 것. 로컬 두께를 월드 두께로 옮기는 상한이다. */
 function matrixMaxScale(matrix: Matrix4): number {
   const sx = Math.hypot(matrix[0], matrix[1], matrix[2]);
@@ -841,6 +1240,22 @@ const BATCH_VOLUME_SHARE = 0.25;
 const BATCH_CONTAINS_PARTS = 2;
 /** 관통으로 셀 상대의 최소 크기. 모델 전체 부피의 이만큼을 차지하는 것이 "몸통"이다. */
 const BODY_VOLUME_SHARE = 0.04;
+/**
+ * "묻혔다"고 말하려면 감싸는 쪽이 자기 상자를 이만큼은 채우고 있어야 한다.
+ *
+ * 상자(AABB)만 보고 판정하면 속 빈 것이 전부 무언가를 묻은 것으로 나온다 — 부두 키트
+ * 보고서 6절의 등롱(살 8개 + 유리 8장) 안에 든 회전등이 그렇게 걸렸다.
+ *
+ * 실측(2026-09-05, 마켓 GLB 80개). 예전에 "묻혔다"로 나온 10건의 감싸는 쪽 채움률:
+ * post_timbers 0.171 · barnbatch0 0.003 · farmhousebatch2 0.004 · siloHardware 0.079.
+ * 전부 기둥 두 개나 재질별로 흩어진 덩어리처럼 속이 빈 것이고, 그 안의 창유리·경첩 핀은
+ * 화면에서 잘 보인다. 같은 마켓에서 감싸는 쪽으로 나온 다른 부품도 barnRoof 0.132 ·
+ * wall_sheathing 0.096 · wall_lap_siding 0.059 · gable_boards 0.024 ·
+ * corner_and_frieze_boards 0.016 으로 전부 0.2 아래였다. 반대로 정말 묻는 덩어리
+ * (픽스처 penetrating-rod 의 sealedTank)는 1.000 이다. 0.5 는 그 둘 사이에서
+ * "속이 찬 덩어리"만 남기는 자리다.
+ */
+const BURIED_FILL_RATIO = 0.5;
 /** 한 파일에서 낼 관통 지적의 최대 수. 넘으면 깊은 것부터 싣고 나머지는 수만 말한다. */
 const MAX_INTERSECTION_FINDINGS = 12;
 /** 덩어리 이름을 알아보는 접미사. 같은 덩어리 안의 부품끼리는 조립이므로 세지 않는다. */
@@ -868,23 +1283,50 @@ function analyseContacts(
   groups: readonly (string | null)[],
   clips: readonly AnimationClip[],
   sceneMinY: number,
+  isLayout = false,
 ): ContactAnalysis {
   const floorY = sceneMinY > 0 ? sceneMinY : 0;
   const contactEps = CONTACT_TOLERANCE_MM / 1000;
   const grid = buildTriangleGrid(parts);
   const budget = { tests: 0, truncated: false };
 
-  const whole = (() => {
+  const boxVolumeOf = (indices: readonly number[]): number => {
     const min: [number, number, number] = [Infinity, Infinity, Infinity];
     const max: [number, number, number] = [-Infinity, -Infinity, -Infinity];
-    for (const part of parts) {
+    for (const index of indices) {
       for (let axis = 0; axis < 3; axis += 1) {
-        min[axis] = Math.min(min[axis], part.min[axis]);
-        max[axis] = Math.max(max[axis], part.max[axis]);
+        min[axis] = Math.min(min[axis], parts[index].min[axis]);
+        max[axis] = Math.max(max[axis], parts[index].max[axis]);
       }
     }
     return Math.max(1e-12, (max[0] - min[0]) * (max[1] - min[1]) * (max[2] - min[2]));
-  })();
+  };
+
+  const allIndices = parts.map((_, index) => index);
+  /*
+   * "몸통"을 재는 기준 부피.
+   *
+   * 배치도에서는 상품 하나의 부피로 잰다. 파일 전체로 재면 상품 16종을 늘어놓은
+   * 키트에서 어느 부품도 전체의 4%(BODY_VOLUME_SHARE)에 못 미쳐 관통이 통째로
+   * 묻힌다 — 2026-09-05 실측: kit-mine-entrance 지적 0건, 그 안의 mine-cart 를
+   * 따로 검사하면 GEO-PART-INTERSECTION 2건.
+   */
+  const unitVolume = new Map<number, number>();
+  if (isLayout) {
+    const byUnit = new Map<number, number[]>();
+    parts.forEach((part, index) => {
+      if (part.layoutUnit < 0) return;
+      const bucket = byUnit.get(part.layoutUnit);
+      if (bucket) bucket.push(index);
+      else byUnit.set(part.layoutUnit, [index]);
+    });
+    for (const [unit, indices] of byUnit) unitVolume.set(unit, boxVolumeOf(indices));
+  }
+  const wholeAll = boxVolumeOf(allIndices);
+  const wholeFor = (index: number): number =>
+    (isLayout ? unitVolume.get(parts[index].layoutUnit) : undefined) ?? wholeAll;
+  const sameUnit = (a: number, b: number): boolean =>
+    !isLayout || (parts[a].layoutUnit >= 0 && parts[a].layoutUnit === parts[b].layoutUnit);
 
   /* 판정 대상. 닿았는지는 걸러낸 조각까지 넣고 보지만, 지적은 이 집합에 대해서만 낸다 —
      재질별로 쪼개진 몸통이나 충돌 프록시도 부품이 기대어 설 수 있는 실체이고, 그것을
@@ -894,7 +1336,7 @@ function analyseContacts(
     const volume = volumeOf(part);
     if (volume <= 1e-9) return;
     if (NOT_A_PART.test(part.name)) return;
-    if (volume >= whole * BATCH_VOLUME_SHARE) {
+    if (volume >= wholeFor(index) * BATCH_VOLUME_SHARE) {
       let swallowed = 0;
       for (let other = 0; other < parts.length && swallowed < BATCH_CONTAINS_PARTS; other += 1) {
         if (other === index || volumeOf(parts[other]) <= 1e-9) continue;
@@ -904,6 +1346,18 @@ function analyseContacts(
     }
     judged.add(index);
   });
+
+  /* 감싸는 쪽이 속이 찬 덩어리인지. 관통 쌍에 나온 부품만 계산하고 답을 기억해 둔다. */
+  const fillCache = new Map<number, number | null>();
+  const fillRatioOf = (index: number): number | null => {
+    const cached = fillCache.get(index);
+    if (cached !== undefined) return cached;
+    const box = volumeOf(parts[index]);
+    const shape = box > 0 ? signedVolumeOf(parts[index]) : { closed: false, volume: 0 };
+    const value = shape.closed ? Math.abs(shape.volume) / box : null;
+    fillCache.set(index, value);
+    return value;
+  };
 
   const pairs = new Map<number, PhysicalIntersectionMeasurement & { rank: number }>();
   const touching = new Set<number>();
@@ -917,8 +1371,12 @@ function analyseContacts(
     if (!judged.has(a) || !judged.has(b)) return false;
     if (relatedParts(parts[a], parts[b])) return false;
     if (groups[a] && groups[b] && groups[a] === groups[b]) return false;
+    // 배치도에서 서로 다른 상품끼리는 조립 관계가 아니다. 겹치면 배치 간격 문제이고,
+    // 그 경우는 애초에 배치도로 판정되지 않는다(LAYOUT_MIN_SEPARATION_MM).
+    if (!sameUnit(a, b)) return false;
     // 몸통을 뚫은 것만 화면에서 잘못돼 보인다. 볼트가 브래킷을 지나는 것은 조립이다.
-    return Math.max(volumeOf(parts[a]), volumeOf(parts[b])) / whole >= BODY_VOLUME_SHARE;
+    const reference = Math.min(wholeFor(a), wholeFor(b));
+    return Math.max(volumeOf(parts[a]), volumeOf(parts[b])) / reference >= BODY_VOLUME_SHARE;
   };
 
   intersectAll(parts, grid, budget, reportablePair, (a, b, depthMm, trianglePairs) => {
@@ -927,7 +1385,10 @@ function analyseContacts(
     const [bodyIndex, throughIndex] = volumeA >= volumeB ? [a, b] : [b, a];
     const body = parts[bodyIndex];
     const through = parts[throughIndex];
-    const buried = containedIn(through, body);
+    const bodyFillRatio = fillRatioOf(bodyIndex);
+    // 상자 안에 들었다는 것만으로는 안 보인다고 말할 수 없다. 감싸는 쪽이 속이 차 있어야 한다.
+    const buried = containedIn(through, body)
+      && (bodyFillRatio === null || bodyFillRatio >= BURIED_FILL_RATIO);
     const key = Math.min(a, b) * partCount + Math.max(a, b);
     const existing = pairs.get(key);
     if (existing && existing.depthMm >= depthMm) return;
@@ -939,6 +1400,7 @@ function analyseContacts(
       depthMm,
       trianglePairs,
       buried,
+      bodyFillRatio: bodyFillRatio === null ? null : Math.round(bodyFillRatio * 1000) / 1000,
       atRest: true,
       atPhase: null,
       clipName: null,
@@ -951,7 +1413,7 @@ function analyseContacts(
     if (touching.has(index)) continue;
     /* 한 번만 돈다. 답이 contactEps 보다 크게 나왔다는 것은 중간에 빠져나오지 않고
        끝까지 봤다는 뜻이므로, 그 값이 곧 참값이다. */
-    const probe = nearestOther(parts, grid, index, contactEps, budget);
+    const probe = nearestOther(parts, grid, index, contactEps, budget, isLayout ? sameUnit : null);
     gaps.set(index, probe);
     if (probe && probe.distance <= contactEps) touching.add(index);
   }
@@ -996,6 +1458,7 @@ function analyseContacts(
       depthMm: hit.depthMm,
       trianglePairs: hit.trianglePairs,
       buried: existing?.buried ?? false,
+      bodyFillRatio: existing?.bodyFillRatio ?? null,
       atRest: existing !== undefined,
       atPhase: hit.phase,
       clipName: hit.clipName,
@@ -1010,6 +1473,13 @@ function analyseContacts(
   for (const index of judged) {
     if (touching.has(index)) continue;
     const nearest = gaps.get(index) ?? null;
+    /*
+     * 배치도에서 메시가 하나뿐인 상품은 같은 단위 안에 견줄 상대가 없어 nearest 가
+     * null 이다. 그런 상품은 배치도 판별 조건(단위마다 바닥 접지)에 따라 이미 바닥에
+     * 닿아 있으므로 위의 touching 에서 걸러졌고, 여기까지 오지 않는다 — 키트 보고서가
+     * 지적한 "바위가 아무것과도 안 닿는다"가 사라지는 자리가 바로 여기다. 옆 상품과의
+     * 간격(수 미터)을 지적에 싣는 일은 이제 없다.
+     */
     // 예산이 끊겨 거리를 못 잰 부품은 "떠 있다"고 말하지 않는다. 못 잰 것은 안 잰 것이다.
     if (!nearest || !nearest.exact || !Number.isFinite(nearest.distance)) continue;
     floating.push({
@@ -1765,6 +2235,8 @@ function nearestOther(
   partIndex: number,
   stopAt: number,
   budget: { tests: number; truncated: boolean },
+  /** 배치도일 때 같은 상품 안의 부품만 상대로 삼는 걸름망. 그 밖에서는 null. */
+  candidate: ((a: number, b: number) => boolean) | null = null,
 ): { index: number; distance: number; exact: boolean } | null {
   const part = parts[partIndex];
   const step = Math.max(1, Math.floor(part.triangleCount / GAP_TRIANGLE_SAMPLE));
@@ -1798,6 +2270,7 @@ function nearestOther(
         for (const other of bucket) {
           const otherIndex = grid.triPart[other];
           if (otherIndex === partIndex) continue;
+          if (candidate && !candidate(partIndex, otherIndex)) continue;
           // 상자끼리의 거리는 실제 거리의 하한이다. 이미 찾은 답보다 멀면 면은 안 본다.
           if (boxDistance(bounds.min, bounds.max, grid.triMin, grid.triMax, other) >= best) continue;
           budget.tests += 1;

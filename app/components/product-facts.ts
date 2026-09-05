@@ -86,7 +86,7 @@ export const SURFACES = [
 /**
  * Local stdio tools exposed by `integrations/mcp/server.ts`. Legacy clunk_validate and
  * clunk_passport calls remain backward-compatible handlers, while tools/list exposes this
- * eight-tool product surface including local scene and sprite review and the offline
+ * ten-tool product surface including local scene and sprite review and the offline
  * visual-evidence capture that decides the engine-render and player-view lanes by machine.
  */
 export const MCP_TOOLS = [
@@ -96,6 +96,20 @@ export const MCP_TOOLS = [
     summary: "실제 GLB·GLTF 바이트를 파싱해 메트릭, finding, 해시를 돌려줍니다.",
     input: "path, profile",
     output: "report, inputHash, resultDigest",
+  },
+  {
+    name: "clunk_validate",
+    description: "Inspect a real GLB/GLTF and answer with a pass/fail verdict plus the same report clunk_inspect returns.",
+    summary: "clunk_inspect 와 같은 보고서에 valid·점수·기준·막는 문제 수를 얹어 돌려줍니다. 물리 지적은 WARNING/INFO 라 valid 를 바꾸지 않습니다.",
+    input: "path, profile | profileFile",
+    output: "valid, validBasis, report, score",
+  },
+  {
+    name: "clunk_passport",
+    description: "Compare a source asset with an optimized output on this machine and produce the provenance passport that names every operation applied between them.",
+    summary: "원본과 최적화 결과를 대조해 어떤 작업이 적용됐는지 적은 여권(출처 증서)을 만듭니다.",
+    input: "sourcePath, outputPath, profile | profileFile",
+    output: "passport, operations, hashes",
   },
   {
     name: "clunk_optimize",

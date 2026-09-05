@@ -1,12 +1,11 @@
 {
   "schema": "clunk.listing-facts.v1",
-  "generatedAt": "2026-09-05T03:36:31.062Z",
+  "generatedAt": "2026-09-05T03:49:42.348Z",
   "sources": [
     "outputs\\market-launch\\wave1\\upload-manifest.json",
     "tmp\\listings-snapshot.json",
     "배달 파일에서 다시 잰 항목 30건",
-    "이전 판에서 유지한 항목 56건",
-    "examples/generated/kits/*/listing-facts.fragment.json → public/market 파일에서 재측정 (scripts/merge-kit-facts.mjs)"
+    "이전 판에서 유지한 항목 56건"
   ],
   "facts": {
     "clunk-heli-h145": {

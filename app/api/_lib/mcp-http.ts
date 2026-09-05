@@ -90,7 +90,7 @@ const UPLOAD_INSPECTION_SCHEMA = {
     targetProfileId: {
       type: "string",
       enum: MCP_HTTP_TARGET_PROFILE_IDS,
-      description: "Which engine to check against, for example unity or harvest-frontier-web-three. The local stdio names pc/web/mobile are policy profiles and are not accepted here.",
+      description: "Which engine to check against, for example unity or harvest-frontier-web-three. It selects the triangle/material/texture budgets the score is judged against — unity, godot-4 and unreal use the desktop budget (250,000 triangles, 24 materials), web-three-mobile the mobile one (25,000 triangles, 6 materials). harvest-frontier-web-three is the Harvest Frontier delivery contract, not a general check: it additionally requires named root/socket/collider nodes and EXT_meshopt_compression as ERRORs, so an ordinary uncompressed GLB is always BLOCKED under it — use web-three-mobile or unity for a general verdict. The local stdio names pc/web/mobile are policy profiles and are not accepted here.",
     },
     assetKind: {
       type: "string",
@@ -147,7 +147,7 @@ export const MCP_HTTP_TOOLS = [
   {
     name: "clunk_asset_validate",
     description:
-      "Answer whether uploaded bytes pass the target profile's structural contract: returns valid true/false, a 0-100 score, the count of hard blockers, and the blocking findings themselves. Same input as clunk_asset_inspect; use this one when you want a verdict rather than the full evidence. hardBlockerCount counts only ERROR and CRITICAL findings, so the physical-plausibility rules (floating part, part intersection, ground contact, thin shell) never add to it — they come back in the report's findings as WARNING or INFO with the measured millimetres, because the same measurement describes a defect in one file and the author's intent in the next. Read those before shipping even when valid is true. A structural pass is not a statement that the asset looks right in a game — visualRuntime and playerFacing stay unevaluated.",
+      "Answer whether uploaded bytes pass the target profile's structural contract: returns valid true/false, a 0-100 score, the count of hard blockers, and the blocking findings themselves. Same input as clunk_asset_inspect; use this one when you want a verdict rather than the full evidence. hardBlockerCount counts only ERROR and CRITICAL findings, so the physical-plausibility rules (floating part, part intersection, ground contact, thin shell) never add to it — they come back in the report's findings as WARNING or INFO with the measured millimetres, because the same measurement describes a defect in one file and the author's intent in the next. Read those before shipping even when valid is true. `valid` and `score` are the FILE-ONLY lanes' answer: this endpoint never drives an engine editor, so `coverage` names which lanes ran (bytes, structure, policy) and which did not (import, runtime, and device on android/ios come back ENVIRONMENT_UNAVAILABLE), `engineVerified` is false whenever an engine lane was skipped, and `scoreBasis` says in one line what the number covers. `readiness` explains why ready can be false at score 100 — a rounded score hides a single WARNING. A structural pass is not a statement that the asset looks right in a game — visualRuntime and playerFacing stay unevaluated.",
     inputSchema: UPLOAD_INSPECTION_SCHEMA,
   },
   {

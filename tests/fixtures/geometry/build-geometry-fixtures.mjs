@@ -23,13 +23,21 @@ function boxMesh(center, half) {
     [-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],
     [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1],
   ].map(([sx, sy, sz]) => [cx + sx * hx, cy + sy * hy, cz + sz * hz]);
+  /*
+   * 면은 바깥을 보게 감는다(오른손 좌표계에서 반시계 방향 = 앞면).
+   *
+   * 2026-09-05 실측: 예전 목록은 전부 반대 방향이라 여기서 나온 상자가 모두
+   * 안팎이 뒤집혀 있었다. 부호 있는 부피가 음수인 픽스처로 "뒤집힘을 잡는다"는
+   * 규칙을 시험할 수는 없으므로 바로잡았다 — 좌표는 그대로이므로 다른 규칙이
+   * 재는 mm 값은 바뀌지 않는다.
+   */
   const faces = [
-    [0, 1, 2], [0, 2, 3],
-    [4, 6, 5], [4, 7, 6],
-    [0, 4, 5], [0, 5, 1],
-    [1, 5, 6], [1, 6, 2],
-    [2, 6, 7], [2, 7, 3],
-    [3, 7, 4], [3, 4, 0],
+    [0, 2, 1], [0, 3, 2],
+    [4, 5, 6], [4, 6, 7],
+    [0, 5, 4], [0, 1, 5],
+    [1, 6, 5], [1, 2, 6],
+    [2, 7, 6], [2, 3, 7],
+    [3, 4, 7], [3, 0, 4],
   ];
   return { positions: corners.flat(), indices: faces.flat() };
 }
@@ -304,4 +312,101 @@ class GlbBuilder {
   glb.write("required-extension.glb");
 }
 
-process.stdout.write("tests/fixtures/geometry: 9 fixtures written\n");
+/*
+ * 10. 안팎이 뒤집힌 상자 — 면 감김을 뒤집어 부호 있는 부피가 음수가 된다.
+ *     받침은 바로 놓고, 그 위 상자만 뒤집는다. 뒷면을 그리는 렌더에서는 둘이 똑같이 보인다.
+ */
+function invertedBox(center, half) {
+  const mesh = boxMesh(center, half);
+  const indices = [];
+  for (let index = 0; index < mesh.indices.length; index += 3) {
+    indices.push(mesh.indices[index], mesh.indices[index + 2], mesh.indices[index + 1]);
+  }
+  return { positions: mesh.positions, indices };
+}
+
+{
+  const glb = new GlbBuilder();
+  const solid = glb.material("solid", false);
+  const base = glb.mesh("baseMesh", boxMesh([0, 0.1, 0], [0.3, 0.1, 0.3]), solid);
+  const flipped = glb.mesh("flippedMesh", invertedBox([0, 0.3, 0], [0.1, 0.1, 0.1]), solid);
+  glb.root(glb.node({ name: "pedestal", mesh: base }));
+  glb.root(glb.node({ name: "insideOutCrate", mesh: flipped }));
+  glb.write("inside-out-box.glb");
+}
+
+/* 11. 뒤집혔지만 doubleSided — 뒷면도 그리므로 화면에서는 티가 안 난다. INFO 여야 한다. */
+{
+  const glb = new GlbBuilder();
+  const solid = glb.material("solid", false);
+  const both = glb.material("bothSides", true);
+  const base = glb.mesh("baseMesh", boxMesh([0, 0.1, 0], [0.3, 0.1, 0.3]), solid);
+  const flipped = glb.mesh("flippedMesh", invertedBox([0, 0.3, 0], [0.1, 0.1, 0.1]), both);
+  glb.root(glb.node({ name: "pedestal", mesh: base }));
+  glb.root(glb.node({ name: "insideOutShell", mesh: flipped }));
+  glb.write("inside-out-double-sided.glb");
+}
+
+/*
+ * 12. 거울로 뒤집은 인스턴스 — 데이터는 바른 방향인데 노드 scale 이 [-1, 1, 1] 이다.
+ *     glTF 규격은 이때 감김을 뒤집어 그리라고 하므로 결함이 아니다. 월드 좌표에서 잰
+ *     부호만 보고 판정하면 여기서 가짜 지적이 난다.
+ */
+{
+  const glb = new GlbBuilder();
+  const solid = glb.material("solid", false);
+  const base = glb.mesh("baseMesh", boxMesh([0, 0.1, 0], [0.3, 0.1, 0.3]), solid);
+  const arm = glb.mesh("armMesh", boxMesh([0.25, 0.3, 0], [0.1, 0.1, 0.1]), solid);
+  glb.root(glb.node({ name: "pedestal", mesh: base }));
+  glb.root(glb.node({ name: "mirroredArm", mesh: arm, scale: [-1, 1, 1] }));
+  glb.write("mirrored-instance.glb");
+}
+
+/*
+ * 13. 배치도 — 독립 상품 넷을 2 m 씩 떼어 바닥에 늘어놓았다. 첫 상품 안에서만
+ *     뚜껑이 120 mm 떠 있다. 규칙이 봐야 하는 것은 그 뚜껑 하나뿐이고, 상품끼리
+ *     안 닿는 것은 지적이 아니다.
+ */
+{
+  const glb = new GlbBuilder();
+  const solid = glb.material("solid", false);
+  const unit = (x) => {
+    const body = glb.mesh(`crate${x}Mesh`, boxMesh([0, 0.2, 0], [0.3, 0.2, 0.3]), solid);
+    return glb.node({ name: `crate_${x}`, mesh: body });
+  };
+  const capMesh = glb.mesh("capMesh", boxMesh([0, 0.52, 0], [0.1, 0.1, 0.1]), solid);
+  const productA = glb.node({
+    name: "product_a",
+    translation: [0, 0, 0],
+    children: [unit("a"), glb.node({ name: "loose_cap", mesh: capMesh })],
+  });
+  const productB = glb.node({ name: "product_b", translation: [2, 0, 0], children: [unit("b")] });
+  const productC = glb.node({ name: "product_c", translation: [4, 0, 0], children: [unit("c")] });
+  const productD = glb.node({ name: "product_d", translation: [6, 0, 0], children: [unit("d")] });
+  glb.root(glb.node({ name: "kit_root", children: [productA, productB, productC, productD] }));
+  glb.write("layout-pack.glb");
+}
+
+/*
+ * 14. 속 빈 등롱 안의 등 — 부두 키트 보고서 6절의 거짓 양성을 그대로 옮겼다.
+ *     등은 살 넷으로 된 우리 안에 있고 그 상자 안에 통로 들어간다. 상자만 보면
+ *     "묻혔다"가 되지만 우리는 속이 비어 있어 등이 유리 너머로 잘 보인다.
+ *     등이 -x 쪽 살을 파고들게 두어 삼각형 교차 자체는 나게 한다.
+ */
+{
+  const glb = new GlbBuilder();
+  const solid = glb.material("solid", false);
+  const bars = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([sx, sz]) =>
+    boxMesh([sx * 0.28, 0.3, sz * 0.28], [0.02, 0.3, 0.02]));
+  const cage = {
+    positions: bars.flatMap((bar) => bar.positions),
+    indices: bars.flatMap((bar, index) => bar.indices.map((value) => value + index * 8)),
+  };
+  const cageMesh = glb.mesh("lanternCageMesh", cage, solid);
+  const lampMesh = glb.mesh("beaconLampMesh", boxMesh([-0.14, 0.3, -0.14], [0.14, 0.1, 0.14]), solid);
+  glb.root(glb.node({ name: "lanternCage", mesh: cageMesh }));
+  glb.root(glb.node({ name: "beaconLamp", mesh: lampMesh }));
+  glb.write("caged-lamp.glb");
+}
+
+process.stdout.write("tests/fixtures/geometry: 14 fixtures written\n");
