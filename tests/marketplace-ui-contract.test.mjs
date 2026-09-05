@@ -29,7 +29,7 @@ test("marketplace catalog defensively renders only published API rows with comme
   // 카드는 지금 되는 일을 말해야 한다. 판매가 닫혀 있는 동안에는 유료 등급도 로그인만
   // 하면 받으므로 "구독자 전용" 이라고만 적으면 눌러 보는 순간 라벨이 거짓이 된다
   // (2026-09-04 마스터가 그 모순을 짚었다).
-  assert.match(catalog, /cardFree \? "무료" : salesOpen \? "구독자 전용" : "베타 무료"/u, "app/components/MarketplaceCatalog.tsx: 카드 배지가 지금 되는 일을 말하지 않는다");
+  assert.match(catalog, /cardFree \? "무료" : salesOpen \? "구독자 전용" : "지금은 무료"/u, "app/components/MarketplaceCatalog.tsx: 카드 배지가 지금 되는 일을 말하지 않는다");
   assert.doesNotMatch(catalog, /formatPrice/u, "app/components/MarketplaceCatalog.tsx: 아무도 청구하지 않는 값을 카드에 되살리지 않는다");
   assert.match(catalog, /listing\.format|formatLabel\(listing\)/u);
   assert.match(catalog, /listing\.licenseStatus/u);
@@ -77,7 +77,7 @@ test("listing detail names an unconfigured payment provider without seller CTAs"
   assert.match(page, /MarketplaceListingDetail/u);
   assert.match(catalog, /function MarketplaceListingDetail/u);
   // 상세도 값이 아니라 받을 수 있는지를 말한다.
-  assert.match(catalog, /freeTier \? "무료" : beta \? "베타 무료" : "구독자 전용"/u, "app/components/MarketplaceCatalog.tsx: 상세가 지금 되는 일을 말하지 않는다");
+  assert.match(catalog, /freeTier \? "무료" : beta \? "지금은 무료" : "구독자 전용"/u, "app/components/MarketplaceCatalog.tsx: 상세가 지금 되는 일을 말하지 않는다");
   assert.match(catalog, /구독하고 전체 받기/u, "app/components/MarketplaceCatalog.tsx: 구독으로 여는 버튼이 사라졌다");
   assert.match(catalog, /preview=1/u);
   assert.match(catalog, /listing\.status !== ["']PUBLISHED["']/u);

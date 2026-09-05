@@ -81,7 +81,7 @@ function KitBody({ kit, salesOpen }: { kit: Kit<KitListing>; salesOpen: boolean 
   const product = kit.product;
   // 로그인하지 않은 방문자는 미리보기 파일을, 로그인한 방문자는 문이 있는 주소로 판매
   // 파일 그대로를 본다(app/components/model-source.ts).
-  const productSource = useModelSource(product ?? null, kit.free);
+  const productSource = useModelSource(product ?? null, kit.free, salesOpen);
 
   return (
     <>

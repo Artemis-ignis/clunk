@@ -12,7 +12,7 @@ register(new URL("./helpers/next-resolve-hooks.mjs", import.meta.url));
 const { setRuntimeBindings } = await import("../app/runtime-environment.ts");
 const { gateStaticMarketRequest } = await import("../app/api/_lib/market-gate.ts");
 const { isPublicMarketFile, previewGlbFileName, previewGlbUrl } = await import("../app/api/_lib/market-path.ts");
-const { previewModelUrl, saleModelUrl, modelSourceFor, previewNoteFor, PREVIEW_NOTE, PREVIEW_NOTE_SIGNED_IN } =
+const { previewModelUrl, saleModelUrl, modelSourceFor, previewNoteFor, PREVIEW_NOTE, PREVIEW_NOTE_SIGNED_IN, PREVIEW_NOTE_SIGNED_IN_BETA } =
   await import("../app/components/model-source.ts");
 
 /**
@@ -187,6 +187,9 @@ test("뷰어 주소는 '받을 수 있는가' 로 갈린다", () => {
   assert.equal(modelSourceFor(target, false, true).note, PREVIEW_NOTE_SIGNED_IN);
   assert.equal(previewNoteFor(null), PREVIEW_NOTE);
   assert.equal(previewNoteFor(true), PREVIEW_NOTE_SIGNED_IN);
+  // 판매가 열리기 전에는 구독하라고 하지 않는다 — 받기를 누르면 받는다.
+  assert.equal(previewNoteFor(true, false), PREVIEW_NOTE_SIGNED_IN_BETA);
+  assert.equal(modelSourceFor(target, false, true, false).note, PREVIEW_NOTE_SIGNED_IN_BETA);
   // 받을 수 있는 사람 — 문이 있는 주소로 판매 파일 그대로.
   assert.deepEqual(modelSourceFor(target, true, true), {
     src: saleModelUrl(ASSET_ID, SALE_FILE),

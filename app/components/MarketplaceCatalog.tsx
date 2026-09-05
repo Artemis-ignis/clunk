@@ -703,7 +703,7 @@ function ListingCard({
             {/* 판매가 열리기 전에는 유료 등급도 로그인만 하면 받는다. 그 사실을 숨기고
                 "구독자 전용" 이라고만 적으면, 눌러서 받아지는 순간 라벨이 거짓이 된다. */}
             <span className={`${styles.accessBadge} ${cardFree || !salesOpen ? styles.accessFree : styles.accessSub}`}>
-              {cardFree ? "무료" : salesOpen ? "구독자 전용" : "베타 무료"}
+              {cardFree ? "무료" : salesOpen ? "구독자 전용" : "지금은 무료"}
             </span>
           </span>
         </span>
@@ -1006,7 +1006,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
   // "받을 수 있는가" 를 로그인 여부만으로 판정하지 않는다. 로그인은 했지만 구독이 없는
   // 방문자에게 유료 상품의 판매 주소는 403 이고, 뷰어가 그것을 먼저 부르면 콘솔에 오류가
   // 남는다. 화면이 이미 아는 사실(무료 등급인가, 방금 받았는가)을 함께 본다.
-  const modelSource = modelSourceFor(listing, signedIn === null ? null : signedIn && (freeTier || owned), signedIn);
+  const modelSource = modelSourceFor(listing, signedIn === null ? null : signedIn && (freeTier || owned), signedIn, !beta);
   const name = displayTitle(listing.slug, listing.title);
   const pictureSpec = describePicture(listing);
   const rows = listing.facts ? factRows(listing.facts) : [];
@@ -1021,7 +1021,8 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
     : null;
   const reconciled = reconcileMeasured(
     listing.facts,
-    measured ? { triangles: measured.triangles, materials: measured.materials, bytes: measured.bytes } : null,
+    // 미리보기 파일을 열고 있으면 뷰어가 잰 것은 미리보기다 — 판매 파일과 다르다고 말할 근거가 아니다.
+    measured && !modelSource.isPreview ? { triangles: measured.triangles, materials: measured.materials, bytes: measured.bytes } : null,
   );
 
   return (
@@ -1051,7 +1052,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
           <EmbeddedGlbViewer
             src={modelSource.src}
             previewSrc={previewModelUrl(listing.slug, listing.entryFileName)}
-            previewNote={previewNoteFor(signedIn)}
+            previewNote={previewNoteFor(signedIn, !beta)}
             poster={previewUrl}
             alt={modelSource.isPreview ? `${name} 미리보기 파일` : `${name} 실제 받는 파일`}
             onMeasured={setMeasured}
@@ -1190,7 +1191,7 @@ export function MarketplaceListingDetail({ slug }: { slug: string }) {
           {/* 지금 되는 일을 먼저 적는다. 판매가 열리기 전에는 유료 등급도 로그인만 하면
               받는데 "구독자 전용" 이라고만 적혀 있었고, 눌러 보면 그대로 받아졌다 —
               2026-09-04 마스터가 그 모순을 짚었다. 나중에 무엇이 달라지는지는 아래 줄이 말한다. */}
-          <div className={styles.priceRow}><strong className={`${styles.accessBadge} ${styles.accessLarge} ${freeTier || beta ? styles.accessFree : styles.accessSub}`}>{freeTier ? "무료" : beta ? "베타 무료" : "구독자 전용"}</strong><small>{listing.sellerName ?? "Clunk"} · {formatBytes(listing.byteLength)} · {listing.entryFileName}</small></div>
+          <div className={styles.priceRow}><strong className={`${styles.accessBadge} ${styles.accessLarge} ${freeTier || beta ? styles.accessFree : styles.accessSub}`}>{freeTier ? "무료" : beta ? "지금은 무료" : "구독자 전용"}</strong><small>{listing.sellerName ?? "Clunk"} · {formatBytes(listing.byteLength)} · {listing.entryFileName}</small></div>
           {!freeTier && paymentUnavailable ? (
             <p className={styles.payState} data-payment-state={checkout?.status ?? "UNKNOWN"} role="status">
               지금은 로그인만 하면 이 에셋을 받습니다. 구독이 시작되면 이 에셋은 구독자 전용이 되고, 구독하면 마켓의 모든 에셋과 앞으로 올라오는 것까지 함께 열립니다.

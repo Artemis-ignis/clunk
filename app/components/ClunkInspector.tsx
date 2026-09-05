@@ -749,7 +749,7 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
             <Icon name="fingerprint" size={16} />
             <div>
               <strong>로컬 우선 처리</strong>
-              <p>파일은 브라우저에 남습니다. 메타데이터와 해시, 결과만 저장합니다.</p>
+              <p>파일은 브라우저에 남습니다. 메타데이터와 파일 지문, 결과만 저장합니다.</p>
             </div>
           </div>
         </aside>
@@ -767,7 +767,7 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
             </div>
             <span className="hash-chip">
               <Icon name="hash" size={13} />
-              {report ? shortHash(report.inputHash) : "해시 없음"}
+              {report ? shortHash(report.inputHash) : "파일 지문 없음"}
             </span>
           </div>
 
@@ -929,7 +929,7 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
             <Compare label="점수" before={`${optimization.before.score.score}`} after={`${optimization.after.score.score}`} />
             <Compare label="재질" before={`${optimization.before.metrics.materialCount}`} after={`${optimization.after.metrics.materialCount}`} />
             <Compare label="빈 노드" before={`${optimization.before.metrics.emptyNodeCount}`} after={`${optimization.after.metrics.emptyNodeCount}`} />
-            <Compare label="해시" before={shortHash(optimization.inputHash)} after={shortHash(optimization.outputHash)} />
+            <Compare label="파일 지문" before={shortHash(optimization.inputHash)} after={shortHash(optimization.outputHash)} />
           </dl>
           <div className="passport-actions">
             <button
@@ -955,7 +955,7 @@ export function ClunkInspector({ userLabel, welcome }: InspectorProps) {
       <section className="evidence-chain" aria-label="증거 체인">
         <h3>모든 결정은 흔적을 남깁니다</h3>
         <dl>
-          <EvidenceItem label="입력 해시" value={report ? shortHash(report.inputHash) : "대기 중"} />
+          <EvidenceItem label="입력 파일 지문" value={report ? shortHash(report.inputHash) : "대기 중"} />
           <EvidenceItem label="규칙 세트" value={report ? report.ruleSetId : "실행 시 선언"} />
           <EvidenceItem label="새 재검사" value={optimization ? "확인됨" : "최적화 후"} />
           <EvidenceItem label="다운로드 바이트" value={downloadGate === "verified" ? "재오픈 확인" : "최적화 후 확인"} />

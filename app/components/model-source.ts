@@ -39,10 +39,13 @@ export { PREVIEW_NOTE };
 
 /** 로그인은 했는데 아직 받을 수 없는 사람에게 하는 말. 로그인하라고 할 수는 없다. */
 export const PREVIEW_NOTE_SIGNED_IN = "미리보기 파일로 보는 중입니다. 구독하면 판매 파일 그대로 봅니다.";
+/** 판매가 열리기 전(지금은 결제를 받지 않는다)의 같은 사람에게 하는 말 — 구독하라고 할 수 없다. */
+export const PREVIEW_NOTE_SIGNED_IN_BETA = "미리보기 파일로 보는 중입니다. 받기를 누르면 판매 파일 그대로 받습니다.";
 
 /** 지금 미리보기를 보고 있는 사람에게 맞는 한 줄. */
-export function previewNoteFor(authenticated: boolean | null): string {
-  return authenticated === true ? PREVIEW_NOTE_SIGNED_IN : PREVIEW_NOTE;
+export function previewNoteFor(authenticated: boolean | null, salesOpen = true): string {
+  if (authenticated !== true) return PREVIEW_NOTE;
+  return salesOpen ? PREVIEW_NOTE_SIGNED_IN : PREVIEW_NOTE_SIGNED_IN_BETA;
 }
 
 /** 문이 있는 판매 파일 주소. 받을 수 있는 방문자의 뷰어가 읽는다. */
@@ -65,6 +68,7 @@ export function modelSourceFor(
   target: { slug: string; entryFileName: string; assetId?: string | null },
   entitled: boolean | null,
   authenticated: boolean | null = entitled,
+  salesOpen = true,
 ): ModelSource {
   const assetId = target.assetId?.trim();
   if (entitled === true && assetId) {
@@ -73,7 +77,7 @@ export function modelSourceFor(
   return {
     src: previewModelUrl(target.slug, target.entryFileName),
     isPreview: true,
-    note: previewNoteFor(authenticated),
+    note: previewNoteFor(authenticated, salesOpen),
   };
 }
 
@@ -103,6 +107,7 @@ export function probeSession(): Promise<boolean> {
 export function useModelSource(
   target: { slug: string; entryFileName: string; assetId?: string | null } | null,
   free = false,
+  salesOpen = true,
 ): ModelSource | null {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
 
@@ -118,5 +123,5 @@ export function useModelSource(
 
   if (!target) return null;
   const entitled = authenticated === null ? null : authenticated && free;
-  return modelSourceFor(target, entitled, authenticated);
+  return modelSourceFor(target, entitled, authenticated, salesOpen);
 }

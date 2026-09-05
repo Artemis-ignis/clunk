@@ -75,7 +75,7 @@ export function useKitCatalog(): { state: KitCatalogState; kits: Kit<KitListing>
 /** 접근권 알약에 적히는 말. 판매가 열리기 전에는 모두 로그인만 하면 받습니다. */
 export function accessChipLabel(free: boolean, salesOpen: boolean): string {
   if (free) return "무료";
-  return salesOpen ? "구독자 전용" : "베타 무료";
+  return salesOpen ? "구독자 전용" : "지금은 무료";
 }
 
 /** 오른쪽 판이 문장으로 적는 같은 사실. */
