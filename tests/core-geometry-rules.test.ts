@@ -328,7 +328,7 @@ test("open meshes are left alone: a signed volume means nothing on a card", asyn
 });
 
 test("the repro file from the mine kit is caught and the shipped rail is clean", async () => {
-  const broken = inspectAsset(await bundleAt("tmp/kits/mine-entrance/repro/inside-out-rail.glb"));
+  const broken = inspectAsset(await bundleAt("tests/fixtures/geometry/mine-inside-out-rail.glb") /* the mine kit build's repro, kept with the test: tmp/ is not in the repository */);
   const finding = one(broken.findings, "GEO-INVERTED-WINDING");
   assert.equal(finding.severity, "WARNING");
   assert.match(finding.message, /rails/);
