@@ -66,7 +66,7 @@ test("server-renders an actionable setup journey instead of a text wall", async 
   assert.match(html, /<span>03<\/span><strong>설정 복사<\/strong>/);
   assert.match(html, /<span>04<\/span><strong>연결 확인<\/strong>/);
   assert.match(html, /agent-tab-purpose/);
-  assert.match(html, /선택한 클라이언트/);
+  assert.match(html, /고른 도구/);
   assert.match(html, /로그인 후 키 발급/);
 });
 

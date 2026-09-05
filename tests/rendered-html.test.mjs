@@ -95,7 +95,7 @@ test("landing language covers the full 2D and 3D asset path", async () => {
   // reader what the number is for. The contract follows the fact, not the slogan.
   // 2026-09-02 (2): the long hero paragraph became a machine's own name plate. The
   // contract is still that the landing names all three kinds it actually sells.
-  assert.match(html, /3D 모델, 2D 스프라이트 시트, 이어 붙여도 이음매가 안 보이는 텍스처/);
+  assert.match(html, /3D 모델과 스프라이트 시트, 이어 붙여도 자국이 보이지 않는 텍스처/);
   assert.match(html, /게임 적합도/);
   // 2026-09-01: the three section labels are Korean now — the Korean reference
   // sites the master gave (meshy.ai/ko, aetherforgeai.com/ko) use no English
