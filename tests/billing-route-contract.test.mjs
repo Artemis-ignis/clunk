@@ -67,8 +67,7 @@ test("paid artifact delivery requires active entitlement while free listing deli
   const route = [
     await source("app/api/marketplace/assets/[assetId]/route.ts"),
     await source("app/api/_lib/market-gate.ts"),
-  ].join("
-");
+  ].join("\n");
   assert.match(route, /getCurrentUser|requireUser/);
   // 2026-09-04: 낱개 가격이 사라졌으므로 문지기는 값이 아니라 등급을 본다.
   assert.match(route, /isFreeGrade\(gradeOf\(/, "문지기가 등급 규칙을 불러야 한다");
@@ -97,8 +96,7 @@ test("베타에서 눌러 생긴 기록은 판매가 열린 뒤 유료 에셋을
   const route = [
     await source("app/api/marketplace/assets/[assetId]/route.ts"),
     await source("app/api/_lib/market-gate.ts"),
-  ].join("
-");
+  ].join("\n");
   assert.match(route, /areSalesOpen/, "문지기가 지금 판매 중인지 알아야 베타 기록을 가릴 수 있다");
   assert.match(
     route,
