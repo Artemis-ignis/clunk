@@ -168,6 +168,46 @@
   letter-spacing: .04em;
 }
 
+.studio-template-search {
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--tint-1);
+  color: inherit;
+  font-size: 0.78rem;
+}
+
+/*
+ * Sixty-three templates is a column of sixteen rows, which used to push the sentence box and
+ * the make button below the fold on a laptop and far below it on a phone. The list scrolls
+ * inside its own box instead, so the controls after it stay where they were when the library
+ * held seventeen. The cap is in `vh` rather than pixels because what matters is how much of
+ * the screen the picker is allowed to take, not how many rows fit.
+ */
+.studio-template-scroll.is-long {
+  max-height: 46vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* Only a right gutter for the scrollbar. A box with side padding and a full border eats
+     6px of a 288px column, which is exactly enough to drop the grid from four tiles per row
+     to three; the two hairlines mark the scrolling region without costing any width. */
+  padding: 8px 4px 8px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.studio-template-section + .studio-template-section { margin-top: 10px; }
+
+.studio-template-section-label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--text-dim);
+  font: 0.7rem var(--font-mono);
+  letter-spacing: .04em;
+}
+
 .studio-template-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(66px, 1fr));

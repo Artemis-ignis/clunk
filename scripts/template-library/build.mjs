@@ -33,6 +33,15 @@ import { ANIMATION_TEMPLATES, DEFAULT_SIZE_ID, MAX_SCALE, MIN_SCALE, SIZES, TEMP
 const REPO = resolve(import.meta.dirname, "..", "..");
 const HERO = resolve(REPO, "outputs/market-launch/wave1/tools/hero-render.mjs");
 const SHEET_BAKER = resolve(REPO, "scripts/sprite-sheet-from-glb.mjs");
+const MATERIAL_ATLAS = resolve(REPO, "scripts/template-library/material-atlas.mjs");
+
+/**
+ * The material ceiling the studio's own review holds a saved file to — mobile is what
+ * `web-three-mobile` resolves to (packages/core/src/assetops-profiles.ts, MOBILE_BUDGET).
+ * A template over it is refused with a 422 and never reaches the customer, so the library
+ * folds those models' palettes into a swatch before filing them. See ./material-atlas.mjs.
+ */
+const MAX_MATERIALS = 6;
 
 const THUMB_PX = 384;
 const SHEET_CELL = 64;
@@ -108,6 +117,31 @@ async function bakeSheet(glbPath, templateDir, paletteId, scratch) {
   };
 }
 
+/**
+ * Folds a palette-heavy model down to one material, in place, and says what it did.
+ *
+ * Runs last, after the thumbnail and the sheet, and in its own process. Both of those open
+ * the GLB with three's loader in Node, which cannot unpack an embedded image; the swatch the
+ * fold adds is exactly such an image. Doing it afterwards means the pictures are rendered
+ * from the plain model and the file that ships is the one the studio can save.
+ */
+function foldMaterials(glbPath) {
+  const raw = execFileSync(
+    process.execPath,
+    [MATERIAL_ATLAS, glbPath, "--limit", String(MAX_MATERIALS), "--json"],
+    { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
+  );
+  const report = JSON.parse(raw.trim().split("\n").pop());
+  return {
+    status: report.status,
+    materialsBefore: report.materialsBefore,
+    materialsAfter: report.materialsAfter,
+    ...(report.status === "folded"
+      ? { swatchPx: report.swatchPx, worstColourStep: report.worstColourStep, worstShadingStep: report.worstShadingStep }
+      : {}),
+  };
+}
+
 async function buildFactoryTemplate(template, scratch) {
   const dir = join(OUT, template.id);
   await mkdir(dir, { recursive: true });
@@ -141,8 +175,26 @@ async function buildFactoryTemplate(template, scratch) {
       entry.thumbnailByteLength = await renderThumbnail(glbPath, join(dir, thumbName), scratch);
     }
     if (template.sheet && !SKIP_SHEETS) entry.sheet = await bakeSheet(glbPath, dir, colourway.id, scratch);
+
+    // The file is finished here, so the length and the hash are taken from the bytes on disk
+    // rather than from what the exporter returned — the fold rewrites them.
+    const atlas = foldMaterials(glbPath);
+    if (atlas.status === "folded") {
+      const folded = await readFile(glbPath);
+      if (folded.byteLength > MAX_TEMPLATE_BYTES) {
+        throw new Error(`${template.id}/${colourway.id} is ${folded.byteLength} bytes after the material fold, over the 3 MB ceiling.`);
+      }
+      entry.byteLength = folded.byteLength;
+      entry.sha256 = sha256(folded);
+      entry.materialAtlas = atlas;
+    } else {
+      entry.materials = atlas.materialsAfter;
+    }
     palettes.push(entry);
-    log(`  ${template.id}/${colourway.id}  ${baked.bytes.byteLength.toLocaleString()} B  ${baked.facts.triangles} tri`);
+    log(
+      `  ${template.id}/${colourway.id}  ${entry.byteLength.toLocaleString()} B  ${baked.facts.triangles} tri`
+      + (atlas.status === "folded" ? `  materials ${atlas.materialsBefore} -> ${atlas.materialsAfter}` : ""),
+    );
   }
   return { palettes, facts, clips };
 }

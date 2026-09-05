@@ -179,7 +179,47 @@ type SeriesTemplate = {
   thumbnailUrl?: string;
   palettes?: Array<{ id: string; name: string; swatches?: string[] }>;
   sizes?: Array<string | number | { id?: string; name?: string }>;
+  /** The factory or export the library baked this from. Used to group the grid. */
+  source?: string;
+  /** What the runtime matches a prompt against; the search box uses the same words. */
+  keywords?: string[];
 };
+
+/**
+ * Which set a template belongs to, read off the path the library recorded for it.
+ *
+ * The library grew from seventeen templates to sixty-three when three kits were added, and a
+ * flat grid of sixty-three tiles pushed the sentence box and the make button off the screen.
+ * Grouping is derived from `source` rather than from the id, because the id is a name the
+ * author chose and the path is where the file actually is; a new kit lands in its own group
+ * without anyone editing this list.
+ *
+ * The labels are the names those kits are already sold under in the marketplace, so a person
+ * who saw the product finds the same words here.
+ */
+const TEMPLATE_GROUPS: Array<{ id: string; label: string; match: (source: string) => boolean }> = [
+  { id: "village-square", label: "마을 광장 키트", match: (s) => s.includes("kits/village-square/") },
+  { id: "fishing-dock", label: "부두·낚시터 키트", match: (s) => s.includes("kits/fishing-dock/") },
+  { id: "mine-entrance", label: "광산 입구 키트", match: (s) => s.includes("kits/mine-entrance/") },
+  { id: "trees", label: "나무", match: (s) => s.includes("harvest-frontier-trees/") },
+  { id: "wave2", label: "궤짝·건초", match: (s) => s.includes("hf-wave2/") },
+  { id: "farm", label: "코지 팜 세트", match: (s) => s.includes("cozy-farm-set/") || s.includes("hf-greenhouse/") },
+  { id: "machines", label: "탈것·기계", match: (s) => s.includes("vehicles/") || s.includes("windmill") },
+];
+const OTHER_GROUP = { id: "other", label: "그 밖", match: () => true };
+
+function groupOf(template: SeriesTemplate): { id: string; label: string } {
+  const source = template.source ?? "";
+  const group = TEMPLATE_GROUPS.find((candidate) => candidate.match(source)) ?? OTHER_GROUP;
+  return { id: group.id, label: group.label };
+}
+
+/** True when the typed words appear in the template's name, its id or its keywords. */
+function templateMatches(template: SeriesTemplate, query: string): boolean {
+  if (!query) return true;
+  const haystack = [template.name, template.id, ...(template.keywords ?? [])].join(" ").toLowerCase();
+  return query.toLowerCase().split(/\s+/).filter(Boolean).every((word) => haystack.includes(word));
+}
 
 const PROMPT_LABEL: Record<AssetKind, { title: string; placeholder: string; hint: string }> = {
   "2d-image": {
@@ -338,6 +378,7 @@ export function AssetCreationWorkbench({
   const [templateId, setTemplateId] = useState("");
   const [paletteId, setPaletteId] = useState("");
   const [templateSize, setTemplateSize] = useState("");
+  const [templateQuery, setTemplateQuery] = useState("");
   // A thumbnail the library has not baked yet must not leave a broken image in
   // the grid; the icon stands in for it.
   const [brokenThumbnails, setBrokenThumbnails] = useState<string[]>([]);
@@ -409,6 +450,27 @@ export function AssetCreationWorkbench({
   }, []);
 
   const kindTemplates = useMemo(() => templates.filter((template) => template.kind === assetKind), [templates, assetKind]);
+  // The grid is grouped and searchable only once it is long enough for that to help; below
+  // this a heading per set and a search box are two extra things to read for no gain.
+  const GROUPING_THRESHOLD = 18;
+  const searchable = kindTemplates.length >= GROUPING_THRESHOLD;
+  const query = searchable ? templateQuery.trim() : "";
+  const visibleTemplates = useMemo(
+    () => kindTemplates.filter((template) => templateMatches(template, query)),
+    [kindTemplates, query],
+  );
+  const templateSections = useMemo(() => {
+    if (!searchable) return [{ id: "all", label: "", items: visibleTemplates }];
+    const sections = new Map<string, { id: string; label: string; items: SeriesTemplate[] }>();
+    for (const template of visibleTemplates) {
+      const group = groupOf(template);
+      if (!sections.has(group.id)) sections.set(group.id, { ...group, items: [] });
+      sections.get(group.id)!.items.push(template);
+    }
+    // The registry's own order decides which set comes first, so the grid reads the way the
+    // library is written rather than alphabetically.
+    return [...sections.values()];
+  }, [visibleTemplates, searchable]);
   // A template, palette or size chosen for one kind must not survive a tab
   // change. Derived rather than reset in an effect, so the wrong choice is never
   // live for even one render — and is never sent with the request.
@@ -857,33 +919,65 @@ export function AssetCreationWorkbench({
               <span className="studio-templates-label">템플릿</span>
               {templateState === "ready" && kindTemplates.length ? (
                 <>
-                  <div className="studio-template-grid" role="radiogroup" aria-label="템플릿 고르기">
-                    {kindTemplates.map((template) => (
-                      <button
-                        key={template.id}
-                        type="button"
-                        role="radio"
-                        aria-checked={template.id === activeTemplateId}
-                        className={`studio-template${template.id === activeTemplateId ? " is-selected" : ""}`}
-                        onClick={() => setTemplateId(template.id)}
-                      >
-                        <span className="studio-template-thumb">
-                          {template.thumbnailUrl && !brokenThumbnails.includes(template.id) ? (
-                            <Image
-                              unoptimized
-                              src={template.thumbnailUrl}
-                              alt={template.name}
-                              width={72}
-                              height={72}
-                              onError={() => setBrokenThumbnails((current) => (current.includes(template.id) ? current : [...current, template.id]))}
-                            />
-                          ) : (
-                            <Icon name="box" size={18} />
-                          )}
-                        </span>
-                        <small>{template.name}</small>
-                      </button>
+                  {searchable ? (
+                    <input
+                      className="studio-template-search"
+                      type="search"
+                      value={templateQuery}
+                      onChange={(event) => setTemplateQuery(event.target.value)}
+                      placeholder={`템플릿 ${kindTemplates.length}개에서 찾기`}
+                      aria-label="템플릿 찾기"
+                    />
+                  ) : null}
+                  <div
+                    className={`studio-template-scroll${searchable ? " is-long" : ""}`}
+                    data-testid="studio-template-scroll"
+                  >
+                    {templateSections.map((section) => (
+                      <div key={section.id} className="studio-template-section">
+                        {section.label ? <span className="studio-template-section-label">{section.label}</span> : null}
+                        <div
+                          className="studio-template-grid"
+                          role="radiogroup"
+                          aria-label={section.label ? `${section.label} 템플릿 고르기` : "템플릿 고르기"}
+                        >
+                          {section.items.map((template) => (
+                            <button
+                              key={template.id}
+                              type="button"
+                              role="radio"
+                              aria-checked={template.id === activeTemplateId}
+                              className={`studio-template${template.id === activeTemplateId ? " is-selected" : ""}`}
+                              // A 66px tile ellipsises most of these names; hovering says the
+                              // whole one rather than making the buyer guess from "나무 궤...".
+                              title={template.name}
+                              onClick={() => setTemplateId(template.id)}
+                            >
+                              <span className="studio-template-thumb">
+                                {template.thumbnailUrl && !brokenThumbnails.includes(template.id) ? (
+                                  <Image
+                                    unoptimized
+                                    src={template.thumbnailUrl}
+                                    alt={template.name}
+                                    width={72}
+                                    height={72}
+                                    onError={() => setBrokenThumbnails((current) => (current.includes(template.id) ? current : [...current, template.id]))}
+                                  />
+                                ) : (
+                                  <Icon name="box" size={18} />
+                                )}
+                              </span>
+                              <small>{template.name}</small>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     ))}
+                    {!visibleTemplates.length ? (
+                      <p className="studio-templates-empty">
+                        「{query}」에 맞는 템플릿이 없습니다. 다른 말로 찾아 보십시오.
+                      </p>
+                    ) : null}
                   </div>
                   {selectedTemplate?.palettes?.length ? (
                     <label className="studio-field">
