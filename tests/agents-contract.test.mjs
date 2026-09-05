@@ -39,8 +39,8 @@ test("server-renders the client connection guide", async () => {
   // 사람이 읽는 글만 본다. class 이름·data 속성·RSC 스크립트·<code> 안의 응답 필드 이름
   // (connection, endpoint, workspaceId …)은 화면의 산문이 아니다.
   const prose = html
-    .replace(/<script[sS]*?</script>/gi, " ")
-    .replace(/<code[^>]*>[sS]*?</code>/gi, " ")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<code[^>]*>[\s\S]*?<\/code>/gi, " ")
     .replace(/<[^>]+>/g, " ");
   assert.doesNotMatch(prose, /(^|[^a-z])(stdio|endpoint|terminal)([^a-z]|$)/i, "방문자 화면에 영문 도구 낱말이 돌아왔습니다");
   assert.match(clientSource, /Clunk 연결 키 만들기/);
