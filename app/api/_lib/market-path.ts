@@ -48,7 +48,7 @@ function isSafeMarketSegment(value: string): boolean {
  *   판매 파일(GLB·원본 시트 PNG·텍스처)은 여전히 이 목록 밖이다.
  */
 export function isPublicMarketFile(fileName: string): boolean {
-  return /^(?:hero-|preview-)/u.test(fileName) || /.card.png$/iu.test(fileName);
+  return /^(?:hero-|preview-)/u.test(fileName) || /\.card\.png$/iu.test(fileName);
 }
 
 /**
